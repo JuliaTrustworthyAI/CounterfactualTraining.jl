@@ -47,7 +47,7 @@ end
 
 # Training
 opt_state = Flux.setup(Adam(), model)
-nepochs = 5
+nepochs = 10
 my_log = []
 for epoch in 1:nepochs
     losses = Float32[]
@@ -110,3 +110,6 @@ for epoch in 1:nepochs
         break
     end
 end
+
+# Check counterfactual:
+M = MLP(model; likelihood=:classification_multi)
