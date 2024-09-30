@@ -9,9 +9,11 @@ using Flux
 using TaijaData
 using TaijaParallel
 
+include("utils.jl")
+
 # Countefactual generator:
 generator = ECCoGenerator(opt=Descent(1.0))
-max_iter = 1
+max_iter = 25
 conv =  MaxIterConvergence(max_iter)
 pllr = ThreadsParallelizer()
 
@@ -31,9 +33,9 @@ model = Chain(
 )
 
 # Loss function:
-function loss(yhat, y, implausibility)
+function loss(yhat, y, implausibility; λ=0.1)
     class_loss = Flux.Losses.logitcrossentropy(yhat, y)
-    return class_loss + sum(implausibility)/length(implausibility)
+    return class_loss + λ * sum(implausibility)/length(implausibility)
 end
 function accuracy(model, train_set)
     acc = 0
@@ -47,38 +49,45 @@ end
 
 # Training
 opt_state = Flux.setup(Adam(), model)
-nepochs = 10
+burnin = 40
+nepochs = 50
 my_log = []
 for epoch in 1:nepochs
     losses = Float32[]
     M = MLP(model; likelihood=:classification_multi)
+    implausibilities = Float32[]
     for (i, batch) in enumerate(train_set)
         input, label = batch
 
-        # Generate counterfactuals:
-        nbatch = size(input, 2)
-        targets = rand(unique_labels, nbatch)               # randomly generate targets
-        xs = [x[:, :] for x in eachcol(input)]              # factuals
-        println("Generating counterfactuals for batch $i/$(length(train_set))")
-        ces = TaijaParallel.parallelize(
-            pllr, 
-            generate_counterfactual, 
-            xs,
-            targets,
-            data,
-            M,
-            generator;
-            convergence=conv,
-            verbose=false,
-        )
-        input = hcat(counterfactual.(ces)...)               # counterfactual inputs
-        implaus = TaijaParallel.parallelize(
-            pllr,
-            CounterfactualExplanations.Evaluation.evaluate,
-            ces;
-            measure=plausibility,
-            verbose=false,
-        ) |> stack |> stack |> vec
+        if epoch > burnin
+            # Generate counterfactuals:
+            nbatch = size(input, 2)
+            targets = rand(unique_labels, nbatch)               # randomly generate targets
+            xs = [x[:, :] for x in eachcol(input)]              # factuals
+            println("Generating counterfactuals for batch $i/$(length(train_set))")
+            ces = TaijaParallel.parallelize(
+                pllr, 
+                generate_counterfactual, 
+                xs,
+                targets,
+                data,
+                M,
+                generator;
+                convergence=conv,
+                verbose=false,
+            )
+            input = hcat(counterfactual.(ces)...)               # counterfactual inputs
+            implaus = TaijaParallel.parallelize(
+                pllr,
+                CounterfactualExplanations.Evaluation.evaluate,
+                ces;
+                measure=plausibility,
+                verbose=false,
+            ) |> stack |> stack |> vec |> x -> .-x
+            push!(implausibilities, sum(implaus)/length(implaus))
+        else
+            implaus = [0.0f0]
+        end
 
         val, grads = Flux.withgradient(model) do m
             # Any code inside here is differentiated.
@@ -104,6 +113,12 @@ for epoch in 1:nepochs
     @info "Accuracy in epoch $epoch/$nepochs: $acc"
     push!(my_log, (; acc, losses))
 
+    if epoch > burnin
+        implaus = sum(implausibilities)/length(implausibilities)
+        @info "Average implausibility in $epoch/$nepochs: $implaus"
+    end
+
+
     # Stop training when some criterion is reached
     if acc > 0.95
         println("stopping after $epoch epochs")
@@ -113,3 +128,5 @@ end
 
 # Check counterfactual:
 M = MLP(model; likelihood=:classification_multi)
+gen = GenericGenerator(opt=Descent(1.0))
+plot_all_mnist(generator, M; convergence=MaxIterConvergence(100))
