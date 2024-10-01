@@ -30,14 +30,9 @@ model = Chain(
 )
 
 # Loss function:
-function loss(yhat, y, implausibility, targets, valids; λ=0.1)
-    if isnothing(valids)
-        return Flux.Losses.logitcrossentropy(yhat, y)
-    else
-        class_loss_valids = Flux.Losses.logitcrossentropy(yhat[valids], targets[valids])
-        class_loss_invalids = Flux.Losses.logitcrossentropy(yhat[valids], y[valids])
-        return class_loss_valids + class_loss_invalids + λ * sum(implausibility)/length(implausibility)
-    end
+function loss(yhat, y, implausibility; λ=0.1)
+    class_loss = Flux.Losses.logitcrossentropy(yhat, y)
+    return class_loss + λ * sum(implausibility)/length(implausibility)
 end
 function accuracy(model, train_set)
     acc = 0
@@ -53,7 +48,7 @@ end
 burnin = 40
 nepochs = 50
 max_iter = 50
-conv = GeneratorConditionsConvergence(max_iter=max_iter)
+conv = MaxIterConvergence(max_iter)
 pllr = ThreadsParallelizer()
 function counterfactual_training(model, generator; opt_state=opt_state, burnin=burnin, nepochs=nepochs)
     println(generator)
@@ -64,6 +59,7 @@ function counterfactual_training(model, generator; opt_state=opt_state, burnin=b
         implausibilities = Float32[]
         for (i, batch) in enumerate(train_set)
             input, label = batch
+            labels_cold = Flux.onecold(label, unique_labels)
 
             if epoch > burnin
                 # Generate counterfactuals:
@@ -85,29 +81,31 @@ function counterfactual_training(model, generator; opt_state=opt_state, burnin=b
                 input = hcat(counterfactual.(ces)...)               # counterfactual inputs
 
                 # Implausibility and validity:
-                implaus, valids = (x -> (.-stack(x[1, :]), stack(x[2, :])))(
-                    stack(
-                        TaijaParallel.parallelize(
-                            pllr,
-                            CounterfactualExplanations.Evaluation.evaluate,
-                            ces;
-                            measure=[plausibility, validity],
-                            verbose=false,
-                        ),
-                    ),
-                )
+                println("Evaluating counterfactuals for batch $i/$(length(train_set))")
+                implaus = (x -> .-x)(vec(stack(stack(TaijaParallel.parallelize(
+                    pllr,
+                    CounterfactualExplanations.Evaluation.evaluate,
+                    ces;
+                    measure=plausibility,
+                    verbose=false,
+                )))))
+                valids = Bool.(validity.(ces))
                 push!(implausibilities, sum(implaus) / length(implaus))
-
             else
                 implaus = [0.0f0]
-                valids = nothing
+                targets = labels_cold
+                valids = Bool.(zeros(size(input,2)))
             end
+
+            # Swap labels where necessary:
+            labels_cold[valids] .= targets[valids]
+            label = Flux.onehotbatch(labels_cold, unique_labels)
 
             val, grads = Flux.withgradient(model) do m
                 # Any code inside here is differentiated.
                 # Evaluation of the model and loss must be inside!
                 logits = m(input)
-                loss(logits, label, implaus, targets, valids)
+                loss(logits, label, implaus)
             end
 
             # Save the loss from the forward pass. (Done outside of gradient.)
