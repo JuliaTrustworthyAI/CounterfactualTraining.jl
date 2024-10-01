@@ -6,6 +6,7 @@ using CounterfactualExplanations.Convergence
 using CounterfactualExplanations.Evaluation: plausibility
 using CounterfactualExplanations.Generators
 using Flux
+using Serialization
 using TaijaData
 using TaijaParallel
 
@@ -127,6 +128,13 @@ for epoch in 1:nepochs
 end
 
 # Check counterfactual:
+gen = ECCoGenerator(; opt=Descent(1.0), λ=[0, 5.0])
+
 M = MLP(model; likelihood=:classification_multi)
-gen = GenericGenerator(opt=Descent(1.0))
-plot_all_mnist(generator, M; convergence=MaxIterConvergence(100))
+serialize("paper/experiments/output/poc_model_ct.jls", M)
+plt = plot_all_mnist(gen, M; convergence=MaxIterConvergence(100))
+savefig(plt, "paper/figures/poc_model_ct.png")
+
+M = load_mnist_mlp()
+plt = plot_all_mnist(gen, M; convergence=MaxIterConvergence(100))
+savefig(plt, "paper/figures/poc_model.png")

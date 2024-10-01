@@ -4,3 +4,13 @@
 /Manifest.toml
 /docs/Manifest.toml
 /docs/build/
+
+# LaTeX aux files
+**.aux
+**.bbl
+**.blg
+**.fdb_latexmk
+**.fls
+**.log
+**.out
+**.synctex.gz
