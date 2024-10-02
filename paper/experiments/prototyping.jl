@@ -140,7 +140,7 @@ function counterfactual_training(model, generator; opt_state=opt_state, burnin=b
 end
 
 # With ECCo:
-λ = [0.1, 100.0]
+λ = [0.1, 1.0]
 generator = ECCoGenerator(; opt=Descent(1.0), λ=λ)
 mod = deepcopy(model)
 opt_state = Flux.setup(Adam(), mod)
@@ -153,6 +153,7 @@ opt_state = Flux.setup(Adam(), mod)
 model_generic = counterfactual_training(mod, generator)
 
 ################### Results ###################
+λ = [0.1, 100.0]
 gen = ECCoGenerator(; opt=Descent(1.0), λ=λ)
 
 M = MLP(model_ecco; likelihood=:classification_multi)
