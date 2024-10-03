@@ -77,3 +77,12 @@ function convert2mnist(x)
     x = (x -> (x -> Gray.(x))(permutedims(reshape(x, 28, 28))))((x .+ 1) ./ 2)
     return x
 end
+
+function avg(x::Vector{Float32})
+    return sum(x) / length(x)
+end
+
+function loss(yhat, y, implausibility; λ=0.1, agg=avg)
+    class_loss = Flux.Losses.logitcrossentropy(yhat, y)
+    return class_loss + λ * avg(implausibility)
+end

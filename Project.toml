@@ -1,7 +1,12 @@
 name = "CounterfactualTraining"
 uuid = "c5e5e904-ed0d-4ddb-967e-dbb7fd41a507"
 authors = ["Patrick Altmeyer and contributors"]
-version = "1.0.0-DEV"
+version = "0.0.1"
+
+[deps]
+CounterfactualExplanations = "2f13d31b-18db-44c1-bc43-ebaf2cff0be0"
+Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
+TaijaParallel = "bf1c2c22-5e42-4e78-8b6b-92e6c673eeb0"
 
 [compat]
 julia = "1.10"
