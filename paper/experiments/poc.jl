@@ -31,7 +31,7 @@ model = Chain(
 ################### Counterfactual Training ###################
 burnin = 0.8
 nepochs = 20
-max_iter = 25
+max_iter = 10
 conv = Convergence.MaxIterConvergence(max_iter)
 pllr = ThreadsParallelizer()
 search_opt = Descent(1.0)

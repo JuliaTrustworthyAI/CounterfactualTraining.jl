@@ -79,8 +79,12 @@ function counterfactual_training(
                     verbose=verbose,
                 )
 
-                # Get neighbours in target class:
-                samples = [CounterfactualExplanations.find_potential_neighbours(ce, 10) for ce in ces]
+                # Get neighbour in target class:
+                samples = (X -> X[:,1])([
+                    CounterfactualExplanations.find_potential_neighbours(ce, 10) for
+                    ce in ces
+                ])
+
                 implaus = []
             else
                 perturbed_input = nothing

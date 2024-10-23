@@ -82,7 +82,7 @@ function avg(x::Vector{Float32})
     return sum(x) / length(x)
 end
 
-function loss(yhat, y, implausibility; λ=1.0, agg=avg)
+function loss(yhat, y, implausibility; λ=0.1, agg=avg)
     class_loss = Flux.Losses.logitcrossentropy(yhat, y)
-    return class_loss + λ * avg(Float32.(implausibility))
+    return class_loss + λ * agg(Float32.(implausibility))
 end
