@@ -107,6 +107,10 @@ function counterfactual_training(
                 loss(logits, label, implaus)
             end
 
+            if epoch > burnin
+                display(grads)
+            end
+
             # Save the loss from the forward pass. (Done outside of gradient.)
             push!(losses, val)
 

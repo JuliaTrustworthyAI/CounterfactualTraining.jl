@@ -84,5 +84,5 @@ end
 
 function loss(yhat, y, implausibility; λ=1.0, agg=avg)
     class_loss = Flux.Losses.logitcrossentropy(yhat, y)
-    return class_loss + λ * avg(Float32.(implausibility))
+    return λ * avg(Float32.(implausibility))
 end

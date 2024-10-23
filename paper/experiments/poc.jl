@@ -29,9 +29,9 @@ model = Chain(
 )
 
 ################### Counterfactual Training ###################
-burnin = 0.8
-nepochs = 100
-max_iter = 50
+burnin = 0.9
+nepochs = 10
+max_iter = 1
 conv = Convergence.MaxIterConvergence(max_iter)
 pllr = ThreadsParallelizer()
 search_opt = Descent(1.0)
@@ -39,11 +39,11 @@ verbose = true
 
 # With ECCo:
 generator = ECCoGenerator(; opt=search_opt, λ=[0.01, 1.0])
-mod = deepcopy(model)
-opt_state = Flux.setup(Adam(), mod)
+model_ecco = deepcopy(model)
+opt_state = Flux.setup(Adam(), model_ecco)
 model_ecco = counterfactual_training(
     loss,
-    mod,
+    model_ecco,
     generator,
     train_set,
     opt_state;
@@ -56,11 +56,11 @@ model_ecco = counterfactual_training(
 
 # With Generic:
 generator = GenericGenerator(; opt=search_opt, λ=0.1)
-mod = deepcopy(model)
-opt_state = Flux.setup(Adam(), mod)
+model_generic = deepcopy(model)
+opt_state = Flux.setup(Adam(), model_generic)
 model_generic = counterfactual_training(
     loss,
-    mod,
+    model_generic,
     generator,
     train_set,
     opt_state;
@@ -73,11 +73,11 @@ model_generic = counterfactual_training(
 
 # With REVISE
 generator = REVISEGenerator(; opt=search_opt, λ=0.01)
-mod = deepcopy(model)
-opt_state = Flux.setup(Adam(), mod)
+model_revise = deepcopy(model)
+opt_state = Flux.setup(Adam(), model_revise)
 model_revise = counterfactual_training(
     loss,
-    mod,
+    model_revise,
     generator,
     train_set,
     opt_state;
