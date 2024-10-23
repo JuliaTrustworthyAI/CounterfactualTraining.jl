@@ -65,11 +65,9 @@ function counterfactual_training(
         for (i, batch) in enumerate(train_set)
             input, label = batch
 
-            ces = CounterfactualExplanation[]
-
             if epoch > burnin
                 # Generate counterfactuals:
-                _, _ces = generate!(
+                perturbed_input, ces = generate!(
                     input,
                     model,
                     train_set,
@@ -80,9 +78,11 @@ function counterfactual_training(
                     verbose=verbose,
                 )
 
-                push!(ces, _ces...)
-
+                # Get neighbours in target class:
+                samples = [find_potential_neighbours(ce; n=1000) for ce in ces]
             else
+                perturbed_input = nothing
+                ces = nothing
                 implaus = [0.0f0]
             end
 
@@ -92,20 +92,8 @@ function counterfactual_training(
                 logits = m(input)
 
                 # Compute implausibility:
-                if epoch > burnin
-                    implaus = (x -> .-x)(
-                        vec(
-                            stack(
-                                stack(
-                                    CounterfactualExplanations.Evaluation.evaluate.(
-                                        ces;
-                                        measure=plausibility,
-                                    ),
-                                ),
-                            ),
-                        ),
-                    )
-                    push!(implausibilities, sum(implaus) / length(implaus))
+                if !isnothing(perturbed_input)
+                    implaus = implausibility(m, perturbed_input, samples)
                 end
 
                 loss(logits, label, implaus)
