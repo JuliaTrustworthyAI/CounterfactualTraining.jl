@@ -29,16 +29,17 @@ model = Chain(
 )
 
 ################### Counterfactual Training ###################
-burnin = 0.8
-nepochs = 20
-max_iter = 10
+burnin = 0.9
+nepochs = 100
+max_iter = 100
+nce = 10
 conv = Convergence.MaxIterConvergence(max_iter)
 pllr = ThreadsParallelizer()
-search_opt = Descent(1.0)
+search_opt = Descent(0.05)
 verbose = true
 
 # With ECCo:
-generator = ECCoGenerator(; opt=search_opt, λ=[0.01, 1.0])
+generator = ECCoGenerator(; opt=search_opt, λ=[0.01, 0.1])
 model_ecco = deepcopy(model)
 opt_state = Flux.setup(Adam(), model_ecco)
 model_ecco, logs = counterfactual_training(
@@ -51,11 +52,12 @@ model_ecco, logs = counterfactual_training(
     verbose=verbose,
     convergence=conv,
     nepochs=nepochs,
-    burnin=burnin
+    burnin=burnin,
+    nce=nce,
 )
 
 # With Generic:
-generator = GenericGenerator(; opt=search_opt, λ=0.1)
+generator = GenericGenerator(; opt=search_opt, λ=0.01)
 model_generic = deepcopy(model)
 opt_state = Flux.setup(Adam(), model_generic)
 model_generic, logs = counterfactual_training(
@@ -69,6 +71,7 @@ model_generic, logs = counterfactual_training(
     convergence=Convergence.DecisionThresholdConvergence(),
     nepochs=nepochs,
     burnin=burnin,
+    nce=nce,
 )
 
 # With REVISE
@@ -87,11 +90,12 @@ model_revise, logs = counterfactual_training(
     convergence=conv,
     nepochs=nepochs,
     burnin=burnin,
+    nce=nce,
 )
 
 ################### Results ###################
-λ = [0.0, 1.0]
-gen = ECCoGenerator(; opt=Descent(0.5), λ=λ)
+λ = [0.0, 5.0]
+gen = ECCoGenerator(; opt=Descent(1.0), λ=λ)
 
 M = MLP(model_ecco; likelihood=:classification_multi)
 serialize("paper/experiments/output/poc_model_ct_ecco.jls", M)

@@ -52,12 +52,16 @@ function counterfactual_training(
     opt_state;
     nepochs=100,
     burnin=0.5,
+    nce=nothing,
     parallelizer=nothing,
     convergence=Convergence.MaxIterConvergence(),
     transformer=nothing,
     verbose=false,
 )
+
+    # Set up:
     burnin = Int(round(burnin * nepochs))
+    nce = isnothing(nce) ? train_set.batchsize : nce
 
     my_log = []
     for epoch in 1:nepochs
@@ -67,9 +71,19 @@ function counterfactual_training(
             input, label = batch
 
             if epoch > burnin
-                # Generate counterfactuals:
+
+                # Choose subset of inputs:
+                nbatch = size(input, 2)
+                if nce != nbatch
+                    idx = rand(1:nbatch, nce)
+                    chosen_input = input[:, idx]
+                else
+                    chosen_input = input
+                end
+
+                # Generate counterfactuals for chosen inputs:
                 perturbed_input, ces, targets = generate!(
-                    input,
+                    chosen_input,
                     model,
                     train_set,
                     generator;
