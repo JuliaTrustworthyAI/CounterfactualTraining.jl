@@ -36,10 +36,9 @@ conv = Convergence.MaxIterConvergence(max_iter)
 pllr = ThreadsParallelizer()
 search_opt = Descent(1.0)
 verbose = true
-λ = [0.1, 1.0]
 
 # With ECCo:
-generator = ECCoGenerator(; opt=search_opt, λ=λ)
+generator = ECCoGenerator(; opt=search_opt, λ=[0.01, 1.0])
 mod = deepcopy(model)
 opt_state = Flux.setup(Adam(), mod)
 model_ecco = counterfactual_training(
@@ -56,7 +55,7 @@ model_ecco = counterfactual_training(
 )
 
 # With Generic:
-generator = GenericGenerator(; opt=search_opt, λ=λ[1])
+generator = GenericGenerator(; opt=search_opt, λ=0.1)
 mod = deepcopy(model)
 opt_state = Flux.setup(Adam(), mod)
 model_generic = counterfactual_training(
@@ -67,13 +66,13 @@ model_generic = counterfactual_training(
     opt_state;
     parallelizer=pllr,
     verbose=verbose,
-    convergence=conv,
+    convergence=Convergence.DecisionThresholdConvergence(),
     nepochs=nepochs,
     burnin=burnin,
 )
 
 # With REVISE
-generator = REVISEGenerator(; opt=search_opt, λ=λ[1])
+generator = REVISEGenerator(; opt=search_opt, λ=0.01)
 mod = deepcopy(model)
 opt_state = Flux.setup(Adam(), mod)
 model_revise = counterfactual_training(
@@ -91,24 +90,24 @@ model_revise = counterfactual_training(
 )
 
 ################### Results ###################
-λ = [0.1, 100.0]
-gen = ECCoGenerator(; opt=Descent(1.0), λ=λ)
+λ = [0.0, 1.0]
+gen = ECCoGenerator(; opt=Descent(0.5), λ=λ)
 
 M = MLP(model_ecco; likelihood=:classification_multi)
 serialize("paper/experiments/output/poc_model_ct_ecco.jls", M)
-plt = plot_all_mnist(gen, M; convergence=MaxIterConvergence(100))
+plt = plot_all_mnist(gen, M; convergence=Convergence.MaxIterConvergence(100))
 savefig(plt, "paper/dump/poc_model_ct_ecco.png")
 
 M = MLP(model_generic; likelihood=:classification_multi)
 serialize("paper/experiments/output/poc_model_ct_generic.jls", M)
-plt = plot_all_mnist(gen, M; convergence=MaxIterConvergence(100))
+plt = plot_all_mnist(gen, M; convergence=Convergence.MaxIterConvergence(100))
 savefig(plt, "paper/dump/poc_model_ct_generic.png")
 
 M = MLP(model_revise; likelihood=:classification_multi)
 serialize("paper/experiments/output/poc_model_ct_revise.jls", M)
-plt = plot_all_mnist(gen, M; convergence=MaxIterConvergence(100))
+plt = plot_all_mnist(gen, M; convergence=Convergence.MaxIterConvergence(100))
 savefig(plt, "paper/dump/poc_model_ct_model_revise.png")
 
 M = load_mnist_mlp()
-plt = plot_all_mnist(gen, M; convergence=MaxIterConvergence(100))
+plt = plot_all_mnist(gen, M; convergence=Convergence.MaxIterConvergence(100))
 savefig(plt, "paper/dump/poc_model.png")

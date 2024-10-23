@@ -67,7 +67,7 @@ function counterfactual_training(
 
             if epoch > burnin
                 # Generate counterfactuals:
-                input, ces = generate!(
+                perturbed_input, ces = generate!(
                     input,
                     model,
                     train_set,
