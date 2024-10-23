@@ -65,9 +65,11 @@ function counterfactual_training(
         for (i, batch) in enumerate(train_set)
             input, label = batch
 
+            ces = CounterfactualExplanation[]
+
             if epoch > burnin
                 # Generate counterfactuals:
-                perturbed_input, ces = generate!(
+                _, _ces = generate!(
                     input,
                     model,
                     train_set,
@@ -78,32 +80,34 @@ function counterfactual_training(
                     verbose=verbose,
                 )
 
-                # Implausibility and validity:
-                println("Evaluating counterfactuals for batch $i/$(length(train_set))")
-                implaus = (x -> .-x)(
-                    vec(
-                        stack(
-                            stack(
-                                TaijaParallel.parallelize(
-                                    parallelizer,
-                                    CounterfactualExplanations.Evaluation.evaluate,
-                                    ces;
-                                    measure=plausibility,
-                                    verbose=false,
-                                ),
-                            ),
-                        ),
-                    ),
-                )
-                push!(implausibilities, sum(implaus) / length(implaus))
+                push!(ces, _ces...)
+
             else
                 implaus = [0.0f0]
             end
 
             val, grads = Flux.withgradient(model) do m
-                # Any code inside here is differentiated.
-                # Evaluation of the model and loss must be inside!
+
+                # Compute predictions:
                 logits = m(input)
+
+                # Compute implausibility:
+                if epoch > burnin
+                    implaus = (x -> .-x)(
+                        vec(
+                            stack(
+                                stack(
+                                    CounterfactualExplanations.Evaluation.evaluate.(
+                                        ces;
+                                        measure=plausibility,
+                                    ),
+                                ),
+                            ),
+                        ),
+                    )
+                    push!(implausibilities, sum(implaus) / length(implaus))
+                end
+
                 loss(logits, label, implaus)
             end
 
