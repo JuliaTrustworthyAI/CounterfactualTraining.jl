@@ -1,3 +1,4 @@
+using ChainRulesCore: ChainRulesCore
 using CounterfactualExplanations
 using CounterfactualExplanations: Convergence
 using CounterfactualExplanations: Models
@@ -39,7 +40,7 @@ function generate!(
     )
     input = hcat(CounterfactualExplanations.counterfactual.(ces)...)                               # counterfactual inputs
 
-    return input, ces
+    return input, ces, targets
     
 end
 
@@ -67,7 +68,7 @@ function counterfactual_training(
 
             if epoch > burnin
                 # Generate counterfactuals:
-                perturbed_input, ces = generate!(
+                perturbed_input, ces, targets = generate!(
                     input,
                     model,
                     train_set,
@@ -79,7 +80,8 @@ function counterfactual_training(
                 )
 
                 # Get neighbours in target class:
-                samples = [find_potential_neighbours(ce; n=1000) for ce in ces]
+                samples = [CounterfactualExplanations.find_potential_neighbours(ce, 10) for ce in ces]
+                implaus = []
             else
                 perturbed_input = nothing
                 ces = nothing
@@ -93,14 +95,15 @@ function counterfactual_training(
 
                 # Compute implausibility:
                 if !isnothing(perturbed_input)
-                    implaus = implausibility(m, perturbed_input, samples)
+                    implaus = implausibility(m, perturbed_input, samples, targets)
                 end
 
-                loss(logits, label, implaus)
-            end
+                # Save the implausibilities from the forward pass:
+                ChainRulesCore.ignore_derivatives() do
+                    push!(implausibilities, sum(implaus) / length(implaus))
+                end
 
-            if epoch > burnin
-                display(grads)
+                return loss(logits, label, implaus)
             end
 
             # Save the loss from the forward pass. (Done outside of gradient.)
@@ -118,12 +121,12 @@ function counterfactual_training(
         # Compute some accuracy, and save details as a NamedTuple
         acc = accuracy(model, train_set)
         @info "Accuracy in epoch $epoch/$nepochs: $acc"
-        push!(my_log, (; acc, losses))
+        push!(my_log, (; acc, losses, implausibilities))
 
         if epoch > burnin
             implaus = sum(implausibilities) / length(implausibilities)
             @info "Average implausibility in $epoch/$nepochs: $implaus"
         end
     end
-    return model
+    return model, my_log
 end

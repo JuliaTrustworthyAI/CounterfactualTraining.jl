@@ -1,10 +1,9 @@
 using EnergySamplers: EnergySamplers
 
-function implausibility(model, perturbed_input, samples, target)
-    implausibilities = zeros(length(samples))
-    for (i, input) in enumerate(eachcol(perturbed_input))
-        implaus = EnergySamplers.energy_differential.(model, input, samples[i], target)
-        implausibilities[i] = implaus
-    end
+function implausibility(model, perturbed_input, samples, targets)
+    implausibilities =
+        EnergySamplers.energy_differential.(
+            (model,), eachcol(perturbed_input), samples, targets
+        )
     return implausibilities
 end

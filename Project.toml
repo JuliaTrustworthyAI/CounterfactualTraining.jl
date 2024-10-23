@@ -4,12 +4,14 @@ authors = ["Patrick Altmeyer and contributors"]
 version = "0.0.1"
 
 [deps]
+ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 CounterfactualExplanations = "2f13d31b-18db-44c1-bc43-ebaf2cff0be0"
 EnergySamplers = "f446124b-5d5e-4171-a6dd-a1d99768d3ce"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 TaijaParallel = "bf1c2c22-5e42-4e78-8b6b-92e6c673eeb0"
 
 [compat]
+ChainRulesCore = "1.25.0"
 EnergySamplers = "1.0.0"
 julia = "1.10"
 
