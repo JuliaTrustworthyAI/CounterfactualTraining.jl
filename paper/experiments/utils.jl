@@ -88,7 +88,7 @@ function loss(
     implausibility,
     regularization,
     validity;
-    λ=[0.1, 0.0001],
+    λ=[0.5, 0.001],
     agg=avg,
 )
 

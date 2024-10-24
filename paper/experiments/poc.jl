@@ -37,30 +37,29 @@ maxoutdim = vae.params.latent_dim
 pca = fit_transformer(data, PCA; maxoutdim=maxoutdim);
 
 ################### Counterfactual Training ###################
-burnin = 0.75
+burnin = 0.0
 nepochs = 100
-max_iter = 20
+max_iter = 50
 nce = 10
-conv = Convergence.GeneratorConditionsConvergence(max_iter=max_iter)
+conv = Convergence.MaxIterConvergence(max_iter=max_iter)
 pllr = ThreadsParallelizer()
-search_opt = Adam(0.5)
+search_opt = Descent(1.0)
 verbose = true
 domain = (-1.0f0, 1.0f0)    # restrict domain for images to [-1, 1]
-λ = [0.001, 10.0]
+λ = [0.001, 5.0]
 λ₁ = λ[1]
 
 # With ECCo:
 generator = ECCoGenerator(; opt=search_opt, λ=λ)
 model_ecco = deepcopy(model)
 opt_state = Flux.setup(Adam(), model_ecco)
-model_ecco, logs = counterfactual_training(
+model_ecco, logs_ecco = counterfactual_training(
     loss,
     model_ecco,
     generator,
     train_set,
     opt_state;
     parallelizer=pllr,
-    input_encoder=pca,
     verbose=verbose,
     convergence=conv,
     nepochs=nepochs,
@@ -73,14 +72,13 @@ model_ecco, logs = counterfactual_training(
 generator = GenericGenerator(; opt=search_opt, λ=λ₁)
 model_generic = deepcopy(model)
 opt_state = Flux.setup(Adam(), model_generic)
-model_generic, logs = counterfactual_training(
+model_generic, logs_generic = counterfactual_training(
     loss,
     model_generic,
     generator,
     train_set,
     opt_state;
     parallelizer=pllr,
-    input_encoder=pca,
     verbose=verbose,
     convergence=conv,
     nepochs=nepochs,
@@ -93,7 +91,7 @@ model_generic, logs = counterfactual_training(
 generator = REVISEGenerator(; opt=search_opt, λ=λ₁)
 model_revise = deepcopy(model)
 opt_state = Flux.setup(Adam(), model_revise)
-model_revise, logs = counterfactual_training(
+model_revise, logs_revise = counterfactual_training(
     loss,
     model_revise,
     generator,
@@ -111,9 +109,10 @@ model_revise, logs = counterfactual_training(
 
 ################### Results ###################
 gen = ECCoGenerator(; opt=search_opt, λ=λ)
-# gen = GenericGenerator(; opt=Descent(1.0), λ=0.0)
 test_data = CounterfactualData(load_mnist_test()...)
 # test_data.input_encoder = pca
+
+conv = Convergence.MaxIterConvergence(; max_iter=100)
 
 M = MLP(model_ecco; likelihood=:classification_multi)
 serialize("paper/experiments/output/poc_model_ct_ecco.jls", M)

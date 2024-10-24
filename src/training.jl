@@ -131,8 +131,7 @@ function counterfactual_training(
                     regs = reg_loss(m, perturbed_input, samples, targets)
                     # Validity loss (counterfactual):
                     yhat_ce = m(perturbed_input)
-                    # validity_loss = Flux.Losses.logitcrossentropy(yhat_ce, targets_enc)
-                    validity_loss = 0.0f0
+                    validity_loss = Flux.Losses.logitcrossentropy(yhat_ce, targets_enc)
                 end
 
                 # Save the implausibilities from the forward pass:
