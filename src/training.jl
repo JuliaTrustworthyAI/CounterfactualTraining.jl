@@ -10,15 +10,17 @@ function generate!(
     input, model, data, generator;
     convergence=Convergence.MaxIterConvergence(),
     parallelizer=nothing,
-    transformer=nothing,
+    input_encoder=nothing,
     verbose=true,
+    domain=nothing,
 )
 
     # Set up:
-    counterfactual_data = CounterfactualData(unwrap(data)...)
-    if !isnothing(transformer)
-        counterfactual_data.input_encoder = transformer
-    end
+    counterfactual_data = CounterfactualData(
+        unwrap(data)...,
+        domain=domain,
+        input_encoder=input_encoder,
+    )
     M = Models.Model(model, Models.FluxNN(); likelihood=:classification_multi)
 
     # Generate counterfactuals:
@@ -55,8 +57,10 @@ function counterfactual_training(
     nce=nothing,
     parallelizer=nothing,
     convergence=Convergence.MaxIterConvergence(),
-    transformer=nothing,
+    input_encoder=nothing,
+    domain=nothing, 
     verbose=false,
+    kwrgs...
 )
 
     # Set up:
@@ -65,8 +69,12 @@ function counterfactual_training(
 
     my_log = []
     for epoch in 1:nepochs
+
+        # Logs:
         losses = Float32[]
         implausibilities = Float32[]
+        reg_losses = Float32[]
+
         for (i, batch) in enumerate(train_set)
             input, label = batch
 
@@ -89,7 +97,8 @@ function counterfactual_training(
                     generator;
                     convergence=convergence,
                     parallelizer=parallelizer,
-                    transformer=transformer,
+                    input_encoder=input_encoder,
+                    domain=domain,
                     verbose=verbose,
                 )
 
@@ -104,6 +113,7 @@ function counterfactual_training(
                 perturbed_input = nothing
                 ces = nothing
                 implaus = [0.0f0]
+                regs = [0.0f0]
             end
 
             val, grads = Flux.withgradient(model) do m
@@ -111,17 +121,19 @@ function counterfactual_training(
                 # Compute predictions:
                 logits = m(input)
 
-                # Compute implausibility:
+                # Compute implausibility and regulatization:
                 if !isnothing(perturbed_input)
                     implaus = implausibility(m, perturbed_input, samples, targets)
+                    regs = reg_loss(m, perturbed_input, samples, targets)
                 end
 
                 # Save the implausibilities from the forward pass:
                 ChainRulesCore.ignore_derivatives() do
                     push!(implausibilities, sum(implaus) / length(implaus))
+                    push!(reg_losses, sum(regs) / length(regs))
                 end
 
-                return loss(logits, label, implaus)
+                return loss(logits, label, implaus, regs)
             end
 
             # Save the loss from the forward pass. (Done outside of gradient.)
@@ -139,11 +151,12 @@ function counterfactual_training(
         # Compute some accuracy, and save details as a NamedTuple
         acc = accuracy(model, train_set)
         @info "Accuracy in epoch $epoch/$nepochs: $acc"
-        push!(my_log, (; acc, losses, implausibilities))
+        push!(my_log, (; acc, losses, implausibilities, reg_losses))
 
         if epoch > burnin
             implaus = sum(implausibilities) / length(implausibilities)
             @info "Average implausibility in $epoch/$nepochs: $implaus"
+            @info "Average reg loss in $epoch/$nepochs: $(sum(reg_losses)/length(reg_losses))"
         end
     end
     return model, my_log

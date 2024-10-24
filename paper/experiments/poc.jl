@@ -31,17 +31,18 @@ model = Chain(
 )
 
 ################### Counterfactual Training ###################
-burnin = 1.0
-nepochs = 200
-max_iter = 100
+burnin = 0.0
+nepochs = 100
+max_iter = 50
 nce = 10
 conv = Convergence.MaxIterConvergence(max_iter)
 pllr = ThreadsParallelizer()
-search_opt = Descent(0.1)
+search_opt = Descent(1.0)
 verbose = true
+domain = (-1.0f0, 1.0f0)    # restrict domain for images to [-1, 1]
 
 # With ECCo:
-generator = ECCoGenerator(; opt=search_opt, λ=[0.0, 1.0])
+generator = ECCoGenerator(; opt=search_opt, λ=[0.1, 1.0])
 model_ecco = deepcopy(model)
 opt_state = Flux.setup(Adam(), model_ecco)
 model_ecco, logs = counterfactual_training(
@@ -56,6 +57,7 @@ model_ecco, logs = counterfactual_training(
     nepochs=nepochs,
     burnin=burnin,
     nce=nce,
+    domain=domain, 
 )
 
 # With Generic:
@@ -74,6 +76,7 @@ model_ecco, logs = counterfactual_training(
 #     nepochs=nepochs,
 #     burnin=burnin,
 #     nce=nce,
+#     domain=domain,
 # )
 
 # With REVISE
@@ -87,16 +90,17 @@ model_ecco, logs = counterfactual_training(
 #     train_set,
 #     opt_state;
 #     parallelizer=pllr,
-#     transformer=CounterfactualExplanations.Models.load_mnist_vae(),
+#     input_encoder=CounterfactualExplanations.Models.load_mnist_vae(),
 #     verbose=verbose,
 #     convergence=conv,
 #     nepochs=nepochs,
 #     burnin=burnin,
 #     nce=nce,
+#     domain=domain,
 # )
 
 ################### Results ###################
-λ = [0.0, 5.0]
+λ = [0.01, 5.0]
 gen = ECCoGenerator(; opt=Descent(1.0), λ=λ)
 
 M = MLP(model_ecco; likelihood=:classification_multi)
