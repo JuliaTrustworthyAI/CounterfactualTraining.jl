@@ -2,9 +2,11 @@ using Pkg; Pkg.activate("paper/experiments")
 
 using CounterfactualExplanations
 using CounterfactualExplanations: Convergence, Generators, counterfactual
+using CounterfactualExplanations.DataPreprocessing: fit_transformer
 using CounterfactualTraining
 using CounterfactualTraining: generate!, counterfactual_training
 using Flux
+using MultivariateStats: PCA
 using Serialization
 using TaijaData
 using TaijaParallel
@@ -29,20 +31,26 @@ model = Chain(
     Dense(nhidden, nout)
 )
 
+# Input transformers:
+vae = CounterfactualExplanations.Models.load_mnist_vae()
+maxoutdim = vae.params.latent_dim
+pca = fit_transformer(data, PCA; maxoutdim=maxoutdim);
+
 ################### Counterfactual Training ###################
-burnin = 0.8
+burnin = 0.75
 nepochs = 100
-max_iter = 50
+max_iter = 20
 nce = 10
-conv = Convergence.MaxIterConvergence(max_iter)
+conv = Convergence.GeneratorConditionsConvergence(max_iter=max_iter)
 pllr = ThreadsParallelizer()
-search_opt = Descent(1.0)
+search_opt = Adam(0.5)
 verbose = true
 domain = (-1.0f0, 1.0f0)    # restrict domain for images to [-1, 1]
-λ₁ = 0.01
+λ = [0.001, 10.0]
+λ₁ = λ[1]
 
 # With ECCo:
-generator = ECCoGenerator(; opt=search_opt, λ=[λ₁, 5.0])
+generator = ECCoGenerator(; opt=search_opt, λ=λ)
 model_ecco = deepcopy(model)
 opt_state = Flux.setup(Adam(), model_ecco)
 model_ecco, logs = counterfactual_training(
@@ -52,6 +60,7 @@ model_ecco, logs = counterfactual_training(
     train_set,
     opt_state;
     parallelizer=pllr,
+    input_encoder=pca,
     verbose=verbose,
     convergence=conv,
     nepochs=nepochs,
@@ -71,8 +80,9 @@ model_generic, logs = counterfactual_training(
     train_set,
     opt_state;
     parallelizer=pllr,
+    input_encoder=pca,
     verbose=verbose,
-    convergence=Convergence.DecisionThresholdConvergence(),
+    convergence=conv,
     nepochs=nepochs,
     burnin=burnin,
     nce=nce,
@@ -90,7 +100,7 @@ model_revise, logs = counterfactual_training(
     train_set,
     opt_state;
     parallelizer=pllr,
-    input_encoder=CounterfactualExplanations.Models.load_mnist_vae(),
+    input_encoder=vae,
     verbose=verbose,
     convergence=conv,
     nepochs=nepochs,
@@ -100,24 +110,26 @@ model_revise, logs = counterfactual_training(
 )
 
 ################### Results ###################
-λ = [0.001, 5.0]
-gen = ECCoGenerator(; opt=Descent(1.0), λ=λ)
+gen = ECCoGenerator(; opt=search_opt, λ=λ)
+# gen = GenericGenerator(; opt=Descent(1.0), λ=0.0)
+test_data = CounterfactualData(load_mnist_test()...)
+# test_data.input_encoder = pca
 
 M = MLP(model_ecco; likelihood=:classification_multi)
 serialize("paper/experiments/output/poc_model_ct_ecco.jls", M)
-plt = plot_all_mnist(gen, M; convergence=Convergence.MaxIterConvergence(100))
+plt = plot_all_mnist(gen, M, test_data; convergence=conv)
 savefig(plt, "paper/dump/poc_model_ct_ecco.png")
 
 M = MLP(model_generic; likelihood=:classification_multi)
 serialize("paper/experiments/output/poc_model_ct_generic.jls", M)
-plt = plot_all_mnist(gen, M; convergence=Convergence.MaxIterConvergence(100))
+plt = plot_all_mnist(gen, M, test_data; convergence=conv)
 savefig(plt, "paper/dump/poc_model_ct_generic.png")
 
 M = MLP(model_revise; likelihood=:classification_multi)
 serialize("paper/experiments/output/poc_model_ct_revise.jls", M)
-plt = plot_all_mnist(gen, M; convergence=Convergence.MaxIterConvergence(100))
+plt = plot_all_mnist(gen, M, test_data; convergence=conv)
 savefig(plt, "paper/dump/poc_model_ct_model_revise.png")
 
 M = load_mnist_mlp()
-plt = plot_all_mnist(gen, M; convergence=Convergence.MaxIterConvergence(100))
+plt = plot_all_mnist(gen, M, test_data; convergence=conv)
 savefig(plt, "paper/dump/poc_model.png")

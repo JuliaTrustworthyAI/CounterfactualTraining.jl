@@ -74,6 +74,7 @@ function counterfactual_training(
         losses = Float32[]
         implausibilities = Float32[]
         reg_losses = Float32[]
+        validity_losses = Float32[]
 
         for (i, batch) in enumerate(train_set)
             input, label = batch
@@ -108,12 +109,15 @@ function counterfactual_training(
                     ce in ces
                 ])
 
-                implaus = []
+                # Encoded targets:
+                targets_enc = hcat((x -> x.target_encoded).(ces)...)
             else
                 perturbed_input = nothing
+                targets_enc = nothing
                 ces = nothing
                 implaus = [0.0f0]
                 regs = [0.0f0]
+                validity_loss = 0.0f0
             end
 
             val, grads = Flux.withgradient(model) do m
@@ -125,15 +129,20 @@ function counterfactual_training(
                 if !isnothing(perturbed_input)
                     implaus = implausibility(m, perturbed_input, samples, targets)
                     regs = reg_loss(m, perturbed_input, samples, targets)
+                    # Validity loss (counterfactual):
+                    yhat_ce = m(perturbed_input)
+                    # validity_loss = Flux.Losses.logitcrossentropy(yhat_ce, targets_enc)
+                    validity_loss = 0.0f0
                 end
 
                 # Save the implausibilities from the forward pass:
                 ChainRulesCore.ignore_derivatives() do
                     push!(implausibilities, sum(implaus) / length(implaus))
                     push!(reg_losses, sum(regs) / length(regs))
+                    push!(validity_losses, validity_loss)
                 end
 
-                return loss(logits, label, implaus, regs)
+                return loss(logits, label, implaus, regs, validity_loss)
             end
 
             # Save the loss from the forward pass. (Done outside of gradient.)
@@ -151,12 +160,13 @@ function counterfactual_training(
         # Compute some accuracy, and save details as a NamedTuple
         acc = accuracy(model, train_set)
         @info "Accuracy in epoch $epoch/$nepochs: $acc"
-        push!(my_log, (; acc, losses, implausibilities, reg_losses))
+        push!(my_log, (; acc, losses, implausibilities, reg_losses, validity_losses))
 
         if epoch > burnin
             implaus = sum(implausibilities) / length(implausibilities)
             @info "Average implausibility in $epoch/$nepochs: $implaus"
             @info "Average reg loss in $epoch/$nepochs: $(sum(reg_losses)/length(reg_losses))"
+            @info "Average validity loss in $epoch/$nepochs: $(sum(validity_losses)/length(validity_losses))"
         end
     end
     return model, my_log
