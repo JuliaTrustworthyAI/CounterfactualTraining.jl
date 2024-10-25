@@ -20,7 +20,7 @@ Xtrain, y = load_mnist(10000)
 data = CounterfactualData(Xtrain, y)
 unique_labels = sort(unique(y))
 ytrain = Flux.onehotbatch(y, unique_labels)
-bs = 1000
+bs = 100
 train_set = Flux.DataLoader((Xtrain, ytrain), batchsize=bs)
 nin = size(first(train_set)[1], 1)
 nout = size(first(train_set)[2], 1)
@@ -38,9 +38,9 @@ pca = fit_transformer(data, PCA; maxoutdim=maxoutdim);
 
 ################### Counterfactual Training ###################
 burnin = 0.0
-nepochs = 100
-max_iter = 50
-nce = 100
+nepochs = 50
+max_iter = 100
+nce = 10
 conv = Convergence.MaxIterConvergence(max_iter=max_iter)
 pllr = ThreadsParallelizer()
 search_opt = Descent(1.0)
