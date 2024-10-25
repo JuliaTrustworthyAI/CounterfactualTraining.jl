@@ -40,7 +40,7 @@ pca = fit_transformer(data, PCA; maxoutdim=maxoutdim);
 burnin = 0.0
 nepochs = 100
 max_iter = 50
-nce = 10
+nce = 100
 conv = Convergence.MaxIterConvergence(max_iter=max_iter)
 pllr = ThreadsParallelizer()
 search_opt = Descent(1.0)

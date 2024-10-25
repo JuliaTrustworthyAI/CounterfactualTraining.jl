@@ -16,6 +16,8 @@ Tried different things here.
 
 **Different generators** Still not entirely clear, but for certain settings the hypothesized outcome appears: ECCo > Generic >>> REVISE.
 
+**Burn-in period** This speeds things up but seems to make things worse.
+
 ### Added
 
 - 
