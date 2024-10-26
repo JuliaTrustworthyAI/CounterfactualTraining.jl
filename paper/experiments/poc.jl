@@ -20,11 +20,11 @@ Xtrain, y = load_mnist(10000)
 data = CounterfactualData(Xtrain, y)
 unique_labels = sort(unique(y))
 ytrain = Flux.onehotbatch(y, unique_labels)
-bs = 100
+bs = 1000
 train_set = Flux.DataLoader((Xtrain, ytrain), batchsize=bs)
 nin = size(first(train_set)[1], 1)
 nout = size(first(train_set)[2], 1)
-nhidden = 32
+nhidden = 64
 activation = relu
 model = Chain(
     Dense(nin, nhidden, activation),
@@ -38,7 +38,7 @@ pca = fit_transformer(data, PCA; maxoutdim=maxoutdim);
 
 ################### Counterfactual Training ###################
 burnin = 0.0
-nepochs = 50
+nepochs = 200
 max_iter = 100
 nce = 10
 conv = Convergence.MaxIterConvergence(max_iter=max_iter)
@@ -108,6 +108,7 @@ model_revise, logs_revise = counterfactual_training(
 )
 
 ################### Results ###################
+λ = [0.001, 20.0]
 gen = ECCoGenerator(; opt=search_opt, λ=λ)
 test_data = CounterfactualData(load_mnist_test()...)
 # test_data.input_encoder = pca
