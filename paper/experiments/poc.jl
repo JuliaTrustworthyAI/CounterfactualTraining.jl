@@ -108,7 +108,7 @@ model_revise, logs_revise = counterfactual_training(
 )
 
 ################### Results ###################
-λ = [0.001, 20.0]
+λ = [0.01, 25.0]
 gen = ECCoGenerator(; opt=search_opt, λ=λ)
 test_data = CounterfactualData(load_mnist_test()...)
 # test_data.input_encoder = pca
