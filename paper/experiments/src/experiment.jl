@@ -10,6 +10,8 @@ include("model_and_data.jl")
 Mutable struct holding the meta parameters for the experiment.
 """
 Base.@kwdef struct MetaParams <: AbstractConfiguration
+    generator_type::String = "ECCo"
+    model_type::String = "MLPModel"
     dim_reduction::Bool = false
 end
 
@@ -89,6 +91,7 @@ function run_training(exp::Experiment)
     training_opt = get_opt(exp.training_params)
     opt_state = Flux.setup(training_opt, model)
 
+    # Train:
     model, logs = CT.counterfactual_training(
         loss,
         model,
@@ -104,6 +107,7 @@ function run_training(exp::Experiment)
         domain=domain,
         input_encoder=input_encoder,
     )
+
     return model, logs
 end
 
