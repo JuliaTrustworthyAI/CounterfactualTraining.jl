@@ -26,6 +26,23 @@ function setup(data::MNIST, model::ModelType)
     return model, train_set
 end
 
+function set_input_encoder!(
+    exp::Experiment,
+    data::MNIST,
+    generator_type::AbstractGeneratorType
+)
+    if exp.meta_params.dim_reduction
+        # Input transformers:
+        vae = CounterfactualExplanations.Models.load_mnist_vae()
+        maxoutdim = vae.params.latent_dim
+        input_encoder = fit_transformer(data, PCA; maxoutdim=maxoutdim)
+    else 
+        input_encoder = nothing
+    end
+    exp.training_params.input_encoder = input_encoder
+    return exp
+end
+
 Base.@kwdef struct MLPModel <: ModelType
     nhidden::Int = 32
     nlayers::Int = 1

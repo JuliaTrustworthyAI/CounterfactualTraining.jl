@@ -46,6 +46,8 @@ function generate!(
     
 end
 
+
+
 function counterfactual_training(
     loss,
     model,
@@ -55,7 +57,7 @@ function counterfactual_training(
     nepochs=100,
     burnin=0.5,
     nce=nothing,
-    parallelizer=nothing,
+    parallelizer::TaijaParallel.AbstractParallelizer=nothing,
     convergence=Convergence.MaxIterConvergence(),
     input_encoder=nothing,
     domain=nothing, 
