@@ -41,6 +41,11 @@ function setup(exp::Experiment)
     return exp
 end
 
+"""
+    set_input_encoder!(exp::Experiment)
+
+Sets up the input encoder for the given experiment. This is dispatched over the dataset and generator type.
+"""
 function set_input_encoder!(exp::Experiment)
     return set_input_encoder!(
         exp,
@@ -49,6 +54,15 @@ function set_input_encoder!(exp::Experiment)
     )
 end
 
+"""
+    set_input_encoder!(
+        exp::Experiment,
+        data::Dataset,
+        generator_type::AbstractGeneratorType,
+    )
+
+Sets up the input encoder for the given experiment, dataset and generator type.
+"""
 function set_input_encoder!(
     exp::Experiment,
     data::Dataset,
@@ -58,6 +72,11 @@ function set_input_encoder!(
     return exp
 end
 
+"""
+    run_trainging(exp::Experiment)
+
+Trains the model on the given dataset with Counterfactual Training using the given training parameters and meta parameters.
+"""
 function run_training(exp::Experiment)
     generator = get_generator(exp.training_params.generator_params)
     model, train_set = setup(exp)

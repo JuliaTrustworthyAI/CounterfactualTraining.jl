@@ -4,6 +4,11 @@ Base.@kwdef struct MNIST <: Dataset
     domain::Union{Nothing,Tuple,Vector{<:Tuple}} = (-1.0f0, 1.0f0)
 end
 
+"""
+    setup(data::MNIST, model::ModelType)
+
+Loads the MNIST data and builds a model corresponding to the specified `model` type. Returns the model and training dataset.
+"""
 function setup(data::MNIST, model::ModelType)
 
     # Data:
@@ -13,11 +18,6 @@ function setup(data::MNIST, model::ModelType)
     ytrain = Flux.onehotbatch(y, unique_labels)
     train_set = Flux.DataLoader((Xtrain, ytrain); batchsize=data.batchsize)
 
-    # Input transformers:
-    vae = CounterfactualExplanations.Models.load_mnist_vae()
-    maxoutdim = vae.params.latent_dim
-    input_encoder = fit_transformer(data, PCA; maxoutdim=maxoutdim)
-
     # Model:
     nin = size(first(train_set)[1], 1)
     nout = size(first(train_set)[2], 1)
@@ -26,6 +26,15 @@ function setup(data::MNIST, model::ModelType)
     return model, train_set
 end
 
+"""
+    set_input_encoder!(
+        exp::Experiment,
+        data::MNIST,
+        generator_type::AbstractGeneratorType
+    )
+
+For MNIST data, use PCA for dimensionality reduction if requested and set the `maxoutdim` to the size of the latent dimension of the VAE.
+"""
 function set_input_encoder!(
     exp::Experiment,
     data::MNIST,
@@ -39,6 +48,25 @@ function set_input_encoder!(
     else 
         input_encoder = nothing
     end
+    exp.training_params.input_encoder = input_encoder
+    return exp
+end
+
+"""
+    set_input_encoder!(
+        exp::Experiment, 
+        data::MNIST, 
+        generator_type::REVISE
+    )
+
+For MNIST data and the REVISE generator, use the VAE as the input encoder.
+"""
+function set_input_encoder!(
+    exp::Experiment, 
+    data::MNIST, 
+    generator_type::REVISE
+)
+    vae = CounterfactualExplanations.Models.load_mnist_vae()
     exp.training_params.input_encoder = input_encoder
     return exp
 end
