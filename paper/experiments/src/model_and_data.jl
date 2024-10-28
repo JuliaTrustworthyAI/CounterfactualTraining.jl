@@ -1,3 +1,8 @@
+"""
+    MNIST
+
+Keyword container for the `MNIST` data set. Can specify the number of samples `n`, the batch size `batchsize` and the feature `domain`.
+"""
 Base.@kwdef struct MNIST <: Dataset
     n::Int = 10000
     batchsize::Int = 1000
@@ -28,7 +33,7 @@ end
 
 """
     set_input_encoder!(
-        exp::Experiment,
+        exp::AbstractExperiment,
         data::MNIST,
         generator_type::AbstractGeneratorType
     )
@@ -36,7 +41,7 @@ end
 For MNIST data, use PCA for dimensionality reduction if requested and set the `maxoutdim` to the size of the latent dimension of the VAE.
 """
 function set_input_encoder!(
-    exp::Experiment,
+    exp::AbstractExperiment,
     data::MNIST,
     generator_type::AbstractGeneratorType
 )
@@ -54,7 +59,7 @@ end
 
 """
     set_input_encoder!(
-        exp::Experiment, 
+        exp::AbstractExperiment, 
         data::MNIST, 
         generator_type::REVISE
     )
@@ -62,7 +67,7 @@ end
 For MNIST data and the REVISE generator, use the VAE as the input encoder.
 """
 function set_input_encoder!(
-    exp::Experiment, 
+    exp::AbstractExperiment, 
     data::MNIST, 
     generator_type::REVISE
 )
@@ -71,12 +76,26 @@ function set_input_encoder!(
     return exp
 end
 
+"""
+    MLPModel
+
+`MLPModel` type. The following parameters can be specified:
+
+- `nhidden`: the number of hidden units in each layer (default is 32).
+- `nlayers`: the number of hidden layers in the model (default is 1).
+- `activation`: the activation function to use (default is `relu`).
+"""
 Base.@kwdef struct MLPModel <: ModelType
     nhidden::Int = 32
     nlayers::Int = 1
     activation::Function = relu
 end
 
+"""
+    build_model(model::MLPModel, nin::Int, nout::Int)
+
+Builds a multi-layer perceptron model.
+"""
 function build_model(model::MLPModel, nin::Int, nout::Int)
     model = Chain(
         Dense(nin, model.nhidden, model.activation),

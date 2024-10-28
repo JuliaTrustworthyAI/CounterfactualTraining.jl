@@ -6,54 +6,59 @@ using Flux
 
 const Opt = Flux.Optimise.AbstractOptimiser
 
-abstract type AbstractGeneratorType end
-
-"Type for the ECCoGenerator."
-struct ECCo end
-
-"""
-    get_generator(params::GeneratorParams, type::ECCo=params.type)::AbstractGenerator
-
-Instantiates the `ECCoGenerator` with the given parameters.
-"""
-function get_generator(params::GeneratorParams, type::ECCo=params.type)::AbstractGenerator
-    return ECCoGenerator(; opt=params.search_opt, λ=params.λ[1:2])
-end
-
-"Type for the REVISEGenerator."
-struct REVISE end
-
-"""
-    get_generator(params::GeneratorParams, type::REVISE=params.type)::AbstractGenerator
-
-Instantiates the `REVISEGenerator` with the given parameters.
-"""
-function get_generator(params::GeneratorParams, type::REVISE=params.type)::AbstractGenerator
-    return REVISEGenerator(; opt=params.search_opt, λ=params.λ[1])
-end
-
-"Type for the GenericGenerator."
-struct Generic end
-
-"""
-    get_generator(params::GeneratorParams, type::Generic=params.type)::AbstractGenerator
-
-Instantiates a `GenericGenerator` with the given parameters.
-"""
-function get_generator(params::GeneratorParams, type::Generic=params.type)::AbstractGenerator
-    return GenericGenerator(; opt=params.search_opt, λ=params.λ[1])
-end
-
 """
     GeneratorParams
 
 Mutable struct holding keyword arguments relevant to counterfactual generator.
 """
-Base.@kwdef struct GeneratorParams
+Base.@kwdef struct GeneratorParams <: AbstractGeneratorParams
     type::AbstractGeneratorType = ECCo()
     search_opt::Opt = Descent(1.0f0)
     max_iter::Int = 50
     λ::AbstractVector{<:AbstractFloat} = [0.001f0, 5.0f0]
+end
+
+"""
+    get_generator(params::GeneratorParams)
+
+Instantiates the generator according to the given parameters.
+"""
+get_generator(params::GeneratorParams) = get_generator(params, params.type)
+
+"Type for the ECCoGenerator."
+struct ECCo <: AbstractGeneratorType end
+
+"""
+    get_generator(params::GeneratorParams, type::ECCo=params.type)
+
+Instantiates the `ECCoGenerator` with the given parameters.
+"""
+function get_generator(params::GeneratorParams, generator_type::ECCo)
+    return ECCoGenerator(; opt=params.search_opt, λ=params.λ[1:2])
+end
+
+"Type for the REVISEGenerator."
+struct REVISE <: AbstractGeneratorType end
+
+"""
+    get_generator(params::GeneratorParams, type::REVISE=params.type)
+
+Instantiates the `REVISEGenerator` with the given parameters.
+"""
+function get_generator(params::GeneratorParams, generator_type::REVISE)
+    return REVISEGenerator(; opt=params.search_opt, λ=params.λ[1])
+end
+
+"Type for the GenericGenerator."
+struct Generic <: AbstractGeneratorType end
+
+"""
+    get_generator(params::GeneratorParams, type::Generic)
+
+Instantiates a `GenericGenerator` with the given parameters.
+"""
+function get_generator(params::GeneratorParams, type::Generic)
+    return GenericGenerator(; opt=params.search_opt, λ=params.λ[1])
 end
 
 """

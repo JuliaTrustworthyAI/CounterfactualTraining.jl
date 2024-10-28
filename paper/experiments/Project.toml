@@ -1,3 +1,6 @@
+name = "CTExperiments"
+uuid = "2f47672f-113f-55c8-bd97-40bd014a29f2"
+
 [deps]
 CounterfactualExplanations = "2f13d31b-18db-44c1-bc43-ebaf2cff0be0"
 CounterfactualTraining = "c5e5e904-ed0d-4ddb-967e-dbb7fd41a507"

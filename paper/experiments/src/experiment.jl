@@ -1,12 +1,7 @@
-
 using Flux
 
-abstract type Dataset end
-
-abstract type ModelType end
-
-include("model_and_data.jl")
 include("training_params.jl")
+include("model_and_data.jl")
 
 """
     MetaParams
@@ -17,7 +12,11 @@ Base.@kwdef struct MetaParams
     dim_reduction::Bool = false
 end
 
+"""
+    Experiment
 
+A mutable struct that holds the data, model, training parameters, meta parameters and results of an experiment.
+"""
 mutable struct Experiment
     data::Dataset
     model_type::ModelType
