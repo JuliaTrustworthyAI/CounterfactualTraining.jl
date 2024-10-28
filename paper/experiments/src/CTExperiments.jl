@@ -9,4 +9,6 @@ abstract type ModelType end
 include("utils.jl")
 include("experiment.jl")
 
+export Experiment, run_training
+
 end

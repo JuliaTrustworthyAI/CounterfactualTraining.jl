@@ -14,7 +14,7 @@ Mutable struct holding keyword arguments relevant to counterfactual generator.
 Base.@kwdef struct GeneratorParams <: AbstractGeneratorParams
     type::AbstractGeneratorType = ECCo()
     search_opt::Opt = Descent(1.0f0)
-    max_iter::Int = 50
+    maxiter::Int = 100
     λ::AbstractVector{<:AbstractFloat} = [0.001f0, 5.0f0]
 end
 
@@ -71,9 +71,8 @@ Base.@kwdef struct TrainingParams
     nepochs::Int = 100
     generator_params::GeneratorParams = GeneratorParams()
     nce::Int = 100
-    conv::AbstractConvergence = Convergence.MaxIterConvergence(; max_iter=max_iter)
+    conv::AbstractConvergence = Convergence.MaxIterConvergence(; max_iter=generator_params.maxiter)
     training_opt::Opt = Adam()
-    input_encoder::Union{Nothing,DataPreprocessing.InputTransformer} = nothing
     parallelizer::AbstractParallelizer = ThreadsParallelizer()
     verbose::Bool = true
 end

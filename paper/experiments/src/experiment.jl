@@ -1,3 +1,4 @@
+import CounterfactualTraining as CT
 using Flux
 
 include("training_params.jl")
@@ -17,11 +18,20 @@ end
 
 A mutable struct that holds the data, model, training parameters, meta parameters and results of an experiment.
 """
-mutable struct Experiment
+mutable struct Experiment <: AbstractExperiment
     data::Dataset
     model_type::ModelType
     training_params::TrainingParams
     meta_params::MetaParams
+end
+
+function Experiment(;
+    data=MNIST(),
+    model_type=MLPModel(),
+    training_params=TrainingParams(),
+    meta_params=MetaParams()
+)
+    return Experiment(data, model_type, training_params, meta_params)
 end
 
 """
@@ -29,24 +39,15 @@ end
 
 Sets up the experiment.
 """
-function setup(exp::Experiment)
-
-    # Setup the model and data:
-    exp = setup(exp.data, exp.model_type)
-
-    # Set up the input encoder for the given dataset, generator and meta parameters.
-    set_input_encoder!(exp)
-
-    return exp
-end
+setup(exp::AbstractExperiment) = setup(exp, exp.data, exp.model_type)
 
 """
-    set_input_encoder!(exp::Experiment)
+    get_input_encoder(exp::Experiment)
 
 Sets up the input encoder for the given experiment. This is dispatched over the dataset and generator type.
 """
-function set_input_encoder!(exp::Experiment)
-    return set_input_encoder!(
+function get_input_encoder(exp::AbstractExperiment)
+    return get_input_encoder(
         exp,
         exp.data,
         exp.training_params.generator_params.type,
@@ -54,7 +55,7 @@ function set_input_encoder!(exp::Experiment)
 end
 
 """
-    set_input_encoder!(
+    get_input_encoder(
         exp::Experiment,
         data::Dataset,
         generator_type::AbstractGeneratorType,
@@ -62,13 +63,12 @@ end
 
 Sets up the input encoder for the given experiment, dataset and generator type.
 """
-function set_input_encoder!(
-    exp::Experiment,
+function get_input_encoder(
+    exp::AbstractExperiment,
     data::Dataset,
     generator_type::AbstractGeneratorType,
 )
-    exp.training_params.input_encoder = nothing
-    return exp
+    return nothing
 end
 
 """
@@ -78,9 +78,9 @@ Trains the model on the given dataset with Counterfactual Training using the giv
 """
 function run_training(exp::Experiment)
     generator = get_generator(exp.training_params.generator_params)
-    model, train_set = setup(exp)
+    model, train_set, input_encoder = setup(exp)
     opt_state = Flux.setup(exp.training_params.training_opt, model)
-    model, logs = counterfactual_training(
+    model, logs = CT.counterfactual_training(
         loss,
         model,
         generator,
@@ -92,7 +92,8 @@ function run_training(exp::Experiment)
         nepochs=exp.training_params.nepochs,
         burnin=exp.training_params.burnin,
         nce=exp.training_params.nce,
-        domain=exp.data.domain
+        domain=exp.data.domain,
+        input_encoder=input_encoder,
     )
     return model, logs
 end

@@ -1,3 +1,5 @@
+using TaijaData
+
 """
     MNIST
 
@@ -10,15 +12,15 @@ Base.@kwdef struct MNIST <: Dataset
 end
 
 """
-    setup(data::MNIST, model::ModelType)
+    setup(exp::AbstractExperiment, data::MNIST, model::ModelType)
 
 Loads the MNIST data and builds a model corresponding to the specified `model` type. Returns the model and training dataset.
 """
-function setup(data::MNIST, model::ModelType)
+function setup(exp::AbstractExperiment, data::MNIST, model::ModelType)
 
     # Data:
     Xtrain, y = load_mnist(data.n)
-    data = CounterfactualData(Xtrain, y)
+    counterfactual_data = CounterfactualData(Xtrain, y)
     unique_labels = sort(unique(y))
     ytrain = Flux.onehotbatch(y, unique_labels)
     train_set = Flux.DataLoader((Xtrain, ytrain); batchsize=data.batchsize)
@@ -28,11 +30,14 @@ function setup(data::MNIST, model::ModelType)
     nout = size(first(train_set)[2], 1)
     model = build_model(model, nin, nout)
 
-    return model, train_set
+    # Input encoding:
+    input_encoder = get_input_encoder(exp)
+
+    return model, train_set, input_encoder
 end
 
 """
-    set_input_encoder!(
+    get_input_encoder(
         exp::AbstractExperiment,
         data::MNIST,
         generator_type::AbstractGeneratorType
@@ -40,7 +45,7 @@ end
 
 For MNIST data, use PCA for dimensionality reduction if requested and set the `maxoutdim` to the size of the latent dimension of the VAE.
 """
-function set_input_encoder!(
+function get_input_encoder(
     exp::AbstractExperiment,
     data::MNIST,
     generator_type::AbstractGeneratorType
@@ -53,12 +58,11 @@ function set_input_encoder!(
     else 
         input_encoder = nothing
     end
-    exp.training_params.input_encoder = input_encoder
-    return exp
+    return input_encoder
 end
 
 """
-    set_input_encoder!(
+    get_input_encoder(
         exp::AbstractExperiment, 
         data::MNIST, 
         generator_type::REVISE
@@ -66,14 +70,13 @@ end
 
 For MNIST data and the REVISE generator, use the VAE as the input encoder.
 """
-function set_input_encoder!(
+function get_input_encoder(
     exp::AbstractExperiment, 
     data::MNIST, 
     generator_type::REVISE
 )
     vae = CounterfactualExplanations.Models.load_mnist_vae()
-    exp.training_params.input_encoder = input_encoder
-    return exp
+    return vae
 end
 
 """
