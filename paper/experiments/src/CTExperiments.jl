@@ -1,10 +1,11 @@
 module CTExperiments
 
-abstract type AbstractGeneratorType end
-abstract type AbstractGeneratorParams end
-abstract type AbstractExperiment end
-abstract type Dataset end
-abstract type ModelType end
+include("config.jl")
+
+abstract type AbstractGeneratorType <: AbstractConfiguration end
+abstract type AbstractGeneratorParams <: AbstractConfiguration end
+abstract type Dataset <: AbstractConfiguration end
+abstract type ModelType <: AbstractConfiguration end
 
 include("utils.jl")
 include("experiment.jl")

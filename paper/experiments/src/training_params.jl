@@ -1,10 +1,25 @@
 using CounterfactualExplanations
 using CounterfactualExplanations.Convergence
 using CounterfactualExplanations.DataPreprocessing
+using MPI: MPI
 using TaijaParallel
 using Flux
 
 const Opt = Flux.Optimise.AbstractOptimiser
+
+function get_opt(params::AbstractConfiguration)
+    # Adam:
+    if params.opt == "adam"
+        opt = Adam(params.lr)
+    end
+
+    # SGD:
+    if params.opt == "sgd"
+        opt = Descent(params.lr)
+    end
+
+    return opt
+end
 
 """
     GeneratorParams
@@ -13,9 +28,10 @@ Mutable struct holding keyword arguments relevant to counterfactual generator.
 """
 Base.@kwdef struct GeneratorParams <: AbstractGeneratorParams
     type::AbstractGeneratorType = ECCo()
-    search_opt::Opt = Descent(1.0f0)
+    lr::AbstractFloat = 1.0
+    opt::AbstractString = "sgd"
     maxiter::Int = 100
-    λ::AbstractVector{<:AbstractFloat} = [0.001f0, 5.0f0]
+    penalty_strengths::AbstractVector{<:AbstractFloat} = [0.001, 5.0]
 end
 
 """
@@ -34,7 +50,7 @@ struct ECCo <: AbstractGeneratorType end
 Instantiates the `ECCoGenerator` with the given parameters.
 """
 function get_generator(params::GeneratorParams, generator_type::ECCo)
-    return ECCoGenerator(; opt=params.search_opt, λ=params.λ[1:2])
+    return ECCoGenerator(; opt=get_opt(params), λ=params.penalty_strengths[1:2])
 end
 
 "Type for the REVISEGenerator."
@@ -46,7 +62,7 @@ struct REVISE <: AbstractGeneratorType end
 Instantiates the `REVISEGenerator` with the given parameters.
 """
 function get_generator(params::GeneratorParams, generator_type::REVISE)
-    return REVISEGenerator(; opt=params.search_opt, λ=params.λ[1])
+    return REVISEGenerator(; opt=get_opt(params), λ=params.penalty_strengths[1])
 end
 
 "Type for the GenericGenerator."
@@ -58,7 +74,7 @@ struct Generic <: AbstractGeneratorType end
 Instantiates a `GenericGenerator` with the given parameters.
 """
 function get_generator(params::GeneratorParams, type::Generic)
-    return GenericGenerator(; opt=params.search_opt, λ=params.λ[1])
+    return GenericGenerator(; opt=get_opt(params), λ=params.penalty_strengths[1])
 end
 
 """
@@ -66,13 +82,49 @@ end
 
 Mutable struct holding keyword arguments relevant to counterfactual training.
 """
-Base.@kwdef struct TrainingParams
+Base.@kwdef struct TrainingParams <: AbstractConfiguration
     burnin::AbstractFloat = 0.0f0
     nepochs::Int = 100
     generator_params::GeneratorParams = GeneratorParams()
     nce::Int = 100
-    conv::AbstractConvergence = Convergence.MaxIterConvergence(; max_iter=generator_params.maxiter)
-    training_opt::Opt = Adam()
-    parallelizer::AbstractParallelizer = ThreadsParallelizer()
+    conv::AbstractString = "max_iter"
+    lr::AbstractFloat = 0.001
+    opt::AbstractString = "adam"
+    parallelizer::AbstractString = "threads"
+    threaded::Bool = true
     verbose::Bool = true
+end
+
+function get_parallelizer(params::TrainingParams)
+
+    # Multi-threading
+    if params.parallelizer == "threads"
+        pllr = ThreadsParallelizer()
+    end
+
+    # Multi-processing
+    if params.parallelizer == "mpi"
+        MPI.Init()
+        pllr = MPIParallelizer(MPI.COMM_WORLD; threaded=params.threaded)
+    end
+
+    return pllr
+end
+
+function get_convergence(params::TrainingParams)
+    # Maximum iterations:
+    if params.conv == "max_iter"
+        conv = Convergence.MaxIterConvergence(; max_iter=params.generator_params.maxiter)
+    end
+
+    # Decision threshold:
+    if params.conv == "threshold"
+        conv = Convergence.DecisionThresholdConvergence(; max_iter=params.generator_params.maxiter)
+    end
+
+    # Generator conditions:
+    if params.conv == "gen_con"
+        conv = Convergence.GeneratorConditionsConvergence(; max_iter=params.generator_params.maxiter)
+    end
+    return conv
 end

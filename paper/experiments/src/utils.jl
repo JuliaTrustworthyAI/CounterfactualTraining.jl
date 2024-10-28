@@ -88,7 +88,7 @@ function loss(
     implausibility,
     regularization,
     validity;
-    λ=[0.5, 0.001],
+    penalty_strengths=[0.5, 0.001],
     agg=avg,
 )
 
@@ -96,10 +96,10 @@ function loss(
     class_loss = Flux.Losses.logitcrossentropy(yhat, y)
 
     # Implausibility loss (counterfactual):
-    implausibility_loss = λ[1] * agg(Float32.(implausibility))
+    implausibility_loss = penalty_strengths[1] * agg(Float32.(implausibility))
 
     # Regularization loss:
-    regularization_loss = λ[2] * agg(Float32.(regularization))
+    regularization_loss = penalty_strengths[2] * agg(Float32.(regularization))
 
     # Total loss:
     ℒ = class_loss + validity + implausibility_loss + regularization_loss

@@ -9,7 +9,7 @@ include("model_and_data.jl")
 
 Mutable struct holding the meta parameters for the experiment.
 """
-Base.@kwdef struct MetaParams
+Base.@kwdef struct MetaParams <: AbstractConfiguration
     dim_reduction::Bool = false
 end
 
@@ -77,22 +77,31 @@ end
 Trains the model on the given dataset with Counterfactual Training using the given training parameters and meta parameters.
 """
 function run_training(exp::Experiment)
+
+    # Counterfactual generator:
     generator = get_generator(exp.training_params.generator_params)
     model, train_set, input_encoder = setup(exp)
-    opt_state = Flux.setup(exp.training_params.training_opt, model)
+    conv = get_convergence(exp.training_params)
+    domain = get_domain(exp.data)
+    pllr = get_parallelizer(exp.training_params)
+
+    # Optimizer and model:
+    training_opt = get_opt(exp.training_params)
+    opt_state = Flux.setup(training_opt, model)
+
     model, logs = CT.counterfactual_training(
         loss,
         model,
         generator,
         train_set,
         opt_state;
-        parallelizer=exp.training_params.parallelizer,
+        parallelizer=pllr,
         verbose=exp.training_params.verbose,
-        convergence=exp.training_params.conv,
+        convergence=conv,
         nepochs=exp.training_params.nepochs,
         burnin=exp.training_params.burnin,
         nce=exp.training_params.nce,
-        domain=exp.data.domain,
+        domain=domain,
         input_encoder=input_encoder,
     )
     return model, logs

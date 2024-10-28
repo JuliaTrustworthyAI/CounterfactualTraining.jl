@@ -1,5 +1,7 @@
 using TaijaData
 
+get_domain(d::Dataset) = nothing
+
 """
     MNIST
 
@@ -8,8 +10,9 @@ Keyword container for the `MNIST` data set. Can specify the number of samples `n
 Base.@kwdef struct MNIST <: Dataset
     n::Int = 10000
     batchsize::Int = 1000
-    domain::Union{Nothing,Tuple,Vector{<:Tuple}} = (-1.0f0, 1.0f0)
 end
+
+get_domain(d::MNIST) = (-1.0f0, 1.0f0)
 
 """
     setup(exp::AbstractExperiment, data::MNIST, model::ModelType)
