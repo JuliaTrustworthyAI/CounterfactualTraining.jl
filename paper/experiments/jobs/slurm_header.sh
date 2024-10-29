@@ -4,3 +4,5 @@ export OPENBLAS_NUM_THREADS=1                           # avoid that OpenBLAS ca
 export DATADEPS_ALWAYS_ACCEPT="true"                    # always allow data to be downloaded
 export EXPERIMENT_DIR=paper/experiments                 # experiment folder
 export OUTPUT_DIR=$EXPERIMENT_DIR/output                # output folder for this
+export JOB_DIR=$EXPERIMENT_DIR/jobs                     # folder for job scripts
+export LOG_DIR=$EXPERIMENT_DIR/logs                     # folder for log files
