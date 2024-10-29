@@ -1,7 +1,7 @@
 [meta_params]
 dim_reduction = false
 experiment_name = "template"
-generator_type = "ecco"
+generator_type = "generic"
 data = "mnist"
 model_type = "mlp"
 config_file = "paper/experiments/template_config.toml"
