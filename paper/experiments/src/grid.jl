@@ -1,5 +1,10 @@
 using Base.Iterators
 
+"""
+    ExperimentGrid
+
+A keyword dictionary that contains the parameters for experiments. It is used to generate a list of [`MetaParams`](@ref) objects, one for each unique combination of the fields (see [`setup_experiments`](@ref)).
+"""
 Base.@kwdef struct ExperimentGrid <: AbstractConfiguration
     data::Vector{<:AbstractString} = ["mnist"]
     model_type::Vector{<:AbstractString} = ["mlp"]
@@ -7,6 +12,11 @@ Base.@kwdef struct ExperimentGrid <: AbstractConfiguration
     dim_reduction::Vector{<:Bool} = [false]
 end
 
+"""
+    setup_experiments(cfg::ExperimentGrid)
+
+Generates a list of experiments to be run. The list contains one experiment for every combination of the fields in `cfg`.
+"""
 function setup_experiments(cfg::ExperimentGrid)
 
     # Store results in new dictionary with arrays of pairs (key, value):

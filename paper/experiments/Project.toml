@@ -2,6 +2,7 @@ name = "CTExperiments"
 uuid = "2f47672f-113f-55c8-bd97-40bd014a29f2"
 
 [deps]
+Accessors = "7d9f7c33-5ae7-4f3b-8dc6-eff91059b697"
 CounterfactualExplanations = "2f13d31b-18db-44c1-bc43-ebaf2cff0be0"
 CounterfactualTraining = "c5e5e904-ed0d-4ddb-967e-dbb7fd41a507"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
@@ -16,5 +17,6 @@ TaijaData = "9d524318-b4e6-4a65-86d2-b2b72d07866c"
 TaijaParallel = "bf1c2c22-5e42-4e78-8b6b-92e6c673eeb0"
 
 [compat]
+Accessors = "0.1.38"
 MPI = "0.20.22"
 TOML = "1.0.3"

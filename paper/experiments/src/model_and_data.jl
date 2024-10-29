@@ -45,6 +45,12 @@ Base.@kwdef struct MLPModel <: ModelType
     nhidden::Int = 32
     nlayers::Int = 1
     activation::Function = relu
+    function MLPModel(nhidden, nlayers, activation)
+        if isa(activation, String)
+            activation = eval(Meta.parse(activation))
+        end
+        new(nhidden, nlayers, activation)
+    end
 end
 
 """

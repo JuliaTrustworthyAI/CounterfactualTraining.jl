@@ -1,3 +1,4 @@
+using Accessors
 import CounterfactualTraining as CT
 using Flux
 
@@ -14,6 +15,7 @@ Base.@kwdef struct MetaParams <: AbstractConfiguration
     model_type::String = "mlp"
     generator_type::String = "ecco"
     dim_reduction::Bool = false
+    config_file::String = joinpath(tempdir(), "experiment_config.toml")
 end
 
 """
@@ -33,16 +35,35 @@ end
 
 Sets up the experiment for the provided meta data.
 """
-function Experiment(meta_params::MetaParams)
+function Experiment(meta_params::MetaParams=MetaParams())
+
+    # Set up empty keyword containers:
+    data_params = (;)
+    model_params = (;)
+    training_params = (;)
+    generator_params = (;)
+
+    # Load the configuration file and set up the experiment:
+    if isfile(meta_params.config_file)
+        config_dict = from_toml(meta_params.config_file)
+        @info "Experiment configuration loaded from $(meta_params.config_file)."
+        # Generate keyword containers from config file:
+        data_params = to_ntuple(config_dict["data"])
+        model_params = to_ntuple(config_dict["model_type"])
+        _training_params = to_ntuple(config_dict["training_params"])
+        _generator_params = _training_params.generator_params
+        training_params = @delete $_training_params.generator_params
+        generator_params = @delete $_generator_params.type
+    end
 
     # Model and data:
-    data = get_data(meta_params.data)()
-    model_type = get_model_type(meta_params.model_type)()
+    data = get_data(meta_params.data)(;data_params...)
+    model_type = get_model_type(meta_params.model_type)(;model_params...)
 
     # Training parameters:
     generator_type = get_generator_type(meta_params.generator_type)
-    generator_params = GeneratorParams(type=generator_type())
-    training_params = TrainingParams(generator_params=generator_params)
+    generator_params = GeneratorParams(; type=generator_type(), generator_params...)
+    training_params = TrainingParams(; generator_params=generator_params, training_params...)
 
     # Experiment:
     exper = Experiment(
@@ -55,13 +76,11 @@ function Experiment(meta_params::MetaParams)
     return exper
 end
 
-function Experiment(;
-    data=MNIST(),
-    model_type=MLPModel(),
-    training_params=TrainingParams(),
-    meta_params=MetaParams()
-)
-    return Experiment(data, model_type, training_params, meta_params)
+function Experiment(fname::String)
+    @assert isfile(fname) "Experiment file not found."
+    exper = from_toml(fname) |> to_meta |> Experiment
+    @info "Experiment loaded from $(fname)."
+    return exper
 end
 
 """
