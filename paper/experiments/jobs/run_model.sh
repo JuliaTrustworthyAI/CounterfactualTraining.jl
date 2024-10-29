@@ -13,4 +13,4 @@ module load 2024r1
 
 source experiments/slurm_header.sh
 
-srun julia --project=$EXPERIMENT_FOLDER --threads $SLURM_CPUS_PER_TASK $EXPERIMENT_FOLDER/run_model.jl > $EXPERIMENT_FOLDER/logs/run_model.log
+srun julia --project=$EXPERIMENT_DIR --threads $SLURM_CPUS_PER_TASK $EXPERIMENT_DIR/run_model.jl > $EXPERIMENT_DIR/logs/run_model.log

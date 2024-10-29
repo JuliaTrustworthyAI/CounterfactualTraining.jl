@@ -2,4 +2,5 @@ set -x                                                  # keep log of executed c
 export SRUN_CPUS_PER_TASK="$SLURM_CPUS_PER_TASK"        # assign extra environment variable to be safe 
 export OPENBLAS_NUM_THREADS=1                           # avoid that OpenBLAS calls too many threads
 export DATADEPS_ALWAYS_ACCEPT="true"                    # always allow data to be downloaded
-export EXPERIMENT_FOLDER="paper/experiments"            # experiment folder
+export EXPERIMENT_DIR=paper/experiments                 # experiment folder
+export OUTPUT_DIR=$EXPERIMENT_DIR/output                # output folder for this
