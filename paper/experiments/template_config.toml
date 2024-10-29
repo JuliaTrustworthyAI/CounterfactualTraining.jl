@@ -1,0 +1,34 @@
+[meta_params]
+dim_reduction = false
+experiment_name = "template"
+generator_type = "ecco"
+data = "mnist"
+model_type = "mlp"
+config_file = "paper/experiments/template_config.toml"
+
+[training_params]
+opt = "adam"
+nce = 100
+lr = 0.001
+parallelizer = "threads"
+threaded = true
+nepochs = 100
+burnin = 0.0
+verbose = true
+conv = "max_iter"
+
+    [training_params.generator_params]
+    opt = "sgd"
+    lr = 1.0
+    maxiter = 100
+    type = "ECCo"
+    penalty_strengths = [0.001, 5.0]
+
+[data]
+batchsize = 1000
+n = 10000
+
+[model_type]
+nlayers = 1
+activation = "relu"
+nhidden = 32

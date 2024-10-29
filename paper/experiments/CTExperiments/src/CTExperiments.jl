@@ -14,4 +14,12 @@ include("experiment.jl")
 
 export Experiment, run_training
 
+function generate_template(fname::String="paper/experiments/template_config.toml"; experiment_name="template", kwrgs...)
+    exper = Experiment(MetaParams(; config_file=fname, experiment_name=experiment_name, kwrgs...))
+    to_toml(exper)
+    return fname
+end
+
+export generate_template
+
 end

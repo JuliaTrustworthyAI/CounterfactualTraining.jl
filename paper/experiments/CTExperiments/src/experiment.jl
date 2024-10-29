@@ -81,9 +81,10 @@ end
 
 function Experiment(fname::String)
     @assert isfile(fname) "Experiment file not found."
-    exper = from_toml(fname) |> to_meta |> Experiment
+    meta = from_toml(fname) |> to_meta
+    @assert meta.config_file == fname "Specified file name does not match the file name specified in the configuration file. Did you accidentally overwrite that parameter in the TOML file?"
     @info "Experiment loaded from $(fname)."
-    return exper
+    return Experiment(meta)
 end
 
 """

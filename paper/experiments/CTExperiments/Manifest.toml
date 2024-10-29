@@ -2,7 +2,7 @@
 
 julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "7c77c46a02b92aa6dab10d9a05ddd276786b6464"
+project_hash = "66fe2eb847a673d16dd553cb78793ced65fa7a3d"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -173,12 +173,6 @@ deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers
 git-tree-sha1 = "deddd8725e5e1cc49ee205a1964256043720a6c3"
 uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 version = "0.10.15"
-
-[[deps.CTExperiments]]
-deps = ["Accessors", "CounterfactualExplanations", "CounterfactualTraining", "Flux", "KernelDensity", "MPI", "MultivariateStats", "Plots", "Random", "Serialization", "TOML", "TaijaData", "TaijaParallel", "UUIDs"]
-path = "CTExperiments"
-uuid = "5eca96c7-09a4-4424-a5a1-dee2b4aead1e"
-version = "0.0.0"
 
 [[deps.Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
@@ -364,7 +358,7 @@ version = "0.6.3"
 
 [[deps.CounterfactualExplanations]]
 deps = ["CategoricalArrays", "CausalInference", "ChainRulesCore", "DataFrames", "Distributions", "EnergySamplers", "Flux", "Graphs", "LazyArtifacts", "LinearAlgebra", "Logging", "MLJBase", "MLJDecisionTreeInterface", "MLUtils", "MultivariateStats", "PackageExtensionCompat", "ProgressMeter", "Random", "Serialization", "Statistics", "StatsBase", "Tables", "TaijaBase", "UUIDs"]
-path = "../../../CounterfactualExplanations.jl"
+path = "../../../../CounterfactualExplanations.jl"
 uuid = "2f13d31b-18db-44c1-bc43-ebaf2cff0be0"
 version = "1.3.5"
 
@@ -382,7 +376,7 @@ version = "1.3.5"
 
 [[deps.CounterfactualTraining]]
 deps = ["ChainRulesCore", "CounterfactualExplanations", "EnergySamplers", "Flux", "TaijaParallel"]
-path = "../.."
+path = "../../.."
 uuid = "c5e5e904-ed0d-4ddb-967e-dbb7fd41a507"
 version = "0.0.1"
 
@@ -504,7 +498,7 @@ version = "1.6.0"
 
 [[deps.EnergySamplers]]
 deps = ["CategoricalArrays", "Distributions", "Flux", "MLUtils", "Optimisers", "StatsBase", "Tables"]
-path = "../../../EnergySamplers.jl"
+path = "../../../../EnergySamplers.jl"
 uuid = "f446124b-5d5e-4171-a6dd-a1d99768d3ce"
 version = "1.0.1"
 
