@@ -15,8 +15,10 @@ Serialization = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 TaijaData = "9d524318-b4e6-4a65-86d2-b2b72d07866c"
 TaijaParallel = "bf1c2c22-5e42-4e78-8b6b-92e6c673eeb0"
+UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
 [compat]
 Accessors = "0.1.38"
 MPI = "0.20.22"
 TOML = "1.0.3"
+UUIDs = "1.11.0"

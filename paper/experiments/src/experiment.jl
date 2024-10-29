@@ -1,6 +1,7 @@
 using Accessors
 import CounterfactualTraining as CT
 using Flux
+using UUIDs
 
 include("training_params.jl")
 include("model_and_data.jl")
@@ -8,14 +9,15 @@ include("model_and_data.jl")
 """
     MetaParams
 
-Mutable struct holding the meta parameters for the experiment.
+Struct holding the meta parameters for the experiment.
 """
 Base.@kwdef struct MetaParams <: AbstractConfiguration
+    experiment_name::String = string(uuid1())
     data::String = "mnist"
     model_type::String = "mlp"
     generator_type::String = "ecco"
     dim_reduction::Bool = false
-    config_file::String = joinpath(tempdir(), "experiment_config.toml")
+    config_file::String = joinpath(tempdir(), "experiment_config_$experiment_name.toml")
 end
 
 """
@@ -33,20 +35,21 @@ end
 """
     Experiment(meta_params::MetaParams)
 
-Sets up the experiment for the provided meta data.
+Sets up the experiment for the provided meta data. Keyword arguments for [`Dataset`](@ref), [`ModelType`](@ref), [`TrainingParams``](@ref) and [`GeneratorParams`](@ref) can be passed as named tuples to `data_params`, `model_params`, `training_params` and `generator_params`, respectively.
 """
-function Experiment(meta_params::MetaParams=MetaParams())
-
-    # Set up empty keyword containers:
-    data_params = (;)
-    model_params = (;)
-    training_params = (;)
-    generator_params = (;)
+function Experiment(
+    meta_params::MetaParams=MetaParams();
+    data_params::NamedTuple=(;),
+    model_params::NamedTuple=(;),
+    training_params::NamedTuple=(;),
+    generator_params::NamedTuple=(;),
+)
 
     # Load the configuration file and set up the experiment:
     if isfile(meta_params.config_file)
         config_dict = from_toml(meta_params.config_file)
-        @info "Experiment configuration loaded from $(meta_params.config_file)."
+        @info "Experiment configuration loaded from $(meta_params.config_file). Any parameters specified in the function call other than the meta params will be ignored."
+        @assert meta_params == to_meta(config_dict) "Meta parameters do not match the configuration file."
         # Generate keyword containers from config file:
         data_params = to_ntuple(config_dict["data"])
         model_params = to_ntuple(config_dict["model_type"])
