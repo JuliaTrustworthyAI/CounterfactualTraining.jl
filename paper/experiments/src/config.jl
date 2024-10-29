@@ -14,6 +14,6 @@ function to_dict(config::AbstractConfiguration)
     )
 end
 
-function to_toml(exp::AbstractExperiment)
+function to_toml(exp::AbstractConfiguration)
     TOML.print(to_dict(exp))
 end

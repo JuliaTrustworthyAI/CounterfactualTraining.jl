@@ -7,6 +7,37 @@ using Flux
 
 const Opt = Flux.Optimise.AbstractOptimiser
 
+"Type for the ECCoGenerator."
+struct ECCo <: AbstractGeneratorType end
+
+"Type for the REVISEGenerator."
+struct REVISE <: AbstractGeneratorType end
+
+"Type for the GenericGenerator."
+struct Generic <: AbstractGeneratorType end
+
+"""
+    generator_types
+
+Catalogue of available generator types.
+"""
+const generator_types = Dict(
+    "ecco" => ECCo,
+    "generic" => Generic,
+    "revise" => REVISE,
+)
+
+"""
+    get_generator_type(name::String)
+
+Retrieves the generator type from the catalogue if available.
+"""
+function get_generator_type(s::String)
+    s = lowercase(s)
+    @assert s in keys(generator_types) "Unknown generator type: $s. Available types are $(keys(generator_types))"
+    return generator_types[s]
+end
+
 function get_opt(params::AbstractConfiguration)
     # Adam:
     if params.opt == "adam"
@@ -41,9 +72,6 @@ Instantiates the generator according to the given parameters.
 """
 get_generator(params::GeneratorParams) = get_generator(params, params.type)
 
-"Type for the ECCoGenerator."
-struct ECCo <: AbstractGeneratorType end
-
 """
     get_generator(params::GeneratorParams, type::ECCo=params.type)
 
@@ -53,9 +81,6 @@ function get_generator(params::GeneratorParams, generator_type::ECCo)
     return ECCoGenerator(; opt=get_opt(params), λ=params.penalty_strengths[1:2])
 end
 
-"Type for the REVISEGenerator."
-struct REVISE <: AbstractGeneratorType end
-
 """
     get_generator(params::GeneratorParams, type::REVISE=params.type)
 
@@ -64,9 +89,6 @@ Instantiates the `REVISEGenerator` with the given parameters.
 function get_generator(params::GeneratorParams, generator_type::REVISE)
     return REVISEGenerator(; opt=get_opt(params), λ=params.penalty_strengths[1])
 end
-
-"Type for the GenericGenerator."
-struct Generic <: AbstractGeneratorType end
 
 """
     get_generator(params::GeneratorParams, type::Generic)

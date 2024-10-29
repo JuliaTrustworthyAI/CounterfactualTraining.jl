@@ -10,8 +10,9 @@ include("model_and_data.jl")
 Mutable struct holding the meta parameters for the experiment.
 """
 Base.@kwdef struct MetaParams <: AbstractConfiguration
-    generator_type::String = "ECCo"
-    model_type::String = "MLPModel"
+    data::String = "mnist"
+    model_type::String = "mlp"
+    generator_type::String = "ecco"
     dim_reduction::Bool = false
 end
 
@@ -25,6 +26,33 @@ mutable struct Experiment <: AbstractExperiment
     model_type::ModelType
     training_params::TrainingParams
     meta_params::MetaParams
+end
+
+"""
+    Experiment(meta_params::MetaParams)
+
+Sets up the experiment for the provided meta data.
+"""
+function Experiment(meta_params::MetaParams)
+
+    # Model and data:
+    data = get_data(meta_params.data)()
+    model_type = get_model_type(meta_params.model_type)()
+
+    # Training parameters:
+    generator_type = get_generator_type(meta_params.generator_type)
+    generator_params = GeneratorParams(type=generator_type())
+    training_params = TrainingParams(generator_params=generator_params)
+
+    # Experiment:
+    exper = Experiment(
+        data,
+        model_type,
+        training_params,
+        meta_params
+    )
+
+    return exper
 end
 
 function Experiment(;

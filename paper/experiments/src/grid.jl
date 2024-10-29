@@ -1,8 +1,9 @@
 using Base.Iterators
 
 Base.@kwdef struct ExperimentGrid <: AbstractConfiguration
-    generator_type::Vector{<:AbstractString} = ["ECCo", "Generic", "REVISE"]
-    model_type::Vector{<:AbstractString} = ["MLPModel"]
+    data::Vector{<:AbstractString} = ["mnist"]
+    model_type::Vector{<:AbstractString} = ["mlp"]
+    generator_type::Vector{<:AbstractString} = ["ecco", "generic", "revise"]
     dim_reduction::Vector{<:Bool} = [false]
 end
 
@@ -24,7 +25,8 @@ function setup_experiments(cfg::ExperimentGrid)
         _names = Symbol.([k for (k, _) in kwrgs])
         _values = [v for (_, v) in kwrgs]
         kwrgs = (; zip(_names, _values)...)
-        push!(output, MetaParams(;kwrgs...))
+        exper = Experiment(MetaParams(; kwrgs...))
+        push!(output, exper)
     end
     return output
 end

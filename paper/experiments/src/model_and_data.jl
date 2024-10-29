@@ -12,6 +12,61 @@ Base.@kwdef struct MNIST <: Dataset
     batchsize::Int = 1000
 end
 
+"""
+    data_sets
+
+Catalogue of available model types.
+"""
+const data_sets = Dict(
+    "mnist" => MNIST,
+)
+
+"""
+    get_data(s::String)
+
+Retrieves the data set from the catalogue if available.
+"""
+function get_data(s::String)
+    s = lowercase(s)
+    @assert s in keys(data_sets) "Unknown data set: $s. Available sets are $(keys(data_sets))"
+    return data_sets[s]
+end
+
+"""
+    MLPModel
+
+`MLPModel` type. The following parameters can be specified:
+
+- `nhidden`: the number of hidden units in each layer (default is 32).
+- `nlayers`: the number of hidden layers in the model (default is 1).
+- `activation`: the activation function to use (default is `relu`).
+"""
+Base.@kwdef struct MLPModel <: ModelType
+    nhidden::Int = 32
+    nlayers::Int = 1
+    activation::Function = relu
+end
+
+"""
+    model_types
+
+Catalogue of available model types.
+"""
+const model_types = Dict(
+    "mlp" => MLPModel,
+)
+
+"""
+    get_model_type(s::String)
+
+Retrieves the model type from the catalogue if available.
+"""
+function get_model_type(s::String)
+    s = lowercase(s)
+    @assert s in keys(model_types) "Unknown model type: $s. Available types are $(keys(model_types))"
+    return model_types[s]
+end
+
 get_domain(d::MNIST) = (-1.0f0, 1.0f0)
 
 """
@@ -80,21 +135,6 @@ function get_input_encoder(
 )
     vae = CounterfactualExplanations.Models.load_mnist_vae()
     return vae
-end
-
-"""
-    MLPModel
-
-`MLPModel` type. The following parameters can be specified:
-
-- `nhidden`: the number of hidden units in each layer (default is 32).
-- `nlayers`: the number of hidden layers in the model (default is 1).
-- `activation`: the activation function to use (default is `relu`).
-"""
-Base.@kwdef struct MLPModel <: ModelType
-    nhidden::Int = 32
-    nlayers::Int = 1
-    activation::Function = relu
 end
 
 """
