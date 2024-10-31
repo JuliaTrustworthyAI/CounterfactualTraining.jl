@@ -46,8 +46,6 @@ function generate!(
     
 end
 
-
-
 function counterfactual_training(
     loss,
     model,
