@@ -2,13 +2,15 @@ using CounterfactualExplanations
 using CounterfactualExplanations: Convergence
 using CounterfactualExplanations: Models
 using Flux
+using StatsBase
 using TaijaParallel
 
+
 function generate!(
-    loss::AbstractObjective,
     model,
     data,
     generator;
+    nsamples::Union{Int,Nothing}=nothing,
     convergence=Convergence.MaxIterConvergence(),
     parallelizer=nothing,
     input_encoder=nothing,
@@ -25,9 +27,16 @@ function generate!(
     M = Models.Model(model, Models.FluxNN(); likelihood=:classification_multi)
 
     # Set up counterfactual search:
-    nsamples = size(X, 2)
-    targets = rand(counterfactual_data.y_levels, nsamples)      # randomly generate targets
-    xs = [x[:, :] for x in eachcol(X)]                          # factuals
+    if isnothing(nsamples)
+        nsamples = size(X,2)
+        # Use whole dataset:
+        xs = [x[:, :] for x in eachcol(X)]                          # factuals
+    else
+        # Use subset:
+        Xsub = X[:, sample(1:size(X,2), nsamples)]                   
+        xs = [x[:, :] for x in eachcol(Xsub)]                       # factuals
+    end
+    targets = rand(counterfactual_data.y_levels, nsamples)       # randomly generate targets
 
     # Generate counterfactuals:
     verbose > 0 || println("Generating counterfactuals ...")
@@ -61,17 +70,4 @@ function generate!(
     )
 
     return dl
-end
-
-function generate!(
-    loss::AdversarialObjective,
-    model,
-    data,
-    generator;
-    convergence=Convergence.MaxIterConvergence(),
-    parallelizer=nothing,
-    input_encoder=nothing,
-    verbose=1,
-    domain=nothing,
-)
 end

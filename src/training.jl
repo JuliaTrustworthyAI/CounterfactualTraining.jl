@@ -42,6 +42,7 @@ function counterfactual_training(
             model,
             train_set,
             generator;
+            nsamples=nce,
             converged=convergence,
             parallelizer=parallelizer,
             input_encoder=input_encoder,
