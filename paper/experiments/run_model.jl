@@ -1,6 +1,9 @@
 using CTExperiments
 using CTExperiments.CounterfactualExplanations
+using DotEnv
 using Serialization
+
+DotEnv.load!()
 
 config_file = joinpath(ENV["EXPERIMENT_DIR"],"template_config.toml")
 experiment = Experiment(config_file)

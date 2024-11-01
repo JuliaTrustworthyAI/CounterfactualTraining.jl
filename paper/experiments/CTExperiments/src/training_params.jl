@@ -100,11 +100,37 @@ function get_generator(params::GeneratorParams, type::Generic)
 end
 
 """
+    class_losses
+
+Catalouge of available class losses.
+"""
+const class_losses = Dict(
+    "logitcrossentropy" => Flux.Losses.logitcrossentropy,
+)
+
+"""
+    get_classloss(s::String)
+
+Retrieves the class loss from the catalogue if available.
+"""
+function get_class_loss(s::String)
+    s = lowercase(s)
+    @assert s in keys(class_losses) "Unknown class loss function: $s. Available types are $(keys(class_losses))"
+    return class_losses[s]
+end
+
+"""
     TrainingParams
 
 Mutable struct holding keyword arguments relevant to counterfactual training.
 """
 Base.@kwdef struct TrainingParams <: AbstractConfiguration
+    objective::AbstractString = "full"
+    lambda_class_loss::AbstractFloat = 1.0
+    lambda_energy_diff::AbstractFloat = CT.default_energy_lambda[1]
+    lambda_energy_reg::AbstractFloat = CT.default_energy_lambda[2]
+    lambda_adversarial::AbstractFloat = CT.default_adversarial_lambda
+    class_loss::AbstractString = "logitcrossentropy"
     burnin::AbstractFloat = 0.0f0
     nepochs::Int = 100
     generator_params::GeneratorParams = GeneratorParams()
@@ -114,7 +140,49 @@ Base.@kwdef struct TrainingParams <: AbstractConfiguration
     opt::AbstractString = "adam"
     parallelizer::AbstractString = "threads"
     threaded::Bool = true
-    verbose::Bool = true
+    verbose::Int = 2
+end
+
+"""
+    objectives
+
+Catalogue of available objective functions.
+"""
+const objectives = Dict(
+    "full" => CT.FullObjective,
+    "energy" => CT.EnergyDifferentialObjective,
+    "adversarial" => CT.AdversarialObjective,
+)
+
+"""
+    get_objective(s::String)
+
+Retrieves the objective type from the catalogue if available.
+"""
+function get_objective(s::String)
+    s = lowercase(s)
+    @assert s in keys(objectives) "Unknown objective type: $s. Available types are $(keys(objectives))"
+    return objectives[s]
+end
+
+function get_lambdas(obj::CT.FullObjective, params::TrainingParams)
+    lambda = [
+        params.lambda_class_loss,
+        params.lambda_energy_diff,
+        params.lambda_energy_reg,
+        params.lambda_adversarial,
+    ]
+    return lambda
+end
+
+function get_lambdas(obj::CT.EnergyDifferentialObjective, params::TrainingParams)
+    lambda = [params.lambda_class_loss, params.lambda_energy_diff, params.lambda_energy_reg]
+    return lambda
+end
+
+function get_lambdas(obj::CT.AdversarialObjective, params::TrainingParams)
+    lambda = [params.lambda_class_loss, params.lambda_adversarial]
+    return lambda
 end
 
 function get_parallelizer(params::TrainingParams)

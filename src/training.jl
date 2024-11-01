@@ -19,7 +19,7 @@ function counterfactual_training(
     convergence=Convergence.MaxIterConvergence(),
     input_encoder=nothing,
     domain=nothing, 
-    verbose=false,
+    verbose::Int=2,
     kwrgs...
 )
 
@@ -39,12 +39,11 @@ function counterfactual_training(
         # Generate counterfactuals outside of minibatching:
         if epoch > burnin
             perturbed_set = generate!(
-                loss,
                 model,
                 train_set,
                 generator;
                 nsamples=nce,
-                converged=convergence,
+                convergence=convergence,
                 parallelizer=parallelizer,
                 input_encoder=input_encoder,
                 domain=domain,
@@ -61,7 +60,7 @@ function counterfactual_training(
         # Joint data loader:
         joint_loader = zip(train_set, perturbed_set)
 
-        for (i, (batch, perturbed_batch)) in joint_loader
+        for (i, (batch, perturbed_batch)) in enumerate(joint_loader)
 
             # Unpack:
             input, label = batch        
@@ -74,8 +73,8 @@ function counterfactual_training(
 
                 # Compute implausibility and regulatization:
                 if !isnothing(perturbed_input)
-                    implaus = implausibility(m, perturbed_input, samples, targets)
-                    regs = reg_loss(m, perturbed_input, samples, targets)
+                    implaus = implausibility(m, perturbed_input, neighbours, targets)
+                    regs = reg_loss(m, perturbed_input, neighbours, targets)
                     # Validity loss (counterfactual):
                     yhat_ce = m(perturbed_input)
                     adversarial_loss = Flux.Losses.logitcrossentropy(yhat_ce, targets_enc)
@@ -120,9 +119,9 @@ function counterfactual_training(
 
         if epoch > burnin
             implaus = sum(implausibilities) / length(implausibilities)
-            @info "Average implausibility in $epoch/$nepochs: $implaus"
-            @info "Average reg loss in $epoch/$nepochs: $(sum(reg_losses)/length(reg_losses))"
-            @info "Average validity loss in $epoch/$nepochs: $(sum(validity_losses)/length(validity_losses))"
+            @info "Average energy differential in $epoch/$nepochs: $implaus"
+            @info "Average energy regularization in $epoch/$nepochs: $(sum(reg_losses)/length(reg_losses))"
+            @info "Average adversarial loss in $epoch/$nepochs: $(sum(validity_losses)/length(validity_losses))"
         end
     end
     return model, my_log

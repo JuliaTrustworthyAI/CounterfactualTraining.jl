@@ -14,7 +14,11 @@ include("experiment.jl")
 
 export Experiment, run_training
 
-function generate_template(fname::String="paper/experiments/template_config.toml"; experiment_name="template", kwrgs...)
+function generate_template(fname::String="paper/experiments/template_config.toml"; experiment_name="template", overwrite=true, kwrgs...)
+    if overwrite && isfile(fname)
+        @warn "File $fname already exists! Overwriting..."
+        rm(fname)
+    end
     exper = Experiment(MetaParams(; config_file=fname, experiment_name=experiment_name, kwrgs...))
     to_toml(exper)
     return fname

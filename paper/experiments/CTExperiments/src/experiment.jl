@@ -142,9 +142,14 @@ function run_training(exp::Experiment)
     training_opt = get_opt(exp.training_params)
     opt_state = Flux.setup(training_opt, model)
 
+    # Get objective:
+    class_loss = get_class_loss(exp.training_params.class_loss)         # get classification loss function
+    obj = get_objective(exp.training_params.objective)                  # get objective type
+    obj = obj(class_loss, get_lambdas(obj(), exp.training_params))      # instantiate objective
+
     # Train:
     model, logs = CT.counterfactual_training(
-        loss,
+        obj,
         model,
         generator,
         train_set,

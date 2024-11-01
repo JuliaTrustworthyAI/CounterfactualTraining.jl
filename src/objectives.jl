@@ -5,7 +5,7 @@ using StatsBase
 "Base type of training objectives."
 abstract type AbstractObjective end
 
-const default_energy_lambda = [0.5, 0001]
+const default_energy_lambda = [0.5, 0.0001]
 const default_adversarial_lambda = 1.0
 
 """
@@ -19,6 +19,13 @@ The `EnergyDifferentialObjective` is a concrete implementation of the `AbstractO
 struct EnergyDifferentialObjective <: AbstractObjective
     class_loss::Function
     lambda::Vector{<:AbstractFloat}
+    function EnergyDifferentialObjective(class_loss, lambda)
+        if length(lambda) < 3
+            lambda = [obj.lambda..., 0.0]       # Add a dummy value of 0.0 for the reguilarization term.
+        end
+        @assert length(lambda) == 3 "Need exactly three values in lambda: for the class loss, energy differential, and regularization term, respectively and in that order."
+        return new(class_loss, lambda)
+    end
 end
 
 """
@@ -55,13 +62,12 @@ function (obj::EnergyDifferentialObjective)(
     energy_differential::Vector{<:AbstractFloat},
     regularization::Vector{<:AbstractFloat}=[0.0f0],
     adversarial_loss::Union{AbstractFloat,Vector{<:AbstractFloat}},
+    agg=mean,
     kwrgs...,
 )
 
     # Compute the standard classification loss:
-    class_loss = obj.class_loss(yhat, y; kwrgs...)
-
-    lambda = length(obj.lambda)==2 ? obj.lambda : [obj.lambda, 0.0]     # If there are two components to the loss, then we need to add a dummy component for the regularization term
+    class_loss = obj.class_loss(yhat, y; agg=agg, kwrgs...)
 
     # Energy differential:
     implausibility_loss = agg(Float32.(energy_differential))
@@ -69,7 +75,10 @@ function (obj::EnergyDifferentialObjective)(
     # Energy regularization:
     regularization_loss = agg(Float32.(regularization))
 
-    return [class_loss, implausibility_loss, regularization_loss]'lambda
+    # Aggregate:
+    losses = [class_loss, implausibility_loss, regularization_loss]
+
+    return losses'obj.lambda
 end
 
 """
@@ -83,6 +92,10 @@ The `AdversarialObjective` is a concrete implementation of the `AbstractObjectiv
 struct AdversarialObjective <: AbstractObjective
     class_loss::Function
     lambda::Vector{<:AbstractFloat}
+    function AdversarialObjective(class_loss, lambda)
+        @assert length(lambda) == 2 "Need exactly two values in lambda: for the class loss and the adversarial loss, respectively and in that order."
+        return new(class_loss, lambda)
+    end
 end
 
 """
@@ -118,11 +131,12 @@ function (obj::AdversarialObjective)(
     energy_differential::Vector{<:AbstractFloat},
     regularization::Vector{<:AbstractFloat}=[0.0f0],
     adversarial_loss::Union{AbstractFloat,Vector{<:AbstractFloat}},
+    agg=mean,
     kwrgs...,
 )
 
     # Compute the standard classification loss:
-    class_loss = obj.class_loss(yhat, y; kwrgs...)
+    class_loss = obj.class_loss(yhat, y; agg=agg, kwrgs...)
 
     # Adversarial loss:
     adversarial_loss = agg(Float32.(adversarial_loss))
@@ -141,8 +155,11 @@ The `FullObjective` is a concrete implementation of the `AbstractObjective` abst
 """
 struct FullObjective <: AbstractObjective
     class_loss::Function
-    energy_differential::PenaltyOrFun
     lambda::Vector{<:AbstractFloat}
+    function FullObjective(class_loss, lambda)
+        @assert length(lambda) == 4 "Need exactly four values in lambda: for the class loss, energy differential, regularization term and adversarial loss, respectively and in that order."
+        return new(class_loss, lambda)
+    end
 end
 
 """
@@ -156,10 +173,9 @@ Outer constructor for the `FullObjective` type.
 """
 function FullObjective(;
     class_loss::Function=Flux.Losses.logitcrossentropy,
-    energy_differential::PenaltyOrFun=EnergyDifferential(),
     lambda::Vector{<:AbstractFloat}=[1.0,default_energy_lambda...,default_adversarial_lambda]
 )
-    FullObjective(class_loss, energy_differential, lambda)
+    FullObjective(class_loss, lambda)
 end
 
 """
@@ -180,11 +196,12 @@ function (obj::FullObjective)(
     energy_differential::Vector{<:AbstractFloat},
     regularization::Vector{<:AbstractFloat}=[0.0f0],
     adversarial_loss::Union{AbstractFloat,Vector{<:AbstractFloat}},
+    agg=mean,
     kwrgs...,
 )
 
     # Compute the standard classification loss:
-    class_loss = obj.class_loss(yhat, y; kwrgs...)
+    class_loss = obj.class_loss(yhat, y; agg=agg, kwrgs...)
 
     # Energy differential:
     implausibility_loss = agg(Float32.(energy_differential))

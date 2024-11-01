@@ -1,7 +1,7 @@
 [meta_params]
 dim_reduction = false
 experiment_name = "template"
-generator_type = "generic"
+generator_type = "ecco"
 data = "mnist"
 model_type = "mlp"
 config_file = "paper/experiments/template_config.toml"
@@ -10,11 +10,17 @@ config_file = "paper/experiments/template_config.toml"
 opt = "adam"
 nce = 100
 lr = 0.001
-parallelizer = "mpi"
 threaded = true
-nepochs = 100
+class_loss = "logitcrossentropy"
+objective = "full"
+lambda_class_loss = 1.0
+lambda_energy_diff = 0.5
+lambda_energy_reg = 0.0001
 burnin = 0.0
-verbose = true
+nepochs = 100
+verbose = 2
+lambda_adversarial = 1.0
+parallelizer = "threads"
 conv = "max_iter"
 
     [training_params.generator_params]

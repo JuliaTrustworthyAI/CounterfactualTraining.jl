@@ -39,7 +39,6 @@ function generate!(
     targets = rand(counterfactual_data.y_levels, nsamples)       # randomly generate targets
 
     # Generate counterfactuals:
-    verbose > 0 || println("Generating counterfactuals ...")
     ces = TaijaParallel.parallelize(
         parallelizer,
         CounterfactualExplanations.generate_counterfactual,
@@ -62,7 +61,7 @@ function generate!(
     targets_enc = hcat((x -> x.target_encoded).(ces)...)
 
     # Return data:
-    bs = Int(round(length(data)/size(X, 2)))
+    bs = Int(round(size(counterfactuals, 2)/length(data)))
     dl = Flux.DataLoader(
         (counterfactuals, targets, targets_enc, neighbours),
         batchsize=bs;
