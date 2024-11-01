@@ -37,18 +37,26 @@ function counterfactual_training(
         validity_losses = Float32[]
 
         # Generate counterfactuals outside of minibatching:
-        perturbed_set = generate!(
-            loss,
-            model,
-            train_set,
-            generator;
-            nsamples=nce,
-            converged=convergence,
-            parallelizer=parallelizer,
-            input_encoder=input_encoder,
-            domain=domain,
-            verbose=verbose,
-        )
+        if epoch > burnin
+            perturbed_set = generate!(
+                loss,
+                model,
+                train_set,
+                generator;
+                nsamples=nce,
+                converged=convergence,
+                parallelizer=parallelizer,
+                input_encoder=input_encoder,
+                domain=domain,
+                verbose=verbose,
+            )
+        else
+            dummy_data = fill(nothing, length(train_set))
+            perturbed_set = Flux.DataLoader(
+                (dummy_data, dummy_data, dummy_data, dummy_data),
+                batchsize=1
+            )
+        end
 
         # Joint data loader:
         joint_loader = zip(train_set, perturbed_set)
@@ -70,21 +78,21 @@ function counterfactual_training(
                     regs = reg_loss(m, perturbed_input, samples, targets)
                     # Validity loss (counterfactual):
                     yhat_ce = m(perturbed_input)
-                    validity_loss = Flux.Losses.logitcrossentropy(yhat_ce, targets_enc)
+                    adversarial_loss = Flux.Losses.logitcrossentropy(yhat_ce, targets_enc)
                 else
                     implaus = [0.0f0]
                     regs = [0.0f0]
-                    validity_loss = 0.0f0
+                    adversarial_loss = 0.0f0
                 end
 
                 # Save the implausibilities from the forward pass:
                 ChainRulesCore.ignore_derivatives() do
                     push!(implausibilities, sum(implaus) / length(implaus))
                     push!(reg_losses, sum(regs) / length(regs))
-                    push!(validity_losses, validity_loss)
+                    push!(validity_losses, adversarial_loss)
                 end
 
-                return loss(logits, label, implaus, regs, validity_loss)
+                return loss(logits, label, implaus, regs, adversarial_loss)
             end
 
             # Save the loss from the forward pass. (Done outside of gradient.)
