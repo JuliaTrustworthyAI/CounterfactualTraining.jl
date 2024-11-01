@@ -7,7 +7,7 @@ using TaijaParallel
 using Flux
 
 function counterfactual_training(
-    loss,
+    loss::AbstractObjective,
     model,
     generator,
     train_set,
@@ -92,7 +92,13 @@ function counterfactual_training(
                     push!(validity_losses, adversarial_loss)
                 end
 
-                return loss(logits, label, implaus, regs, adversarial_loss)
+                return loss(
+                    logits,
+                    label;
+                    energy_differential = implaus,
+                    regularization = regs,
+                    adversarial_loss = adversarial_loss,
+                )
             end
 
             # Save the loss from the forward pass. (Done outside of gradient.)
