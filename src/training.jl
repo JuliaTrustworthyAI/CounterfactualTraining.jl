@@ -6,46 +6,6 @@ using CounterfactualExplanations.Evaluation: plausibility
 using TaijaParallel
 using Flux
 
-function generate!(
-    input, model, data, generator;
-    convergence=Convergence.MaxIterConvergence(),
-    parallelizer=nothing,
-    input_encoder=nothing,
-    verbose=true,
-    domain=nothing,
-)
-
-    # Set up:
-    counterfactual_data = CounterfactualData(
-        unwrap(data)...,
-        domain=domain,
-        input_encoder=input_encoder,
-    )
-    M = Models.Model(model, Models.FluxNN(); likelihood=:classification_multi)
-
-    # Generate counterfactuals:
-    nbatch = size(input, 2)
-    targets = rand(counterfactual_data.y_levels, nbatch)                # randomly generate targets
-    xs = [x[:, :] for x in eachcol(input)]                              # factuals
-
-    !verbose || println("Generating counterfactuals ...")
-    ces = TaijaParallel.parallelize(
-        parallelizer,
-        CounterfactualExplanations.generate_counterfactual,
-        xs,
-        targets,
-        counterfactual_data,
-        M,
-        generator;
-        convergence=convergence,
-        verbose=false,
-    )
-    input = hcat(CounterfactualExplanations.counterfactual.(ces)...)                               # counterfactual inputs
-
-    return input, ces, targets
-    
-end
-
 function counterfactual_training(
     loss,
     model,
@@ -75,6 +35,19 @@ function counterfactual_training(
         implausibilities = Float32[]
         reg_losses = Float32[]
         validity_losses = Float32[]
+
+        # Generate counterfactuals outside of minibatching:
+        perturbed_set = generate!(
+            loss,
+            model,
+            train_set,
+            generator;
+            converged=convergence,
+            parallelizer=parallelizer,
+            input_encoder=input_encoder,
+            domain=domain,
+            verbose=verbose,
+        )
 
         for (i, batch) in enumerate(train_set)
             input, label = batch
