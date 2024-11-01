@@ -49,49 +49,14 @@ function counterfactual_training(
             verbose=verbose,
         )
 
-        for (i, batch) in enumerate(train_set)
-            input, label = batch
+        # Joint data loader:
+        joint_loader = zip(train_set, perturbed_set)
 
-            if epoch > burnin
+        for (i, (batch, perturbed_batch)) in joint_loader
 
-                # Choose subset of inputs:
-                nbatch = size(input, 2)
-                if nce != nbatch
-                    idx = rand(1:nbatch, nce)
-                    chosen_input = input[:, idx]
-                else
-                    chosen_input = input
-                end
-
-                # Generate counterfactuals for chosen inputs:
-                perturbed_input, ces, targets = generate!(
-                    chosen_input,
-                    model,
-                    train_set,
-                    generator;
-                    convergence=convergence,
-                    parallelizer=parallelizer,
-                    input_encoder=input_encoder,
-                    domain=domain,
-                    verbose=verbose,
-                )
-
-                # Get neighbour in target class:
-                samples = (X -> X[:,1])([
-                    CounterfactualExplanations.find_potential_neighbours(ce, 10) for
-                    ce in ces
-                ])
-
-                # Encoded targets:
-                targets_enc = hcat((x -> x.target_encoded).(ces)...)
-            else
-                perturbed_input = nothing
-                targets_enc = nothing
-                ces = nothing
-                implaus = [0.0f0]
-                regs = [0.0f0]
-                validity_loss = 0.0f0
-            end
+            # Unpack:
+            input, label = batch        
+            perturbed_input, targets, targets_enc, neighbours = perturbed_batch
 
             val, grads = Flux.withgradient(model) do m
 
@@ -105,6 +70,10 @@ function counterfactual_training(
                     # Validity loss (counterfactual):
                     yhat_ce = m(perturbed_input)
                     validity_loss = Flux.Losses.logitcrossentropy(yhat_ce, targets_enc)
+                else
+                    implaus = [0.0f0]
+                    regs = [0.0f0]
+                    validity_loss = 0.0f0
                 end
 
                 # Save the implausibilities from the forward pass:
