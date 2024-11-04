@@ -10,6 +10,10 @@ Base.@kwdef struct ExperimentGrid <: AbstractConfiguration
     model_type::Vector{<:AbstractString} = ["mlp"]
     generator_type::Vector{<:AbstractString} = ["ecco", "generic", "revise"]
     dim_reduction::Vector{<:Bool} = [false]
+    data_params::Dict{String,Any} = Dict()
+    model_params::Dict{String,Any} = Dict()
+    training_params::Dict{String,Any} = Dict()
+    generator_params::Dict{String,Any} = Dict()
 end
 
 """
@@ -20,14 +24,14 @@ Generates a list of experiments to be run. The list contains one experiment for 
 function setup_experiments(cfg::ExperimentGrid)
 
     # Store results in new dictionary with arrays of pairs (key, value):
-    dict_array_of_pairs = Dict()
-    for (key, values) in to_dict(cfg)
-        all_pairs = Pair[]
-        for value in values
-            push!(all_pairs, key => value)
-        end
-        dict_array_of_pairs[key] = all_pairs
-    end
+    dict_array_of_pairs = to_kv_pair(cfg)
+
+    # Filter out empty pairs:
+    dict_array_of_pairs = filter(
+        ((key, value),) -> length(value) > 0, dict_array_of_pairs
+    )
+
+    return dict_array_of_pairs
 
     # For each combintation of parameters, create a new experiment:
     output = []
@@ -40,3 +44,34 @@ function setup_experiments(cfg::ExperimentGrid)
     end
     return output
 end
+
+to_kv_pair(x) = x
+
+function to_kv_pair(k,vals::AbstractArray{<:Any}) 
+    all_pairs = Pair[]
+    for v in vals
+        push!(all_pairs, k => v)
+    end
+    return all_pairs
+end
+
+function to_kv_pair(k, vals::Dict)
+    all_pairs = Pair[]
+    length(vals) == 0 && return all_pairs
+    # Create a vectors of named tuples for each array in the dict:
+    nt_vals = [[(; Symbol(k) => _v) for _v in v] for (k, v) in vals]
+    all_combinations = vec([reduce(merge, x) for x in product(nt_vals...)])
+    for v in all_combinations
+        push!(all_pairs, k => v)
+    end
+    return all_pairs
+end
+
+function to_kv_pair(cfg::ExperimentGrid)
+    dict_array_of_pairs = Dict()
+    for (key, vals) in to_dict(cfg)
+        dict_array_of_pairs[key] = to_kv_pair(key, vals)
+    end
+    return dict_array_of_pairs
+end
+
