@@ -37,7 +37,7 @@ function generate_grid_template(
     exper_grid = CTExperiments.ExperimentGrid(;
         data_params=Dict("batchsize" => [100, 1000], "n" => [10000, 30000])
     )
-    to_toml(exper_grid)
+    to_toml(exper_grid, fname)
     return fname
 end
 
