@@ -24,6 +24,23 @@ function generate_template(fname::String="paper/experiments/template_config.toml
     return fname
 end
 
-export generate_template
+function generate_grid_template(
+    fname::String="paper/experiments/grid_template_config.toml";
+    overwrite=true,
+    kwrgs...,
+)
+    if overwrite && isfile(fname)
+        @warn "File $fname already exists! Overwriting..."
+        rm(fname)
+    end
+   
+    exper_grid = CTExperiments.ExperimentGrid(;
+        data_params=Dict("batchsize" => [100, 1000], "n" => [10000, 30000])
+    )
+    to_toml(exper_grid)
+    return fname
+end
+
+export generate_template, generate_grid_template
 
 end

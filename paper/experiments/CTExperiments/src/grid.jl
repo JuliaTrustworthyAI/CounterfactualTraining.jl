@@ -31,15 +31,18 @@ function setup_experiments(cfg::ExperimentGrid)
         ((key, value),) -> length(value) > 0, dict_array_of_pairs
     )
 
-    return dict_array_of_pairs
-
     # For each combintation of parameters, create a new experiment:
     output = []
     for kwrgs in product(values(dict_array_of_pairs)...)
         _names = Symbol.([k for (k, _) in kwrgs])
         _values = [v for (_, v) in kwrgs]
-        kwrgs = (; zip(_names, _values)...)
-        exper = Experiment(MetaParams(; kwrgs...))
+        # Get inputs for MetaParams (e.g., data, model):
+        idx_meta = .!(v -> typeof(v) <: NamedTuple).(_values)
+        meta_kwrgs = (; zip(_names[idx_meta], _values[idx_meta])...)
+        # Get other params:
+        idx_other = .!(idx_meta)
+        other_kwrgs = (; zip(_names[idx_other], _values[idx_other])...)
+        exper = Experiment(MetaParams(; meta_kwrgs...); other_kwrgs...)
         push!(output, exper)
     end
     return output
