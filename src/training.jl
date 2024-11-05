@@ -64,6 +64,7 @@ function counterfactual_training(
             # Unpack:
             input, label = batch
             perturbed_input, targets, targets_enc, neighbours = perturbed_batch
+            neighbours = typeof(neighbours) <: AbstractVector ? neighbours : [neighbours]
 
             val, grads = Flux.withgradient(model) do m
 
