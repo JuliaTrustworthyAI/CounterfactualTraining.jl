@@ -1,6 +1,7 @@
 using CounterfactualExplanations
 using CounterfactualExplanations.Convergence
 using CounterfactualExplanations.DataPreprocessing
+using Logging
 using MPI: MPI
 using TaijaParallel
 using Flux
