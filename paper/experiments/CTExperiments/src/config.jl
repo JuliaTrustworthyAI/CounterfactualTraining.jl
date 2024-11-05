@@ -25,7 +25,7 @@ function to_toml(config::AbstractConfiguration, fname::Union{Nothing,String}=not
         TOML.print(dict)
     else
         open(fname, "w") do io
-           TOML.print(io, dict)
+            TOML.print(io, dict)
         end
         @info "Configuration written to $fname."
     end
@@ -44,18 +44,18 @@ to_toml(exp::AbstractExperiment) = to_toml(exp, exp.meta_params.config_file)
 Generates a dictionary from a TOML file at the path specified by `fname`.
 """
 function from_toml(fname::String)::Dict
-    dict = TOML.parsefile(fname) 
+    dict = TOML.parsefile(fname)
     return dict
 end
 
 function to_meta(dict::Dict{String,Any})::MetaParams
     meta_kwrgs = to_ntuple(dict["meta_params"])
-    meta_params = MetaParams(;meta_kwrgs...)
+    meta_params = MetaParams(; meta_kwrgs...)
     return meta_params
 end
 
 function to_grid(dict::Dict{String,Any})::ExperimentGrid
-    CTExperiments.to_ntuple(dict) |> kwrgs -> ExperimentGrid(;kwrgs...)
+    return (kwrgs -> ExperimentGrid(; kwrgs...))(CTExperiments.to_ntuple(dict))
 end
 
 to_ntuple(x) = x

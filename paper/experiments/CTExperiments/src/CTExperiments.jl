@@ -15,26 +15,31 @@ include("experiment.jl")
 export Experiment, run_training
 export ExperimentGrid, setup_experiments
 
-function generate_template(fname::String="paper/experiments/template_config.toml"; experiment_name="template", overwrite=true, kwrgs...)
-    if overwrite && isfile(fname)
-        @warn "File $fname already exists! Overwriting..."
-        rm(fname)
-    end
-    exper = Experiment(MetaParams(; config_file=fname, experiment_name=experiment_name, kwrgs...))
-    to_toml(exper)
-    return fname
-end
-
-function generate_grid_template(
-    fname::String="paper/experiments/template_grid_config.toml";
-    overwrite=true,
+function generate_template(
+    fname::String="paper/experiments/template_config.toml";
+    experiment_name="template",
+    overwrite=false,
     kwrgs...,
 )
     if overwrite && isfile(fname)
         @warn "File $fname already exists! Overwriting..."
         rm(fname)
     end
-   
+    exper = Experiment(
+        MetaParams(; config_file=fname, experiment_name=experiment_name, kwrgs...)
+    )
+    to_toml(exper)
+    return fname
+end
+
+function generate_grid_template(
+    fname::String="paper/experiments/template_grid_config.toml"; overwrite=false, kwrgs...
+)
+    if overwrite && isfile(fname)
+        @warn "File $fname already exists! Overwriting..."
+        rm(fname)
+    end
+
     exper_grid = CTExperiments.ExperimentGrid()
     to_toml(exper_grid, fname)
     return fname

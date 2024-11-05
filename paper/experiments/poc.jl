@@ -1,4 +1,5 @@
-using Pkg; Pkg.activate("paper/experiments")
+using Pkg;
+Pkg.activate("paper/experiments");
 
 using CounterfactualExplanations
 using CounterfactualExplanations: Convergence, Generators, counterfactual
@@ -21,15 +22,12 @@ data = CounterfactualData(Xtrain, y)
 unique_labels = sort(unique(y))
 ytrain = Flux.onehotbatch(y, unique_labels)
 bs = 1000
-train_set = Flux.DataLoader((Xtrain, ytrain), batchsize=bs)
+train_set = Flux.DataLoader((Xtrain, ytrain); batchsize=bs)
 nin = size(first(train_set)[1], 1)
 nout = size(first(train_set)[2], 1)
 nhidden = 64
 activation = relu
-model = Chain(
-    Dense(nin, nhidden, activation),
-    Dense(nhidden, nout)
-)
+model = Chain(Dense(nin, nhidden, activation), Dense(nhidden, nout))
 
 # Input transformers:
 vae = CounterfactualExplanations.Models.load_mnist_vae()
@@ -41,7 +39,7 @@ burnin = 0.0
 nepochs = 200
 max_iter = 100
 nce = 10
-conv = Convergence.MaxIterConvergence(max_iter=max_iter)
+conv = Convergence.MaxIterConvergence(; max_iter=max_iter)
 pllr = ThreadsParallelizer()
 search_opt = Descent(1.0)
 verbose = true
@@ -65,7 +63,7 @@ model_ecco, logs_ecco = counterfactual_training(
     nepochs=nepochs,
     burnin=burnin,
     nce=nce,
-    domain=domain, 
+    domain=domain,
 )
 
 # With Generic:

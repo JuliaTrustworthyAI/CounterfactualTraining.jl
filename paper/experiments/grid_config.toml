@@ -1,11 +1,11 @@
-name = "grid_5db912ce-9b53-11ef-08f6-ebe4272f72e3"
-dim_reduction = [false]
+name = "grid_run_2024-11-05"
+dim_reduction = [false, true]
 generator_type = ["ecco", "generic", "revise"]
 data = "mnist"
 model_type = "mlp"
 
 [data_params]
-batchsize = []
+batchsize = [100, 1000]
 n = []
 
 [model_params]
@@ -27,10 +27,10 @@ objective = []
 lambda_class_loss = []
 lambda_energy_diff = []
 burnin = []
-nepochs = []
+nepochs = [100]
 lambda_adversarial = []
 parallelizer = []
-nce = []
+nce = [10, 100]
 threaded = []
 class_loss = []
 lambda_energy_reg = []

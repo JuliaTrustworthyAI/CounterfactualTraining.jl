@@ -5,7 +5,6 @@ using Flux
 using StatsBase
 using TaijaParallel
 
-
 function generate!(
     model,
     data,
@@ -28,12 +27,12 @@ function generate!(
 
     # Set up counterfactual search:
     if isnothing(nsamples)
-        nsamples = size(X,2)
+        nsamples = size(X, 2)
         # Use whole dataset:
         xs = [x[:, :] for x in eachcol(X)]                          # factuals
     else
         # Use subset:
-        Xsub = X[:, sample(1:size(X,2), nsamples)]                   
+        Xsub = X[:, sample(1:size(X, 2), nsamples)]
         xs = [x[:, :] for x in eachcol(Xsub)]                       # factuals
     end
     targets = rand(counterfactual_data.y_levels, nsamples)       # randomly generate targets
@@ -61,11 +60,9 @@ function generate!(
     targets_enc = hcat((x -> x.target_encoded).(ces)...)
 
     # Return data:
-    bs = Int(round(size(counterfactuals, 2)/length(data)))
+    bs = Int(round(size(counterfactuals, 2) / length(data)))
     dl = Flux.DataLoader(
-        (counterfactuals, targets, targets_enc, neighbours),
-        batchsize=bs;
-        shuffle=false
+        (counterfactuals, targets, targets_enc, neighbours); batchsize=bs, shuffle=false
     )
 
     return dl

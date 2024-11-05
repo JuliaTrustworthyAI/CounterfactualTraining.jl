@@ -17,9 +17,7 @@ end
 
 Catalogue of available model types.
 """
-const data_sets = Dict(
-    "mnist" => MNIST,
-)
+const data_sets = Dict("mnist" => MNIST)
 
 """
     get_data(s::String)
@@ -49,7 +47,7 @@ Base.@kwdef struct MLPModel <: ModelType
         if isa(activation, String)
             activation = eval(Meta.parse(activation))
         end
-        new(nhidden, nlayers, activation)
+        return new(nhidden, nlayers, activation)
     end
 end
 
@@ -58,9 +56,7 @@ end
 
 Catalogue of available model types.
 """
-const model_types = Dict(
-    "mlp" => MLPModel,
-)
+const model_types = Dict("mlp" => MLPModel)
 
 """
     get_model_type(s::String)
@@ -110,16 +106,14 @@ end
 For MNIST data, use PCA for dimensionality reduction if requested and set the `maxoutdim` to the size of the latent dimension of the VAE.
 """
 function get_input_encoder(
-    exp::AbstractExperiment,
-    data::MNIST,
-    generator_type::AbstractGeneratorType
+    exp::AbstractExperiment, data::MNIST, generator_type::AbstractGeneratorType
 )
     if exp.meta_params.dim_reduction
         # Input transformers:
         vae = CounterfactualExplanations.Models.load_mnist_vae()
         maxoutdim = vae.params.latent_dim
         input_encoder = fit_transformer(data, PCA; maxoutdim=maxoutdim)
-    else 
+    else
         input_encoder = nothing
     end
     return input_encoder
@@ -134,11 +128,7 @@ end
 
 For MNIST data and the REVISE generator, use the VAE as the input encoder.
 """
-function get_input_encoder(
-    exp::AbstractExperiment, 
-    data::MNIST, 
-    generator_type::REVISE
-)
+function get_input_encoder(exp::AbstractExperiment, data::MNIST, generator_type::REVISE)
     vae = CounterfactualExplanations.Models.load_mnist_vae()
     return vae
 end

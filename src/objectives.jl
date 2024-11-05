@@ -37,8 +37,8 @@ end
 Outer constructor for the `EnergyDifferentialObjective` type.
 """
 function EnergyDifferentialObjective(;
-    class_loss::Function=Flux.Losses.logitcrossentropy, 
-    lambda::Vector{<:AbstractFloat}=[1.0, default_energy_lambda...]
+    class_loss::Function=Flux.Losses.logitcrossentropy,
+    lambda::Vector{<:AbstractFloat}=[1.0, default_energy_lambda...],
 )
     return EnergyDifferentialObjective(class_loss, lambda)
 end
@@ -108,7 +108,7 @@ Outer constructor for the `AdversarialObjective` type.
 """
 function AdversarialObjective(;
     class_loss::Function=Flux.Losses.logitcrossentropy,
-    lambda::Vector{<:AbstractFloat}=[1.0,default_adversarial_lambda],
+    lambda::Vector{<:AbstractFloat}=[1.0, default_adversarial_lambda],
 )
     return AdversarialObjective(class_loss, lambda)
 end
@@ -141,7 +141,7 @@ function (obj::AdversarialObjective)(
     # Adversarial loss:
     adversarial_loss = agg(Float32.(adversarial_loss))
 
-    return [class_loss,adversarial_loss]'obj.lambda
+    return [class_loss, adversarial_loss]'obj.lambda
 end
 
 """
@@ -173,9 +173,11 @@ Outer constructor for the `FullObjective` type.
 """
 function FullObjective(;
     class_loss::Function=Flux.Losses.logitcrossentropy,
-    lambda::Vector{<:AbstractFloat}=[1.0,default_energy_lambda...,default_adversarial_lambda]
+    lambda::Vector{<:AbstractFloat}=[
+        1.0, default_energy_lambda..., default_adversarial_lambda
+    ],
 )
-    FullObjective(class_loss, lambda)
+    return FullObjective(class_loss, lambda)
 end
 
 """
@@ -212,5 +214,7 @@ function (obj::FullObjective)(
     # Adversarial loss:
     adversarial_loss = agg(Float32.(adversarial_loss))
 
-    return [class_loss, implausibility_loss, regularization_loss, adversarial_loss]'obj.lambda
+    return [
+        class_loss, implausibility_loss, regularization_loss, adversarial_loss
+    ]'obj.lambda
 end

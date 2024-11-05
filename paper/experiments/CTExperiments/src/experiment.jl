@@ -60,28 +60,25 @@ function Experiment(
     end
 
     # Model and data:
-    data = get_data(meta_params.data)(;data_params...)
-    model_type = get_model_type(meta_params.model_type)(;model_params...)
+    data = get_data(meta_params.data)(; data_params...)
+    model_type = get_model_type(meta_params.model_type)(; model_params...)
 
     # Training parameters:
     generator_type = get_generator_type(meta_params.generator_type)
     generator_params = GeneratorParams(; type=generator_type(), generator_params...)
-    training_params = TrainingParams(; generator_params=generator_params, training_params...)
+    training_params = TrainingParams(;
+        generator_params=generator_params, training_params...
+    )
 
     # Experiment:
-    exper = Experiment(
-        data,
-        model_type,
-        training_params,
-        meta_params
-    )
+    exper = Experiment(data, model_type, training_params, meta_params)
 
     return exper
 end
 
 function Experiment(fname::String)
     @assert isfile(fname) "Experiment file not found."
-    meta = from_toml(fname) |> to_meta
+    meta = to_meta(from_toml(fname))
     @assert meta.config_file == fname "Specified file name does not match the file name specified in the configuration file. Did you accidentally overwrite that parameter in the TOML file?"
     @info "Experiment loaded from $(fname)."
     return Experiment(meta)
@@ -100,11 +97,7 @@ setup(exp::AbstractExperiment) = setup(exp, exp.data, exp.model_type)
 Sets up the input encoder for the given experiment. This is dispatched over the dataset and generator type.
 """
 function get_input_encoder(exp::AbstractExperiment)
-    return get_input_encoder(
-        exp,
-        exp.data,
-        exp.training_params.generator_params.type,
-    )
+    return get_input_encoder(exp, exp.data, exp.training_params.generator_params.type)
 end
 
 """
@@ -117,9 +110,7 @@ end
 Sets up the input encoder for the given experiment, dataset and generator type.
 """
 function get_input_encoder(
-    exp::AbstractExperiment,
-    data::Dataset,
-    generator_type::AbstractGeneratorType,
+    exp::AbstractExperiment, data::Dataset, generator_type::AbstractGeneratorType
 )
     return nothing
 end
@@ -166,4 +157,3 @@ function run_training(exp::Experiment)
 
     return model, logs
 end
-

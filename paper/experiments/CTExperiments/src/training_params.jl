@@ -21,11 +21,7 @@ struct Generic <: AbstractGeneratorType end
 
 Catalogue of available generator types.
 """
-const generator_types = Dict(
-    "ecco" => ECCo,
-    "generic" => Generic,
-    "revise" => REVISE,
-)
+const generator_types = Dict("ecco" => ECCo, "generic" => Generic, "revise" => REVISE)
 
 """
     get_generator_type(name::String)
@@ -104,9 +100,7 @@ end
 
 Catalouge of available class losses.
 """
-const class_losses = Dict(
-    "logitcrossentropy" => Flux.Losses.logitcrossentropy,
-)
+const class_losses = Dict("logitcrossentropy" => Flux.Losses.logitcrossentropy)
 
 """
     get_classloss(s::String)
@@ -209,12 +203,16 @@ function get_convergence(params::TrainingParams)
 
     # Decision threshold:
     if params.conv == "threshold"
-        conv = Convergence.DecisionThresholdConvergence(; max_iter=params.generator_params.maxiter)
+        conv = Convergence.DecisionThresholdConvergence(;
+            max_iter=params.generator_params.maxiter
+        )
     end
 
     # Generator conditions:
     if params.conv == "gen_con"
-        conv = Convergence.GeneratorConditionsConvergence(; max_iter=params.generator_params.maxiter)
+        conv = Convergence.GeneratorConditionsConvergence(;
+            max_iter=params.generator_params.maxiter
+        )
     end
     return conv
 end

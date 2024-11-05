@@ -1,3 +1,4 @@
 [deps]
+BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
 CTExperiments = "5eca96c7-09a4-4424-a5a1-dee2b4aead1e"
 DotEnv = "4dc1fcf4-5e3b-5448-94ab-0c38ec0385c1"

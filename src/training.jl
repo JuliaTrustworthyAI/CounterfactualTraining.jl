@@ -18,9 +18,9 @@ function counterfactual_training(
     parallelizer::TaijaParallel.AbstractParallelizer=nothing,
     convergence=Convergence.MaxIterConvergence(),
     input_encoder=nothing,
-    domain=nothing, 
+    domain=nothing,
     verbose::Int=2,
-    kwrgs...
+    kwrgs...,
 )
 
     # Set up:
@@ -52,8 +52,7 @@ function counterfactual_training(
         else
             dummy_data = fill(nothing, length(train_set))
             perturbed_set = Flux.DataLoader(
-                (dummy_data, dummy_data, dummy_data, dummy_data),
-                batchsize=1
+                (dummy_data, dummy_data, dummy_data, dummy_data); batchsize=1
             )
         end
 
@@ -63,7 +62,7 @@ function counterfactual_training(
         for (i, (batch, perturbed_batch)) in enumerate(joint_loader)
 
             # Unpack:
-            input, label = batch        
+            input, label = batch
             perturbed_input, targets, targets_enc, neighbours = perturbed_batch
 
             val, grads = Flux.withgradient(model) do m
@@ -94,9 +93,9 @@ function counterfactual_training(
                 return loss(
                     logits,
                     label;
-                    energy_differential = implaus,
-                    regularization = regs,
-                    adversarial_loss = adversarial_loss,
+                    energy_differential=implaus,
+                    regularization=regs,
+                    adversarial_loss=adversarial_loss,
                 )
             end
 
