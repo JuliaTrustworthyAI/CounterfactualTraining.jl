@@ -193,7 +193,6 @@ function get_parallelizer(params::TrainingParams)
         pllr = MPIParallelizer(MPI.COMM_WORLD; threaded=params.threaded)
         if MPI.Comm_rank(MPI.COMM_WORLD) != 0
             global_logger(NullLogger())
-            params.verbose = 0
         else
             @info "Multi-processing using MPI. Disabling logging on non-root processes."
             if params.threaded

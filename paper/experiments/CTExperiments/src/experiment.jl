@@ -1,6 +1,7 @@
 using Accessors
 import CounterfactualTraining as CT
 using Flux
+using Logging
 using UUIDs
 
 include("training_params.jl")
@@ -138,6 +139,9 @@ function run_training(exp::Experiment)
     obj = get_objective(exp.training_params.objective)                  # get objective type
     obj = obj(class_loss, get_lambdas(obj(), exp.training_params))      # instantiate objective
 
+    # Verbosity:
+    verbose = Logging.global_logger() isa NullLogger ? 0 : exp.training_params.verbose
+
     # Train:
     model, logs = CT.counterfactual_training(
         obj,
@@ -146,7 +150,7 @@ function run_training(exp::Experiment)
         train_set,
         opt_state;
         parallelizer=pllr,
-        verbose=exp.training_params.verbose,
+        verbose=verbose,
         convergence=conv,
         nepochs=exp.training_params.nepochs,
         burnin=exp.training_params.burnin,
