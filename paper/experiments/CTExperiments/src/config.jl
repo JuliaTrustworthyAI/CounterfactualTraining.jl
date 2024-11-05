@@ -54,6 +54,10 @@ function to_meta(dict::Dict{String,Any})::MetaParams
     return meta_params
 end
 
+function to_grid(dict::Dict{String,Any})::ExperimentGrid
+    CTExperiments.to_ntuple(dict) |> kwrgs -> ExperimentGrid(;kwrgs...)
+end
+
 to_ntuple(x) = x
 
 function to_ntuple(dict::Dict)

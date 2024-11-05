@@ -10,10 +10,10 @@ struct ExperimentGrid <: AbstractConfiguration
     model_type::String 
     generator_type::Vector{<:AbstractString}
     dim_reduction::Vector{<:Bool} 
-    data_params::AbstractDict
-    model_params::AbstractDict
-    training_params::AbstractDict
-    generator_params::AbstractDict
+    data_params::Union{AbstractDict,NamedTuple}
+    model_params::Union{AbstractDict,NamedTuple}
+    training_params::Union{AbstractDict,NamedTuple}
+    generator_params::Union{AbstractDict,NamedTuple}
     function ExperimentGrid(
         data,
         model_type,
@@ -26,16 +26,16 @@ struct ExperimentGrid <: AbstractConfiguration
     )
         
         # Data parameters
-        append_params!(data_params, fieldnames(get_data(data)))
+        data_params = append_params(data_params, fieldnames(get_data(data)))
 
         # Model parameters
-        append_params!(model_params, fieldnames(get_model_type(model_type)))
+        model_params = append_params(model_params, fieldnames(get_model_type(model_type)))
 
         # Training parameters
-        append_params!(training_params, fieldnames(TrainingParams))
+        training_params = append_params(training_params, fieldnames(TrainingParams))
 
         # Generator parameters
-        append_params!(generator_params, fieldnames(GeneratorParams))
+        generator_params = append_params(generator_params, fieldnames(GeneratorParams))
 
         return new(
             data, 
@@ -50,7 +50,7 @@ struct ExperimentGrid <: AbstractConfiguration
     end
 end
 
-function append_params!(params::AbstractDict, available_params)
+function append_params(params::AbstractDict, available_params)
     for x in available_params
         x = string(x)
         if  !(x in keys(params))
@@ -60,16 +60,35 @@ function append_params!(params::AbstractDict, available_params)
     return params
 end
 
+function append_params(params::NamedTuple, available_params)
+    params = Dict(zip(string.(keys(params)), values(params)))
+    params = append_params(params, available_params)
+    return params
+end
 
+"""
+    ExperimentGrid(;
+        data::String="mnist",
+        model_type::String="mlp",
+        generator_type::Vector{<:AbstractString}=["ecco", "generic", "revise"],
+        dim_reduction::Vector{<:Bool}=[false],
+        data_params::AbstractDict=Dict(),
+        model_params::AbstractDict=Dict(),
+        training_params::AbstractDict=Dict(),
+        generator_params::AbstractDict=Dict(),
+    )
+
+Outer constructor tailored for the `ExperimentGrid` type. It takes a number of keyword arguments, each one (except `data` and `model_type`) being a vector of possible values to be explored by the grid search. Calling [`setup_experiments(cfg::ExperimentGrid)`](@ref) on an instance of type `ExperimentGrid` will generate a list of experiments for all combinations of these vectors.
+"""
 function ExperimentGrid(;
     data::String="mnist",
     model_type::String="mlp",
     generator_type::Vector{<:AbstractString}=["ecco", "generic", "revise"],
     dim_reduction::Vector{<:Bool}=[false],
-    data_params::AbstractDict=Dict(),
-    model_params::AbstractDict=Dict(),
-    training_params::AbstractDict=Dict(),
-    generator_params::AbstractDict=Dict(),
+    data_params::Union{AbstractDict,NamedTuple}=Dict(),
+    model_params::Union{AbstractDict,NamedTuple}=Dict(),
+    training_params::Union{AbstractDict,NamedTuple}=Dict(),
+    generator_params::Union{AbstractDict,NamedTuple}=Dict(),
 )
     return ExperimentGrid( 
         data,
@@ -81,6 +100,11 @@ function ExperimentGrid(;
         training_params, 
         generator_params
      )
+end
+
+function ExperimentGrid(fname::String)
+    @assert isfile(fname) "Experiment file not found."
+    return dict = from_toml(fname)
 end
 
 """

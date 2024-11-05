@@ -13,6 +13,7 @@ include("grid.jl")
 include("experiment.jl")
 
 export Experiment, run_training
+export ExperimentGrid, setup_experiments
 
 function generate_template(fname::String="paper/experiments/template_config.toml"; experiment_name="template", overwrite=true, kwrgs...)
     if overwrite && isfile(fname)
