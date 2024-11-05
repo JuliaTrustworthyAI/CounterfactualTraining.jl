@@ -25,7 +25,7 @@ function generate_template(fname::String="paper/experiments/template_config.toml
 end
 
 function generate_grid_template(
-    fname::String="paper/experiments/grid_template_config.toml";
+    fname::String="paper/experiments/template_grid_config.toml";
     overwrite=true,
     kwrgs...,
 )
@@ -34,9 +34,7 @@ function generate_grid_template(
         rm(fname)
     end
    
-    exper_grid = CTExperiments.ExperimentGrid(;
-        data_params=Dict("batchsize" => [100, 1000], "n" => [10000, 30000])
-    )
+    exper_grid = CTExperiments.ExperimentGrid()
     to_toml(exper_grid, fname)
     return fname
 end

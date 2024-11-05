@@ -1,0 +1,38 @@
+dim_reduction = [false]
+generator_type = ["ecco", "generic", "revise"]
+data = "mnist"
+model_type = "mlp"
+
+[data_params]
+batchsize = []
+n = []
+
+[model_params]
+nlayers = []
+activation = []
+nhidden = []
+
+[generator_params]
+opt = []
+lr = []
+maxiter = []
+type = []
+penalty_strengths = []
+
+[training_params]
+opt = []
+lr = []
+objective = []
+lambda_class_loss = []
+lambda_energy_diff = []
+burnin = []
+nepochs = []
+lambda_adversarial = []
+parallelizer = []
+nce = []
+threaded = []
+class_loss = []
+lambda_energy_reg = []
+verbose = []
+generator_params = []
+conv = []
