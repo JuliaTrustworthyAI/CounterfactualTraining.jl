@@ -62,7 +62,10 @@ function generate!(
     # Return data:
     bs = Int(round(size(counterfactuals, 2) / length(data)))
     dl = Flux.DataLoader(
-        (counterfactuals, targets, targets_enc, neighbours); batchsize=bs, shuffle=false
+        (counterfactuals, targets, targets_enc, neighbours);
+        batchsize=bs,
+        shuffle=false,
+        parallel=true,
     )
 
     return dl

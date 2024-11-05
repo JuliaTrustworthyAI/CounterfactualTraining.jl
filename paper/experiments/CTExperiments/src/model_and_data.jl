@@ -83,7 +83,11 @@ function setup(exp::AbstractExperiment, data::MNIST, model::ModelType)
     counterfactual_data = CounterfactualData(Xtrain, y)
     unique_labels = sort(unique(y))
     ytrain = Flux.onehotbatch(y, unique_labels)
-    train_set = Flux.DataLoader((Xtrain, ytrain); batchsize=data.batchsize)
+    train_set = Flux.DataLoader(
+        (Xtrain, ytrain);
+        batchsize=data.batchsize,
+        parallel=true,
+    )
 
     # Model:
     nin = size(first(train_set)[1], 1)
