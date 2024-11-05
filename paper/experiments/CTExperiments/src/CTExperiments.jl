@@ -26,14 +26,15 @@ function generate_template(
         rm(fname)
     end
     exper = Experiment(
-        MetaParams(; config_file=fname, experiment_name=experiment_name, kwrgs...)
+        MetaParams(; config_file=fname, experiment_name=experiment_name);
+        kwrgs...,
     )
     to_toml(exper)
     return fname
 end
 
 function generate_grid_template(
-    fname::String="paper/experiments/template_grid_config.toml"; overwrite=false, kwrgs...
+    fname::String="paper/experiments/template_grid_config.toml"; overwrite=false
 )
     if overwrite && isfile(fname)
         @warn "File $fname already exists! Overwriting..."

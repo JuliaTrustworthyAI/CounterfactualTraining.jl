@@ -7,7 +7,7 @@ using Serialization
 DotEnv.load!()
 
 # Get config and set up grid:
-config_file = joinpath(ENV["EXPERIMENT_DIR"], "grid_config.toml")
+config_file = joinpath(ENV["EXPERIMENT_DIR"], "run_grid_config.toml")
 exper_grid = ExperimentGrid(config_file)
 
 # Save grid config to output folder:
