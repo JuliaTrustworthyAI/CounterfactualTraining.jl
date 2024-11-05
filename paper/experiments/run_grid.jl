@@ -19,7 +19,7 @@ CTExperiments.to_toml(exper_grid, config_name)
 # Generate list of experiments and run them:
 exper_list = setup_experiments(exper_grid)
 @info "Running $(length(exper_list)) experiments ..."
-Threads.@threads for (i, experiment) in enumerate(exper_list)
+for (i, experiment) in enumerate(exper_list)
 
     # Saving the config file (for the ith experiment)
     name = experiment.meta_params.experiment_name
