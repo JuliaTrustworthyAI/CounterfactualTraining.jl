@@ -2,7 +2,7 @@
 
 julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "efdc3250a5f8040ed409f390de133836c2918886"
+project_hash = "dd99fb3cee35e3acc9643df1c6c838793d5d5967"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -2055,9 +2055,9 @@ version = "1.0.0"
 
 [[deps.TaijaParallel]]
 deps = ["CounterfactualExplanations", "Logging", "MLUtils", "PackageExtensionCompat", "ProgressMeter", "Reexport", "Serialization", "TaijaBase"]
-path = "../../../TaijaParallel.jl"
+git-tree-sha1 = "9ff3d14cd56018d84c15081b8f07c6b92493fa2c"
 uuid = "bf1c2c22-5e42-4e78-8b6b-92e6c673eeb0"
-version = "1.0.3"
+version = "1.1.0"
 weakdeps = ["MPI"]
 
     [deps.TaijaParallel.extensions]

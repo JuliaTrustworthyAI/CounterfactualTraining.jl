@@ -1,4 +1,5 @@
 using TaijaData
+using MultivariateStats
 
 get_domain(d::Dataset) = nothing
 
@@ -116,7 +117,9 @@ function get_input_encoder(
         # Input transformers:
         vae = CounterfactualExplanations.Models.load_mnist_vae()
         maxoutdim = vae.params.latent_dim
-        input_encoder = fit_transformer(data, PCA; maxoutdim=maxoutdim)
+        Xtrain, y = load_mnist(data.n)
+        counterfactual_data = CounterfactualData(Xtrain, y)
+        input_encoder = fit_transformer(counterfactual_data, PCA; maxoutdim=maxoutdim)
     else
         input_encoder = nothing
     end
