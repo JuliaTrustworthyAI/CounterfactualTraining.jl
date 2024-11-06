@@ -1,9 +1,12 @@
 using CTExperiments
 using CTExperiments.CounterfactualExplanations
 using DotEnv
+using Random
 using Serialization
 
 DotEnv.load!()
+
+Random.seed!(2025)
 
 config_file = joinpath(ENV["EXPERIMENT_DIR"], "run_model_config.toml")
 experiment = Experiment(config_file)

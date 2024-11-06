@@ -1,11 +1,11 @@
-name = "grid_run_2024-11-06_equal_sizes"
+name = "grid_run_2024-11-06"
 dim_reduction = [false]
 generator_type = ["ecco", "generic", "revise"]
 data = "mnist"
 model_type = "mlp"
 
 [data_params]
-batchsize = [500]
+batchsize = [500, 1000]
 n = []
 
 [model_params]
@@ -30,7 +30,7 @@ burnin = []
 nepochs = [10]
 lambda_adversarial = []
 parallelizer = ["mpi"]
-nce = [500]
+nce = [10, 100]
 threaded = []
 class_loss = []
 lambda_energy_reg = []

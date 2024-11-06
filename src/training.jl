@@ -36,34 +36,30 @@ function counterfactual_training(
         reg_losses = Float32[]
         validity_losses = Float32[]
 
-        # Generate counterfactuals outside of minibatching:
-        if epoch > burnin
-            perturbed_set = generate!(
-                model,
-                train_set,
-                generator;
-                nsamples=nce,
-                convergence=convergence,
-                parallelizer=parallelizer,
-                input_encoder=input_encoder,
-                domain=domain,
-                verbose=verbose,
-            )
-        else
-            dummy_data = fill(nothing, length(train_set))
-            perturbed_set = Flux.DataLoader(
-                (dummy_data, dummy_data, dummy_data, dummy_data); batchsize=1
-            )
-        end
-
-        # Joint data loader:
-        joint_loader = zip(train_set, perturbed_set)
-
-        for (i, (batch, perturbed_batch)) in enumerate(joint_loader)
+        for (i, batch) in enumerate(train_set)
 
             # Unpack:
             input, label = batch
-            perturbed_input, targets, targets_enc, neighbours = perturbed_batch
+
+            # Generate counterfactuals:
+            if epoch > burnin
+                perturbed_input, targets, targets_enc, neighbours = generate!(
+                    input,
+                    model,
+                    train_set,
+                    generator;
+                    nsamples=nce,
+                    convergence=convergence,
+                    parallelizer=parallelizer,
+                    input_encoder=input_encoder,
+                    domain=domain,
+                    verbose=verbose,
+                )
+            else
+                perturbed_input, targets, targets_enc, neighbours = ntuple(_ -> nothing, 4)
+            end
+
+            
             neighbours = typeof(neighbours) <: AbstractVector ? neighbours : [neighbours]
 
             val, grads = Flux.withgradient(model) do m
@@ -110,6 +106,7 @@ function counterfactual_training(
             end
 
             Flux.update!(opt_state, model, grads[1])
+            
         end
 
         # Compute some accuracy, and save details as a NamedTuple
