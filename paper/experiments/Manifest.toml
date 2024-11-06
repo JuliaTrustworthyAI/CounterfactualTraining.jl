@@ -2055,7 +2055,7 @@ version = "1.0.0"
 
 [[deps.TaijaParallel]]
 deps = ["CounterfactualExplanations", "Logging", "MLUtils", "PackageExtensionCompat", "ProgressMeter", "Reexport", "Serialization", "TaijaBase"]
-git-tree-sha1 = "648716331e9d2adc731dbf70405b90e16a8bfa9b"
+path = "../../../TaijaParallel.jl"
 uuid = "bf1c2c22-5e42-4e78-8b6b-92e6c673eeb0"
 version = "1.0.3"
 weakdeps = ["MPI"]
