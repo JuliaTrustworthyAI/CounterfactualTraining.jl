@@ -3,12 +3,12 @@
 #SBATCH --job-name="Run Grid"
 #SBATCH --partition=compute
 #SBATCH --time=00:10:00
-#SBATCH --ntasks=10
-#SBATCH --cpus-per-task=10
+#SBATCH --ntasks=5
+#SBATCH --cpus-per-task=5
 #SBATCH --mem-per-cpu=2G
 #SBATCH --account=research-eemcs-insy
 #SBATCH --mail-type=END
-
+a
 module load 2024r1 
 
 source paper/experiments/jobs/slurm_header.sh
