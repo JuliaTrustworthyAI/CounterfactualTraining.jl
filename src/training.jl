@@ -36,30 +36,28 @@ function counterfactual_training(
         reg_losses = Float32[]
         validity_losses = Float32[]
 
+        # Generate counterfactuals:
+        if epoch > burnin
+            counterfactual_dl = generate!(
+                model,
+                train_set,
+                generator;
+                nsamples=nce,
+                convergence=convergence,
+                parallelizer=parallelizer,
+                input_encoder=input_encoder,
+                domain=domain,
+                verbose=verbose,
+            )
+        else
+            counterfactual_dl = fill(ntuple(_ -> nothing, 4), length(train_set))
+        end
+
         for (i, batch) in enumerate(train_set)
 
             # Unpack:
             input, label = batch
-
-            # Generate counterfactuals:
-            if epoch > burnin
-                perturbed_input, targets, targets_enc, neighbours = generate!(
-                    input,
-                    model,
-                    train_set,
-                    generator;
-                    nsamples=nce,
-                    convergence=convergence,
-                    parallelizer=parallelizer,
-                    input_encoder=input_encoder,
-                    domain=domain,
-                    verbose=verbose,
-                )
-            else
-                perturbed_input, targets, targets_enc, neighbours = ntuple(_ -> nothing, 4)
-            end
-
-            
+            perturbed_input, targets, targets_enc, neighbours = counterfactual_dl[i]
             neighbours = typeof(neighbours) <: AbstractVector ? neighbours : [neighbours]
 
             val, grads = Flux.withgradient(model) do m

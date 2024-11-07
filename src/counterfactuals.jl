@@ -1,3 +1,4 @@
+using Base.Iterators
 using CounterfactualExplanations
 using CounterfactualExplanations: Convergence
 using CounterfactualExplanations: Models
@@ -134,24 +135,30 @@ function generate!(
         convergence=convergence,
         verbose=verbose > 1,
     )
-    counterfactuals = hcat(CounterfactualExplanations.counterfactual.(ces)...)      # counterfactual inputs
+    counterfactuals = CounterfactualExplanations.counterfactual.(ces)      # counterfactual inputs
 
     # Get neighbours in target class:
-    neighbours = (X -> X[:, 1])([
+    neighbours = [
         CounterfactualExplanations.find_potential_neighbours(ce, 10) for ce in ces
-    ])
+    ]
 
     # Encoded targets:
-    targets_enc = hcat((x -> x.target_encoded).(ces)...)
+    targets_enc = (x -> x.target_encoded).(ces)
 
-    # Return data:
-    bs = Int(round(size(counterfactuals, 2) / length(data)))
-    dl = Flux.DataLoader(
-        (counterfactuals, targets, targets_enc, neighbours);
-        batchsize=bs,
-        shuffle=false,
-        parallel=true,
-    )
+    # Partition data:
+    all_data = zip(counterfactuals, targets, targets_enc, neighbours)
+    n_total = length(all_data)
+    bs = Int(round(n_total / length(data)))
+    group_indices = partition(1:n_total, bs)
+    dl = [
+        (
+            hcat(counterfactuals[i]...),
+            targets[i],
+            hcat(targets_enc[i]...),
+            neighbours[i],
+        ) for i in group_indices
+    ]
+    @assert length(dl) == length(data)
 
     return dl
 end
