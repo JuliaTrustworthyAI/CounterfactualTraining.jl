@@ -12,7 +12,8 @@ config_file = joinpath(ENV["EXPERIMENT_DIR"], "run_model_config.toml")
 experiment = Experiment(config_file)
 name = experiment.meta_params.experiment_name
 @info "Running experiment: $(name)"
-model, logs = run_training(experiment)
+checkpoint_dir = ENV["OUTPUT_DIR"]
+model, logs = run_training(experiment; checkpoint_dir=checkpoint_dir)
 M = MLP(model; likelihood=:classification_multi)
 fname = joinpath(ENV["OUTPUT_DIR"], "model_$(name).jls")
 @info "Saving model to $(fname)"

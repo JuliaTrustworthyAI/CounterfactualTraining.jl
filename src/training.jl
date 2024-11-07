@@ -3,8 +3,9 @@ using CounterfactualExplanations
 using CounterfactualExplanations: Convergence
 using CounterfactualExplanations: Models
 using CounterfactualExplanations.Evaluation: plausibility
-using TaijaParallel
 using Flux
+using JLD2
+using TaijaParallel
 
 function counterfactual_training(
     loss::AbstractObjective,
@@ -20,6 +21,7 @@ function counterfactual_training(
     input_encoder=nothing,
     domain=nothing,
     verbose::Int=2,
+    checkpoint_dir::Union{Nothing, String} = nothing,
     kwrgs...,
 )
 
@@ -27,8 +29,23 @@ function counterfactual_training(
     burnin = Int(round(burnin * nepochs))
     nce = isnothing(nce) ? train_set.batchsize : nce
 
+    # Initialize model:
+    start_epoch = 1
+    if !isnothing(checkpoint_dir) && isfile(joinpath(checkpoint_dir, "checkpoint.jld2"))
+        @info "Found checkpoint file in $checkpoint_dir. Loading..."
+        model, opt_state, epoch = JLD2.load(
+            joinpath(checkpoint_dir, "checkpoint.jld2"), "model", "opt_state", "epoch"
+        )
+        start_epoch = epoch + 1
+        if start_epoch <= nepochs
+            @info "Resuming training from epoch $start_epoch."
+        else
+            @info "Already completed 100% of training. Skipping..."
+        end
+    end
+
     my_log = []
-    for epoch in 1:nepochs
+    for epoch in start_epoch:nepochs
 
         # Logs:
         losses = Float32[]
@@ -105,6 +122,20 @@ function counterfactual_training(
 
             Flux.update!(opt_state, model, grads[1])
             
+        end
+
+        # Checkpointing:
+        if !isnothing(checkpoint_dir)
+            jldsave(joinpath(checkpoint_dir, "checkpoint.jld2"); model, opt_state, epoch)
+            previous_log = joinpath(checkpoint_dir, "checkpoint_$(epoch-1).md")
+            isfile(previous_log) && rm(previous_log)
+            fpath = joinpath(checkpoint_dir, "checkpoint_$(epoch).md")
+            a = """
+            Completed $epoch out of $nepochs epochs.
+            """
+            open(fpath, "w") do file
+                write(file, a)
+            end
         end
 
         # Compute some accuracy, and save details as a NamedTuple

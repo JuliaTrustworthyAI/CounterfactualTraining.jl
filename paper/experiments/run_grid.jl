@@ -51,7 +51,7 @@ for (i, experiment) in enumerate(exper_list)
         continue
     end
     @info "Rank $(rank): Running experiment: $(name) ($i/$(length(exper_list)))"
-    model, logs = run_training(experiment)
+    model, logs = run_training(experiment; checkpoint_dir=save_dir)
 
     # Saving the results:
     logs_name = joinpath(save_dir, "logs.jls")

@@ -117,11 +117,11 @@ function get_input_encoder(
 end
 
 """
-    run_trainging(exp::Experiment)
+    run_training(exp::Experiment; checkpoint_dir::Union{Nothing,String} = nothing)
 
 Trains the model on the given dataset with Counterfactual Training using the given training parameters and meta parameters.
 """
-function run_training(exp::Experiment)
+function run_training(exp::Experiment; checkpoint_dir::Union{Nothing,String}=nothing)
 
     # Counterfactual generator:
     generator = get_generator(exp.training_params.generator_params)
@@ -154,6 +154,7 @@ function run_training(exp::Experiment)
         nce=exp.training_params.nce,
         domain=domain,
         input_encoder=input_encoder,
+        checkpoint_dir=checkpoint_dir,
     )
 
     return model, logs
