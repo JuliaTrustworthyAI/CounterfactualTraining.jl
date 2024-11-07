@@ -42,7 +42,8 @@ for (i, experiment) in enumerate(exper_list)
     save_dir = joinpath(grid_save_dir, "$(name)")
     mkpath(save_dir)
     local_config_name = joinpath(save_dir, "config.toml")
-    CTExperiments.to_toml(experiment, local_config_name)
+    experiment.meta_params.config_file = local_config_name
+    CTExperiments.to_toml(experiment)
 
     # Running the experiment
     mname = joinpath(save_dir, "model.jls")

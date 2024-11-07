@@ -12,7 +12,7 @@ include("model_and_data.jl")
 
 Struct holding the meta parameters for the experiment.
 """
-Base.@kwdef struct MetaParams <: AbstractConfiguration
+Base.@kwdef mutable struct MetaParams <: AbstractConfiguration
     experiment_name::String = string(uuid1())
     data::String = "mnist"
     model_type::String = "mlp"

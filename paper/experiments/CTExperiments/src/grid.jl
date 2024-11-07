@@ -120,7 +120,8 @@ end
 Generates a list of experiments to be run. The list contains one experiment for every combination of the fields in `cfg`.
 """
 function setup_experiments(
-    cfg::ExperimentGrid; experiment_name_prefix::Union{Nothing,String}="experiment"
+    cfg::ExperimentGrid;
+    experiment_name_prefix::Union{Nothing,String}="experiment"
 )
 
     # Store results in new dictionary with arrays of pairs (key, value):
@@ -134,12 +135,14 @@ function setup_experiments(
     # For each combintation of parameters, create a new experiment:
     output = []
     for (i, kwrgs) in enumerate(product(values(dict_array_of_pairs)...))
+
         # Experiment name:
         experiment_name = if isnothing(experiment_name_prefix)
             string(uuid1())
         else
             "$(experiment_name_prefix)_$(i)"
         end
+
         # Unpack:
         _names = Symbol.([k for (k, _) in kwrgs])
         _values = [v for (_, v) in kwrgs]
