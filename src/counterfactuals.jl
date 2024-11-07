@@ -117,6 +117,13 @@ function generate!(
         # Use whole dataset:
         xs = [x[:, :] for x in eachcol(X)]                          # factuals
     else
+
+        # Check that at least one counterfactual is generated for each batch:
+        if nsamples < length(data)
+            @warn "Need at least one counterfactual per batch. Setting `nsamples=$(nsamples)` to the total number of batches ($(length(data)))." maxlog=1
+            nsamples = length(data)
+        end
+
         # Use subset:
         Xsub = X[:, sample(1:size(X, 2), nsamples)]
         xs = [x[:, :] for x in eachcol(Xsub)]                       # factuals
