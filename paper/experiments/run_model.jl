@@ -15,6 +15,10 @@ name = experiment.meta_params.experiment_name
 checkpoint_dir = ENV["OUTPUT_DIR"]
 model, logs = run_training(experiment; checkpoint_dir=checkpoint_dir)
 M = MLP(model; likelihood=:classification_multi)
-fname = joinpath(ENV["OUTPUT_DIR"], "model_$(name).jls")
+fname = joinpath(ENV["OUTPUT_DIR"], "$(name)_model.jls")
+logs_name = joinpath(ENV["OUTPUT_DIR"], "$(name)_logs.jls")
 @info "Saving model to $(fname)"
 serialize(fname, M)
+@info "Saving logs to $(logs_name)"
+serialize(logs_name, logs)
+

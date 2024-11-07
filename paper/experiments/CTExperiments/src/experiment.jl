@@ -1,4 +1,5 @@
 using Accessors
+import Base: ==
 import CounterfactualTraining as CT
 using Flux
 using Logging
@@ -19,6 +20,15 @@ Base.@kwdef mutable struct MetaParams <: AbstractConfiguration
     generator_type::String = "ecco"
     dim_reduction::Bool = false
     config_file::String = joinpath(tempdir(), "experiment_config_$experiment_name.toml")
+end
+
+"""
+    ==(x::MetaParams, y::MetaParams)
+
+Convenience function to check for equality of all fields.
+"""
+function ==(x::MetaParams, y::MetaParams)::Bool
+    return all(getfield(x, field) == getfield(y, field) for field in fieldnames(MetaParams))
 end
 
 """

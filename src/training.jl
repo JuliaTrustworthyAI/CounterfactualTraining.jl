@@ -6,6 +6,7 @@ using CounterfactualExplanations.Evaluation: plausibility
 using Flux
 using JLD2
 using TaijaParallel
+using UnicodePlots
 
 function counterfactual_training(
     loss::AbstractObjective,
@@ -30,11 +31,12 @@ function counterfactual_training(
     nce = isnothing(nce) ? train_set.batchsize : nce
 
     # Initialize model:
+    log = []
     start_epoch = 1
     if !isnothing(checkpoint_dir) && isfile(joinpath(checkpoint_dir, "checkpoint.jld2"))
         @info "Found checkpoint file in $checkpoint_dir. Loading..."
-        model, opt_state, epoch = JLD2.load(
-            joinpath(checkpoint_dir, "checkpoint.jld2"), "model", "opt_state", "epoch"
+        model, opt_state, epoch, log = JLD2.load(
+            joinpath(checkpoint_dir, "checkpoint.jld2"), "model", "opt_state", "epoch", "log"
         )
         start_epoch = epoch + 1
         if start_epoch <= nepochs
@@ -44,7 +46,6 @@ function counterfactual_training(
         end
     end
 
-    my_log = []
     for epoch in start_epoch:nepochs
 
         # Logs:
@@ -124,31 +125,51 @@ function counterfactual_training(
             
         end
 
+        # Compute some accuracy, and save details as a NamedTuple
+        acc = accuracy(model, train_set)
+        msg_acc = "Accuracy in epoch $epoch/$nepochs: $acc"
+        @info msg_acc
+        push!(log, (; acc, losses, implausibilities, reg_losses, validity_losses))
+        
+        if epoch > burnin
+            implaus = sum(implausibilities) / length(implausibilities)
+            msg_imp = "Average energy differential in $epoch/$nepochs: $implaus"
+            msg_reg = "Average energy regularization in $epoch/$nepochs: $(sum(reg_losses)/length(reg_losses))"
+            msg_adv = "Average adversarial loss in $epoch/$nepochs: $(sum(validity_losses)/length(validity_losses))"
+            @info msg_imp
+            @info msg_reg
+            @info msg_adv
+        else
+            msg_imp = "n/a"
+            msg_reg = "n/a"
+            msg_adv = "n/a"
+        end
+
         # Checkpointing:
         if !isnothing(checkpoint_dir)
-            jldsave(joinpath(checkpoint_dir, "checkpoint.jld2"); model, opt_state, epoch)
+            jldsave(joinpath(checkpoint_dir, "checkpoint.jld2"); model, opt_state, epoch, log)
             previous_log = joinpath(checkpoint_dir, "checkpoint_$(epoch-1).md")
             isfile(previous_log) && rm(previous_log)
             fpath = joinpath(checkpoint_dir, "checkpoint_$(epoch).md")
+            acc_plt = lineplot([_log[1] for _log in log], xlabel="Epochs", ylabel="Accuracy");
             a = """
             Completed $epoch out of $nepochs epochs.
+
+            ## Performance
+
+            - *Accuracy*: $msg_acc
+            - *Implausibility*: $msg_imp
+            - *Regularization loss*: $msg_reg
+            - *Adversarial loss*: $msg_adv
+
+            ## History
+
+            $acc_plt
             """
             open(fpath, "w") do file
                 write(file, a)
             end
         end
-
-        # Compute some accuracy, and save details as a NamedTuple
-        acc = accuracy(model, train_set)
-        @info "Accuracy in epoch $epoch/$nepochs: $acc"
-        push!(my_log, (; acc, losses, implausibilities, reg_losses, validity_losses))
-
-        if epoch > burnin
-            implaus = sum(implausibilities) / length(implausibilities)
-            @info "Average energy differential in $epoch/$nepochs: $implaus"
-            @info "Average energy regularization in $epoch/$nepochs: $(sum(reg_losses)/length(reg_losses))"
-            @info "Average adversarial loss in $epoch/$nepochs: $(sum(validity_losses)/length(validity_losses))"
-        end
     end
-    return model, my_log
+    return model, log
 end
