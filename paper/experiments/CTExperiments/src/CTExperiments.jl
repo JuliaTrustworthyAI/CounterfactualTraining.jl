@@ -11,6 +11,7 @@ include("config.jl")
 include("utils.jl")
 include("grid.jl")
 include("experiment.jl")
+include("evaluate.jl")
 
 export Experiment, run_training
 export ExperimentGrid, setup_experiments

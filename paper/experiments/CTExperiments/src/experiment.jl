@@ -19,7 +19,35 @@ Base.@kwdef mutable struct MetaParams <: AbstractConfiguration
     model_type::String = "mlp"
     generator_type::String = "ecco"
     dim_reduction::Bool = false
-    config_file::String = joinpath(tempdir(), "experiment_config_$experiment_name.toml")
+    save_dir::String = mkpath(joinpath(tempdir(), experiment_name))
+    config_file::String = joinpath(save_dir, "config.toml")
+    output_dir::String = mkpath(joinpath(save_dir, "output"))
+    function MetaParams(
+        experiment_name,
+        data,
+        model_type,
+        generator_type,
+        dim_reduction,
+        save_dir,
+        config_file,
+        output_dir
+    )
+        local_config_file = joinpath(save_dir, "config.toml")
+        if config_file != local_config_file
+            @warn "Specified configuration file is at $(config_file), which is different from $(save_dir). Overwriting field value to $(local_config_file)."
+            config_file = local_config_file
+        end
+        return new(
+            experiment_name,
+            data,
+            model_type,
+            generator_type,
+            dim_reduction,
+            save_dir,
+            config_file,
+            output_dir,
+        )
+    end
 end
 
 """
@@ -83,14 +111,18 @@ function Experiment(
 
     # Experiment:
     exper = Experiment(data, model_type, training_params, meta_params)
+    to_toml(exper)
 
     return exper
 end
 
-function Experiment(fname::String)
+function Experiment(fname::String; save_dir::Union{Nothing, String} = nothing)
     @assert isfile(fname) "Experiment file not found."
     meta = to_meta(from_toml(fname))
-    @assert meta.config_file == fname "Specified file name does not match the file name specified in the configuration file. Did you accidentally overwrite that parameter in the TOML file?"
+    if !isnothing(save_dir)
+        mkpath(save_dir)
+        meta.save_dir = save_dir
+    end
     @info "Experiment loaded from $(fname)."
     return Experiment(meta)
 end

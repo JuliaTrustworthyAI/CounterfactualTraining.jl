@@ -5,8 +5,9 @@ data = "mnist"
 model_type = "mlp"
 
 [data_params]
+n_train = []
 batchsize = [500, 1000]
-n = []
+n_validation = []
 
 [model_params]
 nlayers = []

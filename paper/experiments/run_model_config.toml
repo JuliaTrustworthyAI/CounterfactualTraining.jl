@@ -5,6 +5,8 @@ generator_type = "ecco"
 data = "mnist"
 model_type = "mlp"
 config_file = "paper/experiments/run_model_config.toml"
+save_dir = "/var/folders/ct/w1pc0ggd44907l8fkl8m5pdslbh6sh/T/test"
+output_dir = "/var/folders/ct/w1pc0ggd44907l8fkl8m5pdslbh6sh/T/test/output"
 
 [training_params]
 opt = "adam"
@@ -31,9 +33,9 @@ conv = "max_iter"
     penalty_strengths = [0.001, 5.0]
 
 [data]
+n_validation = 1000
 n_train = 10000
 batchsize = 1000
-n_validation = 1000
 
 [model_type]
 nlayers = 1
