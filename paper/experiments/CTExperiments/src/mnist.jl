@@ -1,8 +1,9 @@
 using CounterfactualExplanations
-using CounterfactualExplanations.DataPreprocessing: train_test_split
+using CounterfactualExplanations.DataPreprocessing: train_test_split, unpack_data
 using Flux
 using Flux.MLUtils
 using MultivariateStats
+using StatsBase
 using TaijaData
 
 """
@@ -89,4 +90,29 @@ For MNIST data and the REVISE generator, use the VAE as the input encoder.
 function get_input_encoder(exp::AbstractExperiment, data::MNIST, generator_type::REVISE)
     vae = CounterfactualExplanations.Models.load_mnist_vae()
     return vae
+end
+
+"""
+    get_test_data(
+        exp::AbstractExperiment, data::MNIST; n::Union{Nothing,Int}=data.n_validation
+    )
+
+Returns a test dataloader for the MNIST dataset.
+"""
+function get_test_data(
+    exp::AbstractExperiment, data::MNIST; n::Union{Nothing,Int}=data.n_validation
+)
+    Xtest, ytest = load_mnist_test()
+    n_total = size(Xtest, 2)
+    if n_total > n
+        idx = sample(1:n_total, n; replace=false)
+        
+    elseif n_total < n
+        idx = rand(1:n_total, n)
+    else
+        idx = 1:n_total
+    end
+    Xtest = Xtest[:, idx]
+    ytest = ytest[idx]
+    return Xtest, ytest
 end
