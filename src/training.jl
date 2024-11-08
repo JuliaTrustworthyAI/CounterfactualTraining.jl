@@ -14,6 +14,7 @@ function counterfactual_training(
     generator,
     train_set,
     opt_state;
+    val_set=nothing,
     nepochs=100,
     burnin=0.5,
     nce=nothing,
@@ -71,6 +72,7 @@ function counterfactual_training(
             counterfactual_dl = fill(ntuple(_ -> nothing, 4), length(train_set))
         end
 
+        # Backprop:
         for (i, batch) in enumerate(train_set)
 
             # Unpack:
@@ -125,25 +127,36 @@ function counterfactual_training(
             
         end
 
-        # Compute some accuracy, and save details as a NamedTuple
+        # Logging:
         acc = accuracy(model, train_set)
-        msg_acc = "Accuracy in epoch $epoch/$nepochs: $acc"
+        acc_val = isnothing(val_set) ? nothing : accuracy(model, val_set)
+        msg_acc = "Training accuracy in epoch $epoch/$nepochs: $acc"
         @info msg_acc
-        push!(log, (; acc, losses, implausibilities, reg_losses, validity_losses))
+        if !isnothing(val_set)
+            msg_acc = "Validation accuracy in epoch $epoch/$nepochs: $acc_val."
+            @info msg_acc
+        end
         
         if epoch > burnin
             implaus = sum(implausibilities) / length(implausibilities)
+            log_reg_loss = sum(reg_losses) / length(reg_losses)
+            log_adv_loss = sum(validity_losses) / length(validity_losses)
             msg_imp = "Average energy differential in $epoch/$nepochs: $implaus"
-            msg_reg = "Average energy regularization in $epoch/$nepochs: $(sum(reg_losses)/length(reg_losses))"
-            msg_adv = "Average adversarial loss in $epoch/$nepochs: $(sum(validity_losses)/length(validity_losses))"
+            msg_reg = "Average energy regularization in $epoch/$nepochs: $log_reg_loss"
+            msg_adv = "Average adversarial loss in $epoch/$nepochs: $log_adv_loss"
             @info msg_imp
             @info msg_reg
             @info msg_adv
         else
+            implaus = nothing
+            log_reg_loss = nothing
+            log_adv_loss = nothing
             msg_imp = "n/a"
             msg_reg = "n/a"
             msg_adv = "n/a"
         end
+
+        push!(log, (; acc, acc_val, losses, implaus, log_reg_loss, log_adv_loss))
 
         # Checkpointing:
         if !isnothing(checkpoint_dir)
@@ -152,6 +165,11 @@ function counterfactual_training(
             isfile(previous_log) && rm(previous_log)
             fpath = joinpath(checkpoint_dir, "checkpoint_$(epoch).md")
             acc_plt = lineplot([_log[1] for _log in log], xlabel="Epochs", ylabel="Accuracy");
+            acc_val_plt = if isnothing(acc_val) 
+                ""
+            else
+                lineplot([_log[2] for _log in log], xlabel="Epochs", ylabel="Validation Accuracy");
+            end
             a = """
             Completed $epoch out of $nepochs epochs.
 
@@ -164,7 +182,7 @@ function counterfactual_training(
 
             ## History
 
-            $acc_plt
+            $acc_plt $acc_val_plt
             """
             open(fpath, "w") do file
                 write(file, a)
