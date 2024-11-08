@@ -204,6 +204,7 @@ Loads the results of an experiment from a file.
 function load_results(exper::Experiment)
     save_dir = exper.meta_params.save_dir
     @info "Loading results from $(save_dir):"
+    @assert isfile(joinpath(save_dir,"results.jld2")) "No results found for this experiemnt."
     model, logs, M = JLD2.load(joinpath(save_dir, "results.jld2"), "model", "logs", "M")
     return model, logs, M
 end
