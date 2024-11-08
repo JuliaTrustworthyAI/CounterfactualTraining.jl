@@ -135,7 +135,7 @@ function run_training(exp::Experiment; checkpoint_dir::Union{Nothing,String}=not
 
     # Counterfactual generator:
     generator = get_generator(exp.training_params.generator_params)
-    model, train_set, input_encoder = setup(exp)
+    model, train_set, input_encoder, val_set = setup(exp)
     conv = get_convergence(exp.training_params)
     domain = get_domain(exp.data)
     pllr = get_parallelizer(exp.training_params)
@@ -156,6 +156,7 @@ function run_training(exp::Experiment; checkpoint_dir::Union{Nothing,String}=not
         generator,
         train_set,
         opt_state;
+        val_set=val_set,
         parallelizer=pllr,
         verbose=exp.training_params.verbose,
         convergence=conv,

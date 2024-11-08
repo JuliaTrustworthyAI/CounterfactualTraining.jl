@@ -31,8 +31,9 @@ conv = "max_iter"
     penalty_strengths = [0.001, 5.0]
 
 [data]
+n_train = 10000
 batchsize = 1000
-n = 10000
+n_validation = 1000
 
 [model_type]
 nlayers = 1

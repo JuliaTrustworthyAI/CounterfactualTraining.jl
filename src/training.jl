@@ -182,7 +182,9 @@ function counterfactual_training(
 
             ## History
 
-            $acc_plt $acc_val_plt
+            $acc_plt 
+            
+            $acc_val_plt
             """
             open(fpath, "w") do file
                 write(file, a)

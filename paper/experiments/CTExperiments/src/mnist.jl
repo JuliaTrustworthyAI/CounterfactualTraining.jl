@@ -1,15 +1,19 @@
-using TaijaData
+using CounterfactualExplanations
+using CounterfactualExplanations.DataPreprocessing: train_test_split
+using Flux
+using Flux.MLUtils
 using MultivariateStats
+using TaijaData
 
 """
     MNIST
 
-Keyword container for the `MNIST` data set. Can specify the number of samples `n`, the batch size `batchsize` and the feature `domain`.
+Keyword container for the `MNIST` data set. Can specify the number of samples `n`, the batch size `batchsize`.
 """
 Base.@kwdef struct MNIST <: Dataset
-    n::Int = 10000
+    n_train::Int= 10000
     batchsize::Int = 1000
-    train_val_test_split::Union{Nothing, Vector{<:AbstractFloat}} = nothing
+    n_validation::Int = 1000
 end
 
 get_domain(d::MNIST) = (-1.0f0, 1.0f0)
@@ -22,10 +26,20 @@ Loads the MNIST data and builds a model corresponding to the specified `model` t
 function setup(exp::AbstractExperiment, data::MNIST, model::ModelType)
 
     # Data:
-    Xtrain, y = load_mnist(data.n)
-    unique_labels = sort(unique(y))
-    ytrain = Flux.onehotbatch(y, unique_labels)
+    n_total = data.n_train + data.n_validation
+    ce_data = CounterfactualData(load_mnist(n_total)...)
+    test_size = data.n_validation / n_total
+    Xtrain, ytrain, Xval, yval, unique_labels = (
+        dt -> (dt[1].X, dt[1].y, dt[2].X, dt[2].y, dt[1].y_levels)
+    )(
+        train_test_split(ce_data; test_size=test_size, keep_class_ratio=false)
+    )
     train_set = Flux.DataLoader((Xtrain, ytrain); batchsize=data.batchsize, parallel=true)
+    val_set = if data.n_validation > 0
+        Flux.DataLoader((Xval, yval); batchsize=data.batchsize, parallel=true)
+    else
+        nothing
+    end
 
     # Model:
     nin = size(first(train_set)[1], 1)
@@ -35,7 +49,7 @@ function setup(exp::AbstractExperiment, data::MNIST, model::ModelType)
     # Input encoding:
     input_encoder = get_input_encoder(exp)
 
-    return model, train_set, input_encoder
+    return model, train_set, input_encoder, val_set
 end
 
 """
