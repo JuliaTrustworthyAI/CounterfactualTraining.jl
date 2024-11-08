@@ -2,6 +2,7 @@ using Accessors
 import Base: ==
 import CounterfactualTraining as CT
 using Flux
+using JLD2
 using Logging
 using UUIDs
 
@@ -20,35 +21,11 @@ Base.@kwdef mutable struct MetaParams <: AbstractConfiguration
     generator_type::String = "ecco"
     dim_reduction::Bool = false
     save_dir::String = mkpath(joinpath(tempdir(), experiment_name))
-    config_file::String = joinpath(save_dir, "config.toml")
-    output_dir::String = mkpath(joinpath(save_dir, "output"))
-    function MetaParams(
-        experiment_name,
-        data,
-        model_type,
-        generator_type,
-        dim_reduction,
-        save_dir,
-        config_file,
-        output_dir
-    )
-        local_config_file = joinpath(save_dir, "config.toml")
-        if config_file != local_config_file
-            @warn "Specified configuration file is at $(config_file), which is different from $(save_dir). Overwriting field value to $(local_config_file)."
-            config_file = local_config_file
-        end
-        return new(
-            experiment_name,
-            data,
-            model_type,
-            generator_type,
-            dim_reduction,
-            save_dir,
-            config_file,
-            output_dir,
-        )
-    end
 end
+
+config_file(params::MetaParams) = joinpath(params.save_dir, "config.toml")
+
+output_dir(params::MetaParams) = mkpath(joinpath(params.save_dir, "output"))
 
 """
     ==(x::MetaParams, y::MetaParams)
@@ -56,7 +33,8 @@ end
 Convenience function to check for equality of all fields.
 """
 function ==(x::MetaParams, y::MetaParams)::Bool
-    return all(getfield(x, field) == getfield(y, field) for field in fieldnames(MetaParams))
+    relevant_fields = filter((x,) -> x != :save_dir, fieldnames(CTExperiments.MetaParams))
+    return all(getfield(x, field) == getfield(y, field) for field in relevant_fields)
 end
 
 """
@@ -85,9 +63,9 @@ function Experiment(
 )
 
     # Load the configuration file and set up the experiment:
-    if isfile(meta_params.config_file)
-        config_dict = from_toml(meta_params.config_file)
-        @info "Experiment configuration loaded from $(meta_params.config_file). Any parameters specified in the function call other than the meta params will be ignored."
+    if isfile(config_file(meta_params))
+        config_dict = from_toml(config_file(meta_params))
+        @info "Experiment configuration loaded from $(config_file(meta_params)). Any parameters specified in the function call other than the meta params will be ignored."
         @assert meta_params == to_meta(config_dict) "Meta parameters do not match the configuration file."
         # Generate keyword containers from config file:
         data_params = to_ntuple(config_dict["data"])
@@ -116,15 +94,18 @@ function Experiment(
     return exper
 end
 
-function Experiment(fname::String; save_dir::Union{Nothing, String} = nothing)
+function Experiment(fname::String; new_save_dir::Union{Nothing, String} = nothing)
     @assert isfile(fname) "Experiment file not found."
     meta = to_meta(from_toml(fname))
-    if !isnothing(save_dir)
-        mkpath(save_dir)
-        meta.save_dir = save_dir
+    if !isnothing(new_save_dir)
+        mkpath(new_save_dir)
+        meta.save_dir = new_save_dir
+        cp(fname, config_file(meta); force=true)
     end
     @info "Experiment loaded from $(fname)."
-    return Experiment(meta)
+    exper = Experiment(meta)
+    to_toml(exper, fname)
+    return exper
 end
 
 """
@@ -201,4 +182,28 @@ function run_training(exp::Experiment; checkpoint_dir::Union{Nothing,String}=not
     )
 
     return model, logs
+end
+
+"""
+    save_results(exper::Experiment, model, logs)
+
+Saves the results of an experiment to a file.
+"""
+function save_results(exper::Experiment, model, logs)
+    save_dir = exper.meta_params.save_dir
+    M = MLP(model; likelihood=:classification_multi)
+    @info "Saving model and logs to $(save_dir):"
+    jldsave(joinpath(save_dir,"results.jld2"); model, logs, M)
+end
+
+"""
+    load_results(exper::Experiment)
+
+Loads the results of an experiment from a file.
+"""
+function load_results(exper::Experiment)
+    save_dir = exper.meta_params.save_dir
+    @info "Loading results from $(save_dir):"
+    model, logs, M = JLD2.load(joinpath(save_dir, "results.jld2"), "model", "logs", "M")
+    return model, logs, M
 end

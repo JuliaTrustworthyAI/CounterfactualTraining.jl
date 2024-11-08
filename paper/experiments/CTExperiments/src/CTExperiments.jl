@@ -15,6 +15,7 @@ include("evaluate.jl")
 
 export Experiment, run_training
 export ExperimentGrid, setup_experiments
+export save_results, load_results
 
 function generate_template(
     fname::String="paper/experiments/template_config.toml";
@@ -27,10 +28,10 @@ function generate_template(
         rm(fname)
     end
     exper = Experiment(
-        MetaParams(; config_file=fname, experiment_name=experiment_name);
+        MetaParams(; experiment_name=experiment_name);
         kwrgs...,
     )
-    to_toml(exper)
+    to_toml(exper, fname)
     return fname
 end
 

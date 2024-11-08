@@ -36,7 +36,7 @@ end
 
 Overloads the `to_toml` function for `Experiment`s. The file will be written to the path specified in the meta data (`exp.meta_params.config_file`). 
 """
-to_toml(exp::AbstractExperiment) = to_toml(exp, exp.meta_params.config_file)
+to_toml(exp::AbstractExperiment) = to_toml(exp, config_file(exp.meta_params))
 
 """
     from_toml(fname::String)::Dict

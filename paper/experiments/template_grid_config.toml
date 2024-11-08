@@ -1,13 +1,13 @@
-name = "grid_5db912ce-9b53-11ef-08f6-ebe4272f72e3"
+name = "grid_8621f4ea-9dd5-11ef-315d-a797a8985c02"
 dim_reduction = [false]
 generator_type = ["ecco", "generic", "revise"]
 data = "mnist"
 model_type = "mlp"
 
 [data_params]
+n_validation = []
 n_train = []
 batchsize = []
-n_validation = []
 
 [model_params]
 nlayers = []
