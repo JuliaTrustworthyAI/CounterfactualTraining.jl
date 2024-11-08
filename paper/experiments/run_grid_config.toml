@@ -1,4 +1,4 @@
-name = "grid_run_2024-11-07"
+name = "grid_run_2024-11-08"
 dim_reduction = [false]
 generator_type = ["ecco", "generic", "revise"]
 data = "mnist"
