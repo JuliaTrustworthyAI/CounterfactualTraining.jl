@@ -94,16 +94,17 @@ end
 
 """
     get_test_data(
-        exp::AbstractExperiment, data::MNIST; n::Union{Nothing,Int}=data.n_validation
+        data::MNIST; n::Union{Nothing,Int}=data.n_validation
     )
 
 Returns a test dataloader for the MNIST dataset.
 """
 function get_test_data(
-    exp::AbstractExperiment, data::MNIST; n::Union{Nothing,Int}=data.n_validation
+    data::MNIST; n::Union{Nothing,Int}=data.n_validation
 )
     Xtest, ytest = load_mnist_test()
     n_total = size(Xtest, 2)
+    n = isnothing(n) ? n_total : n
     if n_total > n
         idx = sample(1:n_total, n; replace=false)
         
