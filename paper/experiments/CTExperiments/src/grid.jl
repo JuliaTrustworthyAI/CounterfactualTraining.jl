@@ -1,4 +1,5 @@
 using Base.Iterators
+using JLD2
 using UUIDs
 
 """
@@ -151,7 +152,7 @@ function setup_experiments(
     )
 
     # For each combintation of parameters, create a new experiment:
-    output = []
+    exper_list = Vector{Experiment}()
     for (i, kwrgs) in enumerate(product(values(dict_array_of_pairs)...))
 
         # Experiment name:
@@ -178,9 +179,27 @@ function setup_experiments(
             meta;
             other_kwrgs...,
         )
-        push!(output, exper)
+        push!(exper_list, exper)
     end
-    return output
+
+    # Store list of experiments:
+    save_list(cfg, exper_list)
+
+    return exper_list
+end
+
+function save_list(cfg::ExperimentGrid, exper_list::Vector{Experiment})
+    save_dir = cfg.save_dir
+    @info "Saving list of experiments to $(save_dir):"
+    return jldsave(joinpath(save_dir, "exper_list.jld2"); exper_list)
+end
+
+function load_list(cfg::ExperimentGrid)
+    save_dir = cfg.save_dir
+    @info "Loading list of experiments from $(save_dir):"
+    @assert isfile(joinpath(save_dir, "exper_list.jld2")) "No list of experiments found in $(save_dir). Did you accidentally delete it?"
+    exper_list = JLD2.load(joinpath(save_dir, "exper_list.jld2"), "exper_list")
+    return exper_list
 end
 
 to_kv_pair(x) = x
