@@ -1,8 +1,9 @@
-name = "grid_8621f4ea-9dd5-11ef-315d-a797a8985c02"
+name = "grid_4c97f7ae-9ea4-11ef-3889-e31a0905abe7"
 dim_reduction = [false]
 generator_type = ["ecco", "generic", "revise"]
 data = "mnist"
 model_type = "mlp"
+save_dir = "/var/folders/ct/w1pc0ggd44907l8fkl8m5pdslbh6sh/T/grid_4c97f7ae-9ea4-11ef-3889-e31a0905abe7"
 
 [data_params]
 n_validation = []

@@ -16,6 +16,7 @@ struct ExperimentGrid <: AbstractConfiguration
     model_params::Union{AbstractDict,NamedTuple}
     training_params::Union{AbstractDict,NamedTuple}
     generator_params::Union{AbstractDict,NamedTuple}
+    save_dir::String
     function ExperimentGrid(
         name,
         data,
@@ -26,6 +27,7 @@ struct ExperimentGrid <: AbstractConfiguration
         model_params,
         training_params,
         generator_params,
+        save_dir,
     )
 
         # Data parameters
@@ -50,6 +52,7 @@ struct ExperimentGrid <: AbstractConfiguration
             model_params,
             training_params,
             generator_params,
+            save_dir,
         )
     end
 end
@@ -70,16 +73,18 @@ function append_params(params::NamedTuple, available_params)
     return params
 end
 
-"""
+@doc raw"""
     ExperimentGrid(;
+        name::String="grid_\$(string(uuid1()))",
         data::String="mnist",
         model_type::String="mlp",
         generator_type::Vector{<:AbstractString}=["ecco", "generic", "revise"],
         dim_reduction::Vector{<:Bool}=[false],
-        data_params::AbstractDict=Dict(),
-        model_params::AbstractDict=Dict(),
-        training_params::AbstractDict=Dict(),
-        generator_params::AbstractDict=Dict(),
+        data_params::Union{AbstractDict,NamedTuple}=Dict(),
+        model_params::Union{AbstractDict,NamedTuple}=Dict(),
+        training_params::Union{AbstractDict,NamedTuple}=Dict(),
+        generator_params::Union{AbstractDict,NamedTuple}=Dict(),
+        save_dir::String=mkpath(joinpath(tempdir(), name)),
     )
 
 Outer constructor tailored for the `ExperimentGrid` type. It takes a number of keyword arguments, each one (except `data` and `model_type`) being a vector of possible values to be explored by the grid search. Calling [`setup_experiments(cfg::ExperimentGrid)`](@ref) on an instance of type `ExperimentGrid` will generate a list of experiments for all combinations of these vectors.
@@ -94,6 +99,7 @@ function ExperimentGrid(;
     model_params::Union{AbstractDict,NamedTuple}=Dict(),
     training_params::Union{AbstractDict,NamedTuple}=Dict(),
     generator_params::Union{AbstractDict,NamedTuple}=Dict(),
+    save_dir::String=mkpath(joinpath(tempdir(), name)),
 )
     return ExperimentGrid(
         name,
@@ -105,12 +111,23 @@ function ExperimentGrid(;
         model_params,
         training_params,
         generator_params,
+        save_dir
     )
 end
 
-function ExperimentGrid(fname::String)
+function ExperimentGrid(fname::String; new_save_dir::Union{Nothing,String}=nothing)
     @assert isfile(fname) "Experiment file not found."
-    grid = (kwrgs -> ExperimentGrid(; kwrgs...))(CTExperiments.to_ntuple(from_toml(fname)))
+    dict = from_toml(fname)
+    if !isnothing(new_save_dir)
+        mkpath(new_save_dir)
+        dict["save_dir"] = new_save_dir
+        new_save_name = joinpath(new_save_dir, "grid_config.toml")
+    end
+    grid = (kwrgs -> ExperimentGrid(; kwrgs...))(CTExperiments.to_ntuple(dict))
+    if !isnothing(new_save_dir) 
+        to_toml(grid, new_save_name)        # store in new save directory
+        to_toml(grid, fname)                # over-write old file with new config
+    end
     return grid
 end
 
@@ -129,7 +146,8 @@ function setup_experiments(
 
     # Filter out empty pairs:
     dict_array_of_pairs = filter(
-        ((key, value),) -> length(value) > 0 && key != "name", dict_array_of_pairs
+        ((key, value),) -> length(value) > 0 && !(key in ["name", "save_dir"]),
+        dict_array_of_pairs,
     )
 
     # For each combintation of parameters, create a new experiment:
@@ -152,8 +170,13 @@ function setup_experiments(
         # Get other params:
         idx_other = .!(idx_meta)
         other_kwrgs = (; zip(_names[idx_other], _values[idx_other])...)
+        save_dir = mkpath(joinpath(cfg.save_dir, experiment_name))
+        meta = MetaParams(;
+            experiment_name=experiment_name, save_dir=save_dir, meta_kwrgs...
+        )
         exper = Experiment(
-            MetaParams(; experiment_name=experiment_name, meta_kwrgs...); other_kwrgs...
+            meta;
+            other_kwrgs...,
         )
         push!(output, exper)
     end
