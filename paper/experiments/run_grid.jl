@@ -29,7 +29,7 @@ else
 end
 
 # Broadcast exper_list from rank 0 to all ranks
-final_output = MPI.bcast(exper_list, comm; root=0)
+exper_list = MPI.bcast(exper_list, comm; root=0)
 
 MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 
