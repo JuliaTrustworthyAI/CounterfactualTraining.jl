@@ -10,8 +10,8 @@ DotEnv.load!()
 
 # Get config and set up grid:
 config_file = joinpath(ENV["EXPERIMENT_DIR"], "run_grid_config.toml")
-_name = CTExperiments.from_toml(config_file)["name"]
-root_save_dir = joinpath(ENV["OUTPUT_DIR"], _name)
+root_name = CTExperiments.from_toml(config_file)["name"]
+root_save_dir = joinpath(ENV["OUTPUT_DIR"], root_name)
 exper_grid = ExperimentGrid(config_file; new_save_dir=root_save_dir)
 
 # Initialize MPI
