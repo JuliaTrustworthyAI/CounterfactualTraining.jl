@@ -14,10 +14,6 @@ _name = CTExperiments.from_toml(config_file)["name"]
 save_dir = joinpath(ENV["OUTPUT_DIR"], _name)
 exper_grid = ExperimentGrid(config_file; new_save_dir=save_dir)
 
-# Generate list of experiments and run them:
-exper_list = setup_experiments(exper_grid)
-@info "Running $(length(exper_list)) experiments ..."
-
 # Initialize MPI
 MPI.Init()
 comm = MPI.COMM_WORLD
@@ -25,7 +21,13 @@ rank = MPI.Comm_rank(comm)
 nprocs = MPI.Comm_size(comm)
 if MPI.Comm_rank(MPI.COMM_WORLD) != 0
     global_logger(NullLogger())
+else
+    # Generate list of experiments and run them:
+    exper_list = setup_experiments(exper_grid)
+    @info "Running $(length(exper_list)) experiments ..."
 end
+
+
 
 # Divide the experiments among the available ranks
 for (i, experiment) in enumerate(exper_list)
