@@ -198,24 +198,21 @@ function get_parallelizer(params::TrainingParams)
     return pllr
 end
 
+"""
+    objectives
+
+Catalogue of available objective functions.
+"""
+const conv_catalogue = Dict(
+    "max_iter" => Convergence.MaxIterConvergence,
+    "threshold" => Convergence.DecisionThresholdConvergence,
+    "gen_con" => Convergence.GeneratorConditionsConvergence,
+)
+
 function get_convergence(params::TrainingParams)
-    # Maximum iterations:
-    if params.conv == "max_iter"
-        conv = Convergence.MaxIterConvergence(; max_iter=params.generator_params.maxiter)
-    end
-
-    # Decision threshold:
-    if params.conv == "threshold"
-        conv = Convergence.DecisionThresholdConvergence(;
-            max_iter=params.generator_params.maxiter
-        )
-    end
-
-    # Generator conditions:
-    if params.conv == "gen_con"
-        conv = Convergence.GeneratorConditionsConvergence(;
-            max_iter=params.generator_params.maxiter
-        )
-    end
+    s = params.conv
+    s = lowercase(s)
+    @assert s in keys(objectives) "Unknown convergence type: $s. Available types are $(keys(conv_catalogue))"
+    conv = conv_catalogue[s](; max_iter=params.generator_params.maxiter)
     return conv
 end

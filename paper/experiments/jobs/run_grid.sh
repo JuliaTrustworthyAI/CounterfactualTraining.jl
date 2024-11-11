@@ -7,7 +7,8 @@
 #SBATCH --cpus-per-task=5
 #SBATCH --mem-per-cpu=2G
 #SBATCH --account=research-eemcs-insy
-#SBATCH --mail-type=END
+#SBATCH --mail-type=END,REQUEUE
+#SBATCH --requeue
 
 module load 2024r1 
 

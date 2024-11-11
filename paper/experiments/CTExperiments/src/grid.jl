@@ -188,7 +188,7 @@ function setup_experiments(
     return exper_list
 end
 
-function save_list(cfg::ExperimentGrid, exper_list::Vector{Experiment})
+function save_list(cfg::ExperimentGrid, exper_list::Vector{<:AbstractExperiment})
     save_dir = cfg.save_dir
     @info "Saving list of experiments to $(save_dir):"
     return jldsave(joinpath(save_dir, "exper_list.jld2"); exper_list)

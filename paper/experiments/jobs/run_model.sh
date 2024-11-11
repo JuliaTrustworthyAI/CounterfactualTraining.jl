@@ -7,7 +7,8 @@
 #SBATCH --cpus-per-task=3
 #SBATCH --mem-per-cpu=4G
 #SBATCH --account=innovation
-#SBATCH --mail-type=END
+#SBATCH --mail-type=END,REQUEUE
+#SBATCH --requeue
 
 module load 2024r1 
 

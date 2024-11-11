@@ -16,7 +16,7 @@ function counterfactual_training(
     opt_state;
     val_set=nothing,
     nepochs=100,
-    burnin=0.5,
+    burnin=0.0,
     nce=nothing,
     parallelizer::TaijaParallel.AbstractParallelizer=nothing,
     convergence=Convergence.MaxIterConvergence(),
