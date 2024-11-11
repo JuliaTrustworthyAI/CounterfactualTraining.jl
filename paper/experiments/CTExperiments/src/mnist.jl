@@ -69,7 +69,7 @@ function get_input_encoder(
         # Input transformers:
         vae = CounterfactualExplanations.Models.load_mnist_vae()
         maxoutdim = vae.params.latent_dim
-        Xtrain, y = load_mnist(data.n)
+        Xtrain, y = load_mnist(data.n_train)
         counterfactual_data = CounterfactualData(Xtrain, y)
         input_encoder = fit_transformer(counterfactual_data, PCA; maxoutdim=maxoutdim)
     else

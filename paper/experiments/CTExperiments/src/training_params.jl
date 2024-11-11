@@ -213,7 +213,7 @@ const conv_catalogue = Dict(
 function get_convergence(params::TrainingParams)
     s = params.conv
     s = lowercase(s)
-    @assert s in keys(objectives) "Unknown convergence type: $s. Available types are $(keys(conv_catalogue))"
+    @assert s in keys(conv_catalogue) "Unknown convergence type: $s. Available types are $(keys(conv_catalogue))"
     conv = conv_catalogue[s](; max_iter=params.generator_params.maxiter)
     return conv
 end
