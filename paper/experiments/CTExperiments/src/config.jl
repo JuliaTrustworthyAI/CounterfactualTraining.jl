@@ -49,7 +49,7 @@ function from_toml(fname::String)::Dict
 end
 
 function to_meta(dict::Dict{String,Any})::MetaParams
-    dict = hasfield(dict, "meta_params") ? dict["meta_params"] : dict
+    dict = haskey(dict, "meta_params") ? dict["meta_params"] : dict
     meta_kwrgs = to_ntuple(dict)
     meta_params = MetaParams(; meta_kwrgs...)
     return meta_params
