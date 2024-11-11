@@ -21,15 +21,15 @@ rank = MPI.Comm_rank(comm)
 nprocs = MPI.Comm_size(comm)
 if MPI.Comm_rank(MPI.COMM_WORLD) != 0
     global_logger(NullLogger())
+    exper_list = nothing
 else
     # Generate list of experiments and run them:
     exper_list = setup_experiments(exper_grid)
     @info "Running $(length(exper_list)) experiments ..."
 end
 
-
 # Broadcast exper_list from rank 0 to all ranks
-exper_list = MPI.Bcast(exper_list, 0, comm)
+final_output = MPI.bcast(exper_list, parallelizer.comm; root=0)
 
 MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 
