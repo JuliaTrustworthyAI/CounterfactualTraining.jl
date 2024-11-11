@@ -11,8 +11,8 @@ DotEnv.load!()
 # Get config and set up grid:
 config_file = joinpath(ENV["EXPERIMENT_DIR"], "run_grid_config.toml")
 _name = CTExperiments.from_toml(config_file)["name"]
-save_dir = joinpath(ENV["OUTPUT_DIR"], _name)
-exper_grid = ExperimentGrid(config_file; new_save_dir=save_dir)
+root_save_dir = joinpath(ENV["OUTPUT_DIR"], _name)
+exper_grid = ExperimentGrid(config_file; new_save_dir=root_save_dir)
 
 # Initialize MPI
 MPI.Init()
@@ -26,6 +26,11 @@ else
     exper_list = setup_experiments(exper_grid)
     @info "Running $(length(exper_list)) experiments ..."
 end
+
+
+# Broadcast exper_list from rank 0 to all ranks
+exper_list = MPI.Bcast(exper_list, 0, comm)
+
 MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 
 # Divide the experiments among the available ranks
