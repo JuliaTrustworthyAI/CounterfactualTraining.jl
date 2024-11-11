@@ -27,9 +27,9 @@ function generate_template(
         @warn "File $fname already exists! Overwriting..."
         rm(fname)
     end
+    save_dir = joinpath(splitpath(fname)[1:(end - 1)])
     exper = Experiment(
-        MetaParams(; experiment_name=experiment_name);
-        kwrgs...,
+        MetaParams(; experiment_name=experiment_name, save_dir=save_dir); kwrgs...
     )
     to_toml(exper, fname)
     return fname
@@ -43,7 +43,8 @@ function generate_grid_template(
         rm(fname)
     end
 
-    exper_grid = CTExperiments.ExperimentGrid()
+    save_dir = joinpath(splitpath(fname)[1:(end - 1)])
+    exper_grid = CTExperiments.ExperimentGrid(;save_dir=save_dir)
     to_toml(exper_grid, fname)
     return fname
 end

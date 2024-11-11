@@ -59,7 +59,8 @@ Base.@kwdef struct GeneratorParams <: AbstractGeneratorParams
     lr::AbstractFloat = 1.0
     opt::AbstractString = "sgd"
     maxiter::Int = 100
-    penalty_strengths::AbstractVector{<:AbstractFloat} = [0.001, 5.0]
+    lambda_cost::AbstractFloat = 0.001
+    lambda_energy::AbstractFloat = 5.0
 end
 
 """
@@ -75,7 +76,7 @@ get_generator(params::GeneratorParams) = get_generator(params, params.type)
 Instantiates the `ECCoGenerator` with the given parameters.
 """
 function get_generator(params::GeneratorParams, generator_type::ECCo)
-    return ECCoGenerator(; opt=get_opt(params), λ=params.penalty_strengths[1:2])
+    return ECCoGenerator(; opt=get_opt(params), λ=[params.lambda_cost,params.lambda_energy])
 end
 
 """
@@ -84,7 +85,7 @@ end
 Instantiates the `REVISEGenerator` with the given parameters.
 """
 function get_generator(params::GeneratorParams, generator_type::REVISE)
-    return REVISEGenerator(; opt=get_opt(params), λ=params.penalty_strengths[1])
+    return REVISEGenerator(; opt=get_opt(params), λ=params.lambda_cost)
 end
 
 """
@@ -93,7 +94,7 @@ end
 Instantiates a `GenericGenerator` with the given parameters.
 """
 function get_generator(params::GeneratorParams, type::Generic)
-    return GenericGenerator(; opt=get_opt(params), λ=params.penalty_strengths[1])
+    return GenericGenerator(; opt=get_opt(params), λ=params.lambda_cost)
 end
 
 """

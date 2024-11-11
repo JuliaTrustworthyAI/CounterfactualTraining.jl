@@ -1,9 +1,9 @@
-name = "grid_4c97f7ae-9ea4-11ef-3889-e31a0905abe7"
+name = "grid_51c0a086-a003-11ef-081e-3547b129b3ac"
 dim_reduction = [false]
 generator_type = ["ecco", "generic", "revise"]
 data = "mnist"
 model_type = "mlp"
-save_dir = "/var/folders/ct/w1pc0ggd44907l8fkl8m5pdslbh6sh/T/grid_4c97f7ae-9ea4-11ef-3889-e31a0905abe7"
+save_dir = "paper/experiments"
 
 [data_params]
 n_validation = []
@@ -17,10 +17,11 @@ nhidden = []
 
 [generator_params]
 opt = []
+lambda_cost = []
 lr = []
 maxiter = []
+lambda_energy = []
 type = []
-penalty_strengths = []
 
 [training_params]
 opt = []
