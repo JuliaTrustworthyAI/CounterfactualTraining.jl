@@ -26,8 +26,7 @@ else
     exper_list = setup_experiments(exper_grid)
     @info "Running $(length(exper_list)) experiments ..."
 end
-
-
+MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 
 # Divide the experiments among the available ranks
 for (i, experiment) in enumerate(exper_list)
