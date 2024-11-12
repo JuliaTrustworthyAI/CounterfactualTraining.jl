@@ -2,7 +2,7 @@
 #
 #SBATCH --job-name="Run Grid"
 #SBATCH --partition=compute
-#SBATCH --time=00:20:00
+#SBATCH --time=00:30:00
 #SBATCH --ntasks=12
 #SBATCH --cpus-per-task=8
 #SBATCH --mem-per-cpu=2G
