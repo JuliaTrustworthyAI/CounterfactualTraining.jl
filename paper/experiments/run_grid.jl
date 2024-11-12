@@ -36,6 +36,10 @@ MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 # Divide the experiments among the available ranks
 for (i, experiment) in enumerate(exper_list)
 
+    # Setup:
+    save_dir = experiment.meta_params.save_dir
+    _name = experiment.meta_params.experiment_name
+
     # Skip if not on this rank
     if mod(i, nprocs) != rank
         continue  # Skip experiments that belong to other ranks
@@ -48,8 +52,6 @@ for (i, experiment) in enumerate(exper_list)
     end
 
     # Running the experiment
-    save_dir = experiment.meta_params.save_dir
-    _name = experiment.meta_params.experiment_name
     @info "Rank $(rank): Running experiment: $(_name) ($i/$(length(exper_list)))"
     model, logs = run_training(experiment; checkpoint_dir=save_dir)
 
