@@ -35,18 +35,21 @@ MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 
 # Divide the experiments among the available ranks
 for (i, experiment) in enumerate(exper_list)
+
+    # Skip if not on this rank
     if mod(i, nprocs) != rank
         continue  # Skip experiments that belong to other ranks
+    end
+
+    # Skip if already finished
+    if has_results(experiment)
+        @info "Rank $(rank): Skipping $(_name), model already exists."
+        continue
     end
 
     # Running the experiment
     save_dir = experiment.meta_params.save_dir
     _name = experiment.meta_params.experiment_name
-    mname = joinpath(save_dir, "model.jls")
-    if isfile(mname)
-        @info "Rank $(rank): Skipping $(_name), model already exists."
-        continue
-    end
     @info "Rank $(rank): Running experiment: $(_name) ($i/$(length(exper_list)))"
     model, logs = run_training(experiment; checkpoint_dir=save_dir)
 

@@ -185,15 +185,24 @@ function run_training(exp::Experiment; checkpoint_dir::Union{Nothing,String}=not
 end
 
 """
+    results_name(exper::Experiment)
+
+Default name for the results file.
+"""
+function results_name(exper::Experiment)
+    return joinpath(exper.meta_params.save_dir, "results.jld2")
+end
+
+"""
     save_results(exper::Experiment, model, logs)
 
 Saves the results of an experiment to a file.
 """
 function save_results(exper::Experiment, model, logs)
-    save_dir = exper.meta_params.save_dir
+    save_name = results_name(exper)
     M = MLP(model; likelihood=:classification_multi)
-    @info "Saving model and logs to $(save_dir):"
-    jldsave(joinpath(save_dir,"results.jld2"); model, logs, M)
+    @info "Saving model and logs to $(save_name):"
+    jldsave(save_name; model, logs, M)
 end
 
 """
@@ -202,9 +211,20 @@ end
 Loads the results of an experiment from a file.
 """
 function load_results(exper::Experiment)
-    save_dir = exper.meta_params.save_dir
-    @info "Loading results from $(save_dir):"
-    @assert isfile(joinpath(save_dir,"results.jld2")) "No results found for this experiemnt."
-    model, logs, M = JLD2.load(joinpath(save_dir, "results.jld2"), "model", "logs", "M")
+    @assert has_results(exper) "No results found for experiment."
+    save_name = results_name(exper)
+    @info "Loading results from $(save_name):"
+    model, logs, M = JLD2.load(save_name, "model", "logs", "M")
     return model, logs, M
 end
+
+"""
+    has_results(exper::Experiment)
+
+Checks if the results of an experiment are available in a file.
+"""
+function has_results(exper::Experiment)
+    save_name = results_name(exper)
+    return isfile(save_name)
+end
+
