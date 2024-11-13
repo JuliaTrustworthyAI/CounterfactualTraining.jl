@@ -1,26 +1,26 @@
-name = "grid_run_2024-11-11"
+name = "grid_run_2024-11-13_ablation"
 dim_reduction = [true, false]
 generator_type = ["ecco", "generic", "revise"]
 data = "mnist"
 model_type = "mlp"
-save_dir = "paper/experiments/output/grid_run_2024-11-11"
+save_dir = "paper/experiments/output/grid_run_2024-11-13_ablation"
 
 [data_params]
 n_validation = []
 n_train = []
-batchsize = [1000]
+batchsize = [500]
 
 [model_params]
 nlayers = []
 activation = []
-nhidden = []
+nhidden = [64]
 
 [generator_params]
 opt = []
-lambda_cost = [0.001, 0.1]
+lambda_cost = [0.001]
 lr = []
-maxiter = [20, 100]
-lambda_energy = [0.5, 5.0]
+maxiter = [25]
+lambda_energy = [0.1, 0.5, 1.0, 5.0, 10.0]
 type = []
 
 [training_params]
@@ -29,9 +29,9 @@ nce = [1000]
 lr = []
 threaded = []
 class_loss = []
-objective = ["full"]
+objective = ["full", "adversarial", "energy"]
 lambda_class_loss = []
-lambda_energy_diff = [0.01, 0.5]
+lambda_energy_diff = []
 burnin = []
 nepochs = [100]
 lambda_energy_reg = []
@@ -39,4 +39,4 @@ verbose = []
 lambda_adversarial = []
 parallelizer = ["mpi"]
 generator_params = []
-conv = ["max_iter", "threshold"]
+conv = ["max_iter"]

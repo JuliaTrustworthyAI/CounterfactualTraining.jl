@@ -47,12 +47,13 @@ function evaluate_counterfactuals(
     grid::ExperimentGrid;
     generators::Union{Nothing,Dict{Symbol,AbstractGenerator}}=nothing,
     measure::Vector{<:PenaltyOrFun}=[validity, plausibility],
+    parallelizer::Union{Nothing,AbstractParallelizer}=nothing
 )
     exper_list = load_list(grid)
 
     # Get all available test data:
     dataset = get_data(grid.data) |>
-        dataset_type -> get_test_data(dataset_type; n=nothing) |>
+        dataset_type -> get_test_data(dataset_type(); n=nothing) |>
         dt -> CounterfactualData(dt...)
 
     # Get models:
@@ -72,9 +73,19 @@ function evaluate_counterfactuals(
     end
 
     # Generate and benchmark counterfactuals:
-    pllr = get_parallelizer(exper_list[1].training_params)
+    pllr = if isnothing(parallelizer)
+        get_parallelizer(exper_list[1].training_params)
+	else
+        parallelizer
+    end
+
     return benchmark(
-        dataset; models=models, generators=generators, measure=measure, parallelizer=pllr
+        dataset;
+        models=models,
+        generators=generators,
+        measure=measure,
+        parallelizer=pllr,
+        suppress_training=true,
     )
 
 end
