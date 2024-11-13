@@ -17,7 +17,7 @@ source .env
 srun julia --project=$EXPERIMENT_DIR --threads $SLURM_CPUS_PER_TASK $EXPERIMENT_DIR/run_grid.jl > $LOG_DIR/run_grid.log
 
 # Copy results to long-term storage:
-if [ $PWD/ = $CLUSTER_WORK_DIR ] ; then
+if [ $PWD = $CLUSTER_WORK_DIR ] ; then
     echo 'Copying results to long term storage directory: $LONG_TERM_STORAGE_DIR'
     cp -rf -n $OUTPUT_DIR $LONG_TERM_STORAGE_DIR
 fi
