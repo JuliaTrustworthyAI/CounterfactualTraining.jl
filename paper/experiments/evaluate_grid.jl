@@ -5,5 +5,6 @@ using DotEnv
 DotEnv.load!()
 
 # Get config and set up grid:
-config_file = joinpath(ENV["EXPERIMENT_DIR"], "run_grid_config.toml")
-exper_grid = ExperimentGrid(config_file)
+eval_config = joinpath(ENV["EXPERIMENT_DIR"], "eval_config.toml") |> EvaluationConfig
+exper_grid = ExperimentGrid(eval_config.grid_file)
+

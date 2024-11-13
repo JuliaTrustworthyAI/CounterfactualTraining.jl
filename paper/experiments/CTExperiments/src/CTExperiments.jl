@@ -17,7 +17,9 @@ export Experiment, run_training
 export ExperimentGrid, setup_experiments
 export save_results, load_results, has_results
 export load_list
+export EvaluationConfig
 export test_performance, evaluate_counterfactuals
+export to_toml
 
 function generate_template(
     fname::String="paper/experiments/template_config.toml";

@@ -3,6 +3,38 @@ using CounterfactualExplanations.Evaluation
 using Logging
 using StatisticalMeasures
 
+struct EvaluationConfig <: AbstractConfiguration
+    grid_file::String
+    save_dir::String
+end
+
+function EvaluationConfig(grid::ExperimentGrid; save_dir::Union{Nothing,String}=nothing)
+    save_dir = if isnothing(save_dir)
+        default_evaluation_dir(grid)
+    else
+        save_dir
+    end
+    return EvaluationConfig(default_grid_config_name(grid), save_dir)
+end
+
+function EvaluationConfig(; grid_file, save_dir)
+    EvaluationConfig(grid_file, save_dir)
+end
+
+function EvaluationConfig(fname::String)
+    @assert isfile(fname) "Experiment file not found."
+    dict = from_toml(fname)
+    return (kwrgs -> EvaluationConfig(; kwrgs...))(CTExperiments.to_ntuple(dict))
+end
+
+function default_eval_config_name(eval_config::EvaluationConfig)
+    return joinpath(eval_config.save_dir, "eval_config.toml")
+end
+
+function to_toml(eval_config::EvaluationConfig)
+    to_toml(eval_config, default_eval_config_name(eval_config))
+end
+
 function test_performance(
     exper::Experiment;
     measure=[accuracy, multiclass_f1score],

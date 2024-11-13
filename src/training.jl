@@ -77,7 +77,7 @@ function counterfactual_training(
 
             # Unpack:
             input, label = batch
-            perturbed_input, targets, targets_enc, neighbours = counterfactual_dl[i]
+            perturbed_input, target_indices, targets_enc, neighbours = counterfactual_dl[i]
             neighbours = typeof(neighbours) <: AbstractVector ? neighbours : [neighbours]
 
             val, grads = Flux.withgradient(model) do m
@@ -87,8 +87,8 @@ function counterfactual_training(
 
                 # Compute implausibility and regulatization:
                 if !isnothing(perturbed_input)
-                    implaus = implausibility(m, perturbed_input, neighbours, targets)
-                    regs = reg_loss(m, perturbed_input, neighbours, targets)
+                    implaus = implausibility(m, perturbed_input, neighbours, target_indices)
+                    regs = reg_loss(m, perturbed_input, neighbours, target_indices)
                     # Validity loss (counterfactual):
                     yhat_ce = m(perturbed_input)
                     adversarial_loss = Flux.Losses.logitcrossentropy(yhat_ce, targets_enc)
@@ -133,7 +133,7 @@ function counterfactual_training(
         msg_acc = "Training accuracy in epoch $epoch/$nepochs: $acc"
         @info msg_acc
         if !isnothing(val_set)
-            msg_acc = "Validation accuracy in epoch $epoch/$nepochs: $acc_val."
+            msg_acc = "Validation accuracy in epoch $epoch/$nepochs: $acc_val"
             @info msg_acc
         end
         

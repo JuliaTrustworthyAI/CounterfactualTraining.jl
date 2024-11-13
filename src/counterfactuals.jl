@@ -73,7 +73,10 @@ function generate!(
     # Encoded targets:
     targets_enc = hcat((x -> x.target_encoded).(ces)...)
 
-    return counterfactuals, targets, targets_enc, neighbours
+    # Target indices:
+    target_indices = get_target_index.((counterfactual_data.y_levels,), targets)
+
+    return counterfactuals, target_indices, targets_enc, neighbours
 end
 
 """
@@ -152,15 +155,18 @@ function generate!(
     # Encoded targets:
     targets_enc = (x -> x.target_encoded).(ces)
 
+    # Target indices:
+    target_indices = get_target_index.((counterfactual_data.y_levels,), targets)
+
     # Partition data:
-    all_data = zip(counterfactuals, targets, targets_enc, neighbours)
+    all_data = zip(counterfactuals, target_indices, targets_enc, neighbours)
     n_total = length(all_data)
     bs = Int(round(n_total / length(data)))
     group_indices = partition(1:n_total, bs)
     dl = [
         (
             hcat(counterfactuals[i]...),
-            targets[i],
+            target_indices[i],
             hcat(targets_enc[i]...),
             neighbours[i],
         ) for i in group_indices

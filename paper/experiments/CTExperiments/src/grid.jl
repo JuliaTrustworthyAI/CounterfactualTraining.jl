@@ -122,14 +122,17 @@ function ExperimentGrid(fname::String; new_save_dir::Union{Nothing,String}=nothi
     if !isnothing(new_save_dir)
         mkpath(new_save_dir)
         dict["save_dir"] = new_save_dir
-        new_save_name = joinpath(new_save_dir, "grid_config.toml")
     end
     grid = (kwrgs -> ExperimentGrid(; kwrgs...))(CTExperiments.to_ntuple(dict))
     if !isnothing(new_save_dir) 
-        to_toml(grid, new_save_name)        # store in new save directory
+        to_toml(grid, default_grid_config_name(grid))        # store in new save directory
         to_toml(grid, fname)                # over-write old file with new config
     end
     return grid
+end
+
+function default_grid_config_name(grid::ExperimentGrid)
+    return joinpath(grid.save_dir, "grid_config.toml")
 end
 
 """
@@ -241,4 +244,8 @@ function to_kv_pair(cfg::ExperimentGrid)
         dict_array_of_pairs[key] = to_kv_pair(key, vals)
     end
     return dict_array_of_pairs
+end
+
+function default_evaluation_dir(grid::ExperimentGrid)
+    return mkpath(joinpath(grid.save_dir, "evaluation"))
 end
