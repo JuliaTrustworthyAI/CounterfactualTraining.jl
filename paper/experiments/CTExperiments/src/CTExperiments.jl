@@ -16,6 +16,8 @@ include("evaluate.jl")
 export Experiment, run_training
 export ExperimentGrid, setup_experiments
 export save_results, load_results, has_results
+export load_list
+export test_performance, evaluate_counterfactuals
 
 function generate_template(
     fname::String="paper/experiments/template_config.toml";

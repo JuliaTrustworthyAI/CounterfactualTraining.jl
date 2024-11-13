@@ -218,6 +218,15 @@ function load_results(exper::Experiment)
     return model, logs, M
 end
 
+function load_results(grid::ExperimentGrid)
+    exper_list = load_list(grid)
+    @info "Loading results from $(length(exper_list)) experiments:"
+    results = Logging.with_logger(Logging.NullLogger()) do
+        load_results.(exper_list)
+    end
+    return results
+end
+
 """
     has_results(exper::Experiment)
 

@@ -1,17 +1,30 @@
 using CounterfactualExplanations
 using CounterfactualExplanations.Evaluation
+using Logging
 using StatisticalMeasures
 
-function test_performance(exper::Experiment; measure=[accuracy, multiclass_f1score])
+function test_performance(
+    exper::Experiment;
+    measure=[accuracy, multiclass_f1score],
+    n::Union{Nothing,Int}=nothing,
+)
     model, logs, M = load_results(exper)
     
     # Get test data:
-    Xtest, ytest = get_test_data(exper.data)
+    Xtest, ytest = get_test_data(exper.data; n=n)
     yhat = predict_label(M, CounterfactualData(Xtest, ytest), Xtest)
 
     # Evaluate the model:
     results = [measure(ytest, yhat) for measure in measure]
 
+    return results
+end
+
+function test_performance(grid::ExperimentGrid; kwrgs...)
+    exper_list = load_list(grid)
+    results = Logging.with_logger(Logging.NullLogger()) do
+        test_performance.(exper_list; kwrgs...)
+    end
     return results
 end
 
