@@ -3,7 +3,7 @@
 #SBATCH --job-name="Run Grid"
 #SBATCH --partition=compute
 #SBATCH --time=01:00:00
-#SBATCH --ntasks=12
+#SBATCH --ntasks=2
 #SBATCH --cpus-per-task=8
 #SBATCH --mem-per-cpu=2G
 #SBATCH --account=research-eemcs-insy
