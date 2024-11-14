@@ -144,25 +144,15 @@ function setup_experiments(
     cfg::ExperimentGrid; experiment_name_prefix::Union{Nothing,String}="experiment"
 )
 
-    # Store results in new dictionary with arrays of pairs (key, value):
-    dict_array_of_pairs = to_kv_pair(cfg)
-
-    # Filter out empty pairs:
-    dict_array_of_pairs = filter(
-        ((key, value),) -> length(value) > 0 && !(key in ["name", "save_dir"]),
-        dict_array_of_pairs,
-    )
+    # Expand grid:
+    expanded_grid, experiment_names = expand_grid(cfg)
 
     # For each combintation of parameters, create a new experiment:
     exper_list = Vector{Experiment}()
-    for (i, kwrgs) in enumerate(product(values(dict_array_of_pairs)...))
+    for (i, kwrgs) in enumerate(expanded_grid)
 
         # Experiment name:
-        experiment_name = if isnothing(experiment_name_prefix)
-            string(uuid1())
-        else
-            "$(experiment_name_prefix)_$(i)"
-        end
+        experiment_name = experiment_names[i]
 
         # Unpack:
         _names = Symbol.([k for (k, _) in kwrgs])
@@ -185,6 +175,78 @@ function setup_experiments(
     save_list(cfg, exper_list)
 
     return exper_list
+end
+
+"""
+    expand_grid(cfg::ExperimentGrid)
+
+Computes the Cartesian product across hyperparameters provided in the grid.
+"""
+function expand_grid(
+    cfg::ExperimentGrid; experiment_name_prefix::Union{Nothing,String}="experiment"
+)
+
+    # Store results in new dictionary with arrays of pairs (key, value):
+    dict_array_of_pairs = to_kv_pair(cfg)
+
+    # Filter out empty pairs:
+    dict_array_of_pairs = filter(
+        ((key, value),) -> length(value) > 0 && !(key in ["name", "save_dir"]),
+        dict_array_of_pairs,
+    )
+
+    # Generate Cartesian product:
+    expanded_grid = product(values(dict_array_of_pairs)...)
+
+    # Experiment names:
+    experiment_names = String[]
+    for i in 1:length(expanded_grid)
+        experiment_name = if isnothing(experiment_name_prefix)
+            string(uuid1())
+        else
+            "$(experiment_name_prefix)_$(i)"
+        end
+        push!(experiment_names, experiment_name)
+    end
+
+    return expanded_grid, experiment_names
+end
+
+function expand_grid_to_df(cfg::ExperimentGrid)
+    
+    df = DataFrame()
+
+    # Expand grid:
+    params, exper_names = expand_grid(cfg)
+
+    for (params, _name) in zip(params, exper_names)
+
+        # Step 1: Create a new tuple of Pairs from the original params tuple, 
+        # excluding any Pairs with NamedTuple values
+        new_params = Tuple(Pair(k, v) for (k, v) in params if !isa(v, NamedTuple))
+
+        # Step 2: Iterate over the original params tuple again
+        for (k, v) in params
+            # Check if the value `v` is a NamedTuple
+            if isa(v, NamedTuple)
+                # If so, iterate over the key-value pairs in `v`
+                for (k2, v2) in pairs(v)
+                    # Create a new Pair with the key `k2` and value `v2`
+                    new_params = vcat(new_params..., Pair(string(k2), v2))
+                end
+            end
+        end
+
+        # Collect:
+        _df = DataFrame(new_params)
+        _df.id .= _name
+        df = vcat(df, _df)
+
+    end
+
+    select!(df, :id, Not(:id))
+
+    return df
 end
 
 function save_list(cfg::ExperimentGrid, exper_list::Vector{<:AbstractExperiment})
