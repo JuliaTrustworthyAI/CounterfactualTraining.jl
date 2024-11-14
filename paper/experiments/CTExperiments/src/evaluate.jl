@@ -13,17 +13,22 @@ struct EvaluationConfig <: AbstractConfiguration
     counterfactual_params::CounterfactualParams
 end
 
-function EvaluationConfig(grid::ExperimentGrid; save_dir::Union{Nothing,String}=nothing)
+function EvaluationConfig(
+    grid::ExperimentGrid;
+    save_dir::Union{Nothing,String}=nothing,
+    counterfactual_params::NamedTuple=(;)
+)
     save_dir = if isnothing(save_dir)
         default_evaluation_dir(grid)
     else
         save_dir
     end
-    return EvaluationConfig(default_grid_config_name(grid), save_dir)
+    counterfactual_params = CounterfactualParams(;counterfactual_params...)
+    return EvaluationConfig(default_grid_config_name(grid), save_dir, counterfactual_params)
 end
 
-function EvaluationConfig(; grid_file, save_dir)
-    EvaluationConfig(grid_file, save_dir)
+function EvaluationConfig(; grid_file, save_dir, counterfactual_params)
+    EvaluationConfig(grid_file, save_dir, counterfactual_params)
 end
 
 function EvaluationConfig(fname::String)

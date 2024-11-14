@@ -1,5 +1,7 @@
 module CTExperiments
 
+using Logging
+
 abstract type AbstractConfiguration end
 abstract type AbstractExperiment <: AbstractConfiguration end
 abstract type AbstractGeneratorType <: AbstractConfiguration end
@@ -28,32 +30,68 @@ function generate_template(
     overwrite=false,
     kwrgs...,
 )
-    if overwrite && isfile(fname)
+    write_file = !isfile(fname)     # don't write file if it exists
+    if overwrite                    # unless specified
         @warn "File $fname already exists! Overwriting..."
-        rm(fname)
+        write_file = true
     end
-    save_dir = joinpath(splitpath(fname)[1:(end - 1)])
-    exper = Experiment(
-        MetaParams(; experiment_name=experiment_name, save_dir=save_dir); kwrgs...
-    )
-    to_toml(exper, fname)
+
+    if write_file
+        save_dir = joinpath(splitpath(fname)[1:(end - 1)])
+        exper = Experiment(
+            MetaParams(; experiment_name=experiment_name, save_dir=save_dir); kwrgs...
+        )
+        to_toml(exper, fname)
+    else
+        @warn "File already exists and not explicitly asked to overwrite it."
+    end
+    
     return fname
 end
 
 function generate_grid_template(
     fname::String="paper/experiments/template_grid_config.toml"; overwrite=false
 )
-    if overwrite && isfile(fname)
+    write_file = !isfile(fname)     # don't write file if it exists
+    if overwrite                    # unless specified
         @warn "File $fname already exists! Overwriting..."
-        rm(fname)
+        write_file = true
     end
 
-    save_dir = joinpath(splitpath(fname)[1:(end - 1)])
-    exper_grid = CTExperiments.ExperimentGrid(;save_dir=save_dir)
-    to_toml(exper_grid, fname)
+    if write_file
+        save_dir = joinpath(splitpath(fname)[1:(end - 1)])
+        exper_grid = CTExperiments.ExperimentGrid(;save_dir=save_dir)
+        to_toml(exper_grid, fname)
+    else
+        @warn "File already exists and not explicitly asked to overwrite it."
+    end
+
     return fname
 end
 
-export generate_template, generate_grid_template
+function generate_eval_template(
+    fname::String="paper/experiments/template_eval_config.toml"; overwrite=false
+)
+    write_file = !isfile(fname)     # don't write file if it exists
+    if overwrite                    # unless specified
+        @warn "File $fname already exists! Overwriting..."
+        write_file = true
+    end
+
+    if write_file
+        exper_grid = Logging.with_logger(Logging.NullLogger()) do
+            CTExperiments.ExperimentGrid(generate_grid_template())
+        end
+        cfg = EvaluationConfig(exper_grid)
+        to_toml(cfg, fname)
+    else
+        @warn "File already exists and not explicitly asked to overwrite it."
+    end
+
+    return fname
+
+end
+
+export generate_template, generate_grid_template, generate_eval_template
 
 end
