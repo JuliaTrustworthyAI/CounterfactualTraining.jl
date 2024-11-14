@@ -181,23 +181,24 @@ function get_lambdas(obj::CT.AdversarialObjective, params::TrainingParams)
     return lambda
 end
 
-function get_parallelizer(params::TrainingParams)
-
+function get_parallelizer(pllr_type::String; threaded::Bool=true)
     # Multi-threading
-    if params.parallelizer == "threads"
+    if pllr_type == "threads"
         pllr = ThreadsParallelizer()
     end
 
     # Multi-processing
-    if params.parallelizer == "mpi"
+    if pllr_type == "mpi"
         if !MPI.Initialized()
             MPI.Init()
         end
-        pllr = MPIParallelizer(MPI.COMM_WORLD; threaded=params.threaded)
+        pllr = MPIParallelizer(MPI.COMM_WORLD; threaded=threaded)
     end
 
     return pllr
 end
+
+get_parallelizer(params::TrainingParams) = get_parallelizer(params.parallelizer; threaded=params.threaded)
 
 """
     objectives
@@ -210,10 +211,11 @@ const conv_catalogue = Dict(
     "gen_con" => Convergence.GeneratorConditionsConvergence,
 )
 
-function get_convergence(params::TrainingParams)
-    s = params.conv
+function get_convergence(s::String, maxiter::Int)
     s = lowercase(s)
     @assert s in keys(conv_catalogue) "Unknown convergence type: $s. Available types are $(keys(conv_catalogue))"
-    conv = conv_catalogue[s](; max_iter=params.generator_params.maxiter)
+    conv = conv_catalogue[s](; max_iter=maxiter)
     return conv
 end
+
+get_convergence(params::TrainingParams) = get_convergence(params.conv, params.generator_params.maxiter)

@@ -130,6 +130,7 @@ function counterfactual_training(
         # Logging:
         acc = accuracy(model, train_set)
         acc_val = isnothing(val_set) ? nothing : accuracy(model, val_set)
+        train_loss = sum(losses) / length(losses)
         msg_acc = "Training accuracy in epoch $epoch/$nepochs: $acc"
         @info msg_acc
         if !isnothing(val_set)
@@ -156,7 +157,7 @@ function counterfactual_training(
             msg_adv = "n/a"
         end
 
-        push!(log, (; acc, acc_val, losses, implaus, log_reg_loss, log_adv_loss))
+        push!(log, (; acc, acc_val, train_loss, implaus, log_reg_loss, log_adv_loss))
 
         # Checkpointing:
         if !isnothing(checkpoint_dir)

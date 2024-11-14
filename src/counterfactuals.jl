@@ -35,6 +35,7 @@ function generate!(
 )
 
     # Set up:
+    # NOTE: Using [1,...,n] for labels where n is the number of output classes. Exact label information is not necessary for training.
     counterfactual_data = CounterfactualData(
         unwrap(data)...; domain=domain, input_encoder=input_encoder
     )
@@ -107,7 +108,8 @@ function generate!(
 )
 
     # Wrap training dataset in `CounterfactualData`:
-    X, y = unwrap(data)
+    # NOTE: Using [1,...,n] for labels where n is the number of output classes. Exact label information is not necessary for training.
+    X, y = unwrap(data)     
     counterfactual_data = CounterfactualData(
         X, y; domain=domain, input_encoder=input_encoder
     )

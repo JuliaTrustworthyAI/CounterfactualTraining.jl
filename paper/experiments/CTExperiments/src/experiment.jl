@@ -1,6 +1,7 @@
 using Accessors
 import Base: ==
 import CounterfactualTraining as CT
+using DataFrames
 using Flux
 using JLD2
 using Logging
@@ -218,6 +219,11 @@ function load_results(exper::Experiment)
     return model, logs, M
 end
 
+"""
+    load_results(grid::ExperimentGrid)
+
+Overloads the function to load the results from all experiments in a grid.
+"""
 function load_results(grid::ExperimentGrid)
     exper_list = load_list(grid)
     @info "Loading results from $(length(exper_list)) experiments:"
@@ -237,3 +243,31 @@ function has_results(exper::Experiment)
     return isfile(save_name)
 end
 
+"""
+    get_logs(exper::Experiment)
+
+Retrieves the logs from disk and returns a DataFrame with additional columns for the experiment `:id` and the path to the config file (`:config_file`).
+"""
+function get_logs(exper::Experiment)
+    _, logs, _ = Logging.with_logger(Logging.NullLogger()) do 
+        load_results(exper)
+    end
+    df_logs = DataFrame(logs)
+    df_logs.epoch .= 1:nrow(df_logs)
+    df_logs.id .= exper.meta_params.experiment_name
+    df_logs.config_file .= config_file(exper.meta_params)
+    select!(df_logs, :id, :epoch, Not(:id, :epoch))
+    return df_logs
+end
+
+"""
+    get_logs(grid::ExperimentGrid)
+
+Overloads the function for a grid of experiments.
+"""
+function get_logs(grid::ExperimentGrid)
+    exper_list = Logging.with_logger(Logging.NullLogger()) do 
+        load_list(grid)
+    end
+    return vcat(get_logs.(exper_list)...)
+end
