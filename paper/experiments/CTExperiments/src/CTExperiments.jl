@@ -70,7 +70,9 @@ function generate_grid_template(
 end
 
 function generate_eval_template(
-    fname::String="paper/experiments/template_eval_config.toml"; overwrite=false
+    fname::String="paper/experiments/template_eval_config.toml";
+    overwrite=false,
+    save_dir="paper/experiments/template_eval_dir",
 )
     write_file = !isfile(fname)     # don't write file if it exists
     if overwrite                    # unless specified
@@ -79,10 +81,11 @@ function generate_eval_template(
     end
 
     if write_file
-        exper_grid = Logging.with_logger(Logging.NullLogger()) do
-            CTExperiments.ExperimentGrid(generate_grid_template())
+        grid_file = Logging.with_logger(Logging.NullLogger()) do 
+            generate_grid_template()
         end
-        cfg = EvaluationConfig(exper_grid)
+        exper_grid = CTExperiments.ExperimentGrid(grid_file)
+        cfg = EvaluationConfig(exper_grid; grid_file=grid_file, save_dir=save_dir)
         to_toml(cfg, fname)
     else
         @warn "File already exists and not explicitly asked to overwrite it."

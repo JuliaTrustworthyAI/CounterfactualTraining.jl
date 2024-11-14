@@ -15,6 +15,7 @@ end
 
 function EvaluationConfig(
     grid::ExperimentGrid;
+    grid_file::Union{Nothing,String}=nothing,
     save_dir::Union{Nothing,String}=nothing,
     counterfactual_params::NamedTuple=(;),
 )
@@ -24,7 +25,8 @@ function EvaluationConfig(
         save_dir
     end
     counterfactual_params = CounterfactualParams(; counterfactual_params...)
-    return EvaluationConfig(default_grid_config_name(grid), save_dir, counterfactual_params)
+    grid_file = isnothing(grid_file) ? default_grid_config_name(grid) : grid_file
+    return EvaluationConfig(grid_file, save_dir, counterfactual_params)
 end
 
 function EvaluationConfig(;

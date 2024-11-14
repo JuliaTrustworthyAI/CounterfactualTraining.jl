@@ -15,7 +15,7 @@ UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
 
 [compat]
 ChainRulesCore = "1.25"
-CounterfactualExplanations = "1.3.5"
+CounterfactualExplanations = "1.3.6"
 EnergySamplers = "1.0"
 JLD2 = "0.4.53"
 StatsBase = "0.34.3"

@@ -88,7 +88,7 @@ function evaluate_counterfactuals(
     interim_storage_path = mkpath(joinpath(cfg.save_dir, "interim_counterfactuals"))
 
     # Generate and benchmark counterfactuals:
-    return benchmark(
+    bmk = benchmark(
         dataset;
         models=models,
         generators=generators,
@@ -101,5 +101,9 @@ function evaluate_counterfactuals(
         convergence=conv,
         store_ce=cfg.counterfactual_params.store_ce,
         storage_path=interim_storage_path,
-    )
+    )()
+
+    rename!(bmk, :model => :id)
+
+    return bmk
 end
