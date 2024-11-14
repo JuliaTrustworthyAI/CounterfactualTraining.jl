@@ -1343,9 +1343,9 @@ version = "0.3.2"
 
 [[deps.Memoization]]
 deps = ["MacroTools"]
-git-tree-sha1 = "073f080e733bc6697411901224ed4fd15fefaffa"
+git-tree-sha1 = "7dbf904fa6c4447bd1f1d316886bfbe29feacf45"
 uuid = "6fafb56a-5788-4b4e-91ca-c0cea6611c73"
-version = "0.2.1"
+version = "0.2.2"
 
 [[deps.MetaGraphs]]
 deps = ["Graphs", "JLD2", "Random"]
