@@ -45,7 +45,7 @@ function generate_template(
     else
         @warn "File already exists and not explicitly asked to overwrite it."
     end
-    
+
     return fname
 end
 
@@ -60,7 +60,7 @@ function generate_grid_template(
 
     if write_file
         save_dir = joinpath(splitpath(fname)[1:(end - 1)])
-        exper_grid = CTExperiments.ExperimentGrid(;save_dir=save_dir)
+        exper_grid = CTExperiments.ExperimentGrid(; save_dir=save_dir)
         to_toml(exper_grid, fname)
     else
         @warn "File already exists and not explicitly asked to overwrite it."
@@ -89,7 +89,6 @@ function generate_eval_template(
     end
 
     return fname
-
 end
 
 export generate_template, generate_grid_template, generate_eval_template

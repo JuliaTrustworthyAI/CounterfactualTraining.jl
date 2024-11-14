@@ -15,4 +15,3 @@ experiment = Experiment(config_file; new_save_dir=save_dir)
 @info "Running experiment: $(_name)"
 model, logs = run_training(experiment; checkpoint_dir=save_dir)
 save_results(experiment, model, logs)
-

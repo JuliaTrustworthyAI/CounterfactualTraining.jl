@@ -112,7 +112,7 @@ function ExperimentGrid(;
         model_params,
         training_params,
         generator_params,
-        save_dir
+        save_dir,
     )
 end
 
@@ -124,7 +124,7 @@ function ExperimentGrid(fname::String; new_save_dir::Union{Nothing,String}=nothi
         dict["save_dir"] = new_save_dir
     end
     grid = (kwrgs -> ExperimentGrid(; kwrgs...))(CTExperiments.to_ntuple(dict))
-    if !isnothing(new_save_dir) 
+    if !isnothing(new_save_dir)
         to_toml(grid, default_grid_config_name(grid))        # store in new save directory
         to_toml(grid, fname)                # over-write old file with new config
     end
@@ -141,8 +141,7 @@ end
 Generates a list of experiments to be run. The list contains one experiment for every combination of the fields in `cfg`.
 """
 function setup_experiments(
-    cfg::ExperimentGrid;
-    experiment_name_prefix::Union{Nothing,String}="experiment"
+    cfg::ExperimentGrid; experiment_name_prefix::Union{Nothing,String}="experiment"
 )
 
     # Store results in new dictionary with arrays of pairs (key, value):
@@ -178,10 +177,7 @@ function setup_experiments(
         meta = MetaParams(;
             experiment_name=experiment_name, save_dir=save_dir, meta_kwrgs...
         )
-        exper = Experiment(
-            meta;
-            other_kwrgs...,
-        )
+        exper = Experiment(meta; other_kwrgs...)
         push!(exper_list, exper)
     end
 
@@ -227,7 +223,7 @@ function to_kv_pair(k, vals::Dict)
     # Filter out empty elements in the dict:
     vals = filter(((key, value),) -> length(value) > 0, vals)
     # Create a vectors of named tuples for each array in the dict:
-    nt_vals = [[(; Symbol(k) => _v) for _v in v] for (k, v) in vals] 
+    nt_vals = [[(; Symbol(k) => _v) for _v in v] for (k, v) in vals]
     # If the array is empty, return an empty array:
     length(nt_vals) == 0 && return all_pairs
     # Create a vector of pairs from each array:

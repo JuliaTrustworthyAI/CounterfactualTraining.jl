@@ -4,7 +4,6 @@
 Struct holding keyword arguments relevant to the evaluation of counterfactual explanations for fitted models.
 """
 Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
-    generators::Vector{<:AbstractString} = String["ecco"]
     generator_params::GeneratorParams = GeneratorParams()
     n_individuals::Int = 100
     n_runs::Int = 10
@@ -14,6 +13,41 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
     store_ce::Bool = false
     parallelizer::AbstractString = "threads"
     threaded::Bool = true
+    function CounterfactualParams(
+        generator_params,
+        n_individuals,
+        n_runs,
+        conv,
+        maxiter,
+        vertical_splits,
+        store_ce,
+        parallelizer,
+        threaded,
+    )
+        if generator_params isa NamedTuple
+            if generator_params.type isa String
+                generator_type = get_generator_type(generator_params.type)
+                generator_params = @delete $generator_params.type          # remove type
+                generator_params = GeneratorParams(;
+                    type=generator_type(), generator_params...
+                )
+            else
+                generator_params = GeneratorParams(; generator_params...)
+            end
+        end
+
+        return new(
+            generator_params,
+            n_individuals,
+            n_runs,
+            conv,
+            maxiter,
+            vertical_splits,
+            store_ce,
+            parallelizer,
+            threaded,
+        )
+    end
 end
 
 function get_parallelizer(cfg::CounterfactualParams)
@@ -25,14 +59,16 @@ get_convergence(cfg::CounterfactualParams) = get_convergence(cfg.conv, cfg.maxit
 function evaluate_counterfactuals(
     cfg::AbstractEvaluationConfig; measure::Vector{<:PenaltyOrFun}=[validity, plausibility]
 )
-    grid = from_toml(cfg.grid_file)
+    grid = ExperimentGrid(cfg.grid_file)
     exper_list = load_list(grid)
 
     # Get all available test data:
-    dataset = (dataset_type ->
-        (dt -> CounterfactualData(dt...))(get_test_data(dataset_type(); n=nothing)))(get_data(
-        grid.data
-    ))
+    dataset = (
+        dataset_type ->
+            (dt -> CounterfactualData(dt...))(get_test_data(dataset_type(); n=nothing))
+    )(
+        get_data(grid.data)
+    )
 
     # Get models:
     models = Dict(
@@ -43,15 +79,10 @@ function evaluate_counterfactuals(
     )
 
     # Counterfactual generators:
-    generators = Dict{Symbol,AbstractGenerator}()
-    for gen_name in cfg.counterfactual_params.generators
-        generator_type = get_generator_type(gen_name)
-        _gen_params = cfg.counterfactual_params.generator_params        # get key words
-        generator_params = @delete $_gen_params.type                    # remove type
-        generator_params = GeneratorParams(; type=generator_type(), generator_params...)
-        generator[Symbol(gen_name)] = get_generator(generator_params)
-    end
-
+    gen_params = cfg.counterfactual_params.generator_params
+    _gen_name = get_generator_name(gen_params)
+    _generator = get_generator(gen_params)
+    generators = Dict(_gen_name => _generator)
     pllr = get_parallelizer(cfg.counterfactual_params)
     conv = get_convergence(cfg.counterfactual_params)
     interim_storage_path = mkpath(joinpath(cfg.save_dir, "interim_counterfactuals"))

@@ -42,5 +42,3 @@ function get_model_type(s::String)
     @assert s in keys(model_types) "Unknown model type: $s. Available types are $(keys(model_types))"
     return model_types[s]
 end
-
-

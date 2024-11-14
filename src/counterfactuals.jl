@@ -109,7 +109,7 @@ function generate!(
 
     # Wrap training dataset in `CounterfactualData`:
     # NOTE: Using [1,...,n] for labels where n is the number of output classes. Exact label information is not necessary for training.
-    X, y = unwrap(data)     
+    X, y = unwrap(data)
     counterfactual_data = CounterfactualData(
         X, y; domain=domain, input_encoder=input_encoder
     )
@@ -125,7 +125,8 @@ function generate!(
 
         # Check that at least one counterfactual is generated for each batch:
         if nsamples < length(data)
-            @warn "Need at least one counterfactual per batch. Setting `nsamples=$(nsamples)` to the total number of batches ($(length(data)))." maxlog=1
+            @warn "Need at least one counterfactual per batch. Setting `nsamples=$(nsamples)` to the total number of batches ($(length(data)))." maxlog =
+                1
             nsamples = length(data)
         end
 

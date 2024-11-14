@@ -23,7 +23,7 @@ function counterfactual_training(
     input_encoder=nothing,
     domain=nothing,
     verbose::Int=2,
-    checkpoint_dir::Union{Nothing, String} = nothing,
+    checkpoint_dir::Union{Nothing,String}=nothing,
     kwrgs...,
 )
 
@@ -37,7 +37,11 @@ function counterfactual_training(
     if !isnothing(checkpoint_dir) && isfile(joinpath(checkpoint_dir, "checkpoint.jld2"))
         @info "Found checkpoint file in $checkpoint_dir. Loading..."
         model, opt_state, epoch, log = JLD2.load(
-            joinpath(checkpoint_dir, "checkpoint.jld2"), "model", "opt_state", "epoch", "log"
+            joinpath(checkpoint_dir, "checkpoint.jld2"),
+            "model",
+            "opt_state",
+            "epoch",
+            "log",
         )
         start_epoch = epoch + 1
         if start_epoch <= nepochs
@@ -124,7 +128,6 @@ function counterfactual_training(
             end
 
             Flux.update!(opt_state, model, grads[1])
-            
         end
 
         # Logging:
@@ -137,7 +140,7 @@ function counterfactual_training(
             msg_acc = "Validation accuracy in epoch $epoch/$nepochs: $acc_val"
             @info msg_acc
         end
-        
+
         if epoch > burnin
             implaus = sum(implausibilities) / length(implausibilities)
             log_reg_loss = sum(reg_losses) / length(reg_losses)
@@ -161,15 +164,23 @@ function counterfactual_training(
 
         # Checkpointing:
         if !isnothing(checkpoint_dir)
-            jldsave(joinpath(checkpoint_dir, "checkpoint.jld2"); model, opt_state, epoch, log)
+            jldsave(
+                joinpath(checkpoint_dir, "checkpoint.jld2"); model, opt_state, epoch, log
+            )
             previous_log = joinpath(checkpoint_dir, "checkpoint_$(epoch-1).md")
             isfile(previous_log) && rm(previous_log)
             fpath = joinpath(checkpoint_dir, "checkpoint_$(epoch).md")
-            acc_plt = lineplot([_log[1] for _log in log], xlabel="Epochs", ylabel="Accuracy");
-            acc_val_plt = if isnothing(acc_val) 
+            acc_plt = lineplot(
+                [_log[1] for _log in log]; xlabel="Epochs", ylabel="Accuracy"
+            )
+            acc_val_plt = if isnothing(acc_val)
                 ""
             else
-                lineplot([_log[2] for _log in log], xlabel="Epochs", ylabel="Validation Accuracy");
+                lineplot(
+                    [_log[2] for _log in log];
+                    xlabel="Epochs",
+                    ylabel="Validation Accuracy",
+                )
             end
             a = """
             Completed $epoch out of $nepochs epochs.
@@ -184,7 +195,7 @@ function counterfactual_training(
             ## History
 
             $acc_plt 
-            
+
             $acc_val_plt
             """
             open(fpath, "w") do file

@@ -95,7 +95,7 @@ function Experiment(
     return exper
 end
 
-function Experiment(fname::String; new_save_dir::Union{Nothing, String} = nothing)
+function Experiment(fname::String; new_save_dir::Union{Nothing,String}=nothing)
     @assert isfile(fname) "Experiment file not found."
     meta = to_meta(from_toml(fname))
     if !isnothing(new_save_dir)
@@ -203,7 +203,7 @@ function save_results(exper::Experiment, model, logs)
     save_name = results_name(exper)
     M = MLP(model; likelihood=:classification_multi)
     @info "Saving model and logs to $(save_name):"
-    jldsave(save_name; model, logs, M)
+    return jldsave(save_name; model, logs, M)
 end
 
 """
@@ -249,7 +249,7 @@ end
 Retrieves the logs from disk and returns a DataFrame with additional columns for the experiment `:id` and the path to the config file (`:config_file`).
 """
 function get_logs(exper::Experiment)
-    _, logs, _ = Logging.with_logger(Logging.NullLogger()) do 
+    _, logs, _ = Logging.with_logger(Logging.NullLogger()) do
         load_results(exper)
     end
     df_logs = DataFrame(logs)
@@ -266,7 +266,7 @@ end
 Overloads the function for a grid of experiments.
 """
 function get_logs(grid::ExperimentGrid)
-    exper_list = Logging.with_logger(Logging.NullLogger()) do 
+    exper_list = Logging.with_logger(Logging.NullLogger()) do
         load_list(grid)
     end
     return vcat(get_logs.(exper_list)...)

@@ -17,12 +17,20 @@ struct REVISE <: AbstractGeneratorType end
 "Type for the GenericGenerator."
 struct Generic <: AbstractGeneratorType end
 
+get_generator_name(gen::ECCo) = "ecco"
+get_generator_name(gen::Generic) = "generic"
+get_generator_name(gen::REVISE) = "revise"
+
 """
     generator_types
 
 Catalogue of available generator types.
 """
-const generator_types = Dict("ecco" => ECCo, "generic" => Generic, "revise" => REVISE)
+const generator_types = Dict(
+    get_generator_name(ECCo()) => ECCo,
+    get_generator_name(Generic()) => Generic,
+    get_generator_name(REVISE()) => REVISE,
+)
 
 """
     get_generator_type(name::String)
@@ -63,6 +71,8 @@ Base.@kwdef struct GeneratorParams <: AbstractGeneratorParams
     lambda_energy::AbstractFloat = 5.0
 end
 
+get_generator_name(params::GeneratorParams) = get_generator_name(params.type)
+
 """
     get_generator(params::GeneratorParams)
 
@@ -76,7 +86,9 @@ get_generator(params::GeneratorParams) = get_generator(params, params.type)
 Instantiates the `ECCoGenerator` with the given parameters.
 """
 function get_generator(params::GeneratorParams, generator_type::ECCo)
-    return ECCoGenerator(; opt=get_opt(params), λ=[params.lambda_cost,params.lambda_energy])
+    return ECCoGenerator(;
+        opt=get_opt(params), λ=[params.lambda_cost, params.lambda_energy]
+    )
 end
 
 """
@@ -198,7 +210,9 @@ function get_parallelizer(pllr_type::String; threaded::Bool=true)
     return pllr
 end
 
-get_parallelizer(params::TrainingParams) = get_parallelizer(params.parallelizer; threaded=params.threaded)
+function get_parallelizer(params::TrainingParams)
+    return get_parallelizer(params.parallelizer; threaded=params.threaded)
+end
 
 """
     objectives
@@ -218,4 +232,6 @@ function get_convergence(s::String, maxiter::Int)
     return conv
 end
 
-get_convergence(params::TrainingParams) = get_convergence(params.conv, params.generator_params.maxiter)
+function get_convergence(params::TrainingParams)
+    return get_convergence(params.conv, params.generator_params.maxiter)
+end

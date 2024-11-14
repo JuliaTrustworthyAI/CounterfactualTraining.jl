@@ -3,12 +3,11 @@ save_dir = "paper/experiments/evaluation"
 
 [counterfactual_params]
 n_runs = 10
-generators = ["ecco"]
 vertical_splits = 0
 parallelizer = "threads"
+threaded = true
 maxiter = 100
 store_ce = false
-threaded = true
 conv = "max_iter"
 n_individuals = 100
 

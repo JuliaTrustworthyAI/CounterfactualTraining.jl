@@ -12,7 +12,7 @@ using TaijaData
 Keyword container for the `MNIST` data set. Can specify the number of samples `n`, the batch size `batchsize`.
 """
 Base.@kwdef struct MNIST <: Dataset
-    n_train::Int= 10000
+    n_train::Int = 10000
     batchsize::Int = 1000
     n_validation::Int = 1000
 end
@@ -99,15 +99,13 @@ end
 
 Returns a test dataloader for the MNIST dataset.
 """
-function get_test_data(
-    data::MNIST; n::Union{Nothing,Int}=data.n_validation
-)
+function get_test_data(data::MNIST; n::Union{Nothing,Int}=data.n_validation)
     Xtest, ytest = load_mnist_test()
     n_total = size(Xtest, 2)
     n = isnothing(n) ? n_total : n
     if n_total > n
         idx = sample(1:n_total, n; replace=false)
-        
+
     elseif n_total < n
         idx = rand(1:n_total, n)
     else
