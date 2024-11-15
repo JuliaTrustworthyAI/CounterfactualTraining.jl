@@ -4,7 +4,7 @@ save_dir = "paper/experiments/output/grid_run_2024-11-11/"
 
 [counterfactual_params]
 n_runs = 10
-vertical_splits = 10
+vertical_splits = 50
 parallelizer = "mpi"
 threaded = true
 maxiter = 100
