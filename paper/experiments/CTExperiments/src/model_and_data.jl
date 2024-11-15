@@ -13,11 +13,11 @@ Catalogue of available model types.
 const data_sets = Dict("mnist" => MNIST)
 
 """
-    get_data(s::String)
+    get_data_set(s::String)
 
 Retrieves the data set from the catalogue if available.
 """
-function get_data(s::String)
+function get_data_set(s::String)
     s = lowercase(s)
     @assert s in keys(data_sets) "Unknown data set: $s. Available sets are $(keys(data_sets))"
     return data_sets[s]

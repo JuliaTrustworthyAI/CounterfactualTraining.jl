@@ -64,10 +64,11 @@ function evaluate_counterfactuals(
 
     # Get all available test data:
     dataset = (
-        dataset_type ->
-            (dt -> CounterfactualData(dt...))(get_test_data(dataset_type(); n=nothing))
+        dataset_type -> (dt -> CounterfactualData(dt...))(
+            get_data(dataset_type(); n=nothing, test_set=cfg.test_time)
+        )
     )(
-        get_data(grid.data)
+        get_data_set(grid.data)
     )
 
     # Get models:
@@ -88,6 +89,11 @@ function evaluate_counterfactuals(
     pllr = get_parallelizer(cfg.counterfactual_params)
     conv = get_convergence(cfg.counterfactual_params)
     interim_storage_path = mkpath(joinpath(cfg.save_dir, "interim_counterfactuals"))
+    vertical_splits = if cfg.counterfactual_params.vertical_splits == 0
+        nothing
+    else
+        cfg.counterfactual_params.vertical_splits
+    end
 
     # Generate and benchmark counterfactuals:
     bmk = benchmark(
@@ -103,6 +109,7 @@ function evaluate_counterfactuals(
         convergence=conv,
         store_ce=cfg.counterfactual_params.store_ce,
         storage_path=interim_storage_path,
+        vertical_splits=vertical_splits,
     )()
 
     rename!(bmk, :model => :id)

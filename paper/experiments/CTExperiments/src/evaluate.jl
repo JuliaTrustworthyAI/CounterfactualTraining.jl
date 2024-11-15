@@ -13,6 +13,7 @@ struct EvaluationConfig <: AbstractEvaluationConfig
     grid_file::String
     save_dir::String
     counterfactual_params::CounterfactualParams
+    test_time::Bool
 end
 
 function EvaluationConfig(
@@ -20,6 +21,7 @@ function EvaluationConfig(
     grid_file::Union{Nothing,String}=nothing,
     save_dir::Union{Nothing,String}=nothing,
     counterfactual_params::NamedTuple=(;),
+    test_time::Bool=false,
 )
     save_dir = if isnothing(save_dir)
         default_evaluation_dir(grid)
@@ -28,14 +30,14 @@ function EvaluationConfig(
     end
     counterfactual_params = CounterfactualParams(; counterfactual_params...)
     grid_file = isnothing(grid_file) ? default_grid_config_name(grid) : grid_file
-    return EvaluationConfig(grid_file, save_dir, counterfactual_params)
+    return EvaluationConfig(grid_file, save_dir, counterfactual_params, test_time)
 end
 
 function EvaluationConfig(;
-    grid_file::String, save_dir::String, counterfactual_params::NamedTuple=(;)
+    grid_file::String, save_dir::String, counterfactual_params::NamedTuple=(;), test_time::Bool=false,
 )
     counterfactual_params = CounterfactualParams(; counterfactual_params...)
-    return EvaluationConfig(grid_file, save_dir, counterfactual_params)
+    return EvaluationConfig(grid_file, save_dir, counterfactual_params, test_time)
 end
 
 function EvaluationConfig(fname::String)
@@ -58,7 +60,7 @@ function test_performance(
     model, logs, M = load_results(exper)
 
     # Get test data:
-    Xtest, ytest = get_test_data(exper.data; n=n)
+    Xtest, ytest = get_data(exper.data; n=n, test_set=true)
     yhat = predict_label(M, CounterfactualData(Xtest, ytest), Xtest)
 
     # Evaluate the model:
@@ -79,7 +81,7 @@ function adv_performance(exper::Experiment; measure=[accuracy, multiclass_f1scor
     model, logs, M = load_results(exper)
 
     # Get test data:
-    Xtest, ytest = get_test_data(exper.data)
+    Xtest, ytest = get_data(exper.data; test_set=true)
 
     # Generate adversarial examples:
 

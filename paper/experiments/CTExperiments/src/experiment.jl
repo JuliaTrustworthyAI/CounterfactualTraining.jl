@@ -78,7 +78,7 @@ function Experiment(
     end
 
     # Model and data:
-    data = get_data(meta_params.data)(; data_params...)
+    data = get_data_set(meta_params.data)(; data_params...)
     model_type = get_model_type(meta_params.model_type)(; model_params...)
 
     # Training parameters:

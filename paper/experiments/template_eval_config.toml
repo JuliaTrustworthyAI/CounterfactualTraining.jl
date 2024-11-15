@@ -1,4 +1,5 @@
 grid_file = "paper/experiments/template_grid_config.toml"
+test_time = false
 save_dir = "paper/experiments/template_eval_dir"
 
 [counterfactual_params]

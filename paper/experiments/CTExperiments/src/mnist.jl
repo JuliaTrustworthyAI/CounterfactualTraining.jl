@@ -92,16 +92,13 @@ function get_input_encoder(exp::AbstractExperiment, data::MNIST, generator_type:
     return vae
 end
 
-"""
-    get_test_data(
-        data::MNIST; n::Union{Nothing,Int}=data.n_validation
-    )
-
-Returns a test dataloader for the MNIST dataset.
-"""
-function get_test_data(data::MNIST; n::Union{Nothing,Int}=data.n_validation)
-    Xtest, ytest = load_mnist_test()
-    n_total = size(Xtest, 2)
+function get_data(data::MNIST; n::Union{Nothing,Int}=data.n_train, test_set::Bool=false)
+    if test_set
+        X, y = load_mnist_test()
+    else
+        X, y = load_mnist()
+    end
+    n_total = size(X, 2)
     n = isnothing(n) ? n_total : n
     if n_total > n
         idx = sample(1:n_total, n; replace=false)
@@ -111,7 +108,7 @@ function get_test_data(data::MNIST; n::Union{Nothing,Int}=data.n_validation)
     else
         idx = 1:n_total
     end
-    Xtest = Xtest[:, idx]
-    ytest = ytest[idx]
-    return Xtest, ytest
+    X = X[:, idx]
+    y = y[idx]
+    return X, y
 end

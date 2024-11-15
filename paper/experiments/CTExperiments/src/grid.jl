@@ -32,7 +32,7 @@ struct ExperimentGrid <: AbstractConfiguration
     )
 
         # Data parameters
-        data_params = append_params(data_params, fieldnames(get_data(data)))
+        data_params = append_params(data_params, fieldnames(get_data_set(data)))
 
         # Model parameters
         model_params = append_params(model_params, fieldnames(get_model_type(model_type)))
