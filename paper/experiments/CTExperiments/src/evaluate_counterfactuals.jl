@@ -57,7 +57,7 @@ end
 get_convergence(cfg::CounterfactualParams) = get_convergence(cfg.conv, cfg.maxiter)
 
 function evaluate_counterfactuals(
-    cfg::AbstractEvaluationConfig; measure::Vector{<:PenaltyOrFun}=[validity, plausibility]
+    cfg::AbstractEvaluationConfig; measure::Vector{<:PenaltyOrFun}=CE_MEASURES
 )
     grid = ExperimentGrid(cfg.grid_file)
     exper_list = load_list(grid)
@@ -71,12 +71,14 @@ function evaluate_counterfactuals(
     )
 
     # Get models:
-    models = Dict(
-        [
-            exper.meta_params.experiment_name => load_results(exper)[3] for
-            exper in exper_list
-        ]...,
-    )
+    models = Logging.with_logger(Logging.NullLogger()) do 
+        Dict(
+            [
+                exper.meta_params.experiment_name => load_results(exper)[3] for
+                exper in exper_list
+            ]...,
+        )
+    end
 
     # Counterfactual generators:
     gen_params = cfg.counterfactual_params.generator_params

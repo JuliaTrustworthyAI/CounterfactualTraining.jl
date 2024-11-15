@@ -1,6 +1,6 @@
 using BSON
 using CTExperiments
-using CTExperiments.CounterfactualExplanations
+using CounterfactualExplanations
 using DotEnv
 using Logging
 using MPI

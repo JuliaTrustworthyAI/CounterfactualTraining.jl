@@ -135,9 +135,9 @@ Mutable struct holding keyword arguments relevant to counterfactual training.
 Base.@kwdef struct TrainingParams <: AbstractConfiguration
     objective::AbstractString = "full"
     lambda_class_loss::AbstractFloat = 1.0
-    lambda_energy_diff::AbstractFloat = CT.default_energy_lambda[1]
-    lambda_energy_reg::AbstractFloat = CT.default_energy_lambda[2]
-    lambda_adversarial::AbstractFloat = CT.default_adversarial_lambda
+    lambda_energy_diff::AbstractFloat = CounterfactualTraining.default_energy_lambda[1]
+    lambda_energy_reg::AbstractFloat = CounterfactualTraining.default_energy_lambda[2]
+    lambda_adversarial::AbstractFloat = CounterfactualTraining.default_adversarial_lambda
     class_loss::AbstractString = "logitcrossentropy"
     burnin::AbstractFloat = 0.0f0
     nepochs::Int = 100
@@ -157,9 +157,9 @@ end
 Catalogue of available objective functions.
 """
 const objectives = Dict(
-    "full" => CT.FullObjective,
-    "energy" => CT.EnergyDifferentialObjective,
-    "adversarial" => CT.AdversarialObjective,
+    "full" => CounterfactualTraining.FullObjective,
+    "energy" => CounterfactualTraining.EnergyDifferentialObjective,
+    "adversarial" => CounterfactualTraining.AdversarialObjective,
 )
 
 """
@@ -173,7 +173,7 @@ function get_objective(s::String)
     return objectives[s]
 end
 
-function get_lambdas(obj::CT.FullObjective, params::TrainingParams)
+function get_lambdas(obj::CounterfactualTraining.FullObjective, params::TrainingParams)
     lambda = [
         params.lambda_class_loss,
         params.lambda_energy_diff,
@@ -183,12 +183,12 @@ function get_lambdas(obj::CT.FullObjective, params::TrainingParams)
     return lambda
 end
 
-function get_lambdas(obj::CT.EnergyDifferentialObjective, params::TrainingParams)
+function get_lambdas(obj::CounterfactualTraining.EnergyDifferentialObjective, params::TrainingParams)
     lambda = [params.lambda_class_loss, params.lambda_energy_diff, params.lambda_energy_reg]
     return lambda
 end
 
-function get_lambdas(obj::CT.AdversarialObjective, params::TrainingParams)
+function get_lambdas(obj::CounterfactualTraining.AdversarialObjective, params::TrainingParams)
     lambda = [params.lambda_class_loss, params.lambda_adversarial]
     return lambda
 end

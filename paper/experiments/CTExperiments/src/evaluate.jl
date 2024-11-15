@@ -1,5 +1,7 @@
 using CounterfactualExplanations
 using CounterfactualExplanations.Evaluation
+using CSV
+using DataFrames
 using Logging
 using StatisticalMeasures
 
@@ -86,4 +88,11 @@ function adv_performance(exper::Experiment; measure=[accuracy, multiclass_f1scor
     results = [measure(ytest, yhat) for measure in measure]
 
     return results
+end
+
+function save_results(cfg::EvaluationConfig, data::DataFrame, fname::String)
+    csv_file = joinpath(cfg.save_dir, fname * ".csv")
+    CSV.write(csv_file, data)
+    jld2_file = joinpath(cfg.save_dir, fname * ".jld2")
+    jldsave(jld2_file; data)
 end

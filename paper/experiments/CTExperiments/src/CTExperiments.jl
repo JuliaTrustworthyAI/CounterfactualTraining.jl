@@ -1,5 +1,10 @@
 module CTExperiments
 
+using CounterfactualTraining
+
+using CounterfactualExplanations
+using CounterfactualExplanations.Evaluation
+using CounterfactualExplanations.Objectives
 using Logging
 
 abstract type AbstractConfiguration end
@@ -23,6 +28,16 @@ export get_logs
 export EvaluationConfig
 export test_performance, evaluate_counterfactuals
 export to_toml
+
+"The default benchmarking measures."
+const CE_MEASURES = [
+    validity, 
+    plausibility_cosine,
+    plausibility_distance_from_target,
+    plausibility_energy_differential,
+    distance,
+    redundancy
+]
 
 function generate_template(
     fname::String="paper/experiments/template_config.toml";

@@ -1,5 +1,5 @@
 using CTExperiments
-using CTExperiments.CounterfactualExplanations
+using CounterfactualExplanations
 using DotEnv
 using Random
 using Serialization

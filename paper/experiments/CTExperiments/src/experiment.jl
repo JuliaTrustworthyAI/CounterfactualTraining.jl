@@ -164,7 +164,7 @@ function run_training(exp::Experiment; checkpoint_dir::Union{Nothing,String}=not
     obj = obj(class_loss, get_lambdas(obj(), exp.training_params))      # instantiate objective
 
     # Train:
-    model, logs = CT.counterfactual_training(
+    model, logs = CounterfactualTraining.counterfactual_training(
         obj,
         model,
         generator,
