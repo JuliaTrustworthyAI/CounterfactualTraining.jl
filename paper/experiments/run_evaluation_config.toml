@@ -1,10 +1,10 @@
-grid_file = "paper/experiments/output/grid_run_2024-11-11/grid_config.toml"
+grid_file = "paper/experiments/output/grid_run_2024-11-13_ablation/grid_config.toml"
 test_time = false
-save_dir = "paper/experiments/output/grid_run_2024-11-11/"
+save_dir = "paper/experiments/output/grid_run_2024-11-13_ablation/"
 
 [counterfactual_params]
 n_runs = 10
-vertical_splits = 100
+vertical_splits = 50
 parallelizer = "threads"
 threaded = true
 maxiter = 100
