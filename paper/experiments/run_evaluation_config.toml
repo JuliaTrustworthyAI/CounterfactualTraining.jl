@@ -1,16 +1,16 @@
-grid_file = "paper/experiments/output/grid_run_2024-11-13_ablation/grid_config.toml"
+grid_file = "paper/experiments/output/grid_run_2024-11-11/grid_config.toml"
 test_time = false
-save_dir = "paper/experiments/output/grid_run_2024-11-13_ablation/"
+save_dir = "paper/experiments/output/grid_run_2024-11-11/store_ce"
 
 [counterfactual_params]
 n_runs = 10
-vertical_splits = 50
+vertical_splits = 100
 parallelizer = "threads"
 threaded = true
 maxiter = 100
-store_ce = false
+store_ce = true
 conv = "max_iter"
-n_individuals = 100
+n_individuals = 500
 
     [counterfactual_params.generator_params]
     opt = "sgd"
