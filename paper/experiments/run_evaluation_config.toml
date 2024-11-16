@@ -3,7 +3,7 @@ test_time = false
 save_dir = "paper/experiments/output/grid_run_2024-11-11/store_ce"
 
 [counterfactual_params]
-n_runs = 10
+n_runs = 5
 vertical_splits = 0
 parallelizer = "threads"
 threaded = true
