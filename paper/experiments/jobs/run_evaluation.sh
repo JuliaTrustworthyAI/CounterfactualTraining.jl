@@ -3,8 +3,8 @@
 #SBATCH --job-name="Run Evaluation"
 #SBATCH --partition=compute
 #SBATCH --time=00:30:00
-#SBATCH --ntasks=24
-#SBATCH --cpus-per-task=6
+#SBATCH --ntasks=48
+#SBATCH --cpus-per-task=4
 #SBATCH --mem-per-cpu=4G
 #SBATCH --account=research-eemcs-insy
 #SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT
