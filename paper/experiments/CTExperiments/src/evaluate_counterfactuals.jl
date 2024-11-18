@@ -296,7 +296,7 @@ function collect_bmk_with_ce(cfg::AbstractEvaluationConfig)
     bmks = Evaluation.Benchmark[]
     for f in bmk_files
         bmk = Serialization.deserialize(f)
-        replace!(bmk.evaluation, :ce => x -> CounterfactualExplanations.counterfactual.(x))
+        transform!(bmk.evaluation, :ce => x -> CounterfactualExplanations.counterfactual.(x))
         push!(bmks, bmk)
     end
     return vcat(bmks...)
