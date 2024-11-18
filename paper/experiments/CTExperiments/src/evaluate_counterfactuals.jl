@@ -295,9 +295,14 @@ function collect_bmk_with_ce(cfg::AbstractEvaluationConfig)
     bmk_files = Evaluation.get_benchmark_files(interim_ce_path(cfg))
     bmks = Evaluation.Benchmark[]
     for f in bmk_files
-        bmk = Serialization.deserialize(f)
+        bmk = try
+            Serialization.deserialize(f)
+        catch
+            @warn "Failed to deserialize file $f"
+            continue
+        end
         transform!(bmk.evaluation, :ce => x -> CounterfactualExplanations.counterfactual.(x))
         push!(bmks, bmk)
     end
-    return vcat(bmks...)
+    return reduce(vcat, bmks)
 end
