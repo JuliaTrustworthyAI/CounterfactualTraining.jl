@@ -28,8 +28,12 @@ end
 
 # Evaluate counterfactuals:
 bmk = evaluate_counterfactuals(eval_config, comm)
-bmk = innerjoin(df_meta, bmk, on=:id)
 
-# Save results:
-save_results(eval_config, bmk, "benchmark")
+if eval_config.counterfactual_params.concatenate_output
+    bmk = innerjoin(df_meta, bmk, on=:id)
+    # Save results:
+    save_results(eval_config, bmk, "benchmark")
+else
+    @info "Results for individual runs are stored in $(eval_config.save_dir)."
+end
 

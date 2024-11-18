@@ -3,14 +3,16 @@ test_time = false
 save_dir = "paper/experiments/output/grid_run_2024-11-11/store_ce"
 
 [counterfactual_params]
-n_runs = 5
-vertical_splits = 0
-parallelizer = "threads"
 threaded = true
 maxiter = 100
 store_ce = true
-conv = "max_iter"
+verbose = true
 n_individuals = 100
+n_runs = 5
+vertical_splits = 0
+parallelizer = "threads"
+conv = "max_iter"
+concatenate_output = false
 
     [counterfactual_params.generator_params]
     opt = "sgd"

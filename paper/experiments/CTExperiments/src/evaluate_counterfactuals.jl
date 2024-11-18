@@ -13,6 +13,8 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
     store_ce::Bool = false
     parallelizer::AbstractString = "threads"
     threaded::Bool = true
+    concatenate_output::Bool = true
+    verbose::Bool = true
     function CounterfactualParams(
         generator_params,
         n_individuals,
@@ -23,6 +25,8 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
         store_ce,
         parallelizer,
         threaded,
+        concatenate_output,
+        verbose,
     )
         if generator_params isa NamedTuple
             if generator_params.type isa String
@@ -46,6 +50,8 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
             store_ce,
             parallelizer,
             threaded,
+            concatenate_output,
+            verbose,
         )
     end
 end
@@ -111,6 +117,8 @@ function evaluate_counterfactuals(
         store_ce=cfg.counterfactual_params.store_ce,
         storage_path=interim_storage_path,
         vertical_splits=vertical_splits,
+        concatenate_output=cfg.counterfactual_params.concatenate_output,
+        verbose=cfg.counterfactual_params.verbose,
     )()
 
     rename!(bmk, :model => :id)
