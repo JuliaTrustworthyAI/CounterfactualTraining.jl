@@ -220,14 +220,19 @@ function evaluate_counterfactuals(
         cfg, data, local_models, generators; measure=measure
     )
 
-    # Gather results from all processes
-    all_results = MPI.gather(local_results, comm; root=0)
 
-    # Combine results on root process
-    if rank == 0
-        combined_results = vcat(all_results...)
-        MPI.Finalize()
-        return combined_results
+    if cfg.counterfactual_params.concatenate_output
+        # Gather results from all processes
+        all_results = MPI.gather(local_results, comm; root=0)
+
+        # Combine results on root process
+        if rank == 0
+            combined_results = vcat(all_results...)
+            MPI.Finalize()
+            return combined_results
+        end
+    else
+        @info "Not concatenating results as configured."
     end
 
     MPI.Finalize()
