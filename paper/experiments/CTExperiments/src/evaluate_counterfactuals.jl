@@ -1,4 +1,6 @@
+using CounterfactualExplanations
 using CounterfactualExplanations.Evaluation
+using Serialization
 
 """
     CounterfactualParams
@@ -285,10 +287,17 @@ function load_data_models_generators(cfg::AbstractEvaluationConfig)
 end
 
 """
-    collect_benchmarks(cfg::AbstractEvaluationConfig)
+    collect_bmk_with_ce(cfg::AbstractEvaluationConfig)
 
-Uses the `concatenate_benchmarks` function to collect all benchmarks from the specified storage path.
+Uses the `Evaluation.get_benchmark_files` function to collect all benchmarks from the specified storage path.
 """
-function collect_benchmarks(cfg::AbstractEvaluationConfig)
-    return Evaluation.concatenate_benchmarks(interim_ce_path(cfg))
+function collect_bmk_with_ce(cfg::AbstractEvaluationConfig)
+    bmk_files = Evaluation.get_benchmark_files(interim_ce_path(cfg))
+    bmks = Evaluation.Benchmark[]
+    for f in bmk_files
+        bmk = Serialization.deserialize(f)
+        replace!(bmk.evaluation, :ce => x -> CounterfactualExplanations.counterfactual.(x))
+        push!(bmks, bmk)
+    end
+    return vcat(bmks...)
 end
