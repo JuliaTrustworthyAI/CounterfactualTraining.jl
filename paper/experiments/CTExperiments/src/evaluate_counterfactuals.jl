@@ -1,3 +1,5 @@
+using CounterfactualExplanations.Evaluation
+
 """
     CounterfactualParams
 
@@ -95,7 +97,7 @@ function evaluate_counterfactuals(
     # Get parallelizer:
     pllr = get_parallelizer(cfg.counterfactual_params)
     conv = get_convergence(cfg.counterfactual_params)
-    interim_storage_path = mkpath(joinpath(cfg.save_dir, "interim_counterfactuals"))
+    interim_storage_path = interim_ce_path(cfg)
     vertical_splits = if cfg.counterfactual_params.vertical_splits == 0
         nothing
     else
@@ -127,6 +129,15 @@ function evaluate_counterfactuals(
     end
 
     return bmk
+end
+
+"""
+    interim_ce_path(cfg::AbstractEvaluationConfig)
+
+If path to store interim counterfactual data is not set, it creates a new directory at `save_dir`/interim_counterfactuals. Returns the path to this directory.
+"""
+function interim_ce_path(cfg::AbstractEvaluationConfig)
+    return mkpath(joinpath(cfg.save_dir, "interim_counterfactuals"))
 end
 
 """
@@ -271,4 +282,13 @@ function load_data_models_generators(cfg::AbstractEvaluationConfig)
     generators = Dict(_gen_name => _generator)
 
     return data, models, generators
+end
+
+"""
+    collect_benchmarks(cfg::AbstractEvaluationConfig)
+
+Uses the `concatenate_benchmarks` function to collect all benchmarks from the specified storage path.
+"""
+function collect_benchmarks(cfg::AbstractEvaluationConfig)
+    return Evaluation.concatenate_benchmarks(interim_ce_path(cfg))
 end
