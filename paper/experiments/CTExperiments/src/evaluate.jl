@@ -98,3 +98,7 @@ function save_results(cfg::EvaluationConfig, data::DataFrame, fname::String)
     jld2_file = joinpath(cfg.save_dir, fname * ".jld2")
     jldsave(jld2_file; data)
 end
+
+function load_results(cfg::EvaluationConfig, fname::String)
+    return CSV.read(joinpath(cfg.save_dir, fname * ".csv"), DataFrame)
+end
