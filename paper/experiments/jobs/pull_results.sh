@@ -8,7 +8,7 @@ confirm=$(bash -c 'read -p "About to copy results from long term storage directo
 # Check the response
 if [[ $confirm =~ ^[Yy](es)?$ ]]; then
     echo "Proceeding with copy..."
-    scp -pr paltmeyer@login.delftblue.tudelft.nl:$LONG_TERM_STORAGE_DIR/output $LOCAL_STORAGE_DIR
+    rsync -av $LOCAL_STORAGE_DIR/ paltmeyer@login.delftblue.tudelft.nl:$LONG_TERM_STORAGE_DIR/output/
 else
     echo "Operation cancelled"
 fi
