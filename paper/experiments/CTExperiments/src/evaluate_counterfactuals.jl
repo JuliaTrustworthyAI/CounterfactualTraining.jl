@@ -119,9 +119,12 @@ function evaluate_counterfactuals(
         vertical_splits=vertical_splits,
         concatenate_output=cfg.counterfactual_params.concatenate_output,
         verbose=cfg.counterfactual_params.verbose,
-    )()
+    )
 
-    rename!(bmk, :model => :id)
+    if cfg.counterfactual_params.concatenate_output
+        bmk = bmk()
+        rename!(bmk, :model => :id)
+    end
 
     return bmk
 end
