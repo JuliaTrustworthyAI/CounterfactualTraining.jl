@@ -2077,9 +2077,11 @@ version = "1.0.0"
 
 [[deps.TaijaParallel]]
 deps = ["CounterfactualExplanations", "Logging", "MLUtils", "PackageExtensionCompat", "ProgressMeter", "Reexport", "Serialization", "TaijaBase"]
-git-tree-sha1 = "c2a04410131a19637fd7e9751d9cf7636599b6f7"
+git-tree-sha1 = "681dc35e1f08911050b7c2cf3661a7f268109c18"
+repo-rev = "16-serializationdeserialization-causes-issue-with-mpijl"
+repo-url = "https://github.com/JuliaTrustworthyAI/TaijaParallel.jl.git"
 uuid = "bf1c2c22-5e42-4e78-8b6b-92e6c673eeb0"
-version = "1.1.1"
+version = "1.1.2"
 weakdeps = ["MPI"]
 
     [deps.TaijaParallel.extensions]
