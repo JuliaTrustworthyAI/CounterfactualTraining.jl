@@ -1,5 +1,6 @@
 using CounterfactualExplanations
 using CounterfactualExplanations.Evaluation
+using JLD2
 using Serialization
 
 """
@@ -130,11 +131,6 @@ function evaluate_counterfactuals(
         concatenate_output=cfg.counterfactual_params.concatenate_output,
         verbose=cfg.counterfactual_params.verbose,
     )
-
-    if cfg.counterfactual_params.concatenate_output
-        bmk = bmk()
-        rename!(bmk, :model => :id)
-    end
 
     return bmk
 end
@@ -293,22 +289,33 @@ function load_data_models_generators(cfg::AbstractEvaluationConfig)
 end
 
 """
-    collect_bmk_with_ce(cfg::AbstractEvaluationConfig)
+    collect_benchmarks(cfg::AbstractEvaluationConfig)
 
-Uses the `Evaluation.get_benchmark_files` function to collect all benchmarks from the specified storage path.
+Uses the `Evaluation.concatenate_benchmarks` function to collect all benchmarks from the specified storage path.
 """
-function collect_bmk_with_ce(cfg::AbstractEvaluationConfig)
-    bmk_files = Evaluation.get_benchmark_files(interim_ce_path(cfg))
-    bmks = Evaluation.Benchmark[]
-    for f in bmk_files
-        bmk = try
-            Serialization.deserialize(f)
-        catch
-            @warn "Failed to deserialize file $f"
-            continue
-        end
-        transform!(bmk.evaluation, :ce => ByRow(x -> CounterfactualExplanations.counterfactual(x)) => :ce)
-        push!(bmks, bmk)
+function collect_benchmarks(cfg::AbstractEvaluationConfig; save_bmk::Bool=true, remove_interim::Bool=true)
+    
+    bmk = Evaluation.concatenate_benchmarks(interim_ce_path(cfg))
+
+    # Save results to file if requested
+    if save_bmk
+        @info "Saving benchmark results ..."
+        save_results(cfg, bmk.evaluation, "bmk_evaluation")
+        save_results(cfg, bmk.counterfactuals, "bmk_counterfactuals")
+        save_results(cfg, bmk)
     end
-    return reduce(vcat, bmks)
+
+    # Remove interim files if requested
+    if remove_interim
+        @info "Removing interim files ..."
+        rm(interim_ce_path(cfg); recursive=true) 
+    end
+
+    return bmk
+
+end
+
+function save_results(cfg::AbstractEvaluationConfig, bmk::Benchmark)
+    jld2_file = joinpath(cfg.save_dir, "bmk.jld2")
+    return jldsave(jld2_file; bmk)
 end
