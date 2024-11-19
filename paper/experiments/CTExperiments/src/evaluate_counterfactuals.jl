@@ -44,6 +44,12 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
             end
         end
 
+        if store_ce == true
+            @warn "Setting `_ce_transform` to `counterfactual` to avoid storing entire `CounterfactualExplanation` object."
+            transformer = ExplicitCETransformer(CounterfactualExplanations.counterfactual)
+            global_ce_transform(transformer)
+        end
+
         return new(
             generator_params,
             n_individuals,

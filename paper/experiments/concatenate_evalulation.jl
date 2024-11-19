@@ -2,7 +2,6 @@ using CTExperiments
 using CounterfactualExplanations
 using CTExperiments.DataFrames
 using DotEnv
-using Logging
 
 DotEnv.load!()
 
