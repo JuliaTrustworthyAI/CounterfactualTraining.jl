@@ -1,5 +1,6 @@
 using CTExperiments
 using CounterfactualExplanations
+using CounterfactualExplanations.Evaluation
 using CTExperiments.DataFrames
 using DotEnv
 using Logging
@@ -20,7 +21,8 @@ comm = MPI.COMM_WORLD
 rank = MPI.Comm_rank(comm)
 nprocs = MPI.Comm_size(comm)
 if rank != 0
-    global_logger(NullLogger())
+    global_logger(NullLogger())             # avoid logging from other processes
+    global_serializer(NullSerializer())     # avoid serialization issues due to data race
 else
     # Generate list of experiments and run them:
     @info "Running evaluation of $(nrow(df_meta)) experiments ..."
