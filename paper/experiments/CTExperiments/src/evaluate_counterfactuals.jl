@@ -301,7 +301,7 @@ function collect_bmk_with_ce(cfg::AbstractEvaluationConfig)
             @warn "Failed to deserialize file $f"
             continue
         end
-        transform!(bmk.evaluation, :ce => x -> CounterfactualExplanations.counterfactual.(x) => :ce)
+        transform!(bmk.evaluation, :ce => ByRow(x -> CounterfactualExplanations.counterfactual(x)) => :ce)
         push!(bmks, bmk)
     end
     return reduce(vcat, bmks)
