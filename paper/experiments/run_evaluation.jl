@@ -22,7 +22,8 @@ rank = MPI.Comm_rank(comm)
 nprocs = MPI.Comm_size(comm)
 if rank != 0
     global_logger(NullLogger())             # avoid logging from other processes
-    global_serializer(NullSerializer())     # avoid serialization issues due to data race
+    identifier = ExplicitOutputIdentifier("rank_$rank")
+    global_output_identifier(identifier)    # set output identifier to avoid issues with serialization
 else
     # Generate list of experiments and run them:
     @info "Running evaluation of $(nrow(df_meta)) experiments ..."

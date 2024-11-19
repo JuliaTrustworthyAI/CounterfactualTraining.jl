@@ -233,7 +233,7 @@ function evaluate_counterfactuals(
         cfg, data, local_models, generators; measure=measure
     )
 
-
+    # Gather results from all processes (if needed)
     if cfg.counterfactual_params.concatenate_output
         # Gather results from all processes
         all_results = MPI.gather(local_results, comm; root=0)
