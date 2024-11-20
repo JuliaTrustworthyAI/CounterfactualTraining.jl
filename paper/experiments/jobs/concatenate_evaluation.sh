@@ -4,7 +4,7 @@
 #SBATCH --partition=compute
 #SBATCH --time=00:15:00
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=48
 #SBATCH --mem-per-cpu=16G
 #SBATCH --account=research-eemcs-insy
 #SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT

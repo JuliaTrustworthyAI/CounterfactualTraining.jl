@@ -285,11 +285,32 @@ end
 """
     collect_benchmarks(cfg::AbstractEvaluationConfig)
 
-Uses the `Evaluation.concatenate_benchmarks` function to collect all benchmarks from the specified storage path.
+Uses the `Evaluation.get_benchmark_files` function to collect all benchmarks from the specified storage path.
 """
-function collect_benchmarks(cfg::AbstractEvaluationConfig; save_bmk::Bool=true, remove_interim::Bool=true)
+function collect_benchmarks(cfg::AbstractEvaluationConfig; kwrgs...)
     
-    bmk = Evaluation.concatenate_benchmarks(interim_ce_path(cfg))
+    bmk_files = Evaluation.get_benchmark_files(interim_ce_path(cfg))
+
+    bmks = Benchmark[]
+    Threads.@threads for file in bmk_files
+        if Threads.threadid() == 1
+            @info "Collecting benchmarks from $file"
+        end
+        bmk = Serialization.deserialize(file)
+        push!(bmks, bmk)
+    end
+    bmk = reduce(vcat, bmks)
+
+    return collect_benchmarks(bmk; kwrgs...)
+
+end
+
+"""
+    collect_benchmarks(bmk::Benchmark; save_bmk::Bool=true, remove_interim::Bool=true)
+
+Saves the `Benchmark` object to disk if requested.
+"""
+function collect_benchmarks(bmk::Benchmark; save_bmk::Bool=true, remove_interim::Bool=true)
 
     # Save results to file if requested
     if save_bmk
@@ -302,11 +323,10 @@ function collect_benchmarks(cfg::AbstractEvaluationConfig; save_bmk::Bool=true, 
     # Remove interim files if requested
     if remove_interim
         @info "Removing interim files ..."
-        rm(interim_ce_path(cfg); recursive=true) 
+        rm(interim_ce_path(cfg); recursive=true)
     end
 
     return bmk
-
 end
 
 function save_results(cfg::AbstractEvaluationConfig, bmk::Benchmark)
