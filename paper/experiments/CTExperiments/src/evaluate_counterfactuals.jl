@@ -324,6 +324,11 @@ end
 Uses the `Evaluation.get_benchmark_files` function to collect all benchmarks from the specified storage path.
 """
 function collect_benchmarks(cfg::AbstractEvaluationConfig; kwrgs...)
+
+    if isfile(default_bmk_name(cfg))
+        @info "Benchmark file $(default_bmk_name(cfg)) already exists. Skipping."
+        return collect_benchmarks(cfg, bmk; kwrgs...)
+    end
     
     bmk_files = Evaluation.get_benchmark_files(interim_ce_path(cfg))
     bmks = Vector{Benchmark}(undef, length(bmk_files))
@@ -355,7 +360,7 @@ function collect_benchmarks(
 )
 
     # Save results to file if requested
-    if save_bmk
+    if save_bmk && !isfile(default_bmk_name(cfg))
         @info "Saving benchmark results ..."
         save_results(cfg, bmk.evaluation, "bmk_evaluation")
         save_results(cfg, bmk)
@@ -370,7 +375,14 @@ function collect_benchmarks(
     return bmk
 end
 
+"""
+    save_results(cfg::AbstractEvaluationConfig, bmk::Benchmark)
+
+Saves the `Benchmark` object to disk using `Serialization.serialize`. The location is specified by `cfg.save_dir`.
+"""
 function save_results(cfg::AbstractEvaluationConfig, bmk::Benchmark)
-    fname = joinpath(cfg.save_dir, "bmk.jls")
+    fname = default_bmk_name(cfg)
     return Serialization.serialize(fname, bmk)
 end
+
+default_bmk_name(cfg::AbstractEvaluationConfig) = joinpath(cfg.save_dir, "bmk.jls")

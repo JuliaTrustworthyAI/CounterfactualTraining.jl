@@ -95,7 +95,7 @@ end
 """
     get_data(data::MNIST; n::Union{Nothing,Int}=data.n_train, test_set::Bool=false)
 
-    
+Load MNIST data and return a subset of the data. If `n` is specified, it returns that number of samples, otherwise it returns all samples. If `test_set` is true, it loads the test set instead of the training set.
 """
 function get_data(data::MNIST; n::Union{Nothing,Int}=data.n_train, test_set::Bool=false)
     if test_set

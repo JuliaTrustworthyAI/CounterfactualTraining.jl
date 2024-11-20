@@ -43,6 +43,11 @@ function get_generator_type(s::String)
     return generator_types[s]
 end
 
+"""
+    get_opt(params::AbstractConfiguration)
+    
+Retrieves the optimizer from the configuration.
+"""
 function get_opt(params::AbstractConfiguration)
     # Adam:
     if params.opt == "adam"
@@ -131,6 +136,25 @@ end
     TrainingParams
 
 Mutable struct holding keyword arguments relevant to counterfactual training.
+
+    ## Fields
+
+    - `objective`: The objective function to use for training. Options correspond to the keys of the [`CTExperiments.objectives`](@ref) dictionary.
+    - `lambda_class_loss`: The weight of the class loss in the objective function.
+    - `lambda_energy_diff`: The weight of the energy difference term in the objective function.
+    - `lambda_energy_reg`: The weight of the energy regularization term in the objective function.
+    - `lambda_adversarial`: The weight of the adversarial loss in the objective function.
+    - `class_loss`: The class loss to use for training. Options correspond to the keys of the [`CTExperiments.class_losses`](@ref) dictionary.
+    - `burnin`: The fraction of the training epochs to use for warm-up. During warm-up, only standard classification loss is used for training.
+    - `nepochs`: The number of epochs to train for.
+    - `generator_params`: The parameters for the generator to use during training.
+    - `nce`: The namber of counterfactuals to generate per epoch and per batch of training data.
+    - `conv`: The convergence type to use for the counterfactual search.
+    - `lr`: The learning rate to use for training.
+    - `opt`: The optimizer to use for training.
+    - `parallelizer`: The parallelization strategy to use for training.
+    - `threaded`: Whether to also use threading for training if working with MPI.
+    - `verbose`: The level of verbosity to use for training.
 """
 Base.@kwdef struct TrainingParams <: AbstractConfiguration
     objective::AbstractString = "full"
