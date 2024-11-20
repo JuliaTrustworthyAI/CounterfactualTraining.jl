@@ -290,11 +290,10 @@ Uses the `Evaluation.get_benchmark_files` function to collect all benchmarks fro
 function collect_benchmarks(cfg::AbstractEvaluationConfig; kwrgs...)
     
     bmk_files = Evaluation.get_benchmark_files(interim_ce_path(cfg))
+    bmks = Vector{Benchmark}(undef, length(bmk_files))
 
-    bmks = Vector{Benchmark}(undef, Threads.nthreads())
-    Threads.@threads for file in bmk_files
-        bmk = Serialization.deserialize(file)
-        bmks[Threads.threadid()] = bmk
+    Threads.@threads for i in eachindex(bmk_files)
+        bmks[i] = Serialization.deserialize(bmk_files[i])
     end
     bmk = reduce(vcat, bmks)
 
