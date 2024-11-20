@@ -2,6 +2,7 @@ using CounterfactualExplanations
 using CounterfactualExplanations.Evaluation
 using JLD2
 using Serialization
+using TaijaParallel
 
 """
     CounterfactualParams
@@ -186,7 +187,7 @@ function evaluate_counterfactuals(
 
     # Initialize MPI:
     rank = MPI.Comm_rank(comm)
-    size = MPI.Comm_size(comm)
+    _size = MPI.Comm_size(comm)
 
     # Root process loads all data
     if rank == 0
@@ -209,15 +210,8 @@ function evaluate_counterfactuals(
     # Distribute models across processes
     if rank == 0
         # Calculate chunks for each process
-        chunk_size = ceil(Int, length(model_keys) / size)
-        chunks_keys = [
-            model_keys[i:min(i + chunk_size - 1, end)] for
-            i in 1:chunk_size:length(model_keys)
-        ]
-        chunks_values = [
-            model_values[i:min(i + chunk_size - 1, end)] for
-            i in 1:chunk_size:length(model_values)
-        ]
+        chunks_keys = TaijaParallel.split_obs(model_keys, _size)
+        chunks_values = TaijaParallel.split_obs(model_values, _size)
     else
         chunks_keys = nothing
         chunks_values = nothing
