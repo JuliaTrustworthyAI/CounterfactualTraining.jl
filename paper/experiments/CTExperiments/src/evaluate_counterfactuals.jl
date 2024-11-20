@@ -8,6 +8,20 @@ using TaijaParallel
     CounterfactualParams
 
 Struct holding keyword arguments relevant to the evaluation of counterfactual explanations for fitted models.
+
+## Fields
+
+- `generator_params`: A `GeneratorParams` struct containing parameters for the counterfactual generation process.
+- `n_individuals`: The number of individuals to generate counterfactual explanations for (per model and generator).
+- `n_runs`: The number of runs to perform for each model and generator.
+- `conv`: The convergence criterion used to stop the optimization process. Can be any of the options specified by [`CTExperiments.conv_catalogue`](@ref).
+- `maxiter`: The maximum number of iterations allowed during the optimization process.
+- `vertical_splits`: The number of vertical splits to use when generating counterfactual explanations. This can be used to reduce peak memory (higher values mean less memory usage).
+- `store_ce`: A boolean indicating whether to store the counterfactual explanations for each individual and run.
+- `parallelizer`: The parallelization strategy to use. Can be either `"threads"` or `"mpi"`.
+- `threaded`: A boolean indicating whether to also use multi-threading when using `"mpi"` for parallelization.
+- `concatenate_output`: A boolean indicating whether to concatenate the output of multiple runs into a single evaluation. Setting this to `false` can help to avoid out-of-memory errors when dealing with large benchmarks.
+- `verbose`: A boolean indicating whether to print verbose output during the evaluation process.
 """
 Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
     generator_params::GeneratorParams = GeneratorParams()
@@ -179,6 +193,23 @@ function evaluate_counterfactuals(
     return bmk  
 end
 
+"""
+    evaluate_counterfactuals(
+        cfg::AbstractEvaluationConfig,
+        comm::MPI.Comm;
+        measure::Vector{<:PenaltyOrFun}=CE_MEASURES,
+    )
+
+Generate and evaluate counterfactuals based on the provided configuration. This method of `evaluate_counterfactuals` is dispatched for parallel evaluation using MPI (`comm::MPI.Comm`). The generation and evaluation of counterfactuals are distributed across the MPI processes.
+
+# Arguments
+- `cfg::AbstractEvaluationConfig`: Configuration for evaluation.
+- `comm::MPI.Comm`: MPI communicator.
+- `measure::Vector{<:PenaltyOrFun}=CE_MEASURES`: Measures to evaluate the counterfactuals with.
+
+# Returns
+- A DataFrame containing the results of the evaluation. 
+"""
 function evaluate_counterfactuals(
     cfg::AbstractEvaluationConfig,
     comm::MPI.Comm;
@@ -248,6 +279,11 @@ function evaluate_counterfactuals(
     return nothing
 end
 
+"""
+    load_data_models_generators(cfg::AbstractEvaluationConfig)
+
+Load data, models, and generators from the configuration.
+"""
 function load_data_models_generators(cfg::AbstractEvaluationConfig)
 
     # Load grid and experiment list:

@@ -24,8 +24,18 @@ Base.@kwdef mutable struct MetaParams <: AbstractConfiguration
     save_dir::String = mkpath(joinpath(tempdir(), experiment_name))
 end
 
+"""
+    config_file(params::MetaParams)
+
+Returns the path to the config file.
+"""
 config_file(params::MetaParams) = joinpath(params.save_dir, "config.toml")
 
+"""
+    output_dir(params::MetaParams)
+
+Returns the path to the output directory.
+"""
 output_dir(params::MetaParams) = mkpath(joinpath(params.save_dir, "output"))
 
 """
@@ -95,6 +105,11 @@ function Experiment(
     return exper
 end
 
+"""
+    Experiment(fname::String; new_save_dir::Union{Nothing,String}=nothing)
+
+Loads an experiment from a TOML file. If `new_save_dir` is provided, the save directory of the experiment will be updated and the configuration file will be saved to the new location.
+"""
 function Experiment(fname::String; new_save_dir::Union{Nothing,String}=nothing)
     @assert isfile(fname) "Experiment file not found."
     meta = to_meta(from_toml(fname))

@@ -39,6 +39,16 @@ const CE_MEASURES = [
     redundancy
 ]
 
+"""
+    generate_template(
+        fname::String="paper/experiments/template_config.toml";
+        experiment_name="template",
+        overwrite=false,
+        kwrgs...,
+    )
+
+Generates a template configuration file for experiments. This is useful for quickly setting up a new experiment by copying the generated template into your project directory.
+"""
 function generate_template(
     fname::String="paper/experiments/template_config.toml";
     experiment_name="template",
@@ -64,6 +74,13 @@ function generate_template(
     return fname
 end
 
+"""
+    generate_grid_template(
+        fname::String="paper/experiments/template_grid_config.toml"; overwrite=false
+    )
+
+Generates a template configuration file for experiment grids. This is useful for quickly setting up a new grid of experiments by copying the generated template into your project directory.
+"""
 function generate_grid_template(
     fname::String="paper/experiments/template_grid_config.toml"; overwrite=false
 )
@@ -84,6 +101,15 @@ function generate_grid_template(
     return fname
 end
 
+"""
+    generate_eval_template(
+        fname::String="paper/experiments/template_eval_config.toml";
+        overwrite=false,
+        save_dir="paper/experiments/template_eval_dir",
+    )
+
+Generates a template configuration file for evaluation. This is useful for quickly setting up a new evaluation by copying the generated template into your project directory.
+"""
 function generate_eval_template(
     fname::String="paper/experiments/template_eval_config.toml";
     overwrite=false,
