@@ -327,6 +327,7 @@ function collect_benchmarks(cfg::AbstractEvaluationConfig; kwrgs...)
 
     if isfile(default_bmk_name(cfg))
         @info "Benchmark file $(default_bmk_name(cfg)) already exists. Skipping."
+        bmk = Serialization.deserialize(default_bmk_name(cfg))
         return collect_benchmarks(cfg, bmk; kwrgs...)
     end
     
