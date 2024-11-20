@@ -358,7 +358,6 @@ function collect_benchmarks(
     if save_bmk
         @info "Saving benchmark results ..."
         save_results(cfg, bmk.evaluation, "bmk_evaluation")
-        save_results(cfg, bmk.counterfactuals, "bmk_counterfactuals")
         save_results(cfg, bmk)
     end
 
@@ -372,6 +371,6 @@ function collect_benchmarks(
 end
 
 function save_results(cfg::AbstractEvaluationConfig, bmk::Benchmark)
-    jld2_file = joinpath(cfg.save_dir, "bmk.jld2")
-    return jldsave(jld2_file; bmk)
+    fname = joinpath(cfg.save_dir, "bmk.jls")
+    return Serialization.serialize(fname, bmk)
 end

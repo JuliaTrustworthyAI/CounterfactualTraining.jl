@@ -92,6 +92,11 @@ function get_input_encoder(exp::AbstractExperiment, data::MNIST, generator_type:
     return vae
 end
 
+"""
+    get_data(data::MNIST; n::Union{Nothing,Int}=data.n_train, test_set::Bool=false)
+
+    
+"""
 function get_data(data::MNIST; n::Union{Nothing,Int}=data.n_train, test_set::Bool=false)
     if test_set
         X, y = load_mnist_test()
