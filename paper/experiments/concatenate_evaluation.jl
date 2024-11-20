@@ -8,7 +8,7 @@ DotEnv.load!()
 
 # Get config and set up grid:
 eval_config = EvaluationConfig(
-    joinpath(ENV["EXPERIMENT_DIR"], "evaluation_configs/2024-11-11.toml")
+    joinpath(ENV["EXPERIMENT_DIR"], "evaluation_configs/2024-11-13_ablation.toml")
 )
 
 # Collect benchmarks:
