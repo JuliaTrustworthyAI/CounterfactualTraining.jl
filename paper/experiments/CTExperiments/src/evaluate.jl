@@ -15,7 +15,7 @@ struct EvaluationConfig <: AbstractEvaluationConfig
     counterfactual_params::CounterfactualParams
     test_time::Bool
     function EvaluationConfig(grid_file, save_dir, counterfactual_params, test_time)
-        @assert isfile(grid_file), "Grid file not found: $grid_file"
+        @assert isfile(grid_file) "Grid file not found: $grid_file"
         config = new(grid_file, save_dir, counterfactual_params, test_time)
         to_toml(config, joinpath(save_dir, "eval_config.toml"))
         return config
