@@ -301,16 +301,26 @@ function collect_benchmarks(cfg::AbstractEvaluationConfig; kwrgs...)
     end
     bmk = reduce(vcat, bmks)
 
-    return collect_benchmarks(bmk; kwrgs...)
+    return collect_benchmarks(cfg, bmk; kwrgs...)
 
 end
 
 """
-    collect_benchmarks(bmk::Benchmark; save_bmk::Bool=true, remove_interim::Bool=true)
+    collect_benchmarks(
+        cfg::AbstractEvaluationConfig,
+        bmk::Benchmark;
+        save_bmk::Bool=true,
+        remove_interim::Bool=true,
+    )
 
 Saves the `Benchmark` object to disk if requested.
 """
-function collect_benchmarks(bmk::Benchmark; save_bmk::Bool=true, remove_interim::Bool=true)
+function collect_benchmarks(
+    cfg::AbstractEvaluationConfig,
+    bmk::Benchmark;
+    save_bmk::Bool=true,
+    remove_interim::Bool=true,
+)
 
     # Save results to file if requested
     if save_bmk
