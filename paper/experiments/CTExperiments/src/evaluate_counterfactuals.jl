@@ -291,13 +291,10 @@ function collect_benchmarks(cfg::AbstractEvaluationConfig; kwrgs...)
     
     bmk_files = Evaluation.get_benchmark_files(interim_ce_path(cfg))
 
-    bmks = Benchmark[]
+    bmks = Vector{Benchmark}(undef, Threads.nthreads())
     Threads.@threads for file in bmk_files
-        if Threads.threadid() == 1
-            @info "Collecting benchmarks from $file"
-        end
         bmk = Serialization.deserialize(file)
-        push!(bmks, bmk)
+        bmks[Threads.threadid()] = bmk
     end
     bmk = reduce(vcat, bmks)
 
