@@ -33,7 +33,6 @@ end
 bmk = evaluate_counterfactuals(eval_config, comm)
 
 if eval_config.counterfactual_params.concatenate_output
-    bmk = innerjoin(df_meta, bmk, on=:id)
     # Save results:
     save_results(eval_config, bmk, "benchmark")
 else

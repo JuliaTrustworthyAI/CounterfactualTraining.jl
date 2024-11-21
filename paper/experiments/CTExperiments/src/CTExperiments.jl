@@ -19,6 +19,7 @@ include("utils.jl")
 include("grid.jl")
 include("experiment.jl")
 include("evaluate.jl")
+include("plotting.jl")
 
 export Experiment, run_training
 export ExperimentGrid, setup_experiments
@@ -28,6 +29,7 @@ export get_logs
 export EvaluationConfig
 export test_performance, evaluate_counterfactuals
 export to_toml
+export aggregate_logs, plot_errorbar_logs
 
 "The default benchmarking measures."
 const CE_MEASURES = [
