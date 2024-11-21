@@ -9,7 +9,7 @@ confirm=$(bash -c "read -p \"About to copy results from long term storage direct
 # Check the response
 if [[ $confirm =~ ^[Yy](es)?$ ]]; then
     echo "Proceeding with copy..."
-    rsync -av paltmeyer@login.delftblue.tudelft.nl:$OUTPUT_DIR/output/ $LOCAL_STORAGE_DIR/
+    rsync -av paltmeyer@login.delftblue.tudelft.nl:$CLUSTER_WORK_DIR/$OUTPUT_DIR/ $LOCAL_STORAGE_DIR/
 else
     echo "Operation cancelled"
 fi

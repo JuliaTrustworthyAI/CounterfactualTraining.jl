@@ -1,9 +1,9 @@
-name = "grid_run_2024-11-13_ablation"
+name = "grid_run_2024-11-21_architecture"
 dim_reduction = [true, false]
 generator_type = ["ecco", "generic", "revise"]
 data = "mnist"
 model_type = "mlp"
-save_dir = "paper/experiments/output/grid_run_2024-11-13_ablation"
+save_dir = "paper/experiments/output/grid_run_2024-11-21_architecture"
 
 [data_params]
 n_validation = []
@@ -11,16 +11,16 @@ n_train = []
 batchsize = [500]
 
 [model_params]
-nlayers = []
+nlayers = [1, 2]
 activation = []
-nhidden = [64]
+nhidden = [32, 64, 128]
 
 [generator_params]
 opt = []
 lambda_cost = [0.001]
 lr = []
 maxiter = [25]
-lambda_energy = [0.1, 0.5, 1.0, 5.0, 10.0]
+lambda_energy = [5.0]
 type = []
 
 [training_params]
@@ -29,11 +29,11 @@ nce = [1000]
 lr = []
 threaded = []
 class_loss = []
-objective = ["full", "adversarial", "energy"]
+objective = ["full"]
 lambda_class_loss = []
 lambda_energy_diff = []
 burnin = []
-nepochs = [100]
+nepochs = [50, 100, 150]
 lambda_energy_reg = []
 verbose = []
 lambda_adversarial = []
