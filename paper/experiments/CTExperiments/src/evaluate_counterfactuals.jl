@@ -363,7 +363,7 @@ function collect_benchmarks(
     # Save results to file if requested
     if save_bmk && !isfile(default_bmk_name(cfg))
         @info "Saving benchmark results ..."
-        save_results(cfg, bmk.evaluation, "bmk_evaluation")
+        save_results(cfg, bmk.evaluation, default_ce_evaluation_name(cfg))
         save_results(cfg, bmk)
     end
 
@@ -386,4 +386,10 @@ function save_results(cfg::AbstractEvaluationConfig, bmk::Benchmark)
     return Serialization.serialize(fname, bmk)
 end
 
+function load_ce_evaluation(cfg::AbstractEvaluationConfig)
+    load_results(cfg, default_ce_evaluation_name(cfg))
+end
+
 default_bmk_name(cfg::AbstractEvaluationConfig) = joinpath(cfg.save_dir, "bmk.jls")
+
+default_ce_evaluation_name(cfg::AbstractEvaluationConfig) = "bmk_evaluation"

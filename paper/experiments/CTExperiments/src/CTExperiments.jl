@@ -29,7 +29,7 @@ export get_logs
 export EvaluationConfig
 export test_performance, evaluate_counterfactuals
 export to_toml
-export aggregate_logs, plot_errorbar_logs
+export aggregate_logs, plot_errorbar_logs, aggregate_ce_evaluation
 
 "The default benchmarking measures."
 const CE_MEASURES = [
