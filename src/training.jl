@@ -36,18 +36,22 @@ function counterfactual_training(
     start_epoch = 1
     if !isnothing(checkpoint_dir) && isfile(joinpath(checkpoint_dir, "checkpoint.jld2"))
         @info "Found checkpoint file in $checkpoint_dir. Loading..."
-        model, opt_state, epoch, log = JLD2.load(
-            joinpath(checkpoint_dir, "checkpoint.jld2"),
-            "model",
-            "opt_state",
-            "epoch",
-            "log",
-        )
-        start_epoch = epoch + 1
-        if start_epoch <= nepochs
-            @info "Resuming training from epoch $start_epoch."
-        else
-            @info "Already completed 100% of training. Skipping..."
+        try
+            model, opt_state, epoch, log = JLD2.load(
+                joinpath(checkpoint_dir, "checkpoint.jld2"),
+                "model",
+                "opt_state",
+                "epoch",
+                "log",
+            )
+            start_epoch = epoch + 1
+            if start_epoch <= nepochs
+                @info "Resuming training from epoch $start_epoch."
+            else
+                @info "Already completed 100% of training. Skipping..."
+            end
+        catch
+            @warn "Could not load checkpoint. Starting training from scratch."
         end
     end
 
