@@ -30,7 +30,10 @@ export EvaluationConfig
 export test_performance, evaluate_counterfactuals
 export to_toml
 export aggregate_logs, aggregate_ce_evaluation
+export PlotParams
 export plot_errorbar_logs, boxplot_ce
+export set_work_dir, get_work_dir, results_dir
+export save_dir
 
 "The default benchmarking measures."
 const CE_MEASURES = [

@@ -2,6 +2,25 @@ using AlgebraOfGraphics
 using DataFrames
 using Makie
 
+Base.@kwdef struct PlotParams
+    x::Union{Nothing,String}=nothing
+    byvars::Union{Nothing,Vector{String}}=nothing
+    colorvar::Union{Nothing,String}=nothing
+    rowvar::Union{Nothing,String}=nothing
+    colvar::Union{Nothing,String}=nothing
+end
+
+function (params::PlotParams)()
+    return (; x=params.x, byvars=params.byvars, colorvar=params.colorvar, rowvar=params.rowvar, colvar=params.colvar)
+end
+
+function save_dir(params::PlotParams, root::String; prefix::String)
+    suffix = [isnothing(v) ? nothing : "$(v)" for (k, v) in pairs(params())] |>
+        x -> x[.!isnothing.(x)] |>
+        x -> join(x, "---")
+    return mkpath(joinpath(root, prefix, suffix))
+end
+
 const default_axis = (; width=225, height=225)
 
 const default_facet = (; linkyaxes=:minimal, linkxaxes=:minimal)
@@ -83,6 +102,14 @@ function aggregate_logs(
     return aggregate_data(df, y, byvars; byvars_must_include=["epoch"])
 end
 
+function valid_y_logs(logs::DataFrame)
+    return names(logs)[eltype.(eachcol(logs)) .<: AbstractFloat]
+end
+
+function valid_y_logs(cfg::AbstractEvaluationConfig)
+    return valid_y_logs(get_logs(cfg))
+end
+
 """
     plot_errorbar_logs(
         cfg::EvaluationConfig;
@@ -112,6 +139,7 @@ A Makie plot object displaying error bars for aggregated logs.
 """
 function plot_errorbar_logs(
     cfg::EvaluationConfig;
+    x::Nothing=nothing,
     y::String="acc_val",
     byvars::Union{Nothing,Vector{String}}=nothing,
     colorvar::Union{Nothing,String}=nothing,
@@ -140,7 +168,8 @@ function plot_errorbar_logs(
         plt = plt * mapping(; col=colvar => nonnumeric)
     end
     
-    return draw(plt; facet=facet, axis=axis)
+    plt = draw(plt; facet=facet, axis=axis)
+    return plt
 end
 
 function gather_byvars(
@@ -178,7 +207,7 @@ function aggregate_ce_evaluation(
     byvars::Union{Nothing,Vector{String}}=nothing,
 )
     # Assertions:
-    valid_y = sort(unique(df.variable))
+    valid_y = valid_y_ce(df)
     @assert y in valid_y "Variable `y` must be one of the following: $valid_y."
     @assert byvars isa Nothing || all(col -> col in names(df_meta), byvars) "Columns specified in `byvars` must be one of the following: $(names(df_meta))."
 
@@ -190,11 +219,19 @@ function aggregate_ce_evaluation(
     return aggregate_data(df, y, byvars; byvars_must_include=["run"])
 end
 
+function valid_y_ce(df::DataFrame)
+    return sort(unique(df.variable))
+end
+
+function valid_y_ce(cfg::AbstractEvaluationConfig)
+    return valid_y_ce(CTExperiments.load_ce_evaluation(cfg))
+end
+
 function boxplot_ce(
     df::DataFrame, 
     df_meta::DataFrame,
     df_eval::DataFrame;
-    x::String="generator_type",
+    x::Union{Nothing,String}="generator_type",
     y::String="plausibility_distance_from_target",
     byvars::Union{Nothing,Vector{String}}=nothing,
     colorvar::Union{Nothing,String}=nothing,
@@ -203,6 +240,8 @@ function boxplot_ce(
     facet=default_facet,
     axis=default_axis,
 ) 
+
+    x = isnothing(x) ? "generator_type" : x
 
     byvars = gather_byvars(byvars, colorvar, rowvar, colvar, x)
 
@@ -223,5 +262,7 @@ function boxplot_ce(
         plt = plt * mapping(; col=colvar => nonnumeric)
     end
     
-    return draw(plt; facet=facet, axis=axis)
+    plt = draw(plt; facet=facet, axis=axis)
+
+    return plt
 end

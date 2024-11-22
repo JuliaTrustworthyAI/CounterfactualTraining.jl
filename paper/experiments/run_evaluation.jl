@@ -39,3 +39,6 @@ else
     @info "Results for individual runs are stored in $(eval_config.save_dir)."
 end
 
+# Working directory:
+setup_work_dir(eval_config, ENV["EVAL_WORK_DIR"])
+

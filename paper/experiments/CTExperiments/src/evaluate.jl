@@ -183,3 +183,26 @@ Loads the evaluation results from a CSV.
 function load_results(cfg::EvaluationConfig, fname::String)
     return CSV.read(joinpath(cfg.save_dir, fname * ".csv"), DataFrame)
 end
+
+"""
+    set_work_dir(cfg::EvaluationConfig, eval_work_root::String)
+
+A working directory for evaluation results.
+"""
+function set_work_dir(cfg::EvaluationConfig, eval_work_root::String)
+    work_dir = get_work_dir(cfg, eval_work_root)
+    if !isfile(joinpath(work_dir, "eval_config.toml"))
+        to_toml(cfg, joinpath(work_dir, "eval_config.toml"))
+    end
+    @info "Working directory for this evaluation is $work_dir. Use this folder to store script for presenting results (plots, tables, etc.)."
+    if !isfile(joinpath(work_dir, "grid_config.toml"))
+        cp(cfg.grid_file, joinpath(work_dir, "grid_config.toml"))
+    end
+    return work_dir
+end
+
+function get_work_dir(cfg::EvaluationConfig, eval_work_root::String)
+    return mkpath(joinpath(eval_work_root, splitpath(cfg.save_dir)[end]))
+end
+
+results_dir(cfg::EvaluationConfig) = joinpath(cfg.save_dir, "results")
