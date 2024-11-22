@@ -2,6 +2,10 @@ using AlgebraOfGraphics
 using DataFrames
 using Makie
 
+const default_axis = (; width=225, height=225)
+
+const default_facet = (; linkyaxes=:minimal, linkxaxes=:minimal)
+
 get_logs(cfg::AbstractEvaluationConfig) = get_logs(ExperimentGrid(cfg.grid_file))
 
 function merge_with_meta(cfg::EvaluationConfig, df::DataFrame)
@@ -112,20 +116,14 @@ function plot_errorbar_logs(
     byvars::Union{Nothing,Vector{String}}=nothing,
     colorvar::Union{Nothing,String}=nothing,
     rowvar::Union{Nothing,String}=nothing,
-    colvar::Union{Nothing,String}=nothing,
-    facet=(; linkyaxes=:minimal, linkxaxes=:minimal),
-    axis=(width=225, height=225),
+    colvar::Union{Nothing,String}="generator_type",
+    facet=default_facet,
+    axis=default_axis,
 )
 
-    # Aggregate logs:
-    byvars = isnothing(byvars) ? [byvars] : byvars
-    byvars = [byvars..., colorvar, rowvar, colvar] |> unique
-    byvars = if length(byvars) == 1 && isnothing(byvars[1])
-        nothing 
-    else 
-        byvars[.!isnothing.(byvars)] |> x -> string.(x)
-    end
+    byvars = gather_byvars(byvars, colorvar, rowvar, colvar)
 
+    # Aggregate logs:
     df_agg = aggregate_logs(cfg; y=y, byvars=byvars)
 
     # Plotting:
@@ -143,6 +141,21 @@ function plot_errorbar_logs(
     end
     
     return draw(plt; facet=facet, axis=axis)
+end
+
+function gather_byvars(
+    byvars,
+    args...
+)
+    byvars = isnothing(byvars) ? [byvars] : byvars
+    byvars = unique([byvars..., args...])
+    return byvars = if length(byvars) == 1 && isnothing(byvars[1])
+        nothing
+    else
+        (x -> string.(x))(byvars[.!isnothing.(byvars)])
+    end
+
+    return byvars
 end
 
 function aggregate_ce_evaluation(
@@ -175,4 +188,40 @@ function aggregate_ce_evaluation(
 
     # Aggregate:
     return aggregate_data(df, y, byvars; byvars_must_include=["run"])
+end
+
+function boxplot_ce(
+    df::DataFrame, 
+    df_meta::DataFrame,
+    df_eval::DataFrame;
+    x::String="generator_type",
+    y::String="plausibility_distance_from_target",
+    byvars::Union{Nothing,Vector{String}}=nothing,
+    colorvar::Union{Nothing,String}=nothing,
+    rowvar::Union{Nothing,String}=nothing,
+    colvar::Union{Nothing,String}=nothing,
+    facet=default_facet,
+    axis=default_axis,
+) 
+
+    byvars = gather_byvars(byvars, colorvar, rowvar, colvar, x)
+
+    # Aggregate:
+    df_agg = aggregate_ce_evaluation(df, df_meta, df_eval; y=y, byvars=byvars)
+    
+    # Plotting:
+    plt = data(df_agg) *
+        mapping(Symbol(x), :mean => "Value") *
+        visual(BoxPlot)
+    if !isnothing(colorvar)
+        plt = plt * mapping(; color=colorvar => nonnumeric)
+    end
+    if !isnothing(rowvar)
+        plt = plt * mapping(; row=rowvar => nonnumeric)
+    end
+    if !isnothing(colvar)
+        plt = plt * mapping(; col=colvar => nonnumeric)
+    end
+    
+    return draw(plt; facet=facet, axis=axis)
 end
