@@ -12,7 +12,7 @@ eval_config = EvaluationConfig(
 exper_grid = ExperimentGrid(eval_config.grid_file)
 df_meta = CTExperiments.expand_grid_to_df(exper_grid)
 local_save_dir = get_work_dir(eval_config, ENV["EVAL_WORK_DIR"])
-output_dir = results_dir(cfg)
+output_dir = results_dir(eval_config)
 
 # Visualize logs:
 prefix = "logs"
@@ -34,7 +34,7 @@ all_data = CTExperiments.merge_with_meta(
 )
 valid_y = CTExperiments.valid_y_ce(all_data[1])
 
-params = PlotParams(; colvar="lambda_energy", colorvar="objective")
+params = PlotParams(; colorvar="lambda_energy", colvar="objective")
 final_save_dir = save_dir(params, output_dir; prefix)
 for y in valid_y
     plt = boxplot_ce(all_data...; y=y, params()...)

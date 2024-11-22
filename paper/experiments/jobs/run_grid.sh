@@ -3,8 +3,8 @@
 #SBATCH --job-name="Run Grid"
 #SBATCH --partition=compute
 #SBATCH --time=01:00:00
-#SBATCH --ntasks=2
-#SBATCH --cpus-per-task=20
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=40
 #SBATCH --mem-per-cpu=2G
 #SBATCH --account=research-eemcs-insy
 #SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT

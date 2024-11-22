@@ -12,7 +12,7 @@ eval_config = EvaluationConfig(
 exper_grid = ExperimentGrid(eval_config.grid_file)
 df_meta = CTExperiments.expand_grid_to_df(exper_grid)
 local_save_dir = get_work_dir(eval_config, ENV["EVAL_WORK_DIR"])
-output_dir = results_dir(cfg)
+output_dir = results_dir(eval_config)
 
 # Visualize logs:
 prefix = "logs"
