@@ -40,5 +40,5 @@ else
 end
 
 # Working directory:
-setup_work_dir(eval_config, ENV["EVAL_WORK_DIR"])
+set_work_dir(eval_config, ENV["EVAL_WORK_DIR"])
 

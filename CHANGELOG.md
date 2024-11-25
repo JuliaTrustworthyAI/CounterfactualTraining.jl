@@ -18,5 +18,3 @@ Tried different things here.
 
 **Burn-in period** This speeds things up but seems to make things worse.
 
-### Added
-
