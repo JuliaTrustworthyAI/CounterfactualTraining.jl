@@ -43,23 +43,22 @@ function get_generator_type(s::String)
     return generator_types[s]
 end
 
+const available_optimizers = Dict(
+    "adam" => Flux.Optimise.Adam,
+    "sgd" => Flux.Optimise.Descent,
+)
+
 """
     get_opt(params::AbstractConfiguration)
     
 Retrieves the optimizer from the configuration.
 """
-function get_opt(params::AbstractConfiguration)
-    # Adam:
-    if params.opt == "adam"
-        opt = Adam(params.lr)
-    end
+get_opt(params::AbstractConfiguration) = get_opt(params.opt)
 
-    # SGD:
-    if params.opt == "sgd"
-        opt = Descent(params.lr)
-    end
-
-    return opt
+function get_opt(s::String)
+    s = lowercase(s)
+    @assert s in keys(available_optimizers) "Unknown optimizer : $s. Available types are $(keys(available_optimizers))"
+    return available_optimizers[s]()
 end
 
 """

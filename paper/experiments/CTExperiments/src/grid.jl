@@ -56,7 +56,8 @@ struct ExperimentGrid <: AbstractConfiguration
         # Generator parameters
         generator_params = append_params(generator_params, fieldnames(GeneratorParams))
 
-        return new(
+        # Instantiate grid: 
+        grid = new(
             name,
             data,
             model_type,
@@ -68,6 +69,16 @@ struct ExperimentGrid <: AbstractConfiguration
             generator_params,
             save_dir,
         )
+
+        # Store grid config:
+        if !isdir(save_dir)
+            mkpath(save_dir)
+        end
+        if !isfile(default_grid_config_name(grid))
+            to_toml(grid, default_grid_config_name(grid))
+        end
+        
+        return grid
     end
 end
 
