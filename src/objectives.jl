@@ -46,11 +46,11 @@ end
 """
     (obj::EnergyDifferentialObjective)(
         yhat,
-        y;
-        energy_differential::Vector{<:AbstractFloat},
+        y,
+        energy_differential::Vector{<:AbstractFloat}=[0.0f0],
         regularization::Vector{<:AbstractFloat}=[0.0f0],
-        adversarial_loss::Union{AbstractFloat,Vector{<:AbstractFloat}},
-        regularization::Vector{<:AbstractFloat}=[0.0f0],
+        adversarial_loss::Union{AbstractFloat,Vector{<:AbstractFloat}}=0.0f0;
+        agg=mean,
         kwrgs...,
     )
 
@@ -58,10 +58,10 @@ If the `energy_differential` and `regularization` have been computed already, `o
 """
 function (obj::EnergyDifferentialObjective)(
     yhat,
-    y;
-    energy_differential::Vector{<:AbstractFloat},
+    y,
+    energy_differential::Vector{<:AbstractFloat}=[0.0f0],
     regularization::Vector{<:AbstractFloat}=[0.0f0],
-    adversarial_loss::Union{AbstractFloat,Vector{<:AbstractFloat}},
+    adversarial_loss::Union{AbstractFloat,Vector{<:AbstractFloat}}=0.0f0;
     agg=mean,
     kwrgs...,
 )
@@ -116,10 +116,11 @@ end
 """
     (obj::AdversarialObjective)(
         yhat,
-        y;
-        energy_differential::Vector{<:AbstractFloat},
+        y,
+        energy_differential::Vector{<:AbstractFloat}=[0.0f0],
         regularization::Vector{<:AbstractFloat}=[0.0f0],
-        adversarial_loss::Union{AbstractFloat,Vector{<:AbstractFloat}},
+        adversarial_loss::Union{AbstractFloat,Vector{<:AbstractFloat}}=0.0f0;
+        agg=mean,
         kwrgs...,
     )
 
@@ -127,10 +128,10 @@ If the `adversarial_loss` has been computed already, `obj::AdversarialObjective`
 """
 function (obj::AdversarialObjective)(
     yhat,
-    y;
-    energy_differential::Vector{<:AbstractFloat},
+    y,
+    energy_differential::Vector{<:AbstractFloat}=[0.0f0],
     regularization::Vector{<:AbstractFloat}=[0.0f0],
-    adversarial_loss::Union{AbstractFloat,Vector{<:AbstractFloat}},
+    adversarial_loss::Union{AbstractFloat,Vector{<:AbstractFloat}}=0.0f0;
     agg=mean,
     kwrgs...,
 )
@@ -183,10 +184,11 @@ end
 """
     (obj::FullObjective)(
         yhat,
-        y;
-        energy_differential::Vector{<:AbstractFloat},
+        y,
+        energy_differential::Vector{<:AbstractFloat}=[0.0f0],
         regularization::Vector{<:AbstractFloat}=[0.0f0],
-        adversarial_loss::Union{AbstractFloat,Vector{<:AbstractFloat}},
+        adversarial_loss::Union{AbstractFloat,Vector{<:AbstractFloat}}=[0.0f0];
+        agg=mean,
         kwrgs...,
     )
 
@@ -194,10 +196,10 @@ If the `adversarial_loss` has been computed already, `obj::FullObjective` can be
 """
 function (obj::FullObjective)(
     yhat,
-    y;
-    energy_differential::Vector{<:AbstractFloat},
+    y,
+    energy_differential::Vector{<:AbstractFloat}=[0.0f0],
     regularization::Vector{<:AbstractFloat}=[0.0f0],
-    adversarial_loss::Union{AbstractFloat,Vector{<:AbstractFloat}},
+    adversarial_loss::Union{AbstractFloat,Vector{<:AbstractFloat}}=[0.0f0];
     agg=mean,
     kwrgs...,
 )

@@ -115,11 +115,20 @@ function counterfactual_training(
 
                 return loss(
                     logits,
-                    label;
-                    energy_differential=implaus,
-                    regularization=regs,
-                    adversarial_loss=adversarial_loss,
+                    label,
+                    implaus,
+                    regs,
+                    adversarial_loss,
                 )
+
+                # return loss(
+                #     logits,
+                #     label;
+                #     energy_differential=implaus,
+                #     regularization=regs,
+                #     adversarial_loss=adversarial_loss,
+                # )
+                
             end
 
             # Save the loss from the forward pass. (Done outside of gradient.)
