@@ -29,9 +29,9 @@ end
 using Pkg
 if any(contains.(ARGS, "--project"))
     @assert sum(contains.(ARGS, "--project")) == 1 "Only one environment can be specified using the `--project` argument."
-    _path =
-        ARGS[findall(contains.(ARGS, "--project"))][1] |>
-        x -> replace(x, "--project=" => "")
+    _path = (x -> replace(x, "--project=" => ""))(
+        ARGS[findall(contains.(ARGS, "--project"))][1]
+    )
     Pkg.activate(_path)
 else
     Pkg.activate(@__DIR__)
@@ -46,7 +46,9 @@ end
 using CounterfactualTraining
 using Documenter
 
-DocMeta.setdocmeta!(CounterfactualTraining, :DocTestSetup, :(using CounterfactualTraining); recursive=true)
+DocMeta.setdocmeta!(
+    CounterfactualTraining, :DocTestSetup, :(using CounterfactualTraining); recursive=true
+)
 
 makedocs(;
     modules=[CounterfactualTraining],
@@ -57,12 +59,9 @@ makedocs(;
         edit_link="main",
         assets=String[],
     ),
-    pages=[
-        "Home" => "index.md",
-    ],
+    pages=["Home" => "index.md"],
 )
 
 deploydocs(;
-    repo="github.com/JuliaTrustworthyAI/CounterfactualTraining.jl",
-    devbranch="main",
+    repo="github.com/JuliaTrustworthyAI/CounterfactualTraining.jl", devbranch="main"
 )

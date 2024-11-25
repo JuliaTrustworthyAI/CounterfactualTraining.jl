@@ -1,0 +1,42 @@
+name = "grid_5d3c82ba-a28b-11ef-09ac-85a2b21199b3"
+dim_reduction = [false]
+generator_type = ["ecco", "generic", "revise"]
+data = "mnist"
+model_type = "mlp"
+save_dir = "paper/experiments"
+
+[data_params]
+n_validation = []
+n_train = []
+batchsize = []
+
+[model_params]
+nlayers = []
+activation = []
+nhidden = []
+
+[generator_params]
+opt = []
+lambda_cost = []
+lr = []
+maxiter = []
+lambda_energy = []
+type = []
+
+[training_params]
+opt = []
+lr = []
+objective = []
+lambda_class_loss = []
+lambda_energy_diff = []
+burnin = []
+nepochs = []
+lambda_adversarial = []
+parallelizer = []
+nce = []
+threaded = []
+class_loss = []
+lambda_energy_reg = []
+verbose = []
+generator_params = []
+conv = []

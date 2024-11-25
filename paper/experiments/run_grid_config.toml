@@ -1,0 +1,42 @@
+name = "grid_run_2024-11-21_architecture"
+dim_reduction = [true, false]
+generator_type = ["ecco", "generic", "revise"]
+data = "mnist"
+model_type = "mlp"
+save_dir = "paper/experiments/output/grid_run_2024-11-21_architecture"
+
+[data_params]
+n_validation = []
+n_train = []
+batchsize = [500]
+
+[model_params]
+nlayers = [1, 2]
+activation = []
+nhidden = [32, 64, 128]
+
+[generator_params]
+opt = []
+lambda_cost = [0.001]
+lr = []
+maxiter = [25]
+lambda_energy = [5.0]
+type = []
+
+[training_params]
+opt = []
+nce = [1000]
+lr = []
+threaded = []
+class_loss = []
+objective = ["full"]
+lambda_class_loss = []
+lambda_energy_diff = []
+burnin = []
+nepochs = [50, 100, 150]
+lambda_energy_reg = []
+verbose = []
+lambda_adversarial = []
+parallelizer = ["mpi"]
+generator_params = []
+conv = ["max_iter"]

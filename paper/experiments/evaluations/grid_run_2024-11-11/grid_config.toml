@@ -1,0 +1,42 @@
+name = "grid_run_2024-11-11"
+dim_reduction = [true, false]
+generator_type = ["ecco", "generic", "revise"]
+data = "mnist"
+model_type = "mlp"
+save_dir = "paper/experiments/output/grid_run_2024-11-11"
+
+[data_params]
+n_validation = []
+n_train = []
+batchsize = [1000]
+
+[model_params]
+nlayers = []
+activation = []
+nhidden = []
+
+[generator_params]
+opt = []
+lambda_cost = [0.001, 0.1]
+lr = []
+maxiter = [20, 100]
+lambda_energy = [0.5, 5.0]
+type = []
+
+[training_params]
+opt = []
+nce = [1000]
+lr = []
+threaded = []
+class_loss = []
+objective = ["full"]
+lambda_class_loss = []
+lambda_energy_diff = [0.01, 0.5]
+burnin = []
+nepochs = [100]
+lambda_energy_reg = []
+verbose = []
+lambda_adversarial = []
+parallelizer = ["mpi"]
+generator_params = []
+conv = ["max_iter", "threshold"]
