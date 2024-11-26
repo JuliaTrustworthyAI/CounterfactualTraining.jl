@@ -41,6 +41,9 @@ else
     @info "Results for individual runs are stored in $(eval_config.save_dir)."
 end
 
+# Generate factual target pairs for plotting:
+generate_factual_target_pairs(eval_config)
+
 # Working directory:
 set_work_dir(eval_config, ENV["EVAL_WORK_DIR"])
 

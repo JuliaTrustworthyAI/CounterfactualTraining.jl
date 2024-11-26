@@ -376,28 +376,83 @@ function collect_benchmarks(
 end
 
 """
-    save_results(cfg::AbstractEvaluationConfig, bmk::Benchmark)
+    save_results(
+        cfg::AbstractEvaluationConfig, bmk::Benchmark; fname::Union{Nothing,String}=nothing
+    )
 
-Saves the `Benchmark` object to disk using `Serialization.serialize`. The location is specified by `cfg.save_dir`.
+Saves the `Benchmark` object to disk using `Serialization.serialize`. The location is specified by `cfg.save_dir`, unless `fname` is provided.
 """
-function save_results(cfg::AbstractEvaluationConfig, bmk::Benchmark)
-    fname = default_bmk_name(cfg)
+function save_results(
+    cfg::AbstractEvaluationConfig, bmk::Benchmark; fname::Union{Nothing,String}=nothing
+)
+    fname = if isnothing(fname)
+        default_bmk_name(cfg)
+    else
+        fname
+    end
     return Serialization.serialize(fname, bmk)
 end
 
-function load_ce_evaluation(cfg::AbstractEvaluationConfig)
-    load_results(cfg, default_ce_evaluation_name(cfg))
+"""
+    load_results(cfg::EvaluationConfig, fname::String)
+
+Loads the benchmark. 
+"""
+function load_results(cfg::EvaluationConfig, bmk::Type{Benchmark}, fname::String)
+    return Serialization.deserialize(fname)
+end
+
+function load_ce_evaluation(
+    cfg::AbstractEvaluationConfig; fname::Union{Nothing,String}=nothing
+)
+    fname = if isnothing(fname)
+        default_ce_evaluation_name(cfg)
+    else
+        fname
+    end
+
+    load_results(cfg, Benchmark, fname)
 end
 
 default_bmk_name(cfg::AbstractEvaluationConfig) = joinpath(cfg.save_dir, "bmk.jls")
 
 default_ce_evaluation_name(cfg::AbstractEvaluationConfig) = "bmk_evaluation"
 
-function generate_factual_target_pairs(cfg::AbstractEvaluationConfig)
-    data, models, generators = load_data_models_generators(cfg)
-    return generate_factual_target_pairs(cfg, data, models, generators)
+"""
+    generate_factual_target_pairs(cfg::AbstractEvaluationConfig)
+
+Dispatches the `generate_factual_target_pairs` on `cfg::AbstractEvaluationConfig`. The data, models and generators are loaded according the configuration `cfg`.
+"""
+function generate_factual_target_pairs(cfg::AbstractEvaluationConfig; fname::Union{Nothing,String}=nothing)
+    fname = if isnothing(fname)
+        default_factual_target_pairs_name(cfg)
+    end
+    if isfile(fname)
+        @info "Loading factual target pairs from $fname ..."
+        output = load_results(cfg, Benchmark, fname)
+    else
+        data, models, generators = load_data_models_generators(cfg)
+        output = generate_factual_target_pairs(cfg, data, models, generators)
+        @info "Saving results to $fname."
+        save_results(cfg, output; fname=fname)
+    end
+    return output
 end
 
+function default_factual_target_pairs_name(cfg::AbstractEvaluationConfig)
+    return joinpath(cfg.save_dir, "factual_target_pairs.jls")
+end
+
+"""
+    generate_factual_target_pairs(
+        cfg::AbstractEvaluationConfig,
+        data::CounterfactualData,
+        models::AbstractDict,
+        generators::AbstractDict,
+    )
+
+Generates counterfactuals for each target and factual pair. The function randomly chooses a sample in the factual class based on the `data` and uses it for all `models` and `generators` to allow for comparisons between models and generators.
+"""
 function generate_factual_target_pairs(
     cfg::AbstractEvaluationConfig,
     data::CounterfactualData,
