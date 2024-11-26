@@ -192,6 +192,7 @@ function run_training(exp::Experiment; checkpoint_dir::Union{Nothing,String}=not
         nepochs=exp.training_params.nepochs,
         burnin=exp.training_params.burnin,
         nce=exp.training_params.nce,
+        nneighbours=exp.training_params.nneighbours,
         domain=domain,
         input_encoder=input_encoder,
         checkpoint_dir=checkpoint_dir,

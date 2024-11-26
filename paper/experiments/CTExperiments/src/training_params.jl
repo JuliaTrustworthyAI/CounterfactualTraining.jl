@@ -1,3 +1,4 @@
+using Accessors
 using CounterfactualExplanations
 using CounterfactualExplanations.Convergence
 using CounterfactualExplanations.DataPreprocessing
@@ -147,7 +148,8 @@ Mutable struct holding keyword arguments relevant to counterfactual training.
     - `burnin`: The fraction of the training epochs to use for warm-up. During warm-up, only standard classification loss is used for training.
     - `nepochs`: The number of epochs to train for.
     - `generator_params`: The parameters for the generator to use during training.
-    - `nce`: The namber of counterfactuals to generate per epoch and per batch of training data.
+    - `nce`: The number of counterfactuals to generate per epoch and per batch of training data.
+    - `nneighbours`: The number of neighbours in the target class to compare counterfactuals against.
     - `conv`: The convergence type to use for the counterfactual search.
     - `lr`: The learning rate to use for training.
     - `opt`: The optimizer to use for training.
@@ -166,12 +168,23 @@ Base.@kwdef struct TrainingParams <: AbstractConfiguration
     nepochs::Int = 100
     generator_params::GeneratorParams = GeneratorParams()
     nce::Int = 100
+    nneighbours::Int = 100
     conv::AbstractString = "max_iter"
     lr::AbstractFloat = 0.001
     opt::AbstractString = "adam"
     parallelizer::AbstractString = "threads"
     threaded::Bool = true
-    verbose::Int = 2
+    verbose::Int = 1
+end
+
+"""
+    shutup!(params::TrainingParams)
+
+Can be used to ensure that training is quiet, i.e., no output is printed during training. This can be useful for running multiple experiments in a batch without cluttering the console with output. The `verbose` field of the `TrainingParams` struct is reset to 0 to achieve this.
+"""
+function shutup!(params::TrainingParams)
+    @reset params.verbose = 0
+    return params
 end
 
 """

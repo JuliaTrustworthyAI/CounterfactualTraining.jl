@@ -5,6 +5,7 @@ using CounterfactualExplanations: Models
 using CounterfactualExplanations.Evaluation: plausibility
 using Flux
 using JLD2
+using ProgressMeter
 using TaijaParallel
 using UnicodePlots
 
@@ -17,12 +18,13 @@ function counterfactual_training(
     val_set=nothing,
     nepochs=100,
     burnin=0.0,
-    nce=nothing,
+    nce::Union{Nothing,Int}=nothing,
+    nneighbours::Int=100,
     parallelizer::TaijaParallel.AbstractParallelizer=nothing,
     convergence=Convergence.MaxIterConvergence(),
     input_encoder=nothing,
     domain=nothing,
-    verbose::Int=2,
+    verbose::Int=1,
     checkpoint_dir::Union{Nothing,String}=nothing,
     kwrgs...,
 )
@@ -55,6 +57,8 @@ function counterfactual_training(
         end
     end
 
+    p = Progress(nepochs; barglyphs=BarGlyphs("[=> ]"), color=:yellow)
+
     for epoch in start_epoch:nepochs
 
         # Logs:
@@ -70,6 +74,7 @@ function counterfactual_training(
                 train_set,
                 generator;
                 nsamples=nce,
+                nneighbours=nneighbours,
                 convergence=convergence,
                 parallelizer=parallelizer,
                 input_encoder=input_encoder,
@@ -120,14 +125,6 @@ function counterfactual_training(
                     regs,
                     adversarial_loss,
                 )
-
-                # return loss(
-                #     logits,
-                #     label;
-                #     energy_differential=implaus,
-                #     regularization=regs,
-                #     adversarial_loss=adversarial_loss,
-                # )
                 
             end
 
@@ -148,10 +145,9 @@ function counterfactual_training(
         acc_val = isnothing(val_set) ? nothing : accuracy(model, val_set)
         train_loss = sum(losses) / length(losses)
         msg_acc = "Training accuracy in epoch $epoch/$nepochs: $acc"
-        @info msg_acc
         if !isnothing(val_set)
+            msg_acc_train = msg_acc
             msg_acc = "Validation accuracy in epoch $epoch/$nepochs: $acc_val"
-            @info msg_acc
         end
 
         if epoch > burnin
@@ -161,9 +157,6 @@ function counterfactual_training(
             msg_imp = "Average energy differential in $epoch/$nepochs: $implaus"
             msg_reg = "Average energy regularization in $epoch/$nepochs: $log_reg_loss"
             msg_adv = "Average adversarial loss in $epoch/$nepochs: $log_adv_loss"
-            @info msg_imp
-            @info msg_reg
-            @info msg_adv
         else
             implaus = nothing
             log_reg_loss = nothing
@@ -214,6 +207,16 @@ function counterfactual_training(
             open(fpath, "w") do file
                 write(file, a)
             end
+        end
+
+        if verbose == 1
+            next!(p; showvalues = [("Validation accuracy", acc_val), ("Implausibility", implaus)])
+        elseif verbose > 1
+            @info msg_acc_train
+            @info msg_acc
+            @info msg_imp
+            @info msg_reg
+            @info msg_adv
         end
     end
     return model, log

@@ -100,6 +100,7 @@ function generate!(
     data,
     generator;
     nsamples::Union{Int,Nothing}=nothing,
+    nneighbours::Int=100,
     convergence=Convergence.MaxIterConvergence(),
     parallelizer=nothing,
     input_encoder=nothing,
@@ -115,6 +116,8 @@ function generate!(
     )
     # Wrap model:
     M = Models.Model(model, Models.FluxNN(); likelihood=:classification_multi)
+
+    @assert nneighbours >= length(counterfactual_data.y_levels) "Number of neighbours must be greater than or equal to the number of output classes."
 
     # Set up counterfactual search:
     if isnothing(nsamples)
@@ -137,6 +140,7 @@ function generate!(
     targets = rand(counterfactual_data.y_levels, nsamples)       # randomly generate targets
 
     # Generate counterfactuals:
+    @info "Using $parallelizer" maxlog=1
     ces = TaijaParallel.parallelize(
         parallelizer,
         CounterfactualExplanations.generate_counterfactual,
@@ -148,11 +152,12 @@ function generate!(
         convergence=convergence,
         verbose=verbose > 1,
     )
+
     counterfactuals = CounterfactualExplanations.counterfactual.(ces)      # counterfactual inputs
 
     # Get neighbours in target class:
     neighbours = [
-        CounterfactualExplanations.find_potential_neighbours(ce, 10) for ce in ces
+        CounterfactualExplanations.find_potential_neighbours(ce, nneighbours) for ce in ces
     ]
 
     # Encoded targets:
