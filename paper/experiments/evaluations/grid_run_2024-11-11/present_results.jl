@@ -1,6 +1,6 @@
 using CTExperiments
 using CTExperiments.DataFrames
-using CTExperiments.Makie
+using Makie, GLMakie
 using DotEnv
 
 DotEnv.load!()

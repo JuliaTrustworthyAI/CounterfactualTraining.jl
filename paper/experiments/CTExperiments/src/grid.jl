@@ -287,7 +287,7 @@ function expand_grid_to_df(cfg::ExperimentGrid)
         end
 
         # Collect:
-        _df = DataFrame(new_params)
+        _df = DataFrame(new_params; makeunique=true)
         _df.id .= _name
         df = vcat(df, _df)
 

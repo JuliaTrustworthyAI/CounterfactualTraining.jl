@@ -140,7 +140,6 @@ function generate!(
     targets = rand(counterfactual_data.y_levels, nsamples)       # randomly generate targets
 
     # Generate counterfactuals:
-    @info "Using $parallelizer" maxlog=1
     ces = TaijaParallel.parallelize(
         parallelizer,
         CounterfactualExplanations.generate_counterfactual,

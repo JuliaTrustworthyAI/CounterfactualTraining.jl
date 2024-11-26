@@ -36,6 +36,11 @@ MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 # Divide the experiments among the available ranks
 for (i, experiment) in enumerate(exper_list)
 
+    if MPI.Comm_rank(MPI.COMM_WORLD) != 0
+        # Shut up logging for other ranks to avoid cluttering output
+        CTExperiments.shutup!(experiment.training_params)
+    end
+
     # Setup:
     save_dir = experiment.meta_params.save_dir
     _name = experiment.meta_params.experiment_name
