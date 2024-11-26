@@ -106,3 +106,24 @@ function loss(
 
     return ℒ
 end
+
+"""
+    get_config_from_args()
+
+Retrieves the config file name from the command line arguments. This is used for scripting.
+"""
+function get_config_from_args()
+    haskey(ENV, "config") && return ENV["config"]
+    if isinteractive() && !any((x -> contains(x, "--config=")).(ARGS))
+        println("Specify the path to your config file.")
+        input = readline()
+        println("Using config file: $input")
+        push!(ARGS, "--config=$input")
+        ENV["config"] = input
+    end
+    config_arg = ARGS[(x -> contains(x, "--config=")).(ARGS)]
+    @assert length(config_arg) == 1 "Please provide exactly one config file name."
+    fname = replace(config_arg[1], "--config=" => "")
+    @assert isfile(fname) "Config file not found: $fname"
+    return fname
+end

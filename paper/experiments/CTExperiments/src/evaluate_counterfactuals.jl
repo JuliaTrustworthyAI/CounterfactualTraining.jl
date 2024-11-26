@@ -1,5 +1,6 @@
 using CounterfactualExplanations
 using CounterfactualExplanations.Evaluation
+using DataFrames
 using JLD2
 using Serialization
 using TaijaParallel
@@ -267,15 +268,13 @@ function evaluate_counterfactuals(
 
         # Combine results on root process
         if rank == 0
-            combined_results = vcat(all_results...)
-            MPI.Finalize()
+            combined_results = reduce(vcat, all_results)
             return combined_results
         end
     else
         @info "Not concatenating results as configured."
     end
 
-    MPI.Finalize()
     return nothing
 end
 
@@ -393,3 +392,64 @@ end
 default_bmk_name(cfg::AbstractEvaluationConfig) = joinpath(cfg.save_dir, "bmk.jls")
 
 default_ce_evaluation_name(cfg::AbstractEvaluationConfig) = "bmk_evaluation"
+
+function generate_factual_target_pairs(cfg::AbstractEvaluationConfig)
+    data, models, generators = load_data_models_generators(cfg)
+    return generate_factual_target_pairs(cfg, data, models, generators)
+end
+
+function generate_factual_target_pairs(
+    cfg::AbstractEvaluationConfig,
+    data::CounterfactualData,
+    models::AbstractDict,
+    generators::AbstractDict,
+)
+
+    # Targets and factuals:
+    targets = sort(data.y_levels)
+    factuals = targets
+
+    # Other parameters:
+    convergence = get_convergence(cfg.counterfactual_params)
+    parallelizer = get_parallelizer(cfg.counterfactual_params)
+
+    output = Benchmark[]
+
+    for factual in factuals
+        chosen = rand(findall(data.output_encoder.labels .== factual))
+        x = select_factual(data, chosen)
+        for target in targets
+
+            factual == target && continue
+            if cfg.counterfactual_params.verbose
+                @info "Generating counterfactual for $(factual) -> $(target)"
+            end
+
+            # Generate and benchmark counterfactuals:
+            bmk = benchmark(
+                x,
+                target,
+                data;
+                models=models,
+                generators=generators,
+                measure=validity,
+                parallelizer=parallelizer,
+                initialization=:identity,
+                convergence=convergence,
+                store_ce=true,
+                verbose=cfg.counterfactual_params.verbose,
+            )
+
+            DataFrames.transform!(bmk.evaluation, :model => ByRow(x -> x[1]) => :model) 
+            DataFrames.transform!(bmk.evaluation, :generator => ByRow(x -> x[1]) => :generator)
+
+            push!(output, bmk)
+
+        end
+    end
+
+    output = reduce(vcat, output)
+
+    return output
+end
+

@@ -7,9 +7,7 @@ using DotEnv
 DotEnv.load!()
 
 # Get config and set up grid:
-eval_config = EvaluationConfig(
-    joinpath(ENV["EXPERIMENT_DIR"], "evaluation_configs/2024-11-21_architecture.toml")
-)
+eval_config = EvaluationConfig(get_config_from_args())
 
 # Collect benchmarks:
 bmk = CTExperiments.collect_benchmarks(eval_config)

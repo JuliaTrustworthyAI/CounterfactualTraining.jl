@@ -4,30 +4,38 @@ using DotEnv
 
 DotEnv.load!()
 
-# Get config and set up grid:
-config_file = joinpath(ENV["EXPERIMENT_DIR"], "poc.toml")
-exper_grid = ExperimentGrid(config_file)
-exper_list = setup_experiments(exper_grid)
+# Run grid:
+ENV["config"] = joinpath(ENV["EXPERIMENT_DIR"], "poc.toml")
+include("run_grid.jl")
 
-@info "Running $(length(exper_list)) experiments ..."
+# Run evaluation:
+ENV["config"] = joinpath(ENV["EXPERIMENT_DIR"], "poc_evaluation_config.toml")
+include("run_evaluation.jl")
 
-# Divide the experiments among the available ranks
-for (i, experiment) in enumerate(exper_list)
 
-    # Setup:
-    save_dir = experiment.meta_params.save_dir
-    _name = experiment.meta_params.experiment_name
 
-    # Skip if already finished
-    if has_results(experiment)
-        @info "Skipping $(_name), model already exists."
-        continue
-    end
+################### Results ###################
+λ = [0.01, 25.0]
+gen = ECCoGenerator(; opt=search_opt, λ=λ)
+test_data = CounterfactualData(load_mnist_test()...)
 
-    # Running the experiment
-    @info "Running experiment: $(_name) ($i/$(length(exper_list)))"
-    model, logs = run_training(experiment; checkpoint_dir=save_dir)
+conv = Convergence.MaxIterConvergence(; max_iter=100)
 
-    # Saving the results:
-    save_results(experiment, model, logs)
-end
+M = MLP(model_ecco; likelihood=:classification_multi)
+serialize("paper/experiments/output/poc_model_ct_ecco.jls", M)
+plt = plot_all_mnist(gen, M, test_data; convergence=conv)
+savefig(plt, "paper/dump/poc_model_ct_ecco.png")
+
+M = MLP(model_generic; likelihood=:classification_multi)
+serialize("paper/experiments/output/poc_model_ct_generic.jls", M)
+plt = plot_all_mnist(gen, M, test_data; convergence=conv)
+savefig(plt, "paper/dump/poc_model_ct_generic.png")
+
+M = MLP(model_revise; likelihood=:classification_multi)
+serialize("paper/experiments/output/poc_model_ct_revise.jls", M)
+plt = plot_all_mnist(gen, M, test_data; convergence=conv)
+savefig(plt, "paper/dump/poc_model_ct_model_revise.png")
+
+M = load_mnist_mlp()
+plt = plot_all_mnist(gen, M, test_data; convergence=conv)
+savefig(plt, "paper/dump/poc_model.png")

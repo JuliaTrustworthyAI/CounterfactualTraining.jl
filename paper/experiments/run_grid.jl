@@ -9,7 +9,7 @@ using Serialization
 DotEnv.load!()
 
 # Get config and set up grid:
-config_file = joinpath(ENV["EXPERIMENT_DIR"], "run_grid_config.toml")
+config_file = get_config_from_args()
 root_name = CTExperiments.from_toml(config_file)["name"]
 root_save_dir = joinpath(ENV["OUTPUT_DIR"], root_name)
 exper_grid = ExperimentGrid(config_file; new_save_dir=root_save_dir)
@@ -66,4 +66,3 @@ end
 
 # Finalize MPI
 MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
-MPI.Finalize()

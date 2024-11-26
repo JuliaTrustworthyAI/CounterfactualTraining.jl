@@ -8,7 +8,7 @@ DotEnv.load!()
 
 Random.seed!(2025)
 
-config_file = joinpath(ENV["EXPERIMENT_DIR"], "run_model_config.toml")
+config_file = get_config_from_args()
 _name = CTExperiments.from_toml(config_file)["meta_params"]["experiment_name"]
 save_dir = joinpath(ENV["OUTPUT_DIR"], _name)
 experiment = Experiment(config_file; new_save_dir=save_dir)
