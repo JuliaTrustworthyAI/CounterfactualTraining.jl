@@ -1,6 +1,7 @@
 using AlgebraOfGraphics
 using DataFrames
 using Makie
+using Plots: Plots, PlotMeasures
 
 Base.@kwdef struct PlotParams
     x::Union{Nothing,String}=nothing
@@ -22,6 +23,8 @@ function save_dir(params::PlotParams, root::String; prefix::String)
 end
 
 const default_axis = (; width=225, height=225)
+
+const default_mnist = (; width=150, height=150)
 
 const default_facet = (; linkyaxes=:minimal, linkxaxes=:minimal)
 
@@ -265,4 +268,84 @@ function boxplot_ce(
     plt = draw(plt; facet=facet, axis=axis)
 
     return plt
+end
+
+function aggregate_counterfactuals(eval_config::EvaluationConfig; kwrgs...)
+    bmk = generate_factual_target_pairs(eval_config)
+    all_data = CTExperiments.merge_with_meta(
+        eval_config, innerjoin(bmk.evaluation, bmk.counterfactuals; on=:sample)
+    )
+    return aggregate_counterfactuals(all_data...; kwrgs...)
+end
+
+function aggregate_counterfactuals(
+    df::DataFrame,
+    df_meta::DataFrame,
+    df_eval::DataFrame;
+    byvars::Union{Nothing,Vector{String}}=nothing,
+)
+    # Assertions:
+    @assert byvars isa Nothing || all(col -> col in names(df_meta), byvars) "Columns specified in `byvars` must be one of the following: $(names(df_meta))."
+
+    # Drop redundant:
+    select!(df, Not(:variable, :value))
+
+    # Aggregate:
+    return aggregate_data(
+        df, "ce", byvars; byvars_must_include=["factual", "target", "generator_type"]
+    )
+end
+
+function plot_ce(
+    dataset::MNIST,
+    eval_config::EvaluationConfig;
+    byvars::Union{Nothing,Vector{String}}=nothing,
+    rowvar::Union{Nothing,String}=nothing,
+    axis=default_mnist,
+)
+
+    byvars = gather_byvars(byvars, rowvar)
+
+    # Aggregate:
+    df_agg = aggregate_counterfactuals(eval_config; byvars=byvars)
+
+    # Plotting:
+    full_plts = []
+    generators = sort(unique(df_agg.generator_type))
+    factuals = sort(unique(df_agg.factual))
+    targets = sort(unique(df_agg.target))
+    for (i, generator) in enumerate(generators)
+        df_local = df_agg[df_agg.generator_type .== generator, :]
+        plts = []
+        for factual in factuals
+            for target in targets
+                x = filter(x -> x.factual .== factual && x.target .== target, df_local).mean
+                if target==factual || length(x) == 0
+                    plt = Plots.plot(; axis=([], false), size=values(axis))
+                else
+                    @assert length(x) == 1 "Expected 1 value, got $(length(x))."
+                    x = x[1]
+                    plt = Plots.plot(
+                        convert2mnist(x);
+                        axis=([], false),
+                        size=values(axis),
+                        title="$factual → $target",
+                    )
+                end
+                push!(plts, plt)
+            end
+        end
+        full_plt = Plots.plot(
+            plts...;
+            layout=(length(factuals), length(targets)),
+            size=(
+                values(axis)[1] * length(targets),
+                values(axis)[2] * length(factuals),
+            ),
+            dpi=300,
+        )
+        push!(full_plts, full_plt)
+    end
+    
+    return full_plts
 end
