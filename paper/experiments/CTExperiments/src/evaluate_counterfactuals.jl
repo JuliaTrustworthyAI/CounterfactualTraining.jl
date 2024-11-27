@@ -406,12 +406,13 @@ function load_ce_evaluation(
     cfg::AbstractEvaluationConfig; fname::Union{Nothing,String}=nothing
 )
     fname = if isnothing(fname)
-        default_ce_evaluation_name(cfg)
+        default_bmk_name(cfg)
     else
         fname
     end
 
-    load_results(cfg, Benchmark, fname)
+    bmk = load_results(cfg, Benchmark, fname)
+    return bmk.evaluation
 end
 
 default_bmk_name(cfg::AbstractEvaluationConfig) = joinpath(cfg.save_dir, "bmk.jls")
@@ -423,11 +424,11 @@ default_ce_evaluation_name(cfg::AbstractEvaluationConfig) = "bmk_evaluation"
 
 Dispatches the `generate_factual_target_pairs` on `cfg::AbstractEvaluationConfig`. The data, models and generators are loaded according the configuration `cfg`.
 """
-function generate_factual_target_pairs(cfg::AbstractEvaluationConfig; fname::Union{Nothing,String}=nothing)
+function generate_factual_target_pairs(cfg::AbstractEvaluationConfig; fname::Union{Nothing,String}=nothing, overwrite::Bool=false)
     fname = if isnothing(fname)
         default_factual_target_pairs_name(cfg)
     end
-    if isfile(fname)
+    if isfile(fname) && !overwrite
         @info "Loading factual target pairs from $fname ..."
         output = load_results(cfg, Benchmark, fname)
     else
@@ -465,7 +466,6 @@ function generate_factual_target_pairs(
     factuals = targets
 
     # Other parameters:
-    convergence = get_convergence(cfg.counterfactual_params)
     parallelizer = get_parallelizer(cfg.counterfactual_params)
 
     output = Benchmark[]
@@ -475,9 +475,15 @@ function generate_factual_target_pairs(
         x = select_factual(data, chosen)
         for target in targets
 
-            factual == target && continue
             if cfg.counterfactual_params.verbose
                 @info "Generating counterfactual for $(factual) -> $(target)"
+            end
+
+            # If factual is equal to target, don't search:
+            if factual == target
+                convergence = MaxIterConvergence(0)
+            else
+                convergence = get_convergence(cfg.counterfactual_params)
             end
 
             # Generate and benchmark counterfactuals:
@@ -497,6 +503,9 @@ function generate_factual_target_pairs(
 
             DataFrames.transform!(bmk.evaluation, :model => ByRow(x -> x[1]) => :model) 
             DataFrames.transform!(bmk.evaluation, :generator => ByRow(x -> x[1]) => :generator)
+
+            # Add factual values:
+            bmk.counterfactuals.x .= [x]
 
             push!(output, bmk)
 

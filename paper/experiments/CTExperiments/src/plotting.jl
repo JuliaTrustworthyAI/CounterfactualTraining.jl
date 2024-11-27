@@ -302,6 +302,7 @@ function plot_ce(
     byvars::Union{Nothing,Vector{String}}=nothing,
     rowvar::Union{Nothing,String}=nothing,
     axis=default_mnist,
+    dpi=300,
 )
 
     byvars = gather_byvars(byvars, rowvar)
@@ -320,16 +321,23 @@ function plot_ce(
         for factual in factuals
             for target in targets
                 x = filter(x -> x.factual .== factual && x.target .== target, df_local).mean
-                if target==factual || length(x) == 0
+                if length(x) == 0
                     plt = Plots.plot(; axis=([], false), size=values(axis))
                 else
                     @assert length(x) == 1 "Expected 1 value, got $(length(x))."
                     x = x[1]
+                    if target == factual
+                        title = "Factual"
+                        blue = true
+                    else
+                        title = "$factual→$target"
+                        blue = false
+                    end
                     plt = Plots.plot(
-                        convert2mnist(x);
+                        convert2mnist(x; blue=blue);
                         axis=([], false),
                         size=values(axis),
-                        title="$factual → $target",
+                        title=title,
                     )
                 end
                 push!(plts, plt)
@@ -342,8 +350,9 @@ function plot_ce(
                 values(axis)[1] * length(targets),
                 values(axis)[2] * length(factuals),
             ),
-            dpi=300,
+            dpi=dpi,
         )
+        
         push!(full_plts, full_plt)
     end
     
