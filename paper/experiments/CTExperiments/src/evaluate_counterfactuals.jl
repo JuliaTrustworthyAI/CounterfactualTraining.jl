@@ -394,11 +394,11 @@ function save_results(
 end
 
 """
-    load_results(cfg::EvaluationConfig, fname::String)
+    load_results(cfg::AbstractEvaluationConfig, fname::String)
 
 Loads the benchmark. 
 """
-function load_results(cfg::EvaluationConfig, bmk::Type{Benchmark}, fname::String)
+function load_results(cfg::AbstractEvaluationConfig, bmk::Type{Benchmark}, fname::String)
     return Serialization.deserialize(fname)
 end
 

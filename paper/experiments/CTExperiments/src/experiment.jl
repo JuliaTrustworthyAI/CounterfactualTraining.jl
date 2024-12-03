@@ -132,6 +132,40 @@ Sets up the experiment.
 setup(exp::AbstractExperiment) = setup(exp, exp.data, exp.model_type)
 
 """
+    setup(exp::AbstractExperiment, data::Dataset, model::ModelType)
+
+Loads the data and builds a model corresponding to the specified `model` type. Returns the model and training dataset.
+"""
+function setup(exp::AbstractExperiment, data::Dataset, model::ModelType)
+
+    # Data:
+    n_total = data.n_train + data.n_validation
+    ce_data = get_ce_data(data, n_total)
+    test_size = data.n_validation / n_total
+    Xtrain, ytrain, Xval, yval, unique_labels = (
+        dt -> (dt[1].X, dt[1].y, dt[2].X, dt[2].y, dt[1].y_levels)
+    )(
+        train_test_split(ce_data; test_size=test_size, keep_class_ratio=false)
+    )
+    train_set = Flux.DataLoader((Xtrain, ytrain); batchsize=data.batchsize, parallel=true)
+    val_set = if data.n_validation > 0
+        Flux.DataLoader((Xval, yval); batchsize=data.batchsize, parallel=true)
+    else
+        nothing
+    end
+
+    # Model:
+    nin = size(first(train_set)[1], 1)
+    nout = size(first(train_set)[2], 1)
+    model = build_model(model, nin, nout)
+
+    # Input encoding:
+    input_encoder = get_input_encoder(exp)
+
+    return model, train_set, input_encoder, val_set
+end
+
+"""
     get_input_encoder(exp::Experiment)
 
 Sets up the input encoder for the given experiment. This is dispatched over the dataset and generator type.

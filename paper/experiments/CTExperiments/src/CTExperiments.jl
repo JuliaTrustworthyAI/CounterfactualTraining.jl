@@ -19,6 +19,7 @@ include("utils.jl")
 include("grid.jl")
 include("experiment.jl")
 include("evaluate.jl")
+include("evaluation_grid.jl")
 include("plotting.jl")
 
 export Experiment, run_training

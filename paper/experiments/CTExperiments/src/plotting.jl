@@ -1,6 +1,5 @@
 using AlgebraOfGraphics
 using DataFrames
-using Makie
 using Plots: Plots, PlotMeasures
 
 Base.@kwdef struct PlotParams
