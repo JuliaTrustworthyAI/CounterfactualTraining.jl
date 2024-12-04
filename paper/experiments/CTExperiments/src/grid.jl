@@ -22,7 +22,7 @@ A keyword dictionary that contains the parameters for experiments. It is used to
 - `generator_params`: Parameters for the generator.
 - `save_dir`: The directory where results will be saved.
 """
-struct ExperimentGrid <: AbstractConfiguration
+struct ExperimentGrid <: AbstractGridConfiguration
     name::String
     data::String
     model_type::String
