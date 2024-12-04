@@ -145,6 +145,41 @@ function generate_eval_template(
     return fname
 end
 
-export generate_template, generate_grid_template, generate_eval_template
+"""
+    generate_eval_grid_template(
+        fname::String="paper/experiments/template_eval_grid_config.toml";
+        overwrite=false,
+        save_dir="paper/experiments/template_eval_dir",
+    )
+
+Generates a template configuration file for evaluation grids. This is useful for quickly setting up a new evaluation grid by copying the generated template into your project directory.
+"""
+function generate_eval_grid_template(
+    fname::String="paper/experiments/template_eval_grid_config.toml";
+    overwrite=false,
+    save_dir="paper/experiments/template_eval_dir",
+)
+    write_file = !isfile(fname)     # don't write file if it exists
+    if overwrite                    # unless specified
+        @warn "File $fname already exists! Overwriting..."
+        write_file = true
+    end
+
+    if write_file
+        grid_file = Logging.with_logger(Logging.NullLogger()) do
+            generate_grid_template()
+        end
+        exper_grid = CTExperiments.ExperimentGrid(grid_file)
+        cfg = EvaluationGrid(exper_grid; grid_file=grid_file, save_dir=save_dir)
+        to_toml(cfg, fname)
+    else
+        @warn "File already exists and not explicitly asked to overwrite it."
+    end
+
+    return fname
+
+end
+
+export generate_template, generate_grid_template, generate_eval_template, generate_eval_grid_template
 
 end

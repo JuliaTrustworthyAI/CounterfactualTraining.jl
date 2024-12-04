@@ -76,7 +76,7 @@ struct ExperimentGrid <: AbstractConfiguration
         if !isdir(save_dir)
             mkpath(save_dir)
         end
-        if !isfile(default_grid_config_name(grid))
+        if !isfile(default_grid_config_name(grid)) && !isfile(joinpath(save_dir, "template_grid_config.toml"))
             to_toml(grid, default_grid_config_name(grid))
         end
         
