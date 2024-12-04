@@ -50,7 +50,7 @@ for eval_config in eval_list
     generate_factual_target_pairs(eval_config)
 
     # Working directory:
-    set_work_dir(eval_config, ENV["EVAL_WORK_DIR"])
+    set_work_dir(eval_grid, eval_config, joinpath(ENV["EVAL_WORK_DIR"]))
 
 end
 

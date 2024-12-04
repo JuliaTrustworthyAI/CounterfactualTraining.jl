@@ -177,3 +177,39 @@ function setup_evaluations(
 
     return eval_list
 end
+
+"""
+    set_work_dir(grid::EvaluationGrid, cfg::EvaluationConfig, eval_work_root::String)
+
+A working directory for evaluation grid results.
+"""
+function set_work_dir(grid::EvaluationGrid, cfg::EvaluationConfig, eval_work_root::String)
+    work_dir = get_work_dir(grid, cfg, eval_work_root)
+    
+    # Evaluation specific:
+    if !isfile(joinpath(work_dir, "eval_config.toml"))
+        to_toml(cfg, joinpath(work_dir, "eval_config.toml"))
+    end
+    @info "Working directory for this evaluation is $work_dir. Use this folder to store script for presenting results (plots, tables, etc.)."
+
+    # Root directory for all evaluations:
+    root_dir = joinpath(splitpath(work_dir)[1:(end - 1)]...)
+    if !isfile(joinpath(root_dir, "grid_config.toml"))
+        cp(cfg.grid_file, joinpath(root_dir, "grid_config.toml"))
+    end
+    if !isfile(joinpath(root_dir, "evaluation_grid_config.toml"))
+        to_toml(grid, joinpath(root_dir, "evaluation_grid_config.toml"))
+    end
+
+    return work_dir
+end
+
+"""
+    get_work_dir(grid::EvaluationGrid, cfg::EvaluationConfig, eval_work_root::String)
+
+Get the working directory for evaluation grid results.
+"""
+function get_work_dir(grid::EvaluationGrid, cfg::EvaluationConfig, eval_work_root::String)
+    _root = joinpath(eval_work_root, splitpath(grid.save_dir)[end - 1])
+    return mkpath(joinpath(_root, splitpath(cfg.save_dir)[end]))
+end
