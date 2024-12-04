@@ -1,3 +1,4 @@
+using Accessors
 using CounterfactualExplanations
 using CounterfactualExplanations.Evaluation
 using CSV
@@ -74,7 +75,13 @@ function EvaluationConfig(;
     save_dir::String,
     counterfactual_params::NamedTuple=(;),
     test_time::Bool=false,
+    generator_params::Union{Nothing,NamedTuple}=nothing,
 )
+    if !isnothing(generator_params)
+        # append generator params to counterfactual params:
+        counterfactual_params = @insert counterfactual_params.generator_params = generator_params
+    end
+    println(counterfactual_params)
     counterfactual_params = CounterfactualParams(; counterfactual_params...)
     return EvaluationConfig(grid_file, save_dir, counterfactual_params, test_time)
 end

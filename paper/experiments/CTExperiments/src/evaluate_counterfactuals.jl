@@ -50,7 +50,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
         verbose,
     )
         if generator_params isa NamedTuple
-            if generator_params.type isa String
+            if haskey(generator_params, :type) && generator_params.type isa String
                 generator_type = get_generator_type(generator_params.type)
                 generator_params = @delete $generator_params.type          # remove type
                 generator_params = GeneratorParams(;

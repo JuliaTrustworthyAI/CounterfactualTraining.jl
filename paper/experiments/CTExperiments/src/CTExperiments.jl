@@ -28,6 +28,7 @@ export save_results, load_results, has_results
 export load_list
 export get_logs
 export EvaluationConfig
+export EvaluationGrid, setup_evaluations
 export test_performance, evaluate_counterfactuals
 export generate_factual_target_pairs
 export to_toml
