@@ -9,7 +9,6 @@ using Serialization
 DotEnv.load!()
 
 # Get config and set up grid:
-ENV["config"] = joinpath(ENV["EXPERIMENT_DIR"], "run_grid_cofig.toml")
 config_file = get_config_from_args()
 root_name = CTExperiments.from_toml(config_file)["name"]
 root_save_dir = joinpath(ENV["OUTPUT_DIR"], root_name)
