@@ -25,15 +25,27 @@ if rank != 0
     global_logger(NullLogger())             # avoid logging from other processes
     identifier = ExplicitOutputIdentifier("rank_$rank")
     global_output_identifier(identifier)    # set output identifier to avoid issues with serialization
+    eval_list = nothing
 else
-    # Generate list of experiments and run them:
-    @info "Running evaluation of $(nrow(df_meta)) experiments ..."
+    # Set up evaluation configuration:
+    eval_list = setup_evaluations(eval_grid)
+    @info "Running $(length(eval_list)) evaluations ..."
 end
+
+# Broadcast eval_list from rank 0 to all ranks
+eval_list = MPI.bcast(eval_list, comm; root=0)
+
+MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 
 # Set up evaluation configuration:
 eval_list = setup_evaluations(eval_grid)
 
 for eval_config in eval_list
+
+    # Skip if not on this rank
+    if mod(i, nprocs) != rank
+        continue  # Skip experiments that belong to other ranks
+    end
 
     # Evaluate counterfactuals:
     bmk = evaluate_counterfactuals(eval_config, comm)
@@ -54,3 +66,5 @@ for eval_config in eval_list
 
 end
 
+# Finalize MPI
+MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
