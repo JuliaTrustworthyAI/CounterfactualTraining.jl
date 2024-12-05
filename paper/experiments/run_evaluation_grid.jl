@@ -40,7 +40,7 @@ MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 # Set up evaluation configuration:
 eval_list = setup_evaluations(eval_grid)
 
-for eval_config in eval_list
+for (i, eval_config) in enumerate(eval_list)
 
     # Skip if not on this rank
     if mod(i, nprocs) != rank
