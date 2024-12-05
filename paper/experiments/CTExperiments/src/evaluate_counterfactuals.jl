@@ -402,6 +402,13 @@ function load_results(cfg::AbstractEvaluationConfig, bmk::Type{Benchmark}, fname
     return Serialization.deserialize(fname)
 end
 
+"""
+    load_ce_evaluation(
+        cfg::AbstractEvaluationConfig; fname::Union{Nothing,String}=nothing
+    )
+
+Load the counterfactual evaluation results.
+"""
 function load_ce_evaluation(
     cfg::AbstractEvaluationConfig; fname::Union{Nothing,String}=nothing
 )
@@ -412,7 +419,12 @@ function load_ce_evaluation(
     end
 
     bmk = load_results(cfg, Benchmark, fname)
-    return bmk.evaluation
+    df = bmk.evaluation
+    if "model" in names(df) && !("id" in names(df))
+        rename!(df, :model => :id)
+    end
+    
+    return df
 end
 
 default_bmk_name(cfg::AbstractEvaluationConfig) = joinpath(cfg.save_dir, "bmk.jls")

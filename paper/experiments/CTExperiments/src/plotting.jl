@@ -29,14 +29,46 @@ const default_facet = (; linkyaxes=:minimal, linkxaxes=:minimal)
 
 get_logs(cfg::AbstractEvaluationConfig) = get_logs(ExperimentGrid(cfg.grid_file))
 
+"""
+    merge_with_meta(cfg::EvaluationConfig, df::DataFrame)
+
+Merge the metadata of a CTExperiments experiment grid with the data frame.
+"""
 function merge_with_meta(cfg::EvaluationConfig, df::DataFrame)
     # Load data:
     exper_grid = ExperimentGrid(cfg.grid_file)
     df_meta = CTExperiments.expand_grid_to_df(exper_grid)
-    if "model" in names(df) && !("id" in names(df))
-        rename!(df, :model => :id)
-    end
-    return innerjoin(df_meta, df; on=:id), df_meta, df
+
+    df_merged = innerjoin(df_meta, df; on=:id)
+    select!(df_merged, :id, Not(:id))
+    return df_merged, df_meta, df
+end
+
+"""
+    merge_with_meta(grid::EvaluationGrid, df::DataFrame)
+
+Merge the metadata of a CTExperiments experiment grid with the data frame.
+"""
+function merge_with_meta(grid::EvaluationGrid, df::DataFrame)
+    # Load data:
+    exper_grid = ExperimentGrid(grid.grid_file)
+    df_meta_exper = CTExperiments.expand_grid_to_df(exper_grid)
+    df_meta_eval = CTExperiments.expand_grid_to_df(grid; name_prefix="evaluation")
+    rename!(df_meta_eval, :id => :evaluation)
+
+    # Merge meta data:
+    isduplicate(s) = s in names(df_meta_eval) && s in names(df_meta_exper)
+    df_meta = crossjoin(
+        df_meta_eval,
+        df_meta_exper;
+        renamecols=(x -> isduplicate(x) ? "$(x)_eval" : x) =>
+            (x -> isduplicate(x) ? "$(x)_exper" : x),
+    )
+    select!(df_meta, :evaluation, :id, Not(:evaluation, :id))
+
+    df_merged = innerjoin(df_meta, df; on=[:id, :evaluation])
+    select!(df_merged, :evaluation, :id, Not(:evaluation, :id))
+    return df_merged, df_meta, df
 end
 
 function aggregate_data(
@@ -189,8 +221,16 @@ function gather_byvars(
     return byvars
 end
 
+"""
+    aggregate_ce_evaluation(
+        cfg::EvaluationConfig;
+        kwrgs...
+    )
+
+Aggregate the results from a single counterfactual evaluation.
+"""
 function aggregate_ce_evaluation(
-    cfg::EvaluationConfig;
+    cfg::Union{EvaluationConfig,EvaluationGrid};
     kwrgs...
 )
 
@@ -201,6 +241,17 @@ function aggregate_ce_evaluation(
     
 end
 
+"""
+    aggregate_ce_evaluation(
+        df::DataFrame, 
+        df_meta::DataFrame,
+        df_eval::DataFrame;
+        y::String="plausibility_distance_from_target",
+        byvars::Union{Nothing,Vector{String}}=nothing,
+    )
+
+Aggregate the results from a single counterfactual evaluation.
+"""
 function aggregate_ce_evaluation(
     df::DataFrame, 
     df_meta::DataFrame,

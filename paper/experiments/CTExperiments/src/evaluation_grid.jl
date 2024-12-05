@@ -173,7 +173,7 @@ function setup_evaluations(
     end
 
     # Store list of experiments:
-    # save_list(cfg, exper_list)
+    save_list(cfg, eval_list)
 
     return eval_list
 end
@@ -212,4 +212,55 @@ Get the working directory for evaluation grid results.
 function get_work_dir(grid::EvaluationGrid, cfg::EvaluationConfig, eval_work_root::String)
     _root = joinpath(eval_work_root, splitpath(grid.save_dir)[end - 1])
     return mkpath(joinpath(_root, splitpath(cfg.save_dir)[end]))
+end
+
+"""
+    save_list(grid::EvaluationGrid, exper_list::Vector{<:AbstractExperiment})
+
+Saves the list of evaluations corresponding to the evaluation grid for easy down-stream usage.
+"""
+function save_list(grid::EvaluationGrid, eval_list::Vector{<:EvaluationConfig})
+    save_dir = grid.save_dir
+    @info "Saving list of evaluations to $(save_dir):"
+    return jldsave(joinpath(save_dir, "eval_list.jld2"); eval_list)
+end
+
+"""
+    load_list(grid::EvaluationGrid)
+
+Loads the list of evaluations corresponding to the evaluation grid.
+"""
+function load_list(grid::EvaluationGrid)
+    save_dir = grid.save_dir
+    @info "Loading list of evaluations from $(save_dir):"
+    @assert isfile(joinpath(save_dir, "eval_list.jld2")) "No list of evaluations found in $(save_dir). Did you accidentally delete it?"
+    eval_list = JLD2.load(joinpath(save_dir, "eval_list.jld2"), "eval_list")
+    return eval_list
+end
+
+"""
+    load_ce_evaluation(grid::EvaluationGrid)
+
+Loads the benchmark. 
+"""
+function load_ce_evaluation(grid::EvaluationGrid)
+    
+    # Load list:
+    eval_list = load_list(grid)
+    evals = DataFrame[]
+
+    for (i, cfg) in enumerate(eval_list)
+        evaluation = load_results(cfg, Benchmark, default_bmk_name(cfg)).evaluation
+        evaluation.evaluation .= splitpath(cfg.save_dir)[end]
+        push!(evals, evaluation)
+    end
+
+    # Combine:
+    evaluation = reduce(vcat, evals)
+    if "model" in names(evaluation) && !("id" in names(evaluation))
+        rename!(evaluation, :model => :id)
+    end
+    select!(evaluation, :evaluation, :id, Not(:evaluation, :id))
+
+    return evaluation
 end
