@@ -1,4 +1,5 @@
 using AlgebraOfGraphics
+using CairoMakie
 using DataFrames
 using Plots: Plots, PlotMeasures
 
@@ -14,6 +15,10 @@ function (params::PlotParams)()
     return (; x=params.x, byvars=params.byvars, colorvar=params.colorvar, rowvar=params.rowvar, colvar=params.colvar)
 end
 
+function useful_byvars(df_meta::DataFrame)
+    return names(df_meta)[findall([length(unique(x)) != 1 for x in eachcol(df_meta)])]
+end
+
 function save_dir(params::PlotParams, root::String; prefix::String)
     suffix = [isnothing(v) ? nothing : "$(v)" for (k, v) in pairs(params())] |>
         x -> x[.!isnothing.(x)] |>
@@ -27,7 +32,14 @@ const default_mnist = (; width=150, height=150)
 
 const default_facet = (; linkyaxes=:minimal, linkxaxes=:minimal)
 
-get_logs(cfg::AbstractEvaluationConfig) = get_logs(ExperimentGrid(cfg.grid_file))
+const EvalConfigOrGrid = Union{AbstractEvaluationConfig, EvaluationGrid}
+
+"""
+    get_logs(cfg::EvalConfigOrGrid)
+
+Get the logs of an experiment grid pertaining to either a single evaluation or a grid of evaluations.
+"""
+get_logs(cfg::EvalConfigOrGrid) = get_logs(ExperimentGrid(cfg.grid_file))
 
 """
     merge_with_meta(cfg::EvaluationConfig, df::DataFrame)
@@ -53,21 +65,28 @@ function merge_with_meta(grid::EvaluationGrid, df::DataFrame)
     # Load data:
     exper_grid = ExperimentGrid(grid.grid_file)
     df_meta_exper = CTExperiments.expand_grid_to_df(exper_grid)
-    df_meta_eval = CTExperiments.expand_grid_to_df(grid; name_prefix="evaluation")
-    rename!(df_meta_eval, :id => :evaluation)
 
-    # Merge meta data:
-    isduplicate(s) = s in names(df_meta_eval) && s in names(df_meta_exper)
-    df_meta = crossjoin(
-        df_meta_eval,
-        df_meta_exper;
-        renamecols=(x -> isduplicate(x) ? "$(x)_eval" : x) =>
-            (x -> isduplicate(x) ? "$(x)_exper" : x),
-    )
-    select!(df_meta, :evaluation, :id, Not(:evaluation, :id))
+    if "evaluation" in names(df)
+        df_meta_eval = CTExperiments.expand_grid_to_df(grid; name_prefix="evaluation")
+        rename!(df_meta_eval, :id => :evaluation)
 
-    df_merged = innerjoin(df_meta, df; on=[:id, :evaluation])
-    select!(df_merged, :evaluation, :id, Not(:evaluation, :id))
+        # Merge meta data:
+        isduplicate(s) = s in names(df_meta_eval) && s in names(df_meta_exper)
+        df_meta = crossjoin(
+            df_meta_eval,
+            df_meta_exper;
+            renamecols=(x -> isduplicate(x) ? "$(x)_eval" : x) =>
+                (x -> isduplicate(x) ? "$(x)_exper" : x),
+        )
+        select!(df_meta, :evaluation, :id, Not(:evaluation, :id))
+
+        df_merged = innerjoin(df_meta, df; on=[:id, :evaluation])
+        select!(df_merged, :evaluation, :id, Not(:evaluation, :id))
+    else
+        df_meta = df_meta_exper
+        df_merged = innerjoin(df_meta, df; on=:id)
+        select!(df_merged, :id, Not(:id))
+    end
     return df_merged, df_meta, df
 end
 
@@ -103,7 +122,7 @@ end
 Aggregate logs variable `y` from an experiment grid by columns specified in `byvars`.
 """
 function aggregate_logs(
-    cfg::EvaluationConfig;
+    cfg::EvalConfigOrGrid;
     kwrgs...,
 )
 
@@ -128,7 +147,7 @@ function aggregate_logs(
     byvars::Union{Nothing,Vector{String}}=nothing,
 )
     # Assertions:
-    valid_y = names(logs)[eltype.(eachcol(logs)) .<: AbstractFloat]
+    valid_y = valid_y_logs(logs)
     @assert y in valid_y "Variable `y` must be one of the following: $valid_y."
     @assert byvars isa Nothing || all(col -> col in names(df_meta), byvars) "Columns specified in `byvars` must be one of the following: $(names(df_meta))."
 
@@ -140,7 +159,7 @@ function valid_y_logs(logs::DataFrame)
     return names(logs)[eltype.(eachcol(logs)) .<: AbstractFloat]
 end
 
-function valid_y_logs(cfg::AbstractEvaluationConfig)
+function valid_y_logs(cfg::EvalConfigOrGrid)
     return valid_y_logs(get_logs(cfg))
 end
 
@@ -160,7 +179,7 @@ Plot error bars for aggregated logs from an experiment grid.
 
 ## Arguments
 
-- `cfg::EvaluationConfig`: Configuration object containing grid file path and other settings.
+- `cfg::EvalConfigOrGridg`: Configuration object containing grid file path and other settings.
 - `y`: Variable in the logs to aggregate and plot (default: "acc_val").
 - `byvars`: Columns to group data by for aggregation (default: nothing).
 - `colorvar`, `rowvar`, `colvar`: Variables to use as color, row, and column facets respectively.
@@ -172,7 +191,7 @@ Plot error bars for aggregated logs from an experiment grid.
 A Makie plot object displaying error bars for aggregated logs.
 """
 function plot_errorbar_logs(
-    cfg::EvaluationConfig;
+    cfg::EvalConfigOrGrid;
     x::Nothing=nothing,
     y::String="acc_val",
     byvars::Union{Nothing,Vector{String}}=nothing,
@@ -187,11 +206,19 @@ function plot_errorbar_logs(
 
     # Aggregate logs:
     df_agg = aggregate_logs(cfg; y=y, byvars=byvars)
+    use_line_plot = all(isnan.(df_agg.std))
 
     # Plotting:
-    plt = data(df_agg) *
-        mapping(:epoch => "Epoch", :mean => "Value", :std) *
-        visual(Errorbars) 
+    plt = data(df_agg) 
+    if use_line_plot
+        plt = plt * 
+            mapping(:epoch => "Epoch", :mean => "Value") *
+            visual(Lines)
+    else
+        plt = plt * 
+            mapping(:epoch => "Epoch", :mean => "Value", :std) *
+            visual(Errorbars) 
+    end
     if !isnothing(colorvar)
         plt = plt * mapping(; color=colorvar => nonnumeric)
     end
@@ -230,7 +257,7 @@ end
 Aggregate the results from a single counterfactual evaluation.
 """
 function aggregate_ce_evaluation(
-    cfg::Union{EvaluationConfig,EvaluationGrid};
+    cfg::EvalConfigOrGrid;
     kwrgs...
 )
 
@@ -320,11 +347,16 @@ function boxplot_ce(
     return plt
 end
 
+function aggregate_counterfactuals(eval_grid::EvaluationGrid; kwrgs...)
+    eval_list = load_list(eval_grid)
+    return aggregate_counterfactuals.(eval_list)
+end
+
 function aggregate_counterfactuals(eval_config::EvaluationConfig; kwrgs...)
     bmk = generate_factual_target_pairs(eval_config)
-    all_data = CTExperiments.merge_with_meta(
-        eval_config, innerjoin(bmk.evaluation, bmk.counterfactuals; on=:sample)
-    )
+    df = innerjoin(bmk.evaluation, bmk.counterfactuals; on=:sample)
+    rename!(df, :model => :id)
+    all_data = CTExperiments.merge_with_meta(eval_config, df)
     return aggregate_counterfactuals(all_data...; kwrgs...)
 end
 
@@ -333,6 +365,7 @@ function aggregate_counterfactuals(
     df_meta::DataFrame,
     df_eval::DataFrame;
     byvars::Union{Nothing,Vector{String}}=nothing,
+    byvars_must_include=["factual", "target", "generator_type"],
 )
     # Assertions:
     @assert byvars isa Nothing || all(col -> col in names(df_meta), byvars) "Columns specified in `byvars` must be one of the following: $(names(df_meta))."
@@ -340,10 +373,31 @@ function aggregate_counterfactuals(
     # Drop redundant:
     select!(df, Not(:variable, :value))
 
+    # Adjust ce:
+    if eltype(df.ce) == CounterfactualExplanation
+        df.ce .= CounterfactualExplanations.counterfactual.(df.ce)
+    end
+
     # Aggregate:
     return aggregate_data(
-        df, "ce", byvars; byvars_must_include=["factual", "target", "generator_type"]
+        df, "ce", byvars; byvars_must_include=byvars_must_include
     )
+end
+
+function plot_ce(dataset::Dataset, eval_grid::EvaluationGrid; save_dir=nothing, kwrgs...)
+    eval_list = load_list(eval_grid)
+    plt_list = []
+
+    for eval_config in eval_list
+        if !isnothing(save_dir)
+            local_save_dir = mkpath(joinpath(save_dir, splitpath(eval_config.save_dir)[end]))
+        else
+            local_save_dir = nothing
+        end
+        plt = plot_ce(dataset, eval_config; save_dir=local_save_dir, kwrgs...)
+        push!(plt_list, plt)
+    end
+    return plt_list
 end
 
 function plot_ce(
@@ -353,6 +407,7 @@ function plot_ce(
     rowvar::Union{Nothing,String}=nothing,
     axis=default_mnist,
     dpi=300,
+    save_dir=nothing,
 )
 
     byvars = gather_byvars(byvars, rowvar)
@@ -402,7 +457,9 @@ function plot_ce(
             ),
             dpi=dpi,
         )
-        
+        if !isnothing(save_dir)
+            Plots.savefig(full_plt, joinpath(save_dir, "ce_$(generator).png"))
+        end
         push!(full_plts, full_plt)
     end
     

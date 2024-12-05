@@ -4,7 +4,7 @@ save_dir = "paper/experiments/output/grid_poc/evaluation"
 
 [generator_params]
 opt = ["sgd"]
-lambda_cost = [0.1]
+lambda_cost = [0.01]
 lr = [1.0]
 maxiter = [100]
 lambda_energy = [0.1, 1.0, 5.0, 10.0, 20.0]

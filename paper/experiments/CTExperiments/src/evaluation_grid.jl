@@ -210,9 +210,20 @@ end
 Get the working directory for evaluation grid results.
 """
 function get_work_dir(grid::EvaluationGrid, cfg::EvaluationConfig, eval_work_root::String)
-    _root = joinpath(eval_work_root, splitpath(grid.save_dir)[end - 1])
+    _root = get_work_dir(grid, eval_work_root)
     return mkpath(joinpath(_root, splitpath(cfg.save_dir)[end]))
 end
+
+"""
+    get_work_dir(grid::EvaluationGrid, eval_work_root::String)
+
+Get the root working directory for evaluation grid results.
+"""
+function get_work_dir(grid::EvaluationGrid, eval_work_root::String)
+    return joinpath(eval_work_root, splitpath(grid.save_dir)[end - 1])
+end
+
+results_dir(grid::EvaluationGrid) = joinpath(grid.save_dir, "results")
 
 """
     save_list(grid::EvaluationGrid, exper_list::Vector{<:AbstractExperiment})
