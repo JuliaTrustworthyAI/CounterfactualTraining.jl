@@ -3,8 +3,8 @@
 #SBATCH --job-name="Run POC"
 #SBATCH --partition=compute
 #SBATCH --time=00:20:00
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=20
+#SBATCH --ntasks=6
+#SBATCH --cpus-per-task=5
 #SBATCH --mem-per-cpu=2G
 #SBATCH --account=research-eemcs-insy
 #SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT
