@@ -1,0 +1,23 @@
+grid_file = "paper/experiments/output/grid_poc/grid_config.toml"
+test_time = false
+save_dir = "paper/experiments/output/grid_poc/evaluation/evaluation_1"
+
+[counterfactual_params]
+threaded = true
+maxiter = 100
+store_ce = false
+verbose = true
+n_individuals = 100
+n_runs = 10
+vertical_splits = 0
+parallelizer = "threads"
+conv = "max_iter"
+concatenate_output = true
+
+    [counterfactual_params.generator_params]
+    opt = "sgd"
+    lambda_cost = 0.001
+    lr = 1.0
+    maxiter = 100
+    lambda_energy = 0.1
+    type = "ECCo"
