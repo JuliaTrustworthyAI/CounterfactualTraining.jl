@@ -8,6 +8,70 @@ abstract type AbstractObjective end
 const default_energy_lambda = [0.5, 0.0001]
 const default_adversarial_lambda = 1.0
 
+needs_counterfactuals(obj::AbstractObjective) = true
+
+"""
+    VanillaObjective <: AbstractObjective
+
+The `VanillaObjective` is a concrete implementation of the `AbstractObjective` abstract type that optimizes for:
+
+1. Standard classification objective (the discriminative task).
+"""
+struct VanillaObjective <: AbstractObjective
+    class_loss::Function
+    lambda::Vector{<:AbstractFloat}
+    function VanillaObjective(class_loss, lambda)
+        @assert length(lambda) == 1 "Need exactly one values in lambda for the class loss."
+        return new(class_loss, lambda)
+    end
+end
+
+needs_counterfactuals(obj::VanillaObjective) = false
+
+"""
+    VanillaObjective(;
+        class_loss::Function=Flux.Losses.logitcrossentropy,
+        lambda::Vector{<:AbstractFloat}=[1.0],
+    )
+
+Outer constructor for the `VanillaObjective` type.
+"""
+function VanillaObjective(;
+    class_loss::Function=Flux.Losses.logitcrossentropy,
+    lambda::Vector{<:AbstractFloat}=[1.0],
+)
+    return VanillaObjective(class_loss, lambda)
+end
+
+"""
+    (obj::VanillaObjective)(
+        yhat,
+        y,
+        energy_differential::Vector{<:AbstractFloat}=[0.0f0],
+        regularization::Vector{<:AbstractFloat}=[0.0f0],
+        adversarial_loss::Union{AbstractFloat,Vector{<:AbstractFloat}}=0.0f0;
+        agg=mean,
+        kwrgs...,
+    )
+
+`obj::VanillaObjective` can be called directly on predictions `yhat` and labels `y`.
+"""
+function (obj::VanillaObjective)(
+    yhat,
+    y,
+    energy_differential::Vector{<:AbstractFloat}=[0.0f0],
+    regularization::Vector{<:AbstractFloat}=[0.0f0],
+    adversarial_loss::Union{AbstractFloat,Vector{<:AbstractFloat}}=0.0f0;
+    agg=mean,
+    kwrgs...,
+)
+
+    # Compute the standard classification loss:
+    class_loss = obj.class_loss(yhat, y; agg=agg, kwrgs...)
+
+    return [class_loss]'obj.lambda
+end
+
 """
     EnergyDifferentialObjective <: AbstractObjective
 

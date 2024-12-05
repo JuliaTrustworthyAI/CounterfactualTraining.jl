@@ -193,6 +193,7 @@ end
 Catalogue of available objective functions.
 """
 const objectives = Dict(
+    "vanilla" => CounterfactualTraining.VanillaObjective,
     "full" => CounterfactualTraining.FullObjective,
     "energy" => CounterfactualTraining.EnergyDifferentialObjective,
     "adversarial" => CounterfactualTraining.AdversarialObjective,
@@ -207,6 +208,13 @@ function get_objective(s::String)
     s = lowercase(s)
     @assert s in keys(objectives) "Unknown objective type: $s. Available types are $(keys(objectives))"
     return objectives[s]
+end
+
+function get_lambdas(
+    obj::CounterfactualTraining.VanillaObjective, params::TrainingParams
+)
+    lambda = [params.lambda_class_loss]
+    return lambda
 end
 
 function get_lambdas(obj::CounterfactualTraining.FullObjective, params::TrainingParams)

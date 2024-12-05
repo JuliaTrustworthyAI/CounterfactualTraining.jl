@@ -1,10 +1,10 @@
 [meta_params]
 dim_reduction = false
-experiment_name = "experiment_2"
-generator_type = "generic"
+experiment_name = "experiment_4"
+generator_type = "ecco"
 data = "mnist"
 model_type = "mlp"
-save_dir = "paper/experiments/output/grid_poc/experiment_2"
+save_dir = "paper/experiments/output/grid_poc/experiment_4"
 
 [training_params]
 opt = "adam"
@@ -12,7 +12,7 @@ nce = 100
 lr = 0.001
 threaded = true
 class_loss = "logitcrossentropy"
-objective = "vanilla"
+objective = "full"
 lambda_class_loss = 1.0
 lambda_energy_diff = 0.5
 lambda_energy_reg = 0.001
@@ -30,7 +30,7 @@ nneighbours = 100
     lr = 1.0
     maxiter = 25
     lambda_energy = 5.0
-    type = "Generic"
+    type = "ECCo"
 
 [data]
 n_validation = 1000

@@ -66,9 +66,11 @@ function counterfactual_training(
         implausibilities = Float32[]
         reg_losses = Float32[]
         validity_losses = Float32[]
+        times = Float32[]
+        start = time()
 
         # Generate counterfactuals:
-        if epoch > burnin
+        if epoch > burnin && needs_counterfactuals(loss)
             counterfactual_dl = generate!(
                 model,
                 train_set,
@@ -141,6 +143,7 @@ function counterfactual_training(
         end
 
         # Logging:
+        time_taken = time() - start
         acc = accuracy(model, train_set)
         acc_val = isnothing(val_set) ? nothing : accuracy(model, val_set)
         train_loss = sum(losses) / length(losses)
@@ -166,7 +169,7 @@ function counterfactual_training(
             msg_adv = "n/a"
         end
 
-        push!(log, (; acc, acc_val, train_loss, implaus, log_reg_loss, log_adv_loss))
+        push!(log, (; acc, acc_val, train_loss, implaus, log_reg_loss, log_adv_loss, time_taken))
 
         # Checkpointing:
         if !isnothing(checkpoint_dir)

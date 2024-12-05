@@ -235,10 +235,22 @@ uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 version = "0.10.15"
 
 [[deps.CTExperiments]]
-deps = ["Accessors", "AlgebraOfGraphics", "CSV", "CounterfactualExplanations", "CounterfactualTraining", "DataFrames", "Flux", "JLD2", "KernelDensity", "Logging", "MPI", "MultivariateStats", "Plots", "Random", "Serialization", "StatisticalMeasures", "StatsBase", "TOML", "TaijaData", "TaijaParallel", "UUIDs"]
+deps = ["Accessors", "AlgebraOfGraphics", "CSV", "CairoMakie", "CounterfactualExplanations", "CounterfactualTraining", "DataFrames", "Flux", "JLD2", "KernelDensity", "Logging", "MPI", "MultivariateStats", "Plots", "Random", "Serialization", "StatisticalMeasures", "StatsBase", "TOML", "TaijaData", "TaijaParallel", "UUIDs"]
 path = "CTExperiments"
 uuid = "5eca96c7-09a4-4424-a5a1-dee2b4aead1e"
 version = "0.0.0"
+
+[[deps.Cairo]]
+deps = ["Cairo_jll", "Colors", "Glib_jll", "Graphics", "Libdl", "Pango_jll"]
+git-tree-sha1 = "71aa551c5c33f1a4415867fe06b7844faadb0ae9"
+uuid = "159f3aea-2a34-519c-b102-8c37f9878175"
+version = "1.1.1"
+
+[[deps.CairoMakie]]
+deps = ["CRC32c", "Cairo", "Cairo_jll", "Colors", "FileIO", "FreeType", "GeometryBasics", "LinearAlgebra", "Makie", "PrecompileTools"]
+git-tree-sha1 = "c3161fbfe99d9d7ee121cf2017d49966b152857c"
+uuid = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+version = "0.12.16"
 
 [[deps.Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
@@ -878,6 +890,12 @@ version = "2.82.2+0"
 git-tree-sha1 = "97285bbd5230dd766e9ef6749b80fc617126d496"
 uuid = "c27321d9-0574-5035-807b-f59d2c89b15c"
 version = "1.3.1"
+
+[[deps.Graphics]]
+deps = ["Colors", "LinearAlgebra", "NaNMath"]
+git-tree-sha1 = "a641238db938fff9b2f60d08ed9030387daf428c"
+uuid = "a2bd30eb-e257-5431-a919-1863eab51364"
+version = "1.1.3"
 
 [[deps.Graphite2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]

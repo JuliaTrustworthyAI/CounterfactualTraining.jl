@@ -12,7 +12,7 @@ nce = 100
 lr = 0.001
 threaded = true
 class_loss = "logitcrossentropy"
-objective = "full"
+objective = "vanilla"
 lambda_class_loss = 1.0
 lambda_energy_diff = 0.5
 lambda_energy_reg = 0.001
@@ -28,7 +28,7 @@ nneighbours = 100
     opt = "sgd"
     lambda_cost = 0.001
     lr = 1.0
-    maxiter = 100
+    maxiter = 25
     lambda_energy = 5.0
     type = "ECCo"
 
