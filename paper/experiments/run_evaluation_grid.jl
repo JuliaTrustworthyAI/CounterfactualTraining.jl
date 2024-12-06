@@ -37,9 +37,6 @@ eval_list = MPI.bcast(eval_list, comm; root=0)
 
 MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 
-# Set up evaluation configuration:
-eval_list = setup_evaluations(eval_grid)
-
 for (i, eval_config) in enumerate(eval_list)
 
     # Skip if not on this rank
