@@ -1,0 +1,43 @@
+[meta_params]
+dim_reduction = false
+experiment_name = "experiment_16"
+generator_type = "ecco"
+data = "mnist"
+model_type = "mlp"
+save_dir = "paper/experiments/output/2024-12-05_gen_params/experiment_16"
+
+[training_params]
+opt = "adam"
+nce = 100
+lr = 0.001
+threaded = true
+class_loss = "logitcrossentropy"
+objective = "full"
+lambda_class_loss = 1.0
+lambda_energy_diff = 0.5
+lambda_energy_reg = 0.001
+burnin = 0.0
+nepochs = 200
+verbose = 1
+lambda_adversarial = 1.0
+parallelizer = "mpi"
+conv = "max_iter"
+nneighbours = 100
+
+    [training_params.generator_params]
+    opt = "sgd"
+    lambda_cost = 0.1
+    lr = 1.0
+    maxiter = 100
+    lambda_energy = 1.0
+    type = "ECCo"
+
+[data]
+n_validation = 1000
+n_train = 10000
+batchsize = 100
+
+[model_type]
+nlayers = 1
+activation = "relu"
+nhidden = 64
