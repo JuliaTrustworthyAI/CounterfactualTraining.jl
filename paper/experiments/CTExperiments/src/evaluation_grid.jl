@@ -57,6 +57,8 @@ struct EvaluationGrid <: AbstractGridConfiguration
     end
 end
 
+const EvalConfigOrGrid = Union{AbstractEvaluationConfig,EvaluationGrid}
+
 """
     EvaluationGrid(
         grid::ExperimentGrid;

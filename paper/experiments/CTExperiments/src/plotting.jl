@@ -35,8 +35,6 @@ const default_ce = (; width=400, height=400)
 
 const default_facet = (; linkyaxes=:minimal, linkxaxes=:minimal)
 
-const EvalConfigOrGrid = Union{AbstractEvaluationConfig, EvaluationGrid}
-
 """
     get_logs(cfg::EvalConfigOrGrid)
 
