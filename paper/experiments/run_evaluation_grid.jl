@@ -40,7 +40,7 @@ MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 for (i, eval_config) in enumerate(eval_list)
 
     # Skip if not on this rank
-    if mod(i, nprocs) != rank
+    if mod(i, nprocs) != rank + 1
         continue  # Skip experiments that belong to other ranks
     end
 

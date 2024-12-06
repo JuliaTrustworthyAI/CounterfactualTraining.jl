@@ -63,27 +63,14 @@ function get_input_encoder(exp::AbstractExperiment, data::MNIST, generator_type:
 end
 
 """
-    get_data(data::MNIST; n::Union{Nothing,Int}=data.n_train, test_set::Bool=false)
+    get_data(data::MNIST, test_set::Bool=false)
 
-Load MNIST data and return a subset of the data. If `n` is specified, it returns that number of samples, otherwise it returns all samples. If `test_set` is true, it loads the test set instead of the training set.
+Load the MNIST data set. If `test_set` is true, load the test set; otherwise, load the training set.
 """
-function get_data(data::MNIST; n::Union{Nothing,Int}=data.n_train, test_set::Bool=false)
+function get_data(data::MNIST, test_set::Bool=false)
     if test_set
         X, y = load_mnist_test()
     else
         X, y = load_mnist()
     end
-    n_total = size(X, 2)
-    n = isnothing(n) ? n_total : n
-    if n_total > n
-        idx = sample(1:n_total, n; replace=false)
-
-    elseif n_total < n
-        idx = rand(1:n_total, n)
-    else
-        idx = 1:n_total
-    end
-    X = X[:, idx]
-    y = y[idx]
-    return X, y
 end

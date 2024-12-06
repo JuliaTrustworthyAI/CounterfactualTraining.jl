@@ -12,9 +12,9 @@ using TaijaData
 Keyword container for the `Moons` data set. Can specify the number of samples `n`, the batch size `batchsize`.
 """
 Base.@kwdef struct Moons <: Dataset
-    n_train::Int = 1000
+    n_train::Int = 3000
     batchsize::Int = 1
-    n_validation::Int = 100
+    n_validation::Int = 600
 end
 
 get_domain(d::Moons) = nothing
@@ -26,3 +26,10 @@ end
 get_input_encoder(
     exp::AbstractExperiment, data::Moons, generator_type::AbstractGeneratorType
 ) = nothing
+
+"""
+    get_data(data::Moons, test_set::Bool=false)
+
+Load the Moons data set. Since data is synthetically generated, `test_set` has no effect.
+"""
+get_data(data::Moons, test_set::Bool=false) = load_moons()
