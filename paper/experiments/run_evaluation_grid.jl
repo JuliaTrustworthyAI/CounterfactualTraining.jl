@@ -45,6 +45,7 @@ for (i, eval_config) in enumerate(eval_list)
     end
 
     # Evaluate counterfactuals:
+    @info "Running evaluation $i of $(length(eval_list))."
     bmk = evaluate_counterfactuals(eval_config, comm)
 
     if eval_config.counterfactual_params.concatenate_output
