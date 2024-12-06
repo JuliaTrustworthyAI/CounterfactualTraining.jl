@@ -1,0 +1,43 @@
+[meta_params]
+dim_reduction = false
+experiment_name = "experiment_1"
+generator_type = "ecco"
+data = "moons"
+model_type = "mlp"
+save_dir = "paper/experiments/output/poc_moons/experiment_1"
+
+[training_params]
+opt = "adam"
+nce = 100
+lr = 0.001
+threaded = true
+class_loss = "logitcrossentropy"
+objective = "vanilla"
+lambda_class_loss = 1.0
+lambda_energy_diff = 0.5
+lambda_energy_reg = 0.001
+burnin = 0.0
+nepochs = 100
+verbose = 1
+lambda_adversarial = 1.0
+parallelizer = "mpi"
+conv = "max_iter"
+nneighbours = 100
+
+    [training_params.generator_params]
+    opt = "sgd"
+    lambda_cost = 0.001
+    lr = 0.1
+    maxiter = 50
+    lambda_energy = 5.0
+    type = "ECCo"
+
+[data]
+n_validation = 600
+n_train = 3000
+batchsize = 30
+
+[model_type]
+nlayers = 1
+activation = "relu"
+nhidden = 64

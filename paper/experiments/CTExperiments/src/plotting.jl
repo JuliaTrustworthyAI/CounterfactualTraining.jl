@@ -2,6 +2,7 @@ using AlgebraOfGraphics
 using CairoMakie
 using DataFrames
 using Plots: Plots, PlotMeasures
+using TaijaPlotting
 
 Base.@kwdef struct PlotParams
     x::Union{Nothing,String}=nothing
@@ -29,6 +30,8 @@ end
 const default_axis = (; width=225, height=225)
 
 const default_mnist = (; width=150, height=150)
+
+const default_ce = (; width=400, height=400)
 
 const default_facet = (; linkyaxes=:minimal, linkxaxes=:minimal)
 
@@ -384,7 +387,12 @@ function aggregate_counterfactuals(
     )
 end
 
+function plot_ce(cfg::EvalConfigOrGrid; save_dir=nothing, kwrgs...)
+    plot_ce(CTExperiments.get_data_set(cfg)(), cfg; save_dir=save_dir, kwrgs...)
+end
+
 function plot_ce(dataset::Dataset, eval_grid::EvaluationGrid; save_dir=nothing, kwrgs...)
+
     eval_list = load_list(eval_grid)
     plt_list = []
 
@@ -401,67 +409,160 @@ function plot_ce(dataset::Dataset, eval_grid::EvaluationGrid; save_dir=nothing, 
 end
 
 function plot_ce(
-    dataset::MNIST,
+    dataset::Dataset,
     eval_config::EvaluationConfig;
     byvars::Union{Nothing,Vector{String}}=nothing,
-    rowvar::Union{Nothing,String}=nothing,
-    axis=default_mnist,
+    axis=default_axis,
     dpi=300,
     save_dir=nothing,
 )
-
-    byvars = gather_byvars(byvars, rowvar)
 
     # Aggregate:
     df_agg = aggregate_counterfactuals(eval_config; byvars=byvars)
 
     # Plotting:
-    full_plts = []
     generators = sort(unique(df_agg.generator_type))
     factuals = sort(unique(df_agg.factual))
     targets = sort(unique(df_agg.target))
+
+    if isnothing(byvars)
+        byvars = [byvars]
+    else
+        plot_dict = Dict(k => Dict() for k in byvars)
+    end
+
+    # Plotting:
+    for variable in byvars
+        vals = if isnothing(variable)
+            [nothing]
+        else
+            sort(unique(df_agg[!,variable]))
+        end
+        for val in vals
+            full_plts = _plot_over_generators(
+                dataset,
+                generators,
+                factuals,
+                targets,
+                df_agg,
+                variable,
+                val;
+                save_dir,
+                axis,
+                dpi,
+            )
+            if isnothing(val)
+                plot_dict = full_plts
+            else
+                plot_dict[variable][val] = full_plts
+            end
+        end
+    end
+
+    return plot_dict
+
+end
+
+function _plot_over_generators(
+    dataset,
+    generators,
+    factuals,
+    targets,
+    df_agg,
+    variable,
+    val;
+    save_dir=nothing,
+    axis=default_axis,
+    dpi=300,
+)
+    full_plts = []
     for (i, generator) in enumerate(generators)
-        df_local = df_agg[df_agg.generator_type .== generator, :]
+        if !isnothing(variable)
+            df_local = df_agg[
+                df_agg.generator_type .== generator .&& df_agg[!, variable] .== val,
+                :,
+            ]
+        else
+            df_local = df_agg[df_agg.generator_type .== generator, :]
+        end
         plts = []
         for factual in factuals
             for target in targets
-                x = filter(x -> x.factual .== factual && x.target .== target, df_local).mean
-                if length(x) == 0
-                    plt = Plots.plot(; axis=([], false), size=values(axis))
-                else
-                    @assert length(x) == 1 "Expected 1 value, got $(length(x))."
-                    x = x[1]
-                    if target == factual
-                        title = "Factual"
-                        blue = true
-                    else
-                        title = "$factual→$target"
-                        blue = false
-                    end
-                    plt = Plots.plot(
-                        convert2mnist(x; blue=blue);
-                        axis=([], false),
-                        size=values(axis),
-                        title=title,
-                    )
-                end
+                plt = plot_ce(dataset, df_local, factual, target)
                 push!(plts, plt)
             end
         end
         full_plt = Plots.plot(
             plts...;
             layout=(length(factuals), length(targets)),
-            size=(
-                values(axis)[1] * length(targets),
-                values(axis)[2] * length(factuals),
-            ),
+            size=(values(axis)[1] * length(targets), values(axis)[2] * length(factuals)),
             dpi=dpi,
         )
         if !isnothing(save_dir)
-            Plots.savefig(full_plt, joinpath(save_dir, "ce_$(generator).png"))
+            Plots.savefig(
+                full_plt, joinpath(save_dir, "ce_$(generator)_$(variable)=$(val).png")
+            )
         end
         push!(full_plts, full_plt)
     end
-    
     return full_plts
+end
+
+function plot_ce(data::MNIST, df::DataFrame, factual::Int, target::Int; axis=default_mnist)
+    x = filter(x -> x.factual .== factual && x.target .== target, df).mean
+    if length(x) == 0
+        plt = Plots.plot(; axis=([], false), size=values(axis))
+    else
+        @assert length(x) == 1 "Expected 1 value, got $(length(x))."
+        x = x[1]
+        if target == factual
+            title = "Factual"
+            blue = true
+        else
+            title = "$factual→$target"
+            blue = false
+        end
+        plt = Plots.plot(
+            convert2mnist(x; blue=blue); axis=([], false), size=values(axis), title=title
+        )
+    end
+    return plt
+end
+
+function plot_ce(data::Dataset, df::DataFrame, factual::Int, target::Int; axis=default_ce)
+    data = get_ce_data(data, 200)
+    plt = Plots.plot(data)
+    x = filter(x -> x.factual .== factual && x.target .== target, df).mean
+    if length(x) > 0
+        @assert length(x) == 1 "Expected 1 value, got $(length(x))."
+        x = x[1]
+        @assert size(x, 1) == 2 "Can only plot 2-D data."
+        if target == factual
+            title = ""
+            Plots.scatter!(
+                plt,
+                [x[1]],
+                [x[2]];
+                label="Factual",
+                size=values(axis),
+                title=title,
+                ms=10,
+                color=:yellow,
+            )
+        else
+            title = "$factual→$target"
+            Plots.scatter!(
+                plt,
+                [x[1]],
+                [x[2]];
+                label="Counterfactual",
+                size=values(axis),
+                title=title,
+                ms=10,
+                shape=:star,
+                color=:yellow,
+            )
+        end
+    end
+    return plt
 end

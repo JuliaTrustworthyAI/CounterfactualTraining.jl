@@ -275,3 +275,5 @@ function load_ce_evaluation(grid::EvaluationGrid)
 
     return evaluation
 end
+
+get_data_set(grid::EvalConfigOrGrid) = get_data_set(ExperimentGrid(grid.grid_file).data)

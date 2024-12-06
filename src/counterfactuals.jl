@@ -168,8 +168,8 @@ function generate!(
     # Partition data:
     all_data = zip(counterfactuals, target_indices, targets_enc, neighbours)
     n_total = length(all_data)
-    bs = Int(round(n_total / length(data)))
-    group_indices = partition(1:n_total, bs)
+    group_indices = TaijaParallel.split_obs(1:n_total, length(data))
+
     dl = [
         (
             hcat(counterfactuals[i]...),

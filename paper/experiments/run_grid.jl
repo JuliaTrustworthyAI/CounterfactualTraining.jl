@@ -46,7 +46,7 @@ for (i, experiment) in enumerate(exper_list)
     _name = experiment.meta_params.experiment_name
 
     # Skip if not on this rank
-    if mod(i, nprocs) != rank + 1
+    if mod(i, nprocs) != rank + 1 && nprocs > 1
         continue  # Skip experiments that belong to other ranks
     end
 

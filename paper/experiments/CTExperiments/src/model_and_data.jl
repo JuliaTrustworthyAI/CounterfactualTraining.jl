@@ -4,13 +4,17 @@ using MultivariateStats
 get_domain(d::Dataset) = nothing
 
 include("mnist.jl")
+include("moons.jl")
 
 """
     data_sets
 
 Catalogue of available model types.
 """
-const data_sets = Dict("mnist" => MNIST)
+const data_sets = Dict(
+    "mnist" => MNIST,
+    "moons" => Moons,
+)
 
 """
     get_data_set(s::String)
@@ -46,13 +50,17 @@ function get_data(data::Dataset; n::Union{Nothing,Int}=data.n_train, test_set::B
 end
 
 include("mlp.jl")
+include("cnn.jl")
 
 """
     model_types
 
 Catalogue of available model types.
 """
-const model_types = Dict("mlp" => MLPModel)
+const model_types = Dict(
+    "mlp" => MLPModel,
+    "lenet" => LeNetModel,
+)
 
 """
     get_model_type(s::String)
