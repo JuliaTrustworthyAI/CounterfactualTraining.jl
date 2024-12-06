@@ -475,7 +475,7 @@ function _plot_over_generators(
     axis=default_axis,
     dpi=300,
 )
-    full_plts = []
+    full_plts = Dict()
     for (i, generator) in enumerate(generators)
         if !isnothing(variable)
             df_local = df_agg[
@@ -503,7 +503,7 @@ function _plot_over_generators(
                 full_plt, joinpath(save_dir, "ce_$(generator)_$(variable)=$(val).png")
             )
         end
-        push!(full_plts, full_plt)
+        full_plts[generator] = full_plt
     end
     return full_plts
 end
@@ -546,7 +546,7 @@ function plot_ce(data::Dataset, df::DataFrame, factual::Int, target::Int; axis=d
                 label="Factual",
                 size=values(axis),
                 title=title,
-                ms=10,
+                ms=5,
                 color=:yellow,
             )
         else
