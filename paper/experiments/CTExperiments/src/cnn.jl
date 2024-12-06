@@ -36,9 +36,9 @@ function build_model(model::LeNetModel, nin::Int, nout::Int)
 
     # Model:
     front = Chain(
-        Conv((k, k), 1 => c1; pad=(p, p), model.activation),
+        Conv((k, k), 1 => c1, model.activation; pad=(p, p)),
         MaxPool((2, 2)),
-        Conv((k, k), c1 => c2; pad=(p, p), model.activation),
+        Conv((k, k), c1 => c2, model.activation; pad=(p, p)),
         MaxPool((2, 2)),
         Flux.flatten,
     )

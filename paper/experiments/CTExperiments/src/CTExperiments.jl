@@ -86,13 +86,13 @@ end
 
 """
     generate_grid_template(
-        fname::String="paper/experiments/template_grid_config.toml"; overwrite=false
+        fname::String="paper/experiments/template_grid_config.toml"; overwrite=false, kwrgs...
     )
 
 Generates a template configuration file for experiment grids. This is useful for quickly setting up a new grid of experiments by copying the generated template into your project directory.
 """
 function generate_grid_template(
-    fname::String="paper/experiments/template_grid_config.toml"; overwrite=false
+    fname::String="paper/experiments/template_grid_config.toml"; overwrite=false, kwrgs...
 )
     write_file = !isfile(fname)     # don't write file if it exists
     if overwrite                    # unless specified
@@ -102,7 +102,7 @@ function generate_grid_template(
 
     if write_file
         save_dir = joinpath(splitpath(fname)[1:(end - 1)])
-        exper_grid = CTExperiments.ExperimentGrid(; save_dir=save_dir)
+        exper_grid = CTExperiments.ExperimentGrid(; save_dir=save_dir, kwrgs...)
         to_toml(exper_grid, fname)
     else
         @warn "File already exists and not explicitly asked to overwrite it."
