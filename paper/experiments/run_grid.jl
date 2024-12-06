@@ -42,7 +42,7 @@ for (i, experiment) in enumerate(exper_list)
     end
 
     # Setup:
-    save_dir = experiment.meta_params.save_dir
+    _save_dir = experiment.meta_params.save_dir
     _name = experiment.meta_params.experiment_name
 
     # Skip if not on this rank
@@ -58,7 +58,7 @@ for (i, experiment) in enumerate(exper_list)
 
     # Running the experiment
     @info "Rank $(rank): Running experiment: $(_name) ($i/$(length(exper_list)))"
-    model, logs = run_training(experiment; checkpoint_dir=save_dir)
+    model, logs = run_training(experiment; checkpoint_dir=_save_dir)
 
     # Saving the results:
     save_results(experiment, model, logs)
