@@ -173,7 +173,7 @@ Base.@kwdef struct TrainingParams <: AbstractConfiguration
     lr::AbstractFloat = 0.001
     opt::AbstractString = "adam"
     parallelizer::AbstractString = "threads"
-    threaded::Bool = true
+    threaded::Bool = false
     verbose::Int = 1
 end
 
