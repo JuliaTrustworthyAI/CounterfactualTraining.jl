@@ -4,7 +4,7 @@
 #SBATCH --partition=compute
 #SBATCH --time=00:05:00
 #SBATCH --ntasks=5
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=5
 #SBATCH --mem-per-cpu=2G
 #SBATCH --account=innovation
 #SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT
