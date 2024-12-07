@@ -2,8 +2,8 @@
 #
 #SBATCH --job-name="Run POC"
 #SBATCH --partition=compute
-#SBATCH --time=00:20:00
-#SBATCH --ntasks=60
+#SBATCH --time=00:30:00
+#SBATCH --ntasks=10
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=2G
 #SBATCH --account=research-eemcs-insy
