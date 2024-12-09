@@ -20,49 +20,53 @@ MPI.Init()
 comm = MPI.COMM_WORLD
 rank = MPI.Comm_rank(comm)
 nprocs = MPI.Comm_size(comm)
-if MPI.Comm_rank(MPI.COMM_WORLD) != 0
-    global_logger(NullLogger())
-    exper_list = nothing
-else
-    # Generate list of experiments and run them:
+
+# Only process 0 generates the experiment list
+if rank == 0
     exper_list = setup_experiments(exper_grid)
     @info "Running $(length(exper_list)) experiments ..."
+else
+    exper_list = nothing
+    global_logger(NullLogger())
 end
 
 # Broadcast exper_list from rank 0 to all ranks
 exper_list = MPI.bcast(exper_list, comm; root=0)
 
-MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
+# Compute chunks for distribution
+chunks = TaijaParallel.split_obs(exper_list, nprocs)
 
-if length(exper_list) < nprocs
-    @warn "There are less experiments than processes. Check CPU efficiency of job."
-end
-chunks = TaijaParallel.split_obs(exper_list, nprocs)    # split experiments into chunks for each process
-worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
+# Each process gets its chunk, which might be empty
+worker_chunk = MPI.scatter(chunks, comm)
 
-for (i, experiment) in enumerate(worker_chunk)
-    if rank != 0
-        # Shut up logging for other ranks to avoid cluttering output
-        CTExperiments.shutup!(experiment.training_params)
+# Check if the current process has any work to do
+if !isempty(worker_chunk)
+    for (i, experiment) in enumerate(worker_chunk)
+        if rank != 0
+            # Shut up logging for other ranks to avoid cluttering output
+            CTExperiments.shutup!(experiment.training_params)
+        end
+
+        # Setup:
+        _save_dir = experiment.meta_params.save_dir
+        _name = experiment.meta_params.experiment_name
+
+        # Skip if already finished
+        if has_results(experiment)
+            @info "Rank $(rank): Skipping $(_name), model already exists."
+            continue
+        end
+
+        # Running the experiment
+        @info "Rank $(rank): Running experiment: $(_name) ($i/$(length(worker_chunk)))"
+        println("Saving checkpoints in: ", _save_dir)
+        model, logs = run_training(experiment; checkpoint_dir=_save_dir)
+
+        # Saving the results:
+        save_results(experiment, model, logs)
     end
-
-    # Setup:
-    _save_dir = experiment.meta_params.save_dir
-    _name = experiment.meta_params.experiment_name
-
-    # Skip if already finished
-    if has_results(experiment)
-        @info "Rank $(rank): Skipping $(_name), model already exists."
-        continue
-    end
-
-    # Running the experiment
-    @info "Rank $(rank): Running experiment: $(_name) ($i/$(length(worker_chunk)))"
-    println("Saving checkpoints in: ", _save_dir)
-    model, logs = run_training(experiment; checkpoint_dir=_save_dir)
-
-    # Saving the results:
-    save_results(experiment, model, logs)
+else
+    @info "Rank $(rank): No experiments to process"
 end
 
 # Finalize MPI
