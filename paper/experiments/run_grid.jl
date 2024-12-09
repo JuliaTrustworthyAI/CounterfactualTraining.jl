@@ -40,38 +40,36 @@ end
 chunks = TaijaParallel.split_obs(exper_list, nprocs)    # split experiments into chunks for each process
 worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
 
-@info "Rank $(rank): Worker chunk size $(length(worker_chunk))"
-
-# Check if the current process has any work to do
-if !isempty(worker_chunk) 
-    for (i, experiment) in enumerate(worker_chunk)
-        if rank != 0
-            # Shut up logging for other ranks to avoid cluttering output
-            CTExperiments.shutup!(experiment.training_params)
-        end
-
-        # Setup:
-        _save_dir = experiment.meta_params.save_dir
-        _name = experiment.meta_params.experiment_name
-
-        # Skip if already finished
-        if has_results(experiment)
-            @info "Rank $(rank): Skipping $(_name), model already exists."
-            continue
-        end
-
-        # Running the experiment
-        @info "Rank $(rank): Running experiment: $(_name) ($i/$(length(worker_chunk)))"
-        println("Saving checkpoints in: ", _save_dir)
-        model, logs = run_training(experiment; checkpoint_dir=_save_dir)
-
-        # Saving the results:
-        save_results(experiment, model, logs)
-    end
-else
-    sleep(100)
-    @info "Rank $(rank): No work to do."
+# Dummy experiment in case empty:
+if isempty(worker_chunk)
+    worker_chunk = [Experiment()]
 end
+
+for (i, experiment) in enumerate(worker_chunk)
+    if rank != 0
+        # Shut up logging for other ranks to avoid cluttering output
+        CTExperiments.shutup!(experiment.training_params)
+    end
+
+    # Setup:
+    _save_dir = experiment.meta_params.save_dir
+    _name = experiment.meta_params.experiment_name
+
+    # Skip if already finished
+    if has_results(experiment)
+        @info "Rank $(rank): Skipping $(_name), model already exists."
+        continue
+    end
+
+    # Running the experiment
+    @info "Rank $(rank): Running experiment: $(_name) ($i/$(length(worker_chunk)))"
+    println("Saving checkpoints in: ", _save_dir)
+    model, logs = run_training(experiment; checkpoint_dir=_save_dir)
+
+    # Saving the results:
+    save_results(experiment, model, logs)
+end
+
 
 # Finalize MPI
 MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
