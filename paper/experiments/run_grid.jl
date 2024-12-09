@@ -27,21 +27,31 @@ if rank == 0
     @info "Running $(length(exper_list)) experiments ..."
 else
     exper_list = nothing
-    global_logger(NullLogger())
 end
 
 # Broadcast exper_list from rank 0 to all ranks
 exper_list = MPI.bcast(exper_list, comm; root=0)
 
-# Compute chunks for distribution
-chunks = TaijaParallel.split_obs(exper_list, nprocs)
+# Custom distribution logic
+local_experiments = if rank == 0
+    # Distribute experiments across processes
+    chunks = TaijaParallel.split_obs(exper_list, nprocs)
+    chunks[rank + 1]  # Julia is 1-indexed, MPI is 0-indexed
+else
+    Experiment[]  # Empty list for other ranks
+end
 
-# Each process gets its chunk, which might be empty
-worker_chunk = MPI.scatter(chunks, comm)
+# Scatter the experiment chunks using serialization
+if rank == 0
+    @info "Total processes: $nprocs"
+    @info "Total experiments: $(length(exper_list))"
+    chunk_lengths = [length(chunk) for chunk in TaijaParallel.split_obs(exper_list, nprocs)]
+    @info "Chunk lengths: $chunk_lengths"
+end
 
-# Check if the current process has any work to do
-if !isempty(worker_chunk)
-    for (i, experiment) in enumerate(worker_chunk)
+# Process experiments for this rank
+if !isempty(local_experiments)
+    for (i, experiment) in enumerate(local_experiments)
         if rank != 0
             # Shut up logging for other ranks to avoid cluttering output
             CTExperiments.shutup!(experiment.training_params)
@@ -58,7 +68,7 @@ if !isempty(worker_chunk)
         end
 
         # Running the experiment
-        @info "Rank $(rank): Running experiment: $(_name) ($i/$(length(worker_chunk)))"
+        @info "Rank $(rank): Running experiment: $(_name) ($i/$(length(local_experiments)))"
         println("Saving checkpoints in: ", _save_dir)
         model, logs = run_training(experiment; checkpoint_dir=_save_dir)
 
@@ -71,3 +81,4 @@ end
 
 # Finalize MPI
 MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
+MPI.Finalize()
