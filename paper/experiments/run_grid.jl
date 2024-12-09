@@ -21,7 +21,7 @@ comm = MPI.COMM_WORLD
 rank = MPI.Comm_rank(comm)
 nprocs = MPI.Comm_size(comm)
 if MPI.Comm_rank(MPI.COMM_WORLD) != 0
-    global_logger(NullLogger())
+    # global_logger(NullLogger())
     exper_list = nothing
 else
     # Generate list of experiments and run them:
@@ -39,20 +39,17 @@ if length(exper_list) < nprocs
 end
 chunks = TaijaParallel.split_obs(exper_list, nprocs)    # split experiments into chunks for each process
 
-# Set up dummy experiment configs for processes without experiments to avoid errors during parallelization
-chunks = Logging.with_logger(Logging.NullLogger()) do
-    for (i, chunk) in enumerate(chunks)
-        if isempty(chunk)
-            exper = deepcopy(exper_list[1])
-            exper.meta_params.experiment_name = "dummy"
-            exper.meta_params.save_dir = tempdir()
-            exper.training_params = CTExperiments.TrainingParams(;
-                objective="vanilla", nepochs=1
-            )
-            chunks[i] = [exper]
-        end
+# Set up dummy:
+for (i, chunk) in enumerate(chunks)
+    if isempty(chunk)
+        exper = deepcopy(exper_list[1])
+        exper.meta_params.experiment_name = "dummy"
+        exper.meta_params.save_dir = tempdir()
+        exper.training_params = CTExperiments.TrainingParams(;
+            objective="vanilla", nepochs=1
+        )
+        chunks[i] = [exper]
     end
-    return chunks
 end
 
 worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
