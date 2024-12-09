@@ -45,13 +45,9 @@ for (i, chunk) in enumerate(chunks)
         exper = deepcopy(exper_list[1])
         exper.meta_params.experiment_name = "dummy"
         exper.meta_params.save_dir = tempdir()
-        exper.training_params = CTExperiments.TrainingParams(;
-            objective="vanilla", nepochs=1
-        )
         chunks[i] = [exper]
     end
 end
-
 worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
 
 for (i, experiment) in enumerate(worker_chunk)
