@@ -40,7 +40,7 @@ end
 chunks = TaijaParallel.split_obs(exper_list, nprocs)    # split experiments into chunks for each process
 
 # Set up dummy experiment configs for processes without experiments to avoid errors during parallelization
-Logging.with_logger(Logging.NullLogger()) do
+chunks = Logging.with_logger(Logging.NullLogger()) do
     for (i, chunk) in enumerate(chunks)
         if isempty(chunk)
             exper = deepcopy(exper_list[1])
@@ -52,6 +52,7 @@ Logging.with_logger(Logging.NullLogger()) do
             chunks[i] = [exper]
         end
     end
+    return chunks
 end
 
 worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes

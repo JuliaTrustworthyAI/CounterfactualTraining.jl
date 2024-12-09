@@ -44,7 +44,7 @@ end
 chunks = TaijaParallel.split_obs(eval_list, nprocs)    # split experiments into chunks for each process
 
 # Set up dummy eval configs for processes without evaluations to avoid errors during parallelization
-Logging.with_logger(Logging.NullLogger()) do
+chunks = Logging.with_logger(Logging.NullLogger()) do
     for (i, chunk) in enumerate(chunks)
         if isempty(chunk)
             cfg = eval_list[1]
@@ -62,6 +62,7 @@ Logging.with_logger(Logging.NullLogger()) do
             chunks[i] = [eval_cfg]
         end
     end
+    return chunks
 end
 
 worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
