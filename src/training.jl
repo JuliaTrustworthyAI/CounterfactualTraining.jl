@@ -215,13 +215,15 @@ function counterfactual_training(
         end
 
         if verbose == 1
-            next!(p; showvalues = [("Validation accuracy", acc_val), ("Implausibility", implaus)])
+            next!(p)
         elseif verbose > 1
+            @info "Iteration $epoch:"
             @info msg_acc_train
             @info msg_acc
             @info msg_imp
             @info msg_reg
             @info msg_adv
+            println()
         end
     end
     return model, log

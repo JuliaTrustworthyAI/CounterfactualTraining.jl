@@ -38,41 +38,36 @@ eval_list = MPI.bcast(eval_list, comm; root=0)
 
 MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 
-if length(eval_list) <= nprocs
+if length(eval_list) < nprocs
     @warn "There are less evaluations than processes. Check CPU efficiency of job."
 end
-chunks = TaijaParallel.split_obs(eval_list, nprocs)     # distribute across processes
+chunks = TaijaParallel.split_obs(eval_list, nprocs)    # split experiments into chunks for each process
+worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
 
-for (i, chunk) in enumerate(chunks)
+for (i, eval_config) in enumerate(worker_chunk)
 
-    if i != rank + 1 || length(chunk) == 0
-        continue    # Skip experiments that belong to other ranks or are empty chunks
+    # Evaluate counterfactuals:
+    @info "Running evaluation $i of $(length(worker_chunk))."
+    bmk = evaluate_counterfactuals(eval_config, comm)
+
+    if eval_config.counterfactual_params.concatenate_output
+        # Save results:
+        save_results(
+            eval_config, bmk.evaluation, default_ce_evaluation_name(eval_config)
+        )
+        save_results(eval_config, bmk)
+    else
+        @info "Results for individual runs are stored in $(eval_config.save_dir)."
     end
 
-    for eval_config in chunk
+    # Generate factual target pairs for plotting:
+    generate_factual_target_pairs(eval_config)
 
-        # Evaluate counterfactuals:
-        @info "Running evaluation $i of $(length(eval_list))."
-        bmk = evaluate_counterfactuals(eval_config, comm)
-
-        if eval_config.counterfactual_params.concatenate_output
-            # Save results:
-            save_results(
-                eval_config, bmk.evaluation, default_ce_evaluation_name(eval_config)
-            )
-            save_results(eval_config, bmk)
-        else
-            @info "Results for individual runs are stored in $(eval_config.save_dir)."
-        end
-
-        # Generate factual target pairs for plotting:
-        generate_factual_target_pairs(eval_config)
-
-        # Working directory:
-        set_work_dir(eval_grid, eval_config, joinpath(ENV["EVAL_WORK_DIR"]))
-    end
-
+    # Working directory:
+    set_work_dir(eval_grid, eval_config, joinpath(ENV["EVAL_WORK_DIR"]))
 end
+
+
 
 # Finalize MPI
 MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
