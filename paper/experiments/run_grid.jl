@@ -20,7 +20,8 @@ MPI.Init()
 comm = MPI.COMM_WORLD
 rank = MPI.Comm_rank(comm)
 nprocs = MPI.Comm_size(comm)
-if MPI.Comm_rank(MPI.COMM_WORLD) != 0
+
+if rank != 0
     global_logger(NullLogger())
     exper_list = nothing
 else
@@ -32,19 +33,31 @@ end
 # Broadcast exper_list from rank 0 to all ranks
 exper_list = MPI.bcast(exper_list, comm; root=0)
 
-MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
+# Number of experiments (outer loop size)
+m = length(exper_list)
 
-if length(exper_list) < nprocs
-    @warn "There are less experiments ($(length(exper_list))) than processes ($(nprocs)). Check CPU efficiency of job."
+if m < nprocs
+    @warn "There are fewer experiments ($(m)) than processes ($(nprocs)). Check CPU efficiency of job."
 end
-chunks = TaijaParallel.split_obs(exper_list, nprocs)    # split experiments into chunks for each process
-worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
 
-@info "Rank $(rank): Worker chunk size: $(length(worker_chunk))"
+# Assign each rank to an outer loop task based on `rank % m`
+outer_task_id = rank % m
 
-for (i, experiment) in enumerate(worker_chunk)
-    if rank != 0
-        # Shut up logging for other ranks to avoid cluttering output
+# Split communicator by outer loop task
+sub_comm = MPI.Comm_split(comm, outer_task_id, rank)
+sub_rank = MPI.Comm_rank(sub_comm)
+sub_nprocs = MPI.Comm_size(sub_comm)
+
+# Each sub-communicator processes its corresponding outer-loop task
+if outer_task_id < m
+    experiment = exper_list[outer_task_id + 1]  # Outer loop task assigned to this communicator
+
+    if sub_rank == 0
+        @info "Processing experiment $outer_task_id with $sub_nprocs processes in sub-communicator."
+    end
+
+    if sub_rank != 0
+        # Shut up logging for non-root ranks of sub-communicator
         CTExperiments.shutup!(experiment.training_params)
     end
 
@@ -54,25 +67,22 @@ for (i, experiment) in enumerate(worker_chunk)
 
     # Skip if already finished
     if has_results(experiment)
-        @info "Rank $(rank): Skipping $(_name), model already exists."
-        continue
+        if sub_rank == 0
+            @info "Experiment $_name is already finished. Skipping."
+        end
+    else
+        # Run the experiment
+        if sub_rank == 0
+            @info "Running experiment $_name (Outer Task ID $outer_task_id)."
+        end
+        model, logs = run_training(experiment; checkpoint_dir=_save_dir)
+
+        # Save the results
+        if sub_rank == 0
+            save_results(experiment, model, logs)
+        end
     end
-
-    # Running the experiment
-    @info "Rank $(rank): Running experiment: $(_name) ($i/$(length(worker_chunk)))"
-    println("Saving checkpoints in: ", _save_dir)
-
-    # Finalize MPI
-    MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
-    
-    model, logs = run_training(experiment; checkpoint_dir=_save_dir)
-
-    # Finalize MPI
-    MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
-
-    # Saving the results:
-    save_results(experiment, model, logs)
 end
 
 # Finalize MPI
-MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
+MPI.Barrier(comm)
