@@ -38,7 +38,6 @@ if length(exper_list) < nprocs
     @warn "There are less experiments ($(length(exper_list))) than processes ($(nprocs)). Check CPU efficiency of job."
 end
 chunks = TaijaParallel.split_obs(exper_list, nprocs)    # split experiments into chunks for each process
-chunks = [isempty(chunk) ? [exper_list[1]] : chunk for chunk in chunks]
 worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
 
 @info "Rank $(rank): Worker chunk size $(length(worker_chunk))"
@@ -65,12 +64,12 @@ if !isempty(worker_chunk)
         @info "Rank $(rank): Running experiment: $(_name) ($i/$(length(worker_chunk)))"
         println("Saving checkpoints in: ", _save_dir)
         model, logs = run_training(experiment; checkpoint_dir=_save_dir)
-        MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 
         # Saving the results:
         save_results(experiment, model, logs)
     end
 else
+    sleep(100)
     @info "Rank $(rank): No work to do."
 end
 
