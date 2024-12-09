@@ -38,7 +38,7 @@ if length(exper_list) < nprocs
     @warn "There are less experiments ($(length(exper_list))) than processes ($(nprocs)). Check CPU efficiency of job."
 end
 chunks = TaijaParallel.split_obs(exper_list, nprocs)    # split experiments into chunks for each process
-chunks = [isempty(chunk) ? exper_list[1] : chunk for chunk in chunks]
+chunks = [isempty(chunk) ? [exper_list[1]] : chunk for chunk in chunks]
 worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
 
 @info "Rank $(rank): Worker chunk size $(length(worker_chunk))"
