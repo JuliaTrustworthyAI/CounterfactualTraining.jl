@@ -20,38 +20,29 @@ MPI.Init()
 comm = MPI.COMM_WORLD
 rank = MPI.Comm_rank(comm)
 nprocs = MPI.Comm_size(comm)
-
-# Only process 0 generates the experiment list
-if rank == 0
+if MPI.Comm_rank(MPI.COMM_WORLD) != 0
+    global_logger(NullLogger())
+    exper_list = nothing
+else
+    # Generate list of experiments and run them:
     exper_list = setup_experiments(exper_grid)
     @info "Running $(length(exper_list)) experiments ..."
-else
-    exper_list = nothing
 end
 
 # Broadcast exper_list from rank 0 to all ranks
 exper_list = MPI.bcast(exper_list, comm; root=0)
 
-# Custom distribution logic
-local_experiments = if rank == 0
-    # Distribute experiments across processes
-    chunks = TaijaParallel.split_obs(exper_list, nprocs)
-    chunks[rank + 1]  # Julia is 1-indexed, MPI is 0-indexed
-else
-    Experiment[]  # Empty list for other ranks
-end
+MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 
-# Scatter the experiment chunks using serialization
+if length(exper_list) < nprocs
+    @warn "There are less experiments than processes. Check CPU efficiency of job."
+end
+chunks = TaijaParallel.split_obs(exper_list, nprocs)    # split experiments into chunks for each process
+worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
+
+# Check if the current process has any work to do
 if rank == 0
-    @info "Total processes: $nprocs"
-    @info "Total experiments: $(length(exper_list))"
-    chunk_lengths = [length(chunk) for chunk in TaijaParallel.split_obs(exper_list, nprocs)]
-    @info "Chunk lengths: $chunk_lengths"
-end
-
-# Process experiments for this rank
-if !isempty(local_experiments)
-    for (i, experiment) in enumerate(local_experiments)
+    for (i, experiment) in enumerate(worker_chunk)
         if rank != 0
             # Shut up logging for other ranks to avoid cluttering output
             CTExperiments.shutup!(experiment.training_params)
@@ -68,7 +59,7 @@ if !isempty(local_experiments)
         end
 
         # Running the experiment
-        @info "Rank $(rank): Running experiment: $(_name) ($i/$(length(local_experiments)))"
+        @info "Rank $(rank): Running experiment: $(_name) ($i/$(length(worker_chunk)))"
         println("Saving checkpoints in: ", _save_dir)
         model, logs = run_training(experiment; checkpoint_dir=_save_dir)
 
@@ -81,4 +72,3 @@ end
 
 # Finalize MPI
 MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
-MPI.Finalize()
