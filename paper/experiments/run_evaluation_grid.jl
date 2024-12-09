@@ -38,7 +38,9 @@ eval_list = MPI.bcast(eval_list, comm; root=0)
 
 MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 
-@assert length(eval_list) >= nprocs  "Ensure there are enough evaluations to distribute across all ranks"
+if length(eval_list) >= nprocs  
+    @warn "There are less evaluations than processes. Check CPU efficiency of job."
+end
 chunks = TaijaParallel.split_obs(eval_list, nprocs)     # distribute across processes
 
 for (i, chunk) in enumerate(chunks)

@@ -3,8 +3,8 @@
 #SBATCH --job-name="Run Model"
 #SBATCH --partition=compute
 #SBATCH --time=00:10:00
-#SBATCH --ntasks=4
-#SBATCH --cpus-per-task=3
+#SBATCH --ntasks=12
+#SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=4G
 #SBATCH --account=innovation
 #SBATCH --mail-type=END,REQUEUE
