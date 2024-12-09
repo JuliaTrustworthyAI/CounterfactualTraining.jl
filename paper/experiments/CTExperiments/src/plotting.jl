@@ -497,8 +497,13 @@ function _plot_over_generators(
             dpi=dpi,
         )
         if !isnothing(save_dir)
+            fnmake = if isnothing(variable)
+                "ce_$(generator).png"
+            else
+                "ce_$(generator)_$(variable)=$(val).png"
+            end
             Plots.savefig(
-                full_plt, joinpath(save_dir, "ce_$(generator)_$(variable)=$(val).png")
+                full_plt, joinpath(save_dir, fname)
             )
         end
         full_plts[generator] = full_plt
