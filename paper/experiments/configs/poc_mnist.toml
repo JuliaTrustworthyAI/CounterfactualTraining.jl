@@ -1,9 +1,9 @@
-name = "poc_lenet"
+name = "grid_poc"
 dim_reduction = [false]
 generator_type = ["ecco", "generic", "revise"]
 data = "mnist"
-model_type = "lenet"
-save_dir = "paper/experiments/output/poc_lenet"
+model_type = "mlp"
+save_dir = "paper/experiments/output/grid_poc"
 
 [data_params]
 n_validation = []
@@ -11,10 +11,9 @@ n_train = [10000]
 batchsize = [100]
 
 [model_params]
-channels1 = []
-channels2 = []
+nlayers = []
 activation = []
-filter_size = []
+nhidden = [64]
 
 [generator_params]
 opt = ["sgd"]
@@ -26,7 +25,7 @@ type = []
 
 [training_params]
 opt = ["adam"]
-nce = [100]
+nce = [1000]
 lr = []
 threaded = []
 class_loss = []
@@ -34,7 +33,7 @@ objective = ["vanilla", "full"]
 lambda_class_loss = [1.0]
 lambda_energy_diff = [0.5]
 burnin = [0.0]
-nepochs = [50]
+nepochs = [200]
 lambda_energy_reg = [0.001]
 verbose = [1]
 lambda_adversarial = []
