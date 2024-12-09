@@ -48,10 +48,10 @@ for (i, chunk) in enumerate(chunks)
     # Divide the experiments among the available ranks
     for experiment in chunk
 
-        # if i != 1
-        #     # Shut up logging for other ranks to avoid cluttering output
-        #     CTExperiments.shutup!(experiment.training_params)
-        # end
+        if i != 1
+            # Shut up logging for other ranks to avoid cluttering output
+            CTExperiments.shutup!(experiment.training_params)
+        end
 
         # Setup:
         _save_dir = experiment.meta_params.save_dir
@@ -66,6 +66,7 @@ for (i, chunk) in enumerate(chunks)
 
         # Running the experiment
         @info "Rank $(rank): Running experiment: $(_name) ($i/$(length(exper_list)))"
+        println("Saving checkpoints in: ", _save_dir)
         model, logs = run_training(experiment; checkpoint_dir=_save_dir)
 
         # Saving the results:
