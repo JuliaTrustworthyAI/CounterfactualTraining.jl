@@ -6,6 +6,7 @@ using CTExperiments: default_ce_evaluation_name
 using DotEnv
 using Logging
 using MPI
+using TaijaParallel
 
 DotEnv.load!()
 
@@ -37,30 +38,37 @@ eval_list = MPI.bcast(eval_list, comm; root=0)
 
 MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 
-for (i, eval_config) in enumerate(eval_list)
+@assert length(eval_list) >= nprocs  "Ensure there are enough evaluations to distribute across all ranks"
+chunks = TaijaParallel.split_obs(eval_list, nprocs)     # distribute across processes
 
-    # Skip if not on this rank
-    if mod(i, nprocs) != rank 
-        continue  # Skip experiments that belong to other ranks
+for (i, chunk) in enumerate(chunks)
+
+    if i != rank 
+        continue    # Skip experiments that belong to other ranks
     end
 
-    # Evaluate counterfactuals:
-    @info "Running evaluation $i of $(length(eval_list))."
-    bmk = evaluate_counterfactuals(eval_config, comm)
+    for eval_config in chunk
 
-    if eval_config.counterfactual_params.concatenate_output
-        # Save results:
-        save_results(eval_config, bmk.evaluation, default_ce_evaluation_name(eval_config))
-        save_results(eval_config, bmk)
-    else
-        @info "Results for individual runs are stored in $(eval_config.save_dir)."
+        # Evaluate counterfactuals:
+        @info "Running evaluation $i of $(length(eval_list))."
+        bmk = evaluate_counterfactuals(eval_config, comm)
+
+        if eval_config.counterfactual_params.concatenate_output
+            # Save results:
+            save_results(
+                eval_config, bmk.evaluation, default_ce_evaluation_name(eval_config)
+            )
+            save_results(eval_config, bmk)
+        else
+            @info "Results for individual runs are stored in $(eval_config.save_dir)."
+        end
+
+        # Generate factual target pairs for plotting:
+        generate_factual_target_pairs(eval_config)
+
+        # Working directory:
+        set_work_dir(eval_grid, eval_config, joinpath(ENV["EVAL_WORK_DIR"]))
     end
-
-    # Generate factual target pairs for plotting:
-    generate_factual_target_pairs(eval_config)
-
-    # Working directory:
-    set_work_dir(eval_grid, eval_config, joinpath(ENV["EVAL_WORK_DIR"]))
 
 end
 

@@ -480,6 +480,11 @@ function generate_factual_target_pairs(
     # Other parameters:
     parallelizer = get_parallelizer(cfg.counterfactual_params)
 
+    # Store only counterfactual, not whole CE object:
+    @warn "Setting `_ce_transform` to `counterfactual` to avoid storing entire `CounterfactualExplanation` object."
+    transformer = ExplicitCETransformer(CounterfactualExplanations.counterfactual)
+    global_ce_transform(transformer)
+
     output = Benchmark[]
 
     for factual in factuals
