@@ -41,8 +41,8 @@ chunks = TaijaParallel.split_obs(exper_list, nprocs)     # distribute across pro
 
 for (i, chunk) in enumerate(chunks)
 
-    if i != rank + 1
-        continue    # Skip experiments that belong to other ranks
+    if i != rank + 1 || length(chunk) == 0
+        continue    # Skip experiments that belong to other ranks or are empty chunks
     end
 
     # Divide the experiments among the available ranks

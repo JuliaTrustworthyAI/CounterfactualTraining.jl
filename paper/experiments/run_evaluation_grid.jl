@@ -45,8 +45,8 @@ chunks = TaijaParallel.split_obs(eval_list, nprocs)     # distribute across proc
 
 for (i, chunk) in enumerate(chunks)
 
-    if i != rank + 1
-        continue    # Skip experiments that belong to other ranks
+    if i != rank + 1 || length(chunk) == 0
+        continue    # Skip experiments that belong to other ranks or are empty chunks
     end
 
     for eval_config in chunk
