@@ -34,14 +34,14 @@ exper_list = MPI.bcast(exper_list, comm; root=0)
 
 MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 
-if length(exper_list) >= nprocs
+if length(exper_list) <= nprocs
     @warn "There are less experiments than processes. Check CPU efficiency of job."
 end
 chunks = TaijaParallel.split_obs(exper_list, nprocs)     # distribute across processes
 
 for (i, chunk) in enumerate(chunks)
 
-    if i != rank 
+    if i != rank + 1
         continue    # Skip experiments that belong to other ranks
     end
 
