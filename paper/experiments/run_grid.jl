@@ -5,6 +5,7 @@ using DotEnv
 using Logging
 using MPI
 using Serialization
+using TaijaParallel
 
 DotEnv.load!()
 
