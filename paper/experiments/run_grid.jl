@@ -38,14 +38,22 @@ if length(exper_list) < nprocs
     @warn "There are less experiments ($(length(exper_list))) than processes ($(nprocs)). Check CPU efficiency of job."
 end
 chunks = TaijaParallel.split_obs(exper_list, nprocs)    # split experiments into chunks for each process
-for (i, chunk) in enumerate(chunks)
-    if isempty(chunk)
-        exper = deepcopy(exper_list[1])
-        exper.meta_params.experiment_name = "dummy"
-        exper.meta_params.save_dir = tempdir()
-        chunks[i] = [exper]
+
+# Set up dummy experiment configs for processes without experiments to avoid errors during parallelization
+Logging.with_logger(Logging.NullLogger()) do
+    for (i, chunk) in enumerate(chunks)
+        if isempty(chunk)
+            exper = deepcopy(exper_list[1])
+            exper.meta_params.experiment_name = "dummy"
+            exper.meta_params.save_dir = tempdir()
+            exper.training_params = CTExperiments.TrainingParams(;
+                objective="vanilla", nepochs=1
+            )
+            chunks[i] = [exper]
+        end
     end
 end
+
 worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
 
 for (i, experiment) in enumerate(worker_chunk)
