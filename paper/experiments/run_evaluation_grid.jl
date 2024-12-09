@@ -44,8 +44,18 @@ end
 chunks = TaijaParallel.split_obs(eval_list, nprocs)    # split experiments into chunks for each process
 for (i, chunk) in enumerate(chunks)
     if isempty(chunk)
-        eval_cfg = deepcopy(eval_list[1])
-        eval_cfg.save_dir = tempdir()
+        cfg = eval_list[1]
+        params = (
+            n_individuals = 1,
+            n_runs = 1,
+            maxiter = 1,
+            parallelizer=cfg.counterfactual_params.parallelizer,
+        )
+        eval_cfg = EvaluationConfig(;
+            grid_file=eval_list[1].grid_file,
+            save_dir=mkpath(joinpath(tempdir(),"dummy_eval_$(i)")),
+            counterfactual_params=params,
+        )
         chunks[i] = [eval_cfg]
     end
 end

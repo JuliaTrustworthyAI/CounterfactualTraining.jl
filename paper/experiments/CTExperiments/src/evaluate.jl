@@ -81,7 +81,6 @@ function EvaluationConfig(;
         # append generator params to counterfactual params:
         counterfactual_params = @insert counterfactual_params.generator_params = generator_params
     end
-    println(counterfactual_params)
     counterfactual_params = CounterfactualParams(; counterfactual_params...)
     return EvaluationConfig(grid_file, save_dir, counterfactual_params, test_time)
 end
