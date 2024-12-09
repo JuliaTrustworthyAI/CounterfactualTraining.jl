@@ -40,7 +40,7 @@ end
 chunks = TaijaParallel.split_obs(exper_list, nprocs)    # split experiments into chunks for each process
 worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
 
-for experiment in worker_chunk
+for (i, experiment) in enumerate(worker_chunk)
     if rank != 0
         # Shut up logging for other ranks to avoid cluttering output
         CTExperiments.shutup!(experiment.training_params)
@@ -57,7 +57,7 @@ for experiment in worker_chunk
     end
 
     # Running the experiment
-    @info "Rank $(rank): Running experiment: $(_name) ($i/$(length(exper_list)))"
+    @info "Rank $(rank): Running experiment: $(_name) ($i/$(length(worker_chunk)))"
     println("Saving checkpoints in: ", _save_dir)
     model, logs = run_training(experiment; checkpoint_dir=_save_dir)
 
