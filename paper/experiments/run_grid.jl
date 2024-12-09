@@ -40,6 +40,8 @@ end
 chunks = TaijaParallel.split_obs(exper_list, nprocs)    # split experiments into chunks for each process
 worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
 
+@info "Rank $(rank): Worker chunk size $(length(worker_chunk))"
+
 # Check if the current process has any work to do
 for (i, experiment) in enumerate(worker_chunk)
     if rank != 0
@@ -65,6 +67,8 @@ for (i, experiment) in enumerate(worker_chunk)
     # Saving the results:
     save_results(experiment, model, logs)
 end
+
+@info "Rank $(rank): Experiment finished."
 
 # Finalize MPI
 MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
