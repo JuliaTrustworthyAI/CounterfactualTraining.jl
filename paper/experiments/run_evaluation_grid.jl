@@ -23,7 +23,7 @@ comm = MPI.COMM_WORLD
 rank = MPI.Comm_rank(comm)
 nprocs = MPI.Comm_size(comm)
 if rank != 0
-    global_logger(NullLogger())             # avoid logging from other processes
+    # global_logger(NullLogger())             # avoid logging from other processes
     identifier = ExplicitOutputIdentifier("rank_$rank")
     global_output_identifier(identifier)    # set output identifier to avoid issues with serialization
     eval_list = nothing
@@ -42,6 +42,13 @@ if length(eval_list) < nprocs
     @warn "There are less evaluations than processes. Check CPU efficiency of job."
 end
 chunks = TaijaParallel.split_obs(eval_list, nprocs)    # split experiments into chunks for each process
+for (i, chunk) in enumerate(chunks)
+    if isempty(chunk)
+        eval_cfg = deepcopy(eval_list[1])
+        eval_cfg.save_dir = tempdir()
+        chunks[i] = [eval_cfg]
+    end
+end
 worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
 
 for (i, eval_config) in enumerate(worker_chunk)
