@@ -48,10 +48,10 @@ for (i, chunk) in enumerate(chunks)
     # Divide the experiments among the available ranks
     for experiment in chunk
 
-        if rank != 0
-            # Shut up logging for other ranks to avoid cluttering output
-            CTExperiments.shutup!(experiment.training_params)
-        end
+        # if i != 1
+        #     # Shut up logging for other ranks to avoid cluttering output
+        #     CTExperiments.shutup!(experiment.training_params)
+        # end
 
         # Setup:
         _save_dir = experiment.meta_params.save_dir
