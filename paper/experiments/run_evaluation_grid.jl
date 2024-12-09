@@ -65,6 +65,8 @@ chunks = Logging.with_logger(Logging.NullLogger()) do
     return chunks
 end
 
+display(chunks)
+
 worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
 
 for (i, eval_config) in enumerate(worker_chunk)
