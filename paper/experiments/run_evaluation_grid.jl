@@ -23,7 +23,7 @@ comm = MPI.COMM_WORLD
 rank = MPI.Comm_rank(comm)
 nprocs = MPI.Comm_size(comm)
 if rank != 0
-    # global_logger(NullLogger())             # avoid logging from other processes
+    global_logger(NullLogger())             # avoid logging from other processes
     identifier = ExplicitOutputIdentifier("rank_$rank")
     global_output_identifier(identifier)    # set output identifier to avoid issues with serialization
     eval_list = nothing
@@ -42,23 +42,28 @@ if length(eval_list) < nprocs
     @warn "There are less evaluations than processes. Check CPU efficiency of job."
 end
 chunks = TaijaParallel.split_obs(eval_list, nprocs)    # split experiments into chunks for each process
-for (i, chunk) in enumerate(chunks)
-    if isempty(chunk)
-        cfg = eval_list[1]
-        params = (
-            n_individuals = 1,
-            n_runs = 1,
-            maxiter = 1,
-            parallelizer=cfg.counterfactual_params.parallelizer,
-        )
-        eval_cfg = EvaluationConfig(;
-            grid_file=eval_list[1].grid_file,
-            save_dir=mkpath(joinpath(tempdir(),"dummy_eval_$(i)")),
-            counterfactual_params=params,
-        )
-        chunks[i] = [eval_cfg]
+
+# Set up dummy eval configs for processes without evaluations to avoid errors during parallelization
+Logging.with_logger(Logging.NullLogger()) do
+    for (i, chunk) in enumerate(chunks)
+        if isempty(chunk)
+            cfg = eval_list[1]
+            params = (
+                n_individuals = 1,
+                n_runs = 1,
+                maxiter = 1,
+                parallelizer=cfg.counterfactual_params.parallelizer,
+            )
+            eval_cfg = EvaluationConfig(;
+                grid_file=eval_list[1].grid_file,
+                save_dir=mkpath(joinpath(tempdir(),"dummy_eval_$(i)")),
+                counterfactual_params=params,
+            )
+            chunks[i] = [eval_cfg]
+        end
     end
 end
+
 worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
 
 for (i, eval_config) in enumerate(worker_chunk)
