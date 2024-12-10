@@ -39,16 +39,27 @@ if length(exper_list) < nprocs
 end
 chunks = TaijaParallel.split_obs(exper_list, nprocs)    # split experiments into chunks for each process
 
-# Set up dummy:
-for (i, chunk) in enumerate(chunks)
-    if isempty(chunk)
-        exper = deepcopy(exper_list[1])
-        exper.meta_params.experiment_name = "dummy"
-        exper.meta_params.save_dir = tempdir()
-        chunks[i] = [exper]
-    end
-end
+# # Set up dummy:
+# chunks = Logging.with_logger(Logging.NullLogger()) do
+#     for (i, chunk) in enumerate(chunks)
+#         if isempty(chunk)
+#             exper = deepcopy(exper_list[1])
+#             exper.meta_params.experiment_name = "dummy"
+#             exper.meta_params.save_dir = tempdir()
+#             chunks[i] = [exper]
+#         end
+#     end
+#     return chunks
+# end
+
 worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
+
+# Create a new communicator with only the active processes
+rank_is_active = !isempty(worker_chunk)
+active_comm = MPI.Comm_split(
+    MPI.COMM_WORLD, rank_is_active ? 1 : MPI.MPI_UNDEFINED, rank
+)
+TaijaParallel.set_active_comm(active_comm)
 
 for (i, experiment) in enumerate(worker_chunk)
     if rank != 0

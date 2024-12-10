@@ -248,7 +248,9 @@ function get_parallelizer(pllr_type::String; threaded::Bool=true)
         if !MPI.Initialized()
             MPI.Init()
         end
-        pllr = MPIParallelizer(MPI.COMM_WORLD; threaded=threaded)
+        # Active comm:
+        active_comm = TaijaParallel.get_active_comm()
+        pllr = MPIParallelizer(MPI.COMM_WORLD; threaded=threaded, active_comm=active_comm)
     end
 
     return pllr
