@@ -62,7 +62,9 @@ active_comm = MPI.Comm_split(
     rank_is_active ? 1 : nothing,
     rank,
 )
-TaijaParallel.set_active_comm(active_comm)
+if rank_is_active
+    TaijaParallel.set_active_comm(active_comm)
+end
 
 for (i, experiment) in enumerate(worker_chunk)
     if rank != 0
@@ -83,6 +85,7 @@ for (i, experiment) in enumerate(worker_chunk)
     # Running the experiment
     @info "Rank $(rank): Running experiment: $(_name) ($i/$(length(worker_chunk)))"
     println("Saving checkpoints in: ", _save_dir)
+    @info "Rank $(MPI.Comm_rank(parallelizer.comm)) starting training with communicator $(parallelizer.active_comm) ..."
     model, logs = run_training(experiment; checkpoint_dir=_save_dir)
 
     # Saving the results:
