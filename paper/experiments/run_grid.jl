@@ -57,6 +57,7 @@ worker_chunk = MPI.scatter(chunks, comm)                # distribute across proc
 # Create a new communicator with only the active processes
 rank_is_active = !isempty(worker_chunk)
 @info "Rank $(rank) is active: $(rank_is_active)"
+@info "Rank $(rank) has $(length(worker_chunk)) experiments to run.
 active_comm = MPI.Comm_split(
     comm,
     rank_is_active ? 1 : nothing,
