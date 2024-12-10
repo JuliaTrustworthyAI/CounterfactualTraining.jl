@@ -62,9 +62,7 @@ active_comm = MPI.Comm_split(
     rank_is_active ? 1 : nothing,
     rank,
 )
-if rank_is_active
-    TaijaParallel.set_active_comm(active_comm)
-end
+TaijaParallel.set_active_comm(active_comm)
 
 for (i, experiment) in enumerate(worker_chunk)
     if rank != 0
