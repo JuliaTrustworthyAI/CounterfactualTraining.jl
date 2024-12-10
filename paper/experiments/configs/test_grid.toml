@@ -1,4 +1,4 @@
-name = "grid_32d53de2-b6e4-11ef-090b-b5be19287e3c"
+name = "test_grid"
 dim_reduction = [false]
 generator_type = ["ecco", "generic", "revise"]
 data = "mnist"
