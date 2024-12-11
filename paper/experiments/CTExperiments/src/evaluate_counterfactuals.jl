@@ -253,6 +253,8 @@ function evaluate_counterfactuals(
         cfg, data, local_models, generators; measure=measure
     )
 
+    MPI.Barrier(comm)  # Ensure all processes have completed local evaluation before gathering results
+
     # Gather results from all processes (if needed)
     if cfg.counterfactual_params.concatenate_output
         # Gather results from all processes
