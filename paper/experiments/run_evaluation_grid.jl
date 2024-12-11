@@ -1,3 +1,4 @@
+using Accessors
 using CounterfactualExplanations
 using CounterfactualExplanations.Evaluation
 using CTExperiments
@@ -41,25 +42,16 @@ MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 if length(eval_list) < nprocs
     @warn "There are less evaluations than processes. Check CPU efficiency of job."
 end
-chunks = TaijaParallel.split_obs(eval_list, nprocs)    # split experiments into chunks for each process
+chunks = TaijaParallel.split_obs(eval_list, nprocs)    # split  evaluations into chunks for each process
 
-# Set up dummy eval configs for processes without evaluations to avoid errors during parallelization
+# Set up dummy evaluation for processes without evaluations to avoid deadlock if no  evaluations are assigned to a process:
 chunks = Logging.with_logger(Logging.NullLogger()) do
     for (i, chunk) in enumerate(chunks)
         if isempty(chunk)
             cfg = eval_list[1]
-            params = (
-                n_individuals=1,
-                n_runs=1,
-                maxiter=1,
-                parallelizer=cfg.counterfactual_params.parallelizer,
-            )
-            eval_cfg = EvaluationConfig(;
-                grid_file=eval_list[1].grid_file,
-                save_dir=mkpath(joinpath(tempdir(), "dummy_eval_$(i)")),
-                counterfactual_params=params,
-            )
-            chunks[i] = [eval_cfg]
+            @reset cfg.counterfactual_params.maxiter = 1
+            @reset cfg.save_dir = mkpath(joinpath(tempdir(), "dummy_eval_$(i)"))
+            chunks[i] = [cfg]
         end
     end
     return chunks
