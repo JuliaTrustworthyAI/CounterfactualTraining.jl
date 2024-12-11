@@ -203,9 +203,6 @@ function run_training(exp::Experiment; checkpoint_dir::Union{Nothing,String}=not
     domain = get_domain(exp.data)
     pllr = get_parallelizer(exp.training_params)
 
-    @info "Parallelizer:"
-    display(pllr)
-
     # Optimizer and model:
     training_opt = get_opt(exp.training_params)
     opt_state = Flux.setup(training_opt, model)

@@ -1,4 +1,3 @@
-using Accessors
 using BSON
 using CTExperiments
 using CounterfactualExplanations
@@ -47,7 +46,6 @@ chunks = Logging.with_logger(Logging.NullLogger()) do
             exper = deepcopy(exper_list[1])
             exper.meta_params.experiment_name = "dummy"
             exper.meta_params.save_dir = tempdir()
-            @reset exper.training_params.nepochs = 1
             chunks[i] = [exper]
         end
     end

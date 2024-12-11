@@ -49,7 +49,6 @@ chunks = Logging.with_logger(Logging.NullLogger()) do
     for (i, chunk) in enumerate(chunks)
         if isempty(chunk)
             cfg = eval_list[1]
-            @reset cfg.counterfactual_params.maxiter = 1
             @reset cfg.save_dir = mkpath(joinpath(tempdir(), "dummy_eval_$(i)"))
             chunks[i] = [cfg]
         end
