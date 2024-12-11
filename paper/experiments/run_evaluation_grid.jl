@@ -45,7 +45,7 @@ if length(eval_list) < nprocs
     @warn "There are less evaluations than processes. Check CPU efficiency of job."
 end
 chunks = TaijaParallel.split_obs(eval_list, nprocs)     # split  evaluations into chunks for each process
-dummy_rank = isempty(chunks[rank])                      # check if rank was allocated any evaluations
+dummy_rank = isempty(chunks[rank+1])                    # check if rank was allocated any evaluations
 
 # Set up dummy evaluation for processes without evaluations to avoid deadlock if no  evaluations are assigned to a process:
 chunks = Logging.with_logger(Logging.NullLogger()) do
