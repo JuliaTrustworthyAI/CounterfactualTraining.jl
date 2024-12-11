@@ -44,7 +44,8 @@ MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 if length(eval_list) < nprocs
     @warn "There are less evaluations than processes. Check CPU efficiency of job."
 end
-chunks = TaijaParallel.split_obs(eval_list, nprocs)    # split  evaluations into chunks for each process
+chunks = TaijaParallel.split_obs(eval_list, nprocs)     # split  evaluations into chunks for each process
+dummy_rank = isempty(chunks[rank])                      # check if rank was allocated any evaluations
 
 # Set up dummy evaluation for processes without evaluations to avoid deadlock if no  evaluations are assigned to a process:
 chunks = Logging.with_logger(Logging.NullLogger()) do
@@ -58,8 +59,6 @@ chunks = Logging.with_logger(Logging.NullLogger()) do
     return chunks
 end
 
-display(chunks)
-
 worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
 
 for (i, eval_config) in enumerate(worker_chunk)
@@ -67,6 +66,8 @@ for (i, eval_config) in enumerate(worker_chunk)
     # Evaluate counterfactuals:
     @info "Running evaluation $i of $(length(worker_chunk))."
     bmk = evaluate_counterfactuals(eval_config, comm)
+
+    MPI.Barrier(comm)
 
     if eval_config.counterfactual_params.concatenate_output
         # Save results:
@@ -80,7 +81,9 @@ for (i, eval_config) in enumerate(worker_chunk)
     # generate_factual_target_pairs(eval_config)
 
     # Working directory:
-    set_work_dir(eval_grid, eval_config, joinpath(ENV["EVAL_WORK_DIR"]))
+    if !dummy_rank
+        set_work_dir(eval_grid, eval_config, joinpath(ENV["EVAL_WORK_DIR"]))
+    end
 end
 
 # Finalize MPI
