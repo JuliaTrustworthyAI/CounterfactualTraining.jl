@@ -250,8 +250,7 @@ function get_parallelizer(pllr_type::String; threaded::Bool=true)
             MPI.Init()
         end
         # Active comm:
-        active_comm = TaijaParallel.get_active_comm()
-        pllr = MPIParallelizer(MPI.COMM_WORLD; threaded=threaded, active_comm=active_comm)
+        pllr = MPIParallelizer(MPI.COMM_WORLD; threaded=threaded)
     end
 
     return pllr
