@@ -52,7 +52,9 @@ for y in valid_y
 end
 @info "Images stored in $final_save_dir/"
 
-params = PlotParams(; rowvar="lambda_energy_diff", colorvar="maxiter", colvar="lambda_energy")
+params = PlotParams(;
+    rowvar="lambda_energy_diff", colorvar="maxiter", colvar="lambda_energy"
+)
 final_save_dir = save_dir(params, output_dir; prefix)
 for y in valid_y
     plt = boxplot_ce(all_data...; y=y, params()...)

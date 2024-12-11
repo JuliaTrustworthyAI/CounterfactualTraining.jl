@@ -73,7 +73,7 @@ end
 
 Converts a vector to a 28x28 grey image.
 """
-function convert2mnist(x; blue::Bool = false)
+function convert2mnist(x; blue::Bool=false)
     if !blue
         x = (x -> (x -> Gray.(x))(permutedims(reshape(x, 28, 28))))((x .+ 1) ./ 2)
     else

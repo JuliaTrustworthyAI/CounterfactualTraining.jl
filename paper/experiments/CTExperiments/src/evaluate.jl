@@ -6,7 +6,7 @@ using DataFrames
 using Logging
 using StatisticalMeasures
 
-abstract type AbstractEvaluationConfig <:AbstractConfiguration end
+abstract type AbstractEvaluationConfig <: AbstractConfiguration end
 
 include("evaluate_counterfactuals.jl")
 
@@ -79,7 +79,8 @@ function EvaluationConfig(;
 )
     if !isnothing(generator_params)
         # append generator params to counterfactual params:
-        counterfactual_params = @insert counterfactual_params.generator_params = generator_params
+        counterfactual_params = @insert counterfactual_params.generator_params =
+            generator_params
     end
     counterfactual_params = CounterfactualParams(; counterfactual_params...)
     return EvaluationConfig(grid_file, save_dir, counterfactual_params, test_time)
@@ -178,7 +179,7 @@ function save_results(cfg::EvaluationConfig, data::DataFrame, fname::String)
     csv_file = joinpath(cfg.save_dir, fname * ".csv")
     CSV.write(csv_file, data)
     jld2_file = joinpath(cfg.save_dir, fname * ".jld2")
-    jldsave(jld2_file; data)
+    return jldsave(jld2_file; data)
 end
 
 """

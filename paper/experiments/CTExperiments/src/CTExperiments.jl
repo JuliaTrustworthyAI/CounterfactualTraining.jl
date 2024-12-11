@@ -41,12 +41,12 @@ export get_config_from_args
 
 "The default benchmarking measures."
 const CE_MEASURES = [
-    validity, 
+    validity,
     plausibility_cosine,
     plausibility_distance_from_target,
     plausibility_energy_differential,
     distance,
-    redundancy
+    redundancy,
 ]
 
 """
@@ -132,7 +132,7 @@ function generate_eval_template(
     end
 
     if write_file
-        grid_file = Logging.with_logger(Logging.NullLogger()) do 
+        grid_file = Logging.with_logger(Logging.NullLogger()) do
             generate_grid_template()
         end
         exper_grid = CTExperiments.ExperimentGrid(grid_file)
@@ -177,9 +177,9 @@ function generate_eval_grid_template(
     end
 
     return fname
-
 end
 
-export generate_template, generate_grid_template, generate_eval_template, generate_eval_grid_template
+export generate_template,
+    generate_grid_template, generate_eval_template, generate_eval_grid_template
 
 end

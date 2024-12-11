@@ -15,7 +15,6 @@ When called on any function `fun`, returns a string representation of its name.
 """
 to_dict(fun::Function) = String(nameof(fun))
 
-
 """
     to_dict(generator_type::AbstractGeneratorType)
 

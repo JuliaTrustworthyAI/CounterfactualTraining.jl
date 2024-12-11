@@ -11,10 +11,7 @@ include("moons.jl")
 
 Catalogue of available model types.
 """
-const data_sets = Dict(
-    "mnist" => MNIST,
-    "moons" => Moons,
-)
+const data_sets = Dict("mnist" => MNIST, "moons" => Moons)
 
 """
     get_data_set(s::String)
@@ -57,10 +54,7 @@ include("cnn.jl")
 
 Catalogue of available model types.
 """
-const model_types = Dict(
-    "mlp" => MLPModel,
-    "lenet" => LeNetModel,
-)
+const model_types = Dict("mlp" => MLPModel, "lenet" => LeNetModel)
 
 """
     get_model_type(s::String)

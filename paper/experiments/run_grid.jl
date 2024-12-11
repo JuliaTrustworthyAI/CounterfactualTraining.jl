@@ -1,3 +1,4 @@
+using Accessors
 using BSON
 using CTExperiments
 using CounterfactualExplanations
@@ -39,13 +40,16 @@ if length(exper_list) < nprocs
 end
 chunks = TaijaParallel.split_obs(exper_list, nprocs)    # split experiments into chunks for each process
 
-# Set up dummy:
-for (i, chunk) in enumerate(chunks)
-    if isempty(chunk)
-        exper = deepcopy(exper_list[1])
-        exper.meta_params.experiment_name = "dummy"
-        exper.meta_params.save_dir = tempdir()
-        chunks[i] = [exper]
+# Set up dummy experiment for processes without experiments to avoid deadlock if no experiments are assigned to a process:
+chunks = Logging.with_logger(Logging.NullLogger()) do
+    for (i, chunk) in enumerate(chunks)
+        if isempty(chunk)
+            exper = deepcopy(exper_list[1])
+            exper.meta_params.experiment_name = "dummy"
+            exper.meta_params.save_dir = tempdir()
+            @reset exper.training_params.nepochs = 1
+            chunks[i] = [exper]
+        end
     end
 end
 worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes

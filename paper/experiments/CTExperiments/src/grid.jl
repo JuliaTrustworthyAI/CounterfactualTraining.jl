@@ -76,10 +76,11 @@ struct ExperimentGrid <: AbstractGridConfiguration
         if !isdir(save_dir)
             mkpath(save_dir)
         end
-        if !isfile(default_grid_config_name(grid)) && !isfile(joinpath(save_dir, "template_grid_config.toml"))
+        if !isfile(default_grid_config_name(grid)) &&
+            !isfile(joinpath(save_dir, "template_grid_config.toml"))
             to_toml(grid, default_grid_config_name(grid))
         end
-        
+
         return grid
     end
 end
@@ -232,8 +233,7 @@ end
 Computes the Cartesian product across hyperparameters provided in the grid.
 """
 function expand_grid(
-    cfg::AbstractGridConfiguration;
-    name_prefix::Union{Nothing,String}="experiment",
+    cfg::AbstractGridConfiguration; name_prefix::Union{Nothing,String}="experiment"
 )
 
     # Store results in new dictionary with arrays of pairs (key, value):
@@ -244,8 +244,7 @@ function expand_grid(
 
     # Filter out empty pairs:
     dict_array_of_pairs = filter(
-        ((key, value),) -> length(value) > 0 && !(key in ingore_cols),
-        dict_array_of_pairs,
+        ((key, value),) -> length(value) > 0 && !(key in ingore_cols), dict_array_of_pairs
     )
 
     # Generate Cartesian product:
@@ -273,7 +272,6 @@ Expands a grid of hyperparameters into a DataFrame. This is used to eventually m
 function expand_grid_to_df(
     cfg::AbstractGridConfiguration; name_prefix::Union{Nothing,String}="experiment"
 )
-    
     df = DataFrame()
 
     # Expand grid:
@@ -301,14 +299,12 @@ function expand_grid_to_df(
         _df = DataFrame(new_params...; makeunique=true)
         _df.id .= _name
         df = vcat(df, _df)
-
     end
 
     select!(df, :id, Not(:id))
 
     return df
 end
-
 
 """
     save_list(cfg::ExperimentGrid, exper_list::Vector{<:AbstractExperiment})
@@ -350,7 +346,6 @@ function to_kv_pair(k, vals::String)
     all_pairs = Pair[k => vals]
     return all_pairs
 end
-
 
 """
     to_kv_pair(k, vals::Bool)
