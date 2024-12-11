@@ -2611,7 +2611,7 @@ version = "1.0.0"
 
 [[deps.TaijaParallel]]
 deps = ["CounterfactualExplanations", "Logging", "MLUtils", "PackageExtensionCompat", "ProgressMeter", "Reexport", "Serialization", "TaijaBase"]
-git-tree-sha1 = "561c72fa98558816059195c19223b34a2b229e97"
+git-tree-sha1 = "1d62e1a88d11e816f14adae1cb0301c34d60064a"
 repo-rev = "counterfactual-training"
 repo-url = "https://github.com/JuliaTrustworthyAI/TaijaParallel.jl.git"
 uuid = "bf1c2c22-5e42-4e78-8b6b-92e6c673eeb0"
