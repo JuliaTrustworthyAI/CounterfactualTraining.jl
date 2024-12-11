@@ -49,14 +49,14 @@ chunks = Logging.with_logger(Logging.NullLogger()) do
         if isempty(chunk)
             cfg = eval_list[1]
             params = (
-                n_individuals = 1,
-                n_runs = 1,
-                maxiter = 1,
+                n_individuals=1,
+                n_runs=1,
+                maxiter=1,
                 parallelizer=cfg.counterfactual_params.parallelizer,
             )
             eval_cfg = EvaluationConfig(;
                 grid_file=eval_list[1].grid_file,
-                save_dir=mkpath(joinpath(tempdir(),"dummy_eval_$(i)")),
+                save_dir=mkpath(joinpath(tempdir(), "dummy_eval_$(i)")),
                 counterfactual_params=params,
             )
             chunks[i] = [eval_cfg]
@@ -77,9 +77,7 @@ for (i, eval_config) in enumerate(worker_chunk)
 
     if eval_config.counterfactual_params.concatenate_output
         # Save results:
-        save_results(
-            eval_config, bmk.evaluation, default_ce_evaluation_name(eval_config)
-        )
+        save_results(eval_config, bmk.evaluation, default_ce_evaluation_name(eval_config))
         save_results(eval_config, bmk)
     else
         @info "Results for individual runs are stored in $(eval_config.save_dir)."
@@ -91,8 +89,6 @@ for (i, eval_config) in enumerate(worker_chunk)
     # Working directory:
     set_work_dir(eval_grid, eval_config, joinpath(ENV["EVAL_WORK_DIR"]))
 end
-
-
 
 # Finalize MPI
 MPI.Barrier(comm)  # Ensure all processes reach this point before finishing

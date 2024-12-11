@@ -44,9 +44,7 @@ function build_model(model::LeNetModel, nin::Int, nout::Int)
     )
     d = first(Flux.outputsize(front, (_n_in, _n_in, 1, 1)))
     back = Chain(
-        Dense(d, 120, model.activation),
-        Dense(120, 84, model.activation),
-        Dense(84, nout),
+        Dense(d, 120, model.activation), Dense(120, 84, model.activation), Dense(84, nout)
     )
     model = Chain(ToConv(_n_in), front, back)
 

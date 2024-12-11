@@ -5,15 +5,21 @@ using Plots: Plots, PlotMeasures
 using TaijaPlotting
 
 Base.@kwdef struct PlotParams
-    x::Union{Nothing,String}=nothing
-    byvars::Union{Nothing,Vector{String}}=nothing
-    colorvar::Union{Nothing,String}=nothing
-    rowvar::Union{Nothing,String}=nothing
-    colvar::Union{Nothing,String}=nothing
+    x::Union{Nothing,String} = nothing
+    byvars::Union{Nothing,Vector{String}} = nothing
+    colorvar::Union{Nothing,String} = nothing
+    rowvar::Union{Nothing,String} = nothing
+    colvar::Union{Nothing,String} = nothing
 end
 
 function (params::PlotParams)()
-    return (; x=params.x, byvars=params.byvars, colorvar=params.colorvar, rowvar=params.rowvar, colvar=params.colvar)
+    return (;
+        x=params.x,
+        byvars=params.byvars,
+        colorvar=params.colorvar,
+        rowvar=params.rowvar,
+        colvar=params.colvar,
+    )
 end
 
 function useful_byvars(df_meta::DataFrame)
@@ -21,9 +27,9 @@ function useful_byvars(df_meta::DataFrame)
 end
 
 function save_dir(params::PlotParams, root::String; prefix::String)
-    suffix = [isnothing(v) ? nothing : "$(v)" for (k, v) in pairs(params())] |>
-        x -> x[.!isnothing.(x)] |>
-        x -> join(x, "---")
+    suffix = (x -> (x -> join(x, "---"))(x[.!isnothing.(x)]))([
+        isnothing(v) ? nothing : "$(v)" for (k, v) in pairs(params())
+    ])
     return mkpath(joinpath(root, prefix, suffix))
 end
 
@@ -97,7 +103,6 @@ function aggregate_data(
     byvars::Union{Nothing,Vector{String}}=nothing;
     byvars_must_include=Union{Nothing,Vector{String}},
 )
-
     df = filter(row -> all(x -> !(x isa Number && (isnan(x) || isinf(x))), row), df)
 
     # Aggregate:
@@ -122,15 +127,12 @@ end
 
 Aggregate logs variable `y` from an experiment grid by columns specified in `byvars`.
 """
-function aggregate_logs(
-    cfg::EvalConfigOrGrid;
-    kwrgs...,
-)
+function aggregate_logs(cfg::EvalConfigOrGrid; kwrgs...)
 
     # Load data:
     df, df_meta, logs = merge_with_meta(cfg, get_logs(cfg))
 
-    aggregate_logs(df, df_meta, logs; kwrgs...)
+    return aggregate_logs(df, df_meta, logs; kwrgs...)
 end
 
 """
@@ -202,7 +204,6 @@ function plot_errorbar_logs(
     facet=default_facet,
     axis=default_axis,
 )
-
     byvars = gather_byvars(byvars, colorvar, rowvar, colvar)
 
     # Aggregate logs:
@@ -210,15 +211,11 @@ function plot_errorbar_logs(
     use_line_plot = all(isnan.(df_agg.std))
 
     # Plotting:
-    plt = data(df_agg) 
+    plt = data(df_agg)
     if use_line_plot
-        plt = plt * 
-            mapping(:epoch => "Epoch", :mean => "Value") *
-            visual(Lines)
+        plt = plt * mapping(:epoch => "Epoch", :mean => "Value") * visual(Lines)
     else
-        plt = plt * 
-            mapping(:epoch => "Epoch", :mean => "Value", :std) *
-            visual(Errorbars) 
+        plt = plt * mapping(:epoch => "Epoch", :mean => "Value", :std) * visual(Errorbars)
     end
     if !isnothing(colorvar)
         plt = plt * mapping(; color=colorvar => nonnumeric)
@@ -229,15 +226,12 @@ function plot_errorbar_logs(
     if !isnothing(colvar)
         plt = plt * mapping(; col=colvar => nonnumeric)
     end
-    
+
     plt = draw(plt; facet=facet, axis=axis)
     return plt
 end
 
-function gather_byvars(
-    byvars,
-    args...
-)
+function gather_byvars(byvars, args...)
     byvars = isnothing(byvars) ? [byvars] : byvars
     byvars = unique([byvars..., args...])
     return byvars = if length(byvars) == 1 && isnothing(byvars[1])
@@ -257,16 +251,12 @@ end
 
 Aggregate the results from a single counterfactual evaluation.
 """
-function aggregate_ce_evaluation(
-    cfg::EvalConfigOrGrid;
-    kwrgs...
-)
+function aggregate_ce_evaluation(cfg::EvalConfigOrGrid; kwrgs...)
 
     # Load data:
     all_data = merge_with_meta(cfg, CTExperiments.load_ce_evaluation(cfg))
 
     return aggregate_ce_evaluation(all_data...; kwrgs...)
-    
 end
 
 """
@@ -281,7 +271,7 @@ end
 Aggregate the results from a single counterfactual evaluation.
 """
 function aggregate_ce_evaluation(
-    df::DataFrame, 
+    df::DataFrame,
     df_meta::DataFrame,
     df_eval::DataFrame;
     y::String="plausibility_distance_from_target",
@@ -292,7 +282,7 @@ function aggregate_ce_evaluation(
     @assert y in valid_y "Variable `y` must be one of the following: $valid_y."
     @assert byvars isa Nothing || all(col -> col in names(df_meta), byvars) "Columns specified in `byvars` must be one of the following: $(names(df_meta))."
 
-    df = df[df.variable .== y,:]
+    df = df[df.variable .== y, :]
     rename!(df, :value => y)
     select!(df, Not(:variable))
 
@@ -309,7 +299,7 @@ function valid_y_ce(cfg::AbstractEvaluationConfig)
 end
 
 function boxplot_ce(
-    df::DataFrame, 
+    df::DataFrame,
     df_meta::DataFrame,
     df_eval::DataFrame;
     x::Union{Nothing,String}="generator_type",
@@ -320,19 +310,16 @@ function boxplot_ce(
     colvar::Union{Nothing,String}=nothing,
     facet=default_facet,
     axis=default_axis,
-) 
-
+)
     x = isnothing(x) ? "generator_type" : x
 
     byvars = gather_byvars(byvars, colorvar, rowvar, colvar, x)
 
     # Aggregate:
     df_agg = aggregate_ce_evaluation(df, df_meta, df_eval; y=y, byvars=byvars)
-    
+
     # Plotting:
-    plt = data(df_agg) *
-        mapping(Symbol(x), :mean => "Value") *
-        visual(BoxPlot)
+    plt = data(df_agg) * mapping(Symbol(x), :mean => "Value") * visual(BoxPlot)
     if !isnothing(colorvar)
         plt = plt * mapping(; color=colorvar => nonnumeric)
     end
@@ -342,7 +329,7 @@ function boxplot_ce(
     if !isnothing(colvar)
         plt = plt * mapping(; col=colvar => nonnumeric)
     end
-    
+
     plt = draw(plt; facet=facet, axis=axis)
 
     return plt
@@ -380,23 +367,22 @@ function aggregate_counterfactuals(
     end
 
     # Aggregate:
-    return aggregate_data(
-        df, "ce", byvars; byvars_must_include=byvars_must_include
-    )
+    return aggregate_data(df, "ce", byvars; byvars_must_include=byvars_must_include)
 end
 
 function plot_ce(cfg::EvalConfigOrGrid; save_dir=nothing, kwrgs...)
-    plot_ce(CTExperiments.get_data_set(cfg)(), cfg; save_dir=save_dir, kwrgs...)
+    return plot_ce(CTExperiments.get_data_set(cfg)(), cfg; save_dir=save_dir, kwrgs...)
 end
 
 function plot_ce(dataset::Dataset, eval_grid::EvaluationGrid; save_dir=nothing, kwrgs...)
-
     eval_list = load_list(eval_grid)
     plt_list = []
 
     for eval_config in eval_list
         if !isnothing(save_dir)
-            local_save_dir = mkpath(joinpath(save_dir, splitpath(eval_config.save_dir)[end]))
+            local_save_dir = mkpath(
+                joinpath(save_dir, splitpath(eval_config.save_dir)[end])
+            )
         else
             local_save_dir = nothing
         end
@@ -434,7 +420,7 @@ function plot_ce(
         vals = if isnothing(variable)
             [nothing]
         else
-            sort(unique(df_agg[!,variable]))
+            sort(unique(df_agg[!, variable]))
         end
         for val in vals
             full_plts = _plot_over_generators(
@@ -458,7 +444,6 @@ function plot_ce(
     end
 
     return plot_dict
-
 end
 
 function _plot_over_generators(
@@ -477,8 +462,7 @@ function _plot_over_generators(
     for (i, generator) in enumerate(generators)
         if !isnothing(variable)
             df_local = df_agg[
-                df_agg.generator_type .== generator .&& df_agg[!, variable] .== val,
-                :,
+                df_agg.generator_type .== generator .&& df_agg[!, variable] .== val, :,
             ]
         else
             df_local = df_agg[df_agg.generator_type .== generator, :]
@@ -502,9 +486,7 @@ function _plot_over_generators(
             else
                 "ce_$(generator)_$(variable)=$(val).png"
             end
-            Plots.savefig(
-                full_plt, joinpath(save_dir, fname)
-            )
+            Plots.savefig(full_plt, joinpath(save_dir, fname))
         end
         full_plts[generator] = full_plt
     end

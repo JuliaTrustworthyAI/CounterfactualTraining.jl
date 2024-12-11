@@ -22,27 +22,19 @@ struct EvaluationGrid <: AbstractGridConfiguration
     generator_params::Union{AbstractDict,NamedTuple}
     test_time::Bool
     function EvaluationGrid(
-        grid_file, 
-        save_dir,
-        counterfactual_params,
-        generator_params,
-        test_time,
+        grid_file, save_dir, counterfactual_params, generator_params, test_time
     )
 
         # Counterfactual params:
-        counterfactual_params = append_params(counterfactual_params, fieldnames(CounterfactualParams))
+        counterfactual_params = append_params(
+            counterfactual_params, fieldnames(CounterfactualParams)
+        )
 
         # Generator parameters
         generator_params = append_params(generator_params, fieldnames(GeneratorParams))
 
         # Instantiate grid: 
-        grid = new(
-            grid_file,
-            save_dir,
-            counterfactual_params,
-            generator_params,
-            test_time,
-        )
+        grid = new(grid_file, save_dir, counterfactual_params, generator_params, test_time)
 
         # Store grid config:
         if !isdir(save_dir)
@@ -85,7 +77,9 @@ function EvaluationGrid(
         save_dir
     end
     grid_file = isnothing(grid_file) ? default_grid_config_name(grid) : grid_file
-    return EvaluationGrid(grid_file, save_dir, counterfactual_params, generator_params, test_time)
+    return EvaluationGrid(
+        grid_file, save_dir, counterfactual_params, generator_params, test_time
+    )
 end
 
 """
@@ -107,11 +101,7 @@ function EvaluationGrid(;
     test_time::Bool,
 )
     return EvaluationGrid(
-        grid_file,
-        save_dir,
-        counterfactual_params,
-        generator_params,
-        test_time,
+        grid_file, save_dir, counterfactual_params, generator_params, test_time
     )
 end
 
@@ -187,7 +177,7 @@ A working directory for evaluation grid results.
 """
 function set_work_dir(grid::EvaluationGrid, cfg::EvaluationConfig, eval_work_root::String)
     work_dir = get_work_dir(grid, cfg, eval_work_root)
-    
+
     # Evaluation specific:
     if !isfile(joinpath(work_dir, "eval_config.toml"))
         to_toml(cfg, joinpath(work_dir, "eval_config.toml"))
@@ -257,7 +247,7 @@ end
 Loads the benchmark. 
 """
 function load_ce_evaluation(grid::EvaluationGrid)
-    
+
     # Load list:
     eval_list = load_list(grid)
     evals = DataFrame[]

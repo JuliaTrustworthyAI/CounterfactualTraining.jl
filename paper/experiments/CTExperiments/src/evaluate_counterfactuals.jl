@@ -176,22 +176,14 @@ Generate and evaluate counterfactuals based on the provided configuration. This 
 - A DataFrame containing the results of the evaluation.
 """
 function evaluate_counterfactuals(
-    cfg::AbstractEvaluationConfig;
-    measure::Vector{<:PenaltyOrFun}=CE_MEASURES,
+    cfg::AbstractEvaluationConfig; measure::Vector{<:PenaltyOrFun}=CE_MEASURES
 )
-    
     data, models, generators = load_data_models_generators(cfg)
 
     # Evaluate counterfactuals:
-    bmk = evaluate_counterfactuals(
-        cfg,
-        data,
-        models,
-        generators;
-        measure=measure,
-    )
+    bmk = evaluate_counterfactuals(cfg, data, models, generators; measure=measure)
 
-    return bmk  
+    return bmk
 end
 
 """
@@ -299,7 +291,7 @@ function load_data_models_generators(cfg::AbstractEvaluationConfig)
     )
 
     # Get models:
-    models = Logging.with_logger(Logging.NullLogger()) do 
+    models = Logging.with_logger(Logging.NullLogger()) do
         Dict(
             [
                 exper.meta_params.experiment_name => load_results(exper)[3] for
@@ -323,13 +315,12 @@ end
 Uses the `Evaluation.get_benchmark_files` function to collect all benchmarks from the specified storage path.
 """
 function collect_benchmarks(cfg::AbstractEvaluationConfig; kwrgs...)
-
     if isfile(default_bmk_name(cfg))
         @info "Benchmark file $(default_bmk_name(cfg)) already exists. Skipping."
         bmk = Serialization.deserialize(default_bmk_name(cfg))
         return collect_benchmarks(cfg, bmk; kwrgs...)
     end
-    
+
     bmk_files = Evaluation.get_benchmark_files(interim_ce_path(cfg))
     bmks = Vector{Benchmark}(undef, length(bmk_files))
 
@@ -339,7 +330,6 @@ function collect_benchmarks(cfg::AbstractEvaluationConfig; kwrgs...)
     bmk = reduce(vcat, bmks)
 
     return collect_benchmarks(cfg, bmk; kwrgs...)
-
 end
 
 """
@@ -423,7 +413,7 @@ function load_ce_evaluation(
     if "model" in names(df) && !("id" in names(df))
         rename!(df, :model => :id)
     end
-    
+
     return df
 end
 
@@ -436,7 +426,11 @@ default_ce_evaluation_name(cfg::AbstractEvaluationConfig) = "bmk_evaluation"
 
 Dispatches the `generate_factual_target_pairs` on `cfg::AbstractEvaluationConfig`. The data, models and generators are loaded according the configuration `cfg`.
 """
-function generate_factual_target_pairs(cfg::AbstractEvaluationConfig; fname::Union{Nothing,String}=nothing, overwrite::Bool=false)
+function generate_factual_target_pairs(
+    cfg::AbstractEvaluationConfig;
+    fname::Union{Nothing,String}=nothing,
+    overwrite::Bool=false,
+)
     fname = if isnothing(fname)
         default_factual_target_pairs_name(cfg)
     end
@@ -491,7 +485,6 @@ function generate_factual_target_pairs(
         chosen = rand(findall(data.output_encoder.labels .== factual))
         x = select_factual(data, chosen)
         for target in targets
-
             if cfg.counterfactual_params.verbose
                 @info "Generating counterfactual for $(factual) -> $(target)"
             end
@@ -518,14 +511,15 @@ function generate_factual_target_pairs(
                 verbose=cfg.counterfactual_params.verbose,
             )
 
-            DataFrames.transform!(bmk.evaluation, :model => ByRow(x -> x[1]) => :model) 
-            DataFrames.transform!(bmk.evaluation, :generator => ByRow(x -> x[1]) => :generator)
+            DataFrames.transform!(bmk.evaluation, :model => ByRow(x -> x[1]) => :model)
+            DataFrames.transform!(
+                bmk.evaluation, :generator => ByRow(x -> x[1]) => :generator
+            )
 
             # Add factual values:
             bmk.counterfactuals.x .= [x]
 
             push!(output, bmk)
-
         end
     end
 
@@ -533,4 +527,3 @@ function generate_factual_target_pairs(
 
     return output
 end
-

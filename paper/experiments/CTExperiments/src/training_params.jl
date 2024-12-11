@@ -45,8 +45,7 @@ function get_generator_type(s::String)
 end
 
 const available_optimizers = Dict(
-    "adam" => Flux.Optimise.Adam,
-    "sgd" => Flux.Optimise.Descent,
+    "adam" => Flux.Optimise.Adam, "sgd" => Flux.Optimise.Descent
 )
 
 """
@@ -210,9 +209,7 @@ function get_objective(s::String)
     return objectives[s]
 end
 
-function get_lambdas(
-    obj::CounterfactualTraining.VanillaObjective, params::TrainingParams
-)
+function get_lambdas(obj::CounterfactualTraining.VanillaObjective, params::TrainingParams)
     lambda = [params.lambda_class_loss]
     return lambda
 end
@@ -227,12 +224,16 @@ function get_lambdas(obj::CounterfactualTraining.FullObjective, params::Training
     return lambda
 end
 
-function get_lambdas(obj::CounterfactualTraining.EnergyDifferentialObjective, params::TrainingParams)
+function get_lambdas(
+    obj::CounterfactualTraining.EnergyDifferentialObjective, params::TrainingParams
+)
     lambda = [params.lambda_class_loss, params.lambda_energy_diff, params.lambda_energy_reg]
     return lambda
 end
 
-function get_lambdas(obj::CounterfactualTraining.AdversarialObjective, params::TrainingParams)
+function get_lambdas(
+    obj::CounterfactualTraining.AdversarialObjective, params::TrainingParams
+)
     lambda = [params.lambda_class_loss, params.lambda_adversarial]
     return lambda
 end

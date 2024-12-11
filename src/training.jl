@@ -122,14 +122,7 @@ function counterfactual_training(
                     push!(validity_losses, adversarial_loss)
                 end
 
-                return loss(
-                    logits,
-                    label,
-                    implaus,
-                    regs,
-                    adversarial_loss,
-                )
-                
+                return loss(logits, label, implaus, regs, adversarial_loss)
             end
 
             # Save the loss from the forward pass. (Done outside of gradient.)
@@ -171,7 +164,10 @@ function counterfactual_training(
             msg_adv = "n/a"
         end
 
-        push!(log, (; acc, acc_val, train_loss, implaus, log_reg_loss, log_adv_loss, time_taken))
+        push!(
+            log,
+            (; acc, acc_val, train_loss, implaus, log_reg_loss, log_adv_loss, time_taken),
+        )
 
         # Checkpointing:
         if !isnothing(checkpoint_dir)

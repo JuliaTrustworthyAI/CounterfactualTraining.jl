@@ -6,9 +6,7 @@ using DotEnv
 DotEnv.load!()
 
 # Get config and set up grid:
-eval_config = EvaluationConfig(
-    joinpath(ENV["EVAL_WORK_DIR"], "poc", "eval_config.toml")
-)
+eval_config = EvaluationConfig(joinpath(ENV["EVAL_WORK_DIR"], "poc", "eval_config.toml"))
 exper_grid = ExperimentGrid(eval_config.grid_file)
 df_meta = CTExperiments.expand_grid_to_df(exper_grid)
 local_save_dir = get_work_dir(eval_config, ENV["EVAL_WORK_DIR"])

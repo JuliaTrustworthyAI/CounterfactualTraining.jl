@@ -35,7 +35,7 @@ valid_y = CTExperiments.valid_y_ce(all_data[1])
 params = PlotParams(; colvar="lambda_energy_eval")
 final_save_dir = save_dir(params, output_dir; prefix)
 for y in valid_y
-    plt = boxplot_ce(all_data...; y=y, params()..., facet = (;linkyaxes=:none))
+    plt = boxplot_ce(all_data...; y=y, params()..., facet=(; linkyaxes=:none))
     display(plt)
     save(joinpath(final_save_dir, "$y.png"), plt; px_per_unit=3)
 end
