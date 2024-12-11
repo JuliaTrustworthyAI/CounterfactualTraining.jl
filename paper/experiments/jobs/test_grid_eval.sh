@@ -3,7 +3,7 @@
 #SBATCH --job-name="Test Grid Eval"
 #SBATCH --partition=compute
 #SBATCH --time=00:10:00
-#SBATCH --ntasks=10
+#SBATCH --ntasks=42
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=4G
 #SBATCH --account=innovation
