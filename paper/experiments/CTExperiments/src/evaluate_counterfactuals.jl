@@ -497,6 +497,7 @@ function generate_factual_target_pairs(
             end
 
             # Generate and benchmark counterfactuals:
+            @info "Generating counterfactual for $(factual) -> $(target)"
             bmk = benchmark(
                 x,
                 target,
@@ -510,6 +511,7 @@ function generate_factual_target_pairs(
                 store_ce=true,
                 verbose=cfg.counterfactual_params.verbose,
             )
+            @info "Type: $(typeof(bmk.counterfactuals.ce))"
 
             DataFrames.transform!(bmk.evaluation, :model => ByRow(x -> x[1]) => :model)
             DataFrames.transform!(
