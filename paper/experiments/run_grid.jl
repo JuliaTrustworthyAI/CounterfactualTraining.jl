@@ -23,7 +23,7 @@ comm = MPI.COMM_WORLD
 rank = MPI.Comm_rank(comm)
 nprocs = MPI.Comm_size(comm)
 if MPI.Comm_rank(MPI.COMM_WORLD) != 0
-    # global_logger(NullLogger())
+    global_logger(NullLogger())
     exper_list = nothing
 else
     # Generate list of experiments and run them:
