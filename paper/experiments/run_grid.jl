@@ -7,7 +7,9 @@ using MPI
 using Serialization
 using TaijaParallel
 
+# Setup:
 DotEnv.load!()
+set_global_seed()
 
 # Get config and set up grid:
 config_file = get_config_from_args()
@@ -44,8 +46,10 @@ chunks = Logging.with_logger(Logging.NullLogger()) do
     for (i, chunk) in enumerate(chunks)
         if isempty(chunk)
             exper = deepcopy(exper_list[1])
-            exper.meta_params.experiment_name = "dummy"
-            exper.meta_params.save_dir = tempdir()
+            exper.meta_params.experiment_name = "dummy_$(i)"
+            exper.meta_params.save_dir = mkpath(
+                joinpath(tempdir(), exper.meta_params.experiment_name)
+            )
             chunks[i] = [exper]
         end
     end

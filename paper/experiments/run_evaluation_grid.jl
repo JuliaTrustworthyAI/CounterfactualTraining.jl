@@ -9,7 +9,9 @@ using Logging
 using MPI
 using TaijaParallel
 
+# Setup:
 DotEnv.load!()
+set_global_seed()
 
 # Get config and set up grid:
 eval_grid = EvaluationGrid(get_config_from_args())

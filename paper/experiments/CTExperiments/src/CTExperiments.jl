@@ -6,6 +6,7 @@ using CounterfactualExplanations
 using CounterfactualExplanations.Evaluation
 using CounterfactualExplanations.Objectives
 using Logging
+using Random
 
 abstract type AbstractConfiguration end
 abstract type AbstractExperiment <: AbstractConfiguration end
@@ -181,5 +182,18 @@ end
 
 export generate_template,
     generate_grid_template, generate_eval_template, generate_eval_grid_template
+
+function set_global_seed()
+    seed = try
+        parse(Int, ENV["GLOBAL_SEED"])
+    catch
+        @warn "No environment variable found to set global seed."
+        2025
+    end
+    Random.seed!(seed)
+    @info "Global seed set to $seed"
+end
+
+export set_global_seed 
 
 end
