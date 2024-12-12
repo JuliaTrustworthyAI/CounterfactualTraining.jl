@@ -69,7 +69,7 @@ for (i, eval_config) in enumerate(worker_chunk)
         @info "Memory usage:"
         meminfo_julia()
     end
-    bmk = evaluate_counterfactuals(eval_config, comm)
+    bmk = evaluate_counterfactuals(eval_config)
 
     MPI.Barrier(comm)
 
