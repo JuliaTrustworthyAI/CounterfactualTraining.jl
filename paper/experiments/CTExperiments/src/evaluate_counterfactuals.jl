@@ -213,6 +213,9 @@ function evaluate_counterfactuals(
     rank = MPI.Comm_rank(comm)
     _size = MPI.Comm_size(comm)
 
+    @info "Memory before broadcasting:"
+    TaijaParallel.meminfo_julia()
+
     # Root process loads all data
     if rank == 0
         data, all_models, generators = load_data_models_generators(cfg)
@@ -247,6 +250,9 @@ function evaluate_counterfactuals(
 
     # Create local models dictionary
     local_models = Dict(zip(local_keys, local_values))
+
+    @info "Memory after broadcasting:"
+    TaijaParallel.meminfo_julia()
 
     # Evaluate counterfactuals on local models
     local_results = evaluate_counterfactuals(
