@@ -58,7 +58,7 @@ function counterfactual_training(
     end
 
     if verbose == 1
-        p = Progress(nepochs; barglyphs=BarGlyphs("[=> ]"), color=:yellow)
+        p = Progress(nepochs-start_epoch; barglyphs=BarGlyphs("[=> ]"), color=:yellow)
     end
 
     for epoch in start_epoch:nepochs
