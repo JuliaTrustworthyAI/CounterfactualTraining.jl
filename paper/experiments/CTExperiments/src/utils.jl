@@ -1,4 +1,5 @@
 using Plots
+using Printf: @printf
 using Random
 using TaijaData: load_mnist_test
 
@@ -130,4 +131,13 @@ function get_config_from_args()
     fname = replace(config_arg[1], "--config=" => "")
     @assert isfile(fname) "Config file not found: $fname"
     return fname
+end
+
+
+function meminfo_julia()
+    # @printf "GC total:  %9.3f MiB\n" Base.gc_total_bytes(Base.gc_num())/2^20
+    # Total bytes (above) usually underreports, thus I suggest using live bytes (below)
+    @printf "GC live:   %9.3f MiB\n" Base.gc_live_bytes() / 2^20
+    @printf "JIT:       %9.3f MiB\n" Base.jit_total_bytes() / 2^20
+    @printf "Max. RSS:  %9.3f MiB\n" Sys.maxrss() / 2^20
 end

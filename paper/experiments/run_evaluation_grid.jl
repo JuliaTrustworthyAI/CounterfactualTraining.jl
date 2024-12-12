@@ -65,6 +65,10 @@ for (i, eval_config) in enumerate(worker_chunk)
 
     # Evaluate counterfactuals:
     @info "Running evaluation $i of $(length(worker_chunk))."
+    if rank == 0
+        @info "Memory usage:"
+        meminfo_julia()
+    end
     bmk = evaluate_counterfactuals(eval_config, comm)
 
     MPI.Barrier(comm)
@@ -87,4 +91,5 @@ for (i, eval_config) in enumerate(worker_chunk)
 end
 
 # Finalize MPI
-MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
+MPI.Barrier(comm)       # Ensure all processes reach this point before finishing
+MPI.Finalize()          # finalize MPI
