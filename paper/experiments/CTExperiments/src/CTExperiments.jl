@@ -39,6 +39,7 @@ export plot_errorbar_logs, boxplot_ce, plot_ce
 export set_work_dir, get_work_dir, results_dir
 export save_dir
 export get_config_from_args
+export mpi_should_finalize, set_mpi_finalize
 
 "The default benchmarking measures."
 const CE_MEASURES = [

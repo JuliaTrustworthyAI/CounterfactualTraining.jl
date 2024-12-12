@@ -131,3 +131,12 @@ function get_config_from_args()
     @assert isfile(fname) "Config file not found: $fname"
     return fname
 end
+
+const _mpi_finalize = true
+
+mpi_should_finalize() = _mpi_finalize
+
+function set_mpi_finalize(finalize::Bool)
+    global _mpi_finalize = finalize
+    return _mpi_finalize
+end

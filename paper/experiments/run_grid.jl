@@ -89,3 +89,6 @@ end
 
 # Finalize MPI
 MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
+if mpi_should_finalize()
+    MPI.Finalize()          # finalize MPI
+end
