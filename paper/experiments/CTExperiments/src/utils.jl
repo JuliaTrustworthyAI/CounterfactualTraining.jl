@@ -131,7 +131,3 @@ function get_config_from_args()
     @assert isfile(fname) "Config file not found: $fname"
     return fname
 end
-
-function meminfo_julia()
-    @info "Max. RSS: $(round(Sys.maxrss() / 2^20; digits=3)) MiB"
-end
