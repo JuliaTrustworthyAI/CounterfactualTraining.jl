@@ -107,9 +107,9 @@ version = "3.5.1+1"
 
 [[deps.ArrayInterface]]
 deps = ["Adapt", "LinearAlgebra"]
-git-tree-sha1 = "d5140b60b87473df18cf4fe66382b7c3596df047"
+git-tree-sha1 = "017fcb757f8e921fb44ee063a7aafe5f89b86dd1"
 uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "7.17.1"
+version = "7.18.0"
 
     [deps.ArrayInterface.extensions]
     ArrayInterfaceBandedMatricesExt = "BandedMatrices"
@@ -474,9 +474,7 @@ version = "0.6.3"
 
 [[deps.CounterfactualExplanations]]
 deps = ["CategoricalArrays", "CausalInference", "ChainRulesCore", "DataFrames", "Distributions", "EnergySamplers", "Flux", "Graphs", "LazyArtifacts", "LinearAlgebra", "Logging", "MLJBase", "MLJDecisionTreeInterface", "MLUtils", "MultivariateStats", "PackageExtensionCompat", "ProgressMeter", "Random", "Serialization", "Statistics", "StatsBase", "Tables", "TaijaBase", "UUIDs"]
-git-tree-sha1 = "8b322b9773bc843f092f980444ed8cfa44efd421"
-repo-rev = "counterfactual-training"
-repo-url = "https://github.com/JuliaTrustworthyAI/CounterfactualExplanations.jl.git"
+path = "../../../CounterfactualExplanations.jl"
 uuid = "2f13d31b-18db-44c1-bc43-ebaf2cff0be0"
 version = "1.4.0"
 
@@ -2611,9 +2609,7 @@ version = "1.0.0"
 
 [[deps.TaijaParallel]]
 deps = ["CounterfactualExplanations", "Logging", "MLUtils", "PackageExtensionCompat", "ProgressMeter", "Reexport", "Serialization", "TaijaBase"]
-git-tree-sha1 = "33175c0491bb73209e34fc8a62f2c0f62d5f45ed"
-repo-rev = "counterfactual-training"
-repo-url = "https://github.com/JuliaTrustworthyAI/TaijaParallel.jl.git"
+path = "../../../TaijaParallel.jl"
 uuid = "bf1c2c22-5e42-4e78-8b6b-92e6c673eeb0"
 version = "1.1.2"
 weakdeps = ["MPI"]
