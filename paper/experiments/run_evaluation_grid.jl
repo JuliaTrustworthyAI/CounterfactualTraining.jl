@@ -52,7 +52,10 @@ chunks = Logging.with_logger(Logging.NullLogger()) do
     for (i, chunk) in enumerate(chunks)
         if isempty(chunk)
             cfg = eval_list[1]
-            @reset cfg.save_dir = mkpath(joinpath(tempdir(), "dummy_eval_$(i)"))
+            old_save_dir = cfg.save_dir
+            @reset cfg.save_dir = mkpath(
+                joinpath(splitpath(old_save_dir)[1:(end - 1)]..., "dummy_eval_$(i)")
+            )
             chunks[i] = [cfg]
         end
     end
@@ -64,13 +67,14 @@ worker_chunk = MPI.scatter(chunks, comm)                # distribute across proc
 for (i, eval_config) in enumerate(worker_chunk)
 
     # Evaluate counterfactuals:
-    @info "Running evaluation $i of $(length(worker_chunk))."
+    @info "Rank $(rank): Running evaluation $i of $(length(worker_chunk))."
     if rank == 0
-        @info "Memory usage:"
+        @info "Memory usage before evaluating counterfactuals:"
         meminfo_julia()
     end
     bmk = evaluate_counterfactuals(eval_config)
 
+    @info "Rank $(rank): Done evaluating all counterfactuals. Waiting at barrier ..."
     MPI.Barrier(comm)
 
     if eval_config.counterfactual_params.concatenate_output
@@ -78,7 +82,7 @@ for (i, eval_config) in enumerate(worker_chunk)
         save_results(eval_config, bmk.evaluation, default_ce_evaluation_name(eval_config))
         save_results(eval_config, bmk)
     else
-        @info "Results for individual runs are stored in $(eval_config.save_dir)."
+        @info "Rank $(rank): Results for individual runs are stored in $(eval_config.save_dir)."
     end
 
     # Generate factual target pairs for plotting:
