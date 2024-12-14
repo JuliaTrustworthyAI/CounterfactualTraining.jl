@@ -1,6 +1,6 @@
 grid_file = "paper/experiments/output/test_grid/grid_config.toml"
 test_time = false
-save_dir = "paper/experiments/output/test_grid/evaluation/evaluation_1"
+save_dir = "paper/experiments/output/test_grid/evaluation/dummy_eval_4_1"
 
 [counterfactual_params]
 threaded = false

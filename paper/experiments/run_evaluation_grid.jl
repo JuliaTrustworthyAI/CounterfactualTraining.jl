@@ -26,7 +26,7 @@ comm = MPI.COMM_WORLD
 rank = MPI.Comm_rank(comm)
 nprocs = MPI.Comm_size(comm)
 if rank != 0
-    # global_logger(NullLogger())             # avoid logging from other processes
+    global_logger(NullLogger())             # avoid logging from other processes
     identifier = ExplicitOutputIdentifier("rank_$rank")
     global_output_identifier(identifier)    # set output identifier to avoid issues with serialization
     eval_list = nothing
@@ -47,20 +47,26 @@ end
 chunks = TaijaParallel.split_obs(eval_list, nprocs)     # split  evaluations into chunks for each process
 dummy_rank = isempty(chunks[rank+1])                    # check if rank was allocated any evaluations
 
-# Set up dummy evaluation for processes without evaluations to avoid deadlock if no  evaluations are assigned to a process:
+# Set up dummies for processes without tasks to avoid deadlock:
+max_chunk_size = maximum(length.(chunks))
 chunks = Logging.with_logger(Logging.NullLogger()) do
     for (i, chunk) in enumerate(chunks)
-        if isempty(chunk)
-            cfg = eval_list[1]
-            old_save_dir = cfg.save_dir
-            @reset cfg.save_dir = mkpath(
-                joinpath(splitpath(old_save_dir)[1:(end - 1)]..., "dummy_eval_$(i)")
-            )
-            chunks[i] = [cfg]
+        if length(chunk) < max_chunk_size
+            n_missing = max_chunk_size - length(chunk)
+            for j in 1:n_missing
+                cfg = eval_list[1]
+                old_save_dir = cfg.save_dir
+                @reset cfg.save_dir = mkpath(
+                    joinpath(splitpath(old_save_dir)[1:(end - 1)]..., "dummy_eval_$(i)_$(j)")
+                )
+                push!(chunk, cfg)
+            end
         end
     end
     return chunks
 end
+
+@assert allequal(length.(chunks)) "Need all processes to have the same number of tasks."
 
 worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
 

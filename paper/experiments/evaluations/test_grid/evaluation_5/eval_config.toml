@@ -1,6 +1,6 @@
 grid_file = "paper/experiments/output/test_grid/grid_config.toml"
 test_time = false
-save_dir = "paper/experiments/output/test_grid/evaluation/evaluation_1"
+save_dir = "paper/experiments/output/test_grid/evaluation/evaluation_5"
 
 [counterfactual_params]
 threaded = false
@@ -19,5 +19,5 @@ concatenate_output = false
     lambda_cost = 0.001
     lr = 1.0
     maxiter = 100
-    lambda_energy = 0.1
+    lambda_energy = 20.0
     type = "ECCo"
