@@ -219,7 +219,7 @@ results_dir(cfg::EvaluationConfig) = joinpath(cfg.save_dir, "results")
 
 Modify the configurations parameters to create a dummy version of it. This is used in the context of multi-processing to ensure that each process receives the same number of tasks.   
 """
-function make_dummy!(cfg::EvaluationConfig, suffix1::String, suffix2::String)
+function make_dummy!(cfg::EvaluationConfig, suffix1, suffix2)
     old_save_dir = cfg.save_dir
     @reset cfg.save_dir = mkpath(
         joinpath(
@@ -227,4 +227,11 @@ function make_dummy!(cfg::EvaluationConfig, suffix1::String, suffix2::String)
         ),
     )
     return cfg
+end
+
+function remove_dummy!(cfg::EvaluationConfig)
+    if contains(lowercase(cfg.save_dir), "dummy")
+        rm(cfg.save_dir; recursive=true)
+        @info "Removed dummy experiment: $(cfg.save_dir)"
+    end
 end

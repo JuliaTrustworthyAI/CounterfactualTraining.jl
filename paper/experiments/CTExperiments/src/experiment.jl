@@ -327,11 +327,18 @@ end
 
 Modify the experiment's meta parameters to create a dummy version of it. This is used in the context of multi-processing to ensure that each process receives the same number of tasks.
 """
-function make_dummy!(exper::Experiment, suffix1::String, suffix2::String)
+function make_dummy!(exper::Experiment, suffix1, suffix2)
     exper.meta_params.experiment_name = "dummy_$(suffix1)_$(suffix2)"
     old_save_dir = exper.meta_params.save_dir
     exper.meta_params.save_dir = mkpath(
         joinpath(splitpath(old_save_dir)[1:(end - 1)]..., exper.meta_params.experiment_name)
     )
     return exper
+end
+
+function remove_dummy!(exper::Experiment)
+    if contains(lowercase(exper.meta_params.experiment_name), "dummy")
+        rm(exper.meta_params.save_dir; recursive=true)
+        @info "Removed dummy experiment: $(exper.meta_params.save_dir)"
+    end
 end

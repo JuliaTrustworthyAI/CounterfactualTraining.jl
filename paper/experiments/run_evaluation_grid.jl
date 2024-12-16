@@ -95,6 +95,8 @@ for (i, eval_config) in enumerate(worker_chunk)
     if !dummy_rank
         set_work_dir(eval_grid, eval_config, joinpath(ENV["EVAL_WORK_DIR"]))
     end
+
+    remove_dummy!(eval_config)
 end
 
 # Finalize MPI
