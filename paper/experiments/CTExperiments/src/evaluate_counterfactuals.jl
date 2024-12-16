@@ -512,7 +512,7 @@ function generate_factual_target_pairs(
                 models=models,
                 generators=generators,
                 measure=validity,
-                parallelizer=parallelizer,
+                parallelizer=nothing,
                 initialization=:identity,
                 convergence=convergence,
                 store_ce=true,
