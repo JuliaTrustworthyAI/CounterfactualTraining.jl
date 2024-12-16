@@ -5,7 +5,7 @@
 #SBATCH --time=00:10:00
 #SBATCH --ntasks=20
 #SBATCH --cpus-per-task=1
-#SBATCH --mem-per-cpu=4G
+#SBATCH --mem-per-cpu=2G
 #SBATCH --account=innovation
 #SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT
 
