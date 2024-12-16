@@ -26,7 +26,7 @@ comm = MPI.COMM_WORLD
 rank = MPI.Comm_rank(comm)
 nprocs = MPI.Comm_size(comm)
 if rank != 0
-    global_logger(NullLogger())             # avoid logging from other processes
+    # global_logger(NullLogger())             # avoid logging from other processes
     identifier = ExplicitOutputIdentifier("rank_$rank")
     global_output_identifier(identifier)    # set output identifier to avoid issues with serialization
     eval_list = nothing
@@ -54,7 +54,7 @@ chunks = Logging.with_logger(Logging.NullLogger()) do
             n_missing = max_chunk_size - length(chunk)
             for j in 1:n_missing
                 cfg = deepcopy(eval_list[1])
-                make_dummy!(cfg, i, j)
+                cfg = make_dummy(cfg, i, j)
                 push!(chunk, cfg)
             end
         end

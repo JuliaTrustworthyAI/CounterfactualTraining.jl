@@ -120,7 +120,13 @@ function evaluate_counterfactuals(
     measure::Vector{<:PenaltyOrFun}=CE_MEASURES,
 )
     # Get parallelizer:
-    mpi_storage_dir = mkpath(joinpath(cfg.save_dir, "mpi_temp"))
+    meta_path = joinpath(splitpath(cfg.save_dir)[1:end-1]...)
+    if !isdummy(cfg)
+        mpi_storage_dir = mkpath(joinpath(meta_path, "mpi_temp"))
+    else
+        @info "Running dummy evaluation."
+        mpi_storage_dir = mkpath(joinpath(meta_path, "mpi_temp_dummy"))
+    end
     pllr = get_parallelizer(cfg.counterfactual_params; storage_dir=mpi_storage_dir)
     conv = get_convergence(cfg.counterfactual_params)
     interim_storage_path = interim_ce_path(cfg)

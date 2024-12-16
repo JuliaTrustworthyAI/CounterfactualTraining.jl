@@ -49,7 +49,7 @@ chunks = Logging.with_logger(Logging.NullLogger()) do
             n_missing = max_chunk_size - length(chunk)
             for j in 1:n_missing
                 exper = deepcopy(exper_list[1])
-                make_dummy!(exper, i, j)
+                make_dummy(exper, i, j)
                 push!(chunk, exper)
             end
         end

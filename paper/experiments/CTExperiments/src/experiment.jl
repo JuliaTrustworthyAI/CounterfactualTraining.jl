@@ -328,11 +328,11 @@ function get_logs(grid::ExperimentGrid)
 end
 
 """
-    make_dummy!(exper::Experiment)
+    make_dummy(exper::Experiment)
 
 Modify the experiment's meta parameters to create a dummy version of it. This is used in the context of multi-processing to ensure that each process receives the same number of tasks.
 """
-function make_dummy!(exper::Experiment, suffix1, suffix2)
+function make_dummy(exper::Experiment, suffix1, suffix2)
     exper.meta_params.experiment_name = "dummy_$(suffix1)_$(suffix2)"
     old_save_dir = exper.meta_params.save_dir
     exper.meta_params.save_dir = mkpath(
