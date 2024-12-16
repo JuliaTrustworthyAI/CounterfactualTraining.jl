@@ -219,8 +219,8 @@ function counterfactual_training(
             @info msg_imp
             @info msg_reg
             @info msg_adv
+            println()
         end
-        println()
     end
     return model, log
 end
