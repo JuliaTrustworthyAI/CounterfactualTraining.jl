@@ -24,6 +24,7 @@ include("evaluation_grid.jl")
 include("plotting.jl")
 
 export Experiment, run_training
+export make_dummy!
 export ExperimentGrid, setup_experiments
 export save_results, load_results, has_results
 export load_list

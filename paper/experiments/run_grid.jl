@@ -49,14 +49,7 @@ chunks = Logging.with_logger(Logging.NullLogger()) do
             n_missing = max_chunk_size - length(chunk)
             for j in 1:n_missing
                 exper = deepcopy(exper_list[1])
-                exper.meta_params.experiment_name = "dummy_$(i)_$(j)"
-                old_save_dir = exper.meta_params.save_dir
-                exper.meta_params.save_dir = mkpath(
-                    joinpath(
-                        splitpath(old_save_dir)[1:(end - 1)]...,
-                        exper.meta_params.experiment_name,
-                    ),
-                )
+                make_dummy!(exper, i, j)
                 push!(chunk, exper)
             end
         end

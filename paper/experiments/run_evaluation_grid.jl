@@ -54,11 +54,8 @@ chunks = Logging.with_logger(Logging.NullLogger()) do
         if length(chunk) < max_chunk_size
             n_missing = max_chunk_size - length(chunk)
             for j in 1:n_missing
-                cfg = eval_list[1]
-                old_save_dir = cfg.save_dir
-                @reset cfg.save_dir = mkpath(
-                    joinpath(splitpath(old_save_dir)[1:(end - 1)]..., "dummy_eval_$(i)_$(j)")
-                )
+                cfg = deepcopy(eval_list[1])
+                make_dummy!(cfg, i, j)
                 push!(chunk, cfg)
             end
         end
@@ -92,7 +89,7 @@ for (i, eval_config) in enumerate(worker_chunk)
     end
 
     # Generate factual target pairs for plotting:
-    # generate_factual_target_pairs(eval_config)
+    generate_factual_target_pairs(eval_config)
 
     # Working directory:
     if !dummy_rank

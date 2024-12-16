@@ -213,3 +213,18 @@ function get_work_dir(cfg::EvaluationConfig, eval_work_root::String)
 end
 
 results_dir(cfg::EvaluationConfig) = joinpath(cfg.save_dir, "results")
+
+"""
+    make_dummy!(cfg::EvaluationConfig)
+
+Modify the configurations parameters to create a dummy version of it. This is used in the context of multi-processing to ensure that each process receives the same number of tasks.   
+"""
+function make_dummy!(cfg::EvaluationConfig, suffix1::String, suffix2::String)
+    old_save_dir = cfg.save_dir
+    @reset cfg.save_dir = mkpath(
+        joinpath(
+            splitpath(old_save_dir)[1:(end - 1)]..., "dummy_eval_$(suffix1)_$(suffix2)"
+        ),
+    )
+    return cfg
+end
