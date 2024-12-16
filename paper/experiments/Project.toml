@@ -1,6 +1,7 @@
 [deps]
 Accessors = "7d9f7c33-5ae7-4f3b-8dc6-eff91059b697"
 BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
+CTExperiments = "5eca96c7-09a4-4424-a5a1-dee2b4aead1e"
 CounterfactualExplanations = "2f13d31b-18db-44c1-bc43-ebaf2cff0be0"
 DotEnv = "4dc1fcf4-5e3b-5448-94ab-0c38ec0385c1"
 Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
