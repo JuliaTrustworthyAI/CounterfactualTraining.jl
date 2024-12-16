@@ -45,7 +45,6 @@ if length(eval_list) < nprocs
     @warn "There are less evaluations than processes. Check CPU efficiency of job."
 end
 chunks = TaijaParallel.split_obs(eval_list, nprocs)     # split  evaluations into chunks for each process
-dummy_rank = isempty(chunks[rank+1])                    # check if rank was allocated any evaluations
 
 # Set up dummies for processes without tasks to avoid deadlock:
 max_chunk_size = maximum(length.(chunks))
@@ -92,11 +91,11 @@ for (i, eval_config) in enumerate(worker_chunk)
     generate_factual_target_pairs(eval_config)
 
     # Working directory:
-    if !dummy_rank
+    if !isdummy(eval_config)
         set_work_dir(eval_grid, eval_config, joinpath(ENV["EVAL_WORK_DIR"]))
+    else
+        remove_dummy!(eval_config)
     end
-
-    remove_dummy!(eval_config)
 end
 
 # Finalize MPI

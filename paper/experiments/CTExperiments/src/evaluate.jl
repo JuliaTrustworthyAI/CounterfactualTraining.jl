@@ -229,8 +229,13 @@ function make_dummy!(cfg::EvaluationConfig, suffix1, suffix2)
     return cfg
 end
 
+function isdummy(cfg::EvaluationConfig) :: Bool
+    foldername = splitpath(cfg.save_dir)[end]
+    return contains(lowercase(foldername), "dummy")
+end
+
 function remove_dummy!(cfg::EvaluationConfig)
-    if contains(lowercase(cfg.save_dir), "dummy")
+    if isdummy(cfg)
         rm(cfg.save_dir; recursive=true)
         @info "Removed dummy experiment: $(cfg.save_dir)"
     end

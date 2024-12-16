@@ -336,8 +336,12 @@ function make_dummy!(exper::Experiment, suffix1, suffix2)
     return exper
 end
 
+function isdummy(exper::Experiment)
+    return contains(lowercase(exper.meta_params.experiment_name), "dummy")
+end
+
 function remove_dummy!(exper::Experiment)
-    if contains(lowercase(exper.meta_params.experiment_name), "dummy")
+    if isdummy(exper)
         rm(exper.meta_params.save_dir; recursive=true)
         @info "Removed dummy experiment: $(exper.meta_params.save_dir)"
     end

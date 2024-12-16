@@ -88,7 +88,11 @@ for (i, experiment) in enumerate(worker_chunk)
     model, logs = run_training(experiment; checkpoint_dir=_save_dir)
 
     # Saving the results:
-    save_results(experiment, model, logs)
+    if !isdummy(experiment)  # Avoid overwriting dummy results
+        save_results(experiment, model, logs)
+    else
+        remove_dummy!(experiment)
+    end
 end
 
 # Finalize MPI
