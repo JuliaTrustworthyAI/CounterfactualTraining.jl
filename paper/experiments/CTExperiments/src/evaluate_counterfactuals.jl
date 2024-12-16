@@ -83,8 +83,8 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
     end
 end
 
-function get_parallelizer(cfg::CounterfactualParams)
-    return get_parallelizer(cfg.parallelizer; threaded=cfg.threaded)
+function get_parallelizer(cfg::CounterfactualParams; storage_dir=tempdir())
+    return get_parallelizer(cfg.parallelizer; threaded=cfg.threaded, storage_dir=storage_dir)
 end
 
 get_convergence(cfg::CounterfactualParams) = get_convergence(cfg.conv, cfg.maxiter)
@@ -120,7 +120,8 @@ function evaluate_counterfactuals(
     measure::Vector{<:PenaltyOrFun}=CE_MEASURES,
 )
     # Get parallelizer:
-    pllr = get_parallelizer(cfg.counterfactual_params)
+    mpi_storage_dir = mkpath(joinpath(cfg.save_dir, "mpi_temp"))
+    pllr = get_parallelizer(cfg.counterfactual_params; storage_dir=mpi_storage_dir)
     conv = get_convergence(cfg.counterfactual_params)
     interim_storage_path = interim_ce_path(cfg)
     vertical_splits = if cfg.counterfactual_params.vertical_splits == 0
@@ -478,9 +479,6 @@ function generate_factual_target_pairs(
     # Targets and factuals:
     targets = sort(data.y_levels)
     factuals = targets
-
-    # Other parameters:
-    parallelizer = get_parallelizer(cfg.counterfactual_params)
 
     # Store only counterfactual, not whole CE object:
     @warn "Setting `_ce_transform` to `counterfactual` to avoid storing entire `CounterfactualExplanation` object."

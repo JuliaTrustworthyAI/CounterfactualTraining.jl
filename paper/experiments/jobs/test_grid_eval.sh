@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #SBATCH --job-name="Test Grid Eval"
-#SBATCH --partition=compute
+#SBATCH --partition=innovation
 #SBATCH --time=00:10:00
 #SBATCH --ntasks=20
 #SBATCH --cpus-per-task=1
