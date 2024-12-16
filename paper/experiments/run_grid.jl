@@ -57,7 +57,7 @@ chunks = Logging.with_logger(Logging.NullLogger()) do
                         exper.meta_params.experiment_name,
                     ),
                 )
-                push!(chunk, cfg)
+                push!(chunk, exper)
             end
         end
     end
