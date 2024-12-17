@@ -204,8 +204,7 @@ function run_training(exp::Experiment; checkpoint_dir::Union{Nothing,String}=not
     mpi_storage_dir = mkpath(joinpath(exp.meta_params.save_dir, "mpi_temp"))
     pllr = get_parallelizer(
         exp.training_params;
-        threaded=exp.training_params.threaded,
-        storage_dir=mpi_storage_dir,
+        storage_dir=tempdir(),
     )
 
     # Optimizer and model:

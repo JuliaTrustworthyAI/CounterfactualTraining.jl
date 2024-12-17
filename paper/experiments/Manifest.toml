@@ -2611,7 +2611,7 @@ version = "1.0.0"
 
 [[deps.TaijaParallel]]
 deps = ["CounterfactualExplanations", "Logging", "MLUtils", "PackageExtensionCompat", "ProgressMeter", "Reexport", "Serialization", "TaijaBase"]
-git-tree-sha1 = "b885d58381b1fce8dce19816a67de1bd6e5cd125"
+git-tree-sha1 = "422d099e2d157fded422eec9b2692082f4aa99b6"
 repo-rev = "counterfactual-training"
 repo-url = "https://github.com/JuliaTrustworthyAI/TaijaParallel.jl.git"
 uuid = "bf1c2c22-5e42-4e78-8b6b-92e6c673eeb0"
@@ -2651,9 +2651,9 @@ version = "0.1.12"
 
 [[deps.TiffImages]]
 deps = ["ColorTypes", "DataStructures", "DocStringExtensions", "FileIO", "FixedPointNumbers", "IndirectArrays", "Inflate", "Mmap", "OffsetArrays", "PkgVersion", "ProgressMeter", "SIMD", "UUIDs"]
-git-tree-sha1 = "0248b1b2210285652fbc67fd6ced9bf0394bcfec"
+git-tree-sha1 = "3c0faa42f2bd3c6d994b06286bba2328eae34027"
 uuid = "731e570b-9d59-4bfa-96dc-6df516fadf69"
-version = "0.11.1"
+version = "0.11.2"
 
 [[deps.TranscodingStreams]]
 git-tree-sha1 = "0c45878dcfdcfa8480052b6ab162cdd138781742"

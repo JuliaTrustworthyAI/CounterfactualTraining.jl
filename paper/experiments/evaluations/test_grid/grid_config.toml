@@ -1,0 +1,43 @@
+name = "test_grid"
+dim_reduction = [false]
+generator_type = ["ecco", "generic", "revise"]
+data = "mnist"
+model_type = "mlp"
+save_dir = "paper/experiments/output/test_grid"
+
+[data_params]
+n_validation = []
+n_train = [1000]
+batchsize = [100]
+
+[model_params]
+nlayers = []
+activation = []
+nhidden = [64]
+
+[generator_params]
+opt = ["sgd"]
+lambda_cost = [0.001]
+lr = [1.0]
+maxiter = [100]
+lambda_energy = [0.5]
+type = []
+
+[training_params]
+opt = []
+nce = [10]
+lr = []
+threaded = [true]
+class_loss = []
+objective = ["full"]
+lambda_class_loss = [1.0]
+lambda_energy_diff = [0.5]
+burnin = [0.0]
+nepochs = [100]
+lambda_energy_reg = [0.001]
+verbose = [1]
+lambda_adversarial = []
+parallelizer = ["mpi"]
+generator_params = []
+conv = ["max_iter"]
+nneighbours = []

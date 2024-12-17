@@ -256,8 +256,8 @@ function get_parallelizer(pllr_type::String; threaded::Bool=true, storage_dir::S
     return pllr
 end
 
-function get_parallelizer(params::TrainingParams)
-    return get_parallelizer(params.parallelizer; threaded=params.threaded)
+function get_parallelizer(params::TrainingParams; storage_dir=tempdir())
+    return get_parallelizer(params.parallelizer; threaded=params.threaded, storage_dir=storage_dir)
 end
 
 """

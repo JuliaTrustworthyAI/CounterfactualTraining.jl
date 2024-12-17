@@ -124,8 +124,7 @@ function evaluate_counterfactuals(
     if !isdummy(cfg)
         mpi_storage_dir = mkpath(joinpath(meta_path, "mpi_temp"))
     else
-        @info "Running dummy evaluation."
-        mpi_storage_dir = mkpath(joinpath(meta_path, "mpi_temp_dummy"))
+        mpi_storage_dir = mkpath(joinpath(meta_path, "mpi_temp"))
     end
     pllr = get_parallelizer(cfg.counterfactual_params; storage_dir=mpi_storage_dir)
     conv = get_convergence(cfg.counterfactual_params)
