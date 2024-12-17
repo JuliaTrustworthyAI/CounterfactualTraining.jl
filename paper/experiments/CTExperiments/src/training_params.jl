@@ -238,7 +238,7 @@ function get_lambdas(
     return lambda
 end
 
-function get_parallelizer(pllr_type::String; threaded::Bool=true, storage_dir::String=tempdir())
+function get_parallelizer(pllr_type::String; threaded::Bool=true, save_dir::String=tempdir())
     # Multi-threading
     if pllr_type == "threads"
         pllr = ThreadsParallelizer()
@@ -250,14 +250,14 @@ function get_parallelizer(pllr_type::String; threaded::Bool=true, storage_dir::S
             MPI.Init()
         end
         # Active comm:
-        pllr = MPIParallelizer(MPI.COMM_WORLD; threaded=threaded, storage_dir=storage_dir)
+        pllr = MPIParallelizer(MPI.COMM_WORLD; threaded=threaded, save_dir=save_dir)
     end
 
     return pllr
 end
 
-function get_parallelizer(params::TrainingParams; storage_dir=tempdir())
-    return get_parallelizer(params.parallelizer; threaded=params.threaded, storage_dir=storage_dir)
+function get_parallelizer(params::TrainingParams; save_dir=tempdir())
+    return get_parallelizer(params.parallelizer; threaded=params.threaded, save_dir=save_dir)
 end
 
 """

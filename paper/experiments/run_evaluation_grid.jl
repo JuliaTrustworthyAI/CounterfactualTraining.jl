@@ -70,10 +70,6 @@ for (i, eval_config) in enumerate(worker_chunk)
 
     # Evaluate counterfactuals:
     @info "Rank $(rank): Running evaluation $i of $(length(worker_chunk))."
-    if rank == 0
-        @info "Memory usage before evaluating counterfactuals:"
-        meminfo_julia()
-    end
     bmk = evaluate_counterfactuals(eval_config)
 
     @info "Rank $(rank): Done evaluating all counterfactuals. Waiting at barrier ..."
