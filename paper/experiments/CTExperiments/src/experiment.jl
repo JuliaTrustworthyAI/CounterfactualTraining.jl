@@ -201,11 +201,7 @@ function run_training(exp::Experiment; checkpoint_dir::Union{Nothing,String}=not
     model, train_set, input_encoder, val_set = setup(exp)
     conv = get_convergence(exp.training_params)
     domain = get_domain(exp.data)
-    mpi_save_dir = tempdir()
-    pllr = get_parallelizer(
-        exp.training_params;
-        save_dir=mpi_save_dir,
-    )
+    pllr = get_parallelizer(exp.training_params)
 
     # Optimizer and model:
     training_opt = get_opt(exp.training_params)

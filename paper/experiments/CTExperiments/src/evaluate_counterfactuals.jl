@@ -83,8 +83,8 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
     end
 end
 
-function get_parallelizer(cfg::CounterfactualParams; save_dir=tempdir())
-    return get_parallelizer(cfg.parallelizer; threaded=cfg.threaded, save_dir=save_dir)
+function get_parallelizer(cfg::CounterfactualParams)
+    return get_parallelizer(cfg.parallelizer; threaded=cfg.threaded)
 end
 
 get_convergence(cfg::CounterfactualParams) = get_convergence(cfg.conv, cfg.maxiter)
@@ -120,13 +120,7 @@ function evaluate_counterfactuals(
     measure::Vector{<:PenaltyOrFun}=CE_MEASURES,
 )
     # Get parallelizer:
-    meta_path = joinpath(splitpath(cfg.save_dir)[1:end-1]...)
-    if !isdummy(cfg)
-        mpi_save_dir = mkpath(joinpath(meta_path, "mpi_temp"))
-    else
-        mpi_save_dir = mkpath(joinpath(meta_path, "mpi_temp"))
-    end
-    pllr = get_parallelizer(cfg.counterfactual_params; save_dir=mpi_save_dir)
+    pllr = get_parallelizer(cfg.counterfactual_params)
     conv = get_convergence(cfg.counterfactual_params)
     interim_storage_path = interim_ce_path(cfg)
     vertical_splits = if cfg.counterfactual_params.vertical_splits == 0

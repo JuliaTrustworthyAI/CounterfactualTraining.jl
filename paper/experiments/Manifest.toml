@@ -1403,9 +1403,9 @@ version = "1.11.0"
 
 [[deps.Libffi_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "0b4a5d71f3e5200a7dff793393e09dfc2d874290"
+git-tree-sha1 = "27ecae93dd25ee0909666e6835051dd684cc035e"
 uuid = "e9f186c6-92d2-5b65-8a66-fee21dc1b490"
-version = "3.2.2+1"
+version = "3.2.2+2"
 
 [[deps.Libgcrypt_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libgpg_error_jll"]
@@ -2611,9 +2611,7 @@ version = "1.0.0"
 
 [[deps.TaijaParallel]]
 deps = ["CounterfactualExplanations", "Logging", "MLUtils", "PackageExtensionCompat", "ProgressMeter", "Reexport", "Serialization", "TaijaBase"]
-git-tree-sha1 = "6d18767c211dc998e4c8a1ad30a5ef3cb5f2fb01"
-repo-rev = "counterfactual-training"
-repo-url = "https://github.com/JuliaTrustworthyAI/TaijaParallel.jl.git"
+git-tree-sha1 = "681dc35e1f08911050b7c2cf3661a7f268109c18"
 uuid = "bf1c2c22-5e42-4e78-8b6b-92e6c673eeb0"
 version = "1.1.2"
 weakdeps = ["MPI"]

@@ -16,6 +16,7 @@ set_global_seed()
 # Get config and set up grid:
 eval_grid = EvaluationGrid(get_config_from_args())
 exper_grid = ExperimentGrid(eval_grid.grid_file)
+@assert "mpi" ∉ eval_grid.counterfactual_params["parallelizer"] "Cannot distribute both evaluations and counterfactual search across processes. Use multi-threaded ('threads') for counterfactual search instead."
 
 # Meta data:
 df_meta = CTExperiments.expand_grid_to_df(exper_grid)
@@ -45,25 +46,6 @@ if length(eval_list) < nprocs
     @warn "There are less evaluations than processes. Check CPU efficiency of job."
 end
 chunks = TaijaParallel.split_obs(eval_list, nprocs)     # split  evaluations into chunks for each process
-
-# Set up dummies for processes without tasks to avoid deadlock:
-max_chunk_size = maximum(length.(chunks))
-chunks = Logging.with_logger(Logging.NullLogger()) do
-    for (i, chunk) in enumerate(chunks)
-        if length(chunk) < max_chunk_size
-            n_missing = max_chunk_size - length(chunk)
-            for j in 1:n_missing
-                cfg = deepcopy(eval_list[1])
-                cfg = make_dummy(cfg, i, j)
-                push!(chunk, cfg)
-            end
-        end
-    end
-    return chunks
-end
-
-@assert allequal(length.(chunks)) "Need all processes to have the same number of tasks."
-
 worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
 
 for (i, eval_config) in enumerate(worker_chunk)

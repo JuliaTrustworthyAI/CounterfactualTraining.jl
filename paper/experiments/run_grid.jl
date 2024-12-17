@@ -16,6 +16,7 @@ config_file = get_config_from_args()
 root_name = CTExperiments.from_toml(config_file)["name"]
 root_save_dir = joinpath(ENV["OUTPUT_DIR"], root_name)
 exper_grid = ExperimentGrid(config_file; new_save_dir=root_save_dir)
+@assert "mpi" ∉ exper_grid.training_params["parallelizer"] "Cannot distribute both experiments and training across processes. Use multi-threaded ('threads') for training instead."
 
 # Initialize MPI
 MPI.Init()
@@ -23,7 +24,7 @@ comm = MPI.COMM_WORLD
 rank = MPI.Comm_rank(comm)
 nprocs = MPI.Comm_size(comm)
 if MPI.Comm_rank(MPI.COMM_WORLD) != 0
-    global_logger(NullLogger())
+    # global_logger(NullLogger())
     exper_list = nothing
 else
     # Generate list of experiments and run them:
@@ -40,25 +41,6 @@ if length(exper_list) < nprocs
     @warn "There are less experiments ($(length(exper_list))) than processes ($(nprocs)). Check CPU efficiency of job."
 end
 chunks = TaijaParallel.split_obs(exper_list, nprocs)    # split experiments into chunks for each process
-
-# Set up dummies for processes without tasks to avoid deadlock:
-max_chunk_size = maximum(length.(chunks))
-chunks = Logging.with_logger(Logging.NullLogger()) do
-    for (i, chunk) in enumerate(chunks)
-        if length(chunk) < max_chunk_size
-            n_missing = max_chunk_size - length(chunk)
-            for j in 1:n_missing
-                exper = deepcopy(exper_list[1])
-                make_dummy(exper, i, j)
-                push!(chunk, exper)
-            end
-        end
-    end
-    return chunks
-end
-
-@assert allequal(length.(chunks)) "Need all processes to have the same number of tasks."
-
 worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
 
 for (i, experiment) in enumerate(worker_chunk)
