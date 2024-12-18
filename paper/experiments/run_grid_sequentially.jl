@@ -1,3 +1,4 @@
+using Accessors
 using BSON
 using CTExperiments
 using CounterfactualExplanations
@@ -38,23 +39,22 @@ exper_list = MPI.bcast(exper_list, comm; root=0)
 MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 
 for (i, experiment) in enumerate(exper_list)
-    if rank != 0
-        # Shut up logging for other ranks to avoid cluttering output
-        CTExperiments.shutup!(experiment.training_params)
-    end
 
     # Setup:
-    _save_dir = mkpath(joinpath(experiment.meta_params.save_dir, "rank_$rank"))
     _name = experiment.meta_params.experiment_name
+    if rank != 0
+        CTExperiments.shutup!(experiment.training_params)                   # shut off logging for non-root ranks
+        @reset experiment.training_params.generator_params.maxiter = 1      # decrease load on non-root ranks
+        _save_dir = nothing                                                 # disable saving models for non-root ranks
+    else
+        _save_dir = experiment.meta_params.save_dir
+    end
 
     # Skip if already finished
     if has_results(experiment)
         @info "Rank $(rank): Skipping $(_name), model already exists."
         continue
     end
-
-    # Running the experiment
-    @info "Rank $(rank): Running experiment: $(_name) ($i/$(length(exper_list)))"
 
     model, logs = run_training(experiment; checkpoint_dir=_save_dir)
 
