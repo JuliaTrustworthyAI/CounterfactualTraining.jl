@@ -1,9 +1,9 @@
-name = "2024-12-12_gen_params"
+name = "2024-12-18_gen_params"
 dim_reduction = [false]
 generator_type = ["ecco", "generic", "revise"]
 data = "mnist"
 model_type = "mlp"
-save_dir = "paper/experiments/output/2024-12-12_gen_params"
+save_dir = "paper/experiments/output/2024-12-18_gen_params"
 
 [data_params]
 n_validation = []
