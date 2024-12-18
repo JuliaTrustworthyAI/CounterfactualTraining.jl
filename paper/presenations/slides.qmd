@@ -1,0 +1,57 @@
+---
+title: Counterfactual Training
+subtitle: Update Meeting Dec 2024
+author: 
+  - name: "**Patrick Altmeyer**"
+    url: https://www.patalt.org/
+  - name: Arie van Deursen
+  - name: Cynthia C. S. Liem
+institute: Delft University of Technology
+date: today
+format: 
+  tudelft-revealjs:
+    theme: custom.scss
+    self-contained: true
+    smaller: false
+    scrollable: true
+    preview-links: auto
+    slide-number: true
+    transition: slide
+    background-transition: fade
+    fig-align: center
+    html-math-method: mathjax
+    include-in-header:
+      - text: |
+          <script>
+          MathJax = {
+            options: {
+              menuOptions: {
+                settings: {
+                  assistiveMml: false
+                }
+              }
+            }
+          };
+          </script>
+revealjs-plugins:
+  - pointer
+crossref: 
+  prp-title: RQ
+  prp-prefix: RQ
+classoption: "notheorems"
+---
+
+## Status
+
+- *Code base*: In place and streamlined for reproducibility and configuration. 
+- *Experiments*: Lots of work done and results largely supportive of idea.
+    - Ran into problems on DelftBlue, which has set me back about 2 weeks. 
+- *Paper*: Still bare-bones. 
+- *ICML*: Potentially still possible to submit something, but this will be rushed and not "finished".
+
+## High-Level Idea
+
+$$
+
+$$
+
