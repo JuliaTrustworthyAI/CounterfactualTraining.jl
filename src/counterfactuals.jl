@@ -62,7 +62,7 @@ function generate!(
         M,
         generator;
         convergence=convergence,
-        verbose=verbose > 1,
+        verbose=verbose >= 1,
     )
     counterfactuals = hcat(CounterfactualExplanations.counterfactual.(ces)...)
 
@@ -149,7 +149,7 @@ function generate!(
         M,
         generator;
         convergence=convergence,
-        verbose=verbose > 1,
+        verbose=verbose >= 1,
     )
 
     counterfactuals = CounterfactualExplanations.counterfactual.(ces)      # counterfactual inputs
