@@ -264,6 +264,8 @@ function expand_grid(
     return expanded_grid, experiment_names
 end
 
+ntasks(grid::AbstractGridConfiguration) = length(expand_grid(grid)[2])
+
 """
     expand_grid_to_df(cfg::AbstractGridConfiguration)
 
