@@ -50,8 +50,8 @@ classoption: "notheorems"
 ## Problems on Cluster
 
 - Trying to distribute: 
-    1. Models/experiments across processes and then ...
-    2. ... for each model/experiment distribute the counterfactual search across processes.
+    1. Models/experiments across processes.
+    2. For each model/experiment distribute the counterfactual search across processes.
 - Out-of-memory issues, data races, ...
 - Multi-processing for models & multi-threading for counterfactual search: low CPU efficiency on DelftBlue (jobs get cancelled).
 
@@ -60,6 +60,21 @@ classoption: "notheorems"
 Combine ideas from Energy-Based Models and Adversarial Training:
 
 $$
-\ell_{\text{clf}}(f(x),y) + \lambda_{\text{gen}} \ell_{\text{gen}}(x^\prime,x) + \lambda_{\text{adv}} \ell_{\text{clf}}(f(x^\prime),y) + \text{reg}
+\ell_{\text{clf}}(f(x),y) + \lambda_{\text{gen}} \ell_{\text{gen}}(x^\prime,x) + \lambda_{\text{adv}} \ell_{\text{clf}}(f(x^\prime),y) + \text{r}
 $$
+
+- $x^\prime$ are counterfactuals of $x$.
+- $\ell_{\text{gen}}$ is the difference in energies between observed samples and counterfactuals.
+- Counterfactuals are recycled as adversarial examples. 
+
+## Training Details
+
+During each `EPOCH`:
+
+1. Generate `nce` counterfactuals and distribute across mini-batches.
+2. For each batch compute:
+    - Classifier loss: $\ell_{\text{clf}}(f(x),y)$
+    - Generator loss: $\ell_{\text{gen}}(x^\prime,x)$
+    - Adversarial loss: $\lambda_{\text{adv}} \ell_{\text{clf}}(f(x^\prime),y)$
+3. Backpropagate all losses and update parameters.
 
