@@ -60,10 +60,10 @@ classoption: "notheorems"
 Combine ideas from Energy-Based Models and Adversarial Training:
 
 $$
-\ell_{\text{clf}}(f_\theta(x),y) + \lambda_{\text{gen}} \ell_{\text{gen}}(x^\prime,x;\theta) + \lambda_{\text{adv}} \ell_{\text{clf}}(f_\theta(x^\prime),y)
+\ell_{\text{clf}}(f_\theta(x),y) + \lambda_{\text{gen}} \ell_{\text{gen}}({x^\prime}_t,x_t;\theta) + \lambda_{\text{adv}} \ell_{\text{clf}}(f_\theta({x^\prime}_t),y)
 $$
 
-- $x^\prime$ are counterfactuals of $x_{s}\subseteq x$.
+- ${x^\prime}_t$ are counterfactuals of $x_{s}\subseteq x$ with target class $t$.
 - $\ell_{\text{gen}}$ is the difference in energies between observed samples and counterfactuals.
 - Counterfactuals are recycled as adversarial examples. 
 
@@ -74,8 +74,8 @@ During each `EPOCH`:
 1. Generate `nce` counterfactuals and distribute across mini-batches.
 2. For each batch compute:
     - Classifier loss: $\ell_{\text{clf}}(f_\theta(x),y)$
-    - Generator loss: $\ell_{\text{gen}}(x^\prime,x;\theta)$
-    - Adversarial loss: $\lambda_{\text{adv}} \ell_{\text{clf}}(f_\theta(x^\prime),y)$
+    - Generator loss: $\ell_{\text{gen}}({x^\prime}_t,x_t;\theta)$
+    - Adversarial loss: $\lambda_{\text{adv}} \ell_{\text{clf}}(f_\theta({x^\prime}_t),y)$
 3. Backpropagate all losses and update parameters.
 
 ## Motivation and Intuition
@@ -85,5 +85,15 @@ During each `EPOCH`:
 - This should only work if counterfactuals are generated faithfully (favorable evidence).
 - Approach can be leveraged to impicitly encode mutability and domain constraints in model.
 
+## Encoding Domain Knowledge
 
+**Example**: Let $f_\theta(x)=\theta^{T}x$ be a linear classifier. Suppose that featue $x_1$ is immutable (e.g. 'gender' or 'faith'). 
 
+$$
+\begin{aligned}
+\nabla_\theta \ell_{\text{gen}}(x^\prime,x;\theta) &= \nabla_\theta ( \theta^{T}x[t] - \theta^{T}x^\prime[t]) \\
+\frac{\partial \ell_{\text{gen}}}{\partial\theta_1}(x^\prime,x;\theta)&=x_1 - x_1^\prime
+\end{aligned}
+$$
+
+- If $$
