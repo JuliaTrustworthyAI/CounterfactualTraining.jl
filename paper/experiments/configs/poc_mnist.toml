@@ -1,9 +1,9 @@
-name = "grid_poc"
+name = "poc_mnist"
 dim_reduction = [false]
 generator_type = ["ecco", "generic", "revise"]
 data = "mnist"
 model_type = "mlp"
-save_dir = "paper/experiments/output/grid_poc"
+save_dir = "paper/experiments/output/poc_mnist"
 
 [data_params]
 n_validation = []

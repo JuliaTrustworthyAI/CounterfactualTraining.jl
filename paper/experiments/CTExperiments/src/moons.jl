@@ -23,12 +23,6 @@ function get_ce_data(data::Moons, n_total::Int)
     return CounterfactualData(load_moons(n_total)...)
 end
 
-function get_input_encoder(
-    exp::AbstractExperiment, data::Moons, generator_type::AbstractGeneratorType
-)
-    return nothing
-end
-
 """
     get_data(data::Moons, test_set::Bool=false)
 

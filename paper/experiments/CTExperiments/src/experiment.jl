@@ -190,6 +190,21 @@ function get_input_encoder(
 end
 
 """
+    get_input_encoder(
+        exp::AbstractExperiment, 
+        data::Moons, 
+        generator_type::REVISE
+    )
+
+For Moons data and the REVISE generator, use the VAE as the input encoder.
+"""
+function get_input_encoder(exp::AbstractExperiment, data::Dataset, generator_type::REVISE)
+    ce_data = get_ce_data(data, data.n_train)
+    vae = CounterfactualExplanations.DataPreprocessing.fit_transformer(ce_data, CounterfactualExplanations.GenerativeModels.VAE)
+    return vae
+end
+
+"""
     run_training(exp::Experiment; checkpoint_dir::Union{Nothing,String} = nothing)
 
 Trains the model on the given dataset with Counterfactual Training using the given training parameters and meta parameters.
