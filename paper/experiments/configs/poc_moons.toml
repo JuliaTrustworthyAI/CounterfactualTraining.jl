@@ -20,7 +20,7 @@ opt = ["sgd"]
 lambda_cost = [0.001]
 lr = [0.1]
 maxiter = [50]
-lambda_energy = [5.0]
+lambda_energy = [1.0]
 type = []
 
 [training_params]
