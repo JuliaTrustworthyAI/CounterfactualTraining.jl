@@ -127,4 +127,12 @@ Suppose that featue $x[1]$ is immutable (e.g. 'age'), so $x_{t}^\prime[1]=x_s[1]
 
 # Planning Ahead
 
+## Planned Contributions
+
+- Focus on enhancing trustworthiness and applicability of small opaque models. 
+    - Add more datasets and neuro-tree models (relatively straightforward).
+- Do not pitch as state-of-the-art approach to generative modelling similar to JEMs, but rather as an extension of JEMs to XAI and AR. 
+- Limit use of image datasets to illustrate arguments:
+    - Example: what happens if digit values can only be increased/decreased?
+
 
