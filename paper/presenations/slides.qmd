@@ -60,10 +60,10 @@ classoption: "notheorems"
 Combine ideas from Energy-Based Models and Adversarial Training:
 
 $$
-\ell_{\text{clf}}(f(x),y) + \lambda_{\text{gen}} \ell_{\text{gen}}(x^\prime,x) + \lambda_{\text{adv}} \ell_{\text{clf}}(f(x^\prime),y) + \text{r}
+\ell_{\text{clf}}(f_\theta(x),y) + \lambda_{\text{gen}} \ell_{\text{gen}}(x^\prime,x;\theta) + \lambda_{\text{adv}} \ell_{\text{clf}}(f_\theta(x^\prime),y)
 $$
 
-- $x^\prime$ are counterfactuals of $x$.
+- $x^\prime$ are counterfactuals of $x_{s}\subseteq x$.
 - $\ell_{\text{gen}}$ is the difference in energies between observed samples and counterfactuals.
 - Counterfactuals are recycled as adversarial examples. 
 
@@ -73,8 +73,17 @@ During each `EPOCH`:
 
 1. Generate `nce` counterfactuals and distribute across mini-batches.
 2. For each batch compute:
-    - Classifier loss: $\ell_{\text{clf}}(f(x),y)$
-    - Generator loss: $\ell_{\text{gen}}(x^\prime,x)$
-    - Adversarial loss: $\lambda_{\text{adv}} \ell_{\text{clf}}(f(x^\prime),y)$
+    - Classifier loss: $\ell_{\text{clf}}(f_\theta(x),y)$
+    - Generator loss: $\ell_{\text{gen}}(x^\prime,x;\theta)$
+    - Adversarial loss: $\lambda_{\text{adv}} \ell_{\text{clf}}(f_\theta(x^\prime),y)$
 3. Backpropagate all losses and update parameters.
+
+## Motivation and Intuition
+
+- Instead of using SGLD to sample from $p(x|t;\theta)$, we use counterfactual generators.
+- The idea is to align counterfactual explanations with observed data to induce plausibility.
+- This should only work if counterfactuals are generated faithfully (favorable evidence).
+- Approach can be leveraged to impicitly encode mutability and domain constraints in model.
+
+
 
