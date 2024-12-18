@@ -59,10 +59,8 @@ for (i, experiment) in enumerate(exper_list)
     model, logs = run_training(experiment; checkpoint_dir=_save_dir)
 
     # Saving the results:
-    if !isdummy(experiment)  # Avoid overwriting dummy results
+    if rank == 0
         save_results(experiment, model, logs)
-    else
-        remove_dummy!(experiment)
     end
 end
 

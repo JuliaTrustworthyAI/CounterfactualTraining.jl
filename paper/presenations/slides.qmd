@@ -33,8 +33,6 @@ format:
             }
           };
           </script>
-revealjs-plugins:
-  - pointer
 crossref: 
   prp-title: RQ
   prp-prefix: RQ
@@ -62,7 +60,6 @@ classoption: "notheorems"
 Combine ideas from Energy-Based Models and Adversarial Training:
 
 $$
-\ell_{\text{clf}}(f(x),y) + \lambda_{\text{adv}} \ell_{\text{clf}}(f(x^\prime),y) + \lambda_{\text{gen}} \ell_{\text{gen}}(x^\prime,x) + \text{reg}
+\ell_{\text{clf}}(f(x),y) + \lambda_{\text{gen}} \ell_{\text{gen}}(x^\prime,x) + \lambda_{\text{adv}} \ell_{\text{clf}}(f(x^\prime),y) + \text{reg}
 $$
-
 
