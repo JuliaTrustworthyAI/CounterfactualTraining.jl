@@ -55,11 +55,14 @@ classoption: "notheorems"
     1. Models/experiments across processes and then ...
     2. ... for each model/experiment distribute the counterfactual search across processes.
 - Out-of-memory issues, data races, ...
-- When using multi-processing for models and multi-threading for counterfactual search, I get low CPU efficiency on DelftBlue (jobs get cancelled).
+- Multi-processing for models & multi-threading for counterfactual search: low CPU efficiency on DelftBlue (jobs get cancelled).
 
 ## High-Level Idea
 
-$$
+Combine ideas from Energy-Based Models and Adversarial Training:
 
 $$
+\ell_{\text{clf}}(f(x),y) + \lambda_{\text{adv}} \ell_{\text{clf}}(f(x^\prime),y) + \lambda_{\text{gen}} \ell_{\text{gen}}(x^\prime,x) + \text{reg}
+$$
+
 
