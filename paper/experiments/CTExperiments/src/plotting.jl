@@ -481,7 +481,7 @@ function _plot_over_generators(
             dpi=dpi,
         )
         if !isnothing(save_dir)
-            fnmake = if isnothing(variable)
+            fname = if isnothing(variable)
                 "ce_$(generator).png"
             else
                 "ce_$(generator)_$(variable)=$(val).png"
