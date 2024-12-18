@@ -9,6 +9,7 @@ author:
 institute: Delft University of Technology
 date: today
 format: 
+  beamer: default
   tudelft-revealjs:
     theme: custom.scss
     self-contained: true
