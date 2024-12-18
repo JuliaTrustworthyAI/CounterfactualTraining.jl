@@ -3,8 +3,8 @@
 #SBATCH --job-name="Test Grid"
 #SBATCH --partition=compute
 #SBATCH --time=00:15:00
-#SBATCH --ntasks=3
-#SBATCH --cpus-per-task=14
+#SBATCH --ntasks=9
+#SBATCH --cpus-per-task=4
 #SBATCH --mem-per-cpu=1G
 #SBATCH --account=innovation
 #SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT
