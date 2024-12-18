@@ -3,9 +3,9 @@
 #SBATCH --job-name="Run Grid (Sequentially)"
 #SBATCH --partition=compute
 #SBATCH --time=00:10:00
-#SBATCH --ntasks=42
+#SBATCH --ntasks=30
 #SBATCH --cpus-per-task=1
-#SBATCH --mem-per-cpu=2G
+#SBATCH --mem-per-cpu=3G
 #SBATCH --account=innovation
 #SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT
 
