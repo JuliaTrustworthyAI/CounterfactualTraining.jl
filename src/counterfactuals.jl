@@ -160,7 +160,6 @@ function generate!(
         ) for ce in ces
     ]
 
-
     # Unpacking:
     counterfactuals = (ce -> ce.counterfactual).(ces)                               # get actual counterfactuals
     targets_enc = (ce -> target_encoded(ce, counterfactual_data)).(ces)             # encode targets as probabilities

@@ -6,7 +6,7 @@
 #SBATCH --ntasks=6
 #SBATCH --cpus-per-task=2
 #SBATCH --mem-per-cpu=2G
-#SBATCH --account=innovation
+#SBATCH --account=research-eemcs-insy
 #SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT
 
 module load 2024r1 
