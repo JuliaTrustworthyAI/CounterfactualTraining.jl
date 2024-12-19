@@ -25,7 +25,7 @@ type = []
 
 [training_params]
 opt = ["adam"]
-nce = [1000]
+nce = [100]
 lr = []
 threaded = []
 class_loss = []
