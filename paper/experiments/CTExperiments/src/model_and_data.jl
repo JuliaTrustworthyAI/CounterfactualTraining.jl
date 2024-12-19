@@ -41,7 +41,7 @@ function get_data(data::Dataset; n::Union{Nothing,Int}=data.n_train, test_set::B
     else
         idx = 1:n_total
     end
-    X = X[:, idx]
+    X = Float32.(X[:, idx])
     y = y[idx]
     return X, y
 end

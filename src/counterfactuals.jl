@@ -149,21 +149,22 @@ function generate!(
         M,
         generator;
         convergence=convergence,
+        return_flattened=true,
         verbose=verbose >= 1,
     )
 
-    counterfactuals = CounterfactualExplanations.counterfactual.(ces)      # counterfactual inputs
-
     # Get neighbours in target class:
     neighbours = [
-        CounterfactualExplanations.find_potential_neighbours(ce, nneighbours) for ce in ces
+        CounterfactualExplanations.find_potential_neighbours(
+            ce, counterfactual_data, nneighbours
+        ) for ce in ces
     ]
 
-    # Encoded targets:
-    targets_enc = (x -> x.target_encoded).(ces)
 
-    # Target indices:
-    target_indices = get_target_index.((counterfactual_data.y_levels,), targets)
+    # Unpacking:
+    counterfactuals = (ce -> ce.counterfactual).(ces)                               # get actual counterfactuals
+    targets_enc = (ce -> target_encoded(ce, counterfactual_data)).(ces)             # encode targets as probabilities
+    target_indices = get_target_index.((counterfactual_data.y_levels,), targets)    # get indices of targets in y_levels array
 
     # Partition data:
     all_data = zip(counterfactuals, target_indices, targets_enc, neighbours)

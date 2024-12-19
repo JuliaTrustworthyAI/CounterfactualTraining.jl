@@ -20,7 +20,9 @@ end
 get_domain(d::MNIST) = (-1.0f0, 1.0f0)
 
 function get_ce_data(data::MNIST, n_total::Int)
-    return CounterfactualData(load_mnist(n_total)...)
+    X, y = load_mnist(n_total)
+    X = Float32.(X)
+    return CounterfactualData(X,y)
 end
 
 """
@@ -73,4 +75,6 @@ function get_data(data::MNIST, test_set::Bool=false)
     else
         X, y = load_mnist()
     end
+    X = Float32.(X)
+    return X, y
 end

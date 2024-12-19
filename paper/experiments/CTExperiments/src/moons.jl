@@ -13,14 +13,16 @@ Keyword container for the `Moons` data set. Can specify the number of samples `n
 """
 Base.@kwdef struct Moons <: Dataset
     n_train::Int = 3000
-    batchsize::Int = 1
+    batchsize::Int = 30
     n_validation::Int = 600
 end
 
 get_domain(d::Moons) = nothing
 
 function get_ce_data(data::Moons, n_total::Int)
-    return CounterfactualData(load_moons(n_total)...)
+    X, y = load_moons(n_total)
+    X = Float32.(X)
+    return CounterfactualData(X, y)
 end
 
 """
@@ -28,4 +30,8 @@ end
 
 Load the Moons data set. Since data is synthetically generated, `test_set` has no effect.
 """
-get_data(data::Moons, test_set::Bool=false) = load_moons()
+function get_data(data::Moons, test_set::Bool=false)
+    X, y = load_moons()
+    X = Float32.(X)
+    return X, y
+end

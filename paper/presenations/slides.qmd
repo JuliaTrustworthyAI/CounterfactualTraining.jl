@@ -56,6 +56,12 @@ classoption: "notheorems"
 - Out-of-memory issues, data races, ...
 - Multi-processing for models & multi-threading for counterfactual search: low CPU efficiency on DelftBlue (jobs get cancelled).
 
+## The Big Oversight
+
+- **Core problem**: `CounterfactualExplanation` objects are *huge*. They store `X` (the input), `y` (the output), etc. in their own memory.
+- Can't easily fit `CounterfactualExplanation` objects on cluster memory and pass them around processes. 
+- **Good news**: Relatively straightforward to add `FlattenedCE` with gazzilion times lower memory footprint.
+
 ## High-Level Idea
 
 Counterfactual Training (CT) combines ideas from Energy-Based Models and Adversarial Training:

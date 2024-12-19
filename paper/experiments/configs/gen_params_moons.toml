@@ -1,14 +1,14 @@
-name = "poc_mnist"
+name = "gen_params_moons"
 dim_reduction = [false]
 generator_type = ["ecco", "generic", "revise"]
-data = "mnist"
+data = "moons"
 model_type = "mlp"
-save_dir = "paper/experiments/output/poc_mnist"
+save_dir = "paper/experiments/output/gen_params_moons"
 
 [data_params]
 n_validation = []
-n_train = [10000]
-batchsize = [100]
+n_train = []
+batchsize = []
 
 [model_params]
 nlayers = []
@@ -17,10 +17,10 @@ nhidden = [64]
 
 [generator_params]
 opt = ["sgd"]
-lambda_cost = [0.001]
+lambda_cost = [0.0, 0.0001, 0.001, 0.01, 0.1]
 lr = [1.0]
 maxiter = [100]
-lambda_energy = [5.0]
+lambda_energy = [0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0]
 type = []
 
 [training_params]
@@ -29,15 +29,15 @@ nce = [100]
 lr = []
 threaded = []
 class_loss = []
-objective = ["full", "vanilla"]
+objective = ["full"]
 lambda_class_loss = [1.0]
 lambda_energy_diff = [0.5]
 burnin = [0.0]
-nepochs = [200]
+nepochs = [100]
 lambda_energy_reg = [0.001]
-verbose = [1]
+verbose = [0]
 lambda_adversarial = []
-parallelizer = ["mpi"]
+parallelizer = ["threads"]
 generator_params = []
 conv = ["max_iter"]
 nneighbours = []
