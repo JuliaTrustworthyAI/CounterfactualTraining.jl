@@ -1,11 +1,8 @@
 using EnergySamplers: EnergySamplers
+using LinearAlgebra
 
 function implausibility(model, perturbed_input, samples, targets)
-    implausibilities =
-        EnergySamplers.energy_differential.(
-            (model,), eachcol(perturbed_input), samples, targets
-        )
-    return implausibilities
+    return diag((model(samples) - model(perturbed_input))'targets)
 end
 
 function reg_loss(model, perturbed_input, samples, targets)
