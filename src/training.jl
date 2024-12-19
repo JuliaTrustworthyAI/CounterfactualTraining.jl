@@ -94,8 +94,7 @@ function counterfactual_training(
 
             # Unpack:
             input, label = batch
-            perturbed_input, target_indices, targets_enc, neighbours = counterfactual_dl[i]
-            neighbours = typeof(neighbours) <: AbstractVector ? neighbours : [neighbours]
+            perturbed_input, targets_enc, neighbours = counterfactual_dl[i]
 
             val, grads = Flux.withgradient(model) do m
 
@@ -104,8 +103,8 @@ function counterfactual_training(
 
                 # Compute implausibility and regulatization:
                 if !isnothing(perturbed_input)
-                    implaus = implausibility(m, perturbed_input, neighbours, target_indices)
-                    regs = reg_loss(m, perturbed_input, neighbours, target_indices)
+                    implaus = implausibility(m, perturbed_input, neighbours, targets_enc)
+                    regs = reg_loss(m, perturbed_input, neighbours, targets_enc)
                     # Validity loss (counterfactual):
                     yhat_ce = m(perturbed_input)
                     adversarial_loss = Flux.Losses.logitcrossentropy(yhat_ce, targets_enc)
@@ -219,7 +218,6 @@ function counterfactual_training(
             @info msg_imp
             @info msg_reg
             @info msg_adv
-            println()
         end
     end
     return model, log

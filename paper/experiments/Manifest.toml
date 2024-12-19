@@ -493,7 +493,7 @@ version = "1.4.0"
     NeuroTreeModels = "1db4e0a5-a364-4b0c-897c-2bd5a4a3a1f2"
 
 [[deps.CounterfactualTraining]]
-deps = ["ChainRulesCore", "CounterfactualExplanations", "EnergySamplers", "Flux", "JLD2", "ProgressMeter", "StatsBase", "TaijaParallel", "UnicodePlots"]
+deps = ["ChainRulesCore", "CounterfactualExplanations", "EnergySamplers", "Flux", "JLD2", "LinearAlgebra", "ProgressMeter", "StatsBase", "TaijaParallel", "UnicodePlots"]
 path = "../.."
 uuid = "c5e5e904-ed0d-4ddb-967e-dbb7fd41a507"
 version = "0.0.1"
