@@ -16,7 +16,10 @@ set_global_seed()
 # Get config and set up grid:
 eval_grid = EvaluationGrid(get_config_from_args())
 exper_grid = ExperimentGrid(eval_grid.grid_file)
-@assert "mpi" ∉ eval_grid.counterfactual_params["parallelizer"] "Cannot distribute both evaluations and counterfactual search across processes. Use multi-threaded ('threads') for counterfactual search instead."
+if "mpi" in exper_grid.training_params["parallelizer"]
+    @warn "Cannot distribute both evaluations and counterfactual search across processes. For multi-processing counterfactual search, use `run_grid_sequentially.jl` instead. Resetting ..."
+    @reset exper_grid.training_params["parallelizer"] = ["threads"]
+end
 
 # Meta data:
 df_meta = CTExperiments.expand_grid_to_df(exper_grid)

@@ -1,3 +1,4 @@
+using Accessors
 using BSON
 using CTExperiments
 using CounterfactualExplanations
@@ -16,7 +17,10 @@ config_file = get_config_from_args()
 root_name = CTExperiments.from_toml(config_file)["name"]
 root_save_dir = joinpath(ENV["OUTPUT_DIR"], root_name)
 exper_grid = ExperimentGrid(config_file; new_save_dir=root_save_dir)
-@assert "mpi" ∉ exper_grid.training_params["parallelizer"] "Cannot distribute both experiments and counterfactual search across processes. Use multi-threaded ('threads') for counterfactual search instead."
+if "mpi" in exper_grid.training_params["parallelizer"]
+    @warn "Cannot distribute both experiments and counterfactual search across processes. For multi-processing counterfactual search, use `run_grid_sequentially.jl` instead. Resetting ..."
+    @reset exper_grid.training_params["parallelizer"] = ["threads"]
+end
 
 # Initialize MPI
 MPI.Init()

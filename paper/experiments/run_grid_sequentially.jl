@@ -17,7 +17,10 @@ config_file = get_config_from_args()
 root_name = CTExperiments.from_toml(config_file)["name"]
 root_save_dir = joinpath(ENV["OUTPUT_DIR"], root_name)
 exper_grid = ExperimentGrid(config_file; new_save_dir=root_save_dir)
-@assert "threads" ∉ exper_grid.training_params["parallelizer"] "Use multi-processing ('mpi') for counterfactual search if grid is run sequentially."
+if "threads" in exper_grid.training_params["parallelizer"] 
+    @warn "It makes sense to use multi-processing ('mpi') for counterfactual search if grid is run sequentially. For multi-threading, use `run_grid.jl` instead. Resetting ..."
+    @reset exper_grid.training_params["parallelizer"] = ["mpi"]
+end
 
 # Initialize MPI
 MPI.Init()

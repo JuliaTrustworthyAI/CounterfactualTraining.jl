@@ -2,14 +2,15 @@
 title: Counterfactual Training
 subtitle: Update Meeting Dec 2024
 author: 
-  - name: "**Patrick Altmeyer**"
+  - name: Patrick Altmeyer
     url: https://www.patalt.org/
   - name: Arie van Deursen
   - name: Cynthia C. S. Liem
 institute: Delft University of Technology
 date: today
 format: 
-  beamer: default
+  beamer:
+    theme: Boadilla
   tudelft-revealjs:
     theme: custom.scss
     self-contained: true
@@ -60,8 +61,10 @@ classoption: "notheorems"
 
 - **Core problem**: `CounterfactualExplanation` objects are *huge*. They store `X` (the input), `y` (the output), etc. in their own memory.
 - Can't easily fit `CounterfactualExplanation` objects on cluster memory and pass them around processes. 
-- **Good news**: Relatively straightforward to add `FlattenedCE` with gazzilion times lower memory footprint.
-- **Better news**: That's already done.
+- **Good news**: Relatively straightforward to add `FlattenedCE` with gazzilion times lower memory footprint (done!).
+- Nested parallelization issue remains and I will not spend more time trying to make it work. 
+
+# Methodology
 
 ## High-Level Idea
 
@@ -81,9 +84,10 @@ During each `EPOCH`:
 
 1. Generate `nce` counterfactuals and distribute across mini-batches.
 2. For each batch compute:
-    - Classifier loss: $\ell_{\text{clf}}(f_\theta(x),y)$
-    - Generator loss: $\ell_{\text{gen}}({x^\prime}_t,x_t;\theta)$
-    - Adversarial loss: $\lambda_{\text{adv}} \ell_{\text{clf}}(f_\theta({x^\prime}_t),y)$
+    - Classifier loss: $\ell_{\text{clf}}(f_\theta(x),y)$.
+    - Generator loss: $\lambda_{\text{gen}} \ell_{\text{gen}}({x^\prime}_t,x_t;\theta)$.
+    - Adversarial loss: $\lambda_{\text{adv}} \ell_{\text{clf}}(f_\theta({x^\prime}_t),y)$.
+    - Regularization term for energies.
 3. Backpropagate all losses and update parameters.
 
 ## Motivation and Intuition
@@ -115,7 +119,7 @@ Suppose that featue $x[1]$ is immutable (e.g. 'age'), so $x_{t}^\prime[1]=x_s[1]
 - All counterfactuals at test time generated using *ECCo*.
 - Penalty on energy differential increases from *l.* to *r.*
 
-![Plausibility of faithful counterfactuals $x_{t}^\prime$ measured in terms of their distance from $x_{t}$.](www/moons_plaus.png){#fig-moons-plausib}
+![Plausibility of faithful counterfactuals $x_{t}^\prime$ measured in terms of their distance from $x_{t}$. Higher values indicate higher plausibility.](www/moons_plaus.png){#fig-moons-plausib}
 
 ## Moons (Example)
 
@@ -132,6 +136,28 @@ Suppose that featue $x[1]$ is immutable (e.g. 'age'), so $x_{t}^\prime[1]=x_s[1]
 
 ![Validation accuracy for different models.](www/moons_acc_val.png){#fig-moons-acc-val}
 
+## MNIST (Vanilla vs *ECCo*)
+
+::::{.columns}::::
+:::{.column width='50%'}
+![Faithful counterfactuals for conventionally trained MLP.](www/poc_model.png){#fig-mnist-model}
+:::
+:::{.column width='50%'}
+![Faithful counterfactuals for same MLP with CT (*ECCo*).](www/poc_model_ct_ecco.png){#fig-mnist-model-ct-ecco}
+:::
+::::
+
+## MNIST (*Generic* and *REVISE*)
+
+::::{.columns}::::
+:::{.column width='50%'}
+![Faithful counterfactuals for same MLP with CT (*Generic*).](www/poc_model_ct_generic.png){#fig-mnist-model-ct-generic}
+:::
+:::{.column width='50%'}
+![Faithful counterfactuals for same MLP with CT (*REVISE*).](www/poc_model_ct_model_revise.png){#fig-mnist-model-ct-model-revise}
+:::
+::::
+
 # Planning Ahead
 
 ## Planned Contributions
@@ -141,5 +167,14 @@ Suppose that featue $x[1]$ is immutable (e.g. 'age'), so $x_{t}^\prime[1]=x_s[1]
 - Do not pitch as state-of-the-art approach to generative modelling similar to JEMs, but rather as an extension of JEMs to XAI and AR. 
 - Limit use of image datasets to illustrate arguments:
     - Example: what happens if digit values can only be increased/decreased?
+
+## Timeline
+
+- Code base is already streamlined very well to allow for grid searches with easy configuration.
+- Lots of open tasks and questions (see [issue](https://github.com/JuliaTrustworthyAI/CounterfactualTraining.jl/issues/8))
+    1. Add MMD to measure plausibility.
+    2. Evaluate adversarial robustness and generative capacity. Compare to AT, JEM.
+    3. ... 
+- Still aiming for ICML to commit to a timeline, but it seems unlikely to be in the shape I would like.
 
 
