@@ -253,6 +253,10 @@ function get_parallelizer(pllr_type::String; threaded::Bool=true)
         pllr = MPIParallelizer(MPI.COMM_WORLD; threaded=threaded)
     end
 
+    if pllr_type == ""
+        pllr = nothing
+    end
+
     return pllr
 end
 

@@ -125,18 +125,18 @@ function Experiment(fname::String; new_save_dir::Union{Nothing,String}=nothing)
 end
 
 """
-    setup(exp::Experiment) 
+    setup(exper::Experiment) 
 
 Sets up the experiment.
 """
-setup(exp::AbstractExperiment) = setup(exp, exp.data, exp.model_type)
+setup(exper::AbstractExperiment) = setup(exper, exper.data, exper.model_type)
 
 """
-    setup(exp::AbstractExperiment, data::Dataset, model::ModelType)
+    setup(exper::AbstractExperiment, data::Dataset, model::ModelType)
 
 Loads the data and builds a model corresponding to the specified `model` type. Returns the model and training dataset.
 """
-function setup(exp::AbstractExperiment, data::Dataset, model::ModelType)
+function setup(exper::AbstractExperiment, data::Dataset, model::ModelType)
 
     # Data:
     n_total = data.n_train + data.n_validation
@@ -160,23 +160,23 @@ function setup(exp::AbstractExperiment, data::Dataset, model::ModelType)
     model = build_model(model, nin, nout)
 
     # Input encoding:
-    input_encoder = get_input_encoder(exp)
+    input_encoder = get_input_encoder(exper)
 
     return model, train_set, input_encoder, val_set
 end
 
 """
-    get_input_encoder(exp::Experiment)
+    get_input_encoder(exper::Experiment)
 
 Sets up the input encoder for the given experiment. This is dispatched over the dataset and generator type.
 """
-function get_input_encoder(exp::AbstractExperiment)
-    return get_input_encoder(exp, exp.data, exp.training_params.generator_params.type)
+function get_input_encoder(exper::AbstractExperiment)
+    return get_input_encoder(exper, exper.data, exper.training_params.generator_params.type)
 end
 
 """
     get_input_encoder(
-        exp::Experiment,
+        exper::Experiment,
         data::Dataset,
         generator_type::AbstractGeneratorType,
     )
@@ -184,48 +184,48 @@ end
 Sets up the input encoder for the given experiment, dataset and generator type.
 """
 function get_input_encoder(
-    exp::AbstractExperiment, data::Dataset, generator_type::AbstractGeneratorType
+    exper::AbstractExperiment, data::Dataset, generator_type::AbstractGeneratorType
 )
     return nothing
 end
 
 """
     get_input_encoder(
-        exp::AbstractExperiment, 
+        exper::AbstractExperiment, 
         data::Moons, 
         generator_type::REVISE
     )
 
 For Moons data and the REVISE generator, use the VAE as the input encoder.
 """
-function get_input_encoder(exp::AbstractExperiment, data::Dataset, generator_type::REVISE)
+function get_input_encoder(exper::AbstractExperiment, data::Dataset, generator_type::REVISE)
     ce_data = get_ce_data(data, data.n_train)
     vae = CounterfactualExplanations.DataPreprocessing.fit_transformer(ce_data, CounterfactualExplanations.GenerativeModels.VAE)
     return vae
 end
 
 """
-    run_training(exp::Experiment; checkpoint_dir::Union{Nothing,String} = nothing)
+    run_training(exper::Experiment; checkpoint_dir::Union{Nothing,String} = nothing)
 
 Trains the model on the given dataset with Counterfactual Training using the given training parameters and meta parameters.
 """
-function run_training(exp::Experiment; checkpoint_dir::Union{Nothing,String}=nothing)
+function run_training(exper::Experiment; checkpoint_dir::Union{Nothing,String}=nothing)
 
     # Counterfactual generator:
-    generator = get_generator(exp.training_params.generator_params)
-    model, train_set, input_encoder, val_set = setup(exp)
-    conv = get_convergence(exp.training_params)
-    domain = get_domain(exp.data)
-    pllr = get_parallelizer(exp.training_params)
+    generator = get_generator(exper.training_params.generator_params)
+    model, train_set, input_encoder, val_set = setup(exper)
+    conv = get_convergence(exper.training_params)
+    domain = get_domain(exper.data)
+    pllr = get_parallelizer(exper.training_params)
 
     # Optimizer and model:
-    training_opt = get_opt(exp.training_params)
+    training_opt = get_opt(exper.training_params)
     opt_state = Flux.setup(training_opt, model)
 
     # Get objective:
-    class_loss = get_class_loss(exp.training_params.class_loss)         # get classification loss function
-    obj = get_objective(exp.training_params.objective)                  # get objective type
-    obj = obj(class_loss, get_lambdas(obj(), exp.training_params))      # instantiate objective
+    class_loss = get_class_loss(exper.training_params.class_loss)         # get classification loss function
+    obj = get_objective(exper.training_params.objective)                  # get objective type
+    obj = obj(class_loss, get_lambdas(obj(), exper.training_params))      # instantiate objective
 
     # Train:
     model, logs = CounterfactualTraining.counterfactual_training(
@@ -236,12 +236,12 @@ function run_training(exp::Experiment; checkpoint_dir::Union{Nothing,String}=not
         opt_state;
         val_set=val_set,
         parallelizer=pllr,
-        verbose=exp.training_params.verbose,
+        verbose=exper.training_params.verbose,
         convergence=conv,
-        nepochs=exp.training_params.nepochs,
-        burnin=exp.training_params.burnin,
-        nce=exp.training_params.nce,
-        nneighbours=exp.training_params.nneighbours,
+        nepochs=exper.training_params.nepochs,
+        burnin=exper.training_params.burnin,
+        nce=exper.training_params.nce,
+        nneighbours=exper.training_params.nneighbours,
         domain=domain,
         input_encoder=input_encoder,
         checkpoint_dir=checkpoint_dir,

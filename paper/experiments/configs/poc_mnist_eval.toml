@@ -1,6 +1,6 @@
-grid_file = "paper/experiments/output/grid_poc/grid_config.toml"
+grid_file = "paper/experiments/output/poc_mnist/grid_config.toml"
 test_time = false
-save_dir = "paper/experiments/output/grid_poc/evaluation"
+save_dir = "paper/experiments/output/poc_mnist/evaluation"
 
 [generator_params]
 opt = ["sgd"]
@@ -12,10 +12,10 @@ type = ["ecco"]
 
 [counterfactual_params]
 maxiter = [100]
-n_individuals = [500]
-n_runs = [10]
-vertical_splits = [5]
-parallelizer = ["threads"]
+n_individuals = [100]
+n_runs = [5]
+vertical_splits = [100]
+parallelizer = [""]
 concatenate_output = [true]
 threaded = [true]
 store_ce = [false]
