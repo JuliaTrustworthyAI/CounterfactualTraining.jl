@@ -315,9 +315,9 @@ weakdeps = ["UnicodePlots"]
 
 [[deps.CausalInference]]
 deps = ["Combinatorics", "Distances", "Distributions", "Graphs", "LRUCache", "LinearAlgebra", "LinkedLists", "LogarithmicNumbers", "Memoization", "MetaGraphs", "NearestNeighbors", "OffsetArrays", "PrecompileTools", "ProgressMeter", "Random", "Requires", "SpecialFunctions", "Statistics", "Tables", "TabularDisplay", "ThreadsX"]
-git-tree-sha1 = "8e5ff009a8eedb719bb0d450c9f65ef1e110c693"
+git-tree-sha1 = "12dc39598961e6a4054e7bfea9042af45b025845"
 uuid = "8e462317-f959-576b-b3c1-403f26cec956"
-version = "0.17.0"
+version = "0.18.0"
 
     [deps.CausalInference.extensions]
     GraphMakieExt = "GraphMakie"
@@ -474,11 +474,11 @@ version = "0.6.3"
 
 [[deps.CounterfactualExplanations]]
 deps = ["CategoricalArrays", "CausalInference", "ChainRulesCore", "DataFrames", "Distributions", "EnergySamplers", "Flux", "Graphs", "LazyArtifacts", "LinearAlgebra", "Logging", "MLJBase", "MLJDecisionTreeInterface", "MLUtils", "MultivariateStats", "PackageExtensionCompat", "ProgressMeter", "Random", "Serialization", "Statistics", "StatsBase", "Tables", "TaijaBase", "UUIDs"]
-git-tree-sha1 = "6bd675d10cac96ac8065de12d1f4cb48b42d98e7"
+git-tree-sha1 = "92eb980bd31e31e2a5172b094b2db229f25cdacc"
 repo-rev = "counterfactual-training"
 repo-url = "https://github.com/JuliaTrustworthyAI/CounterfactualExplanations.jl.git"
 uuid = "2f13d31b-18db-44c1-bc43-ebaf2cff0be0"
-version = "1.4.0"
+version = "1.4.2"
 
     [deps.CounterfactualExplanations.extensions]
     DecisionTreeExt = "DecisionTree"
@@ -1439,9 +1439,9 @@ version = "2.40.2+2"
 
 [[deps.Libtiff_jll]]
 deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "LERC_jll", "Libdl", "XZ_jll", "Zlib_jll", "Zstd_jll"]
-git-tree-sha1 = "b404131d06f7886402758c9ce2214b636eb4d54a"
+git-tree-sha1 = "4ab7581296671007fc33f07a721631b8855f4b1d"
 uuid = "89763e89-9b03-5906-acba-b20f662cd828"
-version = "4.7.0+0"
+version = "4.7.1+0"
 
 [[deps.Libuuid_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1734,9 +1734,9 @@ version = "0.2.2"
 
 [[deps.MetaGraphs]]
 deps = ["Graphs", "JLD2", "Random"]
-git-tree-sha1 = "1130dbe1d5276cb656f6e1094ce97466ed700e5a"
+git-tree-sha1 = "e9650bea7f91c3397eb9ae6377343963a22bf5b8"
 uuid = "626554b9-1ddb-594c-aa3c-2596fe9399a5"
-version = "0.7.2"
+version = "0.8.0"
 
 [[deps.Metalhead]]
 deps = ["Artifacts", "BSON", "ChainRulesCore", "Flux", "Functors", "JLD2", "LazyArtifacts", "MLUtils", "NNlib", "PartialFunctions", "Random", "Statistics"]
