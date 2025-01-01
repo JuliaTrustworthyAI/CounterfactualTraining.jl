@@ -184,18 +184,22 @@ end
 
 export generate_template,
     generate_grid_template, generate_eval_template, generate_eval_grid_template
+    
+global _global_seed = 2025
 
-function set_global_seed()
-    seed = try
+function set_global_seed(seed::Int=_global_seed)
+    global _global_seed = try
         parse(Int, ENV["GLOBAL_SEED"])
     catch
         @warn "No environment variable found to set global seed."
         2025
     end
-    Random.seed!(seed)
-    @info "Global seed set to $seed"
+    Random.seed!(_global_seed)
+    @info "Global seed set to $_global_seed"
 end
 
-export set_global_seed 
+get_global_seed() = _global_seed
+
+export set_global_seed, get_global_seed
 
 end

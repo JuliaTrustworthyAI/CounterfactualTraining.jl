@@ -12,7 +12,7 @@ type = ["ecco"]
 
 [counterfactual_params]
 maxiter = [100]
-n_individuals = [100]
+n_individuals = [500]
 n_runs = [5]
 vertical_splits = [100]
 parallelizer = ["threads"]
