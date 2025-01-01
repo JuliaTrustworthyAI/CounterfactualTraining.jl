@@ -15,15 +15,11 @@ Base.@kwdef struct MNIST <: Dataset
     n_train::Int = 10000
     batchsize::Int = 1000
     n_validation::Int = 1000
+    train_test_ratio::Float32 = 0.8
+    train_test_seed::Int = get_global_seed()
 end
 
 get_domain(d::MNIST) = (-1.0f0, 1.0f0)
-
-function get_ce_data(data::MNIST, n_total::Int)
-    X, y = load_mnist(n_total)
-    X = Float32.(X)
-    return CounterfactualData(X,y)
-end
 
 """
     get_input_encoder(
@@ -69,12 +65,23 @@ end
 
 Load the MNIST data set. If `test_set` is true, load the test set; otherwise, load the training set.
 """
-function get_data(data::MNIST, test_set::Bool=false)
+function get_data(data::MNIST; n::Union{Nothing,Int}=nothing, test_set::Bool=false)
+
+    # Set seed and shuffle data:
+    Random.seed!(data.train_test_seed)
+
+    # Get data:
     if test_set
         X, y = load_mnist_test()
     else
-        X, y = load_mnist()
+        X, y = load_mnist(Int(round(ntotal(data) * data.train_test_ratio)))
     end
     X = Float32.(X)
+
+    # Subset:
+    if !isnothing(n)
+        X, y = take_subset(X, y, n)
+    end
+
     return X, y
 end

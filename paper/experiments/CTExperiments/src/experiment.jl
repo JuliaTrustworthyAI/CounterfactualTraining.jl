@@ -139,20 +139,9 @@ Loads the data and builds a model corresponding to the specified `model` type. R
 function setup(exper::AbstractExperiment, data::Dataset, model::ModelType)
 
     # Data:
-    n_total = data.n_train + data.n_validation
-    ce_data = get_ce_data(data, n_total)
-    test_size = data.n_validation / n_total
-    Xtrain, ytrain, Xval, yval, unique_labels = (
-        dt -> (dt[1].X, dt[1].y, dt[2].X, dt[2].y, dt[1].y_levels)
-    )(
-        train_test_split(ce_data; test_size=test_size, keep_class_ratio=false)
-    )
-    train_set = Flux.DataLoader((Xtrain, ytrain); batchsize=data.batchsize, parallel=true)
-    val_set = if data.n_validation > 0
-        Flux.DataLoader((Xval, yval); batchsize=data.batchsize, parallel=true)
-    else
-        nothing
-    end
+    ce_data = get_ce_data(data)
+    val_size = data.n_validation / ntotal(data)
+    train_set, val_set, _ = train_val_split(data, ce_data, val_size)
 
     # Model:
     nin = size(first(train_set)[1], 1)
@@ -163,6 +152,32 @@ function setup(exper::AbstractExperiment, data::Dataset, model::ModelType)
     input_encoder = get_input_encoder(exper)
 
     return model, train_set, input_encoder, val_set
+end
+
+function train_val_split(data::Dataset, ce_data::CounterfactualData, val_size)
+
+    Random.seed!(data.train_test_seed)
+
+    Xtrain, ytrain, Xval, yval = (
+        dt -> (dt[1].X, dt[1].y, dt[2].X, dt[2].y)
+    )(
+        train_test_split(ce_data; test_size=val_size, keep_class_ratio=true)
+    )
+    train_set = Flux.DataLoader((Xtrain, ytrain); batchsize=data.batchsize, parallel=true)
+    val_set = if data.n_validation > 0
+        Flux.DataLoader((Xval, yval); batchsize=data.batchsize, parallel=true)
+    else
+        nothing
+    end
+
+    ce_train_data = CounterfactualData(
+        Xtrain,
+        Flux.onecold(ytrain, ce_data.y_levels);
+        domain=ce_data.domain,
+        mutability=ce_data.mutability,
+    )
+
+    return train_set, val_set, ce_train_data
 end
 
 """
@@ -192,14 +207,14 @@ end
 """
     get_input_encoder(
         exper::AbstractExperiment, 
-        data::Moons, 
+        data::Dataset, 
         generator_type::REVISE
     )
 
-For Moons data and the REVISE generator, use the VAE as the input encoder.
+For any data and the REVISE generator, use the VAE as the input encoder.
 """
 function get_input_encoder(exper::AbstractExperiment, data::Dataset, generator_type::REVISE)
-    ce_data = get_ce_data(data, data.n_train)
+    ce_data = get_ce_data(data; train_only=true)
     vae = CounterfactualExplanations.DataPreprocessing.fit_transformer(ce_data, CounterfactualExplanations.GenerativeModels.VAE)
     return vae
 end

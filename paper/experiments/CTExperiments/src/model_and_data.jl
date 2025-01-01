@@ -5,6 +5,7 @@ get_domain(d::Dataset) = nothing
 
 include("mnist.jl")
 include("moons.jl")
+include("gmsc.jl")
 
 """
     data_sets
@@ -24,15 +25,36 @@ function get_data_set(s::String)
     return data_sets[s]
 end
 
-"""
-    get_data(data::Dataset; n::Union{Nothing,Int}=data.n_train, test_set::Bool=false)
+function get_data(data::Dataset; n::Union{Nothing,Int}=nothing, test_set::Bool=false)
 
-Load dataset and return a subset of the data. If `n` is specified, it returns that number of samples, otherwise it returns all samples. If `test_set` is true, it loads the test set instead of the training set.
-"""
-function get_data(data::Dataset; n::Union{Nothing,Int}=data.n_train, test_set::Bool=false)
-    X, y = get_data(data, test_set)
-    n_total = size(X, 2)
-    n = isnothing(n) ? n_total : n
+    X, y = load_data(data, ntotal(data))    # load all available data
+
+    # Set seed and shuffle data:
+    Random.seed!(data.train_test_seed)
+    X = Float32.(X)
+    new_idx = randperm(size(X, 2))
+    X = X[:, new_idx]
+    y = y[new_idx]
+
+    # Split data into training and test sets:
+    ntrain = Int(round(data.train_test_ratio * size(X, 2)))
+    if !test_set
+        X = X[:, 1:ntrain]
+        y = y[1:ntrain]
+    else
+        X = X[:, (ntrain + 1):end]
+        y = y[(ntrain + 1):end]
+    end
+
+    # Subset:
+    if !isnothing(n)
+        X, y = take_subset(X, y, n)
+    end
+
+    return X, y
+end
+
+function take_subset(X, y, n)
     if n_total > n
         idx = sample(1:n_total, n; replace=false)
 
@@ -43,8 +65,19 @@ function get_data(data::Dataset; n::Union{Nothing,Int}=data.n_train, test_set::B
     end
     X = Float32.(X[:, idx])
     y = y[idx]
+
     return X, y
 end
+
+function get_ce_data(data::Dataset; test_set::Bool=false, train_only::Bool=false)
+    data = CounterfactualData(get_data(data; test_set=test_set)...; domain=get_domain(data))
+    if train_only
+        _, _, data = train_val_split(data, data, data.n_validation / ntotal(data))
+    end
+    return data
+end
+
+ntotal(data::Dataset) = Int(round((data.n_train + data.n_validation) / data.train_test_ratio))
 
 include("mlp.jl")
 include("cnn.jl")
