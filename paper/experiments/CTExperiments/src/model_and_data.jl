@@ -55,9 +55,9 @@ function get_data(data::Dataset; n::Union{Nothing,Int}=nothing, test_set::Bool=f
 end
 
 function take_subset(X, y, n)
+    n_total = size(X, 2)
     if n_total > n
         idx = sample(1:n_total, n; replace=false)
-
     elseif n_total < n
         idx = rand(1:n_total, n)
     else
@@ -69,12 +69,14 @@ function take_subset(X, y, n)
     return X, y
 end
 
-function get_ce_data(data::Dataset; test_set::Bool=false, train_only::Bool=false)
-    data = CounterfactualData(get_data(data; test_set=test_set)...; domain=get_domain(data))
+function get_ce_data(
+    data::Dataset, n=nothing; test_set::Bool=false, train_only::Bool=false
+)
+    ce_data = CounterfactualData(get_data(data; n=n, test_set=test_set)...; domain=get_domain(data))
     if train_only
-        _, _, data = train_val_split(data, data, data.n_validation / ntotal(data))
+        _, _, ce_data = train_val_split(data, ce_data, data.n_validation / ntotal(data))
     end
-    return data
+    return ce_data
 end
 
 ntotal(data::Dataset) = Int(round((data.n_train + data.n_validation) / data.train_test_ratio))
