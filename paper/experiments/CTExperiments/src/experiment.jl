@@ -140,7 +140,7 @@ function setup(exper::AbstractExperiment, data::Dataset, model::ModelType)
 
     # Data:
     ce_data = get_ce_data(data)
-    val_size = data.n_validation / ntotal(data)
+    val_size = data.n_validation / (ntotal(data) * data.train_test_ratio)
     train_set, val_set, _ = train_val_split(data, ce_data, val_size)
 
     # Model:
@@ -163,6 +163,7 @@ function train_val_split(data::Dataset, ce_data::CounterfactualData, val_size)
     )(
         train_test_split(ce_data; test_size=val_size, keep_class_ratio=true)
     )
+
     train_set = Flux.DataLoader((Xtrain, ytrain); batchsize=data.batchsize, parallel=true)
     val_set = if data.n_validation > 0
         Flux.DataLoader((Xval, yval); batchsize=data.batchsize, parallel=true)
