@@ -1,9 +1,9 @@
-name = "poc_moons"
+name = "mutability_constraints"
 dim_reduction = [false]
 generator_type = ["ecco", "generic", "revise"]
-data = "moons"
-model_type = "mlp"
-save_dir = "paper/experiments/output/poc_moons"
+data = "gmsc"
+model_type = "linear"
+save_dir = "paper/experiments/output/mutability_constraints"
 
 [data_params]
 n_validation = [600]
@@ -19,9 +19,9 @@ nhidden = [64]
 
 [generator_params]
 opt = ["sgd"]
-lambda_cost = [0.01]
+lambda_cost = [0.1]
 lr = [0.1]
-maxiter = [50]
+maxiter = [20]
 lambda_energy = [5.0]
 type = []
 
@@ -33,10 +33,10 @@ threaded = []
 class_loss = []
 objective = ["full", "vanilla"]
 lambda_class_loss = [1.0]
-lambda_energy_diff = [0.5]
+lambda_energy_diff = [1.0]
 burnin = [0.0]
 nepochs = [50]
-lambda_energy_reg = [0.1]
+lambda_energy_reg = [0.01]
 verbose = [2]
 lambda_adversarial = [1.0]
 parallelizer = ["threads"]

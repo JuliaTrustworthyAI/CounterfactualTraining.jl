@@ -64,7 +64,16 @@ function generate!(
         Xsub = X[:, sample(1:size(X, 2), nsamples)]
         xs = [x[:, :] for x in eachcol(Xsub)]                       # factuals
     end
-    targets = rand(counterfactual_data.y_levels, nsamples)       # randomly generate targets
+
+    # Factual label and targets:
+    factual_labels = Vector{Int}(undef, nsamples)
+    targets = Vector{Int}(undef, nsamples)
+    all_labels = counterfactual_data.y_levels
+    for (i, x) in enumerate(xs)
+        factual_labels[i] = predict_label(M, counterfactual_data, x)[1]     # get factual label
+        targets[i] = rand(all_labels[all_labels .!= factual_labels[i]])     # choose a random target that is not the factual label
+    end
+    factual_enc = Flux.onehotbatch(factual_labels, all_labels)
 
     # Generate counterfactuals:
     ces = TaijaParallel.parallelize(
@@ -87,12 +96,27 @@ function generate!(
                 :, rand(1:end)
             ]
         ).(ces)
-    # Unpacking:
     counterfactuals = (ce -> ce.counterfactual).(ces)                               # get actual counterfactuals
     targets_enc = (ce -> target_encoded(ce, counterfactual_data)).(ces)             # encode targets as probabilities
+    aversarial_targets = []
+    targets_enc = []
+    percent_valid = 0.0
+    for (i, ce) in enumerate(ces)
+        target_enc = target_encoded(ce, counterfactual_data)
+        push!(targets_enc, target_enc)
+        if argmax(vec(model(ce.counterfactual))) == argmax(vec(target_enc))
+            # If model predicts target class, use target for adversarial loss:
+            push!(aversarial_targets, target_enc)
+            percent_valid += 1.0
+        else
+            # Otherwise, use factual label for adversarial loss:
+            push!(aversarial_targets, factual_enc[:,i])
+        end
+    end
 
     # Partition data:
     n_total = length(counterfactuals)
+    percent_valid = percent_valid / n_total
     group_indices = TaijaParallel.split_obs(1:n_total, length(data))
 
     dl = [
@@ -100,9 +124,10 @@ function generate!(
             stack(hcat(counterfactuals[i]...)),
             stack(hcat(targets_enc[i]...)),
             stack(hcat(neighbours[i]...)),
+            stack(hcat(aversarial_targets[i]...)),
         ) for i in group_indices
     ]
     @assert length(dl) == length(data)
 
-    return dl
+    return dl, percent_valid
 end

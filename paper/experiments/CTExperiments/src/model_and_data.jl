@@ -12,7 +12,7 @@ include("gmsc.jl")
 
 Catalogue of available model types.
 """
-const data_sets = Dict("mnist" => MNIST, "moons" => Moons)
+const data_sets = Dict("mnist" => MNIST, "moons" => Moons, "gmsc" => GMSC)
 
 """
     get_data_set(s::String)
@@ -81,6 +81,7 @@ end
 
 ntotal(data::Dataset) = Int(round((data.n_train + data.n_validation) / data.train_test_ratio))
 
+include("linear.jl")
 include("mlp.jl")
 include("cnn.jl")
 
@@ -89,7 +90,7 @@ include("cnn.jl")
 
 Catalogue of available model types.
 """
-const model_types = Dict("mlp" => MLPModel, "lenet" => LeNetModel)
+const model_types = Dict("linear" => LinearModel, "mlp" => MLPModel, "lenet" => LeNetModel)
 
 """
     get_model_type(s::String)
