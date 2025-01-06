@@ -201,7 +201,7 @@ Base.@kwdef struct TrainingParams <: AbstractConfiguration
     conv::AbstractString = "max_iter"
     lr::AbstractFloat = 0.001
     opt::AbstractString = "adam"
-    parallelizer::AbstractString = "threads"
+    parallelizer::AbstractString = ""
     threaded::Bool = false
     verbose::Int = 1
 end

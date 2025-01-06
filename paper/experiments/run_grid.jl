@@ -19,7 +19,7 @@ root_save_dir = joinpath(ENV["OUTPUT_DIR"], root_name)
 exper_grid = ExperimentGrid(config_file; new_save_dir=root_save_dir)
 if "mpi" in exper_grid.training_params["parallelizer"]
     @warn "Cannot distribute both experiments and counterfactual search across processes. For multi-processing counterfactual search, use `run_grid_sequentially.jl` instead. Resetting ..."
-    @reset exper_grid.training_params["parallelizer"] = ["threads"]
+    @reset exper_grid.training_params["parallelizer"] = [""]
 end
 
 # Initialize MPI
