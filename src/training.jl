@@ -22,7 +22,7 @@ function counterfactual_training(
     burnin=0.0,
     nce::Union{Nothing,Int}=nothing,
     nneighbours::Int=100,
-    parallelizer::TaijaParallel.AbstractParallelizer=nothing,
+    parallelizer::Union{Nothing,TaijaParallel.AbstractParallelizer}=nothing,
     convergence=Convergence.MaxIterConvergence(),
     input_encoder=nothing,
     domain=nothing,
