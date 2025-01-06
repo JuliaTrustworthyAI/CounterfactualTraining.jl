@@ -56,7 +56,7 @@ function generate!(
         convergence=convergence,
         initialization=:identity,
         return_flattened=true,
-        verbose=verbose >= 1,
+        verbose=verbose > 1,
     )
 
     # Get neighbours in target class: find `nneighbours` potential neighbours than randomly choose one for each counterfactual.

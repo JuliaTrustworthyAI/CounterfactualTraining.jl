@@ -19,7 +19,7 @@ eval_grid = EvaluationGrid(get_config_from_args())
 exper_grid = ExperimentGrid(eval_grid.grid_file)
 if "mpi" in exper_grid.training_params["parallelizer"]
     @warn "Cannot distribute both evaluations and counterfactual search across processes. For multi-processing counterfactual search, use `run_grid_sequentially.jl` instead. Resetting ..."
-    @reset exper_grid.training_params["parallelizer"] = ["threads"]
+    @reset exper_grid.training_params["parallelizer"] = []
 end
 
 # Meta data:
