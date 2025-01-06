@@ -15,4 +15,6 @@ while total_tasks > parse(Int, ENV["MAX_TASKS"])
     global total_tasks/=2
 end
 
+@info "Requestion $total_tasks resources for experiment '$root_name'."
+
 println(total_tasks)
