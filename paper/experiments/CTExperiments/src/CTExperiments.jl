@@ -17,7 +17,7 @@ abstract type ModelType <: AbstractConfiguration end
 
 include("config.jl")
 include("utils.jl")
-include("omniscient.jl")
+include("omni.jl")
 include("grid.jl")
 include("experiment.jl")
 include("evaluate.jl")
