@@ -1,9 +1,9 @@
-name = "objective_moons"
+name = "poc_moons"
 dim_reduction = [false]
 generator_type = ["ecco", "generic", "revise", "omniscient"]
 data = "moons"
 model_type = "mlp"
-save_dir = "paper/experiments/output/objective_moons"
+save_dir = "paper/experiments/output/poc_moons"
 
 [data_params]
 n_validation = [600]
@@ -15,13 +15,13 @@ batchsize = [30]
 [model_params]
 nlayers = []
 activation = []
-nhidden = [64]
+nhidden = [32]
 
 [generator_params]
 opt = ["sgd"]
 lambda_cost = [0.01]
 lr = [0.1]
-maxiter = [30]
+maxiter = [25]
 lambda_energy = [1.0]
 type = []
 
@@ -31,7 +31,7 @@ nce = [300]
 lr = []
 threaded = []
 class_loss = []
-objective = ["vanilla", "full", "energy", "adversarial"]
+objective = ["full", "vanilla"]
 lambda_class_loss = [1.0]
 lambda_energy_diff = [1.0]
 burnin = [0.0]
