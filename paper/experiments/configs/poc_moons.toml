@@ -1,6 +1,6 @@
 name = "poc_moons"
 dim_reduction = [false]
-generator_type = ["ecco", "generic", "revise"]
+generator_type = ["omniscient", "ecco", "generic", "revise"]
 data = "moons"
 model_type = "mlp"
 save_dir = "paper/experiments/output/poc_moons"
@@ -35,7 +35,7 @@ objective = ["full", "vanilla"]
 lambda_class_loss = [1.0]
 lambda_energy_diff = [1.0]
 burnin = [0.0]
-nepochs = [50]
+nepochs = [1]
 lambda_energy_reg = [0.01]
 verbose = [2]
 lambda_adversarial = [1.0]
