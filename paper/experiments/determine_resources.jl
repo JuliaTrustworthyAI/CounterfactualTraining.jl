@@ -14,6 +14,7 @@ total_tasks = ntasks(exper_grid)
 while total_tasks > parse(Int, ENV["MAX_TASKS"])
     global total_tasks/=2
 end
+total_tasks = round(Int, total_tasks)
 
 @info "Requestion $total_tasks resources for experiment '$root_name'."
 
