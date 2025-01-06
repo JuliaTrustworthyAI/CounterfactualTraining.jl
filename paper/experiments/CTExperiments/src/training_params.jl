@@ -207,16 +207,6 @@ Base.@kwdef struct TrainingParams <: AbstractConfiguration
 end
 
 """
-    shutup!(params::TrainingParams)
-
-Can be used to ensure that training is quiet, i.e., no output is printed during training. This can be useful for running multiple experiments in a batch without cluttering the console with output. The `verbose` field of the `TrainingParams` struct is reset to 0 to achieve this.
-"""
-function shutup!(params::TrainingParams)
-    @reset params.verbose = 0
-    return params
-end
-
-"""
     objectives
 
 Catalogue of available objective functions.

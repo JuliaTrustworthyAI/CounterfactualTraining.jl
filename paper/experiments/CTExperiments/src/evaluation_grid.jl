@@ -115,7 +115,6 @@ Outer constructor dispatched over `fname::String`.
 function EvaluationGrid(fname::String; new_save_dir::Union{Nothing,String}=nothing)
     @assert isfile(fname) "Evaluation grid configuration file not found."
     dict = from_toml(fname)
-    println(dict)
     if !haskey(dict, "name")
         if !isnothing(new_save_dir)
             mkpath(new_save_dir)

@@ -69,7 +69,7 @@ worker_chunk = MPI.scatter(chunks, comm)                # distribute across proc
 for (i, experiment) in enumerate(worker_chunk)
     if rank != 0
         # Shut up logging for other ranks to avoid cluttering output
-        CTExperiments.shutup!(experiment.training_params)
+        @reset experiment.training_params.verbose = 0                       # shut off logging for non-root ranks
     end
 
     # Setup:

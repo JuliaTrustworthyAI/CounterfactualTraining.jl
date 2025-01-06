@@ -46,65 +46,44 @@ eval_list = MPI.bcast(eval_list, comm; root=0)
 
 MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 
-if length(eval_list) < nprocs
-    @warn "There are less evaluations than processes. Check CPU efficiency of job."
-end
-chunks = TaijaParallel.split_obs(eval_list, nprocs)     # split  evaluations into chunks for each process
+for (i, eval_config) in enumerate(eval_list)
 
-# Set up dummies for processes without tasks to avoid deadlock:
-max_chunk_size = maximum(length.(chunks))
-chunks = Logging.with_logger(Logging.NullLogger()) do
-    for (i, chunk) in enumerate(chunks)
-        if length(chunk) < max_chunk_size
-            n_missing = max_chunk_size - length(chunk)
-            for j in 1:n_missing
-                cfg = deepcopy(eval_list[1])
-                cfg = make_dummy(cfg, i, j)
-                push!(chunk, cfg)
-            end
-        end
-    end
-    return chunks
-end
-
-@assert allequal(length.(chunks)) "Need all processes to have the same number of tasks."
-
-worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
-
-for (i, eval_config) in enumerate(worker_chunk)
-
+    # Setup:
     if rank != 0
+        @reset eval_config.counterfactual_params.maxiter = 1                            # decrease load on non-root ranks
+        @reset eval_config.save_dir = mkpath(joinpath(tempdir(), "dummy_rank_$rank"))   # disable saving evals for non-root ranks
         @reset eval_config.counterfactual_params.verbose = false
     end
 
     # Evaluate counterfactuals:
-    @info "Rank $(rank): Running evaluation $i of $(length(worker_chunk))."
+    @info "Rank $(rank): Running evaluation $i of $(length(eval_list))."
     bmk = evaluate_counterfactuals(eval_config)
 
     @info "Rank $(rank): Done evaluating all counterfactuals. Waiting at barrier ..."
     MPI.Barrier(comm)
 
-    if eval_config.counterfactual_params.concatenate_output
-        # Save results:
-        save_results(eval_config, bmk.evaluation, default_ce_evaluation_name(eval_config))
-        save_results(eval_config, bmk)
-    else
-        @info "Rank $(rank): Results for individual runs are stored in $(eval_config.save_dir)."
-    end
+    if rank == 0
+        if eval_config.counterfactual_params.concatenate_output
+            # Save results:
+            save_results(
+                eval_config, bmk.evaluation, default_ce_evaluation_name(eval_config)
+            )
+            save_results(eval_config, bmk)
+        else
+            @info "Rank $(rank): Results for individual runs are stored in $(eval_config.save_dir)."
+        end
 
-    # Generate factual target pairs for plotting:
-    generate_factual_target_pairs(eval_config)
+        # Generate factual target pairs for plotting:
+        generate_factual_target_pairs(eval_config)
 
-    # Working directory:
-    if !isdummy(eval_config)
+        # Set up evaluation work dir:
         set_work_dir(eval_grid, eval_config, joinpath(ENV["EVAL_WORK_DIR"]))
-    else
-        remove_dummy!(eval_config)
     end
+
 end
 
 # Finalize MPI
-MPI.Barrier(comm)       # Ensure all processes reach this point before finishing
+MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 if mpi_should_finalize()
     MPI.Finalize()          # finalize MPI
 end

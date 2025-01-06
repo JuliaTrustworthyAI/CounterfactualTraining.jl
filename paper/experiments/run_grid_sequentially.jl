@@ -46,7 +46,7 @@ for (i, experiment) in enumerate(exper_list)
     # Setup:
     _name = experiment.meta_params.experiment_name
     if rank != 0
-        CTExperiments.shutup!(experiment.training_params)                   # shut off logging for non-root ranks
+        @reset experiment.training_params.verbose = 0                       # shut off logging for non-root ranks
         @reset experiment.training_params.generator_params.maxiter = 1      # decrease load on non-root ranks
         _save_dir = nothing                                                 # disable saving models for non-root ranks
     else
