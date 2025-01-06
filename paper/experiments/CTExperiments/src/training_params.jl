@@ -27,7 +27,7 @@ get_generator_name(gen::ECCo) = "ecco"
 get_generator_name(gen::Generic) = "generic"
 get_generator_name(gen::REVISE) = "revise"
 get_generator_name(gen::Gravitational) = "gravitational"
-get_generator_name(gen::Omniscient) = "omniscient"
+get_generator_name(gen::Omniscient) = "omni"
 
 
 """

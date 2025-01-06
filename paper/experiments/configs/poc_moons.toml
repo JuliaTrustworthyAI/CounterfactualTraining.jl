@@ -1,6 +1,6 @@
 name = "poc_moons"
 dim_reduction = [false]
-generator_type = ["ecco", "generic", "revise", "omniscient"]
+generator_type = ["ecco", "generic", "revise", "omni"]
 data = "moons"
 model_type = "mlp"
 save_dir = "paper/experiments/output/poc_moons"
@@ -22,7 +22,7 @@ opt = ["sgd"]
 lambda_cost = [0.01]
 lr = [0.1]
 maxiter = [25]
-lambda_energy = [0.5]
+lambda_energy = [5.0]
 type = []
 
 [training_params]
