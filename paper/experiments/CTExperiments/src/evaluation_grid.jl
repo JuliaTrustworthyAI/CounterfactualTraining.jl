@@ -2,6 +2,10 @@ using Base.Iterators
 using JLD2
 using UUIDs
 
+global _default_generator_params_eval_grid = (
+    lambda_energy = [0.1, 0.25, 0.5, 1.0, 5.0],
+)
+
 """
     EvaluationGrid
 
@@ -41,9 +45,7 @@ struct EvaluationGrid <: AbstractGridConfiguration
             mkpath(save_dir)
         end
 
-        if !isfile(default_grid_config_name(grid))
-            to_toml(grid, default_grid_config_name(grid))
-        end
+        to_toml(grid, default_grid_config_name(grid))
 
         return grid
     end
@@ -68,7 +70,7 @@ function EvaluationGrid(
     grid_file::Union{Nothing,String}=nothing,
     save_dir::Union{Nothing,String}=nothing,
     counterfactual_params::NamedTuple=(;),
-    generator_params::NamedTuple=(;),
+    generator_params::NamedTuple=_default_generator_params_eval_grid,
     test_time::Bool=false,
 )
     save_dir = if isnothing(save_dir)
@@ -113,16 +115,22 @@ Outer constructor dispatched over `fname::String`.
 function EvaluationGrid(fname::String; new_save_dir::Union{Nothing,String}=nothing)
     @assert isfile(fname) "Evaluation grid configuration file not found."
     dict = from_toml(fname)
-    if !isnothing(new_save_dir)
-        mkpath(new_save_dir)
-        dict["save_dir"] = new_save_dir
+    println(dict)
+    if !haskey(dict, "name")
+        if !isnothing(new_save_dir)
+            mkpath(new_save_dir)
+            dict["save_dir"] = new_save_dir
+        end
+        eval_grid = (kwrgs -> EvaluationGrid(; kwrgs...))(CTExperiments.to_ntuple(dict))
+    else
+        @info "Supplied file path to `ExperimentGrid`. Using default parameters for `EvaluationGrid`."
+        eval_grid = (exper_grid -> EvaluationGrid(exper_grid))(ExperimentGrid(fname))
     end
-    grid = (kwrgs -> EvaluationGrid(; kwrgs...))(CTExperiments.to_ntuple(dict))
     if !isnothing(new_save_dir)
-        to_toml(grid, default_grid_config_name(grid))   # store in new save directory
-        to_toml(grid, fname)                            # over-write old file with new config
+        to_toml(eval_grid, default_grid_config_name(eval_grid))     # store in new save directory
+        to_toml(eval_grid, fname)                                   # over-write old file with new config
     end
-    return grid
+    return eval_grid
 end
 
 """

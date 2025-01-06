@@ -14,6 +14,7 @@ DotEnv.load!()
 set_global_seed()
 
 # Get config and set up grid:
+grid_file = get_config_from_args()
 eval_grid = EvaluationGrid(get_config_from_args())
 exper_grid = ExperimentGrid(eval_grid.grid_file)
 if "mpi" in exper_grid.training_params["parallelizer"]
