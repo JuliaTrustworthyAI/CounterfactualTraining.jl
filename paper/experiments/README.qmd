@@ -35,7 +35,9 @@ using CTExperiments
 
 ## Command Line Usage
 
-
+```
+sbatch --ntasks=$(determine_resources) myfile.sh
+```
 
 ## Interactive Usage
 
