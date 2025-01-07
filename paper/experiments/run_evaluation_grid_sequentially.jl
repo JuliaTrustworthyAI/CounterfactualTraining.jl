@@ -16,14 +16,6 @@ set_global_seed()
 # Get config and set up grid:
 grid_file = get_config_from_args()
 eval_grid = EvaluationGrid(get_config_from_args())
-exper_grid = ExperimentGrid(eval_grid.grid_file)
-if "mpi" in exper_grid.training_params["parallelizer"]
-    @warn "Cannot distribute both evaluations and counterfactual search across processes. For multi-processing counterfactual search, use `run_grid_sequentially.jl` instead. Resetting ..."
-    @reset exper_grid.training_params["parallelizer"] = []
-end
-
-# Meta data:
-df_meta = CTExperiments.expand_grid_to_df(exper_grid)
 
 # Initialize MPI
 MPI.Init()
@@ -39,6 +31,14 @@ else
     # Set up evaluation configuration:
     eval_list = setup_evaluations(eval_grid)
     @info "Running $(length(eval_list)) evaluations ..."
+
+    # Adjust parallelizer:
+    for _eval_cfg in eval_list
+        if _eval_cfg.counterfactual_params.parallelizer in ["threads", ""]
+            @warn "It makes sense to use multi-processing ('mpi') for counterfactual search if grid is run sequentially. For multi-threading, use `run_evaluation_grid.jl` instead. Resetting to 'mpi' ..." maxlog = 1
+            @reset _eval_cfg.counterfactual_params.parallelizer = "mpi"
+        end
+    end
 end
 
 # Broadcast eval_list from rank 0 to all ranks
@@ -78,6 +78,8 @@ for (i, eval_config) in enumerate(eval_list)
 
         # Set up evaluation work dir:
         set_work_dir(eval_grid, eval_config, joinpath(ENV["EVAL_WORK_DIR"]))
+    else
+        rm(eval_config.save_dir; recursive=true)
     end
 
 end

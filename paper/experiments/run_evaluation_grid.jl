@@ -16,14 +16,7 @@ set_global_seed()
 # Get config and set up grid:
 grid_file = get_config_from_args()
 eval_grid = EvaluationGrid(get_config_from_args())
-exper_grid = ExperimentGrid(eval_grid.grid_file)
-if "mpi" in exper_grid.training_params["parallelizer"]
-    @warn "Cannot distribute both evaluations and counterfactual search across processes. For multi-processing counterfactual search, use `run_grid_sequentially.jl` instead. Resetting ..."
-    @reset exper_grid.training_params["parallelizer"] = []
-end
-
-# Meta data:
-df_meta = CTExperiments.expand_grid_to_df(exper_grid)
+@assert length(eval_grid.counterfactual_params["parallelizer"]) <= 1 "It does not make sense to specify multiple parallelizers. Aborting ..."
 
 # Initialize MPI
 MPI.Init()
@@ -39,6 +32,22 @@ else
     # Set up evaluation configuration:
     eval_list = setup_evaluations(eval_grid)
     @info "Running $(length(eval_list)) evaluations ..."
+
+    # Adjust parallelizer:
+    for _eval_cfg in eval_list
+        @info "Specified parallelizer: $(_eval_cfg.counterfactual_params.parallelizer)" maxlog =
+            1
+        if _eval_cfg.counterfactual_params.parallelizer == "mpi"
+            @warn "Cannot distribute both evaluations and counterfactual search across processes. For multi-processing counterfactual search, use `run_evaluation_grid_sequentially.jl` instead. Resetting to 'threads' ..." maxlog =
+                1
+            @reset _eval_cfg.counterfactual_params.parallelizer = "threads"
+        elseif _eval_cfg.counterfactual_params.parallelizer == "" &&
+            Threads.nthreads() > 1
+            @warn "Found multiple available threads. Resetting to 'parallelizer' from '' to 'threads' ..." maxlog =
+                1
+            @reset _eval_cfg.counterfactual_params.parallelizer = "threads"
+        end
+    end
 end
 
 # Broadcast eval_list from rank 0 to all ranks
