@@ -40,7 +40,11 @@ else
         if _eval_cfg.counterfactual_params.parallelizer == "mpi"
             @warn "Cannot distribute both evaluations and counterfactual search across processes. For multi-processing counterfactual search, use `run_evaluation_grid_sequentially.jl` instead. Resetting to 'threads' ..." maxlog =
                 1
-            @reset _eval_cfg.counterfactual_params.parallelizer = "threads"
+            if Threads.nthreads() > 1
+                @reset _eval_cfg.counterfactual_params.parallelizer = "threads"
+            else
+                @reset _eval_cfg.counterfactual_params.parallelizer = ""
+            end
         elseif _eval_cfg.counterfactual_params.parallelizer == "" &&
             Threads.nthreads() > 1
             @warn "Found multiple available threads. Resetting to 'parallelizer' from '' to 'threads' ..." maxlog =

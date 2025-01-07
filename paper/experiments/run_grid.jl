@@ -12,28 +12,42 @@ using TaijaParallel
 DotEnv.load!()
 set_global_seed()
 
-# Get config and set up grid:
-config_file = get_config_from_args()
-root_name = CTExperiments.from_toml(config_file)["name"]
-root_save_dir = joinpath(ENV["OUTPUT_DIR"], root_name)
-exper_grid = ExperimentGrid(config_file; new_save_dir=root_save_dir)
-if "mpi" in exper_grid.training_params["parallelizer"]
-    @warn "Cannot distribute both experiments and counterfactual search across processes. For multi-processing counterfactual search, use `run_grid_sequentially.jl` instead. Resetting ..."
-    @reset exper_grid.training_params["parallelizer"] = [""]
-end
-
 # Initialize MPI
 MPI.Init()
 comm = MPI.COMM_WORLD
 rank = MPI.Comm_rank(comm)
 nprocs = MPI.Comm_size(comm)
+
+
 if MPI.Comm_rank(MPI.COMM_WORLD) != 0
     global_logger(NullLogger())
     exper_list = nothing
 else
+    
+    # Get config and set up grid:
+    config_file = get_config_from_args()
+    root_name = CTExperiments.from_toml(config_file)["name"]
+    root_save_dir = joinpath(ENV["OUTPUT_DIR"], root_name)
+    exper_grid = ExperimentGrid(config_file; new_save_dir=root_save_dir)
+
     # Generate list of experiments and run them:
     exper_list = setup_experiments(exper_grid)
     @info "Running $(length(exper_list)) experiments ..."
+
+    # Adjust parallelizer:
+    for cfg in exper_list
+        if cfg.training_params.parallelizer == "mpi"
+            @warn "Cannot distribute both experiments and counterfactual search across processes. For multi-processing counterfactual search, use `run_grid_sequentially.jl` instead. Resetting ..." maxlog = 1
+            if Threads.nthreads() > 1
+                @reset cfg.training_params.parallelizer = "threads"
+            else
+                @reset cfg.training_params.parallelizer = ""
+            end
+        elseif cfg.training_params.parallelizer == "" && Threads.nthreads() > 1
+            @warn "Found multiple available threads. Resetting to 'parallelizer' from '' to 'threads' ..." maxlog = 1
+            @reset cfg.training_params.parallelizer = "threads"
+        end
+    end
 end
 
 # Broadcast exper_list from rank 0 to all ranks
