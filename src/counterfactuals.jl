@@ -55,7 +55,7 @@ function generate!(
         generator;
         convergence=convergence,
         initialization=:identity,
-        return_flattened=false,
+        return_flattened=true,
         verbose=verbose > 1,
     )
 
