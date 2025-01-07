@@ -35,11 +35,12 @@ else
     @info "Running $(length(eval_list)) evaluations ..."
 
     # Adjust parallelizer:
-    for _eval_cfg in eval_list
+    for (i, _eval_cfg) in enumerate(eval_list)
         if _eval_cfg.counterfactual_params.parallelizer in ["threads", ""]
             @warn "It makes sense to use multi-processing ('mpi') for counterfactual search if grid is run sequentially. For multi-threading, use `run_evaluation_grid.jl` instead. Resetting to 'mpi' ..." maxlog = 1
             @reset _eval_cfg.counterfactual_params.parallelizer = "mpi"
         end
+        eval_list[i] = _eval_cfg
     end
 end
 

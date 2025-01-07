@@ -35,7 +35,7 @@ else
     @info "Running $(length(exper_list)) experiments ..."
 
     # Adjust parallelizer:
-    for cfg in exper_list
+    for (i, cfg) in enumerate(exper_list)
         if cfg.training_params.parallelizer == "mpi"
             @warn "Cannot distribute both experiments and counterfactual search across processes. For multi-processing counterfactual search, use `run_grid_sequentially.jl` instead. Resetting ..." maxlog = 1
             if Threads.nthreads() > 1
@@ -47,6 +47,7 @@ else
             @warn "Found multiple available threads. Resetting to 'parallelizer' from '' to 'threads' ..." maxlog = 1
             @reset cfg.training_params.parallelizer = "threads"
         end
+        exper_list[i] = cfg
     end
 end
 

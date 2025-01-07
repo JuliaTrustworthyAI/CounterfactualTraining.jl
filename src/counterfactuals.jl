@@ -55,7 +55,7 @@ function generate!(
         generator;
         convergence=convergence,
         initialization=:identity,
-        return_flattened=true,
+        return_flattened=false,
         verbose=verbose > 1,
     )
 
@@ -77,8 +77,8 @@ function generate!(
     @info "Targets: $(targets[1:10])"
     @info "Targets (tail): $(targets[end-9:end])"
     nsteps = (ce -> total_steps(ce)).(ces)
-    @info "Steps: $(nsteps[1:10])"
-    @info "Steps (tail): $(nsteps[end-9:end])"
+    @info "Steps: $(nsteps[1:300])"
+    @info "Steps (tail): $(nsteps[end-299:end])"
 
     aversarial_targets = []
     targets_enc = []

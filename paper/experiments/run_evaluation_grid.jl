@@ -35,7 +35,7 @@ else
     @info "Running $(length(eval_list)) evaluations ..."
 
     # Adjust parallelizer:
-    for _eval_cfg in eval_list
+    for (i, _eval_cfg) in enumerate(eval_list)
         @info "Specified parallelizer: $(_eval_cfg.counterfactual_params.parallelizer)" maxlog =
             1
         if _eval_cfg.counterfactual_params.parallelizer == "mpi"
@@ -52,6 +52,7 @@ else
                 1
             @reset _eval_cfg.counterfactual_params.parallelizer = "threads"
         end
+        eval_list[i] = _eval_cfg
     end
 end
 

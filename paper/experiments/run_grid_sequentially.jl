@@ -33,11 +33,12 @@ else
     @info "Running $(length(exper_list)) experiments ..."
 
     # Adjust parallelizer to MPI if grid is run sequentially:
-    for cfg in exper_list
+    for (i,cfg) in enumerate(exper_list)
         if cfg.training_params.parallelizer in ["threads", ""]
             @warn "It makes sense to use multi-processing ('mpi') for counterfactual search if grid is run sequentially. For multi-threading, use `run_grid.jl` instead. Resetting ..." maxlog =
                 1
             @reset cfg.training_params.parallelizer = "mpi"
+            exper_list[i] = cfg
         end
     end
 end
