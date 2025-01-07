@@ -43,6 +43,12 @@ function generate!(
         nneighbours,
         nsamples,
     )
+    xs = zip(xs)
+    @info "Type of `xs`: $(typeof(xs))"
+    @info "Type of `targets`: $(typeof(targets))"
+    @info "Type of `counterfactual_data`: $(typeof(counterfactual_data))"
+    @info "Type of `M`: $(typeof(M))"
+    @info "Type of `generator`: $(typeof(generator))"
 
     # Generate counterfactuals:
     ces = TaijaParallel.parallelize(
@@ -59,13 +65,11 @@ function generate!(
         verbose=verbose > 1,
     )
 
-    # Get neighbours in target class: find `nneighbours` potential neighbours than randomly choose one for each counterfactual.
-    neighbours =
-        (
-            ce -> find_potential_neighbours(ce, counterfactual_data, nneighbours)[
-                :, rand(1:end)
-            ]
-        ).(ces)
+    nsteps = (ce -> total_steps(ce)).(ces)
+    @info "Steps: $(nsteps[1:200])"
+    @info "Steps (tail): $(nsteps[end-199:end])"
+
+
     counterfactuals = (ce -> ce.counterfactual).(ces)                               # get actual counterfactuals
     @info "Length: $(length(ces))"
     @info "Counterfactuals: $(counterfactuals[1:10])"
@@ -76,9 +80,14 @@ function generate!(
     targets = (ce -> ce.target).(ces)
     @info "Targets: $(targets[1:10])"
     @info "Targets (tail): $(targets[end-9:end])"
-    nsteps = (ce -> total_steps(ce)).(ces)
-    @info "Steps: $(nsteps[1:300])"
-    @info "Steps (tail): $(nsteps[end-299:end])"
+
+    # Get neighbours in target class: find `nneighbours` potential neighbours than randomly choose one for each counterfactual.
+    neighbours =
+        (
+            ce -> find_potential_neighbours(ce, counterfactual_data, nneighbours)[
+                :, rand(1:end)
+            ]
+        ).(ces)
 
     aversarial_targets = []
     targets_enc = []
