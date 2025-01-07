@@ -7,6 +7,8 @@ save_dir = "paper/experiments/output/test_grid"
 
 [data_params]
 n_validation = []
+train_test_ratio = []
+train_test_seed = []
 n_train = [1000]
 batchsize = [100]
 
