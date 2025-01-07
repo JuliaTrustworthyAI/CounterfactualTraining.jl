@@ -55,7 +55,7 @@ function generate!(
         generator;
         convergence=convergence,
         initialization=:identity,
-        return_flattened=true,
+        return_flattened=false,
         verbose=verbose > 1,
     )
 
@@ -67,18 +67,18 @@ function generate!(
             ]
         ).(ces)
     counterfactuals = (ce -> ce.counterfactual).(ces)                               # get actual counterfactuals
-    # @info "Length: $(length(ces))"
-    # @info "Counterfactuals: $(counterfactuals[1:10])"
-    # @info "Counterfactuals (tail): $(counterfactuals[end-9:end])"
+    @info "Length: $(length(ces))"
+    @info "Counterfactuals: $(counterfactuals[1:10])"
+    @info "Counterfactuals (tail): $(counterfactuals[end-9:end])"
     factuals = (ce -> ce.factual).(ces)
-    # @info "Factuals: $(factuals[1:10])"
-    # @info "Factuals (tail): $(factuals[end-9:end])"
+    @info "Factuals: $(factuals[1:10])"
+    @info "Factuals (tail): $(factuals[end-9:end])"
     targets = (ce -> ce.target).(ces)
-    # @info "Targets: $(targets[1:10])"
-    # @info "Targets (tail): $(targets[end-9:end])"
-    # nsteps = (ce -> total_steps(ce)).(ces)
-    # @info "Steps: $(nsteps[1:10])"
-    # @info "Steps (tail): $(nsteps[end-9:end])"
+    @info "Targets: $(targets[1:10])"
+    @info "Targets (tail): $(targets[end-9:end])"
+    nsteps = (ce -> total_steps(ce)).(ces)
+    @info "Steps: $(nsteps[1:10])"
+    @info "Steps (tail): $(nsteps[end-9:end])"
 
     aversarial_targets = []
     targets_enc = []
