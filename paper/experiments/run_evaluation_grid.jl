@@ -13,11 +13,6 @@ using TaijaParallel
 DotEnv.load!()
 set_global_seed()
 
-# Get config and set up grid:
-grid_file = get_config_from_args()
-eval_grid = EvaluationGrid(get_config_from_args())
-@assert length(eval_grid.counterfactual_params["parallelizer"]) <= 1 "It does not make sense to specify multiple parallelizers. Aborting ..."
-
 # Initialize MPI
 MPI.Init()
 comm = MPI.COMM_WORLD
@@ -29,6 +24,12 @@ if rank != 0
     global_output_identifier(identifier)    # set output identifier to avoid issues with serialization
     eval_list = nothing
 else
+
+    # Get config and set up grid:
+    grid_file = get_config_from_args()
+    eval_grid = EvaluationGrid(grid_file)
+    @assert length(eval_grid.counterfactual_params["parallelizer"]) <= 1 "It does not make sense to specify multiple parallelizers. Aborting ..."
+
     # Set up evaluation configuration:
     eval_list = setup_evaluations(eval_grid)
     @info "Running $(length(eval_list)) evaluations ..."

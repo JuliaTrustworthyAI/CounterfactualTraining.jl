@@ -12,16 +12,6 @@ using TaijaParallel
 DotEnv.load!()
 set_global_seed()
 
-# Get config and set up grid:
-config_file = get_config_from_args()
-root_name = CTExperiments.from_toml(config_file)["name"]
-root_save_dir = joinpath(ENV["OUTPUT_DIR"], root_name)
-exper_grid = ExperimentGrid(config_file; new_save_dir=root_save_dir)
-if "threads" in exper_grid.training_params["parallelizer"] 
-    @warn "It makes sense to use multi-processing ('mpi') for counterfactual search if grid is run sequentially. For multi-threading, use `run_grid.jl` instead. Resetting ..."
-    @reset exper_grid.training_params["parallelizer"] = ["mpi"]
-end
-
 # Initialize MPI
 MPI.Init()
 comm = MPI.COMM_WORLD
@@ -31,9 +21,25 @@ if MPI.Comm_rank(MPI.COMM_WORLD) != 0
     global_logger(NullLogger())
     exper_list = nothing
 else
+
+    # Get config and set up grid:
+    config_file = get_config_from_args()
+    root_name = CTExperiments.from_toml(config_file)["name"]
+    root_save_dir = joinpath(ENV["OUTPUT_DIR"], root_name)
+    exper_grid = ExperimentGrid(config_file; new_save_dir=root_save_dir)
+
     # Generate list of experiments and run them:
     exper_list = setup_experiments(exper_grid)
     @info "Running $(length(exper_list)) experiments ..."
+
+    # Adjust parallelizer to MPI if grid is run sequentially:
+    for cfg in exper_list
+        if cfg.training_params.parallelizer in ["threads", ""]
+            @warn "It makes sense to use multi-processing ('mpi') for counterfactual search if grid is run sequentially. For multi-threading, use `run_grid.jl` instead. Resetting ..." maxlog =
+                1
+            @reset cfg.training_params.parallelizer = "mpi"
+        end
+    end
 end
 
 # Broadcast exper_list from rank 0 to all ranks
