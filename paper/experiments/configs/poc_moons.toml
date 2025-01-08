@@ -1,6 +1,6 @@
 name = "poc_moons"
 dim_reduction = [false]
-generator_type = ["ecco", "generic", "revise", "omni"]
+generator_type = ["ecco", "generic", "revise", "gravi", "omni"]
 data = "moons"
 model_type = "mlp"
 save_dir = "paper/experiments/output/poc_moons"
