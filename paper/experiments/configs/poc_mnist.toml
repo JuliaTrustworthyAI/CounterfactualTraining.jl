@@ -6,8 +6,10 @@ model_type = "mlp"
 save_dir = "paper/experiments/output/poc_mnist"
 
 [data_params]
-n_validation = []
-n_train = [10000]
+n_validation = [5000]
+train_test_ratio = []
+train_test_seed = []
+n_train = [55000]
 batchsize = [1000]
 
 [model_params]
@@ -25,7 +27,7 @@ type = []
 
 [training_params]
 opt = ["adam"]
-nce = [100]
+nce = [275]
 lr = []
 threaded = []
 class_loss = []

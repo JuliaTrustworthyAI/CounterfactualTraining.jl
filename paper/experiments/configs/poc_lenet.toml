@@ -6,11 +6,11 @@ model_type = "lenet"
 save_dir = "paper/experiments/output/poc_lenet"
 
 [data_params]
-n_validation = [1000]
+n_validation = [1024]
 train_test_ratio = []
 train_test_seed = []
-n_train = [10000]
-batchsize = [1000]
+n_train = [10240]
+batchsize = [512]
 
 [model_params]
 channels1 = []
@@ -28,7 +28,7 @@ type = []
 
 [training_params]
 opt = ["adam"]
-nce = [100]
+nce = [200]
 lr = []
 threaded = [false]
 class_loss = []
