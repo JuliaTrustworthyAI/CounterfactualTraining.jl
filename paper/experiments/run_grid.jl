@@ -46,6 +46,9 @@ else
         elseif cfg.training_params.parallelizer == "" && Threads.nthreads() > 1
             @warn "Found multiple available threads. Resetting to 'parallelizer' from '' to 'threads' ..." maxlog = 1
             @reset cfg.training_params.parallelizer = "threads"
+        elseif cfg.training_params.parallelizer == "threads" && Threads.nthreads() <= 1
+            @warn "Found only one available thread. Resetting to '' from 'threads' ..." maxlog = 1
+            @reset cfg.training_params.parallelizer = ""
         end
         exper_list[i] = cfg
     end
