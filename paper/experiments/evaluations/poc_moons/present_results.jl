@@ -31,7 +31,7 @@ all_data = CTExperiments.merge_with_meta(
 )
 valid_y = CTExperiments.valid_y_ce(all_data[1])
 
-params = PlotParams(; colvar="lambda_energy_eval", rowvar="objective")
+params = PlotParams(; rowvar="lambda_energy_eval", colvar="objective")
 final_save_dir = save_dir(params, output_dir; prefix)
 for y in valid_y
     plt = boxplot_ce(all_data...; y=y, params()..., facet=(; linkyaxes=:none))
