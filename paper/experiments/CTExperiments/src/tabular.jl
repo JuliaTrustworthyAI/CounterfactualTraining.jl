@@ -8,9 +8,9 @@ using StatsBase
 using TaijaData
 
 """
-    MNIST
+    GMSC
 
-Keyword container for the `MNIST` data set. Can specify the number of samples `n`, the batch size `batchsize`.
+Keyword container for the `GMSC` data set. Can specify the number of samples `n`, the batch size `batchsize`.
 """
 Base.@kwdef struct GMSC <: Dataset
     n_train::Int = 15714

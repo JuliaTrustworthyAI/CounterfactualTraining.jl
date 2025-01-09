@@ -5,8 +5,7 @@ using Random
 using Serialization
 
 DotEnv.load!()
-
-Random.seed!(2025)
+set_global_seed()
 
 config_file = get_config_from_args()
 _name = CTExperiments.from_toml(config_file)["meta_params"]["experiment_name"]

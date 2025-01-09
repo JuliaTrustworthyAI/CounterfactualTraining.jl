@@ -1,4 +1,5 @@
 using AlgebraOfGraphics
+using CounterfactualExplanations
 using CairoMakie
 using DataFrames
 using Plots: Plots, PlotMeasures
@@ -101,14 +102,16 @@ function aggregate_data(
     df::DataFrame,
     y::String,
     byvars::Union{Nothing,Vector{String}}=nothing;
-    byvars_must_include=Union{Nothing,Vector{String}},
+    byvars_must_include::Union{Nothing,Vector{String}}=nothing,
 )
     df = filter(row -> all(x -> !(x isa Number && (isnan(x) || isinf(x))), row), df)
 
     # Aggregate:
     if !isnothing(byvars)
         # Aggregate data by columns specified in `byvars`:
-        byvars = union(byvars_must_include, byvars)
+        if !isnothing(byvars_must_include)
+            byvars = union(byvars_must_include, byvars)
+        end
         df_agg = groupby(df, byvars)
     else
         # If nothing is specified, aggregate data by epoch:
@@ -287,7 +290,11 @@ function aggregate_ce_evaluation(
     select!(df, Not(:variable))
 
     # Aggregate:
-    return aggregate_data(df, y, byvars; byvars_must_include=["run"])
+    if "run" in names(df)
+        return aggregate_data(df, y, byvars; byvars_must_include=["run"])
+    else
+        return aggregate_data(df, y, byvars)
+    end
 end
 
 function valid_y_ce(df::DataFrame)
@@ -550,4 +557,68 @@ function plot_ce(data::Dataset, df::DataFrame, factual::Int, target::Int; axis=d
         end
     end
     return plt
+end
+
+function test_seed()
+    randn(1)
+end
+
+"""
+    plot_ce(
+        exper::Experiment,
+        params::Union{CounterfactualParams,TrainingParams};
+        target::Union{Nothing,Int}=nothing,
+        nsamples::Int=9,
+    )
+
+Generate and plot counterfactual explanations for a given experiment and target class.
+"""
+function plot_ce(
+    exper::Experiment,
+    params::Union{CounterfactualParams,TrainingParams};
+    target::Union{Nothing,Int}=nothing,
+    nsamples::Int=25,
+)
+    M = load_results(exper)[3]
+    generator = CTExperiments.get_generator(params.generator_params)
+    conv = CTExperiments.get_convergence(params)
+    data = get_ce_data(exper.data)
+    if isnothing(target)
+        @info "No target supplied, choosing first label."
+        target = data.y_levels[1]
+    end
+    candidates = findall(predict_label(M, data) .!= target)
+    idx = rand(candidates, 1)
+    x = collect(select_factual(data, idx))[1]
+    ce = generate_counterfactual(x, target, data, M, generator; convergence=conv, num_counterfactuals=nsamples)
+    @info "Generator: $(generator)"
+    return Plots.plot(ce; size=(500, 500), cb=false, target=target)
+end
+
+"""
+    plot_ce(exper::Experiment; kwargs...)
+
+Generate and plot counterfactual explanations using the counterfactual generator used during training.
+"""
+function plot_ce(exper::Experiment; kwargs...)
+    return plot_ce(exper, exper.training_params; kwargs...)
+end
+
+"""
+    plot_ce(
+        exper::Experiment,
+        eval_cfg::EvaluationConfig;
+        kwrgs...
+    )
+
+Generate and plot counterfactual explanations using the counterfactual generator specified in the evaluation configuration.
+"""
+function plot_ce(
+    exper::Experiment,
+    eval_cfg::EvaluationConfig;
+    kwrgs...
+)
+
+    params = eval_cfg.counterfactual_params
+    plot_ce(exper, params; kwrgs...)
 end

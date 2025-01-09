@@ -1,18 +1,29 @@
-using TaijaData
 using MultivariateStats
+using Random
+using TaijaData
 
 get_domain(d::Dataset) = nothing
 
 include("mnist.jl")
-include("moons.jl")
-include("gmsc.jl")
+include("synthetic.jl")
+include("tabular.jl")
+
+function get_rng(d::Dataset)
+    return Xoshiro(d.train_test_seed)
+end
 
 """
     data_sets
 
 Catalogue of available model types.
 """
-const data_sets = Dict("mnist" => MNIST, "moons" => Moons, "gmsc" => GMSC)
+const data_sets = Dict(
+    "lin_sep" => LinearlySeparable,
+    "gmsc" => GMSC,
+    "mnist" => MNIST,
+    "moons" => Moons,
+    "over" => Overlapping,
+)
 
 """
     get_data_set(s::String)
@@ -30,9 +41,8 @@ function get_data(data::Dataset; n::Union{Nothing,Int}=nothing, test_set::Bool=f
     X, y = load_data(data, ntotal(data))    # load all available data
 
     # Set seed and shuffle data:
-    Random.seed!(data.train_test_seed)
     X = Float32.(X)
-    new_idx = randperm(size(X, 2))
+    new_idx = randperm(get_rng(data), size(X, 2))
     X = X[:, new_idx]
     y = y[new_idx]
 
@@ -48,18 +58,18 @@ function get_data(data::Dataset; n::Union{Nothing,Int}=nothing, test_set::Bool=f
 
     # Subset:
     if !isnothing(n)
-        X, y = take_subset(X, y, n)
+        X, y = take_subset(X, y, n; rng=get_rng(data))
     end
 
     return X, y
 end
 
-function take_subset(X, y, n)
+function take_subset(X, y, n; rng::AbstractRNG=Random.default_rng())
     n_total = size(X, 2)
     if n_total > n
-        idx = sample(1:n_total, n; replace=false)
+        idx = sample(rng, 1:n_total, n; replace=false)
     elseif n_total < n
-        idx = rand(1:n_total, n)
+        idx = rand(rng, 1:n_total, n)
     else
         idx = 1:n_total
     end

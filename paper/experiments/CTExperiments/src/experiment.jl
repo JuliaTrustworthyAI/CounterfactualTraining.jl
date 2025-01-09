@@ -156,8 +156,6 @@ end
 
 function train_val_split(data::Dataset, ce_data::CounterfactualData, val_size)
 
-    Random.seed!(data.train_test_seed)
-
     Xtrain, ytrain, Xval, yval = (
         dt -> (dt[1].X, dt[1].y, dt[2].X, dt[2].y)
     )(

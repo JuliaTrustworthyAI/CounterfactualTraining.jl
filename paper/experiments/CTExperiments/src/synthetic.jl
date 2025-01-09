@@ -1,0 +1,81 @@
+using CounterfactualExplanations
+using CounterfactualExplanations.DataPreprocessing: train_test_split, unpack_data
+using Flux
+using Flux.MLUtils
+using MultivariateStats
+using StatsBase
+using TaijaData
+
+"""
+    Moons
+
+Keyword container for the `Moons` data set. Can specify the number of samples `n`, the batch size `batchsize`.
+"""
+Base.@kwdef struct Moons <: Dataset
+    n_train::Int = 3000
+    batchsize::Int = 30
+    n_validation::Int = 600
+    train_test_ratio::Float32 = 0.8
+    train_test_seed::Int = get_global_seed()
+end
+
+get_domain(d::Moons) = nothing
+
+load_data(d::Moons, n::Int; seed=TaijaData.data_seed) = load_moons(n; seed=seed)
+
+"""
+    LinearlySeparable
+
+Keyword container for the `LinearlySeparable` data set. Can specify the number of samples `n`, the batch size `batchsize`.
+"""
+Base.@kwdef struct LinearlySeparable <: Dataset
+    n_train::Int = 3000
+    batchsize::Int = 30
+    n_validation::Int = 600
+    train_test_ratio::Float32 = 0.8
+    train_test_seed::Int = get_global_seed()
+end
+
+get_domain(d::LinearlySeparable) = nothing
+
+function load_data(d::LinearlySeparable, n::Int; seed=TaijaData.data_seed)
+    return load_linearly_separable(n; seed=seed)
+end
+
+"""
+    Overlapping
+
+Keyword container for the `Overlapping` data set. Can specify the number of samples `n`, the batch size `batchsize`.
+"""
+Base.@kwdef struct Overlapping <: Dataset
+    n_train::Int = 3000
+    batchsize::Int = 30
+    n_validation::Int = 600
+    train_test_ratio::Float32 = 0.8
+    train_test_seed::Int = get_global_seed()
+end
+
+get_domain(d::Overlapping) = nothing
+
+function load_data(d::Overlapping, n::Int; seed=TaijaData.data_seed)
+    return load_overlapping(n; seed=seed)
+end
+
+"""
+    Circles
+
+Keyword container for the `Circles` data set. Can specify the number of samples `n`, the batch size `batchsize`.
+"""
+Base.@kwdef struct Circles <: Dataset
+    n_train::Int = 3000
+    batchsize::Int = 30
+    n_validation::Int = 600
+    train_test_ratio::Float32 = 0.8
+    train_test_seed::Int = get_global_seed()
+end
+
+get_domain(d::Circles) = nothing
+
+function load_data(d::Circles, n::Int; seed=TaijaData.data_seed)
+    return load_circles(n; seed=seed)
+end

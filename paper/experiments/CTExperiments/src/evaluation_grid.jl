@@ -3,13 +3,13 @@ using JLD2
 using UUIDs
 
 global _default_generator_params_eval_grid = (
-    lambda_energy = [0.1, 0.25, 0.5, 1.0, 5.0],
+    lambda_energy = [0.1, 0.5, 1.0, 5.0, 10.0],
 )
 
 """
     EvaluationGrid
 
-A configuration object for the evaluation grid.
+A configuration object for the evaluation grid. The `generator_params` if the `EvaluationGrid` are inherited from the `ExperimentGrid`, but additional values can be supplied to be merged with the inherited values. 
 
 ## Fields
 
@@ -34,11 +34,17 @@ struct EvaluationGrid <: AbstractGridConfiguration
             counterfactual_params, fieldnames(CounterfactualParams)
         )
 
-        # Generator parameters
+        # Generator parameters (inherited from ExperimentGrid):
+        inherited_generator_params = CTExperiments.from_toml(grid_file)["generator_params"]
         generator_params = append_params(generator_params, fieldnames(GeneratorParams))
+        merged_params = Dict{String,Any}()
+        for (k,v) in generator_params
+            merged_values = unique([inherited_generator_params[k]..., v...])
+            merged_params[k] = merged_values
+        end
 
         # Instantiate grid: 
-        grid = new(grid_file, save_dir, counterfactual_params, generator_params, test_time)
+        grid = new(grid_file, save_dir, counterfactual_params, merged_params, test_time)
 
         # Store grid config:
         if !isdir(save_dir)

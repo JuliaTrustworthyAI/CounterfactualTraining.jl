@@ -1,9 +1,9 @@
-name = "poc_moons"
+name = "poc_over"
 dim_reduction = [false]
 generator_type = ["ecco", "generic", "omni"]
-data = "moons"
+data = "over"
 model_type = "mlp"
-save_dir = "paper/experiments/output/poc_moons"
+save_dir = "paper/experiments/output/poc_over"
 
 [data_params]
 n_validation = [600]

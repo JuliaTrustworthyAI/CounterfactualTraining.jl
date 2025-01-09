@@ -65,7 +65,7 @@ function counterfactual_training(
         end
     end
 
-    if verbose == 1
+    if verbose in [1,2]
         p = Progress(nepochs-start_epoch; barglyphs=BarGlyphs("[=> ]"), color=:yellow)
     end
 
@@ -239,9 +239,9 @@ function counterfactual_training(
             end
         end
 
-        if verbose == 1
+        if verbose in [1,2]
             next!(p)
-        elseif verbose > 1
+        elseif verbose > 2
             @info "Iteration $epoch:"
             @info msg_acc_train
             @info msg_acc

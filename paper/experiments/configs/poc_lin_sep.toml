@@ -1,28 +1,28 @@
-name = "poc_moons"
+name = "poc_lin_sep"
 dim_reduction = [false]
-generator_type = ["ecco", "generic", "omni"]
-data = "moons"
+generator_type = ["ecco", "generic", "omni", "revise"]
+data = "lin_sep"
 model_type = "mlp"
-save_dir = "paper/experiments/output/poc_moons"
+save_dir = "paper/experiments/output/poc_lin_sep"
 
 [data_params]
 n_validation = [600]
 train_test_ratio = []
 train_test_seed = []
 n_train = [3000]
-batchsize = [30]
+batchsize = [128]
 
 [model_params]
-nlayers = []
-activation = []
-nhidden = [64]
+nlayers = [3]
+activation = ["swish"]
+nhidden = [16]
 
 [generator_params]
 opt = ["sgd"]
 lambda_cost = [0.01]
 lr = [0.1]
 maxiter = [50]
-lambda_energy = [1.0]
+lambda_energy = [0.5]
 type = []
 
 [training_params]
@@ -31,13 +31,13 @@ nce = [300]
 lr = []
 threaded = []
 class_loss = []
-objective = ["full", "adversarial", "vanilla"]
+objective = ["adversarial", "energy", "full", "vanilla"]
 lambda_class_loss = [1.0]
-lambda_energy_diff = [1.0]
+lambda_energy_diff = [0.5]
 burnin = [0.0]
 nepochs = [50]
-lambda_energy_reg = [0.0]
-verbose = [1]
+lambda_energy_reg = [0.01]
+verbose = [2]
 lambda_adversarial = [1.0]
 parallelizer = []
 generator_params = []

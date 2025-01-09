@@ -7,6 +7,7 @@ using CounterfactualExplanations.Evaluation
 using CounterfactualExplanations.Objectives
 using Logging
 using Random
+using TaijaData
 
 abstract type AbstractConfiguration end
 abstract type AbstractExperiment <: AbstractConfiguration end
@@ -187,15 +188,15 @@ end
 
 export generate_template,
     generate_grid_template, generate_eval_template, generate_eval_grid_template
-    
+
 global _global_seed = 2025
 
 function set_global_seed(seed::Int=_global_seed)
     global _global_seed = try
         parse(Int, ENV["GLOBAL_SEED"])
+        @info "Found environment variable `ENV['GLOBAL_SEED']`. Setting global seed to it."
     catch
-        @warn "No environment variable found to set global seed."
-        2025
+        seed
     end
     Random.seed!(_global_seed)
     @info "Global seed set to $_global_seed"

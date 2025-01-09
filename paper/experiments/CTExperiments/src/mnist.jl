@@ -67,9 +67,6 @@ Load the MNIST data set. If `test_set` is true, load the test set; otherwise, lo
 """
 function get_data(data::MNIST; n::Union{Nothing,Int}=nothing, test_set::Bool=false)
 
-    # Set seed and shuffle data:
-    Random.seed!(data.train_test_seed)
-
     # Get data:
     if test_set
         X, y = load_mnist_test()
@@ -80,7 +77,7 @@ function get_data(data::MNIST; n::Union{Nothing,Int}=nothing, test_set::Bool=fal
 
     # Subset:
     if !isnothing(n)
-        X, y = take_subset(X, y, n)
+        X, y = take_subset(X, y, n; rng=get_rng(data))
     end
 
     return X, y
