@@ -1,5 +1,5 @@
 using CounterfactualExplanations
-import CounterfactualTraining
+using CounterfactualTraining: CounterfactualTraining
 using Flux
 
 struct OmniscientGenerator <: AbstractGenerator end
@@ -23,7 +23,8 @@ function CounterfactualTraining.generate!(
     )
 
     # Get neighbours in target class and set counterfactuals to neighbours:
-    targets_enc = (target -> Flux.onehotbatch([target], counterfactual_data.y_levels)).(targets)
+    targets_enc =
+        (target -> Flux.onehotbatch([target], counterfactual_data.y_levels)).(targets)
     predicted_labels = [argmax(M.model(x)) for x in xs]
     in_target_class = (target -> findall(predicted_labels .== target)).(targets)
     neighbours = Vector(undef, length(xs))
@@ -55,4 +56,3 @@ function CounterfactualTraining.generate!(
 
     return dl, percent_valid
 end
-

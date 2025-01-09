@@ -560,7 +560,7 @@ function plot_ce(data::Dataset, df::DataFrame, factual::Int, target::Int; axis=d
 end
 
 function test_seed()
-    randn(1)
+    return randn(1)
 end
 
 """
@@ -590,7 +590,9 @@ function plot_ce(
     candidates = findall(predict_label(M, data) .!= target)
     idx = rand(candidates, 1)
     x = collect(select_factual(data, idx))[1]
-    ce = generate_counterfactual(x, target, data, M, generator; convergence=conv, num_counterfactuals=nsamples)
+    ce = generate_counterfactual(
+        x, target, data, M, generator; convergence=conv, num_counterfactuals=nsamples
+    )
     @info "Generator: $(generator)"
     return Plots.plot(ce; size=(500, 500), cb=false, target=target)
 end
@@ -613,12 +615,7 @@ end
 
 Generate and plot counterfactual explanations using the counterfactual generator specified in the evaluation configuration.
 """
-function plot_ce(
-    exper::Experiment,
-    eval_cfg::EvaluationConfig;
-    kwrgs...
-)
-
+function plot_ce(exper::Experiment, eval_cfg::EvaluationConfig; kwrgs...)
     params = eval_cfg.counterfactual_params
-    plot_ce(exper, params; kwrgs...)
+    return plot_ce(exper, params; kwrgs...)
 end

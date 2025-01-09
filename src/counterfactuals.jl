@@ -34,14 +34,8 @@ function generate!(
     verbose=1,
     domain=nothing,
 )
-
     xs, factual_enc, targets, counterfactual_data, M = setup_counterfactual_search(
-        data,
-        model,
-        domain,
-        input_encoder,
-        nneighbours,
-        nsamples,
+        data, model, domain, input_encoder, nneighbours, nsamples
     )
 
     # Generate counterfactuals:
@@ -84,7 +78,7 @@ function generate!(
             percent_valid += 1.0
         else
             # Otherwise, use factual label for adversarial loss:
-            push!(aversarial_targets, factual_enc[:,i])
+            push!(aversarial_targets, factual_enc[:, i])
         end
     end
 
@@ -108,12 +102,7 @@ function generate!(
 end
 
 function setup_counterfactual_search(
-    data,
-    model,
-    domain,
-    input_encoder,
-    nneighbours::Int64,
-    nsamples::Union{Nothing, Int64},
+    data, model, domain, input_encoder, nneighbours::Int64, nsamples::Union{Nothing,Int64}
 )
 
     # Wrap training dataset in `CounterfactualData`:
@@ -158,5 +147,4 @@ function setup_counterfactual_search(
     factual_enc = Flux.onehotbatch(factual_labels, all_labels)
 
     return xs, factual_enc, targets, counterfactual_data, M
-
 end

@@ -229,7 +229,7 @@ function make_dummy(cfg::EvaluationConfig, suffix1, suffix2)
     return cfg
 end
 
-function isdummy(cfg::EvaluationConfig) :: Bool
+function isdummy(cfg::EvaluationConfig)::Bool
     foldername = splitpath(cfg.save_dir)[end]
     return contains(lowercase(foldername), "dummy")
 end

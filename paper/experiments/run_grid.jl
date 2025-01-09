@@ -18,12 +18,11 @@ comm = MPI.COMM_WORLD
 rank = MPI.Comm_rank(comm)
 nprocs = MPI.Comm_size(comm)
 
-
 if MPI.Comm_rank(MPI.COMM_WORLD) != 0
     global_logger(NullLogger())
     exper_list = nothing
 else
-    
+
     # Get config and set up grid:
     config_file = get_config_from_args()
     root_name = CTExperiments.from_toml(config_file)["name"]
@@ -37,17 +36,20 @@ else
     # Adjust parallelizer:
     for (i, cfg) in enumerate(exper_list)
         if cfg.training_params.parallelizer == "mpi"
-            @warn "Cannot distribute both experiments and counterfactual search across processes. For multi-processing counterfactual search, use `run_grid_sequentially.jl` instead. Resetting ..." maxlog = 1
+            @warn "Cannot distribute both experiments and counterfactual search across processes. For multi-processing counterfactual search, use `run_grid_sequentially.jl` instead. Resetting ..." maxlog =
+                1
             if Threads.nthreads() > 1
                 @reset cfg.training_params.parallelizer = "threads"
             else
                 @reset cfg.training_params.parallelizer = ""
             end
         elseif cfg.training_params.parallelizer == "" && Threads.nthreads() > 1
-            @warn "Found multiple available threads. Resetting to 'parallelizer' from '' to 'threads' ..." maxlog = 1
+            @warn "Found multiple available threads. Resetting to 'parallelizer' from '' to 'threads' ..." maxlog =
+                1
             @reset cfg.training_params.parallelizer = "threads"
         elseif cfg.training_params.parallelizer == "threads" && Threads.nthreads() <= 1
-            @warn "Found only one available thread. Resetting to '' from 'threads' ..." maxlog = 1
+            @warn "Found only one available thread. Resetting to '' from 'threads' ..." maxlog =
+                1
             @reset cfg.training_params.parallelizer = ""
         end
         exper_list[i] = cfg

@@ -12,7 +12,7 @@ exper_grid = ExperimentGrid(config_file)
 # Determine number of slurm tasks:
 total_tasks = ntasks(exper_grid)
 while total_tasks > parse(Int, ENV["MAX_TASKS"])
-    global total_tasks/=2
+    global total_tasks /= 2
 end
 total_tasks = round(Int, total_tasks)
 

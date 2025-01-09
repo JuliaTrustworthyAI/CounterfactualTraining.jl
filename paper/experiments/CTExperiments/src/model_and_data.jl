@@ -37,7 +37,6 @@ function get_data_set(s::String)
 end
 
 function get_data(data::Dataset; n::Union{Nothing,Int}=nothing, test_set::Bool=false)
-
     X, y = load_data(data, ntotal(data))    # load all available data
 
     # Set seed and shuffle data:
@@ -79,17 +78,19 @@ function take_subset(X, y, n; rng::AbstractRNG=Random.default_rng())
     return X, y
 end
 
-function get_ce_data(
-    data::Dataset, n=nothing; test_set::Bool=false, train_only::Bool=false
-)
-    ce_data = CounterfactualData(get_data(data; n=n, test_set=test_set)...; domain=get_domain(data))
+function get_ce_data(data::Dataset, n=nothing; test_set::Bool=false, train_only::Bool=false)
+    ce_data = CounterfactualData(
+        get_data(data; n=n, test_set=test_set)...; domain=get_domain(data)
+    )
     if train_only
         _, _, ce_data = train_val_split(data, ce_data, data.n_validation / ntotal(data))
     end
     return ce_data
 end
 
-ntotal(data::Dataset) = Int(round((data.n_train + data.n_validation) / data.train_test_ratio))
+function ntotal(data::Dataset)
+    return Int(round((data.n_train + data.n_validation) / data.train_test_ratio))
+end
 
 include("linear.jl")
 include("mlp.jl")

@@ -37,7 +37,8 @@ else
     # Adjust parallelizer:
     for (i, _eval_cfg) in enumerate(eval_list)
         if _eval_cfg.counterfactual_params.parallelizer in ["threads", ""]
-            @warn "It makes sense to use multi-processing ('mpi') for counterfactual search if grid is run sequentially. For multi-threading, use `run_evaluation_grid.jl` instead. Resetting to 'mpi' ..." maxlog = 1
+            @warn "It makes sense to use multi-processing ('mpi') for counterfactual search if grid is run sequentially. For multi-threading, use `run_evaluation_grid.jl` instead. Resetting to 'mpi' ..." maxlog =
+                1
             @reset _eval_cfg.counterfactual_params.parallelizer = "mpi"
         end
         eval_list[i] = _eval_cfg
@@ -83,7 +84,6 @@ for (i, eval_config) in enumerate(eval_list)
     else
         rm(eval_config.save_dir; recursive=true)
     end
-
 end
 
 # Finalize MPI

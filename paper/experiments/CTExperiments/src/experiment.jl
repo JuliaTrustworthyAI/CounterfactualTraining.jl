@@ -155,10 +155,7 @@ function setup(exper::AbstractExperiment, data::Dataset, model::ModelType)
 end
 
 function train_val_split(data::Dataset, ce_data::CounterfactualData, val_size)
-
-    Xtrain, ytrain, Xval, yval = (
-        dt -> (dt[1].X, dt[1].y, dt[2].X, dt[2].y)
-    )(
+    Xtrain, ytrain, Xval, yval = (dt -> (dt[1].X, dt[1].y, dt[2].X, dt[2].y))(
         train_test_split(ce_data; test_size=val_size, keep_class_ratio=true)
     )
 
@@ -214,7 +211,9 @@ For any data and the REVISE generator, use the VAE as the input encoder.
 """
 function get_input_encoder(exper::AbstractExperiment, data::Dataset, generator_type::REVISE)
     ce_data = get_ce_data(data; train_only=true)
-    vae = CounterfactualExplanations.DataPreprocessing.fit_transformer(ce_data, CounterfactualExplanations.GenerativeModels.VAE)
+    vae = CounterfactualExplanations.DataPreprocessing.fit_transformer(
+        ce_data, CounterfactualExplanations.GenerativeModels.VAE
+    )
     return vae
 end
 

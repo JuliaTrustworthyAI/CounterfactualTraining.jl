@@ -46,8 +46,7 @@ else
             else
                 @reset _eval_cfg.counterfactual_params.parallelizer = ""
             end
-        elseif _eval_cfg.counterfactual_params.parallelizer == "" &&
-            Threads.nthreads() > 1
+        elseif _eval_cfg.counterfactual_params.parallelizer == "" && Threads.nthreads() > 1
             @warn "Found multiple available threads. Resetting to 'parallelizer' from '' to 'threads' ..." maxlog =
                 1
             @reset _eval_cfg.counterfactual_params.parallelizer = "threads"
@@ -87,7 +86,6 @@ end
 worker_chunk = MPI.scatter(chunks, comm)                # distribute across processes
 
 for (i, eval_config) in enumerate(worker_chunk)
-
     if rank != 0
         @reset eval_config.counterfactual_params.verbose = false
     end

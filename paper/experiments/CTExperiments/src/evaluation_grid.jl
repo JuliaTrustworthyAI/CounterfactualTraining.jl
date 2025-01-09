@@ -2,9 +2,7 @@ using Base.Iterators
 using JLD2
 using UUIDs
 
-global _default_generator_params_eval_grid = (
-    lambda_energy = [0.1, 0.5, 1.0, 5.0, 10.0],
-)
+global _default_generator_params_eval_grid = (lambda_energy=[0.1, 0.5, 1.0, 5.0, 10.0],)
 
 """
     EvaluationGrid
@@ -38,7 +36,7 @@ struct EvaluationGrid <: AbstractGridConfiguration
         inherited_generator_params = CTExperiments.from_toml(grid_file)["generator_params"]
         generator_params = append_params(generator_params, fieldnames(GeneratorParams))
         merged_params = Dict{String,Any}()
-        for (k,v) in generator_params
+        for (k, v) in generator_params
             merged_values = unique([inherited_generator_params[k]..., v...])
             merged_params[k] = merged_values
         end

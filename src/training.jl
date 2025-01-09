@@ -65,8 +65,8 @@ function counterfactual_training(
         end
     end
 
-    if verbose in [1,2]
-        p = Progress(nepochs-start_epoch; barglyphs=BarGlyphs("[=> ]"), color=:yellow)
+    if verbose in [1, 2]
+        p = Progress(nepochs - start_epoch; barglyphs=BarGlyphs("[=> ]"), color=:yellow)
     end
 
     for epoch in start_epoch:nepochs
@@ -181,7 +181,16 @@ function counterfactual_training(
 
         push!(
             log,
-            (; acc, acc_val, train_loss, implaus, log_reg_loss, log_adv_loss, time_taken, percent_valid),
+            (;
+                acc,
+                acc_val,
+                train_loss,
+                implaus,
+                log_reg_loss,
+                log_adv_loss,
+                time_taken,
+                percent_valid,
+            ),
         )
 
         # Checkpointing:
@@ -200,14 +209,14 @@ function counterfactual_training(
                 acc_plt = lineplot(
                     [_log[1] for _log in log]; xlabel="Epochs", ylabel="Accuracy"
                 )
-                if !isnothing(acc_val) 
+                if !isnothing(acc_val)
                     acc_val_plt = lineplot(
                         [_log[2] for _log in log];
                         xlabel="Epochs",
                         ylabel="Validation Accuracy",
                     )
                 end
-                if !isnothing(percent_valid) 
+                if !isnothing(percent_valid)
                     validity_plt = lineplot(
                         [_log[8] for _log in log];
                         xlabel="Epochs",
@@ -239,7 +248,7 @@ function counterfactual_training(
             end
         end
 
-        if verbose in [1,2]
+        if verbose in [1, 2]
             next!(p)
         elseif verbose > 2
             @info "Iteration $epoch:"
