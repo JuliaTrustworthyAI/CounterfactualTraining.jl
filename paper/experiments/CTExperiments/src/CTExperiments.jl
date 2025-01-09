@@ -191,11 +191,11 @@ export generate_template,
 
 global _global_seed = 2025
 
-function set_global_seed(seed::Int=_global_seed)
-    global _global_seed = try
+function set_global_seed(seed::Union{Nothing,Int}=_global_seed)
+    global _global_seed = if isnothing(seed)
         parse(Int, ENV["GLOBAL_SEED"])
         @info "Found environment variable `ENV['GLOBAL_SEED']`. Setting global seed to it."
-    catch
+    else
         seed
     end
     Random.seed!(_global_seed)

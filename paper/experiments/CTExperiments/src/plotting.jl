@@ -578,6 +578,7 @@ function plot_ce(
     params::Union{CounterfactualParams,TrainingParams};
     target::Union{Nothing,Int}=nothing,
     nsamples::Int=25,
+    kwrgs...
 )
     M = load_results(exper)[3]
     generator = CTExperiments.get_generator(params.generator_params)
@@ -587,6 +588,12 @@ function plot_ce(
         @info "No target supplied, choosing first label."
         target = data.y_levels[1]
     end
+
+    # Cannot plot counterfactuals for OmnisionGenerator:
+    if isa(generator, OmniscientGenerator)
+        return Plots.plot(M, data; size=(500, 500), cb=false, target=target, kwrgs...)
+    end
+
     candidates = findall(predict_label(M, data) .!= target)
     idx = rand(candidates, 1)
     x = collect(select_factual(data, idx))[1]
@@ -594,7 +601,9 @@ function plot_ce(
         x, target, data, M, generator; convergence=conv, num_counterfactuals=nsamples
     )
     @info "Generator: $(generator)"
-    return Plots.plot(ce; size=(500, 500), cb=false, target=target)
+    return Plots.plot(
+        ce; size=(default_axis.width, default_axis.height), cb=false, target=target, kwrgs...
+    )
 end
 
 """
@@ -609,13 +618,46 @@ end
 """
     plot_ce(
         exper::Experiment,
-        eval_cfg::EvaluationConfig;
+        eval_cfg::Union{Nothing,EvaluationConfig};
         kwrgs...
     )
 
-Generate and plot counterfactual explanations using the counterfactual generator specified in the evaluation configuration.
+Generate and plot counterfactual explanations using the counterfactual generator specified in the evaluation configuration. For `eval_cfg=nothing`, the function uses the default parameters from the training configuration.
 """
-function plot_ce(exper::Experiment, eval_cfg::EvaluationConfig; kwrgs...)
-    params = eval_cfg.counterfactual_params
-    return plot_ce(exper, params; kwrgs...)
+function plot_ce(exper::Experiment, eval_cfg::Union{Nothing,EvaluationConfig}; kwrgs...)
+    if !isnothing(eval_cfg)
+        params = eval_cfg.counterfactual_params
+        return plot_ce(exper, params; kwrgs...)
+    else
+        return plot_ce(exper; kwrgs...)
+    end
+end
+
+"""
+    plot_ce(exper_list::Vector{Experiment}; layout=length(exper_list), kwargs...)
+
+Generate and plot counterfactual explanations for a list of experiments and arrange them in a grid layout.
+"""
+function plot_ce(exper_list::Vector{Experiment}, eval_cfg::Union{Nothing,EvaluationConfig}=nothing; titles=nothing, kwargs...)
+    if isnothing(titles)
+        titles = []
+        for exper in exper_list
+            gen = exper.meta_params.generator_type
+            obj = exper.training_params.objective
+            title = "$(exper.meta_params.experiment_name)\n$(gen) ($obj)"
+            push!(titles, title)
+        end
+    end
+
+    plts = []
+    for (i, exper) in enumerate(exper_list)
+        plt = plot_ce(exper, eval_cfg; title=titles[i], topmargin=5PlotMeasures.mm, kwargs...)
+        push!(plts, plt)
+    end
+
+    w, h =
+        (ceil(sqrt(length(exper_list))), floor(sqrt(length(exper_list)))) |>
+        dims -> (dims[1] * 2default_axis.width, dims[2] * 2default_axis.height)
+
+    return Plots.plot(plts...; layout=length(exper_list), size=(w, h))
 end

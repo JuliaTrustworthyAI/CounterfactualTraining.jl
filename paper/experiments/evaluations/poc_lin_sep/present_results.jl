@@ -7,6 +7,9 @@ DotEnv.load!()
 
 # Get config and set up grid:
 eval_grid = EvaluationGrid(get_config_from_args())
+eval_list = load_list(eval_grid)
+exper_grid = ExperimentGrid(eval_grid.grid_file)
+exper_list = load_list(exper_grid)
 
 local_save_dir = get_work_dir(eval_grid, ENV["EVAL_WORK_DIR"])
 output_dir = results_dir(eval_grid)
@@ -41,4 +44,7 @@ end
 
 # Plot images:
 plot_ce(eval_grid; save_dir=final_save_dir, byvars=["objective"])
+plot_ce(exper_list)
+# plot_ce(exper_list, eval_list[1])
+
 @info "Images stored in $final_save_dir/"
