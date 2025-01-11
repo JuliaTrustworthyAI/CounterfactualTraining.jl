@@ -4,6 +4,11 @@ using TaijaData
 
 get_domain(d::Dataset) = nothing
 
+nmax(d::Dataset) = Inf
+
+exceeds_max(d::Dataset) = ntotal(d) > nmax(d)
+    
+
 include("mnist.jl")
 include("synthetic.jl")
 include("tabular.jl")
@@ -36,7 +41,16 @@ function get_data_set(s::String)
     return data_sets[s]
 end
 
+"""
+    get_data(data::Dataset; n::Union{Nothing,Int}=nothing, test_set::Bool=false)
+
+Loads the dataset `data`. By default, a total of [`ntotal(data)`] samples will be loaded. The output of [`ntotal`](@ref) depends on the parameters of the dataset. The keyword argument `n` can be specified to load only a subset of the dataset. 
+"""
 function get_data(data::Dataset; n::Union{Nothing,Int}=nothing, test_set::Bool=false)
+
+    if exceeds_max(data)
+        @warn "Requesting more data than available (using oversampling)."
+    end
     X, y = load_data(data, ntotal(data))    # load all available data
 
     # Set seed and shuffle data:

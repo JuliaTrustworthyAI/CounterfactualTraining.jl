@@ -45,6 +45,6 @@ end
 # Plot images:
 plot_ce(eval_grid; save_dir=final_save_dir, byvars=["objective"])
 plot_ce(exper_list)
-# plot_ce(exper_list, eval_list[1])
+plot_ce(exper_list, eval_list[1])
 
 @info "Images stored in $final_save_dir/"

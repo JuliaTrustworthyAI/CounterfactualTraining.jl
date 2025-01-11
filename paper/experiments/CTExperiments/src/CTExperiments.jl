@@ -43,15 +43,15 @@ export set_work_dir, get_work_dir, results_dir
 export save_dir
 export get_config_from_args
 export mpi_should_finalize, set_mpi_finalize
-export GMSC, MNIST, Moons
-export get_data, get_ce_data
+export GMSC, MNIST, Moons, LinearlySeparable, Overlapping, Circles, CaliHousing, Adult
+export get_data, get_ce_data, ntotal
 
 "The default benchmarking measures."
 const CE_MEASURES = [
     validity,
-    plausibility_cosine,
     plausibility_distance_from_target,
     plausibility_energy_differential,
+    MMD(compute_p=nothing),
     distance,
     redundancy,
 ]

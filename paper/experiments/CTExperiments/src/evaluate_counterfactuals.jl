@@ -31,7 +31,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
     conv::AbstractString = "max_iter"
     maxiter::Int = 100
     vertical_splits::Int = 100
-    store_ce::Bool = false
+    store_ce::Bool = true
     parallelizer::AbstractString = "mpi"
     threaded::Bool = false
     concatenate_output::Bool = true
@@ -63,7 +63,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
 
         if store_ce == true
             @warn "Setting `_ce_transform` to `counterfactual` to avoid storing entire `CounterfactualExplanation` object."
-            transformer = ExplicitCETransformer(CounterfactualExplanations.counterfactual)
+            transformer = ExplicitCETransformer(CounterfactualExplanations.flatten)
             global_ce_transform(transformer)
         end
 
@@ -390,7 +390,9 @@ end
 
 Loads the benchmark. 
 """
-function load_results(cfg::AbstractEvaluationConfig, bmk::Type{Benchmark}, fname::String)
+function load_results(
+    cfg::AbstractEvaluationConfig, bmk::Type{Benchmark}, fname::String=default_bmk_name(cfg)
+)
     return Serialization.deserialize(fname)
 end
 
@@ -525,4 +527,11 @@ function generate_factual_target_pairs(
     output = reduce(vcat, output)
 
     return output
+end
+
+function evaluate_divergence(
+    cfg::AbstractEvaluationConfig; measures=[CounterfactualExplanations.MMD]
+)
+    @assert cfg.counterfactual_params.store_ce == true "Need to store counterfactual explanations for divergence evaluation."
+    bmk = load_results(bmk)
 end
