@@ -5,7 +5,7 @@ include("implausibility.jl")
 include("objectives.jl")
 include("counterfactuals.jl")
 export EnergyDifferentialObjective, AdversarialObjective, FullObjective
-export implausibility, reg_loss, _reg_loss
+export implausibility, reg_loss
 include("training.jl")
 
 end
