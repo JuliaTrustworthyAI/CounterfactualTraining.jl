@@ -533,5 +533,5 @@ function evaluate_divergence(
     cfg::AbstractEvaluationConfig; measures=[CounterfactualExplanations.MMD]
 )
     @assert cfg.counterfactual_params.store_ce == true "Need to store counterfactual explanations for divergence evaluation."
-    bmk = load_results(bmk)
+    return bmk = load_results(bmk)
 end

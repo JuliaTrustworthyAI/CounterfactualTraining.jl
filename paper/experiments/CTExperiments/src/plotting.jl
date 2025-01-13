@@ -578,7 +578,7 @@ function plot_ce(
     params::Union{CounterfactualParams,TrainingParams};
     target::Union{Nothing,Int}=nothing,
     nsamples::Int=25,
-    kwrgs...
+    kwrgs...,
 )
     M = load_results(exper)[3]
     generator = CTExperiments.get_generator(params.generator_params)
@@ -602,7 +602,11 @@ function plot_ce(
     )
     @info "Generator: $(generator)"
     return Plots.plot(
-        ce; size=(default_axis.width, default_axis.height), cb=false, target=target, kwrgs...
+        ce;
+        size=(default_axis.width, default_axis.height),
+        cb=false,
+        target=target,
+        kwrgs...,
     )
 end
 
@@ -638,7 +642,12 @@ end
 
 Generate and plot counterfactual explanations for a list of experiments and arrange them in a grid layout.
 """
-function plot_ce(exper_list::Vector{Experiment}, eval_cfg::Union{Nothing,EvaluationConfig}=nothing; titles=nothing, kwargs...)
+function plot_ce(
+    exper_list::Vector{Experiment},
+    eval_cfg::Union{Nothing,EvaluationConfig}=nothing;
+    titles=nothing,
+    kwargs...,
+)
     if isnothing(titles)
         titles = []
         for exper in exper_list
@@ -651,7 +660,9 @@ function plot_ce(exper_list::Vector{Experiment}, eval_cfg::Union{Nothing,Evaluat
 
     plts = []
     for (i, exper) in enumerate(exper_list)
-        plt = plot_ce(exper, eval_cfg; title=titles[i], topmargin=5PlotMeasures.mm, kwargs...)
+        plt = plot_ce(
+            exper, eval_cfg; title=titles[i], topmargin=5PlotMeasures.mm, kwargs...
+        )
         push!(plts, plt)
     end
 

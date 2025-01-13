@@ -197,7 +197,16 @@ Sets up the input encoder for the given experiment, dataset and generator type.
 function get_input_encoder(
     exper::AbstractExperiment, data::Dataset, generator_type::AbstractGeneratorType
 )
-    return nothing
+    if exp.meta_params.dim_reduction
+        # Input transformers:
+        vae = CounterfactualExplanations.Models.load_vae(data)
+        maxoutdim = minimum([vae.params.latent_dim, input_dim(data)])
+        counterfactual_data = get_ce_data(data; train_only=true)
+        input_encoder = fit_transformer(counterfactual_data, PCA; maxoutdim=maxoutdim)
+    else
+        input_encoder = nothing
+    end
+    return input_encoder
 end
 
 """
@@ -210,10 +219,7 @@ end
 For any data and the REVISE generator, use the VAE as the input encoder.
 """
 function get_input_encoder(exper::AbstractExperiment, data::Dataset, generator_type::REVISE)
-    ce_data = get_ce_data(data; train_only=true)
-    vae = CounterfactualExplanations.DataPreprocessing.fit_transformer(
-        ce_data, CounterfactualExplanations.GenerativeModels.VAE
-    )
+    vae = load_vae(data)
     return vae
 end
 

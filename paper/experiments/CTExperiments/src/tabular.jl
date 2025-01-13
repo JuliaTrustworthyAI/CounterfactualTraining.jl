@@ -18,7 +18,12 @@ Base.@kwdef struct GMSC <: Dataset
     n_validation::Int = 1000
     train_test_ratio::Float32 = 0.8
     train_test_seed::Int = get_global_seed()
+    mutability::Union{String,Vector{String}} = "none"
+    domain::Union{String,Vector{<:Any}} = "none"
+    datadir::String = get_global_dev_dir()
 end
+
+dname(d::GMSC) = "gmsc"
 
 nmax(d::GMSC) = 16714
 
@@ -35,7 +40,12 @@ Base.@kwdef struct CaliHousing <: Dataset
     n_validation::Int = 1000
     train_test_ratio::Float32 = 0.8
     train_test_seed::Int = get_global_seed()
+    mutability::Union{String,Vector{String}} = "none"
+    domain::Union{String,Vector{<:Any}} = "none"
+    datadir::String = get_global_dev_dir()
 end
+
+dname(d::CaliHousing) = "cali"
 
 nmax(d::CaliHousing) = 20630
 
@@ -52,7 +62,12 @@ Base.@kwdef struct Adult <: Dataset
     n_validation::Int = 1000
     train_test_ratio::Float32 = 0.8
     train_test_seed::Int = get_global_seed()
+    mutability::Union{String,Vector{String}} = "none"
+    domain::Union{String,Vector{<:Any}} = "none"
+    datadir::String = get_global_dev_dir()
 end
+
+dname(d::Adult) = "adult"
 
 nmax(d::Adult) = 32561
 

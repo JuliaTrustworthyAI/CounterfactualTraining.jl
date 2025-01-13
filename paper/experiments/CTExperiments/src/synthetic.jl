@@ -17,9 +17,12 @@ Base.@kwdef struct Moons <: Dataset
     n_validation::Int = 600
     train_test_ratio::Float32 = 0.8
     train_test_seed::Int = get_global_seed()
+    mutability::Union{String,Vector{String}} = "none"
+    domain::Union{String,Vector{<:Any}} = "none"
+    datadir::String = get_global_dev_dir()
 end
 
-get_domain(d::Moons) = nothing
+dname(d::Moons) = "moons"
 
 load_data(d::Moons, n::Int; seed=TaijaData.data_seed) = load_moons(n; seed=seed)
 
@@ -34,9 +37,12 @@ Base.@kwdef struct LinearlySeparable <: Dataset
     n_validation::Int = 600
     train_test_ratio::Float32 = 0.8
     train_test_seed::Int = get_global_seed()
+    mutability::Union{String,Vector{String}} = "none"
+    domain::Union{String,Vector{<:Any}} = "none"
+    datadir::String = get_global_dev_dir()
 end
 
-get_domain(d::LinearlySeparable) = nothing
+dname(d::LinearlySeparable) = "lin_sep"
 
 function load_data(d::LinearlySeparable, n::Int; seed=TaijaData.data_seed)
     return load_linearly_separable(n; seed=seed)
@@ -53,9 +59,12 @@ Base.@kwdef struct Overlapping <: Dataset
     n_validation::Int = 600
     train_test_ratio::Float32 = 0.8
     train_test_seed::Int = get_global_seed()
+    mutability::Union{String,Vector{String}} = "none"
+    domain::Union{String,Vector{<:Any}} = "none"
+    datadir::String = get_global_dev_dir()
 end
 
-get_domain(d::Overlapping) = nothing
+dname(d::Overlapping) = "over"
 
 function load_data(d::Overlapping, n::Int; seed=TaijaData.data_seed)
     return load_overlapping(n; seed=seed)
@@ -72,9 +81,12 @@ Base.@kwdef struct Circles <: Dataset
     n_validation::Int = 600
     train_test_ratio::Float32 = 0.8
     train_test_seed::Int = get_global_seed()
+    mutability::Union{String,Vector{String}} = "none"
+    domain::Union{String,Vector{<:Any}} = "none"
+    datadir::String = get_global_dev_dir()
 end
 
-get_domain(d::Circles) = nothing
+dname(d::Circles) = "circles"
 
 function load_data(d::Circles, n::Int; seed=TaijaData.data_seed)
     return load_circles(n; seed=seed)
