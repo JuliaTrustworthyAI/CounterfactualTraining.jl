@@ -1,4 +1,4 @@
-name = "poc"
+name = "gen_params"
 dim_reduction = []
 generator_type = ["ecco", "generic", "omni", "revise"]
 data = ""
@@ -21,11 +21,11 @@ activation = []
 nhidden = []
 
 [generator_params]
-opt = []
-lambda_cost = []
-lr = []
-maxiter = []
-lambda_energy = []
+opt = ["sgd"]
+lambda_cost = [0.0, 0.0001, 0.001, 0.01, 0.1]
+lr = [1.0]
+maxiter = [100]
+lambda_energy = [0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0]
 type = []
 
 [training_params]

@@ -1,28 +1,31 @@
-name = "training_params_moons"
-dim_reduction = [false]
-generator_type = ["ecco", "generic", "revise", "omni"]
-data = "moons"
-model_type = "mlp"
-save_dir = "paper/experiments/output/training_params_moons"
+name = "training_params"
+dim_reduction = []
+generator_type = ["ecco", "generic", "omni", "revise"]
+data = ""
+model_type = ""
+save_dir = ""
 
 [data_params]
-n_validation = [600]
+datadir = []
+mutability = []
+domain = []
+n_validation = []
 train_test_ratio = []
 train_test_seed = []
-n_train = [3000]
-batchsize = [30]
+n_train = []
+batchsize = []
 
 [model_params]
 nlayers = []
 activation = []
-nhidden = [64]
+nhidden = []
 
 [generator_params]
-opt = ["sgd"]
-lambda_cost = [0.01]
-lr = [0.1]
-maxiter = [30]
-lambda_energy = [1.0]
+opt = []
+lambda_cost = []
+lr = []
+maxiter = []
+lambda_energy = []
 type = []
 
 [training_params]

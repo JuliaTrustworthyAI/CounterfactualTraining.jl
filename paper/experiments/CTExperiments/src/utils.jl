@@ -130,16 +130,16 @@ function get_config_from_args()
     fname = replace(config_arg[1], "--config=" => "")
     @assert isfile(fname) "Config file not found: $fname"
 
+    # Load config:
+    cfg = CTExperiments.from_toml(fname)
+
     if any((x -> contains(x, "--data=")).(ARGS))
         requested_dataset =
             ARGS[(x -> contains(x, "--data=")).(ARGS)] |>
             x -> replace(x[1], "--data=" => "")
-        cfg = CTExperiments.from_toml(fname)
         if haskey(cfg, "data") && cfg["data"] != requested_dataset
             @info "Using existing config with new dataset: $requested_dataset (was $(cfg["data"]))."
             cfg["data"] = requested_dataset
-            fname = replace(fname, ".toml" => "_$(requested_dataset).toml")
-            CTExperiments.to_toml(cfg, fname)
         end
     end
 
@@ -147,13 +147,17 @@ function get_config_from_args()
         requested_model =
             ARGS[(x -> contains(x, "--model=")).(ARGS)] |>
             x -> replace(x[1], "--model=" => "")
-        cfg = CTExperiments.from_toml(fname)
         if haskey(cfg, "model_type") && cfg["model_type"] != requested_model
-            @info "Using existing config with new model type: $requested_model (was $(cfg["model_type"]))."
+            @info "Using existing config with new model type: '$requested_model' (was '$(cfg["model_type"])')."
             cfg["model_type"] = requested_model
-            fname = replace(fname, ".toml" => "_$(requested_model).toml")
-            CTExperiments.to_toml(cfg, fname)
         end
+    end
+
+    # Save copy:
+    if haskey(cfg, "name")
+        rootdir, fonly = (joinpath(splitdir(fname)[1:end-1]...), splitdir(fname)[end])
+        fname = joinpath(mkpath(joinpath(rootdir, cfg["name"], cfg["data"], cfg["model_type"])),fonly)
+        CTExperiments.to_toml(cfg, fname)
     end
 
     return fname
