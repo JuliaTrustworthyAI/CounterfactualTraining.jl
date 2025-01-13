@@ -1,3 +1,4 @@
+using Accessors
 using CounterfactualExplanations
 using CounterfactualExplanations.Convergence
 using CounterfactualExplanations.DataPreprocessing
@@ -17,9 +18,16 @@ struct REVISE <: AbstractGeneratorType end
 "Type for the GenericGenerator."
 struct Generic <: AbstractGeneratorType end
 
+"Type for the GravitationalGenerator."
+struct Gravitational <: AbstractGeneratorType end
+
+struct Omniscient <: AbstractGeneratorType end
+
 get_generator_name(gen::ECCo) = "ecco"
 get_generator_name(gen::Generic) = "generic"
 get_generator_name(gen::REVISE) = "revise"
+get_generator_name(gen::Gravitational) = "gravi"
+get_generator_name(gen::Omniscient) = "omni"
 
 """
     generator_types
@@ -30,6 +38,8 @@ const generator_types = Dict(
     get_generator_name(ECCo()) => ECCo,
     get_generator_name(Generic()) => Generic,
     get_generator_name(REVISE()) => REVISE,
+    get_generator_name(Gravitational()) => Gravitational,
+    get_generator_name(Omniscient()) => Omniscient,
 )
 
 """
@@ -43,23 +53,21 @@ function get_generator_type(s::String)
     return generator_types[s]
 end
 
+const available_optimizers = Dict(
+    "adam" => Flux.Optimise.Adam, "sgd" => Flux.Optimise.Descent
+)
+
 """
     get_opt(params::AbstractConfiguration)
     
 Retrieves the optimizer from the configuration.
 """
-function get_opt(params::AbstractConfiguration)
-    # Adam:
-    if params.opt == "adam"
-        opt = Adam(params.lr)
-    end
+get_opt(params::AbstractConfiguration) = get_opt(params.opt)
 
-    # SGD:
-    if params.opt == "sgd"
-        opt = Descent(params.lr)
-    end
-
-    return opt
+function get_opt(s::String)
+    s = lowercase(s)
+    @assert s in keys(available_optimizers) "Unknown optimizer : $s. Available types are $(keys(available_optimizers))"
+    return available_optimizers[s]()
 end
 
 """
@@ -106,12 +114,32 @@ function get_generator(params::GeneratorParams, generator_type::REVISE)
 end
 
 """
-    get_generator(params::GeneratorParams, type::Generic)
+    get_generator(params::GeneratorParams, generator_type::Generic)
 
 Instantiates a `GenericGenerator` with the given parameters.
 """
-function get_generator(params::GeneratorParams, type::Generic)
+function get_generator(params::GeneratorParams, generator_type::Generic)
     return GenericGenerator(; opt=get_opt(params), λ=params.lambda_cost)
+end
+
+"""
+    get_generator(params::GeneratorParams, generator_type::Gravitational)
+
+Instantiates a `GravitationalGenerator` with the given parameters.
+"""
+function get_generator(params::GeneratorParams, generator_type::Gravitational)
+    return GravitationalGenerator(;
+        opt=get_opt(params), λ=[params.lambda_cost, params.lambda_energy]
+    )
+end
+
+"""
+    get_generator(params::GeneratorParams, generator_type::Omniscient)
+
+Instantiates an `OmniscientGenerator` with the given parameters.
+"""
+function get_generator(params::GeneratorParams, generator_type::Omniscient)
+    return OmniscientGenerator()
 end
 
 """
@@ -148,7 +176,8 @@ Mutable struct holding keyword arguments relevant to counterfactual training.
     - `burnin`: The fraction of the training epochs to use for warm-up. During warm-up, only standard classification loss is used for training.
     - `nepochs`: The number of epochs to train for.
     - `generator_params`: The parameters for the generator to use during training.
-    - `nce`: The namber of counterfactuals to generate per epoch and per batch of training data.
+    - `nce`: The number of counterfactuals to generate per epoch and per batch of training data.
+    - `nneighbours`: The number of neighbours in the target class to compare counterfactuals against.
     - `conv`: The convergence type to use for the counterfactual search.
     - `lr`: The learning rate to use for training.
     - `opt`: The optimizer to use for training.
@@ -167,12 +196,13 @@ Base.@kwdef struct TrainingParams <: AbstractConfiguration
     nepochs::Int = 100
     generator_params::GeneratorParams = GeneratorParams()
     nce::Int = 100
+    nneighbours::Int = 100
     conv::AbstractString = "max_iter"
     lr::AbstractFloat = 0.001
     opt::AbstractString = "adam"
-    parallelizer::AbstractString = "threads"
-    threaded::Bool = true
-    verbose::Int = 2
+    parallelizer::AbstractString = ""
+    threaded::Bool = false
+    verbose::Int = 1
 end
 
 """
@@ -181,6 +211,7 @@ end
 Catalogue of available objective functions.
 """
 const objectives = Dict(
+    "vanilla" => CounterfactualTraining.VanillaObjective,
     "full" => CounterfactualTraining.FullObjective,
     "energy" => CounterfactualTraining.EnergyDifferentialObjective,
     "adversarial" => CounterfactualTraining.AdversarialObjective,
@@ -197,6 +228,11 @@ function get_objective(s::String)
     return objectives[s]
 end
 
+function get_lambdas(obj::CounterfactualTraining.VanillaObjective, params::TrainingParams)
+    lambda = [params.lambda_class_loss]
+    return lambda
+end
+
 function get_lambdas(obj::CounterfactualTraining.FullObjective, params::TrainingParams)
     lambda = [
         params.lambda_class_loss,
@@ -207,12 +243,16 @@ function get_lambdas(obj::CounterfactualTraining.FullObjective, params::Training
     return lambda
 end
 
-function get_lambdas(obj::CounterfactualTraining.EnergyDifferentialObjective, params::TrainingParams)
+function get_lambdas(
+    obj::CounterfactualTraining.EnergyDifferentialObjective, params::TrainingParams
+)
     lambda = [params.lambda_class_loss, params.lambda_energy_diff, params.lambda_energy_reg]
     return lambda
 end
 
-function get_lambdas(obj::CounterfactualTraining.AdversarialObjective, params::TrainingParams)
+function get_lambdas(
+    obj::CounterfactualTraining.AdversarialObjective, params::TrainingParams
+)
     lambda = [params.lambda_class_loss, params.lambda_adversarial]
     return lambda
 end
@@ -228,7 +268,12 @@ function get_parallelizer(pllr_type::String; threaded::Bool=true)
         if !MPI.Initialized()
             MPI.Init()
         end
+        # Active comm:
         pllr = MPIParallelizer(MPI.COMM_WORLD; threaded=threaded)
+    end
+
+    if pllr_type == ""
+        pllr = nothing
     end
 
     return pllr

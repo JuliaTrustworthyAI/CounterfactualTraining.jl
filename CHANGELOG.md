@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Version [0.0.2] - 2025-01-13
+
+### Engineering
+
+Tough few days trying things with MPI that simply do not seem to work:
+
+- Nested distribution seems impossible. Specifically, I have been trying to distribute 1) models/experiments across processes and then 2) for each model/experiment distribute the counterfactual search across processes. This has entailed all sorts of issues:
+    1. The number of models is typically smaller than the number of counterfactuals, making communication between processors very challenging.
+    2. I have continuously run in out-of-memory issues.
+    3. More recently, I have ended up with the model for each experiment implying data race issues. 
+- Instead, just combine multi-processing with multi-threading
+
+### Results
+
+- Outcomes currently seem to be heavily tied to `GeneratorParams`:
+   - Penalizing distance too much never yields useful/faithful counterfactuals during training
+      - *Could tune/vary this during training?*
+   - If `GeneratorParams` during evaluation differ a lot from the once chosen during training, the outcomes are also poor.
+      - *Could introduce stochasticity during training?*
+- It seems that high penalties on the contrastive divergence during training generally lead to good outcomes. 
+
 ## Version [0.0.1] 
 
 Tried different things here.

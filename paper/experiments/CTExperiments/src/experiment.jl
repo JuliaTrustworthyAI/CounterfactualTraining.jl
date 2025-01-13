@@ -125,24 +125,69 @@ function Experiment(fname::String; new_save_dir::Union{Nothing,String}=nothing)
 end
 
 """
-    setup(exp::Experiment) 
+    setup(exper::Experiment) 
 
 Sets up the experiment.
 """
-setup(exp::AbstractExperiment) = setup(exp, exp.data, exp.model_type)
+setup(exper::AbstractExperiment) = setup(exper, exper.data, exper.model_type)
 
 """
-    get_input_encoder(exp::Experiment)
+    setup(exper::AbstractExperiment, data::Dataset, model::ModelType)
+
+Loads the data and builds a model corresponding to the specified `model` type. Returns the model and training dataset.
+"""
+function setup(exper::AbstractExperiment, data::Dataset, model::ModelType)
+
+    # Data:
+    ce_data = get_ce_data(data)
+    val_size = data.n_validation / (ntotal(data) * data.train_test_ratio)
+    train_set, val_set, _ = train_val_split(data, ce_data, val_size)
+
+    # Model:
+    nin = size(first(train_set)[1], 1)
+    nout = size(first(train_set)[2], 1)
+    model = build_model(model, nin, nout)
+
+    # Input encoding:
+    input_encoder = get_input_encoder(exper)
+
+    return model, train_set, input_encoder, val_set
+end
+
+function train_val_split(data::Dataset, ce_data::CounterfactualData, val_size)
+    Xtrain, ytrain, Xval, yval = (dt -> (dt[1].X, dt[1].y, dt[2].X, dt[2].y))(
+        train_test_split(ce_data; test_size=val_size, keep_class_ratio=true)
+    )
+
+    train_set = Flux.DataLoader((Xtrain, ytrain); batchsize=data.batchsize)
+    val_set = if data.n_validation > 0
+        Flux.DataLoader((Xval, yval); batchsize=data.batchsize)
+    else
+        nothing
+    end
+
+    ce_train_data = CounterfactualData(
+        Xtrain,
+        Flux.onecold(ytrain, ce_data.y_levels);
+        domain=ce_data.domain,
+        mutability=ce_data.mutability,
+    )
+
+    return train_set, val_set, ce_train_data
+end
+
+"""
+    get_input_encoder(exper::Experiment)
 
 Sets up the input encoder for the given experiment. This is dispatched over the dataset and generator type.
 """
-function get_input_encoder(exp::AbstractExperiment)
-    return get_input_encoder(exp, exp.data, exp.training_params.generator_params.type)
+function get_input_encoder(exper::AbstractExperiment)
+    return get_input_encoder(exper, exper.data, exper.training_params.generator_params.type)
 end
 
 """
     get_input_encoder(
-        exp::Experiment,
+        exper::Experiment,
         data::Dataset,
         generator_type::AbstractGeneratorType,
     )
@@ -150,33 +195,56 @@ end
 Sets up the input encoder for the given experiment, dataset and generator type.
 """
 function get_input_encoder(
-    exp::AbstractExperiment, data::Dataset, generator_type::AbstractGeneratorType
+    exper::AbstractExperiment, data::Dataset, generator_type::AbstractGeneratorType
 )
-    return nothing
+    if exper.meta_params.dim_reduction
+        # Input transformers:
+        vae = CounterfactualExplanations.Models.load_vae(data)
+        maxoutdim = minimum([vae.params.latent_dim, input_dim(data)])
+        counterfactual_data = get_ce_data(data; train_only=true)
+        input_encoder = fit_transformer(counterfactual_data, PCA; maxoutdim=maxoutdim)
+    else
+        input_encoder = nothing
+    end
+    return input_encoder
 end
 
 """
-    run_training(exp::Experiment; checkpoint_dir::Union{Nothing,String} = nothing)
+    get_input_encoder(
+        exper::AbstractExperiment, 
+        data::Dataset, 
+        generator_type::REVISE
+    )
+
+For any data and the REVISE generator, use the VAE as the input encoder.
+"""
+function get_input_encoder(exper::AbstractExperiment, data::Dataset, generator_type::REVISE)
+    vae = load_vae(data)
+    return vae
+end
+
+"""
+    run_training(exper::Experiment; checkpoint_dir::Union{Nothing,String} = nothing)
 
 Trains the model on the given dataset with Counterfactual Training using the given training parameters and meta parameters.
 """
-function run_training(exp::Experiment; checkpoint_dir::Union{Nothing,String}=nothing)
+function run_training(exper::Experiment; checkpoint_dir::Union{Nothing,String}=nothing)
 
     # Counterfactual generator:
-    generator = get_generator(exp.training_params.generator_params)
-    model, train_set, input_encoder, val_set = setup(exp)
-    conv = get_convergence(exp.training_params)
-    domain = get_domain(exp.data)
-    pllr = get_parallelizer(exp.training_params)
+    generator = get_generator(exper.training_params.generator_params)
+    model, train_set, input_encoder, val_set = setup(exper)
+    conv = get_convergence(exper.training_params)
+    domain = get_domain(exper.data)
+    pllr = get_parallelizer(exper.training_params)
 
     # Optimizer and model:
-    training_opt = get_opt(exp.training_params)
+    training_opt = get_opt(exper.training_params)
     opt_state = Flux.setup(training_opt, model)
 
     # Get objective:
-    class_loss = get_class_loss(exp.training_params.class_loss)         # get classification loss function
-    obj = get_objective(exp.training_params.objective)                  # get objective type
-    obj = obj(class_loss, get_lambdas(obj(), exp.training_params))      # instantiate objective
+    class_loss = get_class_loss(exper.training_params.class_loss)         # get classification loss function
+    obj = get_objective(exper.training_params.objective)                  # get objective type
+    obj = obj(class_loss, get_lambdas(obj(), exper.training_params))      # instantiate objective
 
     # Train:
     model, logs = CounterfactualTraining.counterfactual_training(
@@ -187,11 +255,12 @@ function run_training(exp::Experiment; checkpoint_dir::Union{Nothing,String}=not
         opt_state;
         val_set=val_set,
         parallelizer=pllr,
-        verbose=exp.training_params.verbose,
+        verbose=exper.training_params.verbose,
         convergence=conv,
-        nepochs=exp.training_params.nepochs,
-        burnin=exp.training_params.burnin,
-        nce=exp.training_params.nce,
+        nepochs=exper.training_params.nepochs,
+        burnin=exper.training_params.burnin,
+        nce=exper.training_params.nce,
+        nneighbours=exper.training_params.nneighbours,
         domain=domain,
         input_encoder=input_encoder,
         checkpoint_dir=checkpoint_dir,
@@ -285,4 +354,29 @@ function get_logs(grid::ExperimentGrid)
         load_list(grid)
     end
     return vcat(get_logs.(exper_list)...)
+end
+
+"""
+    make_dummy(exper::Experiment)
+
+Modify the experiment's meta parameters to create a dummy version of it. This is used in the context of multi-processing to ensure that each process receives the same number of tasks.
+"""
+function make_dummy(exper::Experiment, suffix1, suffix2)
+    exper.meta_params.experiment_name = "dummy_$(suffix1)_$(suffix2)"
+    old_save_dir = exper.meta_params.save_dir
+    exper.meta_params.save_dir = mkpath(
+        joinpath(splitpath(old_save_dir)[1:(end - 1)]..., exper.meta_params.experiment_name)
+    )
+    return exper
+end
+
+function isdummy(exper::Experiment)
+    return contains(lowercase(exper.meta_params.experiment_name), "dummy")
+end
+
+function remove_dummy!(exper::Experiment)
+    if isdummy(exper)
+        rm(exper.meta_params.save_dir; recursive=true)
+        @info "Removed dummy experiment: $(exper.meta_params.save_dir)"
+    end
 end

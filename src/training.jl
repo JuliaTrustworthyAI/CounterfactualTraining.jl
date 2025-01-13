@@ -5,8 +5,11 @@ using CounterfactualExplanations: Models
 using CounterfactualExplanations.Evaluation: plausibility
 using Flux
 using JLD2
+using ProgressMeter
 using TaijaParallel
 using UnicodePlots
+
+global _min_nce_ratio = 0.1
 
 function counterfactual_training(
     loss::AbstractObjective,
@@ -17,19 +20,26 @@ function counterfactual_training(
     val_set=nothing,
     nepochs=100,
     burnin=0.0,
-    nce=nothing,
-    parallelizer::TaijaParallel.AbstractParallelizer=nothing,
+    nce::Union{Nothing,Int}=nothing,
+    nneighbours::Int=100,
+    parallelizer::Union{Nothing,TaijaParallel.AbstractParallelizer}=nothing,
     convergence=Convergence.MaxIterConvergence(),
     input_encoder=nothing,
     domain=nothing,
-    verbose::Int=2,
+    verbose::Int=1,
     checkpoint_dir::Union{Nothing,String}=nothing,
     kwrgs...,
 )
 
     # Set up:
     burnin = Int(round(burnin * nepochs))
-    nce = isnothing(nce) ? train_set.batchsize : nce
+    nce = isnothing(nce) ? length(train_set) : nce
+    nce_per_batch = Int(ceil(nce / length(train_set)))
+    nce_batch_ratio = nce_per_batch / train_set.batchsize
+    if nce_batch_ratio < 0.1
+        @warn "The ratio of counterfactuals to training examples is less than $(_min_nce_ratio * 100)% ($(nce_batch_ratio * 100)%). Consider increasing  the `nce` parameter." maxlog =
+            1
+    end
 
     # Initialize model:
     log = []
@@ -55,6 +65,10 @@ function counterfactual_training(
         end
     end
 
+    if verbose in [1, 2]
+        p = Progress(nepochs - start_epoch; barglyphs=BarGlyphs("[=> ]"), color=:yellow)
+    end
+
     for epoch in start_epoch:nepochs
 
         # Logs:
@@ -62,14 +76,16 @@ function counterfactual_training(
         implausibilities = Float32[]
         reg_losses = Float32[]
         validity_losses = Float32[]
+        start = time()
 
         # Generate counterfactuals:
-        if epoch > burnin
-            counterfactual_dl = generate!(
+        if epoch > burnin && needs_counterfactuals(loss)
+            counterfactual_dl, percent_valid = generate!(
                 model,
                 train_set,
                 generator;
                 nsamples=nce,
+                nneighbours=nneighbours,
                 convergence=convergence,
                 parallelizer=parallelizer,
                 input_encoder=input_encoder,
@@ -78,6 +94,7 @@ function counterfactual_training(
             )
         else
             counterfactual_dl = fill(ntuple(_ -> nothing, 4), length(train_set))
+            percent_valid = nothing
         end
 
         # Backprop:
@@ -85,8 +102,7 @@ function counterfactual_training(
 
             # Unpack:
             input, label = batch
-            perturbed_input, target_indices, targets_enc, neighbours = counterfactual_dl[i]
-            neighbours = typeof(neighbours) <: AbstractVector ? neighbours : [neighbours]
+            perturbed_input, targets_enc, neighbours, adversarial_targets = counterfactual_dl[i]
 
             val, grads = Flux.withgradient(model) do m
 
@@ -95,11 +111,13 @@ function counterfactual_training(
 
                 # Compute implausibility and regulatization:
                 if !isnothing(perturbed_input)
-                    implaus = implausibility(m, perturbed_input, neighbours, target_indices)
-                    regs = reg_loss(m, perturbed_input, neighbours, target_indices)
+                    implaus = implausibility(m, perturbed_input, neighbours, targets_enc)
+                    regs = reg_loss(m, perturbed_input, neighbours, targets_enc)
                     # Validity loss (counterfactual):
                     yhat_ce = m(perturbed_input)
-                    adversarial_loss = Flux.Losses.logitcrossentropy(yhat_ce, targets_enc)
+                    adversarial_loss = Flux.Losses.logitcrossentropy(
+                        yhat_ce, adversarial_targets
+                    )
                 else
                     implaus = [0.0f0]
                     regs = [0.0f0]
@@ -113,13 +131,7 @@ function counterfactual_training(
                     push!(validity_losses, adversarial_loss)
                 end
 
-                return loss(
-                    logits,
-                    label;
-                    energy_differential=implaus,
-                    regularization=regs,
-                    adversarial_loss=adversarial_loss,
-                )
+                return loss(logits, label, implaus, regs, adversarial_loss)
             end
 
             # Save the loss from the forward pass. (Done outside of gradient.)
@@ -135,14 +147,14 @@ function counterfactual_training(
         end
 
         # Logging:
+        time_taken = time() - start
         acc = accuracy(model, train_set)
         acc_val = isnothing(val_set) ? nothing : accuracy(model, val_set)
         train_loss = sum(losses) / length(losses)
         msg_acc = "Training accuracy in epoch $epoch/$nepochs: $acc"
-        @info msg_acc
         if !isnothing(val_set)
+            msg_acc_train = msg_acc
             msg_acc = "Validation accuracy in epoch $epoch/$nepochs: $acc_val"
-            @info msg_acc
         end
 
         if epoch > burnin
@@ -152,9 +164,11 @@ function counterfactual_training(
             msg_imp = "Average energy differential in $epoch/$nepochs: $implaus"
             msg_reg = "Average energy regularization in $epoch/$nepochs: $log_reg_loss"
             msg_adv = "Average adversarial loss in $epoch/$nepochs: $log_adv_loss"
-            @info msg_imp
-            @info msg_reg
-            @info msg_adv
+            if !isnothing(percent_valid)
+                msg_valid = "Valid counterfactuals: $(percent_valid * 100)%"
+            else
+                msg_valid = "n/a"
+            end
         else
             implaus = nothing
             log_reg_loss = nothing
@@ -162,9 +176,22 @@ function counterfactual_training(
             msg_imp = "n/a"
             msg_reg = "n/a"
             msg_adv = "n/a"
+            msg_valid = "n/a"
         end
 
-        push!(log, (; acc, acc_val, train_loss, implaus, log_reg_loss, log_adv_loss))
+        push!(
+            log,
+            (;
+                acc,
+                acc_val,
+                train_loss,
+                implaus,
+                log_reg_loss,
+                log_adv_loss,
+                time_taken,
+                percent_valid,
+            ),
+        )
 
         # Checkpointing:
         if !isnothing(checkpoint_dir)
@@ -174,17 +201,28 @@ function counterfactual_training(
             previous_log = joinpath(checkpoint_dir, "checkpoint_$(epoch-1).md")
             isfile(previous_log) && rm(previous_log)
             fpath = joinpath(checkpoint_dir, "checkpoint_$(epoch).md")
-            acc_plt = lineplot(
-                [_log[1] for _log in log]; xlabel="Epochs", ylabel="Accuracy"
-            )
-            acc_val_plt = if isnothing(acc_val)
-                ""
-            else
-                lineplot(
-                    [_log[2] for _log in log];
-                    xlabel="Epochs",
-                    ylabel="Validation Accuracy",
+            acc_plt = ""
+            acc_val_plt = ""
+            validity_plt = ""
+            if verbose > 1
+                # Add plots:
+                acc_plt = lineplot(
+                    [_log[1] for _log in log]; xlabel="Epochs", ylabel="Accuracy"
                 )
+                if !isnothing(acc_val)
+                    acc_val_plt = lineplot(
+                        [_log[2] for _log in log];
+                        xlabel="Epochs",
+                        ylabel="Validation Accuracy",
+                    )
+                end
+                if !isnothing(percent_valid)
+                    validity_plt = lineplot(
+                        [_log[8] for _log in log];
+                        xlabel="Epochs",
+                        ylabel="Valid Counterfatuals (%)",
+                    )
+                end
             end
             a = """
             Completed $epoch out of $nepochs epochs.
@@ -195,16 +233,31 @@ function counterfactual_training(
             - *Implausibility*: $msg_imp
             - *Regularization loss*: $msg_reg
             - *Adversarial loss*: $msg_adv
+            - *Percent valid*: $msg_valid
 
             ## History
 
             $acc_plt 
 
             $acc_val_plt
+
+            $validity_plt
             """
             open(fpath, "w") do file
                 write(file, a)
             end
+        end
+
+        if verbose in [1, 2]
+            next!(p)
+        elseif verbose > 2
+            @info "Iteration $epoch:"
+            @info msg_acc_train
+            @info msg_acc
+            @info msg_imp
+            @info msg_reg
+            @info msg_adv
+            @info msg_valid
         end
     end
     return model, log

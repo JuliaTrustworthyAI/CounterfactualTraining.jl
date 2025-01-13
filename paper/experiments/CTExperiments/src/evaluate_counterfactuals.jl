@@ -1,5 +1,6 @@
 using CounterfactualExplanations
 using CounterfactualExplanations.Evaluation
+using DataFrames
 using JLD2
 using Serialization
 using TaijaParallel
@@ -26,13 +27,13 @@ Struct holding keyword arguments relevant to the evaluation of counterfactual ex
 Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
     generator_params::GeneratorParams = GeneratorParams()
     n_individuals::Int = 100
-    n_runs::Int = 10
+    n_runs::Int = 1
     conv::AbstractString = "max_iter"
     maxiter::Int = 100
-    vertical_splits::Int = 0
-    store_ce::Bool = false
-    parallelizer::AbstractString = "threads"
-    threaded::Bool = true
+    vertical_splits::Int = 100
+    store_ce::Bool = true
+    parallelizer::AbstractString = "mpi"
+    threaded::Bool = false
     concatenate_output::Bool = true
     verbose::Bool = true
     function CounterfactualParams(
@@ -49,7 +50,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
         verbose,
     )
         if generator_params isa NamedTuple
-            if generator_params.type isa String
+            if haskey(generator_params, :type) && generator_params.type isa String
                 generator_type = get_generator_type(generator_params.type)
                 generator_params = @delete $generator_params.type          # remove type
                 generator_params = GeneratorParams(;
@@ -62,7 +63,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
 
         if store_ce == true
             @warn "Setting `_ce_transform` to `counterfactual` to avoid storing entire `CounterfactualExplanation` object."
-            transformer = ExplicitCETransformer(CounterfactualExplanations.counterfactual)
+            transformer = ExplicitCETransformer(CounterfactualExplanations.flatten)
             global_ce_transform(transformer)
         end
 
@@ -129,23 +130,24 @@ function evaluate_counterfactuals(
     end
 
     # Generate and benchmark counterfactuals:
-    bmk = benchmark(
-        data;
-        models=models,
-        generators=generators,
-        measure=measure,
-        parallelizer=pllr,
-        suppress_training=true,
-        initialization=:identity,
-        n_individuals=cfg.counterfactual_params.n_individuals,
-        n_runs=cfg.counterfactual_params.n_runs,
-        convergence=conv,
-        store_ce=cfg.counterfactual_params.store_ce,
-        storage_path=interim_storage_path,
-        vertical_splits=vertical_splits,
-        concatenate_output=cfg.counterfactual_params.concatenate_output,
-        verbose=cfg.counterfactual_params.verbose,
-    )
+    bmk =
+        benchmark(
+            data;
+            models=models,
+            generators=generators,
+            measure=measure,
+            parallelizer=pllr,
+            suppress_training=true,
+            initialization=:identity,
+            n_individuals=cfg.counterfactual_params.n_individuals,
+            n_runs=cfg.counterfactual_params.n_runs,
+            convergence=conv,
+            store_ce=cfg.counterfactual_params.store_ce,
+            storage_path=interim_storage_path,
+            vertical_splits=vertical_splits,
+            concatenate_output=cfg.counterfactual_params.concatenate_output,
+            verbose=cfg.counterfactual_params.verbose,
+        ) |> bmk -> compute_divergence(bmk, measure, data)
 
     return bmk
 end
@@ -175,22 +177,14 @@ Generate and evaluate counterfactuals based on the provided configuration. This 
 - A DataFrame containing the results of the evaluation.
 """
 function evaluate_counterfactuals(
-    cfg::AbstractEvaluationConfig;
-    measure::Vector{<:PenaltyOrFun}=CE_MEASURES,
+    cfg::AbstractEvaluationConfig; measure::Vector{<:PenaltyOrFun}=CE_MEASURES
 )
-    
     data, models, generators = load_data_models_generators(cfg)
 
     # Evaluate counterfactuals:
-    bmk = evaluate_counterfactuals(
-        cfg,
-        data,
-        models,
-        generators;
-        measure=measure,
-    )
+    bmk = evaluate_counterfactuals(cfg, data, models, generators; measure=measure)
 
-    return bmk  
+    return bmk
 end
 
 """
@@ -260,6 +254,8 @@ function evaluate_counterfactuals(
         cfg, data, local_models, generators; measure=measure
     )
 
+    MPI.Barrier(comm)  # Ensure all processes have completed local evaluation before gathering results
+
     # Gather results from all processes (if needed)
     if cfg.counterfactual_params.concatenate_output
         # Gather results from all processes
@@ -267,15 +263,13 @@ function evaluate_counterfactuals(
 
         # Combine results on root process
         if rank == 0
-            combined_results = vcat(all_results...)
-            MPI.Finalize()
+            combined_results = reduce(vcat, all_results)
             return combined_results
         end
     else
         @info "Not concatenating results as configured."
     end
 
-    MPI.Finalize()
     return nothing
 end
 
@@ -300,7 +294,7 @@ function load_data_models_generators(cfg::AbstractEvaluationConfig)
     )
 
     # Get models:
-    models = Logging.with_logger(Logging.NullLogger()) do 
+    models = Logging.with_logger(Logging.NullLogger()) do
         Dict(
             [
                 exper.meta_params.experiment_name => load_results(exper)[3] for
@@ -324,13 +318,12 @@ end
 Uses the `Evaluation.get_benchmark_files` function to collect all benchmarks from the specified storage path.
 """
 function collect_benchmarks(cfg::AbstractEvaluationConfig; kwrgs...)
-
     if isfile(default_bmk_name(cfg))
         @info "Benchmark file $(default_bmk_name(cfg)) already exists. Skipping."
         bmk = Serialization.deserialize(default_bmk_name(cfg))
         return collect_benchmarks(cfg, bmk; kwrgs...)
     end
-    
+
     bmk_files = Evaluation.get_benchmark_files(interim_ce_path(cfg))
     bmks = Vector{Benchmark}(undef, length(bmk_files))
 
@@ -340,7 +333,6 @@ function collect_benchmarks(cfg::AbstractEvaluationConfig; kwrgs...)
     bmk = reduce(vcat, bmks)
 
     return collect_benchmarks(cfg, bmk; kwrgs...)
-
 end
 
 """
@@ -377,19 +369,163 @@ function collect_benchmarks(
 end
 
 """
-    save_results(cfg::AbstractEvaluationConfig, bmk::Benchmark)
+    save_results(
+        cfg::AbstractEvaluationConfig, bmk::Benchmark; fname::Union{Nothing,String}=nothing
+    )
 
-Saves the `Benchmark` object to disk using `Serialization.serialize`. The location is specified by `cfg.save_dir`.
+Saves the `Benchmark` object to disk using `Serialization.serialize`. The location is specified by `cfg.save_dir`, unless `fname` is provided.
 """
-function save_results(cfg::AbstractEvaluationConfig, bmk::Benchmark)
-    fname = default_bmk_name(cfg)
+function save_results(
+    cfg::AbstractEvaluationConfig, bmk::Benchmark; fname::Union{Nothing,String}=nothing
+)
+    fname = if isnothing(fname)
+        default_bmk_name(cfg)
+    else
+        fname
+    end
     return Serialization.serialize(fname, bmk)
 end
 
-function load_ce_evaluation(cfg::AbstractEvaluationConfig)
-    load_results(cfg, default_ce_evaluation_name(cfg))
+"""
+    load_results(cfg::AbstractEvaluationConfig, fname::String)
+
+Loads the benchmark. 
+"""
+function load_results(
+    cfg::AbstractEvaluationConfig, bmk::Type{Benchmark}, fname::String=default_bmk_name(cfg)
+)
+    return Serialization.deserialize(fname)
+end
+
+"""
+    load_ce_evaluation(
+        cfg::AbstractEvaluationConfig; fname::Union{Nothing,String}=nothing
+    )
+
+Load the counterfactual evaluation results.
+"""
+function load_ce_evaluation(
+    cfg::AbstractEvaluationConfig; fname::Union{Nothing,String}=nothing
+)
+    fname = if isnothing(fname)
+        default_bmk_name(cfg)
+    else
+        fname
+    end
+
+    bmk = load_results(cfg, Benchmark, fname)
+    df = bmk.evaluation
+    if "model" in names(df) && !("id" in names(df))
+        rename!(df, :model => :id)
+    end
+
+    return df
 end
 
 default_bmk_name(cfg::AbstractEvaluationConfig) = joinpath(cfg.save_dir, "bmk.jls")
 
 default_ce_evaluation_name(cfg::AbstractEvaluationConfig) = "bmk_evaluation"
+
+"""
+    generate_factual_target_pairs(cfg::AbstractEvaluationConfig)
+
+Dispatches the `generate_factual_target_pairs` on `cfg::AbstractEvaluationConfig`. The data, models and generators are loaded according the configuration `cfg`.
+"""
+function generate_factual_target_pairs(
+    cfg::AbstractEvaluationConfig;
+    fname::Union{Nothing,String}=nothing,
+    overwrite::Bool=false,
+)
+    fname = if isnothing(fname)
+        default_factual_target_pairs_name(cfg)
+    end
+    if isfile(fname) && !overwrite
+        @info "Loading factual target pairs from $fname ..."
+        output = load_results(cfg, Benchmark, fname)
+    else
+        data, models, generators = load_data_models_generators(cfg)
+        output = generate_factual_target_pairs(cfg, data, models, generators)
+        @info "Saving results to $fname."
+        save_results(cfg, output; fname=fname)
+    end
+    return output
+end
+
+function default_factual_target_pairs_name(cfg::AbstractEvaluationConfig)
+    return joinpath(cfg.save_dir, "factual_target_pairs.jls")
+end
+
+"""
+    generate_factual_target_pairs(
+        cfg::AbstractEvaluationConfig,
+        data::CounterfactualData,
+        models::AbstractDict,
+        generators::AbstractDict,
+    )
+
+Generates counterfactuals for each target and factual pair. The function randomly chooses a sample in the factual class based on the `data` and uses it for all `models` and `generators` to allow for comparisons between models and generators.
+"""
+function generate_factual_target_pairs(
+    cfg::AbstractEvaluationConfig,
+    data::CounterfactualData,
+    models::AbstractDict,
+    generators::AbstractDict,
+)
+
+    # Targets and factuals:
+    targets = sort(data.y_levels)
+    factuals = targets
+
+    # Store only counterfactual, not whole CE object:
+    @warn "Setting `_ce_transform` to `counterfactual` to avoid storing entire `CounterfactualExplanation` object."
+    transformer = ExplicitCETransformer(CounterfactualExplanations.counterfactual)
+    global_ce_transform(transformer)
+
+    output = Benchmark[]
+
+    for factual in factuals
+        chosen = rand(findall(data.output_encoder.labels .== factual))
+        x = select_factual(data, chosen)
+        for target in targets
+            if cfg.counterfactual_params.verbose
+                @info "Generating counterfactual for $(factual) -> $(target)"
+            end
+
+            # If factual is equal to target, don't search:
+            if factual == target
+                convergence = MaxIterConvergence(0)
+            else
+                convergence = get_convergence(cfg.counterfactual_params)
+            end
+
+            # Generate and benchmark counterfactuals:
+            bmk = benchmark(
+                x,
+                target,
+                data;
+                models=models,
+                generators=generators,
+                measure=validity,
+                parallelizer=nothing,
+                initialization=:identity,
+                convergence=convergence,
+                store_ce=true,
+                verbose=cfg.counterfactual_params.verbose,
+            )
+
+            DataFrames.transform!(bmk.evaluation, :model => ByRow(x -> x[1]) => :model)
+            DataFrames.transform!(
+                bmk.evaluation, :generator => ByRow(x -> x[1]) => :generator
+            )
+
+            # Add factual values:
+            bmk.counterfactuals.x .= [x]
+
+            push!(output, bmk)
+        end
+    end
+
+    output = reduce(vcat, output)
+
+    return output
+end

@@ -1,15 +1,17 @@
 using EnergySamplers: EnergySamplers
+using LinearAlgebra
 
+@doc raw"""
+    implausibility(model, perturbed_input, samples, targets)
+
+Compute the implausibility (contrastive divergence) of the counterfactuals (`perturbed_input`) with respect to `samples` in the target class. This is computed as the difference between negative logits indexed at the target class for the `samples` and the `perturbed_input`.
+"""
 function implausibility(model, perturbed_input, samples, targets)
-    implausibilities =
-        EnergySamplers.energy_differential.(
-            (model,), eachcol(perturbed_input), samples, targets
-        )
-    return implausibilities
+    x = ((-model(samples)) - (-model(perturbed_input)))'targets
+    return diag(x[:, :])
 end
 
 function reg_loss(model, perturbed_input, samples, targets)
-    return EnergySamplers.energy_penalty.(
-        (model,), eachcol(perturbed_input), samples, targets
-    )
+    x = (abs2.(model(samples)) + abs2.(model(perturbed_input)))'targets
+    return diag(x[:, :])
 end

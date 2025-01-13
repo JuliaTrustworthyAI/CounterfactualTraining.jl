@@ -1,0 +1,44 @@
+name = "poc_lenet"
+dim_reduction = [false]
+generator_type = ["ecco", "generic", "revise"]
+data = "mnist"
+model_type = "lenet"
+save_dir = "paper/experiments/output/poc_lenet"
+
+[data_params]
+n_validation = []
+n_train = [10000]
+batchsize = [100]
+
+[model_params]
+channels1 = []
+channels2 = []
+activation = []
+filter_size = []
+
+[generator_params]
+opt = ["sgd"]
+lambda_cost = [0.001]
+lr = [1.0]
+maxiter = [25]
+lambda_energy = [5.0]
+type = []
+
+[training_params]
+opt = ["adam"]
+nce = [100]
+lr = []
+threaded = []
+class_loss = []
+objective = ["vanilla", "full"]
+lambda_class_loss = [1.0]
+lambda_energy_diff = [0.5]
+burnin = [0.0]
+nepochs = [25]
+lambda_energy_reg = [0.001]
+verbose = [1]
+lambda_adversarial = []
+parallelizer = ["mpi"]
+generator_params = []
+conv = ["max_iter"]
+nneighbours = []

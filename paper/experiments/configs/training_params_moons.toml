@@ -1,0 +1,45 @@
+name = "training_params_moons"
+dim_reduction = [false]
+generator_type = ["ecco", "generic", "revise", "omni"]
+data = "moons"
+model_type = "mlp"
+save_dir = "paper/experiments/output/training_params_moons"
+
+[data_params]
+n_validation = [600]
+train_test_ratio = []
+train_test_seed = []
+n_train = [3000]
+batchsize = [30]
+
+[model_params]
+nlayers = []
+activation = []
+nhidden = [64]
+
+[generator_params]
+opt = ["sgd"]
+lambda_cost = [0.01]
+lr = [0.1]
+maxiter = [30]
+lambda_energy = [1.0]
+type = []
+
+[training_params]
+opt = ["adam"]
+nce = [100, 500, 1000]
+lr = []
+threaded = []
+class_loss = []
+objective = ["full"]
+lambda_class_loss = [1.0]
+lambda_energy_diff = [0.01, 0.1, 0.5, 1.0]
+burnin = [0.0]
+nepochs = [100]
+lambda_energy_reg = [0.0, 0.001, 0.01, 0.1]
+verbose = [1]
+lambda_adversarial = [0.1, 0.5, 1.0]
+parallelizer = []
+generator_params = []
+conv = ["max_iter"]
+nneighbours = []

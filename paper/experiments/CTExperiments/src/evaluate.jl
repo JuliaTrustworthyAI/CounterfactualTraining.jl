@@ -1,3 +1,4 @@
+using Accessors
 using CounterfactualExplanations
 using CounterfactualExplanations.Evaluation
 using CSV
@@ -5,7 +6,7 @@ using DataFrames
 using Logging
 using StatisticalMeasures
 
-abstract type AbstractEvaluationConfig <:AbstractConfiguration end
+abstract type AbstractEvaluationConfig <: AbstractConfiguration end
 
 include("evaluate_counterfactuals.jl")
 
@@ -74,7 +75,13 @@ function EvaluationConfig(;
     save_dir::String,
     counterfactual_params::NamedTuple=(;),
     test_time::Bool=false,
+    generator_params::Union{Nothing,NamedTuple}=nothing,
 )
+    if !isnothing(generator_params)
+        # append generator params to counterfactual params:
+        counterfactual_params = @insert counterfactual_params.generator_params =
+            generator_params
+    end
     counterfactual_params = CounterfactualParams(; counterfactual_params...)
     return EvaluationConfig(grid_file, save_dir, counterfactual_params, test_time)
 end
@@ -172,7 +179,7 @@ function save_results(cfg::EvaluationConfig, data::DataFrame, fname::String)
     csv_file = joinpath(cfg.save_dir, fname * ".csv")
     CSV.write(csv_file, data)
     jld2_file = joinpath(cfg.save_dir, fname * ".jld2")
-    jldsave(jld2_file; data)
+    return jldsave(jld2_file; data)
 end
 
 """
@@ -206,3 +213,30 @@ function get_work_dir(cfg::EvaluationConfig, eval_work_root::String)
 end
 
 results_dir(cfg::EvaluationConfig) = joinpath(cfg.save_dir, "results")
+
+"""
+    make_dummy(cfg::EvaluationConfig)
+
+Modify the configurations parameters to create a dummy version of it. This is used in the context of multi-processing to ensure that each process receives the same number of tasks.   
+"""
+function make_dummy(cfg::EvaluationConfig, suffix1, suffix2)
+    old_save_dir = cfg.save_dir
+    @reset cfg.save_dir = mkpath(
+        joinpath(
+            splitpath(old_save_dir)[1:(end - 1)]..., "dummy_eval_$(suffix1)_$(suffix2)"
+        ),
+    )
+    return cfg
+end
+
+function isdummy(cfg::EvaluationConfig)::Bool
+    foldername = splitpath(cfg.save_dir)[end]
+    return contains(lowercase(foldername), "dummy")
+end
+
+function remove_dummy!(cfg::EvaluationConfig)
+    if isdummy(cfg)
+        rm(cfg.save_dir; recursive=true)
+        @info "Removed dummy experiment: $(cfg.save_dir)"
+    end
+end
