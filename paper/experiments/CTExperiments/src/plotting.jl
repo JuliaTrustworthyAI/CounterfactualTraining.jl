@@ -104,7 +104,7 @@ function aggregate_data(
     byvars::Union{Nothing,Vector{String}}=nothing;
     byvars_must_include::Union{Nothing,Vector{String}}=nothing,
 )
-    df = filter(row -> all(x -> !(x isa Number && (isnan(x) || isinf(x))), row), df)
+    df = filter(row -> all(x -> !(x isa Number && (isinf(x))), row), df)
 
     # Aggregate:
     if !isnothing(byvars)

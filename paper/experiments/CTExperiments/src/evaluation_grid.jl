@@ -38,7 +38,7 @@ struct EvaluationGrid <: AbstractGridConfiguration
         merged_params = Dict{String,Any}()
         for (k, v) in generator_params
             merged_values = unique([inherited_generator_params[k]..., v...])
-            merged_params[k] = merged_values
+            merged_params[k] = sort(merged_values)
         end
 
         # Instantiate grid: 

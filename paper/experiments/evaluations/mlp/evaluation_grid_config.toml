@@ -1,0 +1,24 @@
+grid_file = "paper/experiments/output/poc/lin_sep/mlp/grid_config.toml"
+test_time = false
+save_dir = "paper/experiments/output/poc/lin_sep/mlp/evaluation"
+
+[generator_params]
+opt = ["sgd"]
+lambda_cost = [0.001]
+lr = [1.0]
+maxiter = [50]
+lambda_energy = [5.0, 0.1, 0.5, 1.0, 10.0]
+type = []
+
+[counterfactual_params]
+maxiter = [100]
+n_individuals = [100]
+n_runs = [1]
+vertical_splits = [100]
+parallelizer = ["mpi"]
+concatenate_output = [true]
+threaded = [false]
+store_ce = [true]
+verbose = [true]
+generator_params = []
+conv = ["max_iter"]
