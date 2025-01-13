@@ -61,12 +61,6 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
             end
         end
 
-        if store_ce == true
-            @warn "Setting `_ce_transform` to `counterfactual` to avoid storing entire `CounterfactualExplanation` object."
-            transformer = ExplicitCETransformer(CounterfactualExplanations.flatten)
-            global_ce_transform(transformer)
-        end
-
         return new(
             generator_params,
             n_individuals,
@@ -127,6 +121,12 @@ function evaluate_counterfactuals(
         nothing
     else
         cfg.counterfactual_params.vertical_splits
+    end
+
+    if cfg.counterfactual_params.store_ce == true
+        @warn "Setting `_ce_transform` to `flatten` to avoid storing entire `CounterfactualExplanation` object."
+        transformer = ExplicitCETransformer(CounterfactualExplanations.flatten)
+        global_ce_transform(transformer)
     end
 
     # Generate and benchmark counterfactuals:

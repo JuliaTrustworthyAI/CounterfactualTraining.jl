@@ -54,7 +54,9 @@ for (i, eval_config) in enumerate(eval_list)
 
     # Setup:
     if rank != 0
-        @reset eval_config.save_dir = mkpath(joinpath(tempdir(), "dummy_rank_$rank"))   # disable saving evals for non-root ranks
+        @reset eval_config.save_dir = mkpath(
+            joinpath(eval_config.save_dir, "dummy_rank_$rank")
+        )   # disable saving evals for non-root ranks
         @reset eval_config.counterfactual_params.verbose = false
     end
 

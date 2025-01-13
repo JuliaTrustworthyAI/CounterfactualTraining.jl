@@ -71,6 +71,10 @@ for (i, experiment) in enumerate(exper_list)
     end
 end
 
+if rank == 0
+    @info "All experiments for $(config_file) completed"
+end
+
 # Finalize MPI
 MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 if mpi_should_finalize()

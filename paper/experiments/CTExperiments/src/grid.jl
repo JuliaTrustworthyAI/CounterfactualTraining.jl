@@ -47,16 +47,16 @@ struct ExperimentGrid <: AbstractGridConfiguration
     )
 
         # Data parameters
-        data_params = append_params(data_params, fieldnames(get_data_set(data)))
+        data_params = append_params(data_params, get_data_set(data)())
 
         # Model parameters
-        model_params = append_params(model_params, fieldnames(get_model_type(model_type)))
+        model_params = append_params(model_params, get_model_type(model_type)())
 
         # Training parameters
-        training_params = append_params(training_params, fieldnames(TrainingParams))
+        training_params = append_params(training_params, TrainingParams())
 
         # Generator parameters
-        generator_params = append_params(generator_params, fieldnames(GeneratorParams))
+        generator_params = append_params(generator_params, GeneratorParams())
 
         # Instantiate grid: 
         grid = new(
@@ -85,29 +85,41 @@ struct ExperimentGrid <: AbstractGridConfiguration
     end
 end
 
-"""
-    append_params(params::AbstractDict, available_params)
-
-Append empty lists for parameters to a dictionary if they are not already present. The available parameters are specified in the `available_params` vector. This is used for generating TOML files that can be easily filled out by the user.
-"""
-function append_params(params::AbstractDict, available_params)
-    for x in available_params
-        x = string(x)
-        if !(x in keys(params))
-            params[x] = []
-        end
-    end
-    return params
+function append_params(params::Union{NamedTuple,AbstractDict}, cfg::AbstractConfiguration)
+    kvpairs = [k => getfield(cfg, k) for k in fieldnames(typeof(cfg))]
+    return append_params(params, kvpairs)
 end
 
 """
-    append_params(params::NamedTuple, available_params)
+    append_params(params::AbstractDict, default_values::Vector{<:Pair})
+
+Append default values to `params`. This is used for generating TOML files that can be easily filled out by the user.
+"""
+function append_params(params::AbstractDict, default_values::Vector{<:Pair})
+    newparams = Dict()
+    for (k,v) in default_values
+        k = string(k)
+        if !(k in keys(params)) || params[k] == []
+            newparams[k] = [to_dict(v)]
+        else
+            newparams[k] = params[k]
+        end
+        if typeof(v) <: AbstractConfiguration
+            newparams[k] = []
+
+        end
+    end
+    return newparams
+end
+
+"""
+    append_params(params::NamedTuple, default_values::Vector{<:Pair})
 
 Extends the [`append_params`](@ref) function to work with `NamedTuple` objects.
 """
-function append_params(params::NamedTuple, available_params)
+function append_params(params::NamedTuple, default_values::Vector{<:Pair})
     params = Dict(zip(string.(keys(params)), values(params)))
-    params = append_params(params, available_params)
+    params = append_params(params, default_values)
     return params
 end
 
@@ -169,8 +181,10 @@ Load an experiment grid from a TOML file. The `fname` argument specifies the pat
 function ExperimentGrid(fname::String; new_save_dir::Union{Nothing,String}=nothing)
     @assert isfile(fname) "Experiment grid configuration file not found."
     dict = from_toml(fname)
-    new_save_dir = default_save_dir(new_save_dir, dict["name"], dict["data"], dict["model_type"])
     if !isnothing(new_save_dir)
+        new_save_dir = default_save_dir(
+            new_save_dir, dict["name"], dict["data"], dict["model_type"]
+        )
         mkpath(new_save_dir)
         dict["save_dir"] = new_save_dir
     end

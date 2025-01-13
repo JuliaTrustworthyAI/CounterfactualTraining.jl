@@ -29,12 +29,12 @@ struct EvaluationGrid <: AbstractGridConfiguration
 
         # Counterfactual params:
         counterfactual_params = append_params(
-            counterfactual_params, fieldnames(CounterfactualParams)
+            counterfactual_params, CounterfactualParams()
         )
 
         # Generator parameters (inherited from ExperimentGrid):
         inherited_generator_params = CTExperiments.from_toml(grid_file)["generator_params"]
-        generator_params = append_params(generator_params, fieldnames(GeneratorParams))
+        generator_params = append_params(generator_params, GeneratorParams())
         merged_params = Dict{String,Any}()
         for (k, v) in generator_params
             merged_values = unique([inherited_generator_params[k]..., v...])
