@@ -169,6 +169,7 @@ Load an experiment grid from a TOML file. The `fname` argument specifies the pat
 function ExperimentGrid(fname::String; new_save_dir::Union{Nothing,String}=nothing)
     @assert isfile(fname) "Experiment grid configuration file not found."
     dict = from_toml(fname)
+    new_save_dir = default_save_dir(new_save_dir, dict["name"], dict["data"], dict["model_type"])
     if !isnothing(new_save_dir)
         mkpath(new_save_dir)
         dict["save_dir"] = new_save_dir

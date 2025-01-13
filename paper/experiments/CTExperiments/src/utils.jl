@@ -137,6 +137,7 @@ function get_config_from_args()
         requested_dataset =
             ARGS[(x -> contains(x, "--data=")).(ARGS)] |>
             x -> replace(x[1], "--data=" => "")
+        @assert requested_dataset in collect(keys(CTExperiments.data_sets)) "Requested dataset not available: $requested_data. Available datasets are $(collect(keys(CTExperiments.data_sets)))."
         if haskey(cfg, "data") && cfg["data"] != requested_dataset
             @info "Using existing config with new dataset: $requested_dataset (was $(cfg["data"]))."
             cfg["data"] = requested_dataset
@@ -147,6 +148,7 @@ function get_config_from_args()
         requested_model =
             ARGS[(x -> contains(x, "--model=")).(ARGS)] |>
             x -> replace(x[1], "--model=" => "")
+        @assert requested_model in collect(keys(CTExperiments.model_types)) "Requested model type not available: $requested_model. Available models are $(collect(keys(CTExperiments.model_types)))."
         if haskey(cfg, "model_type") && cfg["model_type"] != requested_model
             @info "Using existing config with new model type: '$requested_model' (was '$(cfg["model_type"])')."
             cfg["model_type"] = requested_model

@@ -25,9 +25,7 @@ else
 
     # Get config and set up grid:
     config_file = get_config_from_args()
-    root_name = CTExperiments.from_toml(config_file)["name"]
-    root_save_dir = joinpath(ENV["OUTPUT_DIR"], root_name)
-    exper_grid = ExperimentGrid(config_file; new_save_dir=root_save_dir)
+    exper_grid = ExperimentGrid(config_file; new_save_dir=ENV["OUTPUT_DIR"])
 
     # Generate list of experiments and run them:
     exper_list = setup_experiments(exper_grid)

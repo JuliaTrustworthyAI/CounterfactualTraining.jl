@@ -39,6 +39,10 @@ Retrieves the data set from the catalogue if available.
 """
 function get_data_set(s::String)
     s = lowercase(s)
+    if s == ""
+        @info "Dataset not specified. Using 'lin_sep'."
+        s = "lin_sep"
+    end
     @assert s in keys(data_sets) "Unknown data set: $s. Available sets are $(keys(data_sets))"
     return data_sets[s]
 end
@@ -127,6 +131,10 @@ Retrieves the model type from the catalogue if available.
 """
 function get_model_type(s::String)
     s = lowercase(s)
+    if s == ""
+        @info "Model type not specified. Using 'mlp'."
+        s = "mlp"
+    end
     @assert s in keys(model_types) "Unknown model type: $s. Available types are $(keys(model_types))"
     return model_types[s]
 end

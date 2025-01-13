@@ -1,0 +1,48 @@
+name = "poc"
+dim_reduction = []
+generator_type = ["ecco", "generic", "omni", "revise"]
+data = "lin_sep"
+model_type = ""
+save_dir = "paper/experiments/output/poc/lin_sep"
+
+[data_params]
+datadir = []
+mutability = []
+domain = []
+n_validation = []
+train_test_ratio = []
+train_test_seed = []
+n_train = []
+batchsize = []
+
+[model_params]
+nlayers = []
+activation = []
+nhidden = []
+
+[generator_params]
+opt = []
+lambda_cost = []
+lr = []
+maxiter = []
+lambda_energy = []
+type = []
+
+[training_params]
+opt = []
+nce = []
+lr = []
+threaded = []
+class_loss = []
+objective = ["adversarial", "energy", "full", "vanilla"]
+lambda_class_loss = []
+lambda_energy_diff = []
+burnin = []
+nepochs = []
+lambda_energy_reg = []
+verbose = []
+lambda_adversarial = []
+parallelizer = []
+generator_params = []
+conv = []
+nneighbours = []

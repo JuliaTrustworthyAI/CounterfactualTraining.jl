@@ -79,7 +79,7 @@ Base.@kwdef struct GeneratorParams <: AbstractGeneratorParams
     type::AbstractGeneratorType = ECCo()
     lr::AbstractFloat = 1.0
     opt::AbstractString = "sgd"
-    maxiter::Int = 100
+    maxiter::Int = 50
     lambda_cost::AbstractFloat = 0.001
     lambda_energy::AbstractFloat = 5.0
 end
@@ -193,7 +193,7 @@ Base.@kwdef struct TrainingParams <: AbstractConfiguration
     lambda_adversarial::AbstractFloat = CounterfactualTraining.default_adversarial_lambda
     class_loss::AbstractString = "logitcrossentropy"
     burnin::AbstractFloat = 0.0f0
-    nepochs::Int = 100
+    nepochs::Int = 50
     generator_params::GeneratorParams = GeneratorParams()
     nce::Int = 100
     nneighbours::Int = 100

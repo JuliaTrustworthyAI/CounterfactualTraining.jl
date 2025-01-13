@@ -46,6 +46,7 @@ export mpi_should_finalize, set_mpi_finalize
 export GMSC, MNIST, Moons, LinearlySeparable, Overlapping, Circles, CaliHousing, Adult
 export get_data, get_ce_data, ntotal
 export get_domain, get_mutability
+export default_save_dir
 
 "The default benchmarking measures."
 const CE_MEASURES = [
