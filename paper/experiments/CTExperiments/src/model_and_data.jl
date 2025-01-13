@@ -180,6 +180,6 @@ end
 
 Loads pre-trained VAE from the dataset directory. The file name is constructed using the dataset name.
 """
-function load_vae(d::Dataset) 
-    Serialization.deserialize(joinpath(d.datadir, "vae", "$(dname(d)).jls"))
+function load_vae(d::Dataset)
+    return Serialization.deserialize(joinpath(d.datadir, "vae", "$(dname(d)).jls"))
 end

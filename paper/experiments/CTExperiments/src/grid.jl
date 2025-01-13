@@ -137,7 +137,7 @@ function ExperimentGrid(;
     model_params::Union{AbstractDict,NamedTuple}=Dict(),
     training_params::Union{AbstractDict,NamedTuple}=Dict(),
     generator_params::Union{AbstractDict,NamedTuple}=Dict(),
-    save_dir::String=default_save_dir(tempdir(),name,data,model_type),
+    save_dir::String=default_save_dir(tempdir(), name, data, model_type),
 )
     return ExperimentGrid(
         name,
@@ -153,12 +153,12 @@ function ExperimentGrid(;
     )
 end
 
-function default_save_dir(rootdir,name,data,model_type)
-    return mkpath(joinpath(rootdir,name,data,model_type))
+function default_save_dir(rootdir, name, data, model_type)
+    return mkpath(joinpath(rootdir, name, data, model_type))
 end
 
 function default_save_dir(grid::ExperimentGrid; rootdir=tempdir())
-    return default_save_dir(rootdir,grid.name,grid.data,grid.model_type)
+    return default_save_dir(rootdir, grid.name, grid.data, grid.model_type)
 end
 
 """

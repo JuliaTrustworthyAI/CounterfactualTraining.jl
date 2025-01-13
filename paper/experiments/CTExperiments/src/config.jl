@@ -40,7 +40,7 @@ end
 Creates a [TOML](https://github.com/toml-lang/toml) file from the configuration `config`. If a file path (`fname`) is not provided then the file will be written to `STDOUT`. Otheriwse it will be written to `fname`.
 """
 function to_toml(config::AbstractConfiguration, fname::Union{Nothing,String}=nothing)
-    to_toml(to_dict(config), fname)
+    return to_toml(to_dict(config), fname)
 end
 
 function to_toml(dict::AbstractDict, fname::Union{Nothing,String}=nothing)
