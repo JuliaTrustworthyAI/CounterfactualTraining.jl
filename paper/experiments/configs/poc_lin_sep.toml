@@ -6,6 +6,9 @@ model_type = "mlp"
 save_dir = "paper/experiments/output/poc_lin_sep"
 
 [data_params]
+datadir = []
+mutability = []
+domain = []
 n_validation = [600]
 train_test_ratio = []
 train_test_seed = []

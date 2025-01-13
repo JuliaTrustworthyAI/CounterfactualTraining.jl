@@ -130,23 +130,24 @@ function evaluate_counterfactuals(
     end
 
     # Generate and benchmark counterfactuals:
-    bmk = benchmark(
-        data;
-        models=models,
-        generators=generators,
-        measure=measure,
-        parallelizer=pllr,
-        suppress_training=true,
-        initialization=:identity,
-        n_individuals=cfg.counterfactual_params.n_individuals,
-        n_runs=cfg.counterfactual_params.n_runs,
-        convergence=conv,
-        store_ce=cfg.counterfactual_params.store_ce,
-        storage_path=interim_storage_path,
-        vertical_splits=vertical_splits,
-        concatenate_output=cfg.counterfactual_params.concatenate_output,
-        verbose=cfg.counterfactual_params.verbose,
-    )
+    bmk =
+        benchmark(
+            data;
+            models=models,
+            generators=generators,
+            measure=measure,
+            parallelizer=pllr,
+            suppress_training=true,
+            initialization=:identity,
+            n_individuals=cfg.counterfactual_params.n_individuals,
+            n_runs=cfg.counterfactual_params.n_runs,
+            convergence=conv,
+            store_ce=cfg.counterfactual_params.store_ce,
+            storage_path=interim_storage_path,
+            vertical_splits=vertical_splits,
+            concatenate_output=cfg.counterfactual_params.concatenate_output,
+            verbose=cfg.counterfactual_params.verbose,
+        ) |> bmk -> compute_divergence(bmk, measure, data)
 
     return bmk
 end
@@ -527,11 +528,4 @@ function generate_factual_target_pairs(
     output = reduce(vcat, output)
 
     return output
-end
-
-function evaluate_divergence(
-    cfg::AbstractEvaluationConfig; measures=[CounterfactualExplanations.MMD]
-)
-    @assert cfg.counterfactual_params.store_ce == true "Need to store counterfactual explanations for divergence evaluation."
-    return bmk = load_results(bmk)
 end

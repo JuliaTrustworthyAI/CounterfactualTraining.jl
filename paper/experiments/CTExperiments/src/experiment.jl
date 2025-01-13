@@ -197,7 +197,7 @@ Sets up the input encoder for the given experiment, dataset and generator type.
 function get_input_encoder(
     exper::AbstractExperiment, data::Dataset, generator_type::AbstractGeneratorType
 )
-    if exp.meta_params.dim_reduction
+    if exper.meta_params.dim_reduction
         # Input transformers:
         vae = CounterfactualExplanations.Models.load_vae(data)
         maxoutdim = minimum([vae.params.latent_dim, input_dim(data)])
