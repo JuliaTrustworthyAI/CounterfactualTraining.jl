@@ -56,7 +56,12 @@ function get_data(data::Dataset; n::Union{Nothing,Int}=nothing, test_set::Bool=f
     if exceeds_max(data)
         @warn "Requesting more data than available (using oversampling)."
     end
-    X, y = load_data(data, ntotal(data))    # load all available data
+    navailable = if isinf(nmax(data))
+        100_000
+    else
+        nmax(data)
+    end
+    X, y = load_data(data, navailable)  # load all available data
 
     # Set seed and shuffle data:
     X = Float32.(X)
@@ -65,13 +70,15 @@ function get_data(data::Dataset; n::Union{Nothing,Int}=nothing, test_set::Bool=f
     y = y[new_idx]
 
     # Split data into training and test sets:
-    ntrain = Int(round(data.train_test_ratio * size(X, 2)))
+    ntrain = data.n_train + data.n_validation
+    ntest = ntotal(data) - ntrain
+    @assert navailable >= ntrain + ntest
     if !test_set
         X = X[:, 1:ntrain]
         y = y[1:ntrain]
     else
-        X = X[:, (ntrain + 1):end]
-        y = y[(ntrain + 1):end]
+        X = X[:,(end - ntest + 1):end]
+        y = y[(end - ntest + 1):end]
     end
 
     # Subset:

@@ -113,6 +113,10 @@ function evaluate_counterfactuals(
     generators::AbstractDict;
     measure::Vector{<:PenaltyOrFun}=CE_MEASURES,
 )
+
+    grid = ExperimentGrid(cfg.grid_file)
+    exper_list = load_list(grid)
+
     # Get parallelizer:
     pllr = get_parallelizer(cfg.counterfactual_params)
     conv = get_convergence(cfg.counterfactual_params)
@@ -130,6 +134,7 @@ function evaluate_counterfactuals(
     end
 
     # Generate and benchmark counterfactuals:
+    rng = get_data_set(cfg)() |> get_rng
     bmk =
         benchmark(
             data;
@@ -147,7 +152,7 @@ function evaluate_counterfactuals(
             vertical_splits=vertical_splits,
             concatenate_output=cfg.counterfactual_params.concatenate_output,
             verbose=cfg.counterfactual_params.verbose,
-        ) |> bmk -> compute_divergence(bmk, measure, data)
+        ) |> bmk -> compute_divergence(bmk, measure, data; nsamples=100, rng=rng)
 
     return bmk
 end
@@ -284,14 +289,8 @@ function load_data_models_generators(cfg::AbstractEvaluationConfig)
     grid = ExperimentGrid(cfg.grid_file)
     exper_list = load_list(grid)
 
-    # Get all available test data:
-    data = (
-        dataset_type -> (dt -> CounterfactualData(dt...))(
-            get_data(dataset_type(); n=nothing, test_set=cfg.test_time)
-        )
-    )(
-        get_data_set(grid.data)
-    )
+    # Get data:
+    data = get_ce_data(cfg)
 
     # Get models:
     models = Logging.with_logger(Logging.NullLogger()) do

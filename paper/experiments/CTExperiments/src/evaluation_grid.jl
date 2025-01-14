@@ -280,3 +280,29 @@ function load_ce_evaluation(grid::EvaluationGrid)
 end
 
 get_data_set(grid::EvalConfigOrGrid) = get_data_set(ExperimentGrid(grid.grid_file).data)
+
+function get_data_seed(grid::EvalConfigOrGrid)
+    _seed = ExperimentGrid(grid.grid_file).data_params["train_test_seed"] |>
+        unique
+    @assert length(_seed) == 1 "Did you specify multiple seeds?"
+    return _seed[1]
+end
+
+function get_ce_data(cfg::AbstractEvaluationConfig)
+    return (dt -> CounterfactualData(dt...))(get_data(cfg))
+end
+
+function get_data(cfg::AbstractEvaluationConfig)
+    # Get all available test data:
+    data = (
+        dataset_type -> (get_data(
+            dataset_type(train_test_seed = get_data_seed(cfg));
+            n=nothing,
+            test_set=cfg.test_time,
+        ))
+    )(
+        get_data_set(cfg)
+    )
+
+    return data
+end
