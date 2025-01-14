@@ -9,6 +9,15 @@ When called on any object `x`, returns `x` as-is.
 to_dict(x) = x
 
 """
+    to_dict(x::Float32)
+
+When called on any float32 number `x`, returns the rounded value with 5 digits. This is to avoid floating-point precision issues.
+"""
+function to_dict(x::Float32)
+    return round(x; digits=5)
+end
+
+"""
     to_dict(fun::Function)
 
 When called on any function `fun`, returns a string representation of its name. 
