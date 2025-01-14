@@ -235,6 +235,7 @@ function run_training(exper::Experiment; checkpoint_dir::Union{Nothing,String}=n
     model, train_set, input_encoder, val_set = setup(exper)
     conv = get_convergence(exper.training_params)
     domain = get_domain(exper.data)
+    mutability = get_mutability(exper.data)
     pllr = get_parallelizer(exper.training_params)
 
     # Optimizer and model:
@@ -262,6 +263,7 @@ function run_training(exper::Experiment; checkpoint_dir::Union{Nothing,String}=n
         nce=exper.training_params.nce,
         nneighbours=exper.training_params.nneighbours,
         domain=domain,
+        mutability=mutability,
         input_encoder=input_encoder,
         checkpoint_dir=checkpoint_dir,
     )

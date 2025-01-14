@@ -5,6 +5,7 @@ using CounterfactualTraining
 using CounterfactualExplanations
 using CounterfactualExplanations.Evaluation
 using CounterfactualExplanations.Objectives
+using KernelFunctions
 using Logging
 using Random
 using TaijaData
@@ -53,7 +54,9 @@ const CE_MEASURES = [
     validity,
     plausibility_distance_from_target,
     plausibility_energy_differential,
-    MMD(; compute_p=nothing),
+    MMD(;
+        kernel=with_lengthscale(KernelFunctions.GaussianKernel(), 5.0), compute_p=nothing
+    ),
     distance,
     redundancy,
 ]

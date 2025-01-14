@@ -105,6 +105,7 @@ function aggregate_data(
     byvars_must_include::Union{Nothing,Vector{String}}=nothing,
 )
     df = filter(row -> all(x -> !(x isa Number && (isinf(x))), row), df)
+    df = df[.!isnan.(df.value),:]
 
     # Aggregate:
     if !isnothing(byvars)

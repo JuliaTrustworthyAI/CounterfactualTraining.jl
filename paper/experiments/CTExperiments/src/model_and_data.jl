@@ -15,6 +15,10 @@ function get_rng(d::Dataset)
     return Xoshiro(d.train_test_seed)
 end
 
+function get_ce_measures(d::Dataset)
+    
+end
+
 """
     data_sets
 

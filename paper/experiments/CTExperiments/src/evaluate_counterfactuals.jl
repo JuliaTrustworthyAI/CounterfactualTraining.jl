@@ -31,11 +31,12 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
     conv::AbstractString = "max_iter"
     maxiter::Int = 100
     vertical_splits::Int = 100
-    store_ce::Bool = true
+    store_ce::Bool = false
     parallelizer::AbstractString = "mpi"
     threaded::Bool = false
     concatenate_output::Bool = true
     verbose::Bool = true
+    ndiv::Int = 100
     function CounterfactualParams(
         generator_params,
         n_individuals,
@@ -48,6 +49,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
         threaded,
         concatenate_output,
         verbose,
+        ndiv
     )
         if generator_params isa NamedTuple
             if haskey(generator_params, :type) && generator_params.type isa String
@@ -73,6 +75,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
             threaded,
             concatenate_output,
             verbose,
+            ndiv
         )
     end
 end
@@ -127,7 +130,7 @@ function evaluate_counterfactuals(
         cfg.counterfactual_params.vertical_splits
     end
 
-    if cfg.counterfactual_params.store_ce == true
+    if cfg.counterfactual_params.store_ce == true || CounterfactualExplanations.Evaluation.includes_divergence_metric(measure)
         @warn "Setting `_ce_transform` to `flatten` to avoid storing entire `CounterfactualExplanation` object."
         transformer = ExplicitCETransformer(CounterfactualExplanations.flatten)
         global_ce_transform(transformer)
@@ -152,9 +155,19 @@ function evaluate_counterfactuals(
             vertical_splits=vertical_splits,
             concatenate_output=cfg.counterfactual_params.concatenate_output,
             verbose=cfg.counterfactual_params.verbose,
-        ) |> bmk -> compute_divergence(bmk, measure, data; nsamples=100, rng=rng)
+        ) |> bmk -> compute_divergence(bmk, measure, data; rng=rng, nsamples=cfg.counterfactual_params.ndiv)
 
-    return bmk
+    rm(interim_storage_path; recursive=true)
+    
+    # Remove counterfactuals to save memory:
+    if !cfg.counterfactual_params.store_ce && "ce" ∈ names(bmk.evaluation)
+        @info "Removing counterfactuals from evaluation"
+        df = select(bmk.evaluation, Not(:ce))
+        return Benchmark(df)
+    else
+        return bmk
+    end
+    
 end
 
 """

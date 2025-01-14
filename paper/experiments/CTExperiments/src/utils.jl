@@ -117,18 +117,24 @@ end
 Retrieves the config file name from the command line arguments. This is used for scripting.
 """
 function get_config_from_args()
-    haskey(ENV, "config") && return ENV["config"]
-    if isinteractive() && !any((x -> contains(x, "--config=")).(ARGS))
+    if isinteractive() &&
+        !any((x -> contains(x, "--config=")).(ARGS)) &&
+        !haskey(ENV, "config")
         println("Specify the path to your config file.")
         input = readline()
         println("Using config file: $input")
         push!(ARGS, "--config=$input")
         ENV["config"] = input
     end
-    config_arg = ARGS[(x -> contains(x, "--config=")).(ARGS)]
-    @assert length(config_arg) == 1 "Please provide exactly one config file name."
-    fname = replace(config_arg[1], "--config=" => "")
-    @assert isfile(fname) "Config file not found: $fname"
+
+    if any((x -> contains(x, "--config=")).(ARGS))
+        config_arg = ARGS[(x -> contains(x, "--config=")).(ARGS)]
+        @assert length(config_arg) == 1 "Please provide exactly one config file name."
+        fname = replace(config_arg[1], "--config=" => "")
+        @assert isfile(fname) "Config file not found: $fname"
+    else
+        fname = ENV["config"]
+    end
 
     # Load config:
     cfg = CTExperiments.from_toml(fname)
@@ -158,6 +164,7 @@ function get_config_from_args()
     # Save copy:
     if haskey(cfg, "name")
         cfg["model_type"] = cfg["model_type"] == "" ? "mlp" : cfg["model_type"]
+        cfg["data"] = cfg["data"] == "" ? "lin_sep" : cfg["data"]
         rootdir, fonly = (joinpath(splitdir(fname)[1:end-1]...), splitdir(fname)[end])
         fname = joinpath(mkpath(joinpath(rootdir, cfg["name"], cfg["data"], cfg["model_type"])),fonly)
         CTExperiments.to_toml(cfg, fname)

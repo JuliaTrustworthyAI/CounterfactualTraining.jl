@@ -267,7 +267,7 @@ uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 version = "0.10.15"
 
 [[deps.CTExperiments]]
-deps = ["Accessors", "AlgebraOfGraphics", "CSV", "CairoMakie", "CounterfactualExplanations", "CounterfactualTraining", "DataFrames", "Flux", "JLD2", "KernelDensity", "Logging", "MPI", "MultivariateStats", "Plots", "Random", "Serialization", "StatisticalMeasures", "StatsBase", "TOML", "TaijaData", "TaijaParallel", "TaijaPlotting", "UUIDs"]
+deps = ["Accessors", "AlgebraOfGraphics", "CSV", "CairoMakie", "CounterfactualExplanations", "CounterfactualTraining", "DataFrames", "Flux", "JLD2", "KernelDensity", "KernelFunctions", "Logging", "MPI", "MultivariateStats", "Plots", "Random", "Serialization", "StatisticalMeasures", "StatsBase", "TOML", "TaijaData", "TaijaParallel", "TaijaPlotting", "UUIDs"]
 path = "CTExperiments"
 uuid = "5eca96c7-09a4-4424-a5a1-dee2b4aead1e"
 version = "0.0.0"
@@ -474,7 +474,7 @@ version = "0.6.3"
 
 [[deps.CounterfactualExplanations]]
 deps = ["CategoricalArrays", "CausalInference", "ChainRulesCore", "DataFrames", "Distributions", "EnergySamplers", "Flux", "Graphs", "KernelFunctions", "LazyArtifacts", "LinearAlgebra", "Logging", "MLJBase", "MLJDecisionTreeInterface", "MLUtils", "MultivariateStats", "PackageExtensionCompat", "ProgressMeter", "Random", "Serialization", "Statistics", "StatsBase", "Tables", "TaijaBase", "UUIDs"]
-git-tree-sha1 = "bed051252ebddc8203838993ed7cfaf0adc21950"
+git-tree-sha1 = "d3051962415f1290bdb216b8d0d063ede542c961"
 repo-rev = "counterfactual-training"
 repo-url = "https://github.com/JuliaTrustworthyAI/CounterfactualExplanations.jl.git"
 uuid = "2f13d31b-18db-44c1-bc43-ebaf2cff0be0"

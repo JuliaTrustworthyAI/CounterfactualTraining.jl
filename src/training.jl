@@ -26,6 +26,7 @@ function counterfactual_training(
     convergence=Convergence.MaxIterConvergence(),
     input_encoder=nothing,
     domain=nothing,
+    mutability=nothing,
     verbose::Int=1,
     checkpoint_dir::Union{Nothing,String}=nothing,
     kwrgs...,
@@ -90,6 +91,7 @@ function counterfactual_training(
                 parallelizer=parallelizer,
                 input_encoder=input_encoder,
                 domain=domain,
+                mutability=mutability,
                 verbose=verbose,
             )
         else

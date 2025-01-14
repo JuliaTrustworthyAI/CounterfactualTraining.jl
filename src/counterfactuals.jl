@@ -33,9 +33,10 @@ function generate!(
     input_encoder=nothing,
     verbose=1,
     domain=nothing,
+    mutability=nothing,
 )
     xs, factual_enc, targets, counterfactual_data, M = setup_counterfactual_search(
-        data, model, domain, input_encoder, nneighbours, nsamples
+        data, model, domain, input_encoder, mutability, nneighbours, nsamples
     )
 
     # Generate counterfactuals:
@@ -102,14 +103,14 @@ function generate!(
 end
 
 function setup_counterfactual_search(
-    data, model, domain, input_encoder, nneighbours::Int64, nsamples::Union{Nothing,Int64}
+    data, model, domain, input_encoder, mutability, nneighbours::Int64, nsamples::Union{Nothing,Int64}
 )
 
     # Wrap training dataset in `CounterfactualData`:
     # NOTE: Using [1,...,n] for labels where n is the number of output classes. Exact label information is not necessary for training.
     X, y = unwrap(data)
     counterfactual_data = CounterfactualData(
-        X, y; domain=domain, input_encoder=input_encoder
+        X, y; domain=domain, input_encoder=input_encoder, mutability=mutability
     )
     # Wrap model:
     M = Models.Model(model, Models.FluxNN(); likelihood=:classification_multi)
