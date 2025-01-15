@@ -36,11 +36,11 @@ using CTExperiments
 ## Command Line Usage
 
 ```
-sbatch --ntasks=$(determine_resources) myfile.sh
+sbatch --ntasks=$(determine_resources) --cpus-per-task=$NTHREADS myfile.sh
 ```
 
 ```
-sbatch --ntasks=$(determine_resources) myfile.sh --data=mydata --model=mymodel
+sbatch --ntasks=$(determine_resources) --cpus-per-task=$NTHREADS myfile.sh --data=mydata --model=mymodel
 ```
 
 ## Interactive Usage
