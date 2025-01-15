@@ -2,8 +2,8 @@ name = "poc"
 dim_reduction = []
 generator_type = ["ecco", "generic", "omni", "revise"]
 data = "mnist"
-model_type = "lenet"
-save_dir = "paper/experiments/output/poc/lenet/mnist"
+model_type = "mlp"
+save_dir = "paper/experiments/output/poc/mlp/mnist"
 
 [data_params]
 datadir = ["paper/experiments/dev"]
@@ -16,10 +16,9 @@ n_train = [10000]
 batchsize = [1000]
 
 [model_params]
-channels1 = [6]
-channels2 = [16]
+nlayers = [1]
 activation = ["relu"]
-filter_size = [5]
+nhidden = [64]
 
 [generator_params]
 opt = ["sgd"]
