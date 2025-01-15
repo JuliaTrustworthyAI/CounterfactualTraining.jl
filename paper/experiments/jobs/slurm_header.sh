@@ -20,8 +20,8 @@ for arg in "$@"; do
     fi
 done
 
-# Extract time limit
-RAW_TIMELIMIT=$(scontrol show job $SLURM_JOB_ID | awk -F= '/TimeLimit/ {print $2}')
+# Extract time limit and clean it
+RAW_TIMELIMIT=$(scontrol show job $SLURM_JOB_ID | awk -F'=' '/TimeLimit=/ {print $2}' | awk '{print $1}')
 
 # Convert DD-HH:MM:SS to HH:MM:SS
 if [[ "$RAW_TIMELIMIT" == *-* ]]; then
@@ -30,8 +30,8 @@ if [[ "$RAW_TIMELIMIT" == *-* ]]; then
   TIME=${RAW_TIMELIMIT#*-}
   # Convert days to hours
   HOURS=$((DAYS * 24 + ${TIME%%:*}))
-  MINUTES=${TIME#*:}
-  TIMELIMIT="$HOURS:$MINUTES"
+  REMAINDER=${TIME#*:}
+  TIMELIMIT="$HOURS:$REMAINDER"
 else
   TIMELIMIT=$RAW_TIMELIMIT
 fi

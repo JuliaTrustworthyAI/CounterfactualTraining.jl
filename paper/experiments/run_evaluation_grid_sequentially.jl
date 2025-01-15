@@ -61,8 +61,13 @@ for (i, eval_config) in enumerate(eval_list)
     end
 
     # Evaluate counterfactuals:
-    @info "Rank $(rank): Running evaluation $i of $(length(eval_list))."
-    bmk = evaluate_counterfactuals(eval_config)
+    if isfile(CTExperiments.default_bmk_name(eval_config))
+        @info "Rank $(rank): Evaluation already exists. Skipping evaluation."
+        continue
+    else
+        @info "Rank $(rank): Running evaluation $i of $(length(eval_list))."
+        bmk = evaluate_counterfactuals(eval_config)
+    end
 
     @info "Rank $(rank): Done evaluating all counterfactuals. Waiting at barrier ..."
     MPI.Barrier(comm)
