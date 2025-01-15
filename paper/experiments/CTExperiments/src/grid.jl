@@ -77,7 +77,8 @@ struct ExperimentGrid <: AbstractGridConfiguration
             mkpath(save_dir)
         end
         if !isfile(default_grid_config_name(grid)) &&
-            !isfile(joinpath(save_dir, "template_grid_config.toml"))
+            !isfile(joinpath(save_dir, "template_grid_config.toml")) && 
+            isnothing(grid.save_dir)
             to_toml(grid, default_grid_config_name(grid))
         end
 
@@ -190,8 +191,8 @@ function ExperimentGrid(fname::String; new_save_dir::Union{Nothing,String}=nothi
     end
     grid = (kwrgs -> ExperimentGrid(; kwrgs...))(CTExperiments.to_ntuple(dict))
     if !isnothing(new_save_dir)
-        to_toml(grid, default_grid_config_name(grid))        # store in new save directory
-        to_toml(grid, fname)                # over-write old file with new config
+        to_toml(grid, default_grid_config_name(grid))   # store in new save directory
+        to_toml(grid, fname)                            # over-write old file with new config
     end
     return grid
 end

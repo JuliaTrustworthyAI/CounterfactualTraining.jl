@@ -16,6 +16,6 @@ while total_tasks * parse(Int, ENV["NTHREADS"]) > parse(Int, ENV["MAX_TASKS"])
 end
 total_tasks = round(Int, total_tasks)
 
-@info "Requestion $total_tasks resources for experiment '$root_name'."
+@info "Requesting $total_tasks CPUs for experiment '$root_name'. Threads per task: $(parse(Int, ENV["NTHREADS"]))"
 
 println(total_tasks)
