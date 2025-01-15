@@ -648,6 +648,7 @@ Generate and plot counterfactual explanations for a list of experiments and arra
 function plot_ce(
     exper_list::Vector{Experiment},
     eval_cfg::Union{Nothing,EvaluationConfig}=nothing;
+    layout=length(exper_list),
     titles=nothing,
     kwargs...,
 )
@@ -669,9 +670,13 @@ function plot_ce(
         push!(plts, plt)
     end
 
-    w, h =
-        (ceil(sqrt(length(exper_list))), floor(sqrt(length(exper_list)))) |>
-        dims -> (dims[1] * 2default_axis.width, dims[2] * 2default_axis.height)
+    if isa(layout, Tuple)
+        _rows, _cols = layout
+    else
+        _rows, _cols = (ceil(sqrt(layout)), floor(sqrt(layout)))
+    end
 
-    return Plots.plot(plts...; layout=length(exper_list), size=(w, h))
+    w, h = (_cols * 2default_axis.width, _rows * 2default_axis.height)
+
+    return Plots.plot(plts...; layout=layout, size=(w, h))
 end
