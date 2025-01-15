@@ -82,7 +82,7 @@ for (i, eval_config) in enumerate(eval_list)
         generate_factual_target_pairs(eval_config)
 
         # Set up evaluation work dir:
-        set_work_dir(eval_grid, eval_config, joinpath(ENV["EVAL_WORK_DIR"]))
+        set_work_dir(eval_grid, eval_config, ENV["EVAL_WORK_DIR"], ENV["OUTPUT_DIR"])
     else
         rm(eval_config.save_dir; recursive=true)
     end

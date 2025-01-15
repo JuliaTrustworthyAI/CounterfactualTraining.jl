@@ -196,8 +196,8 @@ end
 
 A working directory for evaluation results.
 """
-function set_work_dir(cfg::EvaluationConfig, eval_work_root::String)
-    work_dir = get_work_dir(cfg, eval_work_root)
+function set_work_dir(cfg::EvaluationConfig, eval_work_root::String, output_work_root::String)
+    work_dir = get_work_dir(cfg, eval_work_root, output_work_root)
     if !isfile(joinpath(work_dir, "eval_config.toml"))
         to_toml(cfg, joinpath(work_dir, "eval_config.toml"))
     end
@@ -208,8 +208,11 @@ function set_work_dir(cfg::EvaluationConfig, eval_work_root::String)
     return work_dir
 end
 
-function get_work_dir(cfg::EvaluationConfig, eval_work_root::String)
-    return mkpath(joinpath(eval_work_root, splitpath(cfg.save_dir)[end]))
+function get_work_dir(
+    cfg::EvaluationConfig, eval_work_root::String, output_work_root::String
+)
+    dir = replace(cfg.save_dir, output_work_root => eval_work_root)
+    return mkpath(dir)
 end
 
 results_dir(cfg::EvaluationConfig) = joinpath(cfg.save_dir, "results")

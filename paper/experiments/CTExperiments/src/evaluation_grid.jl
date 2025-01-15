@@ -186,8 +186,14 @@ end
 
 A working directory for evaluation grid results.
 """
-function set_work_dir(grid::EvaluationGrid, cfg::EvaluationConfig, eval_work_root::String)
-    work_dir = get_work_dir(grid, cfg, eval_work_root)
+function set_work_dir(
+    grid::EvaluationGrid,
+    cfg::EvaluationConfig,
+    eval_work_root::String,
+    output_work_root::String,
+)
+
+    work_dir = get_work_dir(grid, cfg, eval_work_root, output_work_root)
 
     # Evaluation specific:
     if !isfile(joinpath(work_dir, "eval_config.toml"))
@@ -212,18 +218,24 @@ end
 
 Get the working directory for evaluation grid results.
 """
-function get_work_dir(grid::EvaluationGrid, cfg::EvaluationConfig, eval_work_root::String)
-    _root = get_work_dir(grid, eval_work_root)
+function get_work_dir(
+    grid::EvaluationGrid,
+    cfg::EvaluationConfig,
+    eval_work_root::String,
+    output_work_root::String,
+)
+    _root = get_work_dir(grid, eval_work_root, output_work_root)
     return mkpath(joinpath(_root, splitpath(cfg.save_dir)[end]))
 end
 
 """
-    get_work_dir(grid::EvaluationGrid, eval_work_root::String)
+    get_work_dir(grid::EvaluationGrid, eval_work_root::String, output_work_root::String)
 
 Get the root working directory for evaluation grid results.
 """
-function get_work_dir(grid::EvaluationGrid, eval_work_root::String)
-    return joinpath(eval_work_root, splitpath(grid.save_dir)[end - 1])
+function get_work_dir(grid::EvaluationGrid, eval_work_root::String, output_work_root::String)
+    dir = replace(grid.save_dir, output_work_root => eval_work_root)
+    return mkpath(dir)
 end
 
 results_dir(grid::EvaluationGrid) = joinpath(grid.save_dir, "results")

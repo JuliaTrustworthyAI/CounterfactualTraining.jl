@@ -166,7 +166,9 @@ function get_config_from_args()
         cfg["model_type"] = cfg["model_type"] == "" ? "mlp" : cfg["model_type"]
         cfg["data"] = cfg["data"] == "" ? "lin_sep" : cfg["data"]
         rootdir, fonly = (joinpath(splitdir(fname)[1:end-1]...), splitdir(fname)[end])
-        fname = joinpath(mkpath(joinpath(rootdir, cfg["name"], cfg["data"], cfg["model_type"])),fonly)
+        fname = joinpath(
+            mkpath(joinpath(rootdir, cfg["name"], cfg["model_type"], cfg["data"])), fonly
+        )
         CTExperiments.to_toml(cfg, fname)
     end
 

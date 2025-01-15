@@ -9,7 +9,7 @@ DotEnv.load!()
 eval_grid = EvaluationGrid(get_config_from_args())
 exper_grid = ExperimentGrid(eval_grid.grid_file)
 
-local_save_dir = get_work_dir(eval_grid, ENV["EVAL_WORK_DIR"])
+local_save_dir = get_work_dir(eval_grid, ENV["EVAL_WORK_DIR"], ENV["OUTPUT_DIR"])
 output_dir = results_dir(eval_grid)
 
 # Visualize logs:

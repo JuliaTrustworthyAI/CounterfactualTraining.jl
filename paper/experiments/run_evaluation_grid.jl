@@ -110,7 +110,7 @@ for (i, eval_config) in enumerate(worker_chunk)
 
     # Working directory:
     if !isdummy(eval_config)
-        set_work_dir(eval_grid, eval_config, joinpath(ENV["EVAL_WORK_DIR"]))
+        set_work_dir(eval_grid, eval_config, ENV["EVAL_WORK_DIR"], ENV["OUTPUT_DIR"])
     else
         remove_dummy!(eval_config)
     end

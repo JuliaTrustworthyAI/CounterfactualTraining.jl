@@ -166,11 +166,11 @@ function ExperimentGrid(;
 end
 
 function default_save_dir(rootdir, name, data, model_type)
-    return mkpath(joinpath(rootdir, name, data, model_type))
+    return mkpath(joinpath(rootdir, name, model_type, data))
 end
 
 function default_save_dir(grid::ExperimentGrid; rootdir=tempdir())
-    return default_save_dir(rootdir, grid.name, grid.data, grid.model_type)
+    return default_save_dir(rootdir, grid.name, grid.model_type, grid.data)
 end
 
 """

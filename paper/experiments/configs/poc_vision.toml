@@ -16,9 +16,9 @@ n_train = []
 batchsize = []
 
 [model_params]
-nlayers = []
-activation = []
-nhidden = []
+nlayers = [1]
+activation = ["relu"]
+nhidden = [64]
 
 [generator_params]
 opt = []
