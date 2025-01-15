@@ -20,20 +20,14 @@ for arg in "$@"; do
     fi
 done
 
-# Extract time limit and clean it
-RAW_TIMELIMIT=$(scontrol show job $SLURM_JOB_ID | awk -F'=' '/TimeLimit=/ {print $2}' | awk '{print $1}')
-
-# Convert DD-HH:MM:SS to HH:MM:SS
-if [[ "$RAW_TIMELIMIT" == *-* ]]; then
-  # Split into days and time
-  DAYS=${RAW_TIMELIMIT%-*}
-  TIME=${RAW_TIMELIMIT#*-}
-  # Convert days to hours
-  HOURS=$((DAYS * 24 + ${TIME%%:*}))
-  REMAINDER=${TIME#*:}
-  TIMELIMIT="$HOURS:$REMAINDER"
+# Convert SLURM_TIMELIMIT (in seconds) to HH:MM:SS
+if [[ -n "$SLURM_TIMELIMIT" ]]; then
+  HOURS=$((SLURM_TIMELIMIT / 3600))
+  MINUTES=$(( (SLURM_TIMELIMIT % 3600) / 60 ))
+  SECONDS=$((SLURM_TIMELIMIT % 60))
+  TIMELIMIT=$(printf "%02d:%02d:%02d" $HOURS $MINUTES $SECONDS)
 else
-  TIMELIMIT=$RAW_TIMELIMIT
+  TIMELIMIT="Unknown"
 fi
 
 echo "JOB DETAILS: Running on $SLURM_NTASKS CPUs with $SRUN_CPUS_PER_TASK threads per cpu for $TIMELIMIT (hh:mm:ss)"
