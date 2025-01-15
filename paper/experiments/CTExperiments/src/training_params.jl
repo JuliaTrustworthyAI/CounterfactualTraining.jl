@@ -195,7 +195,7 @@ Base.@kwdef struct TrainingParams <: AbstractConfiguration
     burnin::AbstractFloat = 0.0f0
     nepochs::Int = 50
     generator_params::GeneratorParams = GeneratorParams()
-    nce::Int = 100
+    nce::Int = get_global_param("nce", 100)
     nneighbours::Int = 100
     conv::AbstractString = "max_iter"
     lr::AbstractFloat = 0.001

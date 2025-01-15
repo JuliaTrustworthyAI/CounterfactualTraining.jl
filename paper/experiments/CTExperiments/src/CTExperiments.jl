@@ -17,6 +17,10 @@ abstract type AbstractGeneratorParams <: AbstractConfiguration end
 abstract type Dataset <: AbstractConfiguration end
 abstract type ModelType <: AbstractConfiguration end
 
+include("globals.jl")
+
+export get_global_param
+
 include("config.jl")
 include("utils.jl")
 include("omniscient.jl")
@@ -48,17 +52,5 @@ export GMSC, MNIST, Moons, LinearlySeparable, Overlapping, Circles, CaliHousing,
 export get_data, get_ce_data, ntotal
 export get_domain, get_mutability
 export default_save_dir
-
-"The default benchmarking measures."
-const CE_MEASURES = [
-    validity,
-    plausibility_distance_from_target,
-    plausibility_energy_differential,
-    MMD(;
-        kernel=with_lengthscale(KernelFunctions.GaussianKernel(), 5.0), compute_p=nothing
-    ),
-    distance,
-    redundancy,
-]
 
 end

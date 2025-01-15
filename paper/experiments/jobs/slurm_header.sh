@@ -22,4 +22,4 @@ done
 
 TIME=$(squeue -j $SLURM_JOB_ID -h --Format TimeLimit)
 
-echo "JOB DETAILS: Running on $SLURM_NTASKS CPUs with $SRUN_CPUS_PER_TASK threads per cpu for $TIME (hh:mm:ss)"
+echo "JOB DETAILS: Running on $SLURM_NTASKS CPUs with $SRUN_CPUS_PER_TASK threads per cpu for $TIME (mm:ss)"
