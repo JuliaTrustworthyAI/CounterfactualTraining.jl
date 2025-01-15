@@ -1,9 +1,9 @@
-name = "poc"
+name = "mutability"
 dim_reduction = []
 generator_type = ["ecco", "generic", "omni", "revise"]
 data = "lin_sep"
 model_type = "mlp"
-save_dir = "paper/experiments/output/poc/mlp/lin_sep"
+save_dir = "paper/experiments/output/mutability/mlp/lin_sep"
 
 [data_params]
 datadir = ["paper/experiments/dev"]

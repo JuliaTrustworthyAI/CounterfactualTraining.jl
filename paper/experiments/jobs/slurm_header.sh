@@ -20,4 +20,6 @@ for arg in "$@"; do
     fi
 done
 
-echo "JOB DETAILS: Running on $SLURM_NTASKS CPUs with $SRUN_CPUS_PER_TASK threads per cpu until $SLURM_JOB_END_TIME."
+TIMELIMIT=$(scontrol show job $SLURM_JOB_ID | awk -F= '/TimeLimit/ {print $2}')
+
+echo "JOB DETAILS: Running on $SLURM_NTASKS CPUs with $SRUN_CPUS_PER_TASK threads per cpu for $TIMELIMIT (hh:mm:ss)"
