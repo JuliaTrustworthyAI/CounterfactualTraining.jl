@@ -19,3 +19,5 @@ for arg in "$@"; do
         break
     fi
 done
+
+echo "JOB DETAILS: Running on $SRUN_CPUS_PER_TASK CPUs with $SLURM_NTASKS threads per cpu for $SBATCH_TIMELIMIT hours/minutes."
