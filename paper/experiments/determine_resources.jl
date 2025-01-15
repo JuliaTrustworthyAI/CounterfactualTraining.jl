@@ -5,7 +5,7 @@ using DotEnv
 DotEnv.load!()
 
 # Get config and set up grid:
-config_file = get_config_from_args(; save_adjusted=false)
+config_file = get_config_from_args(; save_adjusted=false, return_adjusted=false)
 root_name = CTExperiments.from_toml(config_file)["name"]
 exper_grid = ExperimentGrid(config_file)
 

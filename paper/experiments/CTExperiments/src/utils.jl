@@ -116,7 +116,9 @@ end
 
 Retrieves the config file name from the command line arguments. This is used for scripting.
 """
-function get_config_from_args(; save_adjusted::Bool=true)
+function get_config_from_args(; save_adjusted::Bool=true, return_adjusted::Bool=true)
+
+    # Interactive sessions:
     if isinteractive() &&
         !any((x -> contains(x, "--config=")).(ARGS)) &&
         !haskey(ENV, "config")
@@ -127,6 +129,7 @@ function get_config_from_args(; save_adjusted::Bool=true)
         ENV["config"] = input
     end
 
+    # Command line:
     if any((x -> contains(x, "--config=")).(ARGS))
         config_arg = ARGS[(x -> contains(x, "--config=")).(ARGS)]
         @assert length(config_arg) == 1 "Please provide exactly one config file name."
@@ -134,6 +137,11 @@ function get_config_from_args(; save_adjusted::Bool=true)
         @assert isfile(fname) "Config file not found: $fname"
     else
         fname = ENV["config"]
+    end
+
+    # Do not return adjust path:
+    if !return_adjusted
+        return fname
     end
 
     # Load config:
