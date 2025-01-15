@@ -26,7 +26,7 @@ Struct holding keyword arguments relevant to the evaluation of counterfactual ex
 """
 Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
     generator_params::GeneratorParams = GeneratorParams()
-    n_individuals::Int = 100
+    n_individuals::Int = get_global_param("n_individuals", 100)
     n_runs::Int = 5
     conv::AbstractString = "max_iter"
     maxiter::Int = 100
@@ -34,7 +34,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
     store_ce::Bool = false
     parallelizer::AbstractString = "mpi"
     threaded::Bool = false
-    concatenate_output::Bool = true
+    concatenate_output::Bool = get_global_param("concatenate_output", true)
     verbose::Bool = true
     ndiv::Int = 100
     function CounterfactualParams(
