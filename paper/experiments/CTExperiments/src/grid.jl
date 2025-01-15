@@ -316,6 +316,9 @@ function expand_grid_to_df(
                 # If so, iterate over the key-value pairs in `v`
                 for (k2, v2) in pairs(v)
                     # Create a new Pair with the key `k2` and value `v2`
+                    if isa(v2, AbstractVector)
+                        v2 = tuple(v2...)
+                    end
                     new_params = vcat(new_params..., Pair(string(k2), v2))
                 end
             end
