@@ -20,4 +20,4 @@ for arg in "$@"; do
     fi
 done
 
-echo "JOB DETAILS: Running on $SRUN_CPUS_PER_TASK CPUs with $SLURM_NTASKS threads per cpu for $SBATCH_TIMELIMIT hours/minutes."
+echo "JOB DETAILS: Running on $SLURM_NTASKS CPUs with $SRUN_CPUS_PER_TASK threads per cpu until $SLURM_JOB_END_TIME."
