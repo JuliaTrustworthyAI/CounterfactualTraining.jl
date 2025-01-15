@@ -13,4 +13,4 @@ module load 2024r1
 source .env
 source $JOB_DIR/slurm_header.sh
 
-srun julia --project=$EXPERIMENT_DIR --threads $SLURM_CPUS_PER_TASK $EXPERIMENT_DIR/run_grid.jl --config=$CONFIG $DATA_ARG $MODEL_ARG
+srun julia --project=$EXPERIMENT_DIR --threads $SLURM_CPUS_PER_TASK $EXPERIMENT_DIR/run_grid.jl --config=$CONFIG $EXTRA_ARGS

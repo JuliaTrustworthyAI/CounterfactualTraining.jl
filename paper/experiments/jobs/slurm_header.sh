@@ -3,20 +3,14 @@ export SRUN_CPUS_PER_TASK="$SLURM_CPUS_PER_TASK"        # assign extra environme
 export OPENBLAS_NUM_THREADS=1                           # avoid that OpenBLAS calls too many threads
 export DATADEPS_ALWAYS_ACCEPT="true"                    # always allow data to be downloaded
 
-# Parse command line arguments
-DATA_ARG=""
-for arg in "$@"; do
-    if [[ $arg == --data=* ]]; then
-        DATA_ARG="--data=${arg#*=}"
-        break
-    fi
-done
+# Initialize empty string for additional arguments
+EXTRA_ARGS=""
 
-MODEL_ARG=""
+# Loop through all arguments
 for arg in "$@"; do
-    if [[ $arg == --model=* ]]; then
-        MODEL_ARG="--model=${arg#*=}"
-        break
+    # Check if argument starts with --
+    if [[ $arg == --* ]]; then
+        EXTRA_ARGS="$EXTRA_ARGS $arg"
     fi
 done
 
