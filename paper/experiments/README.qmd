@@ -39,6 +39,10 @@ using CTExperiments
 sbatch --ntasks=$(determine_resources) myfile.sh
 ```
 
+```
+sbatch --ntasks=$(determine_resources) myfile.sh --data=mydata --model=mymodel
+```
+
 ## Interactive Usage
 
 ### Running a single experiment
