@@ -20,14 +20,6 @@ for arg in "$@"; do
     fi
 done
 
-# Convert SLURM_TIMELIMIT (in seconds) to HH:MM:SS
-if [[ -n "$SLURM_TIMELIMIT" ]]; then
-  HOURS=$((SLURM_TIMELIMIT / 3600))
-  MINUTES=$(( (SLURM_TIMELIMIT % 3600) / 60 ))
-  SECONDS=$((SLURM_TIMELIMIT % 60))
-  TIMELIMIT=$(printf "%02d:%02d:%02d" $HOURS $MINUTES $SECONDS)
-else
-  TIMELIMIT="Unknown"
-fi
+TIME=$(squeue -j $SLURM_JOB_ID -h --Format TimeLimit)
 
-echo "JOB DETAILS: Running on $SLURM_NTASKS CPUs with $SRUN_CPUS_PER_TASK threads per cpu for $TIMELIMIT (hh:mm:ss)"
+echo "JOB DETAILS: Running on $SLURM_NTASKS CPUs with $SRUN_CPUS_PER_TASK threads per cpu for $TIME (hh:mm:ss)"

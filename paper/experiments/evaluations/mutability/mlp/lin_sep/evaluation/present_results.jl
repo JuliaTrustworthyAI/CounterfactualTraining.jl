@@ -1,0 +1,48 @@
+using CTExperiments
+using CTExperiments.CairoMakie
+using CTExperiments.DataFrames
+using DotEnv
+
+DotEnv.load!()
+
+# Get config and set up grid:
+eval_grid = EvaluationGrid(get_config_from_args())
+exper_grid = ExperimentGrid(eval_grid.grid_file)
+
+local_save_dir = get_work_dir(eval_grid, ENV["EVAL_WORK_DIR"], ENV["OUTPUT_DIR"])
+output_dir = results_dir(eval_grid)
+
+# Visualize logs:
+prefix = "logs"
+valid_y = CTExperiments.valid_y_logs(eval_grid)
+
+params = PlotParams(; rowvar="generator_type", colvar="objective", colorvar="mutability")
+final_save_dir = save_dir(params, output_dir; prefix)
+for y in valid_y
+    plt = plot_errorbar_logs(eval_grid; y=y, params()...)
+    display(plt)
+    save(joinpath(final_save_dir, "$y.png"), plt; px_per_unit=3)
+end
+@info "Images stored in $final_save_dir/"
+
+# Visualize CE:
+prefix = "ce"
+all_data = CTExperiments.merge_with_meta(
+    eval_grid, CTExperiments.load_ce_evaluation(eval_grid)
+)
+valid_y = CTExperiments.valid_y_ce(all_data[1])
+
+params = PlotParams(; rowvar="lambda_energy_eval", colvar="objective", colorvar="mutability")
+final_save_dir = save_dir(params, output_dir; prefix)
+for y in valid_y
+    plt = boxplot_ce(all_data...; y=y, params()...)
+    display(plt)
+    save(joinpath(final_save_dir, "$y.png"), plt; px_per_unit=3)
+end
+
+# Plot images:
+exper_list = load_list(exper_grid)
+plot_ce(eval_grid; save_dir=final_save_dir, byvars=["objective"])
+plot_ce(exper_list)
+
+@info "Images stored in $final_save_dir/"
