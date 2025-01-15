@@ -2,7 +2,10 @@ using Base.Iterators
 using JLD2
 using UUIDs
 
-global _default_generator_params_eval_grid = (lambda_energy=[0.1, 0.5, 1.0, 5.0, 10.0],)
+global _default_generator_params_eval_grid = (
+    lambda_cost=[0.0],
+    lambda_energy=[0.1, 0.5, 1.0, 5.0, 10.0, 20.0],
+)
 
 """
     EvaluationGrid
