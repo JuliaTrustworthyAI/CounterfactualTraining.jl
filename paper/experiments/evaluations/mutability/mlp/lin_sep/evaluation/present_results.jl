@@ -16,7 +16,7 @@ output_dir = results_dir(eval_grid)
 prefix = "logs"
 valid_y = CTExperiments.valid_y_logs(eval_grid)
 
-params = PlotParams(; rowvar="generator_type", colvar="objective", colorvar="mutability")
+params = PlotParams(; rowvar="generator_type", colvar="mutability")
 final_save_dir = save_dir(params, output_dir; prefix)
 for y in valid_y
     plt = plot_errorbar_logs(eval_grid; y=y, params()...)
@@ -32,7 +32,7 @@ all_data = CTExperiments.merge_with_meta(
 )
 valid_y = CTExperiments.valid_y_ce(all_data[1])
 
-params = PlotParams(; rowvar="lambda_energy_eval", colvar="objective", colorvar="mutability")
+params = PlotParams(; rowvar="lambda_energy_eval", colvar="mutability")
 final_save_dir = save_dir(params, output_dir; prefix)
 for y in valid_y
     plt = boxplot_ce(all_data...; y=y, params()...)
@@ -42,7 +42,9 @@ end
 
 # Plot images:
 exper_list = load_list(exper_grid)
+eval_list = load_list(eval_grid)
+plot_ce(exper_list; layout=(4,3))
+plot_ce(exper_list, eval_list[1]; layout=(4, 3))
 plot_ce(eval_grid; save_dir=final_save_dir, byvars=["objective"])
-plot_ce(exper_list)
 
 @info "Images stored in $final_save_dir/"
