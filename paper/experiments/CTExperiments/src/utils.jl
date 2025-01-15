@@ -116,7 +116,7 @@ end
 
 Retrieves the config file name from the command line arguments. This is used for scripting.
 """
-function get_config_from_args()
+function get_config_from_args(; save_adjusted::Bool=true)
     if isinteractive() &&
         !any((x -> contains(x, "--config=")).(ARGS)) &&
         !haskey(ENV, "config")
@@ -169,7 +169,9 @@ function get_config_from_args()
         fname = joinpath(
             mkpath(joinpath(rootdir, cfg["name"], cfg["model_type"], cfg["data"])), fonly
         )
-        CTExperiments.to_toml(cfg, fname)
+        if save_adjusted
+            CTExperiments.to_toml(cfg, fname)
+        end
     end
 
     return fname
