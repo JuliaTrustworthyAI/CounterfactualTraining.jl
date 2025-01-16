@@ -40,8 +40,12 @@ sbatch --ntasks=$(determine_resources) --cpus-per-task=$NTHREADS myfile.sh
 ```
 
 ```
-sbatch --ntasks=$(determine_resources) --cpus-per-task=$NTHREADS myfile.sh --data=mydata --model=mymodel
+sbatch --ntasks=$(determine_resources --data=mydata --model=mymodel) --cpus-per-task=$NTHREADS myfile.sh --data=mydata --model=mymodel
 ```
+
+:::{.callout-warning}
+The extra arguments `--data=mydata --model=mymodel` should be consistent, i.e. they should be passed consitently to `determine_resources` and the whole `sbatch` command. 
+:::
 
 ## Interactive Usage
 

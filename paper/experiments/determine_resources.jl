@@ -6,10 +6,8 @@ DotEnv.load!()
 
 # Get config and set up grid:
 config_file = get_config_from_args(; save_adjusted=false, return_adjusted=true)
-@info "After `get_config_from_args` call ..."
 root_name = CTExperiments.from_toml(config_file)["name"]
 exper_grid = ExperimentGrid(config_file)
-@info "After setting up grid..."
 
 # Determine number of slurm tasks:
 total_tasks = ntasks(exper_grid)

@@ -52,5 +52,6 @@ export GMSC, MNIST, Moons, LinearlySeparable, Overlapping, Circles, CaliHousing,
 export get_data, get_ce_data, ntotal
 export get_domain, get_mutability
 export default_save_dir
+export has_results, needs_results
 
 end
