@@ -26,8 +26,9 @@ struct EvaluationGrid <: AbstractGridConfiguration
     counterfactual_params::Union{AbstractDict,NamedTuple}
     generator_params::Union{AbstractDict,NamedTuple}
     test_time::Bool
+    inherit::Bool
     function EvaluationGrid(
-        grid_file, save_dir, counterfactual_params, generator_params, test_time
+        grid_file, save_dir, counterfactual_params, generator_params, test_time, inherit
     )
 
         # Counterfactual params:
@@ -35,17 +36,20 @@ struct EvaluationGrid <: AbstractGridConfiguration
             counterfactual_params, CounterfactualParams()
         )
 
-        # Generator parameters (inherited from ExperimentGrid):
-        inherited_generator_params = CTExperiments.from_toml(grid_file)["generator_params"]
+        # Generator parameters:
         generator_params = append_params(generator_params, GeneratorParams())
-        merged_params = Dict{String,Any}()
-        for (k, v) in generator_params
-            merged_values = unique([inherited_generator_params[k]..., v...])
-            merged_params[k] = sort(merged_values)
+        if inherit
+            inherited_generator_params = CTExperiments.from_toml(grid_file)["generator_params"]
+            merged_params = Dict{String,Any}()
+            for (k, v) in generator_params
+                merged_values = unique([inherited_generator_params[k]..., v...])
+                merged_params[k] = sort(merged_values)
+            end
+            generator_params = merged_params
         end
 
         # Instantiate grid: 
-        grid = new(grid_file, save_dir, counterfactual_params, merged_params, test_time)
+        grid = new(grid_file, save_dir, counterfactual_params, generator_params, test_time, inherit)
 
         # Store grid config:
         if !isdir(save_dir)
@@ -79,6 +83,7 @@ function EvaluationGrid(
     counterfactual_params::NamedTuple=(;),
     generator_params::NamedTuple=_default_generator_params_eval_grid,
     test_time::Bool=false,
+    inherit::Bool=get_global_param("inherit", true),
 )
     save_dir = if isnothing(save_dir)
         default_evaluation_dir(grid)
@@ -87,7 +92,7 @@ function EvaluationGrid(
     end
     grid_file = isnothing(grid_file) ? default_grid_config_name(grid) : grid_file
     return EvaluationGrid(
-        grid_file, save_dir, counterfactual_params, generator_params, test_time
+        grid_file, save_dir, counterfactual_params, generator_params, test_time, inherit
     )
 end
 
@@ -108,9 +113,10 @@ function EvaluationGrid(;
     counterfactual_params::Union{AbstractDict,NamedTuple},
     generator_params::Union{AbstractDict,NamedTuple},
     test_time::Bool,
+    inherit::Bool,
 )
     return EvaluationGrid(
-        grid_file, save_dir, counterfactual_params, generator_params, test_time
+        grid_file, save_dir, counterfactual_params, generator_params, test_time, inherit
     )
 end
 
