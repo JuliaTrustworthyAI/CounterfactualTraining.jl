@@ -92,7 +92,7 @@ get_convergence(cfg::CounterfactualParams) = get_convergence(cfg.conv, cfg.maxit
         data::CounterfactualData,
         models::AbstractDict,
         generators::AbstractDict;
-        measure::Vector{<:PenaltyOrFun}=CE_MEASURES,
+        measure::Vector{<:PenaltyOrFun}=get_ce_measures(),
     )
 
 Evaluate the counterfactuals using the provided `models` and `generators`.
@@ -114,7 +114,7 @@ function evaluate_counterfactuals(
     data::CounterfactualData,
     models::AbstractDict,
     generators::AbstractDict;
-    measure::Vector{<:PenaltyOrFun}=CE_MEASURES,
+    measure::Vector{<:PenaltyOrFun}=get_ce_measures(),
 )
 
     grid = ExperimentGrid(cfg.grid_file)
@@ -182,20 +182,20 @@ end
 """
     evaluate_counterfactuals(
         cfg::AbstractEvaluationConfig;
-        measure::Vector{<:PenaltyOrFun}=CE_MEASURES,
+        measure::Vector{<:PenaltyOrFun}=get_ce_measures(),
     )
 
 Generate and evaluate counterfactuals based on the provided configuration. This function generates counterfactuals and evaluates them using the specified measures. It returns a DataFrame containing the results of the evaluation.
 
 # Arguments
 - `cfg::AbstractEvaluationConfig`: Configuration for evaluation.
-- `measure::Vector{<:PenaltyOrFun}=CE_MEASURES`: Measures to evaluate the counterfactuals with.
+- `measure::Vector{<:PenaltyOrFun}=get_ce_measures()`: Measures to evaluate the counterfactuals with.
 
 # Returns
 - A DataFrame containing the results of the evaluation.
 """
 function evaluate_counterfactuals(
-    cfg::AbstractEvaluationConfig; measure::Vector{<:PenaltyOrFun}=CE_MEASURES
+    cfg::AbstractEvaluationConfig; measure::Vector{<:PenaltyOrFun}=get_ce_measures()
 )
     data, models, generators = load_data_models_generators(cfg)
 
@@ -209,7 +209,7 @@ end
     evaluate_counterfactuals(
         cfg::AbstractEvaluationConfig,
         comm::MPI.Comm;
-        measure::Vector{<:PenaltyOrFun}=CE_MEASURES,
+        measure::Vector{<:PenaltyOrFun}=get_ce_measures(),
     )
 
 Generate and evaluate counterfactuals based on the provided configuration. This method of `evaluate_counterfactuals` is dispatched for parallel evaluation using MPI (`comm::MPI.Comm`). The generation and evaluation of counterfactuals are distributed across the MPI processes.
@@ -217,7 +217,7 @@ Generate and evaluate counterfactuals based on the provided configuration. This 
 # Arguments
 - `cfg::AbstractEvaluationConfig`: Configuration for evaluation.
 - `comm::MPI.Comm`: MPI communicator.
-- `measure::Vector{<:PenaltyOrFun}=CE_MEASURES`: Measures to evaluate the counterfactuals with.
+- `measure::Vector{<:PenaltyOrFun}=get_ce_measures()`: Measures to evaluate the counterfactuals with.
 
 # Returns
 - A DataFrame containing the results of the evaluation. 
@@ -225,7 +225,7 @@ Generate and evaluate counterfactuals based on the provided configuration. This 
 function evaluate_counterfactuals(
     cfg::AbstractEvaluationConfig,
     comm::MPI.Comm;
-    measure::Vector{<:PenaltyOrFun}=CE_MEASURES,
+    measure::Vector{<:PenaltyOrFun}=get_ce_measures(),
 )
 
     # Initialize MPI:
