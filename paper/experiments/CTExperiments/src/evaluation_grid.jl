@@ -177,8 +177,11 @@ function generate_list(
         save_dir = mkpath(joinpath(cfg.save_dir, evaluation_name))
 
         # Unpack:
-        _names = Symbol.([k for (k, _) in kwrgs])
-        _values = [v for (_, v) in kwrgs]
+        dont_include = [
+            "inherit",
+        ]
+        _names = Symbol.([k for (k, _) in kwrgs if !(k in dont_include)])
+        _values = [v for (k, v) in kwrgs if !(k in dont_include)]
 
         evaluation = EvaluationConfig(;
             grid_file=cfg.grid_file, save_dir=save_dir, (; zip(_names, _values)...)...
