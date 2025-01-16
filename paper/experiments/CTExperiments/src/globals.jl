@@ -1,4 +1,8 @@
-function get_ce_measures()
+function get_ce_measures(;
+    use_mmd=get_global_param("use_mmd", true),
+    length_scale=get_global_param("length_scale", 5.0),
+    compute_p=get_global_param("compute_p", nothing),
+)
     
     measures = [
          validity,
@@ -8,9 +12,6 @@ function get_ce_measures()
         redundancy,
     ]
 
-    use_mmd = get_global_param("use_mmd", true)
-    length_scale = get_global_param("length_scale", 5.0)
-    compute_p = get_global_param("compute_p", nothing)
     if use_mmd
         push!(measures, MMD(;
             kernel=with_lengthscale(KernelFunctions.GaussianKernel(), length_scale), compute_p=compute_p
