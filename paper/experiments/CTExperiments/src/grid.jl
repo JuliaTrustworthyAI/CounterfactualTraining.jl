@@ -458,10 +458,16 @@ function to_kv_pair(cfg::AbstractGridConfiguration)
 end
 
 """
-    default_evaluation_dir(grid::ExperimentGrid)
+    default_evaluation_dir(grid::ExperimentGrid; rootdir::Union{Nothing,String}=nothing)
 
 Returns the path to the evaluation directory for the experiment grid `grid`. The evaluation directory is created under the `save_dir` of the grid and named "evaluation". If the directory does not exist, it is created.
 """
-function default_evaluation_dir(grid::ExperimentGrid)
-    return mkpath(joinpath(grid.save_dir, "evaluation"))
+function default_evaluation_dir(grid::ExperimentGrid; rootdir::Union{Nothing,String}=nothing)
+    if isnothing(rootdir)
+        # Use old directory:
+        save_dir = grid.save_dir
+    else
+        save_dir = default_save_dir(grid; rootdir=rootdir)
+    end
+    return mkpath(joinpath(save_dir, "evaluation"))
 end

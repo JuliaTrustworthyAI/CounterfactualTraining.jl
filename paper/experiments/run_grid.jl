@@ -24,8 +24,8 @@ if MPI.Comm_rank(MPI.COMM_WORLD) != 0
 else
 
     # Get config and set up grid:
-    config_file = get_config_from_args()
-    exper_grid = ExperimentGrid(config_file; new_save_dir=ENV["OUTPUT_DIR"])
+    config_file = get_config_from_args(; new_save_dir=ENV["OUTPUT_DIR"])
+    exper_grid = ExperimentGrid(config_file)
 
     # Generate list of experiments and run them:
     exper_list = generate_list(exper_grid) |>

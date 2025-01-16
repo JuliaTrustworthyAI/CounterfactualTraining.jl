@@ -26,7 +26,7 @@ if rank != 0
 else
 
     # Get config and set up grid:
-    grid_file = get_config_from_args()
+    grid_file = get_config_from_args(;new_save_dir=ENV["OUTPUT_DIR"])
     eval_grid = EvaluationGrid(grid_file)
     @assert length(eval_grid.counterfactual_params["parallelizer"]) <= 1 "It does not make sense to specify multiple parallelizers. Aborting ..."
 

@@ -1,0 +1,48 @@
+name = "poc"
+dim_reduction = []
+generator_type = ["ecco", "generic", "omni", "revise"]
+data = "moons"
+model_type = "mlp"
+save_dir = "paper/experiments/configs/poc/mlp/moons"
+
+[data_params]
+datadir = ["paper/experiments/dev"]
+mutability = ["none"]
+domain = ["none"]
+n_validation = [600]
+train_test_ratio = [0.800000011920929]
+train_test_seed = [2025]
+n_train = [3000]
+batchsize = [30]
+
+[model_params]
+nlayers = [3]
+activation = ["swish"]
+nhidden = [16]
+
+[generator_params]
+opt = ["sgd"]
+lambda_cost = [0.001]
+lr = [1.0]
+maxiter = [50]
+lambda_energy = [5.0]
+type = []
+
+[training_params]
+opt = ["adam"]
+lr = [0.001]
+objective = ["adversarial", "energy", "full", "vanilla"]
+lambda_class_loss = [1.0]
+lambda_energy_diff = [0.5]
+burnin = [0.0]
+nepochs = [50]
+lambda_adversarial = [0.1]
+parallelizer = [""]
+nce = [300]
+threaded = [true]
+class_loss = ["logitcrossentropy"]
+lambda_energy_reg = [0.0001]
+verbose = [1]
+generator_params = []
+conv = ["max_iter"]
+nneighbours = [100]
