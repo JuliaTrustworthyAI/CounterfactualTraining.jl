@@ -72,13 +72,16 @@ struct ExperimentGrid <: AbstractGridConfiguration
             save_dir,
         )
 
+        if grid.save_dir == ""
+            return grid
+        end
+
         # Store grid config:
         if !isdir(save_dir)
             mkpath(save_dir)
         end
         if !isfile(default_grid_config_name(grid)) &&
-            !isfile(joinpath(save_dir, "template_grid_config.toml")) && 
-            isnothing(grid.save_dir)
+            !isfile(joinpath(save_dir, "template_grid_config.toml")) 
             to_toml(grid, default_grid_config_name(grid))
         end
 
@@ -236,7 +239,12 @@ function generate_list(
         # Get other params:
         idx_other = .!(idx_meta)
         other_kwrgs = (; zip(_names[idx_other], _values[idx_other])...)
-        save_dir = mkpath(joinpath(cfg.save_dir, experiment_name))
+        if cfg.save_dir != ""
+            save_dir = mkpath(joinpath(cfg.save_dir, experiment_name))
+        else
+            # This avoids setting up folders if no save directory is specified
+            save_dir = ""
+        end
         meta = MetaParams(;
             experiment_name=experiment_name, save_dir=save_dir, meta_kwrgs...
         )
@@ -244,8 +252,8 @@ function generate_list(
         push!(exper_list, exper)
     end
 
-    # Store list of experiments:
-    if store_list
+    # Store list of experiments (if explicitly requested or not yet stored)
+    if store_list || (!isfile(default_list_name(cfg)) && cfg.save_dir != "")
         save_list(cfg, exper_list)
     end
 
@@ -352,9 +360,12 @@ end
 Saves the list of experiments corresponding to the experiment grid. This is used to save the list of experiments for later.
 """
 function save_list(cfg::ExperimentGrid, exper_list::Vector{<:AbstractExperiment})
-    save_dir = cfg.save_dir
-    @info "Saving list of experiments to $(save_dir):"
-    return jldsave(joinpath(save_dir, "exper_list.jld2"); exper_list)
+    @info "Saving list of experiments to $(cfg.save_dir):"
+    return jldsave(default_list_name(cfg); exper_list)
+end
+
+function default_list_name(cfg::ExperimentGrid)
+    return joinpath(cfg.save_dir, "exper_list.jld2")
 end
 
 """
@@ -365,8 +376,8 @@ Loads the list of experiments corresponding to the experiment grid. This is used
 function load_list(cfg::ExperimentGrid)
     save_dir = cfg.save_dir
     @info "Loading list of experiments from $(save_dir):"
-    @assert isfile(joinpath(save_dir, "exper_list.jld2")) "No list of experiments found in $(save_dir). Did you accidentally delete it?"
-    exper_list = JLD2.load(joinpath(save_dir, "exper_list.jld2"), "exper_list")
+    @assert isfile(default_list_name(cfg)) "No list of experiments found in $(save_dir). Did you accidentally delete it?"
+    exper_list = JLD2.load(default_list_name(cfg), "exper_list")
     return exper_list
 end
 

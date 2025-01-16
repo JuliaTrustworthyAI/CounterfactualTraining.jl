@@ -4,12 +4,10 @@ using DotEnv
 # Setup:
 DotEnv.load!()
 
-_return_adjusted = CTExperiments.get_global_param("return_adjusted", true)
-
 # Get config and set up grid:
-config_file = get_config_from_args(; save_adjusted=false, return_adjusted=_return_adjusted)
+config_file = get_config_from_args()
 root_name = CTExperiments.from_toml(config_file)["name"]
-exper_grid = ExperimentGrid(config_file)
+exper_grid = ExperimentGrid(config_file; new_save_dir=ENV["OUTPUT_DIR"])
 
 # Determine number of slurm tasks:
 total_tasks = ntasks(exper_grid)

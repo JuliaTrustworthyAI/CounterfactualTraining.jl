@@ -116,7 +116,7 @@ end
 
 Retrieves the config file name from the command line arguments. This is used for scripting.
 """
-function get_config_from_args(; save_adjusted::Bool=true, return_adjusted::Bool=true)
+function get_config_from_args(;return_adjusted::Bool=true)
 
     # Interactive sessions:
     if isinteractive() &&
@@ -153,7 +153,7 @@ function get_config_from_args(; save_adjusted::Bool=true, return_adjusted::Bool=
             x -> replace(x[1], "--data=" => "")
         @assert requested_dataset in collect(keys(CTExperiments.data_sets)) "Requested dataset not available: $requested_data. Available datasets are $(collect(keys(CTExperiments.data_sets)))."
         if haskey(cfg, "data") && cfg["data"] != requested_dataset
-            @info "Using existing config with new dataset: $requested_dataset (was $(cfg["data"]))."
+            @info "Using existing config with new dataset: '$requested_dataset' (was '$(cfg["data"])')."
             cfg["data"] = requested_dataset
         end
     end
@@ -174,12 +174,8 @@ function get_config_from_args(; save_adjusted::Bool=true, return_adjusted::Bool=
         cfg["model_type"] = cfg["model_type"] == "" ? "mlp" : cfg["model_type"]
         cfg["data"] = cfg["data"] == "" ? "lin_sep" : cfg["data"]
         rootdir, fonly = (joinpath(splitdir(fname)[1:end-1]...), splitdir(fname)[end])
-        fname = joinpath(
-            mkpath(joinpath(rootdir, cfg["name"], cfg["model_type"], cfg["data"])), fonly
-        )
-        if save_adjusted
-            CTExperiments.to_toml(cfg, fname)
-        end
+        fname = joinpath(default_save_dir(rootdir, cfg["name"], cfg["data"], cfg["model_type"]), fonly)
+        CTExperiments.to_toml(cfg, fname)
     end
 
     return fname

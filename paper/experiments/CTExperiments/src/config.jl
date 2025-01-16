@@ -47,6 +47,15 @@ function to_toml(dict::AbstractDict, fname::Union{Nothing,String}=nothing)
     if isnothing(fname)
         TOML.print(dict)
     else
+        # Check if file exists and compare content
+        if isfile(fname)
+            dict_old = TOML.parsefile(fname)
+            if dict == dict_old
+                return 
+            end
+        end
+        
+        # Write only if file doesn't exist or content differs
         open(fname, "w") do io
             TOML.print(io, dict)
         end
