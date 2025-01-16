@@ -4,13 +4,16 @@ using DotEnv
 # Setup:
 DotEnv.load!()
 
+_return_adjusted = CTExperiments.get_global_param("return_adjusted", true)
+
 # Get config and set up grid:
-config_file = get_config_from_args(; save_adjusted=false, return_adjusted=true)
+config_file = get_config_from_args(; save_adjusted=false, return_adjusted=_return_adjusted)
 root_name = CTExperiments.from_toml(config_file)["name"]
 exper_grid = ExperimentGrid(config_file)
 
 # Determine number of slurm tasks:
 total_tasks = ntasks(exper_grid)
+open_tasks = total_tasks
 @assert total_tasks > 0 "It seems that all tasks have already been completed."
 _nthreads = parse(Int, ENV["NTHREADS"])
 while total_tasks * _nthreads > parse(Int, ENV["MAX_TASKS"])
@@ -18,6 +21,6 @@ while total_tasks * _nthreads > parse(Int, ENV["MAX_TASKS"])
 end
 total_tasks = round(Int, total_tasks)
 
-@info "Requesting $(total_tasks * _nthreads) resources for experiment '$root_name'. CPUs: $total_tasks; Threads per task: $(_nthreads)."
+@info "Requesting $(total_tasks * _nthreads) resources for grid '$root_name' with $(open_tasks) open tasks. CPUs: $total_tasks; Threads per task: $(_nthreads)."
 
 println(total_tasks)

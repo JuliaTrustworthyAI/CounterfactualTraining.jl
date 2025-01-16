@@ -78,7 +78,7 @@ struct ExperimentGrid <: AbstractGridConfiguration
         end
         if !isfile(default_grid_config_name(grid)) &&
             !isfile(joinpath(save_dir, "template_grid_config.toml")) && 
-            !isnothing(grid.save_dir)
+            isnothing(grid.save_dir)
             to_toml(grid, default_grid_config_name(grid))
         end
 

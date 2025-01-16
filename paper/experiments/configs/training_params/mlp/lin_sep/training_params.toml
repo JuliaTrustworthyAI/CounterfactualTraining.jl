@@ -1,8 +1,8 @@
 name = "training_params"
 dim_reduction = []
 generator_type = ["ecco", "generic", "omni", "revise"]
-data = ""
-model_type = ""
+data = "lin_sep"
+model_type = "mlp"
 save_dir = ""
 
 [data_params]
@@ -30,19 +30,19 @@ type = []
 
 [training_params]
 opt = ["adam"]
-nce = [100, 500, 1000]
 lr = []
-threaded = []
-class_loss = []
 objective = ["full", "vanilla"]
 lambda_class_loss = [1.0]
 lambda_energy_diff = [0.01, 0.1, 1.0]
 burnin = [0.0, 0.5]
 nepochs = []
-lambda_energy_reg = [0.0, 0.01, 0.1]
-verbose = []
 lambda_adversarial = []
 parallelizer = []
+nce = [100, 500, 1000]
+threaded = []
+class_loss = []
+lambda_energy_reg = [0.0, 0.01, 0.1]
+verbose = []
 generator_params = []
 conv = []
 nneighbours = []
