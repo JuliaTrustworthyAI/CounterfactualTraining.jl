@@ -110,3 +110,9 @@ function to_ntuple(dict::Dict)
     kwrgs = (; zip(_names, _values)...)
     return kwrgs
 end
+
+function has_results(cfg::AbstractConfiguration)
+    return false
+end
+
+needs_results(cfg::AbstractConfiguration) = !has_results(cfg)

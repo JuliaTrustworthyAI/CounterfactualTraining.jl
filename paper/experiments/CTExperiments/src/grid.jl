@@ -297,7 +297,7 @@ function ntasks(grid::AbstractGridConfiguration; include_completed::Bool=false)
         return length(expand_grid(grid)[2])
     else
         task_list = CTExperiments.generate_list(grid; store_list=false)
-        return sum(.!has_results.(task_list))
+        return sum(needs_results.(task_list))
     end
 end
 

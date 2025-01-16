@@ -31,7 +31,8 @@ else
     @assert length(eval_grid.counterfactual_params["parallelizer"]) <= 1 "It does not make sense to specify multiple parallelizers. Aborting ..."
 
     # Set up evaluation configuration:
-    eval_list = generate_list(eval_grid)
+    eval_list = generate_list(eval_grid) |> li -> li[needs_results.(li)]
+    length(eval_list) > 0 || error("No evaluations to run.")
     @info "Running $(length(eval_list)) evaluations ..."
 
     # Adjust parallelizer:
