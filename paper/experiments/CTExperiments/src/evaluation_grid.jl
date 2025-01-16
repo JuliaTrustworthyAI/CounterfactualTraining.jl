@@ -149,12 +149,14 @@ function default_grid_config_name(grid::EvaluationGrid)
 end
 
 """
-    setup_evaluations(cfg::EvaluationGrid)
+    generate_list(cfg::EvaluationGrid)
 
 Generates a list of evaluations to be run. The list contains one evaluation for every combination of the fields in `cfg`.
 """
-function setup_evaluations(
-    cfg::EvaluationGrid; name_prefix::Union{Nothing,String}="evaluation"
+function generate_list(
+    cfg::EvaluationGrid;
+    name_prefix::Union{Nothing,String}="evaluation",
+    store_list::Bool=true,
 )
 
     # Expand grid:
@@ -179,7 +181,9 @@ function setup_evaluations(
     end
 
     # Store list of experiments:
-    save_list(cfg, eval_list)
+    if store_list
+        save_list(cfg, eval_list)
+    end
 
     return eval_list
 end

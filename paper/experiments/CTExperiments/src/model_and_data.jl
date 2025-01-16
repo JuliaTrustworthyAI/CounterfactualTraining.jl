@@ -155,7 +155,7 @@ end
 
 Helper function to get the dimension of the input data.
 """
-input_dim(data::Dataset) = size(get_data(data; n=1)[1], 2)
+input_dim(data::Dataset) = size(get_data(data; n=1)[1], 1)
 
 """
     get_mutability(data::Dataset)

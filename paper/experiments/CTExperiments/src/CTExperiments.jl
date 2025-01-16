@@ -32,12 +32,12 @@ include("plotting.jl")
 
 export Experiment, run_training
 export make_dummy, remove_dummy!, isdummy
-export ExperimentGrid, setup_experiments
+export ExperimentGrid, generate_list
 export save_results, load_results, has_results
 export load_list
 export get_logs
 export EvaluationConfig
-export EvaluationGrid, setup_evaluations, ntasks
+export EvaluationGrid, generate_list, ntasks
 export test_performance, evaluate_counterfactuals
 export generate_factual_target_pairs
 export to_toml

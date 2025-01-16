@@ -28,7 +28,7 @@ else
     exper_grid = ExperimentGrid(config_file; new_save_dir=ENV["OUTPUT_DIR"])
 
     # Generate list of experiments and run them:
-    exper_list = setup_experiments(exper_grid)
+    exper_list = generate_list(exper_grid)
     @info "Running $(length(exper_list)) experiments ..."
 
     # Adjust parallelizer:

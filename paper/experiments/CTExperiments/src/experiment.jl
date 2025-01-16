@@ -71,6 +71,7 @@ function Experiment(
     model_params::NamedTuple=(;),
     training_params::NamedTuple=(;),
     generator_params::NamedTuple=(;),
+    store::Bool=true,
 )
 
     # Load the configuration file and set up the experiment:
@@ -100,7 +101,9 @@ function Experiment(
 
     # Experiment:
     exper = Experiment(data, model_type, training_params, meta_params)
-    to_toml(exper)
+    if store
+        to_toml(exper)
+    end
 
     return exper
 end
@@ -381,4 +384,31 @@ function remove_dummy!(exper::Experiment)
         rm(exper.meta_params.save_dir; recursive=true)
         @info "Removed dummy experiment: $(exper.meta_params.save_dir)"
     end
+end
+
+function get_log_reg_params(exper::Experiment)
+    @assert isa(exper.model_type,LinearModel) "Model needs to be linear model."
+    M = load_results(exper)[3]
+    coeffs =
+        Flux.params(M.model) |>
+        W -> (β₀=W[2][1] - W[2][2], β₁=W[1][1, 1] - W[1][2, 1], β₂=W[1][1, 2] - W[1][2, 2])
+    return coeffs
+end
+
+struct DecisionBoundary
+    intercept::AbstractFloat
+    slope::AbstractFloat
+end
+
+(db::DecisionBoundary)(x::AbstractFloat) = db.intercept + db.slope * x
+
+function get_decision_boundary(exper::Experiment; flip_axis=false)
+    @assert input_dim(exper.data) == 2 "Decision boundary is only defined for 2D data."
+    coeffs = get_log_reg_params(exper)
+    if !flip_axis 
+        dec_boundary = DecisionBoundary(-(coeffs.β₀ / coeffs.β₂), -(coeffs.β₁ / coeffs.β₂))
+    else
+        dec_boundary = DecisionBoundary(-(coeffs.β₀ / coeffs.β₁), -(coeffs.β₂ / coeffs.β₁))
+    end
+    return dec_boundary
 end

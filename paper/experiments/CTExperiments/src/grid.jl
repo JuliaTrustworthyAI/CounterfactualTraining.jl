@@ -7,7 +7,7 @@ abstract type AbstractGridConfiguration <: AbstractConfiguration end
 """
     ExperimentGrid
 
-A keyword dictionary that contains the parameters for experiments. It is used to generate a list of [`MetaParams`](@ref) objects, one for each unique combination of the fields (see [`setup_experiments`](@ref)).
+A keyword dictionary that contains the parameters for experiments. It is used to generate a list of [`MetaParams`](@ref) objects, one for each unique combination of the fields (see [`generate_list`](@ref)).
 
 ## Fields
 
@@ -78,7 +78,7 @@ struct ExperimentGrid <: AbstractGridConfiguration
         end
         if !isfile(default_grid_config_name(grid)) &&
             !isfile(joinpath(save_dir, "template_grid_config.toml")) && 
-            isnothing(grid.save_dir)
+            !isnothing(grid.save_dir)
             to_toml(grid, default_grid_config_name(grid))
         end
 
@@ -138,7 +138,7 @@ end
         save_dir::String=mkpath(joinpath(tempdir(), name)),
     )
 
-Outer constructor tailored for the `ExperimentGrid` type. It takes a number of keyword arguments, each one (except `data` and `model_type`) being a vector of possible values to be explored by the grid search. Calling [`setup_experiments(cfg::ExperimentGrid)`](@ref) on an instance of type `ExperimentGrid` will generate a list of experiments for all combinations of these vectors.
+Outer constructor tailored for the `ExperimentGrid` type. It takes a number of keyword arguments, each one (except `data` and `model_type`) being a vector of possible values to be explored by the grid search. Calling [`generate_list(cfg::ExperimentGrid)`](@ref) on an instance of type `ExperimentGrid` will generate a list of experiments for all combinations of these vectors.
 """
 function ExperimentGrid(;
     name::String="grid_$(string(uuid1()))",
@@ -207,12 +207,14 @@ function default_grid_config_name(grid::ExperimentGrid)
 end
 
 """
-    setup_experiments(cfg::ExperimentGrid)
+    generate_list(cfg::ExperimentGrid)
 
 Generates a list of experiments to be run. The list contains one experiment for every combination of the fields in `cfg`.
 """
-function setup_experiments(
-    cfg::ExperimentGrid; name_prefix::Union{Nothing,String}="experiment"
+function generate_list(
+    cfg::ExperimentGrid;
+    name_prefix::Union{Nothing,String}="experiment",
+    store_list::Bool=true,
 )
 
     # Expand grid:
@@ -238,12 +240,14 @@ function setup_experiments(
         meta = MetaParams(;
             experiment_name=experiment_name, save_dir=save_dir, meta_kwrgs...
         )
-        exper = Experiment(meta; other_kwrgs...)
+        exper = Experiment(meta; store=store_list, other_kwrgs...)
         push!(exper_list, exper)
     end
 
     # Store list of experiments:
-    save_list(cfg, exper_list)
+    if store_list
+        save_list(cfg, exper_list)
+    end
 
     return exper_list
 end
@@ -288,7 +292,14 @@ function expand_grid(
     return expanded_grid, experiment_names
 end
 
-ntasks(grid::AbstractGridConfiguration) = length(expand_grid(grid)[2])
+function ntasks(grid::AbstractGridConfiguration; include_completed::Bool=false)
+    if include_completed
+        return length(expand_grid(grid)[2])
+    else
+        task_list = CTExperiments.generate_list(grid; store_list=false)
+        return sum(.!has_results.(task_list))
+    end
+end
 
 """
     expand_grid_to_df(cfg::AbstractGridConfiguration)

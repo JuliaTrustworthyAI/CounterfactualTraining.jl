@@ -243,3 +243,13 @@ function remove_dummy!(cfg::EvaluationConfig)
         @info "Removed dummy experiment: $(cfg.save_dir)"
     end
 end
+
+"""
+    has_results(cfg::EvaluationConfig)::Bool
+
+Checks if the results of an evaluation are available in a file.
+"""
+function has_results(cfg::EvaluationConfig)
+    save_name = default_bmk_name(cfg)
+    return isfile(save_name)
+end
