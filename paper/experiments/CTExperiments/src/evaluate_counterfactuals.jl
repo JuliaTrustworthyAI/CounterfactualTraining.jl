@@ -155,7 +155,10 @@ function evaluate_counterfactuals(
             vertical_splits=vertical_splits,
             concatenate_output=cfg.counterfactual_params.concatenate_output,
             verbose=cfg.counterfactual_params.verbose,
-        ) |> bmk -> compute_divergence(bmk, measure, data; rng=rng, nsamples=cfg.counterfactual_params.ndiv)
+        ) 
+    if Evaluation.includes_divergence_metric(measure)
+        bmk = compute_divergence(bmk, measure, data; rng=rng, nsamples=cfg.counterfactual_params.ndiv)
+    end
 
     rm(interim_storage_path; recursive=true)
     
