@@ -146,7 +146,7 @@ function get_config_from_args(; new_save_dir::Union{Nothing,String}=nothing, ret
 
     if isnothing(new_save_dir)
         # Use old directory:
-        new_save_dir = dirname(fname)
+        new_save_dir = ""
     end
 
     # Load config:
