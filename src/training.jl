@@ -206,7 +206,7 @@ function counterfactual_training(
             acc_plt = ""
             acc_val_plt = ""
             validity_plt = ""
-            if verbose > 1
+            if verbose > 1 && epoch > burnin
                 # Add plots:
                 acc_plt = lineplot(
                     [_log[1] for _log in log]; xlabel="Epochs", ylabel="Accuracy"

@@ -192,7 +192,7 @@ Base.@kwdef struct TrainingParams <: AbstractConfiguration
     lambda_energy_reg::AbstractFloat = CounterfactualTraining.default_energy_lambda[2]
     lambda_adversarial::AbstractFloat = CounterfactualTraining.default_adversarial_lambda
     class_loss::AbstractString = "logitcrossentropy"
-    burnin::AbstractFloat = 0.0f0
+    burnin::AbstractFloat = get_global_param("burnin", 0.0f0)
     nepochs::Int = get_global_param("nepochs", 50)
     generator_params::GeneratorParams = GeneratorParams()
     nce::Int = get_global_param("nce", 100)
@@ -202,7 +202,7 @@ Base.@kwdef struct TrainingParams <: AbstractConfiguration
     opt::AbstractString = "adam"
     parallelizer::AbstractString = ""
     threaded::Bool = true
-    verbose::Int = 1
+    verbose::Int = get_global_param("verbose", 1)
 end
 
 """

@@ -30,7 +30,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
     n_runs::Int = 5
     conv::AbstractString = "max_iter"
     maxiter::Int = 100
-    vertical_splits::Int = 100
+    vertical_splits::Int = get_global_param("vertical_splits", 100)
     store_ce::Bool = false
     parallelizer::AbstractString = "mpi"
     threaded::Bool = false
