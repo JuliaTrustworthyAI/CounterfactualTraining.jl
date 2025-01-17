@@ -1,4 +1,4 @@
-name = "architecture_mlp"
+name = "architecture"
 dim_reduction = []
 generator_type = ["ecco", "generic", "omni", "revise"]
 data = ""
@@ -34,7 +34,7 @@ nce = []
 lr = []
 threaded = []
 class_loss = []
-objective = ["adversarial", "energy", "full", "vanilla"]
+objective = ["full", "vanilla"]
 lambda_class_loss = []
 lambda_energy_diff = []
 burnin = []
