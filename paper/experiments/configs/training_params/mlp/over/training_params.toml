@@ -1,9 +1,9 @@
 name = "training_params"
 dim_reduction = []
 generator_type = ["ecco", "generic", "omni", "revise"]
-data = "lin_sep"
+data = "over"
 model_type = "mlp"
-save_dir = "paper/experiments/output/training_params/mlp/lin_sep"
+save_dir = "paper/experiments/output/training_params/mlp/over"
 
 [data_params]
 datadir = ["paper/experiments/dev"]
