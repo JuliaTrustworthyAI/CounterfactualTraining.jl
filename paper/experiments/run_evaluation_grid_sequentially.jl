@@ -11,12 +11,12 @@ using TaijaParallel
 
 # Setup:
 DotEnv.load!()
+set_global_seed()
 
 # Initialize MPI
 MPI.Init()
 comm = MPI.COMM_WORLD
 rank = MPI.Comm_rank(comm)
-set_global_seed(rank)                       # rank-specific seed
 nprocs = MPI.Comm_size(comm)
 if rank != 0
     global_logger(NullLogger())             # avoid logging from other processes
@@ -54,8 +54,10 @@ MPI.Barrier(comm)  # Ensure all processes reach this point before finishing
 for (i, eval_config) in enumerate(eval_list)
 
     # Setup:
-    @reset eval_config.save_dir = mkpath(joinpath(eval_config.save_dir, "rank_$rank"))
     if rank != 0
+        @reset eval_config.save_dir = mkpath(
+            joinpath(eval_config.save_dir, "dummy_rank_$rank")
+        )   # disable saving evals for non-root ranks
         @reset eval_config.counterfactual_params.verbose = false
     end
 
@@ -66,7 +68,6 @@ for (i, eval_config) in enumerate(eval_list)
     else
         @info "Rank $(rank): Running evaluation $i of $(length(eval_list))."
         bmk = evaluate_counterfactuals(eval_config)
-        bmk.evaluation.rank .= rank
     end
 
     @info "Rank $(rank): Done evaluating all counterfactuals. Waiting at barrier ..."
@@ -88,8 +89,8 @@ for (i, eval_config) in enumerate(eval_list)
 
         # Set up evaluation work dir:
         set_work_dir(eval_grid, eval_config, ENV["EVAL_WORK_DIR"], ENV["OUTPUT_DIR"])
-    # else
-    #     rm(eval_config.save_dir; recursive=true)
+    else
+        rm(eval_config.save_dir; recursive=true)
     end
 end
 
