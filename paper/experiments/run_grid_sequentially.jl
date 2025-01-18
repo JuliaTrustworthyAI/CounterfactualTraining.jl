@@ -28,7 +28,6 @@ else
 
     # Generate list of experiments and run them:
     exper_list = generate_list(exper_grid) |> li -> li[needs_results.(li)]
-    length(exper_list) > 0 || error("No experiments to run.")
     @info "Running $(length(exper_list)) experiments ..."
 
     # Adjust parallelizer to MPI if grid is run sequentially:
