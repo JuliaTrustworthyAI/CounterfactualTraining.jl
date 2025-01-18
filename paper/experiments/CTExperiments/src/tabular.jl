@@ -14,7 +14,7 @@ Keyword container for the `GMSC` data set. Can specify the number of samples `n`
 """
 Base.@kwdef struct GMSC <: Dataset
     n_train::Int = 12371
-    batchsize::Int = 1024
+    batchsize::Int = 1000
     n_validation::Int = 1000
     train_test_ratio::Float32 = 0.8
     train_test_seed::Int = get_global_seed()
@@ -36,7 +36,7 @@ Keyword container for the `CaliHousing` (california housing) data set. Can speci
 """
 Base.@kwdef struct CaliHousing <: Dataset
     n_train::Int = 15504
-    batchsize::Int = 1024
+    batchsize::Int = 1000
     n_validation::Int = 1000
     train_test_ratio::Float32 = 0.8
     train_test_seed::Int = get_global_seed()
@@ -58,7 +58,7 @@ Keyword container for the `Adult` data set.
 """
 Base.@kwdef struct Adult <: Dataset
     n_train::Int = 25049
-    batchsize::Int = 1024
+    batchsize::Int = 1000
     n_validation::Int = 1000
     train_test_ratio::Float32 = 0.8
     train_test_seed::Int = get_global_seed()
