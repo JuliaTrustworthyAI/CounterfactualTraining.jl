@@ -26,7 +26,11 @@ function get_global_param(argname::String, defaultval::T) where T <: Any
         arg = ARGS[(x -> contains(x, "--$(argname)=")).(ARGS)]
         @assert length(arg) == 1 "Please provide exactly one value for $(argname)."
         val = replace(arg[1], "--$(argname)=" => "")
-        return parse(T, val)
+        if !(T <: Nothing) 
+            return parse(T, val)
+        else
+            return val
+        end
     else
         return defaultval
     end

@@ -126,7 +126,7 @@ function get_config_from_args(; new_save_dir::Union{Nothing,String}=nothing, ret
         input = readline()
         println("Using config file: $input")
         push!(ARGS, "--config=$input")
-        ENV["config"] = input
+        ENV["CONFIG"] = input
     end
 
     # Command line:
@@ -136,7 +136,7 @@ function get_config_from_args(; new_save_dir::Union{Nothing,String}=nothing, ret
         fname = replace(config_arg[1], "--config=" => "")
         @assert isfile(fname) "Config file not found: $fname"
     else
-        fname = ENV["config"]
+        fname = ENV["CONFIG"]
     end
 
     # Do not return adjust path:

@@ -8,9 +8,9 @@ using TaijaPlotting
 Base.@kwdef struct PlotParams
     x::Union{Nothing,String} = nothing
     byvars::Union{Nothing,Vector{String}} = nothing
-    colorvar::Union{Nothing,String} = nothing
-    rowvar::Union{Nothing,String} = nothing
-    colvar::Union{Nothing,String} = nothing
+    colorvar::Union{Nothing,String} = get_global_param("colorvar", nothing)
+    rowvar::Union{Nothing,String} = get_global_param("rowvar", nothing)
+    colvar::Union{Nothing,String} = get_global_param("colvar", nothing)
 end
 
 function (params::PlotParams)()
