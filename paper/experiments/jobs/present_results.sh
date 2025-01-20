@@ -2,10 +2,10 @@
 #
 #SBATCH --job-name="Present results"
 #SBATCH --partition=compute
-#SBATCH --time=00:10:00
+#SBATCH --time=00:15:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem-per-cpu=2G
+#SBATCH --mem-per-cpu=4G
 #SBATCH --account=research-eemcs-insy
 #SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT
 
