@@ -7,7 +7,7 @@ using TaijaPlotting
 
 Base.@kwdef struct PlotParams
     x::Union{Nothing,String} = nothing
-    byvars::Union{Nothing,Vector{String}} = nothing
+    byvars::Union{Nothing,String,Vector{String}} = nothing
     colorvar::Union{Nothing,String} = get_global_param("colorvar", nothing)
     rowvar::Union{Nothing,String} = get_global_param("rowvar", nothing)
     colvar::Union{Nothing,String} = get_global_param("colvar", nothing)
@@ -101,7 +101,7 @@ end
 function aggregate_data(
     df::DataFrame,
     y::String,
-    byvars::Union{Nothing,Vector{String}}=nothing;
+    byvars::Union{Nothing,String,Vector{String}}=nothing;
     byvars_must_include::Union{Nothing,Vector{String}}=nothing,
 )
     df = filter(row -> all(x -> !(x isa Number && (isinf(x))), row), df)
@@ -111,6 +111,11 @@ function aggregate_data(
 
     # Aggregate:
     if !isnothing(byvars)
+
+        if isa(byvars, String)
+            byvars = [byvars]
+        end
+
         # Aggregate data by columns specified in `byvars`:
         if !isnothing(byvars_must_include)
             byvars = union(byvars_must_include, byvars)
@@ -128,7 +133,7 @@ end
     aggregate_logs(
         cfg::EvaluationConfig;
         y::String="acc_val",
-        byvars::Union{Nothing,Vector{String}}=nothing,
+        byvars::Union{Nothing,String,Vector{String}}=nothing,
     )
 
 Aggregate logs variable `y` from an experiment grid by columns specified in `byvars`.
@@ -143,7 +148,7 @@ end
 
 """
     aggregate_logs(
-        df::DataFrame; y::String, byvars::Union{Nothing,Vector{String}}=nothing
+        df::DataFrame; y::String, byvars::Union{Nothing,String,Vector{String}}=nothing
     )
 
 Aggregate data in `df` variable `y` from an experiment grid by columns specified in `byvars`.
@@ -153,11 +158,14 @@ function aggregate_logs(
     df_meta::DataFrame,
     logs::DataFrame;
     y::String,
-    byvars::Union{Nothing,Vector{String}}=nothing,
+    byvars::Union{Nothing,String,Vector{String}}=nothing,
 )
     # Assertions:
     valid_y = valid_y_logs(logs)
     @assert y in valid_y "Variable `y` must be one of the following: $valid_y."
+    if isa(byvars, String)
+        byvars = [byvars]
+    end
     @assert byvars isa Nothing || all(col -> col in names(df_meta), byvars) "Columns specified in `byvars` must be one of the following: $(names(df_meta))."
 
     # Aggregate data:
@@ -176,7 +184,7 @@ end
     plot_errorbar_logs(
         cfg::EvaluationConfig;
         y::String="acc_val",
-        byvars::Union{Nothing,Vector{String}}=nothing,
+        byvars::Union{Nothing,String,Vector{String}}=nothing,
         colorvar::Union{Nothing,String}=nothing,
         rowvar::Union{Nothing,String}=nothing,
         colvar::Union{Nothing,String}=nothing,
@@ -203,7 +211,7 @@ function plot_errorbar_logs(
     cfg::EvalConfigOrGrid;
     x::Nothing=nothing,
     y::String="acc_val",
-    byvars::Union{Nothing,Vector{String}}=nothing,
+    byvars::Union{Nothing,String,Vector{String}}=nothing,
     colorvar::Union{Nothing,String}=nothing,
     rowvar::Union{Nothing,String}=nothing,
     colvar::Union{Nothing,String}="generator_type",
@@ -238,6 +246,9 @@ function plot_errorbar_logs(
 end
 
 function gather_byvars(byvars, args...)
+    if isa(byvars, String)
+        byvars = [byvars]
+    end
     byvars = isnothing(byvars) ? [byvars] : byvars
     byvars = unique([byvars..., args...])
     return byvars = if length(byvars) == 1 && isnothing(byvars[1])
@@ -271,7 +282,7 @@ end
         df_meta::DataFrame,
         df_eval::DataFrame;
         y::String="plausibility_distance_from_target",
-        byvars::Union{Nothing,Vector{String}}=nothing,
+        byvars::Union{Nothing,String,Vector{String}}=nothing,
     )
 
 Aggregate the results from a single counterfactual evaluation.
@@ -281,11 +292,14 @@ function aggregate_ce_evaluation(
     df_meta::DataFrame,
     df_eval::DataFrame;
     y::String="plausibility_distance_from_target",
-    byvars::Union{Nothing,Vector{String}}=nothing,
+    byvars::Union{Nothing,String,Vector{String}}=nothing,
 )
     # Assertions:
     valid_y = valid_y_ce(df)
     @assert y in valid_y "Variable `y` must be one of the following: $valid_y."
+    if isa(byvars, String)
+        byvars = [byvars]
+    end
     @assert byvars isa Nothing || all(col -> col in names(df_meta), byvars) "Columns specified in `byvars` must be one of the following: $(names(df_meta))."
 
     df = df[df.variable .== y, :]
@@ -314,7 +328,7 @@ function boxplot_ce(
     df_eval::DataFrame;
     x::Union{Nothing,String}="generator_type",
     y::String="plausibility_distance_from_target",
-    byvars::Union{Nothing,Vector{String}}=nothing,
+    byvars::Union{Nothing,String,Vector{String}}=nothing,
     colorvar::Union{Nothing,String}=nothing,
     rowvar::Union{Nothing,String}=nothing,
     colvar::Union{Nothing,String}=nothing,
@@ -362,9 +376,14 @@ function aggregate_counterfactuals(
     df::DataFrame,
     df_meta::DataFrame,
     df_eval::DataFrame;
-    byvars::Union{Nothing,Vector{String}}=nothing,
+    byvars::Union{Nothing,String,Vector{String}}=nothing,
     byvars_must_include=["factual", "target", "generator_type"],
 )
+
+    if isa(byvars, String)
+        byvars = [byvars]
+    end
+
     # Assertions:
     @assert byvars isa Nothing || all(col -> col in names(df_meta), byvars) "Columns specified in `byvars` must be one of the following: $(names(df_meta))."
 
@@ -405,7 +424,7 @@ end
 function plot_ce(
     dataset::Dataset,
     eval_config::EvaluationConfig;
-    byvars::Union{Nothing,Vector{String}}=nothing,
+    byvars::Union{Nothing,String,Vector{String}}=nothing,
     axis=default_axis,
     dpi=300,
     save_dir=nothing,
@@ -418,6 +437,10 @@ function plot_ce(
     generators = sort(unique(df_agg.generator_type))
     factuals = sort(unique(df_agg.factual))
     targets = sort(unique(df_agg.target))
+
+    if isa(byvars, String)
+        byvars = [byvars]
+    end
 
     if isnothing(byvars)
         byvars = [byvars]
