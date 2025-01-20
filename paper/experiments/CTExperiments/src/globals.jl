@@ -45,18 +45,3 @@ function get_global_param(argname::String, defaultval::T) where {T<:Any}
         return defaultval
     end
 end
-
-# function get_global_param(argname::String, defaultval::T) where T <: Any
-#     if any((x -> contains(x, "--$(argname)=")).(ARGS))
-#         arg = ARGS[(x -> contains(x, "--$(argname)=")).(ARGS)]
-#         @assert length(arg) == 1 "Please provide exactly one value for $(argname)."
-#         val = replace(arg[1], "--$(argname)=" => "")
-#         if !(T <: Nothing) 
-#             return parse(T, val)
-#         else
-#             return val
-#         end
-#     else
-#         return defaultval
-#     end
-# end
