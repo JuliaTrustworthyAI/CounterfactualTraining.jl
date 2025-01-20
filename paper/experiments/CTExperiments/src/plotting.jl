@@ -242,7 +242,7 @@ function plot_errorbar_logs(
     end
 
     plt = draw(plt; facet=facet, axis=axis)
-    return plt
+    return plt, df_agg
 end
 
 function gather_byvars(byvars, args...)
@@ -356,7 +356,7 @@ function boxplot_ce(
 
     plt = draw(plt; facet=facet, axis=axis)
 
-    return plt
+    return plt, df_agg
 end
 
 function aggregate_counterfactuals(eval_grid::EvaluationGrid; kwrgs...)

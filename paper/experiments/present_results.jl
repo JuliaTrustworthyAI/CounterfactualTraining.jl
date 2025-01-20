@@ -1,5 +1,6 @@
 using CTExperiments
 using CTExperiments.CairoMakie
+using CTExperiments.CSV
 using CTExperiments.DataFrames
 using DotEnv
 
@@ -34,7 +35,7 @@ params = PlotParams(;
 )
 final_save_dir = save_dir(params, output_dir; prefix)
 for y in valid_y
-    plt = plot_errorbar_logs(eval_grid; y=y, params()...)
+    plt, _ = plot_errorbar_logs(eval_grid; y=y, params()...)
     display(plt)
     save(joinpath(final_save_dir, "$y.png"), plt; px_per_unit=3)
 end
@@ -53,9 +54,10 @@ params = PlotParams(;
 )
 final_save_dir = save_dir(params, output_dir; prefix)
 for y in valid_y
-    plt = boxplot_ce(all_data...; y=y, params()...)
+    plt, tbl = boxplot_ce(all_data...; y=y, params()...)
     display(plt)
     save(joinpath(final_save_dir, "$y.png"), plt; px_per_unit=3)
+    CSV.write(joinpath(final_save_dir, "$y.csv"), tbl)
 end
 
 # # Plot images:
