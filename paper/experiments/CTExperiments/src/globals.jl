@@ -1,3 +1,5 @@
+using JSON
+
 function get_ce_measures(;
     use_mmd=get_global_param("use_mmd", true),
     length_scale=get_global_param("length_scale", 5.0),
@@ -21,17 +23,40 @@ function get_ce_measures(;
     return measures
 end
 
-function get_global_param(argname::String, defaultval::T) where T <: Any
+function get_global_param(argname::String, defaultval::T) where {T<:Any}
     if any((x -> contains(x, "--$(argname)=")).(ARGS))
         arg = ARGS[(x -> contains(x, "--$(argname)=")).(ARGS)]
         @assert length(arg) == 1 "Please provide exactly one value for $(argname)."
         val = replace(arg[1], "--$(argname)=" => "")
-        if !(T <: Nothing) 
-            return parse(T, val)
+
+        # Check if the value starts with [ to detect array format
+        if startswith(val, "[") && endswith(val, "]")
+            # Parse as JSON if it's an array format
+            return JSON.parse(val)
         else
-            return val
+            # Original behavior for single values
+            if !(T <: Nothing)
+                return parse(T, val)
+            else
+                return val
+            end
         end
     else
         return defaultval
     end
 end
+
+# function get_global_param(argname::String, defaultval::T) where T <: Any
+#     if any((x -> contains(x, "--$(argname)=")).(ARGS))
+#         arg = ARGS[(x -> contains(x, "--$(argname)=")).(ARGS)]
+#         @assert length(arg) == 1 "Please provide exactly one value for $(argname)."
+#         val = replace(arg[1], "--$(argname)=" => "")
+#         if !(T <: Nothing) 
+#             return parse(T, val)
+#         else
+#             return val
+#         end
+#     else
+#         return defaultval
+#     end
+# end

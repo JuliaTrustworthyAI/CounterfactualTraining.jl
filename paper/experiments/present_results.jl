@@ -59,10 +59,10 @@ for y in valid_y
 end
 
 # # Plot images:
+plot_ce(eval_grid; save_dir=final_save_dir, byvars=get_global_param("byvars_ce", nothing))
 # exper_list = load_list(exper_grid)
 # eval_list = load_list(eval_grid)
 # plot_ce(exper_list; layout=(4, 3))
 # plot_ce(exper_list, eval_list[1]; layout=(4, 3), target=2)
-plot_ce(eval_grid; save_dir=final_save_dir, byvars=["mutability"])
 
 @info "Images stored in $final_save_dir/"

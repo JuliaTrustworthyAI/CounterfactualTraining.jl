@@ -267,7 +267,7 @@ uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 version = "0.10.15"
 
 [[deps.CTExperiments]]
-deps = ["Accessors", "AlgebraOfGraphics", "CSV", "CairoMakie", "CounterfactualExplanations", "CounterfactualTraining", "DataFrames", "Flux", "JLD2", "KernelDensity", "KernelFunctions", "Logging", "MPI", "MultivariateStats", "Plots", "Random", "Serialization", "StatisticalMeasures", "StatsBase", "TOML", "TaijaData", "TaijaParallel", "TaijaPlotting", "UUIDs"]
+deps = ["Accessors", "AlgebraOfGraphics", "CSV", "CairoMakie", "CounterfactualExplanations", "CounterfactualTraining", "DataFrames", "Flux", "JLD2", "JSON", "KernelDensity", "KernelFunctions", "Logging", "MPI", "MultivariateStats", "Plots", "Random", "Serialization", "StatisticalMeasures", "StatsBase", "TOML", "TaijaData", "TaijaParallel", "TaijaPlotting", "UUIDs"]
 path = "CTExperiments"
 uuid = "5eca96c7-09a4-4424-a5a1-dee2b4aead1e"
 version = "0.0.0"
