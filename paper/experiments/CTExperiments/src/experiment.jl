@@ -143,7 +143,7 @@ function setup(exper::AbstractExperiment, data::Dataset, model::ModelType)
 
     # Data:
     ce_data = get_ce_data(data)
-    val_size = data.n_validation / (ntotal(data) * data.train_test_ratio)
+    val_size = data.n_validation / (data.n_validation + data.n_train)
     train_set, val_set, _ = train_val_split(data, ce_data, val_size)
 
     # Model:
