@@ -12,8 +12,6 @@ exper_grid = ExperimentGrid(eval_grid.grid_file)
 local_save_dir = get_work_dir(eval_grid, ENV["EVAL_WORK_DIR"], ENV["OUTPUT_DIR"])
 output_dir = results_dir(eval_grid)
 
-@info "Supplied ARGS: $ARGS"
-
 # Get variables:
 colorvar = get_global_param("colorvar", nothing)
 rowvar = get_global_param("rowvar", nothing)
@@ -65,6 +63,6 @@ end
 # eval_list = load_list(eval_grid)
 # plot_ce(exper_list; layout=(4, 3))
 # plot_ce(exper_list, eval_list[1]; layout=(4, 3), target=2)
-# plot_ce(eval_grid; save_dir=final_save_dir, byvars=["objective"])
+plot_ce(eval_grid; save_dir=final_save_dir, byvars=["mutability"])
 
 @info "Images stored in $final_save_dir/"
