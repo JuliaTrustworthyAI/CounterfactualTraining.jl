@@ -104,10 +104,14 @@ function aggregate_data(
     byvars::Union{Nothing,String,Vector{String}}=nothing;
     byvars_must_include::Union{Nothing,Vector{String}}=nothing,
 )
+
+    # Filter:
     df = filter(row -> all(x -> !(x isa Number && (isinf(x))), row), df)
-    df = df[.!isnan.(df[:,y]), :]
+    keep_rows = [!any(isnan.(x)) for x in df[:,y]]
+    df = df[keep_rows, :]
     if "value" in names(df)
-        df = df[.!isnan.(df.value),:]
+        keep_rows = [!any(isnan.(x)) for x in df.value]
+        df = df[keep_rows,:]
     end
 
     # Aggregate:
