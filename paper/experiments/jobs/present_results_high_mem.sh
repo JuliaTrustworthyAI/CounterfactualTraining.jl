@@ -5,7 +5,7 @@
 #SBATCH --time=00:15:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=25G
+#SBATCH --mem-per-cpu=25G
 #SBATCH --account=research-eemcs-insy
 #SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT
 
