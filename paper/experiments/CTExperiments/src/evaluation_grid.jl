@@ -316,15 +316,26 @@ function get_data_seed(grid::EvalConfigOrGrid)
     return _seed[1]
 end
 
+function get_data_params(grid::EvalConfigOrGrid, param::String)
+    data_params = ExperimentGrid(grid.grid_file).data_params
+    @assert param in keys(data_params)
+    val = data_params[param] |> unique
+    println(val)
+    @assert length(val) == 1 "Did you specify multiple values for $param?"
+    return val[1]
+end
+
 function get_ce_data(cfg::AbstractEvaluationConfig)
     return (dt -> CounterfactualData(dt...))(get_data(cfg))
 end
 
 function get_data(cfg::AbstractEvaluationConfig)
-    # Get all available test data:
+    # Get data:
     data = (
         dataset_type -> (get_data(
-            dataset_type(train_test_seed = get_data_seed(cfg));
+            dataset_type(;
+                train_test_seed=get_data_params(cfg, "train_test_seed"),
+            );
             n=nothing,
             test_set=cfg.test_time,
         ))

@@ -472,7 +472,8 @@ function _plot_over_generators(
     for (i, generator) in enumerate(generators)
         if !isnothing(variable)
             df_local = df_agg[
-                df_agg.generator_type .== generator .&& df_agg[!, variable] .== val, :,
+                df_agg.generator_type .== generator .&& [x == val for x in df_agg[!, variable]],
+                :,
             ]
         else
             df_local = df_agg[df_agg.generator_type .== generator, :]

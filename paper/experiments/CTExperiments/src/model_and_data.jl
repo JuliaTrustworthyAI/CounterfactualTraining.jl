@@ -109,6 +109,7 @@ function take_subset(X, y, n; rng::AbstractRNG=Random.default_rng())
 end
 
 function get_ce_data(data::Dataset, n=nothing; test_set::Bool=false, train_only::Bool=false)
+
     ce_data = CounterfactualData(
         get_data(data; n=n, test_set=test_set)...;
         domain=get_domain(data),
