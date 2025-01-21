@@ -56,7 +56,10 @@ struct EvaluationGrid <: AbstractGridConfiguration
             mkpath(save_dir)
         end
 
-        to_toml(grid, default_grid_config_name(grid))
+        if !isfile(default_grid_config_name(grid)) &&
+            !isfile(joinpath(save_dir, "template_eval_grid_config.toml"))
+            to_toml(grid, default_grid_config_name(grid))
+        end
 
         return grid
     end
