@@ -54,7 +54,7 @@ struct EvaluationGrid <: AbstractGridConfiguration
         # If grid file exists already, return that one:
         if isfile(default_grid_config_name(grid))
             @info "Using existing config file: $(default_grid_config_name(grid))."
-            grid = EvaluationGrid(default_eval_config_name(grid))
+            grid = EvaluationGrid(default_grid_config_name(grid))
             return grid
         end
 
