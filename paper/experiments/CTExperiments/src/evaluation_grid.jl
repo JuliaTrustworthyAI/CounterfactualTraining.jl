@@ -33,25 +33,22 @@ struct EvaluationGrid <: AbstractGridConfiguration
 
         # If grid file doesn't already exist, append parameters:
         fname = default_grid_config_name(save_dir)
-        if !isfile(fname)
-            # Counterfactual params:
-            counterfactual_params = append_params(
-                counterfactual_params, CounterfactualParams()
-            )
 
-            # Generator parameters:
-            generator_params = append_params(generator_params, GeneratorParams())
-            if inherit
-                inherited_generator_params = CTExperiments.from_toml(grid_file)["generator_params"]
-                merged_params = Dict{String,Any}()
-                for (k, v) in generator_params
-                    merged_values = unique([inherited_generator_params[k]..., v...])
-                    merged_params[k] = sort(merged_values)
-                end
-                generator_params = merged_params
+        # Counterfactual params:
+        counterfactual_params = append_params(
+            counterfactual_params, CounterfactualParams()
+        )
+
+        # Generator parameters:
+        generator_params = append_params(generator_params, GeneratorParams())
+        if inherit && !isfile(fname)
+            inherited_generator_params = CTExperiments.from_toml(grid_file)["generator_params"]
+            merged_params = Dict{String,Any}()
+            for (k, v) in generator_params
+                merged_values = unique([inherited_generator_params[k]..., v...])
+                merged_params[k] = sort(merged_values)
             end
-        else
-            @info "Using existing config found at $(fname)."
+            generator_params = merged_params
         end
 
         # Instantiate grid: 
