@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Version [0.0.3] 
+
+### Results
+
+- Effect of mutability constraints is there but not sure about direction yet
+
+### First Grid Search
+
+#### Generator Parameters
+
+
+
+### Engineering
+
+- A sense of the scale of things:
+   - **One grid search** for a single dataset: 
+       1. *Training*: 600 experiments $\times$ 50 iterations $\times$ 300 counterfactuals -> 9_000_000 counterfactuals
+       2. *Evaluation*: 600 experiments $\times$ 12 evaluations $\times$ 5 rounds  $\times$ 100 counterfactuals -> 3_600_000 counterfactuals ($\times$ 5 metrics)
+       3. With around 50 search steps: **650 million backpropagations**
+- Cannot use MMD during grid search, simply too much memory required even for synthetic data
+
 ## Version [0.0.2] - 2025-01-13
 
 ### Engineering
