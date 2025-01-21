@@ -51,11 +51,16 @@ struct EvaluationGrid <: AbstractGridConfiguration
         # Instantiate grid: 
         grid = new(grid_file, save_dir, counterfactual_params, generator_params, test_time, inherit)
 
+        # If grid file exists already, return that one:
+        if isfile(default_grid_config_name(grid))
+            @info "Using existing config file: $(default_grid_config_name(grid))."
+            grid = EvaluationGrid(default_eval_config_name(grid))
+        end
+
         # Store grid config:
         if !isdir(save_dir)
             mkpath(save_dir)
-        end
-
+        end  
         if !isfile(default_grid_config_name(grid)) &&
             !isfile(joinpath(save_dir, "template_eval_grid_config.toml"))
             to_toml(grid, default_grid_config_name(grid))
