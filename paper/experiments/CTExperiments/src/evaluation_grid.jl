@@ -31,40 +31,39 @@ struct EvaluationGrid <: AbstractGridConfiguration
         grid_file, save_dir, counterfactual_params, generator_params, test_time, inherit
     )
 
-        # Counterfactual params:
-        counterfactual_params = append_params(
-            counterfactual_params, CounterfactualParams()
-        )
+        # If grid file doesn't already exist, append parameters:
+        fname = default_grid_config_name(save_dir)
+        if !isfile(fname)
+            # Counterfactual params:
+            counterfactual_params = append_params(
+                counterfactual_params, CounterfactualParams()
+            )
 
-        # Generator parameters:
-        generator_params = append_params(generator_params, GeneratorParams())
-        if inherit
-            inherited_generator_params = CTExperiments.from_toml(grid_file)["generator_params"]
-            merged_params = Dict{String,Any}()
-            for (k, v) in generator_params
-                merged_values = unique([inherited_generator_params[k]..., v...])
-                merged_params[k] = sort(merged_values)
+            # Generator parameters:
+            generator_params = append_params(generator_params, GeneratorParams())
+            if inherit
+                inherited_generator_params = CTExperiments.from_toml(grid_file)["generator_params"]
+                merged_params = Dict{String,Any}()
+                for (k, v) in generator_params
+                    merged_values = unique([inherited_generator_params[k]..., v...])
+                    merged_params[k] = sort(merged_values)
+                end
+                generator_params = merged_params
             end
-            generator_params = merged_params
+        else
+            @info "Using existing config found at $(fname)."
         end
 
         # Instantiate grid: 
         grid = new(grid_file, save_dir, counterfactual_params, generator_params, test_time, inherit)
 
-        # If grid file exists already, return that one:
-        if isfile(default_grid_config_name(grid))
-            @info "Using existing config file: $(default_grid_config_name(grid))."
-            grid = EvaluationGrid(default_grid_config_name(grid))
-            return grid
-        end
-
         # Store grid config:
         if !isdir(save_dir)
             mkpath(save_dir)
         end  
-        if !isfile(default_grid_config_name(grid)) &&
+        if !isfile(fname) &&
             !isfile(joinpath(save_dir, "template_eval_grid_config.toml"))
-            to_toml(grid, default_grid_config_name(grid))
+            to_toml(grid, fname)
         end
 
         return grid
@@ -164,7 +163,11 @@ end
 Returns the default name for the configuration file associated with this grid.
 """
 function default_grid_config_name(grid::EvaluationGrid)
-    return joinpath(grid.save_dir, "evaluation_grid_config.toml")
+    return default_grid_config_name(grid.save_dir)
+end
+
+function default_grid_config_name(save_dir::String)
+    return joinpath(save_dir, "evaluation_grid_config.toml")
 end
 
 """
