@@ -125,7 +125,11 @@ end
 
 Outer constructor dispatched over `fname::String`.
 """
-function EvaluationGrid(fname::String; new_save_dir::Union{Nothing,String}=nothing)
+function EvaluationGrid(
+    fname::String;
+    new_save_dir::Union{Nothing,String}=nothing,
+    inherit::Bool=get_global_param("inherit", true),
+)
     @assert isfile(fname) "Evaluation grid configuration file not found."
     dict = from_toml(fname)
     if !haskey(dict, "name")
@@ -136,7 +140,7 @@ function EvaluationGrid(fname::String; new_save_dir::Union{Nothing,String}=nothi
         eval_grid = (kwrgs -> EvaluationGrid(; kwrgs...))(CTExperiments.to_ntuple(dict))
     else
         @info "Supplied file path to `ExperimentGrid`. Using default parameters for `EvaluationGrid`."
-        eval_grid = (exper_grid -> EvaluationGrid(exper_grid))(ExperimentGrid(fname))
+        eval_grid = (exper_grid -> EvaluationGrid(exper_grid; inherit=inherit))(ExperimentGrid(fname))
     end
     if !isnothing(new_save_dir)
         to_toml(eval_grid, default_grid_config_name(eval_grid))     # store in new save directory
