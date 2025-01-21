@@ -121,7 +121,7 @@ function get_config_from_args(; new_save_dir::Union{Nothing,String}=nothing, ret
     # Interactive sessions:
     if isinteractive() &&
         !any((x -> contains(x, "--config=")).(ARGS)) &&
-        !haskey(ENV, "config")
+        !haskey(ENV, "CONFIG")
         println("Specify the path to your config file.")
         input = readline()
         println("Using config file: $input")
