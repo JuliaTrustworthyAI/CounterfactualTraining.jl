@@ -9,6 +9,8 @@ using TaijaPlotting
 include("plots.jl")
 include("tables.jl")
 
+export tabulate_results
+
 function useful_byvars(df_meta::DataFrame)
     return names(df_meta)[findall([length(unique(x)) != 1 for x in eachcol(df_meta)])]
 end

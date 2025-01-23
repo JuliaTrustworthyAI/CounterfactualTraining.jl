@@ -23,11 +23,11 @@ struct Gravitational <: AbstractGeneratorType end
 
 struct Omniscient <: AbstractGeneratorType end
 
-get_generator_name(gen::ECCo) = "ecco"
-get_generator_name(gen::Generic) = "generic"
-get_generator_name(gen::REVISE) = "revise"
-get_generator_name(gen::Gravitational) = "gravi"
-get_generator_name(gen::Omniscient) = "omni"
+get_generator_name(gen::ECCo; pretty::Bool=false) = pretty ? "ECCo" : "ecco"
+get_generator_name(gen::Generic; pretty::Bool=false) = pretty ? "Generic" : "generic"
+get_generator_name(gen::REVISE; pretty::Bool=false) = pretty ? "REVISE" : "revise"
+get_generator_name(gen::Gravitational; pretty::Bool=false) = pretty ? "Gravitational" : "gravi"
+get_generator_name(gen::Omniscient; pretty::Bool=false) = pretty ? "Omniscient" : "omni"
 
 """
     generator_types
