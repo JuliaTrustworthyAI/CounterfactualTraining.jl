@@ -28,7 +28,7 @@ include("grid.jl")
 include("experiment.jl")
 include("evaluate.jl")
 include("evaluation_grid.jl")
-include("plotting.jl")
+include("presentation.jl")
 
 export Experiment, run_training
 export make_dummy, remove_dummy!, isdummy
