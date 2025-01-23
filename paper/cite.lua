@@ -1,11 +1,11 @@
-function Cite(citations)
-    local latex_cites = {}
-    for _, citation in ipairs(citations) do
-      table.insert(latex_cites, '\\cite{' .. citation.id .. '}')
+return {
+    Cite = function(el)
+      if quarto.doc.is_format("latex") then
+        local cites = el.citations:map(function(cite)
+          return cite.id
+        end)
+        local citesStr = "\\cite{" .. table.concat(cites, ", ") .. "}"
+        return pandoc.RawInline("latex", citesStr)
+      end
     end
-    -- Return the constructed LaTeX citations as a RawInline element
-    return pandoc.RawInline('latex', table.concat(latex_cites, ', '))
-end
-  
-
-  
+}
