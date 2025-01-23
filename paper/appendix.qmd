@@ -1,4 +1,9 @@
 ---
 format:
-  latex: default
+  latex:
+    template: bare.tex
 ---
+
+## Appendix
+
+Here's my awesome appendix.

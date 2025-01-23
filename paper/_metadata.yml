@@ -1,0 +1,5 @@
+bibliography: bib.bib
+format:
+  latex:
+    template: bare.tex
+    filters: [cite.lua]

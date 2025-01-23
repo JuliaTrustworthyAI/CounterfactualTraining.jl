@@ -1,0 +1,55 @@
+# Related Literature {#sec-lit}
+
+## Background on Counterfactual Explanations
+
+## Learning Representations
+
+> For example, joint-energy models
+
+## Generalization and Robustness
+
+@sauer2021counterfactual generate counterfactual images for MNIST and ImageNet through independent mechanisms (IM): each IM learns class-conditional input distributions over a specific lower-dimensional, semantically meaningful factor, such as *texture*, *shape* and *background*. The demonstrate that using these generated counterfactuals during classifier training improves model robustness. Similarly, @abbasnejad2020counterfactual argue that counterfactuals represent potentially useful training data in machine learning, especially in supervised settings where inputs may be reasonably mapped to multiple outputs. They, too, demonstrate the augmenting the training data of image classifiers can improve generalization. 
+
+@teney2020learning propose an approach using counterfactuals in training that does not rely on data augmentation: they argue that counterfactual pairs typically already exist in training datasets. Specifically, their approach relies on, firstly, identifying similar input samples with different annotations and, secondly, ensuring that the gradient of the classifier aligns with the vector between pairs of counterfactual inputs using the cosine distance as a loss function (referred to as *gradient supervision*)
+
+> This might be useful for our task as well... 
+
+In the natural language processing (NLP) domain, counterfactuals have similarly been used to improve models through data augmentation: \cite{wu2021polyjuice}, propose POLYJUICE, a general-purpose counterfactual generator for language models. They demonstrate empirically that augmenting training data through POLYJUICE counterfactuals improves robustness in a number of NLP tasks. 
+
+## Link to Adversarial Training
+
+@freiesleben2022intriguing propose two definitional differences between Adversarial Examples (AE) and Counterfactual Explanations (CE): firstly, and more importantly according to the authors, the term AE implies missclassification, which is not the case for CE;
+
+> this might be a useful notion for use to distinguish between adversarials and explanations during training
+
+secondly, they argue that closeness plays a more critical role in the context of CE but confess that even counterfactuals that are not close might be relevant explanations. @pawelczyk2022exploring show that CE and AE are equivalent under certain conditions and derive upper bounds on the distances between them. 
+
+## Closely Related
+
+@guo2023counternet are the first to propose end-to-end training pipeline that includes counterfactual explanations as part of the training prodeduce. In particular, they propose a specific network architecture that includes a predictor and CE generator network,
+
+> akin a GAN?
+
+where the parameters of the CE generator network are learnable. Counterfactuals are generated during each training iteration and fed back to the predictor network (\textcolor{red}{here we are aligned}). In contrast, we impose no restrictions on the neural network architecture at all.
+
+> to ensure the one-hot encoding of categorical features is maintained, they simple use softmax (might be interesting for CE.jl)
+
+Interestingly, the authors find that their approach is sensitive to the choice of the loss function: only MSE seems to lead to good performance. They also demonstrate theoretically, that the objective function is difficult to optimize due to divergent gradients and suffers from poor adversarial robustness. 
+
+> because partial gradients with respect to the classification loss component and the counterfactual validity component point in opposite directions
+
+To mitigate these issues, the authors use block-wise gradient descent: they first update with respect to classification loss and then use a second update with respect to the other loss components
+
+> this might be useful for our task as well
+
+@ross2021learning propose a way to train models that are guaranteed to provide recourse for individuals with high probability. The approach builds on adversarial training,
+
+> here we are aligned
+
+where in this context adversarial examples are actively encouraged to exist, but only target attacks with respect to the positive class. The proposed method allows for imposing a set of actionable recourse ex-ante: for example, users can impose mutability constraints for features. 
+
+> here we are aligned
+
+> To solve their objective function more efficiently, they use a first-order Taylor approximation to approximate the recourse loss component (might be applicable in our case
+
+@luu2023counterfactual introduce Counterfactual Adversarial Training (CAT) with intention of improving generalization and robustness of language models. Specifically, they propose to proceed as follows: firstly, identify training samples that are subject to high predictive uncertainty (entropy); secondly, generate counterfactual explanations for those samples; and, finally, finetune the model on the augmented dataset that includes the generated counterfactuals.
