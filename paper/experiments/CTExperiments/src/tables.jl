@@ -9,6 +9,7 @@ function tabulate_results(
     backend::Val=Val(:text),
     kwrgs...
 )
+    df = deepcopy(df)
 
     # Highlighters:
     hls = (value_highlighter(df, value_var; backend=backend, kwrgs...),)
