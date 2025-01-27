@@ -36,23 +36,22 @@ gen_params_dir = joinpath(results_dir, "gen_params/mlp")
 df = CSV.read("$(gen_params_dir)/lin_sep/evaluation/results/ce/objective---lambda_energy_exper---lambda_energy_eval/plausibility_distance_from_target.csv", DataFrame)
 df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> 
   gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>
-  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) |>
-  df -> subset(df, :lambda_energy_exper => x -> x .>= 0.5)
+  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type])
 ```
 
-::: {.content-hidden unless-format="pdf"}
-
 ::: {#tbl-lin_sep-lambda_energy_exper}
+
+::: {.content-hidden unless-format="pdf"}
 
 ```{julia}
 #| output: asis
 get_table_inputs(df, "value"; alpha=0.9, byvars="lambda_energy_exper", backend=Val(:latex)) |>
-    inputs -> tabulate_results(inputs)
+    inputs -> tabulate_results(inputs; wrap_table=false)
 ```
 
-Results for Linearly Separable data by energy penalty.
-
 :::
+
+Results for Linearly Separable data by energy penalty.
 
 :::
 
@@ -62,17 +61,22 @@ Results for Linearly Separable data by energy penalty.
 df = CSV.read("$(gen_params_dir)/moons/evaluation/results/ce/objective---lambda_energy_exper---lambda_energy_eval/plausibility_distance_from_target.csv", DataFrame)
 df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> 
   gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>
-  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) |>
-  df -> subset(df, :lambda_energy_exper => x -> x .>= 0.5)
+  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) 
 ```
+
+::: {#tbl-moons-lambda_energy_exper}
 
 ::: {.content-hidden unless-format="pdf"}
 
 ```{julia}
 #| output: asis
 get_table_inputs(df, "value"; alpha=0.9, byvars="lambda_energy_exper", backend=Val(:latex)) |>
-    inputs -> tabulate_results(inputs; label="tab:moons-lambda_energy_exper", title="Results for Moons data by energy penalty.")
+    inputs -> tabulate_results(inputs)
 ```
+
+:::
+
+Results for Moons data by energy penalty.
 
 :::
 
@@ -82,16 +86,21 @@ get_table_inputs(df, "value"; alpha=0.9, byvars="lambda_energy_exper", backend=V
 df = CSV.read("$(gen_params_dir)/circles/evaluation/results/ce/objective---lambda_energy_exper---lambda_energy_eval/plausibility_distance_from_target.csv", DataFrame)
 df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> 
   gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>
-  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) |>
-  df -> subset(df, :lambda_energy_exper => x -> x .>= 0.5)
+  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) 
 ```
+
+::: {#tbl-circles-lambda_energy_exper}
 
 ::: {.content-hidden unless-format="pdf"}
 
 ```{julia}
 #| output: asis
 get_table_inputs(df, "value"; alpha=0.9, byvars="lambda_energy_exper", backend=Val(:latex)) |>
-    inputs -> tabulate_results(inputs; label="tab:circles-lambda_energy_exper", title="Results for Circles data by energy penalty.")
+    inputs -> tabulate_results(inputs)
 ```
+
+:::
+
+Results for Circles data by energy penalty.
 
 :::

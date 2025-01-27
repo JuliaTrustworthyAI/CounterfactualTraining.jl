@@ -7,13 +7,20 @@ function tabulate_results(
     inputs;
     tf=PrettyTables.tf_latex_booktabs,
     wrap_table=true,
-    table_type=:tabular,
+    table_type=:longtable,
+    longtable_footer="Continuing table below.",
     kwrgs...,
 )
     df = inputs[1]
     other_inputs = inputs[2]
     return pretty_table(
-        df; tf=tf, wrap_table=wrap_table, table_type=table_type, other_inputs..., kwrgs...
+        df;
+        tf=tf,
+        wrap_table=wrap_table,
+        table_type=table_type,
+        longtable_footer=longtable_footer,
+        other_inputs...,
+        kwrgs...,
     )
 end
 
