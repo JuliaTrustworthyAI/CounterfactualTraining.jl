@@ -9,7 +9,7 @@ using TaijaPlotting
 include("plots.jl")
 include("tables.jl")
 
-export tabulate_results
+export tabulate_results, get_table_inputs
 
 function useful_byvars(df_meta::DataFrame)
     return names(df_meta)[findall([length(unique(x)) != 1 for x in eachcol(df_meta)])]

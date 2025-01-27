@@ -1,3 +1,9 @@
+---
+engine: julia
+julia: 
+  exeflags: ["--project=paper/experiments/"]
+---
+
 ```{julia}
 using CTExperiments
 using CTExperiments.CSV
@@ -30,8 +36,16 @@ df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |>
   gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>
   df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) |>
   df -> subset(df, :lambda_energy_exper => x -> x .>= 0.5)
-tabulate_results(df, "value"; alpha=0.9)
 ```
+
+::: {.content-hidden unless-format="pdf"}
+
+```{julia}
+get_table_inputs(df, "value"; alpha=0.9, byvars="lambda_energy_exper", backend=Val(:latex)) |>
+    inputs -> tabulate_results(inputs; label="tab:lin_sep-first_run", title="Results for Linearly Separable data.")
+```
+
+:::
 
 #### Moons
 
@@ -41,8 +55,15 @@ df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |>
   gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>
   df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) |>
   df -> subset(df, :lambda_energy_exper => x -> x .>= 0.5)
-tabulate_results(df, "value"; alpha=0.9)
 ```
+
+::: {.content-hidden unless-format="pdf"}
+
+```{julia}
+tabulate_results(df, "value"; alpha=0.9, byvars="lambda_energy_exper", backend=Val(:latex))
+```
+
+:::
 
 #### Circles
 
@@ -52,5 +73,12 @@ df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |>
   gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>
   df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) |>
   df -> subset(df, :lambda_energy_exper => x -> x .>= 0.5)
-tabulate_results(df, "value"; alpha=0.9)
 ```
+
+::: {.content-hidden unless-format="pdf"}
+
+```{julia}
+tabulate_results(df, "value"; alpha=0.9, byvars="lambda_energy_exper", backend=Val(:latex))
+```
+
+:::

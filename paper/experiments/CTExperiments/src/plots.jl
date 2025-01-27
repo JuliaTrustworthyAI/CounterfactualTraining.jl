@@ -96,11 +96,7 @@ function boxplot_ce(
     x::Union{Nothing,String}="generator_type",
     y::String="plausibility_distance_from_target",
     byvars::Union{Nothing,String,Vector{String}}=nothing,
-    colorvar::Union{Nothing,String}=nothing,
-    rowvar::Union{Nothing,String}=nothing,
-    colvar::Union{Nothing,String}=nothing,
-    facet=default_facet,
-    axis=default_axis,
+    kwrgs...
 )
     x = isnothing(x) ? "generator_type" : x
 
@@ -109,6 +105,21 @@ function boxplot_ce(
     # Aggregate:
     df_agg = aggregate_ce_evaluation(df, df_meta, df_eval; y=y, byvars=byvars)
 
+    # Plotting:
+    plt = boxplot_ce(df_agg,x;kwrgs...)
+
+    return plt, df_agg
+end
+
+function boxplot_ce(
+    df_agg::DataFrame,
+    x::Union{Nothing,String}="generator_type";
+    colorvar::Union{Nothing,String}=nothing,
+    rowvar::Union{Nothing,String}=nothing,
+    colvar::Union{Nothing,String}=nothing,
+    facet=default_facet,
+    axis=default_axis,
+)
     # Plotting:
     plt = data(df_agg) * mapping(Symbol(x), :mean => "Value") * visual(BoxPlot)
     if !isnothing(colorvar)
@@ -123,7 +134,7 @@ function boxplot_ce(
 
     plt = draw(plt; facet=facet, axis=axis)
 
-    return plt, df_agg
+    return plt
 end
 
 function plot_ce(cfg::EvalConfigOrGrid; save_dir=nothing, kwrgs...)

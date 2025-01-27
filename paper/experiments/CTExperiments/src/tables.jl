@@ -4,6 +4,20 @@ using PrettyTables
 using StatsBase
 
 function tabulate_results(
+    inputs;
+    tf=PrettyTables.tf_latex_booktabs,
+    wrap_table=true,
+    table_type=:tabular,
+    kwrgs...,
+)
+    df = inputs[1]
+    other_inputs = inputs[2]
+    return pretty_table(
+        df; tf=tf, wrap_table=wrap_table, table_type=table_type, other_inputs..., kwrgs...
+    )
+end
+
+function get_table_inputs(
     df::DataFrame,
     value_var::String="mean";
     backend::Val=Val(:text),
@@ -12,7 +26,7 @@ function tabulate_results(
     df = deepcopy(df)
 
     # Highlighters:
-    hls = (value_highlighter(df, value_var; backend=backend, kwrgs...),)
+    hls = value_highlighter(df, value_var; backend=backend, kwrgs...)
     if "generator_type" in names(df)
         df.generator_type = format_generator.(df.generator_type)
         gen_hl = generator_highlighter(df; backend=backend)
@@ -20,7 +34,7 @@ function tabulate_results(
     end
 
     header = format_header.(names(df))
-    return pretty_table(df; highlighters=hls, backend=backend, header=header)
+    return df, (; highlighters=hls, backend=backend, header=header)
 end
 
 format_generator(s::AbstractString) = get_generator_name(generator_types[s](), pretty=true)
@@ -35,21 +49,41 @@ end
 function value_highlighter(
     df::DataFrame,
     value_var::String="mean";
-    scheme::ColorSchemes.ColorScheme=reverse(colorschemes[:rose]),
+    scheme::Union{Nothing,ColorSchemes.ColorScheme}=nothing,
     alpha::AbstractFloat=0.5,
-    backend::Val=Val(:text)
+    backend::Val=Val(:text),
+    byvars::Union{Nothing,String,Vector{String}}=nothing,
 )
     @assert value_var in names(df) "Provided variables $(value_var) is no in the dataframe"
     col_idx = findall(value_var .== names(df))
-    lb, ub = (alpha/2, 1 - alpha/2)
-    @info "Lower bound $(lb), Upper bound $(ub)"
-    lims = (quantile(df[:, value_var], lb), quantile(df[:, value_var], ub))
-    @info "Limits: $(lims)"
 
-    return value_highlighter(lims, col_idx, backend, scheme)
+    hls = []
+
+    # Maximum value:
+    if !isnothing(byvars)
+        byvars = isa(byvars, String) ? [byvars] : byvars
+        df.row .= 1:nrow(df)
+        max_idx = combine(groupby(df, byvars...)) do sdf
+            (max_idx=sdf.row[argmax(sdf[:, value_var])],)
+        end
+        max_idx = max_idx.max_idx
+        select!(df, Not(:row))
+        hl = bolden_max_hl(max_idx, col_idx, backend)
+        push!(hls, hl)
+    end
+
+    # Color scale:
+    if !isnothing(scheme)
+        lb, ub = (alpha/2, 1 - alpha/2)
+        lims = (quantile(df[:, value_var], lb), quantile(df[:, value_var], ub))
+        hl = color_scale_hl(lims, col_idx, backend, scheme)
+        push!(hls, hl)
+    end
+
+    return tuple(hls...)
 end
 
-function value_highlighter(
+function color_scale_hl(
     lims::Tuple, col_idx::Vector{Int}, backend::Val{:text}, scheme::ColorScheme
 )
     hl = Highlighter(
@@ -68,7 +102,15 @@ function value_highlighter(
     return hl
 end
 
-function value_highlighter(
+function bolden_max_hl(max_idx::Vector{Int},col_idx::Vector{Int},backend::Val{:text})
+    hl = Highlighter(
+        (df, i, j) -> i in max_idx,
+        crayon"blue bold",
+    )
+    return hl
+end
+
+function color_scale_hl(
     lims::Tuple, col_idx::Vector{Int}, backend::Val{:latex}, scheme::ColorScheme
 )
     hl = LatexHighlighter(
@@ -79,6 +121,10 @@ function value_highlighter(
         end,
     )
     return hl
+end
+
+function bolden_max_hl(max_idx::Vector{Int},col_idx::Vector{Int},backend::Val{:latex})
+    hl = LatexHighlighter((df, i, j) -> i in max_idx, ["color{blue}", "textbf"])
 end
 
 function generator_highlighter(df::DataFrame; backend::Val=Val(:text))
