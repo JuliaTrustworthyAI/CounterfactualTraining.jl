@@ -45,86 +45,6 @@ Secondary European Affiliation, Tiergartenstr. 17, 69121 Heidelberg, Germany
 
 \input{related.tex}
 
-\section{Introduction}
-\subsection{Main Contributions}
-Please note that the first paragraph of a section or subsection is
-not indented. The first paragraph that follows a table, figure,
-equation etc. does not need an indent, either.
-
-Subsequent paragraphs, however, are indented.
-
-\section{Related Work}
-\subsection{Basket Weaving}
-\subsubsection{Underwater Basket Weaving} Only two levels of
-headings should be numbered. Lower level headings remain unnumbered;
-they are formatted as run-in headings.
-
-\paragraph{Underwater Basket Weaving Under Difficult Circumstances}
-The contribution should contain no more than four levels of
-headings. Table~\ref{tab1} gives a summary of all heading levels.
-
-\begin{table}[t]
-\caption{Table captions should be placed above the
-tables.}\label{tab1}
-\begin{tabular}{lll}
-\toprule
-Heading level &  Example & Font size and style\\
-\midrule
-Title (centered) &  {\Large\bfseries Lecture Notes} & 14 point, bold\\
-1st-level heading &  {\large\bfseries 1 Introduction} & 12 point, bold\\
-2nd-level heading & {\bfseries 2.1 Printing Area} & 10 point, bold\\
-3rd-level heading & {\bfseries Run-in Heading in Bold.} Text follows & 10 point, bold\\
-4th-level heading & {\itshape Lowest Level Heading.} Text follows & 10 point, italic\\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\section{Recent Advances from the Mariana Trench}
-
-Displayed equations are centered and set on a separate
-line.
-\begin{equation}
-x + y = z
-\end{equation}
-Please try to avoid rasterized images for line-art diagrams and
-schemas. Whenever possible, use vector graphics instead (see
-Fig. \ref{fig1}).
-
-\begin{figure}[t]
-\includegraphics[width=\textwidth]{example-image-duck}
-\caption{A figure caption is always placed below the illustration.
-Please note that short captions are centered, while long ones are
-justified by the macro package automatically.} \label{fig1}
-\end{figure}
-%Note that the \includegraphics command is commented out in this example figure, so that we can compile this document without sending sample figures around.
-
-\begin{theorem}
-This is a sample theorem. The run-in heading is set in bold, while
-the following text appears in italics. Definitions, lemmas,
-propositions, and corollaries are styled the same way.
-\end{theorem}
-%
-% the environments 'definition', 'lemma', 'proposition', 'corollary',
-% 'remark', and 'example' are defined in the LLNCS documentclass as well.
-%
-\begin{proof}
-Proofs, examples, and remarks have the initial word in italics,
-while the following text appears in normal font.
-\end{proof}
-For citations of references, we prefer the use of square brackets
-and consecutive numbers. Citations using labels or the author/year
-convention are also acceptable. 
-
-\section{Experiments}
-\subsection{Experimental Setup}
-\subsection{Experimental Results}
-
-\section{Discussion}
-
-\section{Conclusion}
-
-Of course, authors have complete freedom on how they choose to structure their paper. Section headers from Introduction up to and including Conclusions are completely up to the discretion of the authors; use whichever structure you see fit. Title, Abstract, the credits environment, and References, however, are mandatory.
-
 \begin{credits}
 \subsubsection{\ackname} A bold run-in heading in small font size at the end of the paper is
 used for general acknowledgments, for example: This study was funded
@@ -143,6 +63,8 @@ Company X and owns stock in Company Y. Author C is a member of committee Z.
 
 \bibliography{bib}
 \bibliographystyle{splncs04}
+
+\input{appendix.tex}
 
 \end{document}
 

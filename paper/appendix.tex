@@ -1,3 +1,165 @@
-\subsection{Appendix}\label{appendix}
+\section{Appendix}\label{appendix}
 
-Here's my awesome appendix.
+\subsection{Initial Grid Search}\label{initial-grid-search}
+
+\subsubsection{Generator Params}\label{generator-params}
+
+\paragraph{Linearly Separable}\label{linearly-separable}
+
+\begin{table}
+
+\caption{\label{tbl-lin_sep-lambda_energy_exper}Results for Linearly
+Separable data by energy penalty.}
+
+\centering{
+
+  \begin{tabular}{rrrrr}
+    \toprule
+    \textbf{Objective} & \textbf{Lambda Energy (exper)} & \textbf{Generator Type} & \textbf{Value} & \textbf{Std} \\\midrule
+    full & 0.5 & \textit{ECCo} & -11.7601 & 9.83205 \\
+    full & 0.5 & \textit{Generic} & -1.064e18 & 2.41995e18 \\
+    \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.5}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.5405}} & \color{blue}{\textbf{0.122789}} \\
+    full & 0.5 & \textit{REVISE} & -15.0277 & 12.5588 \\
+    vanilla & 0.5 & \textit{ECCo} & -4.39923 & 3.65268 \\
+    vanilla & 0.5 & \textit{Generic} & -4.38184 & 3.48393 \\
+    vanilla & 0.5 & \textit{Omniscient} & -5.24831 & 4.61237 \\
+    vanilla & 0.5 & \textit{REVISE} & -4.94731 & 4.2233 \\
+    full & 1.0 & \textit{ECCo} & -11.5401 & 11.0622 \\
+    full & 1.0 & \textit{Generic} & -1.70667e11 & 3.88205e11 \\
+    \color{blue}{\textbf{full}} & \color{blue}{\textbf{1.0}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.58956}} & \color{blue}{\textbf{0.117255}} \\
+    full & 1.0 & \textit{REVISE} & -15.7258 & 13.2676 \\
+    vanilla & 1.0 & \textit{ECCo} & -4.27742 & 3.50817 \\
+    vanilla & 1.0 & \textit{Generic} & -4.44409 & 3.4741 \\
+    vanilla & 1.0 & \textit{Omniscient} & -5.11353 & 4.4628 \\
+    vanilla & 1.0 & \textit{REVISE} & -4.91409 & 4.24885 \\
+    full & 5.0 & \textit{ECCo} & -3.99166 & 3.12284 \\
+    full & 5.0 & \textit{Generic} & -4.88333e17 & 1.11064e18 \\
+    \color{blue}{\textbf{full}} & \color{blue}{\textbf{5.0}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.5325}} & \color{blue}{\textbf{0.117196}} \\
+    full & 5.0 & \textit{REVISE} & -14.5887 & 12.1265 \\
+    vanilla & 5.0 & \textit{ECCo} & -4.39614 & 3.64978 \\
+    vanilla & 5.0 & \textit{Generic} & -4.37909 & 3.48341 \\
+    vanilla & 5.0 & \textit{Omniscient} & -5.24668 & 4.60676 \\
+    vanilla & 5.0 & \textit{REVISE} & -4.94655 & 4.22198 \\
+    \color{blue}{\textbf{full}} & \color{blue}{\textbf{10.0}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-2.30721}} & \color{blue}{\textbf{0.73475}} \\
+    full & 10.0 & \textit{Generic} & -1.69667e11 & 3.85893e11 \\
+    full & 10.0 & \textit{Omniscient} & -2.53433 & 0.116736 \\
+    full & 10.0 & \textit{REVISE} & -15.5346 & 13.0245 \\
+    vanilla & 10.0 & \textit{ECCo} & -4.28116 & 3.50992 \\
+    vanilla & 10.0 & \textit{Generic} & -4.4428 & 3.47049 \\
+    vanilla & 10.0 & \textit{Omniscient} & -5.11933 & 4.46099 \\
+    vanilla & 10.0 & \textit{REVISE} & -4.91285 & 4.24407 \\
+    \color{blue}{\textbf{full}} & \color{blue}{\textbf{15.0}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-2.00576}} & \color{blue}{\textbf{0.48751}} \\
+    full & 15.0 & \textit{Generic} & -4.91e17 & 1.11683e18 \\
+    full & 15.0 & \textit{Omniscient} & -2.52833 & 0.11602 \\
+    full & 15.0 & \textit{REVISE} & -14.3763 & 11.7494 \\
+    vanilla & 15.0 & \textit{ECCo} & -4.3957 & 3.65194 \\
+    vanilla & 15.0 & \textit{Generic} & -4.38497 & 3.48359 \\
+    vanilla & 15.0 & \textit{Omniscient} & -5.24893 & 4.60484 \\
+    vanilla & 15.0 & \textit{REVISE} & -4.94518 & 4.22746 \\\bottomrule
+  \end{tabular}
+
+}
+
+\end{table}%
+
+\paragraph{Moons}\label{moons}
+
+\begin{table}
+  \caption{Results for Moons data by energy penalty.}
+  \begin{tabular}{rrrrr}
+    \toprule
+    \textbf{Objective} & \textbf{Lambda Energy (exper)} & \textbf{Generator Type} & \textbf{Value} & \textbf{Std} \\\midrule
+    full & 0.5 & \textit{ECCo} & -7.08577 & 7.51393 \\
+    full & 0.5 & \textit{Generic} & -1.1064e31 & 2.53239e31 \\
+    \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.5}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.58057}} & \color{blue}{\textbf{4.8256}} \\
+    full & 0.5 & \textit{REVISE} & -1187.61 & 2643.72 \\
+    vanilla & 0.5 & \textit{ECCo} & -15.4966 & 17.1932 \\
+    vanilla & 0.5 & \textit{Generic} & -11.7071 & 12.8003 \\
+    vanilla & 0.5 & \textit{Omniscient} & -12.3897 & 14.1104 \\
+    vanilla & 0.5 & \textit{REVISE} & -11.2965 & 13.1122 \\
+    full & 1.0 & \textit{ECCo} & -6.06278 & 6.32519 \\
+    full & 1.0 & \textit{Generic} & -1.57758e33 & 3.59342e33 \\
+    \color{blue}{\textbf{full}} & \color{blue}{\textbf{1.0}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.66436}} & \color{blue}{\textbf{4.88547}} \\
+    full & 1.0 & \textit{REVISE} & -1157.26 & 2585.3 \\
+    vanilla & 1.0 & \textit{ECCo} & -15.4915 & 17.2592 \\
+    vanilla & 1.0 & \textit{Generic} & -10.8969 & 11.888 \\
+    vanilla & 1.0 & \textit{Omniscient} & -12.6685 & 14.4499 \\
+    vanilla & 1.0 & \textit{REVISE} & -11.2874 & 13.1369 \\
+    \color{blue}{\textbf{full}} & \color{blue}{\textbf{5.0}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-2.56504}} & \color{blue}{\textbf{2.06543}} \\
+    full & 5.0 & \textit{Generic} & -1.16971e28 & 2.66145e28 \\
+    full & 5.0 & \textit{Omniscient} & -4.28955 & 4.30748 \\
+    full & 5.0 & \textit{REVISE} & -530.204 & 1163.55 \\
+    vanilla & 5.0 & \textit{ECCo} & -15.4763 & 17.1877 \\
+    vanilla & 5.0 & \textit{Generic} & -11.6655 & 12.7364 \\
+    vanilla & 5.0 & \textit{Omniscient} & -12.3937 & 14.1141 \\
+    vanilla & 5.0 & \textit{REVISE} & -11.2976 & 13.0533 \\
+    \color{blue}{\textbf{full}} & \color{blue}{\textbf{10.0}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.76439}} & \color{blue}{\textbf{0.973615}} \\
+    full & 10.0 & \textit{Generic} & -1.54318e33 & 3.51163e33 \\
+    full & 10.0 & \textit{Omniscient} & -4.44467 & 4.56008 \\
+    full & 10.0 & \textit{REVISE} & -1515.03 & 3402.96 \\
+    vanilla & 10.0 & \textit{ECCo} & -15.5074 & 17.275 \\
+    vanilla & 10.0 & \textit{Generic} & -10.9077 & 11.8867 \\
+    vanilla & 10.0 & \textit{Omniscient} & -12.6771 & 14.4225 \\
+    vanilla & 10.0 & \textit{REVISE} & -11.2735 & 13.1031 \\
+    \color{blue}{\textbf{full}} & \color{blue}{\textbf{15.0}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.36625}} & \color{blue}{\textbf{0.3652}} \\
+    full & 15.0 & \textit{Generic} & -5.32108e28 & 1.21152e29 \\
+    full & 15.0 & \textit{Omniscient} & -4.34376 & 4.38045 \\
+    full & 15.0 & \textit{REVISE} & -473.027 & 1034.8 \\
+    vanilla & 15.0 & \textit{ECCo} & -15.4703 & 17.1898 \\
+    vanilla & 15.0 & \textit{Generic} & -11.6941 & 12.7669 \\
+    vanilla & 15.0 & \textit{Omniscient} & -12.3895 & 14.0956 \\
+    vanilla & 15.0 & \textit{REVISE} & -11.2868 & 13.0587 \\\bottomrule
+  \end{tabular}
+  
+\end{table}
+
+\paragraph{Circles}\label{circles}
+
+\begin{table}
+  \caption{Results for Circles data by energy penalty.}
+  \begin{tabular}{rrrrr}
+    \toprule
+    \textbf{Objective} & \textbf{Lambda Energy (exper)} & \textbf{Generator Type} & \textbf{Value} & \textbf{Std} \\\midrule
+    \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.5}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.12388}} & \color{blue}{\textbf{0.216889}} \\
+    full & 0.5 & \textit{Generic} & -1.20782 & 0.352005 \\
+    full & 0.5 & \textit{Omniscient} & -5.09228 & 5.1182 \\
+    full & 0.5 & \textit{REVISE} & -5.97244e27 & 1.36572e28 \\
+    vanilla & 0.5 & \textit{ECCo} & -9.35338 & 7.30155 \\
+    vanilla & 0.5 & \textit{Generic} & -8.89415 & 6.91671 \\
+    vanilla & 0.5 & \textit{Omniscient} & -8.67963 & 6.9307 \\
+    vanilla & 0.5 & \textit{REVISE} & -8.52507 & 6.74796 \\
+    \color{blue}{\textbf{full}} & \color{blue}{\textbf{1.0}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.099}} & \color{blue}{\textbf{0.163365}} \\
+    full & 1.0 & \textit{Generic} & -1.49485 & 0.726287 \\
+    full & 1.0 & \textit{Omniscient} & -5.15975 & 5.20449 \\
+    full & 1.0 & \textit{REVISE} & -3.09069e26 & 7.22344e26 \\
+    vanilla & 1.0 & \textit{ECCo} & -9.33801 & 7.36386 \\
+    vanilla & 1.0 & \textit{Generic} & -8.8619 & 6.85196 \\
+    vanilla & 1.0 & \textit{Omniscient} & -8.69785 & 6.89941 \\
+    vanilla & 1.0 & \textit{REVISE} & -8.69498 & 6.85371 \\
+    full & 5.0 & \textit{ECCo} & -1.75204 & 0.154399 \\
+    \color{blue}{\textbf{full}} & \color{blue}{\textbf{5.0}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-1.21285}} & \color{blue}{\textbf{0.362686}} \\
+    full & 5.0 & \textit{Omniscient} & -5.13516 & 5.16338 \\
+    full & 5.0 & \textit{REVISE} & -1.09598e28 & 2.50339e28 \\
+    vanilla & 5.0 & \textit{ECCo} & -9.36397 & 7.32382 \\
+    vanilla & 5.0 & \textit{Generic} & -8.88498 & 6.90503 \\
+    vanilla & 5.0 & \textit{Omniscient} & -8.70333 & 6.9289 \\
+    vanilla & 5.0 & \textit{REVISE} & -8.51631 & 6.72565 \\
+    full & 10.0 & \textit{ECCo} & -1.01708e6 & 2.31516e6 \\
+    \color{blue}{\textbf{full}} & \color{blue}{\textbf{10.0}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-1.48827}} & \color{blue}{\textbf{0.701741}} \\
+    full & 10.0 & \textit{Omniscient} & -5.13432 & 5.15897 \\
+    full & 10.0 & \textit{REVISE} & -3.74376e26 & 9.08858e26 \\
+    vanilla & 10.0 & \textit{ECCo} & -9.31463 & 7.32684 \\
+    vanilla & 10.0 & \textit{Generic} & -8.87348 & 6.86388 \\
+    vanilla & 10.0 & \textit{Omniscient} & -8.7046 & 6.89274 \\
+    vanilla & 10.0 & \textit{REVISE} & -8.68653 & 6.83497 \\
+    full & 15.0 & \textit{ECCo} & -3.31332e13 & 7.53714e13 \\
+    \color{blue}{\textbf{full}} & \color{blue}{\textbf{15.0}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-1.21817}} & \color{blue}{\textbf{0.370377}} \\
+    full & 15.0 & \textit{Omniscient} & -5.19548 & 5.23317 \\
+    full & 15.0 & \textit{REVISE} & -9.01467e27 & 2.0592e28 \\
+    vanilla & 15.0 & \textit{ECCo} & -9.37662 & 7.34277 \\
+    vanilla & 15.0 & \textit{Generic} & -8.86149 & 6.8695 \\
+    vanilla & 15.0 & \textit{Omniscient} & -8.69488 & 6.95691 \\
+    vanilla & 15.0 & \textit{REVISE} & -8.50583 & 6.72685 \\\bottomrule
+  \end{tabular}
+  
+\end{table}
