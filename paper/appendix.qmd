@@ -32,7 +32,7 @@ gen_params_dir = joinpath(results_dir, "gen_params/mlp")
 
 #### Linearly Separable 
 
-- **Energy Penalty**: *ECCo* generally does yield better results than *Vanilla* for higher choices of the energy penalty (10,15) during training. *Generic* performs poorly accross the board. *Omni* seems to have an anchoring effect, in that it never performs terribly but also never as good as the best *ECCo* results. *REVISE* performs poorly across the board.
+- **Energy Penalty** (@tbl-lin_sep-lambda_energy_exper): *ECCo* generally does yield better results than *Vanilla* for higher choices of the energy penalty (10,15) during training. *Generic* performs poorly accross the board. *Omni* seems to have an anchoring effect, in that it never performs terribly but also never as good as the best *ECCo* results. *REVISE* performs poorly across the board.
 - **Cost (distance penalty)**: Results for all generators (except *Omni*) are quite bad, which can likely be attributed to extremely bad results for some choices of the **Energy Penalty** (results here are averaged). For *ECCo* and *Generic*, higher cost values generally lead to worse results.
 - **Maximum Iterations**: No clear patterns recognizable, so it seems that smaller choices are ok. 
 - **Validity**: *ECCo* almost always valid except for very low values during training and high values at evaluation time. *Generic* often has poor validity.
@@ -50,7 +50,7 @@ df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |>
 ```{julia}
 #| output: asis
 get_table_inputs(df, "value"; alpha=0.9, byvars="lambda_energy_exper", backend=Val(:latex)) |>
-    inputs -> tabulate_results(inputs; label="tbl-moons-lambda_energy_exper", title="Results for Linearly Separable data by energy penalty.")
+    inputs -> tabulate_results(inputs; label="tbl-lin_sep-lambda_energy_exper", title="Results for Linearly Separable data by energy penalty.")
 ```
 
 
@@ -65,19 +65,13 @@ df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |>
   df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) 
 ```
 
-::: {#tbl-moons-lambda_energy_exper}
-
 ::: {.content-hidden unless-format="pdf"}
 
 ```{julia}
 #| output: asis
 get_table_inputs(df, "value"; alpha=0.9, byvars="lambda_energy_exper", backend=Val(:latex)) |>
-    inputs -> tabulate_results(inputs)
+    inputs -> tabulate_results(inputs; label="tbl-moons-lambda_energy_exper", title="Results for Moons data by energy penalty.")
 ```
-
-:::
-
-Results for Moons data by energy penalty.
 
 :::
 
@@ -90,18 +84,12 @@ df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |>
   df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) 
 ```
 
-::: {#tbl-circles-lambda_energy_exper}
-
 ::: {.content-hidden unless-format="pdf"}
 
 ```{julia}
 #| output: asis
 get_table_inputs(df, "value"; alpha=0.9, byvars="lambda_energy_exper", backend=Val(:latex)) |>
-    inputs -> tabulate_results(inputs)
+    inputs -> tabulate_results(inputs; label="tbl-circles-lambda_energy_exper", title="Results for Circles data by energy penalty.")
 ```
-
-:::
-
-Results for Circles data by energy penalty.
 
 :::

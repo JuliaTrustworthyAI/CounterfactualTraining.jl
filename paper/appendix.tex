@@ -1,0 +1,296 @@
+\section{Appendix}\label{appendix}
+
+\subsection{Initial Grid Search}\label{initial-grid-search}
+
+\subsubsection{Generator Params}\label{generator-params}
+
+\paragraph{Linearly Separable}\label{linearly-separable}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Energy Penalty} (Table~\ref{tbl-lin_sep-lambda_energy_exper}):
+  \emph{ECCo} generally does yield better results than \emph{Vanilla}
+  for higher choices of the energy penalty (10,15) during training.
+  \emph{Generic} performs poorly accross the board. \emph{Omni} seems to
+  have an anchoring effect, in that it never performs terribly but also
+  never as good as the best \emph{ECCo} results. \emph{REVISE} performs
+  poorly across the board.
+\item
+  \textbf{Cost (distance penalty)}: Results for all generators (except
+  \emph{Omni}) are quite bad, which can likely be attributed to
+  extremely bad results for some choices of the \textbf{Energy Penalty}
+  (results here are averaged). For \emph{ECCo} and \emph{Generic},
+  higher cost values generally lead to worse results.
+\item
+  \textbf{Maximum Iterations}: No clear patterns recognizable, so it
+  seems that smaller choices are ok.
+\item
+  \textbf{Validity}: \emph{ECCo} almost always valid except for very low
+  values during training and high values at evaluation time.
+  \emph{Generic} often has poor validity.
+\item
+  \textbf{Accuracy}: Seems largely unaffected.
+\end{itemize}
+
+\begin{longtable}{ccccc}
+
+\caption{\label{tbl-lin_sep-lambda_energy_exper}Results for Linearly Separable data by energy penalty.}
+
+\tabularnewline
+
+  \\
+  \toprule
+  \textbf{Obj.} & \textbf{\textbackslash{}lambda (exper)} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endfirsthead
+  \toprule
+  \textbf{Obj.} & \textbf{\textbackslash{}lambda (exper)} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endhead
+  \bottomrule
+  \multicolumn{5}{r}{Continuing table below.}\\
+  \bottomrule
+  \endfoot
+  \endlastfoot
+  full & 0.01 & \textit{ECCo} & $-9.91 \cdot 10^{11}$ & $2.25 \cdot 10^{12}$ \\
+  full & 0.01 & \textit{Generic} & $-5.71 \cdot 10^{17}$ & $1.3 \cdot 10^{18}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.01}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.54}} & \color{blue}{\textbf{0.116}} \\
+  full & 0.01 & \textit{REVISE} & -15.6 & 13.2 \\
+  vanilla & 0.01 & \textit{ECCo} & -4.28 & 3.52 \\
+  vanilla & 0.01 & \textit{Generic} & -4.45 & 3.47 \\
+  vanilla & 0.01 & \textit{Omniscient} & -5.12 & 4.46 \\
+  vanilla & 0.01 & \textit{REVISE} & -4.91 & 4.24 \\
+  full & 0.05 & \textit{ECCo} & $-5.63 \cdot 10^{5}$ & $1.28 \cdot 10^{6}$ \\
+  full & 0.05 & \textit{Generic} & $-8.35 \cdot 10^{17}$ & $1.9 \cdot 10^{18}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.05}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.53}} & \color{blue}{\textbf{0.114}} \\
+  full & 0.05 & \textit{REVISE} & -15 & 12.6 \\
+  vanilla & 0.05 & \textit{ECCo} & -4.4 & 3.66 \\
+  vanilla & 0.05 & \textit{Generic} & -4.38 & 3.48 \\
+  vanilla & 0.05 & \textit{Omniscient} & -5.25 & 4.62 \\
+  vanilla & 0.05 & \textit{REVISE} & -4.94 & 4.22 \\
+  full & 0.1 & \textit{ECCo} & $-6.74 \cdot 10^{5}$ & $1.53 \cdot 10^{6}$ \\
+  full & 0.1 & \textit{Generic} & $-1.72 \cdot 10^{11}$ & $3.9 \cdot 10^{11}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.56}} & \color{blue}{\textbf{0.124}} \\
+  full & 0.1 & \textit{REVISE} & -15.6 & 13.2 \\
+  vanilla & 0.1 & \textit{ECCo} & -4.28 & 3.52 \\
+  vanilla & 0.1 & \textit{Generic} & -4.45 & 3.48 \\
+  vanilla & 0.1 & \textit{Omniscient} & -5.12 & 4.46 \\
+  vanilla & 0.1 & \textit{REVISE} & -4.91 & 4.25 \\
+  full & 0.5 & \textit{ECCo} & -11.8 & 9.83 \\
+  full & 0.5 & \textit{Generic} & $-1.06 \cdot 10^{18}$ & $2.42 \cdot 10^{18}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.5}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.54}} & \color{blue}{\textbf{0.123}} \\
+  full & 0.5 & \textit{REVISE} & -15 & 12.6 \\
+  vanilla & 0.5 & \textit{ECCo} & -4.4 & 3.65 \\
+  vanilla & 0.5 & \textit{Generic} & -4.38 & 3.48 \\
+  vanilla & 0.5 & \textit{Omniscient} & -5.25 & 4.61 \\
+  vanilla & 0.5 & \textit{REVISE} & -4.95 & 4.22 \\
+  full & 1 & \textit{ECCo} & -11.5 & 11.1 \\
+  full & 1 & \textit{Generic} & $-1.71 \cdot 10^{11}$ & $3.88 \cdot 10^{11}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.59}} & \color{blue}{\textbf{0.117}} \\
+  full & 1 & \textit{REVISE} & -15.7 & 13.3 \\
+  vanilla & 1 & \textit{ECCo} & -4.28 & 3.51 \\
+  vanilla & 1 & \textit{Generic} & -4.44 & 3.47 \\
+  vanilla & 1 & \textit{Omniscient} & -5.11 & 4.46 \\
+  vanilla & 1 & \textit{REVISE} & -4.91 & 4.25 \\
+  full & 5 & \textit{ECCo} & -3.99 & 3.12 \\
+  full & 5 & \textit{Generic} & $-4.88 \cdot 10^{17}$ & $1.11 \cdot 10^{18}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{5}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.53}} & \color{blue}{\textbf{0.117}} \\
+  full & 5 & \textit{REVISE} & -14.6 & 12.1 \\
+  vanilla & 5 & \textit{ECCo} & -4.4 & 3.65 \\
+  vanilla & 5 & \textit{Generic} & -4.38 & 3.48 \\
+  vanilla & 5 & \textit{Omniscient} & -5.25 & 4.61 \\
+  vanilla & 5 & \textit{REVISE} & -4.95 & 4.22 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{10}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-2.31}} & \color{blue}{\textbf{0.735}} \\
+  full & 10 & \textit{Generic} & $-1.7 \cdot 10^{11}$ & $3.86 \cdot 10^{11}$ \\
+  full & 10 & \textit{Omniscient} & -2.53 & 0.117 \\
+  full & 10 & \textit{REVISE} & -15.5 & 13 \\
+  vanilla & 10 & \textit{ECCo} & -4.28 & 3.51 \\
+  vanilla & 10 & \textit{Generic} & -4.44 & 3.47 \\
+  vanilla & 10 & \textit{Omniscient} & -5.12 & 4.46 \\
+  vanilla & 10 & \textit{REVISE} & -4.91 & 4.24 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{15}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-2.01}} & \color{blue}{\textbf{0.488}} \\
+  full & 15 & \textit{Generic} & $-4.91 \cdot 10^{17}$ & $1.12 \cdot 10^{18}$ \\
+  full & 15 & \textit{Omniscient} & -2.53 & 0.116 \\
+  full & 15 & \textit{REVISE} & -14.4 & 11.7 \\
+  vanilla & 15 & \textit{ECCo} & -4.4 & 3.65 \\
+  vanilla & 15 & \textit{Generic} & -4.38 & 3.48 \\
+  vanilla & 15 & \textit{Omniscient} & -5.25 & 4.6 \\
+  vanilla & 15 & \textit{REVISE} & -4.95 & 4.23 \\\bottomrule
+  
+
+\end{longtable}
+
+\paragraph{Moons}\label{moons}
+
+\begin{longtable}{ccccc}
+
+\caption{\label{tbl-moons-lambda_energy_exper}Results for Moons data by energy penalty.}
+
+\tabularnewline
+
+  \\
+  \toprule
+  \textbf{Obj.} & \textbf{\textbackslash{}lambda (exper)} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endfirsthead
+  \toprule
+  \textbf{Obj.} & \textbf{\textbackslash{}lambda (exper)} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endhead
+  \bottomrule
+  \multicolumn{5}{r}{Continuing table below.}\\
+  \bottomrule
+  \endfoot
+  \endlastfoot
+  full & 0.01 & \textit{ECCo} & $-2.8 \cdot 10^{22}$ & $6.39 \cdot 10^{22}$ \\
+  full & 0.01 & \textit{Generic} & $-4.89 \cdot 10^{30}$ & $1.11 \cdot 10^{31}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.01}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.74}} & \color{blue}{\textbf{5.08}} \\
+  full & 0.01 & \textit{REVISE} & -572 & $1.25 \cdot 10^{3}$ \\
+  vanilla & 0.01 & \textit{ECCo} & -15.5 & 17.3 \\
+  vanilla & 0.01 & \textit{Generic} & -10.9 & 11.9 \\
+  vanilla & 0.01 & \textit{Omniscient} & -12.7 & 14.4 \\
+  vanilla & 0.01 & \textit{REVISE} & -11.2 & 13 \\
+  full & 0.05 & \textit{ECCo} & $-1.55 \cdot 10^{16}$ & $3.52 \cdot 10^{16}$ \\
+  full & 0.05 & \textit{Generic} & $-2.22 \cdot 10^{20}$ & $5 \cdot 10^{20}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.05}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.41}} & \color{blue}{\textbf{4.48}} \\
+  full & 0.05 & \textit{REVISE} & $-1.04 \cdot 10^{3}$ & $2.3 \cdot 10^{3}$ \\
+  vanilla & 0.05 & \textit{ECCo} & -15.5 & 17.2 \\
+  vanilla & 0.05 & \textit{Generic} & -11.7 & 12.8 \\
+  vanilla & 0.05 & \textit{Omniscient} & -12.4 & 14.1 \\
+  vanilla & 0.05 & \textit{REVISE} & -11.3 & 13.1 \\
+  full & 0.1 & \textit{ECCo} & $-3.41 \cdot 10^{3}$ & $7.73 \cdot 10^{3}$ \\
+  full & 0.1 & \textit{Generic} & $-5.22 \cdot 10^{30}$ & $1.19 \cdot 10^{31}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.78}} & \color{blue}{\textbf{5.12}} \\
+  full & 0.1 & \textit{REVISE} & -288 & 594 \\
+  vanilla & 0.1 & \textit{ECCo} & -15.5 & 17.2 \\
+  vanilla & 0.1 & \textit{Generic} & -10.9 & 11.9 \\
+  vanilla & 0.1 & \textit{Omniscient} & -12.7 & 14.4 \\
+  vanilla & 0.1 & \textit{REVISE} & -11.3 & 13.1 \\
+  full & 0.5 & \textit{ECCo} & -7.09 & 7.51 \\
+  full & 0.5 & \textit{Generic} & $-1.11 \cdot 10^{31}$ & $2.53 \cdot 10^{31}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.5}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.58}} & \color{blue}{\textbf{4.83}} \\
+  full & 0.5 & \textit{REVISE} & $-1.19 \cdot 10^{3}$ & $2.64 \cdot 10^{3}$ \\
+  vanilla & 0.5 & \textit{ECCo} & -15.5 & 17.2 \\
+  vanilla & 0.5 & \textit{Generic} & -11.7 & 12.8 \\
+  vanilla & 0.5 & \textit{Omniscient} & -12.4 & 14.1 \\
+  vanilla & 0.5 & \textit{REVISE} & -11.3 & 13.1 \\
+  full & 1 & \textit{ECCo} & -6.06 & 6.33 \\
+  full & 1 & \textit{Generic} & $-1.58 \cdot 10^{33}$ & $3.59 \cdot 10^{33}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.66}} & \color{blue}{\textbf{4.89}} \\
+  full & 1 & \textit{REVISE} & $-1.16 \cdot 10^{3}$ & $2.59 \cdot 10^{3}$ \\
+  vanilla & 1 & \textit{ECCo} & -15.5 & 17.3 \\
+  vanilla & 1 & \textit{Generic} & -10.9 & 11.9 \\
+  vanilla & 1 & \textit{Omniscient} & -12.7 & 14.4 \\
+  vanilla & 1 & \textit{REVISE} & -11.3 & 13.1 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{5}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-2.57}} & \color{blue}{\textbf{2.07}} \\
+  full & 5 & \textit{Generic} & $-1.17 \cdot 10^{28}$ & $2.66 \cdot 10^{28}$ \\
+  full & 5 & \textit{Omniscient} & -4.29 & 4.31 \\
+  full & 5 & \textit{REVISE} & -530 & $1.16 \cdot 10^{3}$ \\
+  vanilla & 5 & \textit{ECCo} & -15.5 & 17.2 \\
+  vanilla & 5 & \textit{Generic} & -11.7 & 12.7 \\
+  vanilla & 5 & \textit{Omniscient} & -12.4 & 14.1 \\
+  vanilla & 5 & \textit{REVISE} & -11.3 & 13.1 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{10}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.76}} & \color{blue}{\textbf{0.974}} \\
+  full & 10 & \textit{Generic} & $-1.54 \cdot 10^{33}$ & $3.51 \cdot 10^{33}$ \\
+  full & 10 & \textit{Omniscient} & -4.44 & 4.56 \\
+  full & 10 & \textit{REVISE} & $-1.52 \cdot 10^{3}$ & $3.4 \cdot 10^{3}$ \\
+  vanilla & 10 & \textit{ECCo} & -15.5 & 17.3 \\
+  vanilla & 10 & \textit{Generic} & -10.9 & 11.9 \\
+  vanilla & 10 & \textit{Omniscient} & -12.7 & 14.4 \\
+  vanilla & 10 & \textit{REVISE} & -11.3 & 13.1 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{15}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.37}} & \color{blue}{\textbf{0.365}} \\
+  full & 15 & \textit{Generic} & $-5.32 \cdot 10^{28}$ & $1.21 \cdot 10^{29}$ \\
+  full & 15 & \textit{Omniscient} & -4.34 & 4.38 \\
+  full & 15 & \textit{REVISE} & -473 & $1.03 \cdot 10^{3}$ \\
+  vanilla & 15 & \textit{ECCo} & -15.5 & 17.2 \\
+  vanilla & 15 & \textit{Generic} & -11.7 & 12.8 \\
+  vanilla & 15 & \textit{Omniscient} & -12.4 & 14.1 \\
+  vanilla & 15 & \textit{REVISE} & -11.3 & 13.1 \\\bottomrule
+  
+
+\end{longtable}
+
+\paragraph{Circles}\label{circles}
+
+\begin{longtable}{ccccc}
+
+\caption{\label{tbl-circles-lambda_energy_exper}Results for Circles data by energy penalty.}
+
+\tabularnewline
+
+  \\
+  \toprule
+  \textbf{Obj.} & \textbf{\textbackslash{}lambda (exper)} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endfirsthead
+  \toprule
+  \textbf{Obj.} & \textbf{\textbackslash{}lambda (exper)} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endhead
+  \bottomrule
+  \multicolumn{5}{r}{Continuing table below.}\\
+  \bottomrule
+  \endfoot
+  \endlastfoot
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.01}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.26}} & \color{blue}{\textbf{0.423}} \\
+  full & 0.01 & \textit{Generic} & -1.49 & 0.71 \\
+  full & 0.01 & \textit{Omniscient} & -5.21 & 5.25 \\
+  full & 0.01 & \textit{REVISE} & $-2.71 \cdot 10^{26}$ & $6.37 \cdot 10^{26}$ \\
+  vanilla & 0.01 & \textit{ECCo} & -9.33 & 7.34 \\
+  vanilla & 0.01 & \textit{Generic} & -8.89 & 6.88 \\
+  vanilla & 0.01 & \textit{Omniscient} & -8.67 & 6.87 \\
+  vanilla & 0.01 & \textit{REVISE} & -8.65 & 6.8 \\
+  full & 0.05 & \textit{ECCo} & -1.29 & 0.397 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.05}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-1.21}} & \color{blue}{\textbf{0.356}} \\
+  full & 0.05 & \textit{Omniscient} & -5.08 & 5.09 \\
+  full & 0.05 & \textit{REVISE} & $-5.91 \cdot 10^{27}$ & $1.36 \cdot 10^{28}$ \\
+  vanilla & 0.05 & \textit{ECCo} & -9.35 & 7.32 \\
+  vanilla & 0.05 & \textit{Generic} & -8.85 & 6.87 \\
+  vanilla & 0.05 & \textit{Omniscient} & -8.7 & 6.96 \\
+  vanilla & 0.05 & \textit{REVISE} & -8.52 & 6.76 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.1}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.2}} & \color{blue}{\textbf{0.383}} \\
+  full & 0.1 & \textit{Generic} & -1.5 & 0.735 \\
+  full & 0.1 & \textit{Omniscient} & -5.17 & 5.23 \\
+  full & 0.1 & \textit{REVISE} & $-3.06 \cdot 10^{26}$ & $7.7 \cdot 10^{26}$ \\
+  vanilla & 0.1 & \textit{ECCo} & -9.33 & 7.32 \\
+  vanilla & 0.1 & \textit{Generic} & -8.88 & 6.86 \\
+  vanilla & 0.1 & \textit{Omniscient} & -8.69 & 6.9 \\
+  vanilla & 0.1 & \textit{REVISE} & -8.68 & 6.81 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.5}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.12}} & \color{blue}{\textbf{0.217}} \\
+  full & 0.5 & \textit{Generic} & -1.21 & 0.352 \\
+  full & 0.5 & \textit{Omniscient} & -5.09 & 5.12 \\
+  full & 0.5 & \textit{REVISE} & $-5.97 \cdot 10^{27}$ & $1.37 \cdot 10^{28}$ \\
+  vanilla & 0.5 & \textit{ECCo} & -9.35 & 7.3 \\
+  vanilla & 0.5 & \textit{Generic} & -8.89 & 6.92 \\
+  vanilla & 0.5 & \textit{Omniscient} & -8.68 & 6.93 \\
+  vanilla & 0.5 & \textit{REVISE} & -8.53 & 6.75 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{1}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.1}} & \color{blue}{\textbf{0.163}} \\
+  full & 1 & \textit{Generic} & -1.49 & 0.726 \\
+  full & 1 & \textit{Omniscient} & -5.16 & 5.2 \\
+  full & 1 & \textit{REVISE} & $-3.09 \cdot 10^{26}$ & $7.22 \cdot 10^{26}$ \\
+  vanilla & 1 & \textit{ECCo} & -9.34 & 7.36 \\
+  vanilla & 1 & \textit{Generic} & -8.86 & 6.85 \\
+  vanilla & 1 & \textit{Omniscient} & -8.7 & 6.9 \\
+  vanilla & 1 & \textit{REVISE} & -8.69 & 6.85 \\
+  full & 5 & \textit{ECCo} & -1.75 & 0.154 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{5}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-1.21}} & \color{blue}{\textbf{0.363}} \\
+  full & 5 & \textit{Omniscient} & -5.14 & 5.16 \\
+  full & 5 & \textit{REVISE} & $-1.1 \cdot 10^{28}$ & $2.5 \cdot 10^{28}$ \\
+  vanilla & 5 & \textit{ECCo} & -9.36 & 7.32 \\
+  vanilla & 5 & \textit{Generic} & -8.88 & 6.91 \\
+  vanilla & 5 & \textit{Omniscient} & -8.7 & 6.93 \\
+  vanilla & 5 & \textit{REVISE} & -8.52 & 6.73 \\
+  full & 10 & \textit{ECCo} & $-1.02 \cdot 10^{6}$ & $2.32 \cdot 10^{6}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{10}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-1.49}} & \color{blue}{\textbf{0.702}} \\
+  full & 10 & \textit{Omniscient} & -5.13 & 5.16 \\
+  full & 10 & \textit{REVISE} & $-3.74 \cdot 10^{26}$ & $9.09 \cdot 10^{26}$ \\
+  vanilla & 10 & \textit{ECCo} & -9.31 & 7.33 \\
+  vanilla & 10 & \textit{Generic} & -8.87 & 6.86 \\
+  vanilla & 10 & \textit{Omniscient} & -8.7 & 6.89 \\
+  vanilla & 10 & \textit{REVISE} & -8.69 & 6.83 \\
+  full & 15 & \textit{ECCo} & $-3.31 \cdot 10^{13}$ & $7.54 \cdot 10^{13}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{15}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-1.22}} & \color{blue}{\textbf{0.37}} \\
+  full & 15 & \textit{Omniscient} & -5.2 & 5.23 \\
+  full & 15 & \textit{REVISE} & $-9.01 \cdot 10^{27}$ & $2.06 \cdot 10^{28}$ \\
+  vanilla & 15 & \textit{ECCo} & -9.38 & 7.34 \\
+  vanilla & 15 & \textit{Generic} & -8.86 & 6.87 \\
+  vanilla & 15 & \textit{Omniscient} & -8.69 & 6.96 \\
+  vanilla & 15 & \textit{REVISE} & -8.51 & 6.73 \\\bottomrule
+  
+
+\end{longtable}

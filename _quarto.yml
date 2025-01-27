@@ -15,7 +15,7 @@ format:
     wrap: preserve
     mermaid-format: png
 execute: 
-  freeze: auto
+  freeze: false
   eval: true
   echo: false
   output: false
