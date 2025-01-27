@@ -13,15 +13,29 @@ function tabulate_results(
 )
     df = inputs[1]
     other_inputs = inputs[2]
-    return pretty_table(
-        df;
-        tf=tf,
-        wrap_table=wrap_table,
-        table_type=table_type,
-        longtable_footer=longtable_footer,
-        other_inputs...,
-        kwrgs...,
-    )
+    if isa(other_inputs.backend,Val{:latex})
+        formatters = PrettyTables.ft_latex_sn(3)
+        tf = PrettyTables.tf_latex_booktabs
+        tab = pretty_table(
+            df;
+            tf=tf,
+            formatters=formatters,
+            wrap_table=wrap_table,
+            table_type=table_type,
+            longtable_footer=longtable_footer,
+            alignment=:c,
+            other_inputs...,
+            kwrgs...,
+        )
+    else
+        tab = pretty_table(
+            df;
+            alignment=:c,
+            other_inputs...,
+            kwrgs...,
+        )
+    end
+    return tab
 end
 
 function get_table_inputs(
@@ -47,9 +61,12 @@ end
 format_generator(s::AbstractString) = get_generator_name(generator_types[s](), pretty=true)
 
 function format_header(s::String)
-    s = split(s, "_") |>
+    s = replace(s, "_type" => "") |>
+        s -> replace(s, "objective" => "obj.") |>
+        s -> split(s, "_") |>
         ss -> [s in ["exper", "eval"] ? "($s)" : uppercasefirst(s) for s in ss] |>
-        ss -> join(ss, " ")
+        ss -> join(ss, " ") |>
+        s -> replace(s, "Lambda Energy" => "\$\\lambda\$") 
     return s
 end
 
