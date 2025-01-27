@@ -14,21 +14,21 @@
 
 \begin{document}
 
-\title{Recent Advances in Underwater Basket Weaving Under the Extreme Pressure of the Mariana Trench}
+\title{Counterfactual Training: Teaching Models Plausible and Actionable Explanations}
 
-\titlerunning{Underwater Basket Weaving Under Extreme Pressure}
+\titlerunning{Counterfactual Training}
 % If the full title of your paper is short enough to also fit in the running head, you can omit the abbreviated paper title here. You can check as follows: if you comment out the \titlerunning line, something will appear in the header of all odd-numbered pages of your PDF from page 3 onward. This something is either the full title (in which case all is well), or the error message "Title Suppressed Due to Excessive Length". If this error message appears, you're going to want to provide an abbreviated title within the \titlerunning command, because if you won't do it, Springer will do it for you.
 
 %N.B.: Author information (both in the \author{} and \authorrunning{} command) should only be present in the Camera-Ready Version of your paper. The version that you initially submit for review, ought to be double-blind. So, when initially submitting your paper, use:
-%\author{Author information scrubbed for double-blind reviewing}
-\author{Andr\'e Lauren Benjamin\inst{1} \and
-Calvin Cordozar Broadus Jr.\inst{2,3} \corr \and
-Antwan Andr\'e Patton\inst{1}\orcidID{0000-1111-2222-3333}}
+\author{Author information scrubbed for double-blind reviewing}
+\author{Patrick Altmeyer\inst{1}\orcidID{0000-0003-4726-8613} \corr \and
+Arie van Deursen\inst{1} \and
+Cynthia C. S. Liem\inst{1}}
 % You may leave out the orcidID information, if you want to.
 % Use \corr to indicate the corresponding author. Note the spacing around the \corr command. Only one author can be the corresponding author.
 
 %N.B.: comment out the \authorrunning{} command for the double-blind version of your paper submitted for review. Later, if your paper is accepted, use the command for the Camera-Ready Version.
-\authorrunning{A.L. Benjamin et al.}
+% \authorrunning{A.L. Benjamin et al.}
 % First names are abbreviated in the running head.
 % If there is one author, write 'A.L. Benjamin'.
 % If there are two authors, write 'A.L. Benjamin and C.C. Broadus Jr.'
@@ -45,7 +45,17 @@ Secondary European Affiliation, Tiergartenstr. 17, 69121 Heidelberg, Germany
 
 \input{abstract.tex}
 
-% \input{related.tex}
+\input{intro.tex}
+
+\input{related.tex}
+
+\input{method.tex}
+
+\input{experiments.tex}
+
+\input{discussion.tex}
+
+\input{conclusion.tex}
 
 \begin{credits}
 \subsubsection{\ackname} A bold run-in heading in small font size at the end of the paper is
@@ -66,7 +76,7 @@ Company X and owns stock in Company Y. Author C is a member of committee Z.
 \bibliography{bib}
 \bibliographystyle{splncs04}
 
-\input{appendix.tex}
+% \input{appendix.tex}
 
 \end{document}
 

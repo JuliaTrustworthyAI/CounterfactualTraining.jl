@@ -4,7 +4,6 @@
 
 [@wachter2017counterfactual;@joshi2019realistic;@altmeyer2024faithful]
 
-
 ## Learning Representations
 
 > For example, joint-energy models
