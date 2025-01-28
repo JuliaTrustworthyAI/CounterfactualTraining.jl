@@ -1,5 +1,8 @@
 bibliography: bib.bib
 format:
   latex:
-    template: bare.tex
-    filters: [cite.lua]
+    template: templates/body.tex
+    filters: [cite.lua, abstract-section]
+keywords: 
+  - Counterfactual Explanations
+  - Explainable AI
