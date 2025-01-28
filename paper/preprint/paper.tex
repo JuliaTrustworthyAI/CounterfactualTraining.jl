@@ -1,0 +1,683 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else  
+    % xetex/luatex font selection
+    \setmainfont[]{Latin Modern Roman}
+  \setmathfont[]{Latin Modern Math}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\setcounter{secnumdepth}{5}
+% Make \paragraph and \subparagraph free-standing
+\makeatletter
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+\makeatother
+
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+% definitions for citeproc citations
+\NewDocumentCommand\citeproctext{}{}
+\NewDocumentCommand\citeproc{mm}{%
+  \begingroup\def\citeproctext{#2}\cite{#1}\endgroup}
+\makeatletter
+ % allow citations to break across lines
+ \let\@cite@ofmt\@firstofone
+ % avoid brackets around text for \cite:
+ \def\@biblabel#1{}
+ \def\@cite#1#2{{#1\if@tempswa , #2\fi}}
+\makeatother
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2] % #1 hanging-indent, #2 entry-spacing
+ {\begin{list}{}{%
+  \setlength{\itemindent}{0pt}
+  \setlength{\leftmargin}{0pt}
+  \setlength{\parsep}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+   \setlength{\leftmargin}{\cslhangindent}
+   \setlength{\itemindent}{-1\cslhangindent}
+  \fi
+  % set entry spacing
+  \setlength{\itemsep}{#2\baselineskip}}}
+ {\end{list}}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+
+\usepackage{arxiv}
+\usepackage{orcidlink}
+\usepackage{amsmath}
+\usepackage[T1]{fontenc}
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+
+\usepackage{bookmark}
+
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdfkeywords={Counterfactual Explanations, Explainable AI},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+
+\newcommand{\runninghead}{A Preprint }
+\renewcommand{\runninghead}{A Preprint }
+\def\asep{\\\\\\ } % default: all authors on same column
+\author{}
+\date{}
+\begin{document}
+{\bfseries \emph Keywords}
+\def\sep{\textbullet\ }
+Counterfactual Explanations \sep 
+Explainable AI
+
+
+
+\section{Abstract}\label{abstract}
+
+Counterfactual Explanations (CE) have emerged as a popular method to
+explain the predictions made by opaque machine learning models in a
+post-hoc fashion. We propose a novel approach that leverages
+counterfactuals during the training phase of models.
+
+\section{Introduction}\label{introduction}
+
+\section{Related Literature}\label{sec-lit}
+
+\subsection{Background on Counterfactual
+Explanations}\label{background-on-counterfactual-explanations}
+
+(Wachter, Mittelstadt, and Russell 2017; Joshi et al. 2019; Altmeyer et
+al. 2024)
+
+\subsection{Learning Representations}\label{learning-representations}
+
+\begin{quote}
+For example, joint-energy models
+\end{quote}
+
+\subsection{Generalization and
+Robustness}\label{generalization-and-robustness}
+
+Sauer and Geiger (2021) generate counterfactual images for MNIST and
+ImageNet through independent mechanisms (IM): each IM learns
+class-conditional input distributions over a specific lower-dimensional,
+semantically meaningful factor, such as \emph{texture}, \emph{shape} and
+\emph{background}. The demonstrate that using these generated
+counterfactuals during classifier training improves model robustness.
+Similarly, Abbasnejad et al. (2020) argue that counterfactuals represent
+potentially useful training data in machine learning, especially in
+supervised settings where inputs may be reasonably mapped to multiple
+outputs. They, too, demonstrate the augmenting the training data of
+image classifiers can improve generalization.
+
+Teney, Abbasnedjad, and Hengel (2020) propose an approach using
+counterfactuals in training that does not rely on data augmentation:
+they argue that counterfactual pairs typically already exist in training
+datasets. Specifically, their approach relies on, firstly, identifying
+similar input samples with different annotations and, secondly, ensuring
+that the gradient of the classifier aligns with the vector between pairs
+of counterfactual inputs using the cosine distance as a loss function
+(referred to as \emph{gradient supervision}) (\textbf{\emph{this might
+be useful for our task as well}}). In the natural language processing
+(NLP) domain, counterfactuals have similarly been used to improve models
+through data augmentation: Wu et al. (2021), propose POLYJUICE, a
+general-purpose counterfactual generator for language models. They
+demonstrate empirically that augmenting training data through POLYJUICE
+counterfactuals improves robustness in a number of NLP tasks.
+
+\subsection{Link to Adversarial
+Training}\label{link-to-adversarial-training}
+
+Freiesleben (2022) propose two definitional differences between
+Adversarial Examples (AE) and Counterfactual Explanations (CE): firstly,
+and more importantly according to the authors, the term AE implies
+missclassification, which is not the case for CE (\textbf{\emph{this
+might be a useful notion for use to distinguish between adversarials and
+explanations during training}}); secondly, they argue that closeness
+plays a more critical role in the context of CE but confess that even
+counterfactuals that are not close might be relevant explanations.
+Pawelczyk et al. (2022) show that CE and AE are equivalent under certain
+conditions and derive upper bounds on the distances between them.
+
+\subsection{Closely Related}\label{closely-related}
+
+Guo, Nguyen, and Yadav (2023) are the first to propose end-to-end
+training pipeline that includes counterfactual explanations as part of
+the training prodeduce. In particular, they propose a specific network
+architecture that includes a predictor and CE generator network
+(\textbf{\emph{akin a GAN?}}), where the parameters of the CE generator
+network are learnable. Counterfactuals are generated during each
+training iteration and fed back to the predictor network
+(\textbf{\emph{here we are aligned}}). In contrast, we impose no
+restrictions on the neural network architecture at all.
+(\textbf{\emph{to ensure the one-hot encoding of categorical features is
+maintained, they simple use softmax (might be interesting for CE.jl)}})
+Interestingly, the authors find that their approach is sensitive to the
+choice of the loss function: only MSE seems to lead to good performance.
+They also demonstrate theoretically, that the objective function is
+difficult to optimize due to divergent gradients and suffers from poor
+adversarial robustness. (\textbf{\emph{because partial gradients with
+respect to the classification loss component and the counterfactual
+validity component point in opposite directions}}). To mitigate these
+issues, the authors use block-wise gradient descent: they first update
+with respect to classification loss and then use a second update with
+respect to the other loss components (\textbf{\emph{this might be useful
+for our task as well}}). Ross, Lakkaraju, and Bastani (2024) propose a
+way to train models that are guaranteed to provide recourse for
+individuals with high probability. The approach builds on adversarial
+training (\textbf{\emph{here we are aligned}}), where in this context
+adversarial examples are actively encouraged to exist, but only target
+attacks with respect to the positive class. The proposed method allows
+for imposing a set of actionable recourse ex-ante: for example, users
+can impose mutability constraints for features (\textbf{\emph{here we
+are aligned}}). (\textbf{\emph{To solve their objective function more
+efficiently, they use a first-order Taylor approximation to approximate
+the recourse loss component (might be applicable in our case)}})
+
+Luu and Inoue (2023) introduce Counterfactual Adversarial Training (CAT)
+with intention of improving generalization and robustness of language
+models. Specifically, they propose to proceed as follows: firstly,
+identify training samples that are subject to high predictive
+uncertainty (entropy); secondly, generate counterfactual explanations
+for those samples; and, finally, finetune the model on the augmented
+dataset that includes the generated counterfactuals.
+
+\section{Counterfactual Training}\label{counterfactual-training}
+
+\section{Experiments}\label{sec-experiments}
+
+\subsection{Experimental Setup}\label{experimental-setup}
+
+\subsection{Experimental Results}\label{experimental-results}
+
+\section{Discussion}\label{sec-discussion}
+
+\section{Conclusion}\label{sec-conclusion}
+
+\section{Appendix}\label{appendix}
+
+\subsection{Initial Grid Search}\label{initial-grid-search}
+
+\subsubsection{Generator Params}\label{generator-params}
+
+\paragraph{Linearly Separable}\label{linearly-separable}
+
+\begin{longtable}{ccccc}
+
+\caption{\label{tbl-lin_sep-lambda_energy_exper}Results for Linearly
+Separable data by energy penalty.}
+
+\tabularnewline
+
+  \toprule
+  \textbf{Obj.} & \textbf{\$\textbackslash{}lambda\$ (exper)} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endfirsthead
+  \toprule
+  \textbf{Obj.} & \textbf{\$\textbackslash{}lambda\$ (exper)} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endhead
+  \bottomrule
+  \multicolumn{5}{r}{Continuing table below.}\\
+  \bottomrule
+  \endfoot
+  \endlastfoot
+  full & 0.01 & \textit{ECCo} & $-9.91 \cdot 10^{11}$ & $2.25 \cdot 10^{12}$ \\
+  full & 0.01 & \textit{Generic} & $-5.71 \cdot 10^{17}$ & $1.3 \cdot 10^{18}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.01}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.54}} & \color{blue}{\textbf{0.116}} \\
+  full & 0.01 & \textit{REVISE} & -15.6 & 13.2 \\
+  vanilla & 0.01 & \textit{ECCo} & -4.28 & 3.52 \\
+  vanilla & 0.01 & \textit{Generic} & -4.45 & 3.47 \\
+  vanilla & 0.01 & \textit{Omniscient} & -5.12 & 4.46 \\
+  vanilla & 0.01 & \textit{REVISE} & -4.91 & 4.24 \\
+  full & 0.05 & \textit{ECCo} & $-5.63 \cdot 10^{5}$ & $1.28 \cdot 10^{6}$ \\
+  full & 0.05 & \textit{Generic} & $-8.35 \cdot 10^{17}$ & $1.9 \cdot 10^{18}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.05}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.53}} & \color{blue}{\textbf{0.114}} \\
+  full & 0.05 & \textit{REVISE} & -15 & 12.6 \\
+  vanilla & 0.05 & \textit{ECCo} & -4.4 & 3.66 \\
+  vanilla & 0.05 & \textit{Generic} & -4.38 & 3.48 \\
+  vanilla & 0.05 & \textit{Omniscient} & -5.25 & 4.62 \\
+  vanilla & 0.05 & \textit{REVISE} & -4.94 & 4.22 \\
+  full & 0.1 & \textit{ECCo} & $-6.74 \cdot 10^{5}$ & $1.53 \cdot 10^{6}$ \\
+  full & 0.1 & \textit{Generic} & $-1.72 \cdot 10^{11}$ & $3.9 \cdot 10^{11}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.56}} & \color{blue}{\textbf{0.124}} \\
+  full & 0.1 & \textit{REVISE} & -15.6 & 13.2 \\
+  vanilla & 0.1 & \textit{ECCo} & -4.28 & 3.52 \\
+  vanilla & 0.1 & \textit{Generic} & -4.45 & 3.48 \\
+  vanilla & 0.1 & \textit{Omniscient} & -5.12 & 4.46 \\
+  vanilla & 0.1 & \textit{REVISE} & -4.91 & 4.25 \\
+  full & 0.5 & \textit{ECCo} & -11.8 & 9.83 \\
+  full & 0.5 & \textit{Generic} & $-1.06 \cdot 10^{18}$ & $2.42 \cdot 10^{18}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.5}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.54}} & \color{blue}{\textbf{0.123}} \\
+  full & 0.5 & \textit{REVISE} & -15 & 12.6 \\
+  vanilla & 0.5 & \textit{ECCo} & -4.4 & 3.65 \\
+  vanilla & 0.5 & \textit{Generic} & -4.38 & 3.48 \\
+  vanilla & 0.5 & \textit{Omniscient} & -5.25 & 4.61 \\
+  vanilla & 0.5 & \textit{REVISE} & -4.95 & 4.22 \\
+  full & 1 & \textit{ECCo} & -11.5 & 11.1 \\
+  full & 1 & \textit{Generic} & $-1.71 \cdot 10^{11}$ & $3.88 \cdot 10^{11}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.59}} & \color{blue}{\textbf{0.117}} \\
+  full & 1 & \textit{REVISE} & -15.7 & 13.3 \\
+  vanilla & 1 & \textit{ECCo} & -4.28 & 3.51 \\
+  vanilla & 1 & \textit{Generic} & -4.44 & 3.47 \\
+  vanilla & 1 & \textit{Omniscient} & -5.11 & 4.46 \\
+  vanilla & 1 & \textit{REVISE} & -4.91 & 4.25 \\
+  full & 5 & \textit{ECCo} & -3.99 & 3.12 \\
+  full & 5 & \textit{Generic} & $-4.88 \cdot 10^{17}$ & $1.11 \cdot 10^{18}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{5}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.53}} & \color{blue}{\textbf{0.117}} \\
+  full & 5 & \textit{REVISE} & -14.6 & 12.1 \\
+  vanilla & 5 & \textit{ECCo} & -4.4 & 3.65 \\
+  vanilla & 5 & \textit{Generic} & -4.38 & 3.48 \\
+  vanilla & 5 & \textit{Omniscient} & -5.25 & 4.61 \\
+  vanilla & 5 & \textit{REVISE} & -4.95 & 4.22 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{10}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-2.31}} & \color{blue}{\textbf{0.735}} \\
+  full & 10 & \textit{Generic} & $-1.7 \cdot 10^{11}$ & $3.86 \cdot 10^{11}$ \\
+  full & 10 & \textit{Omniscient} & -2.53 & 0.117 \\
+  full & 10 & \textit{REVISE} & -15.5 & 13 \\
+  vanilla & 10 & \textit{ECCo} & -4.28 & 3.51 \\
+  vanilla & 10 & \textit{Generic} & -4.44 & 3.47 \\
+  vanilla & 10 & \textit{Omniscient} & -5.12 & 4.46 \\
+  vanilla & 10 & \textit{REVISE} & -4.91 & 4.24 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{15}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-2.01}} & \color{blue}{\textbf{0.488}} \\
+  full & 15 & \textit{Generic} & $-4.91 \cdot 10^{17}$ & $1.12 \cdot 10^{18}$ \\
+  full & 15 & \textit{Omniscient} & -2.53 & 0.116 \\
+  full & 15 & \textit{REVISE} & -14.4 & 11.7 \\
+  vanilla & 15 & \textit{ECCo} & -4.4 & 3.65 \\
+  vanilla & 15 & \textit{Generic} & -4.38 & 3.48 \\
+  vanilla & 15 & \textit{Omniscient} & -5.25 & 4.6 \\
+  vanilla & 15 & \textit{REVISE} & -4.95 & 4.23 \\\bottomrule
+
+\end{longtable}
+
+\paragraph{Moons}\label{moons}
+
+\begin{longtable}{ccccc}
+
+\caption{\label{tbl-moons-lambda_energy_exper}Results for Moons data by
+energy penalty.}
+
+\tabularnewline
+
+  \toprule
+  \textbf{Obj.} & \textbf{\$\textbackslash{}lambda\$ (exper)} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endfirsthead
+  \toprule
+  \textbf{Obj.} & \textbf{\$\textbackslash{}lambda\$ (exper)} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endhead
+  \bottomrule
+  \multicolumn{5}{r}{Continuing table below.}\\
+  \bottomrule
+  \endfoot
+  \endlastfoot
+  full & 0.01 & \textit{ECCo} & $-2.8 \cdot 10^{22}$ & $6.39 \cdot 10^{22}$ \\
+  full & 0.01 & \textit{Generic} & $-4.89 \cdot 10^{30}$ & $1.11 \cdot 10^{31}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.01}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.74}} & \color{blue}{\textbf{5.08}} \\
+  full & 0.01 & \textit{REVISE} & -572 & $1.25 \cdot 10^{3}$ \\
+  vanilla & 0.01 & \textit{ECCo} & -15.5 & 17.3 \\
+  vanilla & 0.01 & \textit{Generic} & -10.9 & 11.9 \\
+  vanilla & 0.01 & \textit{Omniscient} & -12.7 & 14.4 \\
+  vanilla & 0.01 & \textit{REVISE} & -11.2 & 13 \\
+  full & 0.05 & \textit{ECCo} & $-1.55 \cdot 10^{16}$ & $3.52 \cdot 10^{16}$ \\
+  full & 0.05 & \textit{Generic} & $-2.22 \cdot 10^{20}$ & $5 \cdot 10^{20}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.05}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.41}} & \color{blue}{\textbf{4.48}} \\
+  full & 0.05 & \textit{REVISE} & $-1.04 \cdot 10^{3}$ & $2.3 \cdot 10^{3}$ \\
+  vanilla & 0.05 & \textit{ECCo} & -15.5 & 17.2 \\
+  vanilla & 0.05 & \textit{Generic} & -11.7 & 12.8 \\
+  vanilla & 0.05 & \textit{Omniscient} & -12.4 & 14.1 \\
+  vanilla & 0.05 & \textit{REVISE} & -11.3 & 13.1 \\
+  full & 0.1 & \textit{ECCo} & $-3.41 \cdot 10^{3}$ & $7.73 \cdot 10^{3}$ \\
+  full & 0.1 & \textit{Generic} & $-5.22 \cdot 10^{30}$ & $1.19 \cdot 10^{31}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.78}} & \color{blue}{\textbf{5.12}} \\
+  full & 0.1 & \textit{REVISE} & -288 & 594 \\
+  vanilla & 0.1 & \textit{ECCo} & -15.5 & 17.2 \\
+  vanilla & 0.1 & \textit{Generic} & -10.9 & 11.9 \\
+  vanilla & 0.1 & \textit{Omniscient} & -12.7 & 14.4 \\
+  vanilla & 0.1 & \textit{REVISE} & -11.3 & 13.1 \\
+  full & 0.5 & \textit{ECCo} & -7.09 & 7.51 \\
+  full & 0.5 & \textit{Generic} & $-1.11 \cdot 10^{31}$ & $2.53 \cdot 10^{31}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.5}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.58}} & \color{blue}{\textbf{4.83}} \\
+  full & 0.5 & \textit{REVISE} & $-1.19 \cdot 10^{3}$ & $2.64 \cdot 10^{3}$ \\
+  vanilla & 0.5 & \textit{ECCo} & -15.5 & 17.2 \\
+  vanilla & 0.5 & \textit{Generic} & -11.7 & 12.8 \\
+  vanilla & 0.5 & \textit{Omniscient} & -12.4 & 14.1 \\
+  vanilla & 0.5 & \textit{REVISE} & -11.3 & 13.1 \\
+  full & 1 & \textit{ECCo} & -6.06 & 6.33 \\
+  full & 1 & \textit{Generic} & $-1.58 \cdot 10^{33}$ & $3.59 \cdot 10^{33}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.66}} & \color{blue}{\textbf{4.89}} \\
+  full & 1 & \textit{REVISE} & $-1.16 \cdot 10^{3}$ & $2.59 \cdot 10^{3}$ \\
+  vanilla & 1 & \textit{ECCo} & -15.5 & 17.3 \\
+  vanilla & 1 & \textit{Generic} & -10.9 & 11.9 \\
+  vanilla & 1 & \textit{Omniscient} & -12.7 & 14.4 \\
+  vanilla & 1 & \textit{REVISE} & -11.3 & 13.1 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{5}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-2.57}} & \color{blue}{\textbf{2.07}} \\
+  full & 5 & \textit{Generic} & $-1.17 \cdot 10^{28}$ & $2.66 \cdot 10^{28}$ \\
+  full & 5 & \textit{Omniscient} & -4.29 & 4.31 \\
+  full & 5 & \textit{REVISE} & -530 & $1.16 \cdot 10^{3}$ \\
+  vanilla & 5 & \textit{ECCo} & -15.5 & 17.2 \\
+  vanilla & 5 & \textit{Generic} & -11.7 & 12.7 \\
+  vanilla & 5 & \textit{Omniscient} & -12.4 & 14.1 \\
+  vanilla & 5 & \textit{REVISE} & -11.3 & 13.1 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{10}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.76}} & \color{blue}{\textbf{0.974}} \\
+  full & 10 & \textit{Generic} & $-1.54 \cdot 10^{33}$ & $3.51 \cdot 10^{33}$ \\
+  full & 10 & \textit{Omniscient} & -4.44 & 4.56 \\
+  full & 10 & \textit{REVISE} & $-1.52 \cdot 10^{3}$ & $3.4 \cdot 10^{3}$ \\
+  vanilla & 10 & \textit{ECCo} & -15.5 & 17.3 \\
+  vanilla & 10 & \textit{Generic} & -10.9 & 11.9 \\
+  vanilla & 10 & \textit{Omniscient} & -12.7 & 14.4 \\
+  vanilla & 10 & \textit{REVISE} & -11.3 & 13.1 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{15}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.37}} & \color{blue}{\textbf{0.365}} \\
+  full & 15 & \textit{Generic} & $-5.32 \cdot 10^{28}$ & $1.21 \cdot 10^{29}$ \\
+  full & 15 & \textit{Omniscient} & -4.34 & 4.38 \\
+  full & 15 & \textit{REVISE} & -473 & $1.03 \cdot 10^{3}$ \\
+  vanilla & 15 & \textit{ECCo} & -15.5 & 17.2 \\
+  vanilla & 15 & \textit{Generic} & -11.7 & 12.8 \\
+  vanilla & 15 & \textit{Omniscient} & -12.4 & 14.1 \\
+  vanilla & 15 & \textit{REVISE} & -11.3 & 13.1 \\\bottomrule
+
+\end{longtable}
+
+\paragraph{Circles}\label{circles}
+
+\begin{longtable}{ccccc}
+
+\caption{\label{tbl-circles-lambda_energy_exper}Results for Circles data
+by energy penalty.}
+
+\tabularnewline
+
+  \toprule
+  \textbf{Obj.} & \textbf{\$\textbackslash{}lambda\$ (exper)} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endfirsthead
+  \toprule
+  \textbf{Obj.} & \textbf{\$\textbackslash{}lambda\$ (exper)} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endhead
+  \bottomrule
+  \multicolumn{5}{r}{Continuing table below.}\\
+  \bottomrule
+  \endfoot
+  \endlastfoot
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.01}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.26}} & \color{blue}{\textbf{0.423}} \\
+  full & 0.01 & \textit{Generic} & -1.49 & 0.71 \\
+  full & 0.01 & \textit{Omniscient} & -5.21 & 5.25 \\
+  full & 0.01 & \textit{REVISE} & $-2.71 \cdot 10^{26}$ & $6.37 \cdot 10^{26}$ \\
+  vanilla & 0.01 & \textit{ECCo} & -9.33 & 7.34 \\
+  vanilla & 0.01 & \textit{Generic} & -8.89 & 6.88 \\
+  vanilla & 0.01 & \textit{Omniscient} & -8.67 & 6.87 \\
+  vanilla & 0.01 & \textit{REVISE} & -8.65 & 6.8 \\
+  full & 0.05 & \textit{ECCo} & -1.29 & 0.397 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.05}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-1.21}} & \color{blue}{\textbf{0.356}} \\
+  full & 0.05 & \textit{Omniscient} & -5.08 & 5.09 \\
+  full & 0.05 & \textit{REVISE} & $-5.91 \cdot 10^{27}$ & $1.36 \cdot 10^{28}$ \\
+  vanilla & 0.05 & \textit{ECCo} & -9.35 & 7.32 \\
+  vanilla & 0.05 & \textit{Generic} & -8.85 & 6.87 \\
+  vanilla & 0.05 & \textit{Omniscient} & -8.7 & 6.96 \\
+  vanilla & 0.05 & \textit{REVISE} & -8.52 & 6.76 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.1}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.2}} & \color{blue}{\textbf{0.383}} \\
+  full & 0.1 & \textit{Generic} & -1.5 & 0.735 \\
+  full & 0.1 & \textit{Omniscient} & -5.17 & 5.23 \\
+  full & 0.1 & \textit{REVISE} & $-3.06 \cdot 10^{26}$ & $7.7 \cdot 10^{26}$ \\
+  vanilla & 0.1 & \textit{ECCo} & -9.33 & 7.32 \\
+  vanilla & 0.1 & \textit{Generic} & -8.88 & 6.86 \\
+  vanilla & 0.1 & \textit{Omniscient} & -8.69 & 6.9 \\
+  vanilla & 0.1 & \textit{REVISE} & -8.68 & 6.81 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.5}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.12}} & \color{blue}{\textbf{0.217}} \\
+  full & 0.5 & \textit{Generic} & -1.21 & 0.352 \\
+  full & 0.5 & \textit{Omniscient} & -5.09 & 5.12 \\
+  full & 0.5 & \textit{REVISE} & $-5.97 \cdot 10^{27}$ & $1.37 \cdot 10^{28}$ \\
+  vanilla & 0.5 & \textit{ECCo} & -9.35 & 7.3 \\
+  vanilla & 0.5 & \textit{Generic} & -8.89 & 6.92 \\
+  vanilla & 0.5 & \textit{Omniscient} & -8.68 & 6.93 \\
+  vanilla & 0.5 & \textit{REVISE} & -8.53 & 6.75 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{1}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.1}} & \color{blue}{\textbf{0.163}} \\
+  full & 1 & \textit{Generic} & -1.49 & 0.726 \\
+  full & 1 & \textit{Omniscient} & -5.16 & 5.2 \\
+  full & 1 & \textit{REVISE} & $-3.09 \cdot 10^{26}$ & $7.22 \cdot 10^{26}$ \\
+  vanilla & 1 & \textit{ECCo} & -9.34 & 7.36 \\
+  vanilla & 1 & \textit{Generic} & -8.86 & 6.85 \\
+  vanilla & 1 & \textit{Omniscient} & -8.7 & 6.9 \\
+  vanilla & 1 & \textit{REVISE} & -8.69 & 6.85 \\
+  full & 5 & \textit{ECCo} & -1.75 & 0.154 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{5}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-1.21}} & \color{blue}{\textbf{0.363}} \\
+  full & 5 & \textit{Omniscient} & -5.14 & 5.16 \\
+  full & 5 & \textit{REVISE} & $-1.1 \cdot 10^{28}$ & $2.5 \cdot 10^{28}$ \\
+  vanilla & 5 & \textit{ECCo} & -9.36 & 7.32 \\
+  vanilla & 5 & \textit{Generic} & -8.88 & 6.91 \\
+  vanilla & 5 & \textit{Omniscient} & -8.7 & 6.93 \\
+  vanilla & 5 & \textit{REVISE} & -8.52 & 6.73 \\
+  full & 10 & \textit{ECCo} & $-1.02 \cdot 10^{6}$ & $2.32 \cdot 10^{6}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{10}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-1.49}} & \color{blue}{\textbf{0.702}} \\
+  full & 10 & \textit{Omniscient} & -5.13 & 5.16 \\
+  full & 10 & \textit{REVISE} & $-3.74 \cdot 10^{26}$ & $9.09 \cdot 10^{26}$ \\
+  vanilla & 10 & \textit{ECCo} & -9.31 & 7.33 \\
+  vanilla & 10 & \textit{Generic} & -8.87 & 6.86 \\
+  vanilla & 10 & \textit{Omniscient} & -8.7 & 6.89 \\
+  vanilla & 10 & \textit{REVISE} & -8.69 & 6.83 \\
+  full & 15 & \textit{ECCo} & $-3.31 \cdot 10^{13}$ & $7.54 \cdot 10^{13}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{15}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-1.22}} & \color{blue}{\textbf{0.37}} \\
+  full & 15 & \textit{Omniscient} & -5.2 & 5.23 \\
+  full & 15 & \textit{REVISE} & $-9.01 \cdot 10^{27}$ & $2.06 \cdot 10^{28}$ \\
+  vanilla & 15 & \textit{ECCo} & -9.38 & 7.34 \\
+  vanilla & 15 & \textit{Generic} & -8.86 & 6.87 \\
+  vanilla & 15 & \textit{Omniscient} & -8.69 & 6.96 \\
+  vanilla & 15 & \textit{REVISE} & -8.51 & 6.73 \\\bottomrule
+
+\end{longtable}
+
+\section*{References}\label{references}
+\addcontentsline{toc}{section}{References}
+
+\phantomsection\label{refs}
+\begin{CSLReferences}{1}{0}
+\bibitem[\citeproctext]{ref-abbasnejad2020counterfactual}
+Abbasnejad, Ehsan, Damien Teney, Amin Parvaneh, Javen Shi, and Anton van
+den Hengel. 2020. {``Counterfactual Vision and Language Learning.''} In
+\emph{2020 IEEE/CVF Conference on Computer Vision and Pattern
+Recognition (CVPR)}, 10041--51.
+\url{https://doi.org/10.1109/CVPR42600.2020.01006}.
+
+\bibitem[\citeproctext]{ref-altmeyer2024faithful}
+Altmeyer, Patrick, Mojtaba Farmanbar, Arie van Deursen, and Cynthia CS
+Liem. 2024. {``Faithful Model Explanations Through Energy-Constrained
+Conformal Counterfactuals.''} In \emph{Proceedings of the AAAI
+Conference on Artificial Intelligence}, 38:10829--37. 10.
+
+\bibitem[\citeproctext]{ref-freiesleben2022intriguing}
+Freiesleben, Timo. 2022. {``The Intriguing Relation Between
+Counterfactual Explanations and Adversarial Examples.''} \emph{Minds and
+Machines} 32 (1): 77--109.
+
+\bibitem[\citeproctext]{ref-guo2023counternet}
+Guo, Hangzhi, Thanh H. Nguyen, and Amulya Yadav. 2023. {``CounterNet:
+End-to-End Training of Prediction Aware Counterfactual Explanations.''}
+In \emph{Proceedings of the 29th ACM SIGKDD Conference on Knowledge
+Discovery and Data Mining}, 577--89. KDD '23. New York, NY, USA:
+Association for Computing Machinery.
+\url{https://doi.org/10.1145/3580305.3599290}.
+
+\bibitem[\citeproctext]{ref-joshi2019realistic}
+Joshi, Shalmali, Oluwasanmi Koyejo, Warut Vijitbenjaronk, Been Kim, and
+Joydeep Ghosh. 2019. {``Towards Realistic Individual Recourse and
+Actionable Explanations in Black-Box Decision Making Systems.''}
+\url{https://arxiv.org/abs/1907.09615}.
+
+\bibitem[\citeproctext]{ref-luu2023counterfactual}
+Luu, Hoai Linh, and Naoya Inoue. 2023. {``Counterfactual Adversarial
+Training for Improving Robustness of Pre-Trained Language Models.''} In
+\emph{Proceedings of the 37th Pacific Asia Conference on Language,
+Information and Computation}, 881--88.
+
+\bibitem[\citeproctext]{ref-pawelczyk2022exploring}
+Pawelczyk, Martin, Chirag Agarwal, Shalmali Joshi, Sohini Upadhyay, and
+Himabindu Lakkaraju. 2022. {``Exploring Counterfactual Explanations
+Through the Lens of Adversarial Examples: A Theoretical and Empirical
+Analysis.''} In \emph{Proceedings of the 25th International Conference
+on Artificial Intelligence and Statistics}, edited by Gustau
+Camps-Valls, Francisco J. R. Ruiz, and Isabel Valera, 151:4574--94.
+Proceedings of Machine Learning Research. PMLR.
+\url{https://proceedings.mlr.press/v151/pawelczyk22a.html}.
+
+\bibitem[\citeproctext]{ref-ross2021learning}
+Ross, Alexis, Himabindu Lakkaraju, and Osbert Bastani. 2024. {``Learning
+Models for Actionable Recourse.''} In \emph{Proceedings of the 35th
+International Conference on Neural Information Processing Systems}. NIPS
+'21. Red Hook, NY, USA: Curran Associates Inc.
+
+\bibitem[\citeproctext]{ref-sauer2021counterfactual}
+Sauer, Axel, and Andreas Geiger. 2021. {``Counterfactual Generative
+Networks.''} \url{https://arxiv.org/abs/2101.06046}.
+
+\bibitem[\citeproctext]{ref-teney2020learning}
+Teney, Damien, Ehsan Abbasnedjad, and Anton van den Hengel. 2020.
+{``Learning What Makes a Difference from Counterfactual Examples and
+Gradient Supervision.''} In \emph{Computer Vision--ECCV 2020: 16th
+European Conference, Glasgow, UK, August 23--28, 2020, Proceedings, Part
+x 16}, 580--99. Springer.
+
+\bibitem[\citeproctext]{ref-wachter2017counterfactual}
+Wachter, Sandra, Brent Mittelstadt, and Chris Russell. 2017.
+{``Counterfactual Explanations Without Opening the Black Box:
+{Automated} Decisions and the {GDPR}.''} \emph{Harv. JL \& Tech.} 31:
+841. \url{https://doi.org/10.2139/ssrn.3063289}.
+
+\bibitem[\citeproctext]{ref-wu2021polyjuice}
+Wu, Tongshuang, Marco Tulio Ribeiro, Jeffrey Heer, and Daniel Weld.
+2021. {``Polyjuice: Generating Counterfactuals for Explaining,
+Evaluating, and Improving Models.''} In \emph{Proceedings of the 59th
+Annual Meeting of the Association for Computational Linguistics and the
+11th International Joint Conference on Natural Language Processing
+(Volume 1: Long Papers)}, edited by Chengqing Zong, Fei Xia, Wenjie Li,
+and Roberto Navigli, 6707--23. Online: Association for Computational
+Linguistics. \url{https://doi.org/10.18653/v1/2021.acl-long.523}.
+
+\end{CSLReferences}
+
+
+
+
+\end{document}

@@ -1,0 +1,19 @@
+---
+engine: julia
+julia: 
+  exeflags: ["--project=../experiments/"]
+format:
+  # pdf:
+  #     keep-tex: true
+  arxiv-pdf:
+    keep-tex: true  
+    linenumbers: false
+    doublespacing: false
+    runninghead: "A Preprint"
+---
+
+{{< include /paper/body.qmd >}}
+
+{{< include /paper/sections/appendix.qmd >}}
+
+# References
