@@ -1,0 +1,10 @@
+---
+format: pdf
+engine: julia
+julia: 
+  exeflags: ["--project=paper/experiments/"]
+---
+
+{{< include paper/body.qmd >}}
+
+{{< include paper/sections/appendix.qmd >}}

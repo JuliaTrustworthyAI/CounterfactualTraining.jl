@@ -1,12 +1,4 @@
----
-engine: julia
-julia: 
-  exeflags: ["--project=experiments/"]
----
-
 ```{julia}
-cd("../")
-
 using CTExperiments
 using CTExperiments.CSV
 using CTExperiments.DataFrames
