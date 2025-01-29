@@ -165,6 +165,15 @@
 \@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\usepackage{amsthm}
+\theoremstyle{definition}
+\newtheorem{exercise}{Parameters}[section]
+\theoremstyle{remark}
+\AtBeginDocument{\renewcommand*{\proofname}{Proof}}
+\newtheorem*{remark}{Remark}
+\newtheorem*{solution}{Solution}
+\newtheorem{refremark}{Remark}[section]
+\newtheorem{refsolution}{Solution}[section]
 \makeatother
 \makeatletter
 \makeatother
@@ -178,6 +187,8 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same} % disable monospaced font for URLs
 \hypersetup{
+  pdftitle={Counterfactual Training: Teaching Models Plausible and Actionable Explanations},
+  pdfauthor={Patrick Altmeyer; Arie van Deursen; Cynthia C. S. Liem},
   pdfkeywords={Counterfactual Explanations, Explainable AI},
   colorlinks=true,
   linkcolor={blue},
@@ -187,25 +198,37 @@
   pdfcreator={LaTeX via pandoc}}
 
 
+\usepackage{lineno}
+\linenumbers
 \newcommand{\runninghead}{A Preprint }
-\renewcommand{\runninghead}{A Preprint }
+\renewcommand{\runninghead}{Counterfactual Training (A Preprint) }
+\title{Counterfactual Training: Teaching Models Plausible and Actionable
+Explanations}
 \def\asep{\\\\\\ } % default: all authors on same column
-\author{}
+\def\asep{\And }
+\author{\textbf{Patrick
+Altmeyer}~\orcidlink{0000-0003-4726-8613}\\Faculty of Electrical
+Engineering, Mathematics and Computer Science\\Delft University of
+Technology\\\\\href{mailto:p.altmeyer@tudelft.nl}{p.altmeyer@tudelft.nl}\asep\textbf{Arie
+van Deursen}\\Faculty of Electrical Engineering, Mathematics and
+Computer Science\\Delft University of Technology\\\\\asep\textbf{Cynthia
+C. S. Liem}\\Faculty of Electrical Engineering, Mathematics and Computer
+Science\\Delft University of Technology\\\\}
 \date{}
 \begin{document}
+\maketitle
+\begin{abstract}
+Counterfactual Explanations (CE) have emerged as a popular method to
+explain the predictions made by opaque machine learning models in a
+post-hoc fashion. We propose a novel approach that leverages
+counterfactuals during the training phase of models.
+\end{abstract}
 {\bfseries \emph Keywords}
 \def\sep{\textbullet\ }
 Counterfactual Explanations \sep 
 Explainable AI
 
 
-
-\section{Abstract}\label{abstract}
-
-Counterfactual Explanations (CE) have emerged as a popular method to
-explain the predictions made by opaque machine learning models in a
-post-hoc fashion. We propose a novel approach that leverages
-counterfactuals during the training phase of models.
 
 \section{Introduction}\label{introduction}
 
@@ -330,7 +353,14 @@ dataset that includes the generated counterfactuals.
 
 For the initial round of experiments we
 
-\subsubsection{Generator Params}\label{generator-params}
+\subsubsection{Generator Parameters}\label{generator-parameters}
+
+The hyperparameter choices are shown in
+Parameters~\ref{exr-gen-params-first-run}:
+
+\begin{exercise}[Parameters]\protect\hypertarget{exr-gen-params-first-run}{}\label{exr-gen-params-first-run}
+
+~
 
 \begin{itemize}
 \tightlist
@@ -361,6 +391,8 @@ For the initial round of experiments we
     \textbf{objective}: full, vanilla
   \end{itemize}
 \end{itemize}
+
+\end{exercise}
 
 \paragraph{Linearly Separable}\label{linearly-separable}
 

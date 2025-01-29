@@ -3,13 +3,12 @@ engine: julia
 julia: 
   exeflags: ["--project=../experiments/"]
 format:
-  # pdf:
-  #     keep-tex: true
   arxiv-pdf:
     keep-tex: true  
-    linenumbers: false
+    linenumbers: true
     doublespacing: false
-    runninghead: "A Preprint"
+    runninghead: "Counterfactual Training (A Preprint)"
+    authorcols: true
 ---
 
 {{< include /paper/body.qmd >}}

@@ -27,13 +27,21 @@ config_dir = ENV["INITIAL_RUN_CONFIG"]
 
 For the initial round of experiments we 
 
-### Generator Params
+### Generator Parameters
+
+The hyperparameter choices are shown in @exr-gen-params-first-run:
+
+::: {#exr-gen-params-first-run}
+
+## Parameters
 
 ```{julia}
 #| output: asis
 dict = CTExperiments.from_toml(joinpath(config_dir,"gen_params.toml")) 
 println(CTExperiments.dict_to_quarto_markdown(dict))
 ```
+
+:::
 
 ```{julia}
 gen_params_dir = joinpath(results_dir, "gen_params/mlp")
