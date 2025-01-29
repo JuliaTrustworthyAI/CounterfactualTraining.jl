@@ -127,5 +127,17 @@ end
 
 needs_results(cfg::AbstractConfiguration) = !has_results(cfg)
 
-function to_mkd(dict::Dict)
+function to_mkd(dict::Dict, header::Union{Nothing,String}=nothing)
+    drop_fields = ["name"]
+    dict = filter(((k,v),) -> length(v) > 0 && !(k in drop_fields), dict)
+    strs = []
+    for (i,(k,v)) in enumerate(dict)
+        if !isa(v, Dict)
+            str = isnothing(header) ? "**$(k)**" : "$(header) **$(k)**"
+        else
+            str = to_mkd(v, k)
+        end
+        push!(strs, str)
+    end
+    str = join(strs, "\n")
 end
