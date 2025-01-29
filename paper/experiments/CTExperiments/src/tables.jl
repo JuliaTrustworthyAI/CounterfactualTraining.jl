@@ -60,13 +60,19 @@ end
 
 format_generator(s::AbstractString) = get_generator_name(generator_types[s](), pretty=true)
 
+global LatexHeaderReplacements = Dict(
+    "lambda_energy_exper" =>  latex_cell"$\lambda_{\text{div}} (\text{train})$",
+    "lambda_energy_eval" =>  latex_cell"$\lambda_{\text{div}} (\text{eval})$",
+    "lambda_cost_exper" =>  latex_cell"$\lambda_{\text{cost}} (\text{train})$",
+    "lambda_cost_eval" =>  latex_cell"$\lambda_{\text{cost}} (\text{eval})$",
+)
+
 function format_header(s::String)
     s = replace(s, "_type" => "") |>
-        s -> replace(s, "objective" => "obj.") |>
+        s -> s in keys(LatexHeaderReplacements) ? LatexHeaderReplacements[s] : s |>
         s -> split(s, "_") |>
-        ss -> [s in ["exper", "eval"] ? "($s)" : uppercasefirst(s) for s in ss] |>
-        ss -> join(ss, " ") |>
-        s -> replace(s, "Lambda Energy" => "\$\\lambda\$") 
+        ss -> [uppercasefirst(s) for s in ss] |>
+        ss -> join(ss, " ") 
     return s
 end
 

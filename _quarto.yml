@@ -19,3 +19,4 @@ execute:
   eval: true
   echo: false
   output: false
+  daemon: 60

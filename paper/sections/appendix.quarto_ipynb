@@ -1,0 +1,239 @@
+{
+  "cells": [
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "projectdir = splitpath(pwd()) |>\n",
+        "    ss -> joinpath(ss[1:findall([s == \"CounterfactualTraining.jl\" for s in ss])[1]]...) \n",
+        "cd(projectdir)"
+      ],
+      "id": "6ad864cf",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "using CTExperiments\n",
+        "using CTExperiments.CSV\n",
+        "using CTExperiments.DataFrames\n",
+        "using CTExperiments.StatsBase\n",
+        "\n",
+        "using DotEnv\n",
+        "DotEnv.load!()"
+      ],
+      "id": "d6707318",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# Appendix\n",
+        "\n",
+        "## Training Details\n",
+        "\n",
+        "\n",
+        "\n",
+        "## Initial Grid Search\n"
+      ],
+      "id": "3a907efb"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "results_dir = ENV[\"INITIAL_RUN\"]"
+      ],
+      "id": "78ba4ab4",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "For the initial round of experiments we \n",
+        "\n",
+        "### Generator Params\n"
+      ],
+      "id": "7d4a86c2"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "gen_params_dir = joinpath(results_dir, \"gen_params/mlp\")"
+      ],
+      "id": "6623a394",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "#### Linearly Separable \n"
+      ],
+      "id": "1277bd57"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "df = CSV.read(\"$(gen_params_dir)/lin_sep/evaluation/results/ce/objective---lambda_energy_exper---lambda_energy_eval/plausibility_distance_from_target.csv\", DataFrame)\n",
+        "df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> \n",
+        "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
+        "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type])"
+      ],
+      "id": "552e34d5",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "::: {#tbl-lin_sep-lambda_energy_exper}\n",
+        "\n",
+        "::: {.content-hidden unless-format=\"pdf\"}\n"
+      ],
+      "id": "f7c12132"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
+        "    inputs -> tabulate_results(inputs; wrap_table=false)"
+      ],
+      "id": "3330e477",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        ":::\n",
+        "\n",
+        "Results for Linearly Separable data by energy penalty.\n",
+        "\n",
+        ":::\n",
+        "\n",
+        "#### Moons\n"
+      ],
+      "id": "4808149e"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "df = CSV.read(\"$(gen_params_dir)/moons/evaluation/results/ce/objective---lambda_energy_exper---lambda_energy_eval/plausibility_distance_from_target.csv\", DataFrame)\n",
+        "df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> \n",
+        "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
+        "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) "
+      ],
+      "id": "9c8b4f14",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "::: {#tbl-moons-lambda_energy_exper}\n",
+        "\n",
+        "::: {.content-hidden unless-format=\"pdf\"}\n"
+      ],
+      "id": "83d13b37"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
+        "    inputs -> tabulate_results(inputs)"
+      ],
+      "id": "f5d72611",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        ":::\n",
+        "\n",
+        "Results for Moons data by energy penalty.\n",
+        "\n",
+        ":::\n",
+        "\n",
+        "#### Circles\n"
+      ],
+      "id": "d6001e93"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "df = CSV.read(\"$(gen_params_dir)/circles/evaluation/results/ce/objective---lambda_energy_exper---lambda_energy_eval/plausibility_distance_from_target.csv\", DataFrame)\n",
+        "df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> \n",
+        "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
+        "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) "
+      ],
+      "id": "1106dd80",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "::: {#tbl-circles-lambda_energy_exper}\n",
+        "\n",
+        "::: {.content-hidden unless-format=\"pdf\"}\n"
+      ],
+      "id": "6f2a8178"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
+        "    inputs -> tabulate_results(inputs)"
+      ],
+      "id": "c0239d33",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        ":::\n",
+        "\n",
+        "Results for Circles data by energy penalty.\n",
+        "\n",
+        ":::"
+      ],
+      "id": "48ab8322"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "julia-1.11",
+      "language": "julia",
+      "display_name": "Julia 1.11.1",
+      "path": "/Users/paltmeyer/Library/Jupyter/kernels/julia-1.11"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

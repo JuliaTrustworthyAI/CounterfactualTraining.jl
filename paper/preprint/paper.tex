@@ -324,11 +324,42 @@ dataset that includes the generated counterfactuals.
 
 \section{Appendix}\label{appendix}
 
+\subsection{Training Details}\label{training-details}
+
 \subsection{Initial Grid Search}\label{initial-grid-search}
+
+For the initial round of experiments we
 
 \subsubsection{Generator Params}\label{generator-params}
 
 \paragraph{Linearly Separable}\label{linearly-separable}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Energy Penalty} (Table~\ref{tbl-lin_sep-lambda_energy_exper}):
+  \emph{ECCo} generally does yield better results than \emph{Vanilla}
+  for higher choices of the energy penalty (10,15) during training.
+  \emph{Generic} performs poorly accross the board. \emph{Omni} seems to
+  have an anchoring effect, in that it never performs terribly but also
+  never as good as the best \emph{ECCo} results. \emph{REVISE} performs
+  poorly across the board.
+\item
+  \textbf{Cost (distance penalty)}: Results for all generators (except
+  \emph{Omni}) are quite bad, which can likely be attributed to
+  extremely bad results for some choices of the \textbf{Energy Penalty}
+  (results here are averaged). For \emph{ECCo} and \emph{Generic},
+  higher cost values generally lead to worse results.
+\item
+  \textbf{Maximum Iterations}: No clear patterns recognizable, so it
+  seems that smaller choices are ok.
+\item
+  \textbf{Validity}: \emph{ECCo} almost always valid except for very low
+  values during training and high values at evaluation time.
+  \emph{Generic} often has poor validity.
+\item
+  \textbf{Accuracy}: Seems largely unaffected.
+\end{itemize}
 
 \begin{longtable}{ccccc}
 
@@ -338,10 +369,10 @@ Separable data by energy penalty.}
 \tabularnewline
 
   \toprule
-  \textbf{Obj.} & \textbf{\$\textbackslash{}lambda\$ (exper)} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \textbf{Objective} & \textbf{$\lambda_{\text{div}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
   \endfirsthead
   \toprule
-  \textbf{Obj.} & \textbf{\$\textbackslash{}lambda\$ (exper)} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \textbf{Objective} & \textbf{$\lambda_{\text{div}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
   \endhead
   \bottomrule
   \multicolumn{5}{r}{Continuing table below.}\\
@@ -417,6 +448,33 @@ Separable data by energy penalty.}
 
 \paragraph{Moons}\label{moons}
 
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Energy Penalty} (Table~\ref{tbl-moons-lambda_energy_exper}):
+  \emph{ECCo} consistently yields better results than \emph{Vanilla},
+  except for very low choices of the energy penalty during training for
+  which it performs abismal. \emph{Generic} performs quite badly across
+  the board for high enough choices of the energy penalty at evaluation
+  time. \emph{Omni} has small positive effect. \emph{REVISE} performs
+  poorly across the board.
+\item
+  \textbf{Cost (distance penalty)}: \emph{Generic} generally does better
+  for higher values, while \emph{ECCo} does better for lower values.
+\item
+  \textbf{Maximum Iterations}: No clear patterns recognizable, so it
+  seems that smaller choices are ok.
+\item
+  \textbf{Validity}: \emph{ECCo} generally achieves full validity except
+  for very low choices the energy penalty during training and high
+  choices at evaluation time. \emph{Generic} performs poorly for high
+  choices of the energy penalty during evaluation.
+\item
+  \textbf{Accuracy}: Largely unaffected although \emph{ECCo} suffers a
+  bit for very low choices the energy penalty during training.
+  \emph{REVISE} suffers a lot in general (around 10 percentage points).
+\end{itemize}
+
 \begin{longtable}{ccccc}
 
 \caption{\label{tbl-moons-lambda_energy_exper}Results for Moons data by
@@ -425,10 +483,10 @@ energy penalty.}
 \tabularnewline
 
   \toprule
-  \textbf{Obj.} & \textbf{\$\textbackslash{}lambda\$ (exper)} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \textbf{Objective} & \textbf{$\lambda_{\text{div}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
   \endfirsthead
   \toprule
-  \textbf{Obj.} & \textbf{\$\textbackslash{}lambda\$ (exper)} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \textbf{Objective} & \textbf{$\lambda_{\text{div}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
   \endhead
   \bottomrule
   \multicolumn{5}{r}{Continuing table below.}\\
@@ -504,6 +562,39 @@ energy penalty.}
 
 \paragraph{Circles}\label{circles}
 
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Energy Penalty} (Table~\ref{tbl-circles-lambda_energy_exper}):
+  \emph{ECCo} consistently yields better results than \emph{Vanilla},
+  though primarily for low to medium choices of the energy penalty
+  (\textless=5) during training. The same goes for \emph{Generic}, which
+  sometimes outperforms \emph{ECCo} (for small energy penalty at
+  evaluation time). \emph{Omni} does alright for lower energy penalty at
+  evaluation time, but loses out for higher choices. \emph{REVISE}
+  performs poorly across the board (except very low choices at
+  evaluation time).
+\item
+  \textbf{Cost (distance penalty)}: \emph{ECCo} and \emph{Generic}
+  generally achieve the best results when no cost penalty is used during
+  training. Both \emph{Omni} and \emph{REVISE} are largely unaffected.
+\item
+  \textbf{Maximum Iterations}: \emph{ECCo} consistently yields better
+  results for higher numbers of iterations. \emph{Generic} generally
+  does best for a medium number (50). \emph{Omni} is sometimes invalid
+  (\textbf{???}).
+\item
+  \textbf{Validity}: \emph{ECCo} tends to outperform its \emph{Vanilla}
+  counterpart, though primarily for low to medium choices of the energy
+  penalty (\textless=5) during training and evaluation. \emph{Vanilla}
+  typically worse across the board.
+\item
+  \textbf{Accuracy}: Mostly unaffected, but \emph{REVISE} again
+  consistently some deterioration and \emph{ECCo} deteriorates for high
+  choices of energy penalty during training, reflecting other outcomes
+  above.
+\end{itemize}
+
 \begin{longtable}{ccccc}
 
 \caption{\label{tbl-circles-lambda_energy_exper}Results for Circles data
@@ -512,10 +603,10 @@ by energy penalty.}
 \tabularnewline
 
   \toprule
-  \textbf{Obj.} & \textbf{\$\textbackslash{}lambda\$ (exper)} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \textbf{Objective} & \textbf{$\lambda_{\text{div}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
   \endfirsthead
   \toprule
-  \textbf{Obj.} & \textbf{\$\textbackslash{}lambda\$ (exper)} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \textbf{Objective} & \textbf{$\lambda_{\text{div}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
   \endhead
   \bottomrule
   \multicolumn{5}{r}{Continuing table below.}\\

@@ -1,3 +1,4 @@
+using Markdown
 using TaijaParallel
 using TOML
 
@@ -125,3 +126,6 @@ function has_results(cfg::AbstractConfiguration)
 end
 
 needs_results(cfg::AbstractConfiguration) = !has_results(cfg)
+
+function to_mkd(dict::Dict)
+end
