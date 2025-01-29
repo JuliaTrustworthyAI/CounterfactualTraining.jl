@@ -332,6 +332,36 @@ For the initial round of experiments we
 
 \subsubsection{Generator Params}\label{generator-params}
 
+\begin{itemize}
+\tightlist
+\item
+  \textbf{generator\_params}:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{lambda\_cost}: 0.0, 0.001, 0.1
+  \item
+    \textbf{lambda\_energy}: 0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0, 15.0
+  \item
+    \textbf{lr}: 1.0
+  \item
+    \textbf{maxiter}: 20, 50, 100
+  \item
+    \textbf{opt}: sgd
+  \end{itemize}
+\item
+  \textbf{generator\_type}: ecco, generic, omni, revise
+\item
+  \textbf{training\_params}:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{objective}: full, vanilla
+  \end{itemize}
+\end{itemize}
+
 \paragraph{Linearly Separable}\label{linearly-separable}
 
 \begin{itemize}

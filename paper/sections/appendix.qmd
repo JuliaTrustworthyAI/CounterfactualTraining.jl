@@ -30,7 +30,9 @@ For the initial round of experiments we
 ### Generator Params
 
 ```{julia}
+#| output: asis
 dict = CTExperiments.from_toml(joinpath(config_dir,"gen_params.toml")) 
+println(CTExperiments.dict_to_quarto_markdown(dict))
 ```
 
 ```{julia}

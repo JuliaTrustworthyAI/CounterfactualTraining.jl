@@ -127,17 +127,73 @@ end
 
 needs_results(cfg::AbstractConfiguration) = !has_results(cfg)
 
-function to_mkd(dict::Dict, header::Union{Nothing,String}=nothing)
-    drop_fields = ["name"]
-    dict = filter(((k,v),) -> length(v) > 0 && !(k in drop_fields), dict)
-    strs = []
-    for (i,(k,v)) in enumerate(dict)
-        if !isa(v, Dict)
-            str = isnothing(header) ? "**$(k)**" : "$(header) **$(k)**"
-        else
-            str = to_mkd(v, k)
-        end
-        push!(strs, str)
+# Function to check if a value is effectively empty
+function is_empty_value(v::Any)
+    if v isa String
+        return isempty(v)
+    elseif v isa Vector
+        return isempty(v)
+    elseif v isa Dict
+        # A dictionary is empty if it's empty itself or if all its filtered values would be empty
+        filtered = filter_dict(v)
+        return isempty(filtered)
+    else
+        return false
     end
-    str = join(strs, "\n")
+end
+
+# Function to filter dictionary
+function filter_dict(dict::Dict)
+    # Filter out empty values and specified fields
+    drop_fields = ["name"]
+    return filter(dict) do (k, v)
+        !is_empty_value(v) && !(k in drop_fields)
+    end
+end
+
+function to_mkd(dict::Dict, level::Int=0)
+
+    drop_fields = ["name"]
+    dict = filter(((k, v),) -> length(v) > 0 && !(k in drop_fields), dict)
+
+    # Create indent string based on level
+    indent = repeat("    ", level)
+
+    # Initialize array to store markdown lines
+    lines = String[]
+
+    # Sort dictionary keys for consistent output
+    for key in sort(collect(keys(dict)))
+        value = dict[key]
+
+        if value isa Dict
+            # Handle nested dictionary
+            push!(lines, "$(indent)- **$(key)**:")
+            # Recursively process nested dictionary with increased indentation
+            nested_lines = to_mkd(value, level + 1)
+            push!(lines, nested_lines)
+        elseif value isa Vector
+            # Handle vector values by joining with commas
+            value_str = join(value, ", ")
+            push!(lines, "$(indent)- **$(key)**: $(value_str)")
+        else
+            # Handle single values
+            push!(lines, "$(indent)- **$(key)**: $(value)")
+        end
+    end
+
+    # Join all lines with newlines
+    return join(lines, "\n")
+end
+
+# Function to create final Markdown string
+function dict_to_markdown(dict::Dict)
+    filtered_dict = filter_dict(dict)
+    return "md\"\"\"\n$(to_mkd(filtered_dict))\n\"\"\""
+end
+
+# New function specifically for Quarto output
+function dict_to_quarto_markdown(dict::Dict)
+    filtered_dict = filter_dict(dict)
+    return to_mkd(filtered_dict)
 end
