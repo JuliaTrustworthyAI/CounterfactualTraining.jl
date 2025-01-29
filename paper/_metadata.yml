@@ -21,3 +21,5 @@ crossref:
   exr-title: "Parameters"
   exr-prefix: "Parameters"
 filters: [abstract-section]
+header-includes: |
+  \usepackage{placeins}

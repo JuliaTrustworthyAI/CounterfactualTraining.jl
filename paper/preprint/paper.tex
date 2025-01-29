@@ -131,6 +131,7 @@
 \usepackage{orcidlink}
 \usepackage{amsmath}
 \usepackage[T1]{fontenc}
+\usepackage{placeins}
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \AtBeginDocument{%
@@ -345,9 +346,108 @@ dataset that includes the generated counterfactuals.
 
 \section{Conclusion}\label{sec-conclusion}
 
-\section{Appendix}\label{appendix}
+\section*{References}\label{references}
+\addcontentsline{toc}{section}{References}
 
-\subsection{Training Details}\label{training-details}
+\phantomsection\label{refs}
+\begin{CSLReferences}{1}{0}
+\bibitem[\citeproctext]{ref-abbasnejad2020counterfactual}
+Abbasnejad, Ehsan, Damien Teney, Amin Parvaneh, Javen Shi, and Anton van
+den Hengel. 2020. {``Counterfactual Vision and Language Learning.''} In
+\emph{2020 IEEE/CVF Conference on Computer Vision and Pattern
+Recognition (CVPR)}, 10041--51.
+\url{https://doi.org/10.1109/CVPR42600.2020.01006}.
+
+\bibitem[\citeproctext]{ref-altmeyer2024faithful}
+Altmeyer, Patrick, Mojtaba Farmanbar, Arie van Deursen, and Cynthia CS
+Liem. 2024. {``Faithful Model Explanations Through Energy-Constrained
+Conformal Counterfactuals.''} In \emph{Proceedings of the AAAI
+Conference on Artificial Intelligence}, 38:10829--37. 10.
+
+\bibitem[\citeproctext]{ref-freiesleben2022intriguing}
+Freiesleben, Timo. 2022. {``The Intriguing Relation Between
+Counterfactual Explanations and Adversarial Examples.''} \emph{Minds and
+Machines} 32 (1): 77--109.
+
+\bibitem[\citeproctext]{ref-guo2023counternet}
+Guo, Hangzhi, Thanh H. Nguyen, and Amulya Yadav. 2023. {``CounterNet:
+End-to-End Training of Prediction Aware Counterfactual Explanations.''}
+In \emph{Proceedings of the 29th ACM SIGKDD Conference on Knowledge
+Discovery and Data Mining}, 577--89. KDD '23. New York, NY, USA:
+Association for Computing Machinery.
+\url{https://doi.org/10.1145/3580305.3599290}.
+
+\bibitem[\citeproctext]{ref-joshi2019realistic}
+Joshi, Shalmali, Oluwasanmi Koyejo, Warut Vijitbenjaronk, Been Kim, and
+Joydeep Ghosh. 2019. {``Towards Realistic Individual Recourse and
+Actionable Explanations in Black-Box Decision Making Systems.''}
+\url{https://arxiv.org/abs/1907.09615}.
+
+\bibitem[\citeproctext]{ref-luu2023counterfactual}
+Luu, Hoai Linh, and Naoya Inoue. 2023. {``Counterfactual Adversarial
+Training for Improving Robustness of Pre-Trained Language Models.''} In
+\emph{Proceedings of the 37th Pacific Asia Conference on Language,
+Information and Computation}, 881--88.
+
+\bibitem[\citeproctext]{ref-pawelczyk2022exploring}
+Pawelczyk, Martin, Chirag Agarwal, Shalmali Joshi, Sohini Upadhyay, and
+Himabindu Lakkaraju. 2022. {``Exploring Counterfactual Explanations
+Through the Lens of Adversarial Examples: A Theoretical and Empirical
+Analysis.''} In \emph{Proceedings of the 25th International Conference
+on Artificial Intelligence and Statistics}, edited by Gustau
+Camps-Valls, Francisco J. R. Ruiz, and Isabel Valera, 151:4574--94.
+Proceedings of Machine Learning Research. PMLR.
+\url{https://proceedings.mlr.press/v151/pawelczyk22a.html}.
+
+\bibitem[\citeproctext]{ref-ross2021learning}
+Ross, Alexis, Himabindu Lakkaraju, and Osbert Bastani. 2024. {``Learning
+Models for Actionable Recourse.''} In \emph{Proceedings of the 35th
+International Conference on Neural Information Processing Systems}. NIPS
+'21. Red Hook, NY, USA: Curran Associates Inc.
+
+\bibitem[\citeproctext]{ref-sauer2021counterfactual}
+Sauer, Axel, and Andreas Geiger. 2021. {``Counterfactual Generative
+Networks.''} \url{https://arxiv.org/abs/2101.06046}.
+
+\bibitem[\citeproctext]{ref-teney2020learning}
+Teney, Damien, Ehsan Abbasnedjad, and Anton van den Hengel. 2020.
+{``Learning What Makes a Difference from Counterfactual Examples and
+Gradient Supervision.''} In \emph{Computer Vision--ECCV 2020: 16th
+European Conference, Glasgow, UK, August 23--28, 2020, Proceedings, Part
+x 16}, 580--99. Springer.
+
+\bibitem[\citeproctext]{ref-wachter2017counterfactual}
+Wachter, Sandra, Brent Mittelstadt, and Chris Russell. 2017.
+{``Counterfactual Explanations Without Opening the Black Box:
+{Automated} Decisions and the {GDPR}.''} \emph{Harv. JL \& Tech.} 31:
+841. \url{https://doi.org/10.2139/ssrn.3063289}.
+
+\bibitem[\citeproctext]{ref-wu2021polyjuice}
+Wu, Tongshuang, Marco Tulio Ribeiro, Jeffrey Heer, and Daniel Weld.
+2021. {``Polyjuice: Generating Counterfactuals for Explaining,
+Evaluating, and Improving Models.''} In \emph{Proceedings of the 59th
+Annual Meeting of the Association for Computational Linguistics and the
+11th International Joint Conference on Natural Language Processing
+(Volume 1: Long Papers)}, edited by Chengqing Zong, Fei Xia, Wenjie Li,
+and Roberto Navigli, 6707--23. Online: Association for Computational
+Linguistics. \url{https://doi.org/10.18653/v1/2021.acl-long.523}.
+
+\end{CSLReferences}
+
+\newpage{}
+
+\FloatBarrier
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\Alph{section}}
+
+\setcounter{table}{0}
+\renewcommand{\thetable}{A\arabic{table}}
+
+\setcounter{figure}{0}
+\renewcommand{\thefigure}{A\arabic{figure}}
+
+\section{Training Details}\label{training-details}
 
 \subsection{Initial Grid Search}\label{initial-grid-search}
 
@@ -741,94 +841,6 @@ by energy penalty.}
   vanilla & 15 & \textit{REVISE} & -8.51 & 6.73 \\\bottomrule
 
 \end{longtable}
-
-\section*{References}\label{references}
-\addcontentsline{toc}{section}{References}
-
-\phantomsection\label{refs}
-\begin{CSLReferences}{1}{0}
-\bibitem[\citeproctext]{ref-abbasnejad2020counterfactual}
-Abbasnejad, Ehsan, Damien Teney, Amin Parvaneh, Javen Shi, and Anton van
-den Hengel. 2020. {``Counterfactual Vision and Language Learning.''} In
-\emph{2020 IEEE/CVF Conference on Computer Vision and Pattern
-Recognition (CVPR)}, 10041--51.
-\url{https://doi.org/10.1109/CVPR42600.2020.01006}.
-
-\bibitem[\citeproctext]{ref-altmeyer2024faithful}
-Altmeyer, Patrick, Mojtaba Farmanbar, Arie van Deursen, and Cynthia CS
-Liem. 2024. {``Faithful Model Explanations Through Energy-Constrained
-Conformal Counterfactuals.''} In \emph{Proceedings of the AAAI
-Conference on Artificial Intelligence}, 38:10829--37. 10.
-
-\bibitem[\citeproctext]{ref-freiesleben2022intriguing}
-Freiesleben, Timo. 2022. {``The Intriguing Relation Between
-Counterfactual Explanations and Adversarial Examples.''} \emph{Minds and
-Machines} 32 (1): 77--109.
-
-\bibitem[\citeproctext]{ref-guo2023counternet}
-Guo, Hangzhi, Thanh H. Nguyen, and Amulya Yadav. 2023. {``CounterNet:
-End-to-End Training of Prediction Aware Counterfactual Explanations.''}
-In \emph{Proceedings of the 29th ACM SIGKDD Conference on Knowledge
-Discovery and Data Mining}, 577--89. KDD '23. New York, NY, USA:
-Association for Computing Machinery.
-\url{https://doi.org/10.1145/3580305.3599290}.
-
-\bibitem[\citeproctext]{ref-joshi2019realistic}
-Joshi, Shalmali, Oluwasanmi Koyejo, Warut Vijitbenjaronk, Been Kim, and
-Joydeep Ghosh. 2019. {``Towards Realistic Individual Recourse and
-Actionable Explanations in Black-Box Decision Making Systems.''}
-\url{https://arxiv.org/abs/1907.09615}.
-
-\bibitem[\citeproctext]{ref-luu2023counterfactual}
-Luu, Hoai Linh, and Naoya Inoue. 2023. {``Counterfactual Adversarial
-Training for Improving Robustness of Pre-Trained Language Models.''} In
-\emph{Proceedings of the 37th Pacific Asia Conference on Language,
-Information and Computation}, 881--88.
-
-\bibitem[\citeproctext]{ref-pawelczyk2022exploring}
-Pawelczyk, Martin, Chirag Agarwal, Shalmali Joshi, Sohini Upadhyay, and
-Himabindu Lakkaraju. 2022. {``Exploring Counterfactual Explanations
-Through the Lens of Adversarial Examples: A Theoretical and Empirical
-Analysis.''} In \emph{Proceedings of the 25th International Conference
-on Artificial Intelligence and Statistics}, edited by Gustau
-Camps-Valls, Francisco J. R. Ruiz, and Isabel Valera, 151:4574--94.
-Proceedings of Machine Learning Research. PMLR.
-\url{https://proceedings.mlr.press/v151/pawelczyk22a.html}.
-
-\bibitem[\citeproctext]{ref-ross2021learning}
-Ross, Alexis, Himabindu Lakkaraju, and Osbert Bastani. 2024. {``Learning
-Models for Actionable Recourse.''} In \emph{Proceedings of the 35th
-International Conference on Neural Information Processing Systems}. NIPS
-'21. Red Hook, NY, USA: Curran Associates Inc.
-
-\bibitem[\citeproctext]{ref-sauer2021counterfactual}
-Sauer, Axel, and Andreas Geiger. 2021. {``Counterfactual Generative
-Networks.''} \url{https://arxiv.org/abs/2101.06046}.
-
-\bibitem[\citeproctext]{ref-teney2020learning}
-Teney, Damien, Ehsan Abbasnedjad, and Anton van den Hengel. 2020.
-{``Learning What Makes a Difference from Counterfactual Examples and
-Gradient Supervision.''} In \emph{Computer Vision--ECCV 2020: 16th
-European Conference, Glasgow, UK, August 23--28, 2020, Proceedings, Part
-x 16}, 580--99. Springer.
-
-\bibitem[\citeproctext]{ref-wachter2017counterfactual}
-Wachter, Sandra, Brent Mittelstadt, and Chris Russell. 2017.
-{``Counterfactual Explanations Without Opening the Black Box:
-{Automated} Decisions and the {GDPR}.''} \emph{Harv. JL \& Tech.} 31:
-841. \url{https://doi.org/10.2139/ssrn.3063289}.
-
-\bibitem[\citeproctext]{ref-wu2021polyjuice}
-Wu, Tongshuang, Marco Tulio Ribeiro, Jeffrey Heer, and Daniel Weld.
-2021. {``Polyjuice: Generating Counterfactuals for Explaining,
-Evaluating, and Improving Models.''} In \emph{Proceedings of the 59th
-Annual Meeting of the Association for Computational Linguistics and the
-11th International Joint Conference on Natural Language Processing
-(Volume 1: Long Papers)}, edited by Chengqing Zong, Fei Xia, Wenjie Li,
-and Roberto Navigli, 6707--23. Online: Association for Computational
-Linguistics. \url{https://doi.org/10.18653/v1/2021.acl-long.523}.
-
-\end{CSLReferences}
 
 
 
