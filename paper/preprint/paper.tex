@@ -455,40 +455,86 @@ For the initial round of experiments we
 
 \subsubsection{Generator Parameters}\label{generator-parameters}
 
-The hyperparameter choices are shown in
-Parameters~\ref{exr-gen-params-first-run}:
+The hyperparameter grids for the first investigation of the effect of
+generator parameters are shown in
+Parameters~\ref{exr-gen-params-first-run-train} and
+Parameters~\ref{exr-gen-params-first-run-eval}.
 
-\begin{exercise}[Parameters]\protect\hypertarget{exr-gen-params-first-run}{}\label{exr-gen-params-first-run}
+\begin{exercise}[Training
+Phase]\protect\hypertarget{exr-gen-params-first-run-train}{}\label{exr-gen-params-first-run-train}
 
 ~
 
 \begin{itemize}
 \tightlist
 \item
-  \textbf{generator\_params}:
+  Generator Parameters:
 
   \begin{itemize}
   \tightlist
   \item
-    \textbf{lambda\_cost}: 0.0, 0.001, 0.1
+    \(\lambda_{\text{cost}}\): \texttt{0.0,\ 0.001,\ 0.1}
   \item
-    \textbf{lambda\_energy}: 0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0, 15.0
+    \(\lambda_{\text{div}}\):
+    \texttt{0.01,\ 0.05,\ 0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0,\ 15.0}
   \item
-    \textbf{lr}: 1.0
+    Learning Rate: \texttt{1.0}
   \item
-    \textbf{maxiter}: 20, 50, 100
+    Maximum Iterations: \texttt{20,\ 50,\ 100}
   \item
-    \textbf{opt}: sgd
+    Optimizerimizer: \texttt{sgd}
   \end{itemize}
 \item
-  \textbf{generator\_type}: ecco, generic, omni, revise
+  Generator: \texttt{ecco,\ generic,\ omni,\ revise}
 \item
-  \textbf{training\_params}:
+  Training Parameters:
 
   \begin{itemize}
   \tightlist
   \item
-    \textbf{objective}: full, vanilla
+    Objective: \texttt{full,\ vanilla}
+  \end{itemize}
+\end{itemize}
+
+\end{exercise}
+
+\begin{exercise}[Evaluation
+Phase]\protect\hypertarget{exr-gen-params-first-run-eval}{}\label{exr-gen-params-first-run-eval}
+
+~
+
+\begin{itemize}
+\tightlist
+\item
+  Counterfactual Parameters:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Convergence: \texttt{max\_iter}
+  \item
+    Maximum Iterations: \texttt{100}
+  \item
+    No.~Individuals: \texttt{100}
+  \item
+    No.~Runs: \texttt{5}
+  \end{itemize}
+\item
+  Generator Parameters:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \(\lambda_{\text{cost}}\): \texttt{0.0}
+  \item
+    \(\lambda_{\text{div}}\):
+    \texttt{0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0,\ 20.0}
+  \item
+    Learning Rate: \texttt{1.0}
+  \item
+    Maximum Iterations: \texttt{50}
+  \item
+    Optimizerimizer: \texttt{sgd}
   \end{itemize}
 \end{itemize}
 
@@ -507,11 +553,12 @@ Parameters~\ref{exr-gen-params-first-run}:
   never as good as the best \emph{ECCo} results. \emph{REVISE} performs
   poorly across the board.
 \item
-  \textbf{Cost (distance penalty)}: Results for all generators (except
-  \emph{Omni}) are quite bad, which can likely be attributed to
-  extremely bad results for some choices of the \textbf{Energy Penalty}
-  (results here are averaged). For \emph{ECCo} and \emph{Generic},
-  higher cost values generally lead to worse results.
+  \textbf{Cost} (Table~\ref{tbl-lin_sep-lambda_cost_exper}): Results for
+  all generators (except \emph{Omni}) are quite bad, which can likely be
+  attributed to extremely bad results for some choices of the
+  \textbf{Energy Penalty} (results here are averaged). For \emph{ECCo}
+  and \emph{Generic}, higher cost values generally lead to worse
+  results.
 \item
   \textbf{Maximum Iterations}: No clear patterns recognizable, so it
   seems that smaller choices are ok.
@@ -605,6 +652,51 @@ Separable data by energy penalty.}
   vanilla & 15 & \textit{Generic} & -4.38 & 3.48 \\
   vanilla & 15 & \textit{Omniscient} & -5.25 & 4.6 \\
   vanilla & 15 & \textit{REVISE} & -4.95 & 4.23 \\\bottomrule
+
+\end{longtable}
+
+\begin{longtable}{ccccc}
+
+\caption{\label{tbl-lin_sep-lambda_cost_exper}Results for Linearly
+Separable data by cost penalty.}
+
+\tabularnewline
+
+  \toprule
+  \textbf{Objective} & \textbf{$\lambda_{\text{cost}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endfirsthead
+  \toprule
+  \textbf{Objective} & \textbf{$\lambda_{\text{cost}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endhead
+  \bottomrule
+  \multicolumn{5}{r}{Continuing table below.}\\
+  \bottomrule
+  \endfoot
+  \endlastfoot
+  full & 0 & \textit{ECCo} & $-5.32 \cdot 10^{3}$ & $1.21 \cdot 10^{4}$ \\
+  full & 0 & \textit{Generic} & $-1.03 \cdot 10^{18}$ & $2.34 \cdot 10^{18}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.64}} & \color{blue}{\textbf{0.125}} \\
+  full & 0 & \textit{REVISE} & -15.4 & 12.9 \\
+  vanilla & 0 & \textit{ECCo} & -4.34 & 3.58 \\
+  vanilla & 0 & \textit{Generic} & -4.41 & 3.48 \\
+  vanilla & 0 & \textit{Omniscient} & -5.18 & 4.54 \\
+  vanilla & 0 & \textit{REVISE} & -4.93 & 4.23 \\
+  full & 0.001 & \textit{ECCo} & -362 & 811 \\
+  full & 0.001 & \textit{Generic} & $-2.65 \cdot 10^{17}$ & $6.03 \cdot 10^{17}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.001}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.49}} & \color{blue}{\textbf{0.115}} \\
+  full & 0.001 & \textit{REVISE} & -15.5 & 13 \\
+  vanilla & 0.001 & \textit{ECCo} & -4.34 & 3.58 \\
+  vanilla & 0.001 & \textit{Generic} & -4.41 & 3.48 \\
+  vanilla & 0.001 & \textit{Omniscient} & -5.18 & 4.53 \\
+  vanilla & 0.001 & \textit{REVISE} & -4.93 & 4.23 \\
+  full & 0.1 & \textit{ECCo} & $-3.72 \cdot 10^{11}$ & $8.46 \cdot 10^{11}$ \\
+  full & 0.1 & \textit{Generic} & $-4.49 \cdot 10^{14}$ & $1.02 \cdot 10^{15}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.5}} & \color{blue}{\textbf{0.112}} \\
+  full & 0.1 & \textit{REVISE} & -14.6 & 12.2 \\
+  vanilla & 0.1 & \textit{ECCo} & -4.34 & 3.58 \\
+  vanilla & 0.1 & \textit{Generic} & -4.41 & 3.48 \\
+  vanilla & 0.1 & \textit{Omniscient} & -5.18 & 4.54 \\
+  vanilla & 0.1 & \textit{REVISE} & -4.93 & 4.24 \\\bottomrule
 
 \end{longtable}
 

@@ -54,7 +54,7 @@ function get_table_inputs(
         hls = (hls..., gen_hl)
     end
 
-    header = format_header.(names(df))
+    header = format_header.(names(df); replacements=LatexHeaderReplacements)
     return df, (; highlighters=hls, backend=backend, header=header)
 end
 
@@ -66,15 +66,6 @@ global LatexHeaderReplacements = Dict(
     "lambda_cost_exper" =>  latex_cell"$\lambda_{\text{cost}} (\text{train})$",
     "lambda_cost_eval" =>  latex_cell"$\lambda_{\text{cost}} (\text{eval})$",
 )
-
-function format_header(s::String)
-    s = replace(s, "_type" => "") |>
-        s -> s in keys(LatexHeaderReplacements) ? LatexHeaderReplacements[s] : s |>
-        s -> split(s, "_") |>
-        ss -> [uppercasefirst(s) for s in ss] |>
-        ss -> join(ss, " ") 
-    return s
-end
 
 function value_highlighter(
     df::DataFrame,
