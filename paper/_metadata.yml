@@ -17,9 +17,11 @@ bibliography: bib.bib
 keywords: 
   - Counterfactual Explanations
   - Explainable AI
+  - Representation Learning
 crossref:
   exr-title: "Parameters"
   exr-prefix: "Parameters"
 filters: [abstract-section]
 header-includes: |
   \usepackage{placeins}
+link-citations: true

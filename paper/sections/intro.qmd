@@ -1,1 +1,9 @@
 # Introduction
+
+Today's prominence of artificial intelligence (AI) has largely been driven by advances in **representation learning**: instead of relying on features and rules that are carefully hand-crafted by humans, modern AIs are tasked with learning these representations from scratch, guided by narrow objectives such as predictive accuracy [@goodfellow2016deep]. Modern advances in computing have made it possible to provide such AIs with ever greater degrees of freedom to achieve that task, which has often led them to outperform traditionally more parsimonious models. Unfortunately, in doing so they have also learned increasingly complex representations that we can no longer easily interpret.
+
+This trend towards complexity for the sake of performance has come under serious scrutiny in recent years. At the very cusp of the deep learning revolution, @goodfellow2014explaining showed that artificial neural networks (ANN) are highly sensitive to adversarial examples (AE): counterfactuals of model inputs that yield vastly different model predictions despite being semantically indifferent from their factual counterparts. Despite continued research efforts towards making models more robust to such counterfactuals, the issue remains unresolved even for models that are considered to small by today's standards [@kolter2023keynote]. It seems that robust representation learning is fundamentally at odds with large degrees of freedom.  
+
+@wilson2020case
+
+@rudin2019stop 
