@@ -8,7 +8,7 @@
         "    ss -> joinpath(ss[1:findall([s == \"CounterfactualTraining.jl\" for s in ss])[1]]...) \n",
         "cd(projectdir)"
       ],
-      "id": "b554853e",
+      "id": "b760b402",
       "execution_count": null,
       "outputs": []
     },
@@ -24,7 +24,7 @@
         "using DotEnv\n",
         "DotEnv.load!()"
       ],
-      "id": "2681e54a",
+      "id": "8e7f4127",
       "execution_count": null,
       "outputs": []
     },
@@ -49,7 +49,7 @@
         "\n",
         "## Initial Grid Search\n"
       ],
-      "id": "363273b9"
+      "id": "54dac12d"
     },
     {
       "cell_type": "code",
@@ -58,7 +58,7 @@
         "results_dir = ENV[\"INITIAL_RUN_RESULTS\"]\n",
         "config_dir = ENV[\"INITIAL_RUN_CONFIG\"]"
       ],
-      "id": "4ad55331",
+      "id": "8064686e",
       "execution_count": null,
       "outputs": []
     },
@@ -76,7 +76,7 @@
         "\n",
         "## Training Phase\n"
       ],
-      "id": "70611747"
+      "id": "66adb108"
     },
     {
       "cell_type": "code",
@@ -86,7 +86,7 @@
         "dict = CTExperiments.from_toml(joinpath(config_dir,\"gen_params.toml\")) \n",
         "println(CTExperiments.dict_to_quarto_markdown(dict))"
       ],
-      "id": "2fe545a0",
+      "id": "193d66fe",
       "execution_count": null,
       "outputs": []
     },
@@ -101,7 +101,7 @@
         "\n",
         "## Evaluation Phase\n"
       ],
-      "id": "ca4b380f"
+      "id": "11c11f4c"
     },
     {
       "cell_type": "code",
@@ -111,7 +111,7 @@
         "dict = CTExperiments.from_toml(joinpath(results_dir, \"gen_params/mlp/lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
         "println(CTExperiments.dict_to_quarto_markdown(dict))"
       ],
-      "id": "66ed29ca",
+      "id": "a7efadf2",
       "execution_count": null,
       "outputs": []
     },
@@ -121,7 +121,7 @@
       "source": [
         ":::\n"
       ],
-      "id": "997a9208"
+      "id": "92d9ad93"
     },
     {
       "cell_type": "code",
@@ -129,7 +129,7 @@
       "source": [
         "gen_params_dir = joinpath(results_dir, \"gen_params/mlp\")"
       ],
-      "id": "480d532c",
+      "id": "fefba242",
       "execution_count": null,
       "outputs": []
     },
@@ -145,7 +145,7 @@
         "- **Validity**: *ECCo* almost always valid except for very low values during training and high values at evaluation time. *Generic* often has poor validity.\n",
         "- **Accuracy**: Seems largely unaffected.\n"
       ],
-      "id": "4987c5b2"
+      "id": "431679d0"
     },
     {
       "cell_type": "code",
@@ -156,7 +156,7 @@
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
         "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type])"
       ],
-      "id": "02aa57a4",
+      "id": "38706fd6",
       "execution_count": null,
       "outputs": []
     },
@@ -168,7 +168,7 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}\n"
       ],
-      "id": "19aa4b1e"
+      "id": "0df6ec2a"
     },
     {
       "cell_type": "code",
@@ -178,7 +178,7 @@
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs; wrap_table=false)"
       ],
-      "id": "fb5505fa",
+      "id": "b777e2b1",
       "execution_count": null,
       "outputs": []
     },
@@ -194,7 +194,7 @@
         "\n",
         "<!-- Cost -->\n"
       ],
-      "id": "f640d78f"
+      "id": "43f503ed"
     },
     {
       "cell_type": "code",
@@ -205,7 +205,7 @@
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
         "  df -> sort(df, [:lambda_cost_exper, :objective, :generator_type])"
       ],
-      "id": "78b191a6",
+      "id": "3e4b0506",
       "execution_count": null,
       "outputs": []
     },
@@ -217,7 +217,7 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}\n"
       ],
-      "id": "04b7cdb3"
+      "id": "322a4551"
     },
     {
       "cell_type": "code",
@@ -227,7 +227,7 @@
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_cost_exper\", backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs; wrap_table=false)"
       ],
-      "id": "9a3e3a25",
+      "id": "95a0251e",
       "execution_count": null,
       "outputs": []
     },
@@ -250,7 +250,7 @@
         "- **Validity**: *ECCo* generally achieves full validity except for very low choices the energy penalty during training and high choices at evaluation time. *Generic* performs poorly for high choices of the energy penalty during evaluation.\n",
         "- **Accuracy**: Largely unaffected although *ECCo* suffers a bit for very low choices the energy penalty during training. *REVISE* suffers a lot in general (around 10 percentage points).\n"
       ],
-      "id": "6ac050be"
+      "id": "1f1fec67"
     },
     {
       "cell_type": "code",
@@ -261,7 +261,7 @@
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
         "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) "
       ],
-      "id": "2ff0917c",
+      "id": "e31bb305",
       "execution_count": null,
       "outputs": []
     },
@@ -273,7 +273,7 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}\n"
       ],
-      "id": "03e9f4a4"
+      "id": "cceec360"
     },
     {
       "cell_type": "code",
@@ -283,7 +283,7 @@
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs)"
       ],
-      "id": "e7050018",
+      "id": "f1668ae4",
       "execution_count": null,
       "outputs": []
     },
@@ -305,7 +305,7 @@
         "- **Validity**: *ECCo* tends to outperform its *Vanilla* counterpart, though primarily for low to medium choices of the energy penalty (<=5) during training and evaluation. *Vanilla* typically worse across the board.\n",
         "- **Accuracy**: Mostly unaffected, but *REVISE* again consistently some deterioration and *ECCo* deteriorates for high choices of energy penalty during training, reflecting other outcomes above.\n"
       ],
-      "id": "d614ed93"
+      "id": "fa0e0e91"
     },
     {
       "cell_type": "code",
@@ -316,7 +316,7 @@
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
         "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) "
       ],
-      "id": "ee97d954",
+      "id": "33b484d2",
       "execution_count": null,
       "outputs": []
     },
@@ -328,7 +328,7 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}\n"
       ],
-      "id": "dd119b23"
+      "id": "c61aee72"
     },
     {
       "cell_type": "code",
@@ -338,7 +338,7 @@
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs)"
       ],
-      "id": "78c9012f",
+      "id": "c9454298",
       "execution_count": null,
       "outputs": []
     },
@@ -352,7 +352,7 @@
         "\n",
         ":::"
       ],
-      "id": "02f5a6fb"
+      "id": "5e79ebbc"
     }
   ],
   "metadata": {

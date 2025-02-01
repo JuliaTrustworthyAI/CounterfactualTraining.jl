@@ -254,26 +254,50 @@ guided by narrow objectives such as predictive accuracy
 2016}). Modern advances in computing have made it possible to provide
 such AIs with ever greater degrees of freedom to achieve that task,
 which has often led them to outperform traditionally more parsimonious
-models. Unfortunately, in doing so they have also learned increasingly
-complex representations that we can no longer easily interpret.
+models. Unfortunately, in doing so they also learn increasingly complex
+and highly sensitive representations that we can no longer easily
+interpret.
 
 This trend towards complexity for the sake of performance has come under
 serious scrutiny in recent years. At the very cusp of the deep learning
 revolution, I. J. Goodfellow, Shlens, and Szegedy
 (\citeproc{ref-goodfellow2014explaining}{2014}) showed that artificial
-neural networks (ANN) are highly sensitive to adversarial examples (AE):
+neural networks (ANN) are sensitive to adversarial examples (AE):
 counterfactuals of model inputs that yield vastly different model
 predictions despite being semantically indifferent from their factual
-counterparts. Despite continued research efforts towards making models
-more robust to such counterfactuals, the issue remains unresolved even
-for models that are considered to small by today's standards
-(\citeproc{ref-kolter2023keynote}{Kolter 2023}). It seems that robust
-representation learning is fundamentally at odds with large degrees of
-freedom.
+counterparts. Despite partially effective mitigation strategies such as
+\textbf{adversarial training}, truly robust deep learning (DL) remains
+unattainable even for models that are considered shallow by today's
+standards (\citeproc{ref-kolter2023keynote}{Kolter 2023}).
 
-Wilson (\citeproc{ref-wilson2020case}{2020})
+Part of the problem is that great degrees of freedom provide room for
+many locally optimal solutions when using narrow objectives
+(\citeproc{ref-wilson2020case}{Wilson 2020}). Based purely on predictive
+performance, these solutions may seem to provide compelling explanations
+for the data at hand, even though they are in fact not grounded in
+meaningful semantics. In other words, the greatest strength of modern
+representation learning is also its greatest pitfall.
 
-Rudin (\citeproc{ref-rudin2019stop}{2019})
+This opaqueness has another dire consquence: since we cannot easily
+interpret the mapping from inputs to outputs, deploying such models in
+practive effectively means blindly relying on model predictions. On
+countless occasions, this has already caused real harm to people who
+were affected adversely and often unfairly by automated decision-making
+systems involving opaque models (\citeproc{ref-oneil2016weapons}{O'Neil
+2016}). Prominent voices have therefore argued to completely abolish the
+use of such ``black boxes'' along with any attempts to explain their
+predictions (\citeproc{ref-rudin2019stop}{Rudin 2019}): after all, if we
+had some interpretable abstraction of a ``black box'' that explains its
+decisions with full fidelity, there would be no need for the ``black
+box'' at all, because we could simply rely on the abstraction for
+decision-making.
+
+While we sympathise with that stance and share the aforementioned
+concerns, the reality is that the trend towards complexity has not been
+reversed. If anything, it has accelerated on the back of unprecented
+investments in computing infrastructure. With opaque AI here to stay, we
+believe that \textbf{explainable AI} (XAI) will conintue to play an
+important role in dealing with ``black boxes''.
 
 \section{Related Literature}\label{sec-lit}
 
@@ -454,6 +478,10 @@ Luu, Hoai Linh, and Naoya Inoue. 2023. {``Counterfactual Adversarial
 Training for Improving Robustness of Pre-Trained Language Models.''} In
 \emph{Proceedings of the 37th Pacific Asia Conference on Language,
 Information and Computation}, 881--88.
+
+\bibitem[\citeproctext]{ref-oneil2016weapons}
+O'Neil, Cathy. 2016. \emph{Weapons of Math Destruction: {How} Big Data
+Increases Inequality and Threatens Democracy}. {Crown}.
 
 \bibitem[\citeproctext]{ref-pawelczyk2022exploring}
 Pawelczyk, Martin, Chirag Agarwal, Shalmali Joshi, Sohini Upadhyay, and
