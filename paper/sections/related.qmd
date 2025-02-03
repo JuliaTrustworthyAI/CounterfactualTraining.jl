@@ -1,5 +1,19 @@
 # Related Literature {#sec-lit}
 
+To the best of our knowledge, our proposed framework for counterfactual training represents the first attempt to use counterfactual explanations during training to improve model explainability. In high-level terms, we define model explainability as the extent to which valid explanations derived for an opaque model are also deemed desirable with respect to the underlying data and stakeholder requirements. To make this more concrete, we follow @augustin2020adversarial in tieing the concept of explainability to the quality of counterfactual explanations that we can generate for a given model. The authors show that counterfactual explanations---understood here as minimal input perturbations that yield some desired model prediction---are generally more meaningful if the underlying model is more robust to adversarial examples. This finding is intuitive when we look at adversarial training (AT) as a means of regularization in the context of representation learning with high degrees of freedom: it reduces the space of viable solutions by inducing models to "unlearn" representations that are susceptible to worst-case counterfactuals (i.e. adversarial examples). @szegedy2013intriguing
+
+The link between counterfactual explanations and adversarial examples has been studied elsewhere: @pawelczyk2022exploring show that CE and AE are equivalent under certain conditions and derive upper bounds on the distances between them. 
+
+::: {#def-explainability}
+
+## Model Explainability
+
+
+
+:::
+
+@altmeyer2024faithful find that 
+
 ## Background on Counterfactual Explanations
 
 [@wachter2017counterfactual;@joshi2019realistic;@altmeyer2024faithful]
@@ -16,9 +30,7 @@
 
 ## Link to Adversarial Training
 
-From this perspective, adversarial training induces models to "unlearn" representations that are susceptible to the semantically most meaningless explanations---adversarial examples. 
-
-@freiesleben2022intriguing propose two definitional differences between Adversarial Examples (AE) and Counterfactual Explanations (CE): firstly, and more importantly according to the authors, the term AE implies missclassification, which is not the case for CE (***this might be a useful notion for use to distinguish between adversarials and explanations during training***); secondly, they argue that closeness plays a more critical role in the context of CE but confess that even counterfactuals that are not close might be relevant explanations. @pawelczyk2022exploring show that CE and AE are equivalent under certain conditions and derive upper bounds on the distances between them. 
+@freiesleben2022intriguing propose two definitional differences between Adversarial Examples (AE) and Counterfactual Explanations (CE): firstly, and more importantly according to the authors, the term AE implies missclassification, which is not the case for CE (***this might be a useful notion for use to distinguish between adversarials and explanations during training***); secondly, they argue that closeness plays a more critical role in the context of CE but confess that even counterfactuals that are not close might be relevant explanations. 
 
 ## Closely Related
 
