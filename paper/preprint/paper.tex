@@ -270,34 +270,54 @@ counterparts. Despite partially effective mitigation strategies such as
 unattainable even for models that are considered shallow by today's
 standards (\citeproc{ref-kolter2023keynote}{Kolter 2023}).
 
-Part of the problem is that great degrees of freedom provide room for
-many locally optimal solutions when using narrow objectives
-(\citeproc{ref-wilson2020case}{Wilson 2020}). Based purely on predictive
-performance, these solutions may seem to provide compelling explanations
-for the data at hand, even though they are in fact not grounded in
-meaningful semantics. In other words, the greatest strength of modern
-representation learning is also its greatest pitfall.
+Part of the problem is that high degrees of freedom provide room for
+many solutions that are locally optimal with respect to narrow
+objectives (\citeproc{ref-wilson2020case}{Wilson 2020}). Based purely on
+predictive performance, these solutions may seem to provide compelling
+explanations for the data, when in fact they are based on purely
+associative, semantically meaningless patterns. This poses two related
+challenges: firstly, it makes these models inherently opaque, since
+humans cannot simply interpret what type of explanation the complex
+learned representations correspond to; secondly, even if we could
+resolve the first challenge, it is not obvious how to mitigate models
+from learning representations that correspond to meaningless and
+undesirable explanations.
 
-This opaqueness has another dire consquence: since we cannot easily
-interpret the mapping from inputs to outputs, deploying such models in
-practive effectively means blindly relying on model predictions. On
-countless occasions, this has already caused real harm to people who
-were affected adversely and often unfairly by automated decision-making
-systems involving opaque models (\citeproc{ref-oneil2016weapons}{O'Neil
-2016}). Prominent voices have therefore argued to completely abolish the
-use of such ``black boxes'' along with any attempts to explain their
-predictions (\citeproc{ref-rudin2019stop}{Rudin 2019}): after all, if we
-had some interpretable abstraction of a ``black box'' that explains its
-decisions with full fidelity, there would be no need for the ``black
-box'' at all, because we could simply rely on the abstraction for
-decision-making.
+The first challenge has attracted an abundance of research on
+\textbf{explainable AI} (XAI) which aims to develop tools to derive
+explanations from complex model representations. This can mitigate a
+scenario in which we deploy opaque models and blindly rely on their
+predictions. On countless occasions, this scenario has already occurred
+in practice and caused real harm to people who were affected adversely
+and often unfairly by automated decision-making systems involving opaque
+models (\citeproc{ref-oneil2016weapons}{O'Neil 2016}). Effective XAI
+tools can aide us in monitoring models and providing affected
+individuals with recourse
+(\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
+Russell 2017}).
 
-While we sympathise with that stance and share the aforementioned
-concerns, the reality is that the trend towards complexity has not been
-reversed. If anything, it has accelerated on the back of unprecented
-investments in computing infrastructure. With opaque AI here to stay, we
-believe that \textbf{explainable AI} (XAI) will conintue to play an
-important role in dealing with ``black boxes''.
+To our surprise, the second challenge has not yet attracted any
+consolidated research effort. Specifically, there has been no concerted
+effort towards improving model \textbf{explainability}, which we define
+here as the degree to which learned representations correspond to
+explanations that are deemed desirable by humans. Instead, the choice
+has typically been to improve the capacity of XAI tools to identify the
+subset explanations that are both desirable and valid for any given
+model, independent of whether the learned representations are also
+compatible with undesirable explanations
+(\citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024}).
+Fortunately, recent findings indicate that explainability can arise as
+byproduct of regularization techniques aimed at other objectives such as
+robustness, generalization and generative capacity Altmeyer et al.
+(\citeproc{ref-altmeyer2024faithful}{2024}).
+
+In this work, we build on these findings and introduce a
+\textbf{counterfactual training}: a novel approach geared explicitly
+towards aligning model representations with desirable explanations.
+
+From this perspective, adversarial training induces models to
+``unlearn'' representations that are susceptible to the semantically
+most meaningless explanations---adversarial examples.
 
 \section{Related Literature}\label{sec-lit}
 
@@ -321,7 +341,7 @@ Sauer and Geiger (\citeproc{ref-sauer2021counterfactual}{2021}) generate
 counterfactual images for MNIST and ImageNet through independent
 mechanisms (IM): each IM learns class-conditional input distributions
 over a specific lower-dimensional, semantically meaningful factor, such
-as \emph{texture}, \emph{shape} and \emph{background}. The demonstrate
+as \emph{texture}, \emph{shape} and \emph{background}. They demonstrate
 that using these generated counterfactuals during classifier training
 improves model robustness. Similarly, Abbasnejad et al.
 (\citeproc{ref-abbasnejad2020counterfactual}{2020}) argue that
@@ -499,15 +519,16 @@ Models for Actionable Recourse.''} In \emph{Proceedings of the 35th
 International Conference on Neural Information Processing Systems}. NIPS
 '21. Red Hook, NY, USA: Curran Associates Inc.
 
-\bibitem[\citeproctext]{ref-rudin2019stop}
-Rudin, Cynthia. 2019. {``Stop Explaining Black Box Machine Learning
-Models for High Stakes Decisions and Use Interpretable Models
-Instead.''} \emph{Nature Machine Intelligence} 1 (5): 206--15.
-\url{https://doi.org/10.1038/s42256-019-0048-x}.
-
 \bibitem[\citeproctext]{ref-sauer2021counterfactual}
 Sauer, Axel, and Andreas Geiger. 2021. {``Counterfactual Generative
 Networks.''} \url{https://arxiv.org/abs/2101.06046}.
+
+\bibitem[\citeproctext]{ref-schut2021generating}
+Schut, Lisa, Oscar Key, Rory Mc Grath, Luca Costabello, Bogdan
+Sacaleanu, Yarin Gal, et al. 2021. {``Generating {Interpretable
+Counterfactual Explanations By Implicit Minimisation} of {Epistemic} and
+{Aleatoric Uncertainties}.''} In \emph{International {Conference} on
+{Artificial Intelligence} and {Statistics}}, 1756--64. {PMLR}.
 
 \bibitem[\citeproctext]{ref-teney2020learning}
 Teney, Damien, Ehsan Abbasnedjad, and Anton van den Hengel. 2020.
