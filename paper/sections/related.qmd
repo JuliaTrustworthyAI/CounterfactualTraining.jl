@@ -16,6 +16,8 @@
 
 ## Link to Adversarial Training
 
+From this perspective, adversarial training induces models to "unlearn" representations that are susceptible to the semantically most meaningless explanations---adversarial examples. 
+
 @freiesleben2022intriguing propose two definitional differences between Adversarial Examples (AE) and Counterfactual Explanations (CE): firstly, and more importantly according to the authors, the term AE implies missclassification, which is not the case for CE (***this might be a useful notion for use to distinguish between adversarials and explanations during training***); secondly, they argue that closeness plays a more critical role in the context of CE but confess that even counterfactuals that are not close might be relevant explanations. @pawelczyk2022exploring show that CE and AE are equivalent under certain conditions and derive upper bounds on the distances between them. 
 
 ## Closely Related

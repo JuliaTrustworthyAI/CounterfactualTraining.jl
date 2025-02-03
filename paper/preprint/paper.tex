@@ -291,10 +291,9 @@ predictions. On countless occasions, this scenario has already occurred
 in practice and caused real harm to people who were affected adversely
 and often unfairly by automated decision-making systems involving opaque
 models (\citeproc{ref-oneil2016weapons}{O'Neil 2016}). Effective XAI
-tools can aide us in monitoring models and providing affected
-individuals with recourse
-(\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
-Russell 2017}).
+tools can aide us in monitoring models and providing recourse to
+affected individuals (\citeproc{ref-wachter2017counterfactual}{Wachter,
+Mittelstadt, and Russell 2017}).
 
 To our surprise, the second challenge has not yet attracted any
 consolidated research effort. Specifically, there has been no concerted
@@ -311,13 +310,37 @@ byproduct of regularization techniques aimed at other objectives such as
 robustness, generalization and generative capacity Altmeyer et al.
 (\citeproc{ref-altmeyer2024faithful}{2024}).
 
-In this work, we build on these findings and introduce a
-\textbf{counterfactual training}: a novel approach geared explicitly
-towards aligning model representations with desirable explanations.
+Building on these findings, we introduce \textbf{counterfactual
+training}: a novel regularization technique geared explicitly towards
+aligning model representations with desirable explanations. Our
+contributions are as follows:
 
-From this perspective, adversarial training induces models to
-``unlearn'' representations that are susceptible to the semantically
-most meaningless explanations---adversarial examples.
+\begin{itemize}
+\tightlist
+\item
+  We discuss existing related work on improving models and consolidate
+  it through the lens of counterfactual explanations
+  (Section~\ref{sec-lit}).
+\item
+  We present our proposed methodological framework that leverages
+  faithful counterfactual explanations during the training phase of
+  models to achieve the explainability objective
+  (Section~\ref{sec-method}).
+\item
+  Through extensive experiments we demonstrate the counterfactual
+  training improve model explainability while maintaining high
+  predictive performance. We run ablation studies and grid searches to
+  understand how the underlying model components and hyperparameters
+  affect outcomes. (Section~\ref{sec-experiments}).
+\end{itemize}
+
+Despite limitations of our approach discussed in
+Section~\ref{sec-discussion}, we conclude that counterfactual training
+provides a practical framework for researchers and practitioners
+interested in making opaque models more trustworthy
+Section~\ref{sec-conclusion}. We also believe that this work serves as
+an opportunity for XAI researchers to reevaluate the premise of
+improving XAI tools without improving models.
 
 \section{Related Literature}\label{sec-lit}
 
@@ -370,6 +393,10 @@ tasks.
 
 \subsection{Link to Adversarial
 Training}\label{link-to-adversarial-training}
+
+From this perspective, adversarial training induces models to
+``unlearn'' representations that are susceptible to the semantically
+most meaningless explanations---adversarial examples.
 
 Freiesleben (\citeproc{ref-freiesleben2022intriguing}{2022}) propose two
 definitional differences between Adversarial Examples (AE) and
@@ -429,7 +456,7 @@ counterfactual explanations for those samples; and, finally, finetune
 the model on the augmented dataset that includes the generated
 counterfactuals.
 
-\section{Counterfactual Training}\label{counterfactual-training}
+\section{Counterfactual Training}\label{sec-method}
 
 \section{Experiments}\label{sec-experiments}
 
@@ -458,6 +485,12 @@ Altmeyer, Patrick, Mojtaba Farmanbar, Arie van Deursen, and Cynthia CS
 Liem. 2024. {``Faithful Model Explanations Through Energy-Constrained
 Conformal Counterfactuals.''} In \emph{Proceedings of the AAAI
 Conference on Artificial Intelligence}, 38:10829--37. 10.
+
+\bibitem[\citeproctext]{ref-augustin2020adversarial}
+Augustin, Maximilian, Alexander Meinke, and Matthias Hein. 2020.
+{``Adversarial Robustness on in-and Out-Distribution Improves
+Explainability.''} In \emph{European Conference on Computer Vision},
+228--45. Springer.
 
 \bibitem[\citeproctext]{ref-freiesleben2022intriguing}
 Freiesleben, Timo. 2022. {``The Intriguing Relation Between

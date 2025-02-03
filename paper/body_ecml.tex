@@ -1,12 +1,120 @@
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
 \begin{abstract}
-Counterfactual Explanations (CE) have emerged as a popular method to
-explain the predictions made by opaque machine learning models in a
-post-hoc fashion. We propose a novel approach that leverages
-counterfactuals during the training phase of models.
-\keywords{Counterfactual Explanations \and Explainable AI}
+Counterfactual Explanations (CE) have emerged as a popular tool to
+explain predictions made by opaque machine learning models: they explain
+how factual inputs need to change in order for some fitted model to
+produce some desired output. Much existing research has focused on
+identifying explanations that are not only valid but also deemed
+desirable with respect to the underlying data and stakeholder
+requirements. Recent work has shown that under this premise, the task of
+learning desirable explanations is effectively reassigned from the model
+itself to the (post-hoc) counterfactual explainer. Building on that
+work, we propose a novel model objective that leverages counterfactuals
+during the training phase (ad-hoc) in order to minimize the divergence
+between learned representations and desirable explanations. Through
+extensive experiments, we demonstrate that our proposed methodology
+facilitates training models that inherently deliver desirable
+explanations while maintaining high predictive performance.
+\keywords{Counterfactual Explanations \and Explainable
+AI \and Representation Learning}
 \end{abstract}
 
 \section{Introduction}\label{introduction}
+
+Today's prominence of artificial intelligence (AI) has largely been
+driven by advances in \textbf{representation learning}: instead of
+relying on features and rules that are carefully hand-crafted by humans,
+modern AIs are tasked with learning these representations from scratch,
+guided by narrow objectives such as predictive accuracy
+\cite{goodfellow2016deep}. Modern advances in computing have made it
+possible to provide such AIs with ever greater degrees of freedom to
+achieve that task, which has often led them to outperform traditionally
+more parsimonious models. Unfortunately, in doing so they also learn
+increasingly complex and highly sensitive representations that we can no
+longer easily interpret.
+
+This trend towards complexity for the sake of performance has come under
+serious scrutiny in recent years. At the very cusp of the deep learning
+revolution, \cite{goodfellow2014explaining} showed that artificial
+neural networks (ANN) are sensitive to adversarial examples (AE):
+counterfactuals of model inputs that yield vastly different model
+predictions despite being semantically indifferent from their factual
+counterparts. Despite partially effective mitigation strategies such as
+\textbf{adversarial training}, truly robust deep learning (DL) remains
+unattainable even for models that are considered shallow by today's
+standards \cite{kolter2023keynote}.
+
+Part of the problem is that high degrees of freedom provide room for
+many solutions that are locally optimal with respect to narrow
+objectives \cite{wilson2020case}. Based purely on predictive
+performance, these solutions may seem to provide compelling explanations
+for the data, when in fact they are based on purely associative,
+semantically meaningless patterns. This poses two related challenges:
+firstly, it makes these models inherently opaque, since humans cannot
+simply interpret what type of explanation the complex learned
+representations correspond to; secondly, even if we could resolve the
+first challenge, it is not obvious how to mitigate models from learning
+representations that correspond to meaningless and undesirable
+explanations.
+
+The first challenge has attracted an abundance of research on
+\textbf{explainable AI} (XAI) which aims to develop tools to derive
+explanations from complex model representations. This can mitigate a
+scenario in which we deploy opaque models and blindly rely on their
+predictions. On countless occasions, this scenario has already occurred
+in practice and caused real harm to people who were affected adversely
+and often unfairly by automated decision-making systems involving opaque
+models \cite{oneil2016weapons}. Effective XAI tools can aide us in
+monitoring models and providing affected individuals with recourse
+\cite{wachter2017counterfactual}.
+
+To our surprise, the second challenge has not yet attracted any
+consolidated research effort. Specifically, there has been no concerted
+effort towards improving model \textbf{explainability}, which we define
+here as the degree to which learned representations correspond to
+explanations that are deemed desirable by humans. Instead, the choice
+has typically been to improve the capacity of XAI tools to identify the
+subset explanations that are both desirable and valid for any given
+model, independent of whether the learned representations are also
+compatible with undesirable explanations \cite{altmeyer2024faithful}.
+Fortunately, recent findings indicate that explainability can arise as
+byproduct of regularization techniques aimed at other objectives such as
+robustness, generalization and generative capacity
+\cite{schut2021generating}.
+
+Building on these findings, we introduce \textbf{counterfactual
+training}: a novel regularization technique geared explicitly towards
+aligning model representations with desirable explanations. Our
+contributions are as follows:
+
+\begin{itemize}
+\tightlist
+\item
+  We discuss existing related work on improving models and consolidate
+  it through the lens of counterfactual explanations
+  (Section~\ref{sec-lit}).
+\item
+  We present our proposed methodological framework that leverages
+  faithful counterfactual explanations during the training phase of
+  models to achieve the explainability objective
+  (Section~\ref{sec-method}).
+\item
+  Through extensive experiments we demonstrate the counterfactual
+  training improve model explainability while maintaining high
+  predictive performance. We run ablation studies and grid searches to
+  understand how the underlying model components and hyperparameters
+  affect outcomes. (Section~\ref{sec-experiments}).
+\end{itemize}
+
+Despite limitations of our approach discussed in
+Section~\ref{sec-discussion}, we conclude that counterfactual training
+provides a practical framework for researchers and practitioners
+interested in making opaque models more trustworthy
+Section~\ref{sec-conclusion}. We also believe that this work serves as
+an opportunity for XAI researchers to reevaluate the premise of
+improving XAI tools without improving models.
 
 \section{Related Literature}\label{sec-lit}
 
@@ -28,7 +136,7 @@ Robustness}\label{generalization-and-robustness}
 and ImageNet through independent mechanisms (IM): each IM learns
 class-conditional input distributions over a specific lower-dimensional,
 semantically meaningful factor, such as \emph{texture}, \emph{shape} and
-\emph{background}. The demonstrate that using these generated
+\emph{background}. They demonstrate that using these generated
 counterfactuals during classifier training improves model robustness.
 Similarly, \cite{abbasnejad2020counterfactual} argue that
 counterfactuals represent potentially useful training data in machine
@@ -54,6 +162,10 @@ counterfactuals improves robustness in a number of NLP tasks.
 
 \subsection{Link to Adversarial
 Training}\label{link-to-adversarial-training}
+
+From this perspective, adversarial training induces models to
+``unlearn'' representations that are susceptible to the semantically
+most meaningless explanations---adversarial examples.
 
 \cite{freiesleben2022intriguing} propose two definitional differences
 between Adversarial Examples (AE) and Counterfactual Explanations (CE):
@@ -110,7 +222,7 @@ uncertainty (entropy); secondly, generate counterfactual explanations
 for those samples; and, finally, finetune the model on the augmented
 dataset that includes the generated counterfactuals.
 
-\section{Counterfactual Training}\label{counterfactual-training}
+\section{Counterfactual Training}\label{sec-method}
 
 \section{Experiments}\label{sec-experiments}
 
