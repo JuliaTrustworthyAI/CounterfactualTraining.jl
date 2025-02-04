@@ -23,9 +23,14 @@ $$
 \text{yloss}(M_\theta(x),y) + \lambda_{\text{div}} \text{div}({x^\prime},x;\theta) + \lambda_{\text{adv}} \text{advloss}(M_\theta({x^\prime}),y)
 $$ {#eq-obj}
 
-where $\text{yloss}(\cdot)$ denotes any conventional classification loss function (e.g. crossentropy) that induces discriminative (predictive) performance. The two additional components in @eq-obj are explained in more detail below. For now they can be sufficiently described as inducing explainability directly and indirectly by penalizing: 1) the contrastive divergence, $\text{div}(\cdot)$, between counterfactuals $x^\prime$ and observed samples $x$ and, 2) the adversarial loss, $\text{advloss}(.)$, with respect to counterfactuals. The tradeoff between the different components can be governed by adjusting the strengths of the penalties $\lambda_{\text{div}}$ and $\lambda_{\text{adv}}$.
+where $\text{yloss}(\cdot)$ denotes any conventional classification loss function (e.g. cross-entropy) that induces discriminative (predictive) performance. The two additional components in @eq-obj are explained in more detail below. For now they can be sufficiently described as inducing explainability directly and indirectly by penalizing: 1) the contrastive divergence, $\text{div}(\cdot)$, between counterfactuals $x^\prime$ and observed samples $x$ and, 2) the adversarial loss, $\text{advloss}(.)$, with respect to counterfactuals. The tradeoff between the different components can be governed by adjusting the strengths of the penalties $\lambda_{\text{div}}$ and $\lambda_{\text{adv}}$.
 
 ### Directly Inducing Explainability through Contrastive Divergence
+
+@grathwohl2020your observe that any classifier can be re-interpreted as a joint energy-based model (JEM) that learns to discriminate output classes conditional on inputs and generate inputs. They show that JEMs can perform well at both tasks by directly optimizing the joint distribution $\log p_\theta(x,y)=\log p_\theta(y|x) + \log p_\theta(x)$. The first factor 
+The distribution over inputs is learned via contrastive divergence: 
+
+Considered through the lens of explainability, JEMs learn plausible explanations.
 
 ### Indirectly Inducing Explainability through Adversarial Robustness
 
