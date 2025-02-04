@@ -168,9 +168,9 @@
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
 \theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
-\theoremstyle{definition}
 \newtheorem{exercise}{Parameters}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -226,17 +226,17 @@ Counterfactual Explanations have emerged as a popular tool to explain
 predictions made by opaque machine learning models: they explain how
 factual inputs need to change in order for some fitted model to produce
 some desired output. Much existing research has focused on identifying
-explanations that are not only valid but also deemed desirable with
-respect to the underlying data and stakeholder requirements. Recent work
-has shown that under this premise, the task of learning desirable
-explanations is effectively reassigned from the model itself to the
-(post-hoc) counterfactual explainer. Building on that work, we propose a
-novel model objective that leverages counterfactuals during the training
-phase (ad-hoc) in order to minimize the divergence between learned
-representations and desirable explanations. Through extensive
-experiments, we demonstrate that our proposed methodology facilitates
-training models that inherently deliver desirable explanations while
-maintaining high predictive performance.
+explanations that are not only valid but also deemed plausible and
+desirable with respect to the underlying data and stakeholder
+requirements. Recent work has shown that under this premise, the task of
+learning plausible explanations is effectively reassigned from the model
+itself to the (post-hoc) counterfactual explainer. Building on that
+work, we propose a novel model objective that leverages counterfactuals
+during the training phase (ad-hoc) in order to minimize the divergence
+between learned representations and plausible explanations. Through
+extensive experiments, we demonstrate that our proposed methodology
+facilitates training models that inherently deliver plausible
+explanations while maintaining high predictive performance.
 \end{abstract}
 {\bfseries \emph Keywords}
 \def\sep{\textbullet\ }
@@ -250,15 +250,15 @@ Representation Learning
 Today's prominence of artificial intelligence (AI) has largely been
 driven by advances in \textbf{representation learning}: instead of
 relying on features and rules that are carefully hand-crafted by humans,
-modern AIs are tasked with learning these representations from scratch,
-guided by narrow objectives such as predictive accuracy
-(\citeproc{ref-goodfellow2016deep}{I. Goodfellow, Bengio, and Courville
-2016}). Modern advances in computing have made it possible to provide
-such AIs with ever greater degrees of freedom to achieve that task,
-which has often led them to outperform traditionally more parsimonious
-models. Unfortunately, in doing so they also learn increasingly complex
-and highly sensitive representations that we can no longer easily
-interpret.
+modern machine learning (ML) models are tasked with learning these
+representations from scratch, guided by narrow objectives such as
+predictive accuracy (\citeproc{ref-goodfellow2016deep}{I. Goodfellow,
+Bengio, and Courville 2016}). Modern advances in computing have made it
+possible to provide such models with ever greater degrees of freedom to
+achieve that task, which has often led them to outperform traditionally
+more parsimonious models. Unfortunately, in doing so they also learn
+increasingly complex and highly sensitive representations that we can no
+longer easily interpret.
 
 This trend towards complexity for the sake of performance has come under
 serious scrutiny in recent years. At the very cusp of the deep learning
@@ -275,16 +275,18 @@ standards (\citeproc{ref-kolter2023keynote}{Kolter 2023}).
 
 Part of the problem is that high degrees of freedom provide room for
 many solutions that are locally optimal with respect to narrow
-objectives (\citeproc{ref-wilson2020case}{Wilson 2020}). Based purely on
-predictive performance, these solutions may seem to provide compelling
-explanations for the data, when in fact they are based on purely
-associative, semantically meaningless patterns. This poses two related
-challenges: firstly, it makes these models inherently opaque, since
-humans cannot simply interpret what type of explanation the complex
-learned representations correspond to; secondly, even if we could
-resolve the first challenge, it is not obvious how to mitigate models
-from learning representations that correspond to meaningless and
-undesirable explanations.
+objectives (\citeproc{ref-wilson2020case}{Wilson 2020})\footnote{For
+  clarity: we follow standard ML convention in using ``degrees of
+  freedom'' to refer to the number of parameters estimated from data.}.
+Based purely on predictive performance, these solutions may seem to
+provide compelling explanations for the data, when in fact they are
+based on purely associative, semantically meaningless patterns. This
+poses two related challenges: firstly, it makes these models inherently
+opaque, since humans cannot simply interpret what type of explanation
+the complex learned representations correspond to; secondly, even if we
+could resolve the first challenge, it is not obvious how to mitigate
+models from learning representations that correspond to meaningless and
+implausible explanations.
 
 The first challenge has attracted an abundance of research on
 \textbf{explainable AI} (XAI) which aims to develop tools to derive
@@ -308,11 +310,12 @@ To our surprise, the second challenge has not yet attracted any
 consolidated research effort. Specifically, there has been no concerted
 effort towards improving model \textbf{explainability}, which we define
 here as the degree to which learned representations correspond to
-explanations that are interpretable and deemed desirable by humans.
-Instead, the choice has typically been to improve the capacity of XAI
-tools to identify the subset explanations that are both desirable and
-valid for any given model, independent of whether the learned
-representations are also compatible with undesirable explanations
+explanations that are interpretable and deemed \textbf{plausible} by
+humans (see Definition~\ref{def-explainability}). Instead, the choice
+has typically been to improve the capacity of XAI tools to identify the
+subset explanations that are both plausible and valid for any given
+model, independent of whether the learned representations are also
+compatible with implausible explanations
 (\citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024}).
 Fortunately, recent findings indicate that explainability can arise as
 byproduct of regularization techniques aimed at other objectives such as
@@ -321,7 +324,7 @@ robustness, generalization and generative capacity Altmeyer et al.
 
 Building on these findings, we introduce \textbf{counterfactual
 training}: a novel regularization technique geared explicitly towards
-aligning model representations with desirable explanations. Our
+aligning model representations with plausible explanations. Our
 contributions are as follows:
 
 \begin{itemize}
@@ -357,7 +360,7 @@ To the best of our knowledge, our proposed framework for counterfactual
 training represents the first attempt to use counterfactual explanations
 during training to improve model explainability. In high-level terms, we
 define model explainability as the extent to which valid explanations
-derived for an opaque model are also deemed desirable with respect to
+derived for an opaque model are also deemed plausible with respect to
 the underlying data and stakeholder requirements. To make this more
 concrete, we follow Augustin, Meinke, and Hein
 (\citeproc{ref-augustin2020adversarial}{2020}) in tieing the concept of
@@ -370,7 +373,7 @@ intuitive sense of this finding when looking at adversarial training
 (AT) through the lens of representation learning with high degrees of
 freedom: by inducing models to ``unlearn'' representations that are
 susceptible to worst-case counterfactuals (i.e.~adversarial examples),
-AT effectively removes some undesirable explanations from the solution
+AT effectively removes some implausible explanations from the solution
 space.
 
 \subsection{Adversarial Examples are Counterfactual
@@ -448,7 +451,7 @@ restrictions on the neural network architecture at all.
 \subsection{Beyond Robustness}\label{beyond-robustness}
 
 Improving the adversarial robustness of models is not the only path
-towards aligning representations with desirable explanations. In a work
+towards aligning representations with plausible explanations. In a work
 closely related to this one, Altmeyer et al.
 (\citeproc{ref-altmeyer2024faithful}{2024}) show that explainability can
 be improved through model averaging and refined model objectives. The
@@ -458,9 +461,9 @@ model has learned about the underlying data. Formally, they rely on
 tools from energy-based modelling to minimize the divergence between the
 distribution of counterfactuals and the conditional posterior over
 inputs learned by the model. Their proposed counterfactual explainer,
-\emph{ECCCo}, yields desirable (or \textbf{plausible}) explanations if
-and only if the underlying model has learned representations that align
-with them. They find that both deep ensembles
+\emph{ECCCo}, yields plausible explanations if and only if the
+underlying model has learned representations that align with them. They
+find that both deep ensembles
 (\citeproc{ref-lakshminarayanan2016simple}{Lakshminarayanan, Pritzel,
 and Blundell 2017}) and joint energy-based models (JEMs)
 (\citeproc{ref-grathwohl2020your}{Grathwohl et al. 2020}) tend to do
@@ -475,23 +478,106 @@ mitigates the aforementioned risk of relying on a single locally optimal
 representations that corresponds to semantically meaningless
 explanations for the data. Previous work by Schut et al.
 (\citeproc{ref-schut2021generating}{2021}) similarly found that
-generating desirable (``interpretable'') counterfactual explanations is
+generating plausible (``interpretable'') counterfactual explanations is
 almost trivial for deep ensembles that have also undergone adversarial
 training. The case for JEMs is even clearer: they involve a hybrid
 objective that induces both high predictive performance and generative
 capacity (\citeproc{ref-grathwohl2020your}{Grathwohl et al. 2020}). This
-is closely related to the idea of aligning models with desirable
+is closely related to the idea of aligning models with plausible
 explanations and has inspired our proposed counterfactual training
 objective, as we explain in Section~\ref{sec-method}.
 
 \section{Counterfactual Training}\label{sec-method}
 
+Counterfactual training combines ideas from adversarial training,
+energy-based modelling and counterfactuals explanations with the
+explicit objective of aligning representations with plausible
+explanations that comply with user requirements. In the context of CE,
+plausibility has broadly been defined as the degree to which
+counterfactuals comply with the underlying data generating process
+(\citeproc{ref-poyiadzi2020face}{Poyiadzi et al. 2020};
+\citeproc{ref-guidotti2022counterfactual}{Guidotti 2022};
+\citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024}). Plausibility
+is a necessary but insufficient condition for using CE to provide
+algorithmic recourse (AR) to individuals affected by opaque models in
+practice. This is because for recourse recommendations to be
+\textbf{actionable}, they need to not only result in plausible
+counterfactuals but also be attainable. A plausible CE for a rejected
+20-year-old loan applicant, for example, might reveal that their
+application would have been accepted, if only they were 20 years older.
+Ignoring all other features, this complies with the definition of
+plausibility if 40-year-old individuals are in fact more credit-worthy
+on average than young adults. But of course this CE does not qualify for
+providing actionable recourse to the applicant. For our intents and
+purposes, counterfactual training aims at improving model explainability
+by aligning models with counterfactuals that meet both desiderata,
+plausibility and actionability. Formally, we define explainability as
+follows:
+
 \begin{definition}[Model
 Explainability]\protect\hypertarget{def-explainability}{}\label{def-explainability}
 
-~
+Let \(M_\theta: \mathcal{X} \mapsto \mathcal{Y}\) denote a supervised
+classification model that maps from intuts to representations
+\(\phi(x;theta)\) and finally to outputs. Assume that for any given
+input-output pair \(\{\mathbf{x},\mathbf{y}\}\) there exists a
+counterfactual
+\(\mathbf{x}^{\prime} = \mathbf{x} + \Delta: M_\theta(\mathbf{x}^{\prime}) = \mathbf{y}^{+} \neq \mathbf{y} = M_\theta(\mathbf{x})\)
+where \(\mathbf{y}^{+}\) denotes some target output. We say that
+\(M_\theta\) is \textbf{explainable} to the extent that faithfully
+generated counterfactuals are:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Plausible: \(\mathbf{x}^{\prime} \sim_{p} \mathcal{X}|\mathbf{y}^{+}\)
+  with \(p \rightarrow 1\) as defined in Altmeyer et al.
+  (\citeproc{ref-altmeyer2024faithful}{2024}).
+\item
+  Actionable: permutations \(\Delta\) are subject to actionability
+  constraints.
+\end{enumerate}
 
 \end{definition}
+
+Actionability constraints in Definition~\ref{def-explainability} vary
+and depend on the context in which \(M_\theta\) is deployed. In this
+work, we focus on domain and mutability constraints for individual
+features. We also limit ourselves to classification tasks in this work,
+a limitation that we discuss in Section~\ref{sec-discussion}.
+
+\subsection{Our Proposed Objective}\label{our-proposed-objective}
+
+To train models with high explainability as defined in
+Definition~\ref{def-explainability}, we propose the following objective,
+
+\begin{equation}\phantomsection\label{eq-obj}{
+\text{yloss}(M_\theta(x),y) + \lambda_{\text{div}} \text{div}({x^\prime},x;\theta) + \lambda_{\text{adv}} \text{advloss}(M_\theta({x^\prime}),y)
+}\end{equation}
+
+where \(\text{yloss}(\cdot)\) denotes any conventional classification
+loss function (e.g.~crossentropy) that induces discriminative
+(predictive) performance. The two additional components in
+Equation~\ref{eq-obj} are explained in more detail below. For now they
+can be sufficiently described as inducing explainability directly and
+indirectly by penalizing: 1) the contrastive divergence,
+\(\text{div}(\cdot)\), between counterfactuals \(x^\prime\) and observed
+samples \(x\) and, 2) the adversarial loss, \(\text{advloss}(.)\), with
+respect to counterfactuals. The tradeoff between the different
+components can be governed by adjusting the strengths of the penalties
+\(\lambda_{\text{div}}\) and \(\lambda_{\text{adv}}\).
+
+\subsubsection{Directly Inducing Explainability through Contrastive
+Divergence}\label{directly-inducing-explainability-through-contrastive-divergence}
+
+\subsubsection{Indirectly Inducing Explainability through Adversarial
+Robustness}\label{indirectly-inducing-explainability-through-adversarial-robustness}
+
+A reasonable choice for the latter is to define
+\(\text{advloss}(M_\theta({x^\prime}),y;\varepsilon):=\text{yloss}(M_\theta({x^\prime}),y)\)
+
+\subsection{Encoding Domain Knowledge}\label{encoding-domain-knowledge}
 
 \section{Experiments}\label{sec-experiments}
 
@@ -547,6 +633,11 @@ Mohammad Norouzi, and Kevin Swersky. 2020. {``Your Classifier Is
 Secretly an Energy Based Model and You Should Treat It Like One.''} In
 \emph{International Conference on Learning Representations}.
 
+\bibitem[\citeproctext]{ref-guidotti2022counterfactual}
+Guidotti, Riccardo. 2022. {``Counterfactual Explanations and How to Find
+Them: Literature Review and Benchmarking.''} \emph{Data Mining and
+Knowledge Discovery}, 1--55.
+
 \bibitem[\citeproctext]{ref-guo2023counternet}
 Guo, Hangzhi, Thanh H. Nguyen, and Amulya Yadav. 2023. {``CounterNet:
 End-to-End Training of Prediction Aware Counterfactual Explanations.''}
@@ -586,6 +677,12 @@ on Artificial Intelligence and Statistics}, edited by Gustau
 Camps-Valls, Francisco J. R. Ruiz, and Isabel Valera, 151:4574--94.
 Proceedings of Machine Learning Research. PMLR.
 \url{https://proceedings.mlr.press/v151/pawelczyk22a.html}.
+
+\bibitem[\citeproctext]{ref-poyiadzi2020face}
+Poyiadzi, Rafael, Kacper Sokol, Raul Santos-Rodriguez, Tijl De Bie, and
+Peter Flach. 2020. {``{FACE}: {Feasible} and Actionable Counterfactual
+Explanations.''} In \emph{Proceedings of the {AAAI}/{ACM Conference} on
+{AI}, {Ethics}, and {Society}}, 344--50.
 
 \bibitem[\citeproctext]{ref-ross2021learning}
 Ross, Alexis, Himabindu Lakkaraju, and Osbert Bastani. 2024. {``Learning

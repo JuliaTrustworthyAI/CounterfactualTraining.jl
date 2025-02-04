@@ -1,9 +1,35 @@
 # Counterfactual Training {#sec-method}
 
+Counterfactual training combines ideas from adversarial training, energy-based modelling and counterfactuals explanations with the explicit objective of aligning representations with plausible explanations that comply with user requirements. In the context of CE, plausibility has broadly been defined as the degree to which counterfactuals comply with the underlying data generating process [@poyiadzi2020face;@guidotti2022counterfactual;@altmeyer2024faithful]. Plausibility is a necessary but insufficient condition for using CE to provide algorithmic recourse (AR) to individuals affected by opaque models in practice. This is because for recourse recommendations to be **actionable**, they need to not only result in plausible counterfactuals but also be attainable. A plausible CE for a rejected 20-year-old loan applicant, for example, might reveal that their application would have been accepted, if only they were 20 years older. Ignoring all other features, this complies with the definition of plausibility if 40-year-old individuals are in fact more credit-worthy on average than young adults. But of course this CE does not qualify for providing actionable recourse to the applicant. For our intents and purposes, counterfactual training aims at improving model explainability by aligning models with counterfactuals that meet both desiderata, plausibility and actionability. Formally, we define explainability as follows:
+
 ::: {#def-explainability}
 
 ## Model Explainability
 
+Let $M_\theta: \mathcal{X} \mapsto \mathcal{Y}$ denote a supervised classification model that maps from intuts to representations $\phi(x;theta)$ and finally to outputs. Assume that for any given input-output pair $\{\mathbf{x},\mathbf{y}\}$ there exists a counterfactual $\mathbf{x}^{\prime} = \mathbf{x} + \Delta: M_\theta(\mathbf{x}^{\prime}) = \mathbf{y}^{+} \neq \mathbf{y} = M_\theta(\mathbf{x})$ where $\mathbf{y}^{+}$ denotes some target output. We say that $M_\theta$ is **explainable** to the extent that faithfully generated counterfactuals are:
 
+1. Plausible: $\mathbf{x}^{\prime} \sim_{p} \mathcal{X}|\mathbf{y}^{+}$ with $p \rightarrow 1$  as defined in @altmeyer2024faithful.
+2. Actionable: permutations $\Delta$ are subject to actionability constraints.
 
 :::
+
+Actionability constraints in @def-explainability vary and depend on the context in which $M_\theta$ is deployed. In this work, we focus on domain and mutability constraints for individual features. We also limit ourselves to classification tasks in this work, a limitation that we discuss in @sec-discussion.
+
+## Our Proposed Objective
+
+To train models with high explainability as defined in @def-explainability, we propose the following objective,
+
+$$
+\text{yloss}(M_\theta(x),y) + \lambda_{\text{div}} \text{div}({x^\prime},x;\theta) + \lambda_{\text{adv}} \text{advloss}(M_\theta({x^\prime}),y)
+$$ {#eq-obj}
+
+where $\text{yloss}(\cdot)$ denotes any conventional classification loss function (e.g. crossentropy) that induces discriminative (predictive) performance. The two additional components in @eq-obj are explained in more detail below. For now they can be sufficiently described as inducing explainability directly and indirectly by penalizing: 1) the contrastive divergence, $\text{div}(\cdot)$, between counterfactuals $x^\prime$ and observed samples $x$ and, 2) the adversarial loss, $\text{advloss}(.)$, with respect to counterfactuals. The tradeoff between the different components can be governed by adjusting the strengths of the penalties $\lambda_{\text{div}}$ and $\lambda_{\text{adv}}$.
+
+### Directly Inducing Explainability through Contrastive Divergence
+
+### Indirectly Inducing Explainability through Adversarial Robustness
+
+A reasonable choice for the latter is to define $\text{advloss}(M_\theta({x^\prime}),y;\varepsilon):=\text{yloss}(M_\theta({x^\prime}),y)$
+
+## Encoding Domain Knowledge
+

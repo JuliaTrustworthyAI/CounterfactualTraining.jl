@@ -12,6 +12,7 @@ return {
               if not (id:match("^fig-") or 
                      id:match("^tbl-") or 
                      id:match("^eq-") or 
+                     id:match("^def-") or
                      id:match("^sec-")) then
                   isCitation = true
                   break
