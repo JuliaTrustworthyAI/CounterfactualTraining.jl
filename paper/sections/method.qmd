@@ -24,7 +24,7 @@ The definitions of faithfulness and plausibility in @def-explainability are the 
 To train models with high explainability as defined in @def-explainability, we propose the following objective,
 
 $$
-\text{yloss}(\mathbf{M}_\theta(x),y) + \lambda_{\text{div}} \text{div}({x^\prime},x;\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta({x^\prime}),y)
+\text{yloss}(\mathbf{M}_\theta(\mathbf{x}),y) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x^\prime};\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),y)
 $$ {#eq-obj}
 
 where $\text{yloss}(\cdot)$ denotes any conventional classification loss function (e.g. cross-entropy) that induces discriminative (predictive) performance. The two additional components in @eq-obj are explained in more detail below. For now, they can be sufficiently described as inducing explainability directly and indirectly by penalizing: 1) the contrastive divergence, $\text{div}(\cdot)$, between counterfactuals $x^\prime$ and observed samples $x$ and, 2) the adversarial loss, $\text{advloss}(.)$, with respect to counterfactuals. The tradeoff between the different components can be governed by adjusting the strengths of the penalties $\lambda_{\text{div}}$ and $\lambda_{\text{adv}}$.
@@ -33,13 +33,30 @@ where $\text{yloss}(\cdot)$ denotes any conventional classification loss functio
 
 @grathwohl2020your observe that any classifier can be re-interpreted as a joint energy-based model (JEM) that learns to discriminate output classes conditional on inputs and generate inputs. They show that JEMs can be trained to perform well at both tasks by directly maximizing the joint log-likelihood factorized as $\log p_\theta(\mathbf{x},\mathbf{y})=\log p_\theta(\mathbf{y}|\mathbf{x}) + \log p_\theta(\mathbf{x})$. The first factor can be optimized using conventional cross-entropy as in @eq-obj. To optimize $\log p_\theta(\mathbf{x})$ @grathwohl2020your minimize the contrastive divergence between samples drawn from $p_\theta(\mathbf{x})$ and training observations, i.e. samples from $p(\mathbf{x})$. 
 
-A key empirical finding in @altmeyer2024faithful was that JEMs tend to do well with respect to the plausibility objective in @def-explainability. If we consider samples drawn from $p_\theta(\mathbf{x})$ as counterfactuals, this is an expected finding, because the JEM objective effectively minimizes the divergence between the conditional posterior and $p(\mathbf{x}|\mathbf{y}^{+})$. To generate samples, @grathwohl2020your rely on Stochastic Gradient Langevin Dynamics (SGLD) using an uninformative prior for initialization. This is where we depart from their methodology: instead of generating samples through SGLD, we propose using counterfactual explainers to generate counterfactuals for observed training samples. 
+A key empirical finding in @altmeyer2024faithful was that JEMs tend to do well with respect to the plausibility objective in @def-explainability. If we consider samples drawn from $p_\theta(\mathbf{x})$ as counterfactuals, this is an expected finding, because the JEM objective effectively minimizes the divergence between the conditional posterior and $p(\mathbf{x}|\mathbf{y}^{+})$. To generate samples, @grathwohl2020your rely on Stochastic Gradient Langevin Dynamics (SGLD) using an uninformative prior for initialization. This is where we depart from their methodology: instead of generating samples through SGLD, we propose using counterfactual explainers to generate counterfactuals for observed training samples. Specifically, we have
 
-This departure allows us to tap into the vast repertoire of explainers that have been proposed in the literature to meet different desiderata. Typically, these methods facilitate the imposition of domain and mutability constraints, for example. In principle, any existing approach for generating counterfactual explanations is viable, so long as it does not violate the faithfulness condition.
+$$
+\text{div}(\mathbf{x},\mathbf{x^\prime};\theta) = \mathcal{E}_\theta(\mathbf{x}) - \mathcal{E}_\theta(\mathbf{x}^\prime)
+$$ {#eq-div}
+
+where $\mathcal{E}_\theta(\cdot)$ denotes the energy function. We generate samples $\mathbf{x}^\prime$ by first randomly sampling the target class $\mathbf{y}^+ \sim p(\mathbf{y})$ and then generating a counterfactual explanation for that target, similar to how conditional sampling can be used for JEMs [@grathwohl2020your]. Intuitively, the gradient of @eq-div decreases the energy of observed training samples (positive samples) while at same time increasing the energy of counterfactuals (negative samples) [@du2019implicit]. As the generated counterfactuals get more plausible (@def-explainability) over the cause of training, these two opposing effects gradually balance each out [@lippe2024uvadlc]. 
+
+The departure from SGLD allows us to tap into the vast repertoire of explainers that have been proposed in the literature to meet different desiderata. Typically, these methods facilitate the imposition of domain and mutability constraints, for example. In principle, any existing approach for generating counterfactual explanations is viable, so long as it does not violate the faithfulness condition. Like JEMs [@murphy2022probabilistic], counterfactual training can be considered as a form of contrastive representation learning. 
 
 ### Indirectly Inducing Explainability through Adversarial Robustness
 
-A reasonable choice for the latter is to define $\text{advloss}(\mathbf{M}_\theta({x^\prime}),y;\varepsilon):=\text{yloss}(\mathbf{M}_\theta({x^\prime}),y)$
+Based on our analysis in @sec-lit, counterfactuals $\mathbf{x}^\prime$ can be repurposed as additional training samples [@luu2023counterfactual] or adversarial examples [@freiesleben2022intriguing;@pawelczyk2022exploring]. This leaves some flexibility with respect to the exact choice for $\text{advloss}(\cdot)$ in @eq-obj. An intuitive functional form to use, though likely not the only reasonable choice, is inspired by adversarial training:
+
+$$
+\begin{aligned}
+\text{advloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),\mathbf{y};\varepsilon)&=\begin{cases}
+\text{yloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),\mathbf{y}) & \text{if} \ ||\Delta||_\infty \leq \varepsilon \\
+0 & \text{otherwise.}
+\end{cases}
+\end{aligned}
+$$ {#eq-adv}
+
+Under this choice we treat the counterfactual $\mathbf{x}^\prime$ as an adversarial example iff it is imperceptible, i.e. the magnitude of the perturbation of any individual feature is upper-bounded at $\varepsilon$.
 
 ## Encoding Domain Knowledge
 

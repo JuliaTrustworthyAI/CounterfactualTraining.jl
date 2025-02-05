@@ -574,7 +574,7 @@ To train models with high explainability as defined in
 Definition~\ref{def-explainability}, we propose the following objective,
 
 \begin{equation}\phantomsection\label{eq-obj}{
-\text{yloss}(\mathbf{M}_\theta(x),y) + \lambda_{\text{div}} \text{div}({x^\prime},x;\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta({x^\prime}),y)
+\text{yloss}(\mathbf{M}_\theta(\mathbf{x}),y) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x^\prime};\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),y)
 }\end{equation}
 
 where \(\text{yloss}(\cdot)\) denotes any conventional classification
@@ -618,19 +618,63 @@ Langevin Dynamics (SGLD) using an uninformative prior for
 initialization. This is where we depart from their methodology: instead
 of generating samples through SGLD, we propose using counterfactual
 explainers to generate counterfactuals for observed training samples.
+Specifically, we have
 
-This departure allows us to tap into the vast repertoire of explainers
-that have been proposed in the literature to meet different desiderata.
-Typically, these methods facilitate the imposition of domain and
-mutability constraints, for example. In principle, any existing approach
-for generating counterfactual explanations is viable, so long as it does
-not violate the faithfulness condition.
+\begin{equation}\phantomsection\label{eq-div}{
+\text{div}(\mathbf{x},\mathbf{x^\prime};\theta) = \mathcal{E}_\theta(\mathbf{x}) - \mathcal{E}_\theta(\mathbf{x}^\prime)
+}\end{equation}
+
+where \(\mathcal{E}_\theta(\cdot)\) denotes the energy function. We
+generate samples \(\mathbf{x}^\prime\) by first randomly sampling the
+target class \(\mathbf{y}^+ \sim p(\mathbf{y})\) and then generating a
+counterfactual explanation for that target, similar to how conditional
+sampling can be used for JEMs
+(\citeproc{ref-grathwohl2020your}{Grathwohl et al. 2020}). Intuitively,
+the gradient of Equation~\ref{eq-div} decreases the energy of observed
+training samples (positive samples) while at same time increasing the
+energy of counterfactuals (negative samples)
+(\citeproc{ref-du2019implicit}{Du and Mordatch 2020}). As the generated
+counterfactuals get more plausible (Definition~\ref{def-explainability})
+over the cause of training, these two opposing effects gradually balance
+each out (\citeproc{ref-lippe2024uvadlc}{Lippe 2024}).
+
+The departure from SGLD allows us to tap into the vast repertoire of
+explainers that have been proposed in the literature to meet different
+desiderata. Typically, these methods facilitate the imposition of domain
+and mutability constraints, for example. In principle, any existing
+approach for generating counterfactual explanations is viable, so long
+as it does not violate the faithfulness condition. Like JEMs
+(\citeproc{ref-murphy2022probabilistic}{Murphy 2022}), counterfactual
+training can be considered as a form of contrastive representation
+learning.
 
 \subsubsection{Indirectly Inducing Explainability through Adversarial
 Robustness}\label{indirectly-inducing-explainability-through-adversarial-robustness}
 
-A reasonable choice for the latter is to define
-\(\text{advloss}(\mathbf{M}_\theta({x^\prime}),y;\varepsilon):=\text{yloss}(\mathbf{M}_\theta({x^\prime}),y)\)
+Based on our analysis in Section~\ref{sec-lit}, counterfactuals
+\(\mathbf{x}^\prime\) can be repurposed as additional training samples
+(\citeproc{ref-luu2023counterfactual}{Luu and Inoue 2023}) or
+adversarial examples
+(\citeproc{ref-freiesleben2022intriguing}{Freiesleben 2022};
+\citeproc{ref-pawelczyk2022exploring}{Pawelczyk et al. 2022}). This
+leaves some flexibility with respect to the exact choice for
+\(\text{advloss}(\cdot)\) in Equation~\ref{eq-obj}. An intuitive
+functional form to use, though likely not the only reasonable choice, is
+inspired by adversarial training:
+
+\begin{equation}\phantomsection\label{eq-adv}{
+\begin{aligned}
+\text{advloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),\mathbf{y};\varepsilon)&=\begin{cases}
+\text{yloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),\mathbf{y}) & \text{if} \ ||\Delta||_\infty \leq \varepsilon \\
+0 & \text{otherwise.}
+\end{cases}
+\end{aligned}
+}\end{equation}
+
+Under this choice we treat the counterfactual \(\mathbf{x}^\prime\) as
+an adversarial example iff it is imperceptible, i.e.~the magnitude of
+the perturbation of any individual feature is upper-bounded at
+\(\varepsilon\).
 
 \subsection{Encoding Domain Knowledge}\label{encoding-domain-knowledge}
 
@@ -667,6 +711,11 @@ Augustin, Maximilian, Alexander Meinke, and Matthias Hein. 2020.
 {``Adversarial Robustness on in-and Out-Distribution Improves
 Explainability.''} In \emph{European Conference on Computer Vision},
 228--45. Springer.
+
+\bibitem[\citeproctext]{ref-du2019implicit}
+Du, Yilun, and Igor Mordatch. 2020. {``Implicit Generation and
+Generalization in Energy-Based Models.''}
+\url{https://arxiv.org/abs/1903.08689}.
 
 \bibitem[\citeproctext]{ref-freiesleben2022intriguing}
 Freiesleben, Timo. 2022. {``The Intriguing Relation Between
@@ -713,11 +762,19 @@ Lakshminarayanan, Balaji, Alexander Pritzel, and Charles Blundell. 2017.
 Ensembles.''} \emph{Advances in Neural Information Processing Systems}
 30.
 
+\bibitem[\citeproctext]{ref-lippe2024uvadlc}
+Lippe, Phillip. 2024. {``{UvA Deep Learning Tutorials}.''}
+\url{https://uvadlc-notebooks.readthedocs.io/en/latest/}.
+
 \bibitem[\citeproctext]{ref-luu2023counterfactual}
 Luu, Hoai Linh, and Naoya Inoue. 2023. {``Counterfactual Adversarial
 Training for Improving Robustness of Pre-Trained Language Models.''} In
 \emph{Proceedings of the 37th Pacific Asia Conference on Language,
 Information and Computation}, 881--88.
+
+\bibitem[\citeproctext]{ref-murphy2022probabilistic}
+Murphy, Kevin P. 2022. \emph{Probabilistic {Machine Learning}: {An}
+Introduction}. {MIT Press}.
 
 \bibitem[\citeproctext]{ref-oneil2016weapons}
 O'Neil, Cathy. 2016. \emph{Weapons of Math Destruction: {How} Big Data
