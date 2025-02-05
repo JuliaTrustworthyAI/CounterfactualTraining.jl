@@ -517,35 +517,56 @@ follows:
 \begin{definition}[Model
 Explainability]\protect\hypertarget{def-explainability}{}\label{def-explainability}
 
-Let \(M_\theta: \mathcal{X} \mapsto \mathcal{Y}\) denote a supervised
-classification model that maps from intuts to representations
-\(\phi(x;theta)\) and finally to outputs. Assume that for any given
-input-output pair \(\{\mathbf{x},\mathbf{y}\}\) there exists a
-counterfactual
-\(\mathbf{x}^{\prime} = \mathbf{x} + \Delta: M_\theta(\mathbf{x}^{\prime}) = \mathbf{y}^{+} \neq \mathbf{y} = M_\theta(\mathbf{x})\)
+Let \(\mathbf{M}_\theta: \mathcal{X} \mapsto \mathcal{Y}\) denote a
+supervised classification model that maps from the \(D\)-dimensional
+input space \(\mathcal{X}\) to representations
+\(\phi(\mathbf{x};\theta)\) and finally to the \(K\)-dimensional output
+space \(\mathcal{Y}\). Assume that for any given input-output pair
+\(\{\mathbf{x},\mathbf{y}\}_i\) there exists a counterfactual
+\(\mathbf{x}^{\prime} = \mathbf{x} + \Delta: \mathbf{M}_\theta(\mathbf{x}^{\prime}) = \mathbf{y}^{+} \neq \mathbf{y} = \mathbf{M}_\theta(\mathbf{x})\)
 where \(\mathbf{y}^{+}\) denotes some target output. We say that
-\(M_\theta\) is \textbf{explainable} to the extent that faithfully
-generated counterfactuals are:
+\(\mathbf{M}_\theta\) is \textbf{explainable} to the extent that
+faithfully generated counterfactuals are plausible (i.e.~consistent with
+the data) and actionable. Formally, we define these properties as
+follows:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Plausible: \(\mathbf{x}^{\prime} \sim_{p} \mathcal{X}|\mathbf{y}^{+}\)
-  with \(p \rightarrow 1\) as defined in Altmeyer et al.
-  (\citeproc{ref-altmeyer2024faithful}{2024}).
+  (Plausibility)
+  \(\int^{A} p(\mathbf{x}|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1\)
+  where \(A\) is some small region around \(\mathbf{x}^{\prime}\).
 \item
-  Actionable: permutations \(\Delta\) are subject to actionability
+  (Actionability) Permutations \(\Delta\) are subject to actionability
   constraints.
+\end{enumerate}
+
+We consider counterfactuals as faithful to the extent that they are
+consistent with what the model has learned about the input data. Let
+\(p_\theta(\mathbf{x}|\mathbf{y}^{+})\) denote the conditional posterior
+over inputs, then formally:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  (Faithfulness)
+  \(\int^{A} p_\theta(\mathbf{x}|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1\)
+  where \(A\) is defined as above.
 \end{enumerate}
 
 \end{definition}
 
+The definitions of faithfulness and plausibility in
+Definition~\ref{def-explainability} are the same as in Altmeyer et al.
+(\citeproc{ref-altmeyer2024faithful}{2024}), with adapted notation.
 Actionability constraints in Definition~\ref{def-explainability} vary
-and depend on the context in which \(M_\theta\) is deployed. In this
-work, we focus on domain and mutability constraints for individual
-features. We also limit ourselves to classification tasks in this work,
-a limitation that we discuss in Section~\ref{sec-discussion}.
+and depend on the context in which \(\mathbf{M}_\theta\) is deployed. In
+this work, we focus on domain and mutability constraints for individual
+features \(x_d\) for \(d=1,...,D\). We limit ourselves to classification
+tasks for reasons discussed in Section~\ref{sec-discussion}.
 
 \subsection{Our Proposed Objective}\label{our-proposed-objective}
 
@@ -553,13 +574,13 @@ To train models with high explainability as defined in
 Definition~\ref{def-explainability}, we propose the following objective,
 
 \begin{equation}\phantomsection\label{eq-obj}{
-\text{yloss}(M_\theta(x),y) + \lambda_{\text{div}} \text{div}({x^\prime},x;\theta) + \lambda_{\text{adv}} \text{advloss}(M_\theta({x^\prime}),y)
+\text{yloss}(\mathbf{M}_\theta(x),y) + \lambda_{\text{div}} \text{div}({x^\prime},x;\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta({x^\prime}),y)
 }\end{equation}
 
 where \(\text{yloss}(\cdot)\) denotes any conventional classification
 loss function (e.g.~cross-entropy) that induces discriminative
 (predictive) performance. The two additional components in
-Equation~\ref{eq-obj} are explained in more detail below. For now they
+Equation~\ref{eq-obj} are explained in more detail below. For now, they
 can be sufficiently described as inducing explainability directly and
 indirectly by penalizing: 1) the contrastive divergence,
 \(\text{div}(\cdot)\), between counterfactuals \(x^\prime\) and observed
@@ -574,20 +595,42 @@ Divergence}\label{directly-inducing-explainability-through-contrastive-divergenc
 Grathwohl et al. (\citeproc{ref-grathwohl2020your}{2020}) observe that
 any classifier can be re-interpreted as a joint energy-based model (JEM)
 that learns to discriminate output classes conditional on inputs and
-generate inputs. They show that JEMs can perform well at both tasks by
-directly optimizing the joint distribution
-\(\log p_\theta(x,y)=\log p_\theta(y|x) + \log p_\theta(x)\). The first
-factor The distribution over inputs is learned via contrastive
-divergence:
+generate inputs. They show that JEMs can be trained to perform well at
+both tasks by directly maximizing the joint log-likelihood factorized as
+\(\log p_\theta(\mathbf{x},\mathbf{y})=\log p_\theta(\mathbf{y}|\mathbf{x}) + \log p_\theta(\mathbf{x})\).
+The first factor can be optimized using conventional cross-entropy as in
+Equation~\ref{eq-obj}. To optimize \(\log p_\theta(\mathbf{x})\)
+Grathwohl et al. (\citeproc{ref-grathwohl2020your}{2020}) minimize the
+contrastive divergence between samples drawn from
+\(p_\theta(\mathbf{x})\) and training observations, i.e.~samples from
+\(p(\mathbf{x})\).
 
-Considered through the lens of explainability, JEMs learn plausible
-explanations.
+A key empirical finding in Altmeyer et al.
+(\citeproc{ref-altmeyer2024faithful}{2024}) was that JEMs tend to do
+well with respect to the plausibility objective in
+Definition~\ref{def-explainability}. If we consider samples drawn from
+\(p_\theta(\mathbf{x})\) as counterfactuals, this is an expected
+finding, because the JEM objective effectively minimizes the divergence
+between the conditional posterior and \(p(\mathbf{x}|\mathbf{y}^{+})\).
+To generate samples, Grathwohl et al.
+(\citeproc{ref-grathwohl2020your}{2020}) rely on Stochastic Gradient
+Langevin Dynamics (SGLD) using an uninformative prior for
+initialization. This is where we depart from their methodology: instead
+of generating samples through SGLD, we propose using counterfactual
+explainers to generate counterfactuals for observed training samples.
+
+This departure allows us to tap into the vast repertoire of explainers
+that have been proposed in the literature to meet different desiderata.
+Typically, these methods facilitate the imposition of domain and
+mutability constraints, for example. In principle, any existing approach
+for generating counterfactual explanations is viable, so long as it does
+not violate the faithfulness condition.
 
 \subsubsection{Indirectly Inducing Explainability through Adversarial
 Robustness}\label{indirectly-inducing-explainability-through-adversarial-robustness}
 
 A reasonable choice for the latter is to define
-\(\text{advloss}(M_\theta({x^\prime}),y;\varepsilon):=\text{yloss}(M_\theta({x^\prime}),y)\)
+\(\text{advloss}(\mathbf{M}_\theta({x^\prime}),y;\varepsilon):=\text{yloss}(\mathbf{M}_\theta({x^\prime}),y)\)
 
 \subsection{Encoding Domain Knowledge}\label{encoding-domain-knowledge}
 
