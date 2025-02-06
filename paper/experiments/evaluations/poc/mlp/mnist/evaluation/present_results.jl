@@ -19,7 +19,7 @@ valid_y = CTExperiments.valid_y_logs(eval_grid)
 params = PlotParams(; colvar="generator_type", rowvar="objective")
 final_save_dir = save_dir(params, output_dir; prefix)
 for y in valid_y
-    plt = plot_errorbar_logs(eval_grid; y=y, params()...)
+    plt, _ = plot_errorbar_logs(eval_grid; y=y, params()...)
     display(plt)
     save(joinpath(final_save_dir, "$y.png"), plt; px_per_unit=3)
 end
@@ -32,12 +32,16 @@ all_data = CTExperiments.merge_with_meta(
 )
 valid_y = CTExperiments.valid_y_ce(all_data[1])
 
-params = PlotParams(; colvar="lambda_energy_eval", rowvar="objective")
+params = PlotParams(;
+    rowvar="lambda_energy_eval",
+    colvar="objective",
+    colorvar=get_global_param("colorvar", nothing),
+)
 final_save_dir = save_dir(params, output_dir; prefix)
 for y in valid_y
-    plt = boxplot_ce(all_data...; y=y, params()..., facet=(; linkyaxes=:none))
+    plt, tbl = boxplot_ce(all_data...; y=y, params()...)
     display(plt)
-    save(joinpath(final_save_dir, "$y.png"), plt; px_per_unit=3)
+    CairoMakie.save(joinpath(final_save_dir, "$y.png"), plt; px_per_unit=3)
 end
 
 # Plot images:

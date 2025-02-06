@@ -69,6 +69,19 @@ function generate!(
             ]
         ).(ces)
 
+    # Adjust for mutability:
+    mtblty = counterfactual_data.mutability
+    if !isnothing(mtblty)
+        for (i, ce) in enumerate(counterfactuals)
+            immtble = findall(mtblty .!= :both)
+            for j in immtble
+                # println(counterfactuals[i])
+                counterfactuals[i][j,:] = neighbours[i][j,:]
+                # println(counterfactuals[i])
+            end
+        end
+    end
+
     aversarial_targets = []
     targets_enc = []
     percent_valid = 0.0

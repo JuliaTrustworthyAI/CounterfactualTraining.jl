@@ -1,6 +1,6 @@
 name = "poc"
 dim_reduction = []
-generator_type = ["ecco"]
+generator_type = ["generic"]
 data = ""
 model_type = ""
 save_dir = ""
@@ -25,7 +25,7 @@ opt = []
 lambda_cost = []
 lr = []
 maxiter = []
-lambda_energy = [1.0]
+lambda_energy = [5.0]
 type = []
 
 [training_params]
@@ -36,10 +36,10 @@ threaded = []
 class_loss = []
 objective = ["energy", "vanilla"]
 lambda_class_loss = []
-lambda_energy_diff = [0.25]
+lambda_energy_diff = [0.5]
 burnin = []
 nepochs = []
-lambda_energy_reg = [0.1]
+lambda_energy_reg = [0.05]
 verbose = [3]
 lambda_adversarial = []
 parallelizer = []

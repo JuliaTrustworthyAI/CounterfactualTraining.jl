@@ -3,7 +3,7 @@ dim_reduction = []
 generator_type = ["ecco"]
 data = "lin_sep"
 model_type = "mlp"
-save_dir = "paper/experiments/output/poc/mlp/lin_sep"
+save_dir = "poc/mlp/lin_sep"
 
 [data_params]
 datadir = []
