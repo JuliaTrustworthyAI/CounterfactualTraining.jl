@@ -27,7 +27,7 @@ using CTExperiments:
 
 # Data:
 # constraints = ["none", "both"]        # x1 cannot be mutated
-constraints = ["both", "both"]        # x2 cannot be mutated
+constraints = ["both", "none"]        # x2 cannot be mutated
 data = LinearlySeparable(
     n_train=500,
     batchsize=50,
@@ -46,10 +46,24 @@ model = build_model(LinearModel(), nin, nout)
 Next, we defined the training objective and the counterfactual generator. Finally, we initialize the optimization state.
 
 ```{julia}
+using CounterfactualExplanations.Convergence
 obj = EnergyDifferentialObjective(lambda=[1.0,0.1,0.0])
 # obj = VanillaObjective()
 generator = GenericGenerator()
 opt_state = Flux.setup(Descent(), model)
+conv = MaxIterConvergence()
+```
+
+```{julia}
+function plot_db(model, x)
+    coeff = get_log_reg_params(model)
+    db = get_decision_boundary(coeff)
+    plt = Plots.scatter(ce_data)
+    yhat = [argmax(y) for y in eachcol(model(x))]
+    Plots.scatter!(x[1,:], x[2,:], label="Counterfactuals", ms=15, shape=:star, color=yhat)
+    Plots.abline!(plt, db.slope, db.intercept; lw=5, label="Dec. Boundary")
+    display(plt)
+end
 ```
 
 Then we train the model:
@@ -65,8 +79,11 @@ model, logs = counterfactual_training(
     train_set,
     opt_state;
     val_set = val_set,
-    nepochs = 50,
-    mutability = Symbol.(constraints)
+    nepochs = 20,
+    mutability = Symbol.(constraints),
+    callback = plot_db,
+    nce=50,
+    convergence=conv, 
 )
 ```
 
