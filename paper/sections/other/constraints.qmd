@@ -27,7 +27,7 @@ using CTExperiments:
 
 # Data:
 # constraints = ["none", "both"]        # x1 cannot be mutated
-constraints = ["both", "none"]        # x2 cannot be mutated
+constraints = ["both", "both"]        # x2 cannot be mutated
 data = LinearlySeparable(
     n_train=500,
     batchsize=50,
