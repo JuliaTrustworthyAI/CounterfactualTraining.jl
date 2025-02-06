@@ -1,0 +1,80 @@
+```{julia}
+projectdir = splitpath(pwd()) |>
+    ss -> joinpath(ss[1:findall([s == "CounterfactualTraining.jl" for s in ss])[1]]...) 
+cd(projectdir)
+```
+
+```{julia}
+using CTExperiments
+using CTExperiments.CounterfactualExplanations
+using CTExperiments.CounterfactualTraining
+using CTExperiments.Flux
+using CTExperiments.Plots
+using CTExperiments.TaijaPlotting
+```
+
+# Linear Model
+
+First, we define the mutability constraints and load the data and model:
+
+```{julia}
+using CTExperiments: 
+    get_ce_data, 
+    train_val_split, 
+    build_model, 
+    LinearModel, 
+    get_input_encoder
+
+# Data:
+# constraints = ["none", "both"]        # x1 cannot be mutated
+constraints = ["both", "none"]        # x2 cannot be mutated
+data = LinearlySeparable(
+    n_train=500,
+    batchsize=50,
+    mutability=constraints
+)
+ce_data = get_ce_data(data)
+val_size = data.n_validation / (data.n_validation + data.n_train)
+train_set, val_set, _ = train_val_split(data, ce_data, val_size)
+
+# Model:
+nin = size(first(train_set)[1], 1)
+nout = size(first(train_set)[2], 1)
+model = build_model(LinearModel(), nin, nout)
+```
+
+Next, we defined the training objective and the counterfactual generator. Finally, we initialize the optimization state.
+
+```{julia}
+obj = EnergyDifferentialObjective(lambda=[1.0,0.1,0.0])
+# obj = VanillaObjective()
+generator = GenericGenerator()
+opt_state = Flux.setup(Descent(), model)
+```
+
+Then we train the model:
+
+```{julia}
+using Random
+Random.seed!(42)
+
+model, logs = counterfactual_training(
+    obj,
+    model,
+    generator,
+    train_set,
+    opt_state;
+    val_set = val_set,
+    nepochs = 50,
+    mutability = Symbol.(constraints)
+)
+```
+
+Finally, we visualize the results:
+
+```{julia}
+coeff = get_log_reg_params(model)
+db = get_decision_boundary(coeff)
+Plots.scatter(ce_data)
+Plots.abline!(db.slope, db.intercept; lw=5, label="Dec. Boundary")
+```

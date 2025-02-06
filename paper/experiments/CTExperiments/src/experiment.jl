@@ -389,8 +389,12 @@ end
 function get_log_reg_params(exper::Experiment)
     @assert isa(exper.model_type,LinearModel) "Model needs to be linear model."
     M = load_results(exper)[3]
-    coeffs =
-        Flux.params(M.model) |>
+    coeffs = get_log_reg_params(M.model)
+    return coeffs
+end
+
+function get_log_reg_params(model)
+    coeffs = Flux.params(model) |>
         W -> (β₀=W[2][1] - W[2][2], β₁=W[1][1, 1] - W[1][2, 1], β₂=W[1][1, 2] - W[1][2, 2])
     return coeffs
 end
@@ -405,7 +409,11 @@ end
 function get_decision_boundary(exper::Experiment; flip_axis=false)
     @assert input_dim(exper.data) == 2 "Decision boundary is only defined for 2D data."
     coeffs = get_log_reg_params(exper)
-    if !flip_axis 
+    return get_decision_boundary(coeffs; flip_axis=flip_axis)
+end
+
+function get_decision_boundary(coeffs; flip_axis=false)
+    if !flip_axis
         dec_boundary = DecisionBoundary(-(coeffs.β₀ / coeffs.β₂), -(coeffs.β₁ / coeffs.β₂))
     else
         dec_boundary = DecisionBoundary(-(coeffs.β₀ / coeffs.β₁), -(coeffs.β₂ / coeffs.β₁))

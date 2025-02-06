@@ -58,5 +58,5 @@ $$ {#eq-adv}
 
 Under this choice we treat the counterfactual $\mathbf{x}^\prime$ as an adversarial example iff it is imperceptible, i.e. the magnitude of the perturbation of any individual feature is upper-bounded at $\varepsilon$.
 
-## Encoding Domain Knowledge
+## The Effect of Actionability Constraints
 
