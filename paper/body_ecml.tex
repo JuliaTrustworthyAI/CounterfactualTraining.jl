@@ -426,7 +426,24 @@ an adversarial example iff it is imperceptible, i.e.~the magnitude of
 the perturbation of any individual feature is upper-bounded at
 \(\varepsilon\).
 
-\subsection{Encoding Domain Knowledge}\label{encoding-domain-knowledge}
+\subsection{Encoding Actionability
+Constraints}\label{encoding-actionability-constraints}
+
+Many existing counterfactual explainers support domain and mutability
+constraints out-of-the-box. In fact, both types of constraints can be
+implemented for any counterfactual explainer that relies on gradient
+descent in the feature space for optimization
+\cite{altmeyer2023explaining}. In this context, domain constraints can
+be imposed by simply projecting counterfactuals back to the specified
+domain, if the previous gradient step moved resulted in updated feature
+values out of the domain. Mutability constraints can similarly be
+enforced by simply clipping gradients to ensure that features are only
+mutated in the allowed direction, if at all.
+
+Since both types of constraints directly affect \(\mathbf{x}^\prime\),
+they also influence model outcomes through Equation~\ref{eq-div}.
+
+Mutability constraints
 
 \section{Experiments}\label{sec-experiments}
 
