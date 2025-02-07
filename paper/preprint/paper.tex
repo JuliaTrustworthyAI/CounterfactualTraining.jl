@@ -508,11 +508,11 @@ application would have been accepted, if only they were 20 years older.
 Ignoring all other features, this complies with the definition of
 plausibility if 40-year-old individuals are in fact more credit-worthy
 on average than young adults. But of course this CE does not qualify for
-providing actionable recourse to the applicant. For our intents and
-purposes, counterfactual training aims at improving model explainability
-by aligning models with counterfactuals that meet both desiderata,
-plausibility and actionability. Formally, we define explainability as
-follows:
+providing actionable recourse to the applicant since \emph{age} is not a
+mutable feature. For our intents and purposes, counterfactual training
+aims at improving model explainability by aligning models with
+counterfactuals that meet both desiderata, plausibility and
+actionability. Formally, we define explainability as follows:
 
 \begin{definition}[Model
 Explainability]\protect\hypertarget{def-explainability}{}\label{def-explainability}
@@ -574,7 +574,7 @@ To train models with high explainability as defined in
 Definition~\ref{def-explainability}, we propose the following objective,
 
 \begin{equation}\phantomsection\label{eq-obj}{
-\text{yloss}(\mathbf{M}_\theta(\mathbf{x}),y) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x^\prime};\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),y)
+\text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x^\prime},y;\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),\mathbf{y})
 }\end{equation}
 
 where \(\text{yloss}(\cdot)\) denotes any conventional classification
@@ -621,18 +621,21 @@ explainers to generate counterfactuals for observed training samples.
 Specifically, we have
 
 \begin{equation}\phantomsection\label{eq-div}{
-\text{div}(\mathbf{x},\mathbf{x^\prime};\theta) = \mathcal{E}_\theta(\mathbf{x}) - \mathcal{E}_\theta(\mathbf{x}^\prime)
+\text{div}(\mathbf{x},\mathbf{x^\prime},y;\theta) = \mathcal{E}_\theta(\mathbf{x},y) - \mathcal{E}_\theta(\mathbf{x}^\prime,y)
 }\end{equation}
 
 where \(\mathcal{E}_\theta(\cdot)\) denotes the energy function. We
 generate samples \(\mathbf{x}^\prime\) by first randomly sampling the
-target class \(\mathbf{y}^+ \sim p(\mathbf{y})\) and then generating a
-counterfactual explanation for that target, similar to how conditional
-sampling can be used for JEMs
-(\citeproc{ref-grathwohl2020your}{Grathwohl et al. 2020}). Intuitively,
-the gradient of Equation~\ref{eq-div} decreases the energy of observed
-training samples (positive samples) while at same time increasing the
-energy of counterfactuals (negative samples)
+target class \(y^+ \sim p(y)\) and then generating a counterfactual
+explanation for that target, similar to how conditional sampling is used
+to draw from \(p_\theta(\mathbf{x})\) in Grathwohl et al.
+(\citeproc{ref-grathwohl2020your}{2020}). In particular, we set
+\(\mathcal{E}_\theta(\mathbf{x},\mathbf{y})=-\mathbf{M}_\theta(\mathbf{x})[y^+]\)
+where \(y^+\) denotes the index of the target class.
+
+Intuitively, the gradient of Equation~\ref{eq-div} decreases the energy
+of observed training samples (positive samples) while at same time
+increasing the energy of counterfactuals (negative samples)
 (\citeproc{ref-du2019implicit}{Du and Mordatch 2020}). As the generated
 counterfactuals get more plausible (Definition~\ref{def-explainability})
 over the cause of training, these two opposing effects gradually balance
@@ -686,15 +689,34 @@ descent in the feature space for optimization
 (\citeproc{ref-altmeyer2023explaining}{Altmeyer, Deursen, et al. 2023}).
 In this context, domain constraints can be imposed by simply projecting
 counterfactuals back to the specified domain, if the previous gradient
-step moved resulted in updated feature values out of the domain.
-Mutability constraints can similarly be enforced by simply clipping
-gradients to ensure that features are only mutated in the allowed
-direction, if at all.
+step resulted in updated feature values that were out-of-domain.
+Mutability constraints can similarly be enforced by setting partial
+derivatives to zero to ensure that features are only mutated in the
+allowed direction, if at all.
 
-Since both types of constraints directly affect \(\mathbf{x}^\prime\),
-they also influence model outcomes through Equation~\ref{eq-div}.
+Since actionability constraints are binding at test time, we should also
+impose them when generating \(\mathbf{x}^\prime\) during each training
+iteration to align model representations with user requirements. Through
+their effect on \(\mathbf{x}^\prime\), both types of constraints
+influence model outcomes through Equation~\ref{eq-div}. This is best
+explained through a simple example involving a linear classifier:
+\(\mathbf{M}_\theta(\mathbf{x})=\theta^\intercal\mathbf{x}\). Then for
+\(y^+ \sim p(y)\) we have:
 
-Mutability constraints
+\begin{equation}\phantomsection\label{eq-grad}{
+\nabla_\theta \left(\text{div}(\mathbf{x},\mathbf{x^\prime},\mathbf{y};\theta)\right) = \nabla_\theta \left(-\mathbf{M}_\theta(\mathbf{x})[y^+]\right) - \nabla_\theta \left(-\mathbf{M}_\theta(\mathbf{x}^\prime)[y^+]\right) = \mathbf{x}^\prime - \mathbf{x}
+}\end{equation}
+
+In other words, contrastive divergence will push down (up) on the
+coefficient \(\theta[d]\) corresponding to a feature \(d\) that is lower
+(higher) for counterfactuals than samples. This has the intended effect
+of aligning counterfactual explanations with the data, as discussed
+above.
+
+Crucially though, we want to avoid penalizing implausibility that arises
+due to mutability constraints. Suppose, for example, that feature \(d\)
+represents \emph{age} and our model predicts the likelihood of credit
+default.
 
 \section{Experiments}\label{sec-experiments}
 
@@ -882,6 +904,17 @@ Linguistics. \url{https://doi.org/10.18653/v1/2021.acl-long.523}.
 
 \setcounter{figure}{0}
 \renewcommand{\thefigure}{A\arabic{figure}}
+
+\section{Notation}\label{notation}
+
+\begin{itemize}
+\tightlist
+\item
+  \(y^+\): The target class and also the index of the target class.
+\item
+  \(\mathbf{y}^+\): The one-hot encoded output vector for the target
+  class.
+\end{itemize}
 
 \section{Training Details}\label{training-details}
 
