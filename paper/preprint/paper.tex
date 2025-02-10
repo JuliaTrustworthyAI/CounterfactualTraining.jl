@@ -133,6 +133,22 @@
 \usepackage[T1]{fontenc}
 \usepackage{placeins}
 \makeatletter
+\@ifpackageloaded{tcolorbox}{}{\usepackage[skins,breakable]{tcolorbox}}
+\@ifpackageloaded{fontawesome5}{}{\usepackage{fontawesome5}}
+\definecolor{quarto-callout-color}{HTML}{909090}
+\definecolor{quarto-callout-note-color}{HTML}{0758E5}
+\definecolor{quarto-callout-important-color}{HTML}{CC1914}
+\definecolor{quarto-callout-warning-color}{HTML}{EB9113}
+\definecolor{quarto-callout-tip-color}{HTML}{00A047}
+\definecolor{quarto-callout-caution-color}{HTML}{FC5300}
+\definecolor{quarto-callout-color-frame}{HTML}{acacac}
+\definecolor{quarto-callout-note-color-frame}{HTML}{4582ec}
+\definecolor{quarto-callout-important-color-frame}{HTML}{d9534f}
+\definecolor{quarto-callout-warning-color-frame}{HTML}{f0ad4e}
+\definecolor{quarto-callout-tip-color-frame}{HTML}{02b875}
+\definecolor{quarto-callout-caution-color-frame}{HTML}{fd7e14}
+\makeatother
+\makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \AtBeginDocument{%
 \ifdefined\contentsname
@@ -169,6 +185,8 @@
 \usepackage{amsthm}
 \theoremstyle{definition}
 \newtheorem{exercise}{Parameters}[section]
+\theoremstyle{definition}
+\newtheorem{example}{Example}[section]
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
 \theoremstyle{remark}
@@ -698,17 +716,37 @@ impose them when generating \(\mathbf{x}^\prime\) during each training
 iteration to align model representations with user requirements. Through
 their effect on \(\mathbf{x}^\prime\), both types of constraints
 influence model outcomes through Equation~\ref{eq-div}. Here it is
-crucial that avoid penalizing implausibility that arises due to
+crucial that we avoid penalizing implausibility that arises due to
 mutability constraints. For any mutability-constrained feature \(d\)
 this can be achieved by enforcing
-\(\mathbf{x}^\prime[d] = \mathbf{x}[d]\) whenever the constraint is
-violated, by adjusting either one to the other. Setting
-\(\mathbf{x}[d] := \mathbf{x}^\prime[d]\) intuitively corresponds to
-imposing user requirements on the target domain; from a Bayesian
-perspective it can be understood as assuming a point mass prior for
-\(p(\mathbf{x})\) with respect to feature \(d\)\footnote{For additional
-  detail, see Section~\ref{sec-app-constraints} of the supplementary
-  appendix.}.
+\(\mathbf{x}[d] - \mathbf{x}^\prime[d]:=0\) whenever perturbing
+\(\mathbf{x}^\prime[d]\) in the direction of \(\mathbf{x}[d]\) would
+violate mutability constraints. Specifically, we set
+\(\mathbf{x}[d] := \mathbf{x}^\prime[d]\) if
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Feature \(d\) is strictly immutable in practice.
+\item
+  We have \(\mathbf{x}[d]>\mathbf{x}^\prime[d]\) but feature \(d\) can
+  only be decreased in practice.
+\item
+  We have \(\mathbf{x}[d]<\mathbf{x}^\prime[d]\) but feature \(d\) can
+  only be increased in practice.
+\end{enumerate}
+
+From a Bayesian perspective, setting
+\(\mathbf{x}[d] := \mathbf{x}^\prime[d]\) can be understood as assuming
+a point mass prior for \(p(\mathbf{x})\) with respect to feature \(d\).
+Intuitively, we think of this simply in terms ignoring implausibility
+costs with respect to immutable features, which effectively forces the
+model to instead seek plausibility with respect to the remaining
+features. This in turn results in lower overall sensitivity to immutable
+features, which we demonstrate empirically bellow and analytically for
+the linear case in Section~\ref{sec-app-constraints} of the
+supplementary appendix.
 
 \section{Experiments}\label{sec-experiments}
 
@@ -924,40 +962,61 @@ features. This is best explained through a simple example involving a
 binary linear classifier.
 
 Let \(\mathbf{M}_\theta(\mathbf{x})=\Theta\mathbf{x}\), with
-\(y \in \{1,2\}\). Then for \(y^+ \sim p(y)=2\) we have:
+\(\mathbf{x} \in \mathbb{R}^2\) and \(y \in \{0,1\}\). Then for any
+given counterfactual with \(y^+ \sim p(y)=1\) we have:
 
 \begin{equation}\phantomsection\label{eq-grad}{
 \nabla_\theta \left(\text{div}(\mathbf{x},\mathbf{x^\prime},\mathbf{y};\theta)\right) = \nabla_\theta \left(-\mathbf{M}_\theta(\mathbf{x})[y^+]\right) - \nabla_\theta \left(-\mathbf{M}_\theta(\mathbf{x}^\prime)[y^+]\right) = \begin{pmatrix} 0 & 0 \\ \mathbf{x}^\prime[1] - \mathbf{x}[1] & \mathbf{x}^\prime[2] - \mathbf{x}[2] \end{pmatrix}
 }\end{equation}
 
-Contrastive divergence pushes down (up) on the coefficient
-\(\Theta[y^+,d]\) by the amount that feature \(d\) that is lower
-(higher) for counterfactuals than samples. This has the intended effect
-of aligning counterfactual explanations with the data, as discussed
-above.
+For the given counterfactual, contrastive divergence pushes down (up) on
+the coefficient \(\Theta[y^+,d]\) by the amount that feature \(d\) that
+is lower (higher) for counterfactuals than samples. This has the
+intended effect of aligning counterfactual explanations with the data,
+as discussed above.
 
-Suppose, for example, that feature \(d=1\) represents \emph{age} and our
-model predicts the likelihood of credit default:
-\(y \in \{1:=\text{'no default'},2:=\text{'default'}\}\). Then if
+\begin{example}[]\protect\hypertarget{exm-grad}{}\label{exm-grad}
+
+Let feature \(d=1\) in Equation~\ref{eq-grad} represents \emph{age} and
+our model predicts the likelihood of credit default:
+\(y \in \{0:=\text{'no default'},1:=\text{'default'}\}\). Then if
 \(\mathbf{x}^\prime[1] < \mathbf{x}[1]\), contrastive divergence will
 push down on the corresponding coefficient,
 \(\Theta[\text{'default'},\text{'age'}]\). Intuitively, this has the
 effect of decreasing the effect of \emph{age} that the model attributes
-to the log odds of default, i.e.~the model learns to higher default risk
-younger individuals. But if \emph{age} is immutable, then this
-corresponds to penalizing younger individuals for implausibility that
-arises due to a feature that they can change about themselves. This is
-precisely what we want to avoid, and therefore we impose no penalty at
-all.
+to the log odds of default, i.e.~the model learns to predict higher
+default risk for younger individuals.
 
-\subsection{Gradient}\label{gradient}
+If \(\Theta[y^+,d]<0\) even in absence of this force, then contrastive
+divergence exacerbates the existing effect. But if \emph{age} is
+immutable, then this corresponds to penalizing younger individuals for
+implausibility that arises due to a feature that they can change about
+themselves. This is precisely what we want to avoid, and therefore we
+impose \(\mathbf{x}^\prime[1] - \mathbf{x}[1]:=0\) in such cases. In
+doing so, we induce lower sensitivity with respect to \emph{age}
+compared to other mutable features (Figure~\ref{fig-mtblty}).
 
-\subsection{Full Training Loop}\label{full-training-loop}
+\end{example}
 
-Next, we defined the training objective and the counterfactual
-generator. Finally, we initialize the optimization state.
+\begin{figure}
 
-Finally, we visualize the results:
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{paper_files/mediabag/../../paper/figures/app_mtblty.pdf}}
+
+}
+
+\caption{\label{fig-mtblty}Visual illustration of the effect of imposing
+mutability constraints.}
+
+\end{figure}%
+
+\begin{tcolorbox}[enhanced jigsaw, opacitybacktitle=0.6, breakable, colback=white, toprule=.15mm, bottomrule=.15mm, arc=.35mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, colframe=quarto-callout-warning-color-frame, opacityback=0, left=2mm, toptitle=1mm, bottomtitle=1mm, titlerule=0mm, rightrule=.15mm, leftrule=.75mm, colbacktitle=quarto-callout-warning-color!10!white, coltitle=black]
+
+@Cynthia, @Arie, the above still needs to be polished. I'm not sure how
+to demonstrate/prove this last point analytically.
+
+\end{tcolorbox}
 
 \section{Detailed Results}\label{detailed-results}
 

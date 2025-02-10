@@ -22,17 +22,27 @@ using CTExperiments.TaijaPlotting
 
 In @sec-constraints we explained that to avoid penalizing implausibility that arises due to mutability constraints for any feature $d$, we impose a point mass prior on $p(\mathbf{x})$ for that features. This is best explained through a simple example involving a binary linear classifier.
 
-:::{exm-constraints}
-
-Let $\mathbf{M}_\theta(\mathbf{x})=\Theta\mathbf{x}$, with $y \in \{1,2\}$. Then for $y^+ \sim p(y)=2$ we have:
+Let $\mathbf{M}_\theta(\mathbf{x})=\Theta\mathbf{x}$, with $\mathbf{x} \in \mathbb{R}^2$ and $y \in \{0,1\}$. Then for any given counterfactual with $y^+ \sim p(y)=1$ we have:
 
 $$
 \nabla_\theta \left(\text{div}(\mathbf{x},\mathbf{x^\prime},\mathbf{y};\theta)\right) = \nabla_\theta \left(-\mathbf{M}_\theta(\mathbf{x})[y^+]\right) - \nabla_\theta \left(-\mathbf{M}_\theta(\mathbf{x}^\prime)[y^+]\right) = \begin{pmatrix} 0 & 0 \\ \mathbf{x}^\prime[1] - \mathbf{x}[1] & \mathbf{x}^\prime[2] - \mathbf{x}[2] \end{pmatrix}
 $$ {#eq-grad}
 
-Contrastive divergence pushes down (up) on the coefficient $\Theta[y^+,d]$ by the amount that feature $d$ that is lower (higher) for counterfactuals than samples. This has the intended effect of aligning counterfactual explanations with the data, as discussed above. 
+For the given counterfactual, contrastive divergence pushes down (up) on the coefficient $\Theta[y^+,d]$ by the amount that feature $d$ that is lower (higher) for counterfactuals than samples. This has the intended effect of aligning counterfactual explanations with the data, as discussed above. 
 
-Suppose, for example, that feature $d=1$ represents *age* and our model predicts the likelihood of credit default: $y \in \{1:=\text{'no default'},2:=\text{'default'}\}$. Then if $\mathbf{x}^\prime[1] < \mathbf{x}[1]$, contrastive divergence will push down on the corresponding coefficient, $\Theta[\text{'default'},\text{'age'}]$. Intuitively, this has the effect of decreasing the effect of *age* that the model attributes to the log odds of default, i.e. the model learns to higher default risk younger individuals. But if *age* is immutable, then this corresponds to penalizing younger individuals for implausibility that arises due to a feature that they can change about themselves. This is precisely what we want to avoid, and therefore we impose no penalty at all. 
+::: {#exm-grad}
+
+Let feature $d=1$ in @eq-grad represents *age* and our model predicts the likelihood of credit default: $y \in \{0:=\text{'no default'},1:=\text{'default'}\}$. Then if $\mathbf{x}^\prime[1] < \mathbf{x}[1]$, contrastive divergence will push down on the corresponding coefficient, $\Theta[\text{'default'},\text{'age'}]$. Intuitively, this has the effect of decreasing the effect of *age* that the model attributes to the log odds of default, i.e. the model learns to predict higher default risk for younger individuals. 
+
+If $\Theta[y^+,d]<0$ even in absence of this force, then contrastive divergence exacerbates the existing effect. But if *age* is immutable, then this corresponds to penalizing younger individuals for implausibility that arises due to a feature that they can change about themselves. This is precisely what we want to avoid, and therefore we impose $\mathbf{x}^\prime[1] - \mathbf{x}[1]:=0$ in such cases. In doing so, we induce lower sensitivity with respect to *age* compared to other mutable features (@fig-mtblty).
+
+:::
+
+![Visual illustration of the effect of imposing mutability constraints.](/paper/figures/app_mtblty.svg){#fig-mtblty}
+
+::: {.callout-warning}
+
+\@Cynthia, \@Arie, the above still needs to be polished. I'm not sure how to demonstrate/prove this last point analytically.
 
 :::
 
@@ -44,48 +54,8 @@ using CTExperiments:
     LinearModel, 
     get_input_encoder
 
-# Data:
-constraints = ["none", "both"]        # x1 cannot be mutated
-# constraints = ["both", "none"]        # x2 cannot be mutated
-data = LinearlySeparable(
-    n_train=500,
-    batchsize=50,
-    mutability=constraints
-)
-ce_data = get_ce_data(data)
-val_size = data.n_validation / (data.n_validation + data.n_train)
-train_set, val_set, _ = train_val_split(data, ce_data, val_size)
 
-# Model:
-nin = size(first(train_set)[1], 1)
-nout = size(first(train_set)[2], 1)
-model = build_model(LinearModel(), nin, nout)
-```
-
-## Gradient
-
-```{julia}
-X1 = ce_data.X[:,ce_data.output_encoder.labels.==1]
-X2 = ce_data.X[:,ce_data.output_encoder.labels.==2]
-factual = X1[:,1]
-target = 2
-target_enc = Flux.onehotbatch([target], [1,2])
-neighbor = X2[:,1]
-```
-
-## Full Training Loop
-
-Next, we defined the training objective and the counterfactual generator. Finally, we initialize the optimization state.
-
-```{julia}
-using CounterfactualExplanations.Convergence
-obj = EnergyDifferentialObjective(lambda=[1.0,1.0,0.0])
-generator = GenericGenerator()
-opt_state = Flux.setup(Descent(), model)
-conv = MaxIterConvergence()
-```
-
-```{julia}
+# Callback:
 using CTExperiments: get_log_reg_params, get_decision_boundary
 
 function plot_db(model, x)
@@ -97,33 +67,75 @@ function plot_db(model, x)
     Plots.abline!(plt, db.slope, db.intercept; lw=5, label="Dec. Boundary")
     display(plt)
 end
+
+# Data:
+constraints = [
+    ["both", "both"],
+    ["none", "both"],
+    ["both", "none"]
+]
 ```
 
 ```{julia}
+using CounterfactualExplanations.Convergence
 using Random
 Random.seed!(42)
 
-model, logs = counterfactual_training(
-    obj,
-    model,
-    generator,
-    train_set,
-    opt_state;
-    val_set = val_set,
-    nepochs = 50,
-    mutability = Symbol.(constraints),
-    callback = plot_db,
-    nce=50,
-    convergence=conv, 
-)
+models = []
+
+for constraint in constraints
+    # Data:
+    data = LinearlySeparable(
+        n_train=500,
+        batchsize=50,
+        mutability=constraint
+    )
+    ce_data = get_ce_data(data)
+    val_size = data.n_validation / (data.n_validation + data.n_train)
+    train_set, val_set, _ = train_val_split(data, ce_data, val_size)
+
+    # Model:
+    nin = size(first(train_set)[1], 1)
+    nout = size(first(train_set)[2], 1)
+    model = build_model(LinearModel(), nin, nout)
+
+    # Objective:
+    obj = EnergyDifferentialObjective(lambda=[1.0,1.0,0.0])
+    generator = GenericGenerator()
+    opt_state = Flux.setup(Descent(), model)
+    conv = MaxIterConvergence()
+
+    model, logs = counterfactual_training(
+        obj,
+        model,
+        generator,
+        train_set,
+        opt_state;
+        val_set = val_set,
+        nepochs = 50,
+        mutability = Symbol.(constraint),
+        callback = plot_db,
+        nce=50,
+        convergence=conv, 
+    )
+
+    push!(models, model)
+end
 ```
 
-Finally, we visualize the results:
-
 ```{julia}
-coeff = get_log_reg_params(model)
-display(coeff)
-db = get_decision_boundary(coeff)
-Plots.scatter(ce_data)
-Plots.abline!(db.slope, db.intercept; lw=5, label="Dec. Boundary")
+using Plots.PlotMeasures
+plts = []
+for (i,model) in enumerate(models)
+    coeff = get_log_reg_params(model)
+    db = get_decision_boundary(coeff)
+    xlab = constraints[i][1] == "both" ? "mutable" : "immutable"
+    ylab = constraints[i][2] == "both" ? "mutable" : "immutable"
+    plt = Plots.scatter(ce_data; xlab=xlab, ylab=ylab, bottom_margin = 5mm, left_margin = 5mm)
+    Plots.abline!(plt, db.slope, db.intercept; lw=5, label="Dec. Boundary")
+
+    push!(plts, plt)
+end
+
+Plots.plot(plts..., layout=(1,3), size=(900,300))
 ```
