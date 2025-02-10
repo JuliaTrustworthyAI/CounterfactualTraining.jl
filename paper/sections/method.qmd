@@ -60,16 +60,8 @@ $$ {#eq-adv}
 
 Under this choice we treat the counterfactual $\mathbf{x}^\prime$ as an adversarial example iff it is imperceptible, i.e. the magnitude of the perturbation of any individual feature is upper-bounded at $\varepsilon$.
 
-## Encoding Actionability Constraints
+## Encoding Actionability Constraints {#sec-constraints}
 
 Many existing counterfactual explainers support domain and mutability constraints out-of-the-box. In fact, both types of constraints can be implemented for any counterfactual explainer that relies on gradient descent in the feature space for optimization [@altmeyer2023explaining]. In this context, domain constraints can be imposed by simply projecting counterfactuals back to the specified domain, if the previous gradient step resulted in updated feature values that were out-of-domain. Mutability constraints can similarly be enforced by setting partial derivatives to zero to ensure that features are only mutated in the allowed direction, if at all. 
 
-Since actionability constraints are binding at test time, we should also impose them when generating $\mathbf{x}^\prime$ during each training iteration to align model representations with user requirements. Through their effect on $\mathbf{x}^\prime$, both types of constraints influence model outcomes through @eq-div. This is best explained through a simple example involving a linear classifier: $\mathbf{M}_\theta(\mathbf{x})=\theta^\intercal\mathbf{x}$. Then for $y^+ \sim p(y)$ we have:
-
-$$
-\nabla_\theta \left(\text{div}(\mathbf{x},\mathbf{x^\prime},\mathbf{y};\theta)\right) = \nabla_\theta \left(-\mathbf{M}_\theta(\mathbf{x})[y^+]\right) - \nabla_\theta \left(-\mathbf{M}_\theta(\mathbf{x}^\prime)[y^+]\right) = \mathbf{x}^\prime - \mathbf{x}
-$$ {#eq-grad}
-
-In other words, contrastive divergence will push down (up) on the coefficient $\theta[d]$ corresponding to a feature $d$ that is lower (higher) for counterfactuals than samples. This has the intended effect of aligning counterfactual explanations with the data, as discussed above. 
-
-Crucially though, we want to avoid penalizing implausibility that arises due to mutability constraints. Suppose, for example, that feature $d$ represents *age* and our model predicts the likelihood of credit default. 
+Since actionability constraints are binding at test time, we should also impose them when generating $\mathbf{x}^\prime$ during each training iteration to align model representations with user requirements. Through their effect on $\mathbf{x}^\prime$, both types of constraints influence model outcomes through @eq-div. Here it is crucial that avoid penalizing implausibility that arises due to mutability constraints. For any mutability-constrained feature $d$ this can be achieved by enforcing $\mathbf{x}^\prime[d] = \mathbf{x}[d]$ whenever the constraint is violated, by adjusting either one to the other. Setting $\mathbf{x}[d] := \mathbf{x}^\prime[d]$ intuitively corresponds to imposing user requirements on the target domain; from a Bayesian perspective it can be understood as assuming a point mass prior for $p(\mathbf{x})$ with respect to feature $d$^[For additional detail, see @sec-app-constraints of the supplementary appendix.]. 

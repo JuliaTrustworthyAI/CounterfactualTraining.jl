@@ -1,3 +1,8 @@
+---
+execute: 
+  eval: false
+---
+
 ```{julia}
 projectdir = splitpath(pwd()) |>
     ss -> joinpath(ss[1:findall([s == "CounterfactualTraining.jl" for s in ss])[1]]...) 
@@ -13,9 +18,23 @@ using CTExperiments.Plots
 using CTExperiments.TaijaPlotting
 ```
 
-# Linear Model
+## Details on Encoding Mutability Constraints {#sec-app-constraints}
 
-First, we define the mutability constraints and load the data and model:
+In @sec-constraints we explained that to avoid penalizing implausibility that arises due to mutability constraints for any feature $d$, we impose a point mass prior on $p(\mathbf{x})$ for that features. This is best explained through a simple example involving a binary linear classifier.
+
+:::{exm-constraints}
+
+Let $\mathbf{M}_\theta(\mathbf{x})=\Theta\mathbf{x}$, with $y \in \{1,2\}$. Then for $y^+ \sim p(y)=2$ we have:
+
+$$
+\nabla_\theta \left(\text{div}(\mathbf{x},\mathbf{x^\prime},\mathbf{y};\theta)\right) = \nabla_\theta \left(-\mathbf{M}_\theta(\mathbf{x})[y^+]\right) - \nabla_\theta \left(-\mathbf{M}_\theta(\mathbf{x}^\prime)[y^+]\right) = \begin{pmatrix} 0 & 0 \\ \mathbf{x}^\prime[1] - \mathbf{x}[1] & \mathbf{x}^\prime[2] - \mathbf{x}[2] \end{pmatrix}
+$$ {#eq-grad}
+
+Contrastive divergence pushes down (up) on the coefficient $\Theta[y^+,d]$ by the amount that feature $d$ that is lower (higher) for counterfactuals than samples. This has the intended effect of aligning counterfactual explanations with the data, as discussed above. 
+
+Suppose, for example, that feature $d=1$ represents *age* and our model predicts the likelihood of credit default: $y \in \{1:=\text{'no default'},2:=\text{'default'}\}$. Then if $\mathbf{x}^\prime[1] < \mathbf{x}[1]$, contrastive divergence will push down on the corresponding coefficient, $\Theta[\text{'default'},\text{'age'}]$. Intuitively, this has the effect of decreasing the effect of *age* that the model attributes to the log odds of default, i.e. the model learns to higher default risk younger individuals. But if *age* is immutable, then this corresponds to penalizing younger individuals for implausibility that arises due to a feature that they can change about themselves. This is precisely what we want to avoid, and therefore we impose no penalty at all. 
+
+:::
 
 ```{julia}
 using CTExperiments: 
@@ -43,12 +62,24 @@ nout = size(first(train_set)[2], 1)
 model = build_model(LinearModel(), nin, nout)
 ```
 
+## Gradient
+
+```{julia}
+X1 = ce_data.X[:,ce_data.output_encoder.labels.==1]
+X2 = ce_data.X[:,ce_data.output_encoder.labels.==2]
+factual = X1[:,1]
+target = 2
+target_enc = Flux.onehotbatch([target], [1,2])
+neighbor = X2[:,1]
+```
+
+## Full Training Loop
+
 Next, we defined the training objective and the counterfactual generator. Finally, we initialize the optimization state.
 
 ```{julia}
 using CounterfactualExplanations.Convergence
 obj = EnergyDifferentialObjective(lambda=[1.0,1.0,0.0])
-# obj = VanillaObjective()
 generator = GenericGenerator()
 opt_state = Flux.setup(Descent(), model)
 conv = MaxIterConvergence()
@@ -67,8 +98,6 @@ function plot_db(model, x)
     display(plt)
 end
 ```
-
-Then we train the model:
 
 ```{julia}
 using Random
