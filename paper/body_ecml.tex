@@ -477,9 +477,30 @@ Intuitively, we think of this simply in terms ignoring implausibility
 costs with respect to immutable features, which effectively forces the
 model to instead seek plausibility with respect to the remaining
 features. This in turn results in lower overall sensitivity to immutable
-features, which we demonstrate empirically bellow and analytically for
-the linear case in \textbf{?@sec-app-constraints} of the supplementary
-appendix.
+features, which we demonstrate empirically for different classifiers in
+Section~\ref{sec-experiments}. Under certain conditions, this results
+holds theoretically\footnote{For the proof, see the supplementary
+  appendix.}:
+
+\begin{theorem}[Protecting Immutable
+Features]\protect\hypertarget{thm-mtblty}{}\label{thm-mtblty}
+
+Let \(\mathbf{M}_\theta(\mathbf{x})=\Theta\mathbf{x}\) denote a linear
+classifier with \(y\in\{1,...,K\}=\mathcal{K}\) and
+\(\mathbf{x} \in \mathbb{R}^D\). If we assume multivariate Gaussian
+class densities with common diagonal covariance matrix
+\(\Sigma_k=\Sigma\) for all \(k \in \mathcal{K}\), then protecting an
+immutable feature from the contrastive divergence penalty
+Equation~\ref{eq-div} will result in lower classifier sensitivity to
+that feature, provided that at least one other feature is mutable.
+
+\end{theorem}
+
+It is worth highlighting that Theorem~\ref{thm-mtblty} assumes
+independence of features. This raises a valid concern about the effect
+of protecting immutable features in the presence of proxy features that
+remain unprotected. We discuss this limitation in
+Section~\ref{sec-discussion}.
 
 \section{Experiments}\label{sec-experiments}
 
@@ -488,5 +509,14 @@ appendix.
 \subsection{Experimental Results}\label{experimental-results}
 
 \section{Discussion}\label{sec-discussion}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Limited to classification models.
+\item
+  Proxy attributes of immutable features.
+\end{enumerate}
 
 \section{Conclusion}\label{sec-conclusion}

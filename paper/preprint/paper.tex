@@ -183,10 +183,12 @@
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
 \theoremstyle{definition}
 \newtheorem{exercise}{Parameters}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
 \theoremstyle{definition}
 \newtheorem{example}{Example}[section]
 \theoremstyle{remark}
@@ -744,9 +746,30 @@ Intuitively, we think of this simply in terms ignoring implausibility
 costs with respect to immutable features, which effectively forces the
 model to instead seek plausibility with respect to the remaining
 features. This in turn results in lower overall sensitivity to immutable
-features, which we demonstrate empirically below. Under certain
-assumptions this can also be shown to hold analytically
-Section~\ref{sec-app-constraints}.
+features, which we demonstrate empirically for different classifiers in
+Section~\ref{sec-experiments}. Under certain conditions, this results
+holds theoretically\footnote{For the proof, see the supplementary
+  appendix.}:
+
+\begin{theorem}[Protecting Immutable
+Features]\protect\hypertarget{thm-mtblty}{}\label{thm-mtblty}
+
+Let \(\mathbf{M}_\theta(\mathbf{x})=\Theta\mathbf{x}\) denote a linear
+classifier with \(y\in\{1,...,K\}=\mathcal{K}\) and
+\(\mathbf{x} \in \mathbb{R}^D\). If we assume multivariate Gaussian
+class densities with common diagonal covariance matrix
+\(\Sigma_k=\Sigma\) for all \(k \in \mathcal{K}\), then protecting an
+immutable feature from the contrastive divergence penalty
+Equation~\ref{eq-div} will result in lower classifier sensitivity to
+that feature, provided that at least one other feature is mutable.
+
+\end{theorem}
+
+It is worth highlighting that Theorem~\ref{thm-mtblty} assumes
+independence of features. This raises a valid concern about the effect
+of protecting immutable features in the presence of proxy features that
+remain unprotected. We discuss this limitation in
+Section~\ref{sec-discussion}.
 
 \section{Experiments}\label{sec-experiments}
 
@@ -755,6 +778,15 @@ Section~\ref{sec-app-constraints}.
 \subsection{Experimental Results}\label{experimental-results}
 
 \section{Discussion}\label{sec-discussion}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Limited to classification models.
+\item
+  Proxy attributes of immutable features.
+\end{enumerate}
 
 \section{Conclusion}\label{sec-conclusion}
 
@@ -947,6 +979,9 @@ Linguistics. \url{https://doi.org/10.18653/v1/2021.acl-long.523}.
 \item
   \(y^+\): The target class and also the index of the target class.
 \item
+  \(y^-\): The non-target class and also the index of non-the target
+  class.
+\item
   \(\mathbf{y}^+\): The one-hot encoded output vector for the target
   class.
 \item
@@ -957,29 +992,27 @@ Linguistics. \url{https://doi.org/10.18653/v1/2021.acl-long.523}.
 
 \section{Training Details}\label{training-details}
 
-\subsection{Details on Encoding Mutability
-Constraints}\label{sec-app-constraints}
+\subsection{Protecting Mutability Constraints with Linear
+Classifiers}\label{sec-app-constraints}
 
 In Section~\ref{sec-constraints} we explain that to avoid penalizing
 implausibility that arises due to mutability constraints, we impose a
 point mass prior on \(p(\mathbf{x})\) for the corresponding feature. We
 argue in Section~\ref{sec-constraints} that this approach induces models
-to be less sensitive to feature \(d\) vis-à-vis some other mutable
-feature \(m\) and demonstrate this empirically in
-Section~\ref{sec-experiments}. Below we derive this result analytically
-for linear classifier.
+to be less sensitive to immutable features and demonstrate this
+empirically in Section~\ref{sec-experiments}. Below we derive the
+analytical results in Theorem~\ref{thm-mtblty}.
 
-\subsubsection{Linear Classifier}\label{linear-classifier}
-
-Let \(\mathbf{M}_\theta(\mathbf{x})=\Theta\mathbf{x}\) denote a linear
-classifier with \(y\in\{1,...,K\}=\mathcal{K}\) and
-\(\mathbf{x} \in \mathbb{R}^D\). Let \(d_{\text{mtbl}}\) and
-\(d_{\text{immtbl}}\) denote some mutable and immutable feature,
-respectively. Suppose that
+\begin{proof}
+Let \(d_{\text{mtbl}}\) and \(d_{\text{immtbl}}\) denote some mutable
+and immutable feature, respectively. Suppose that
 \(\mu_{y^-,d_{\text{immtbl}}} < \mu_{y^+,d_{\text{immtbl}}}\) and
 \(\mu_{y^-,d_{\text{mtbl}}} > \mu_{y^+,d_{\text{mtbl}}}\), where
 \(\mu_{k,d}\) denotes the conditional sample mean of feature \(d\) in
-class \(k\).
+class \(k\). In words, we assume that the immutable feature tends to
+take lower values for samples in the non-target class \(y^-\) than in
+the target class \(y^+\). We assume the opposite to hold for the mutable
+feature.
 
 Assuming multivariate Gaussian class densities with common diagonal
 covariance matrix \(\Sigma_k=\Sigma\) for all \(k \in \mathcal{K}\), we
@@ -988,10 +1021,17 @@ have for the log likelihood ratio between any two classes
 Tibshirani, and Friedman 2009}):
 
 \begin{equation}\phantomsection\label{eq-loglike}{
-\log \frac{p(k|x_{d})}{p(m|x_{d})}=\frac{\mu_{k,d}-\mu_{m,d}}{\sigma_{d}^2} x_{d} + \text{const}
+\log \frac{p(k|\mathbf{x})}{p(m|\mathbf{x})}=\mathbf{x}^\intercal \Sigma^{-1}(\mu_{k}-\mu_{m})  + \text{const}
 }\end{equation}
 
-By Equation~\ref{eq-loglike} we have the
+By independence of \(x_1,...,x_D\), the full log-likelihood ratio
+decomposes into:
+
+\begin{equation}\phantomsection\label{eq-loglike-decomp}{
+\log \frac{p(k|\mathbf{x})}{p(m|\mathbf{x})} = \sum_{d=1}^D \frac{\mu_{k,d}-\mu_{m,d}}{\sigma_{d}^2} x_{d} + \text{const}
+}\end{equation}
+
+By Equation~\ref{eq-loglike-decomp} we have the
 \(\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}} < 0\)
 and \(\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}} > 0\),
 where \(\theta_{k,d}=\Theta[k,d]\) denotes the coefficient on feature
@@ -1038,6 +1078,7 @@ has the net affect of decreasing the classifier's sensitivity to the
 immutable feature relative to the mutable feature (i.e.~no change in
 sensitivity for \(d_{\text{immtbl}}\) relative to increased sensitivity
 for \(d_{\text{mtbl}}\)).
+\end{proof}
 
 We provide an illustrative example in Example~\ref{exm-grad}.
 
@@ -1079,11 +1120,13 @@ mutability constraints. See Example~\ref{exm-grad} for details.}
 
 \end{figure}%
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, opacityback=0, rightrule=.15mm, leftrule=.75mm, colback=white, left=2mm, colframe=quarto-callout-warning-color-frame, opacitybacktitle=0.6, breakable, toprule=.15mm, colbacktitle=quarto-callout-warning-color!10!white, bottomrule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, bottomtitle=1mm]
+\begin{tcolorbox}[enhanced jigsaw, bottomtitle=1mm, titlerule=0mm, breakable, toprule=.15mm, left=2mm, bottomrule=.15mm, colbacktitle=quarto-callout-warning-color!10!white, coltitle=black, opacityback=0, leftrule=.75mm, colframe=quarto-callout-warning-color-frame, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, arc=.35mm, colback=white]
 
-@Cynthia, @Arie, let me know if you want to phrase the above in terms of
-a theorem and proof. This is something I've so far shied away from, but
-I can see how it might be appropriate here.
+@Cynthia, @Arie, I have tentatively phrased the above in terms of a
+theorem and proof. This is something I've so far shied away from because
+I feel a bit out of my depth when it comes to mathematical proofs. The
+above makes intuitive sense to me, but I don't know for sure if it's
+correct.
 
 \end{tcolorbox}
 

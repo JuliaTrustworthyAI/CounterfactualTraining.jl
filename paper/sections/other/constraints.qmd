@@ -13,21 +13,27 @@ using CTExperiments.Plots
 using CTExperiments.TaijaPlotting
 ```
 
-## Details on Encoding Mutability Constraints {#sec-app-constraints}
+## Protecting Mutability Constraints with Linear Classifiers {#sec-app-constraints}
 
-In @sec-constraints we explain that to avoid penalizing implausibility that arises due to mutability constraints, we impose a point mass prior on $p(\mathbf{x})$ for the corresponding feature. We argue in @sec-constraints that this approach induces models to be less sensitive to feature $d$ vis-à-vis some other mutable feature $m$ and demonstrate this empirically in @sec-experiments. Below we derive this result analytically for linear classifier.
+In @sec-constraints we explain that to avoid penalizing implausibility that arises due to mutability constraints, we impose a point mass prior on $p(\mathbf{x})$ for the corresponding feature. We argue in @sec-constraints that this approach induces models to be less sensitive to immutable features and demonstrate this empirically in @sec-experiments. Below we derive the analytical results in @thm-mtblty.
 
-### Linear Classifier
+::: {.proof}
 
-Let $\mathbf{M}_\theta(\mathbf{x})=\Theta\mathbf{x}$ denote a linear classifier with $y\in\{1,...,K\}=\mathcal{K}$ and $\mathbf{x} \in \mathbb{R}^D$. Let $d_{\text{mtbl}}$ and $d_{\text{immtbl}}$ denote some mutable and immutable feature, respectively. Suppose that $\mu_{y^-,d_{\text{immtbl}}} < \mu_{y^+,d_{\text{immtbl}}}$ and $\mu_{y^-,d_{\text{mtbl}}} > \mu_{y^+,d_{\text{mtbl}}}$, where $\mu_{k,d}$ denotes the conditional sample mean of feature $d$ in class $k$.
+Let $d_{\text{mtbl}}$ and $d_{\text{immtbl}}$ denote some mutable and immutable feature, respectively. Suppose that $\mu_{y^-,d_{\text{immtbl}}} < \mu_{y^+,d_{\text{immtbl}}}$ and $\mu_{y^-,d_{\text{mtbl}}} > \mu_{y^+,d_{\text{mtbl}}}$, where $\mu_{k,d}$ denotes the conditional sample mean of feature $d$ in class $k$. In words, we assume that the immutable feature tends to take lower values for samples in the non-target class $y^-$ than in the target class $y^+$. We assume the opposite to hold for the mutable feature.
 
 Assuming multivariate Gaussian class densities with common diagonal covariance matrix $\Sigma_k=\Sigma$ for all $k \in \mathcal{K}$, we have for the log likelihood ratio between any two classes $k,m \in \mathcal{K}$ [@hastie2009elements]:
 
 $$
-\log \frac{p(k|x_{d})}{p(m|x_{d})}=\frac{\mu_{k,d}-\mu_{m,d}}{\sigma_{d}^2} x_{d} + \text{const}
+\log \frac{p(k|\mathbf{x})}{p(m|\mathbf{x})}=\mathbf{x}^\intercal \Sigma^{-1}(\mu_{k}-\mu_{m})  + \text{const}
 $$ {#eq-loglike}
 
-By @eq-loglike we have the $\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}} < 0$ and $\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}} > 0$, where $\theta_{k,d}=\Theta[k,d]$ denotes the coefficient on feature $d$ for class $k$. 
+By independence of $x_1,...,x_D$, the full log-likelihood ratio decomposes into:
+
+$$
+\log \frac{p(k|\mathbf{x})}{p(m|\mathbf{x})} = \sum_{d=1}^D \frac{\mu_{k,d}-\mu_{m,d}}{\sigma_{d}^2} x_{d} + \text{const}
+$$ {#eq-loglike-decomp}
+
+By @eq-loglike-decomp we have the $\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}} < 0$ and $\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}} > 0$, where $\theta_{k,d}=\Theta[k,d]$ denotes the coefficient on feature $d$ for class $k$. 
 
 Let $\mathbf{x}^\prime$ denote some randomly chosen individual from class $y^-$ and let $y^+ \sim p(y)$ denote the randomly chosen target class. Then the partial derivative of the contrastive divergence penalty [@eq-div] with respect to coefficient $\theta_{y^+,d}$ is equal to 
 
@@ -44,6 +50,8 @@ This implies that if we do not protect feature $d_{\text{immtbl}}$, the contrast
 By the same rationale, the contrastive divergence penalty can generally be expected to push up on $\theta_{y^-,d_{\text{mtbl}}}$ exacerbating $\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}} > 0$. In words, this has the effect of making the classifier more sensitive to the mutable feature, in that it would be more likely to predict class $y^-$ as opposed to $y^+$ for higher values of $d_{\text{mtbl}}$.
 
 Thus, our proposed approach of protecting feature $d_{\text{immtbl}}$ has the net affect of decreasing the classifier's sensitivity to the immutable feature relative to the mutable feature (i.e. no change in sensitivity for $d_{\text{immtbl}}$ relative to increased sensitivity for $d_{\text{mtbl}}$).
+
+:::
 
 We provide an illustrative example in @exm-grad.
 
@@ -63,7 +71,7 @@ Conversely, in panel (b) of @fig-mtblty, we have trained the same classifier usi
 
 ::: {.callout-warning}
 
-\@Cynthia, \@Arie, let me know if you want to phrase the above in terms of a theorem and proof. This is something I've so far shied away from, but I can see how it might be appropriate here.
+\@Cynthia, \@Arie, I have tentatively phrased the above in terms of a theorem and proof. This is something I've so far shied away from because I feel a bit out of my depth when it comes to mathematical proofs. The above makes intuitive sense to me, but I don't know for sure if it's correct. 
 
 :::
 

@@ -30,6 +30,7 @@ DotEnv.load!()
 # Notation {.appendix}
 
 - $y^+$: The target class and also the index of the target class.
+- $y^-$: The non-target class and also the index of non-the target class.
 - $\mathbf{y}^+$: The one-hot encoded output vector for the target class. 
 - $\theta$: Model parameters (unspecified).
 - $\Theta$: Matrix of parameters. 

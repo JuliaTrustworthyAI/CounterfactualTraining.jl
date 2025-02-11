@@ -13,6 +13,7 @@ return {
                      id:match("^tbl-") or 
                      id:match("^eq-") or 
                      id:match("^def-") or
+                     id:match("^thm-") or
                      id:match("^sec-")) then
                   isCitation = true
                   break
