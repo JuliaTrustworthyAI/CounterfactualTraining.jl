@@ -35,7 +35,7 @@ DotEnv.load!()
 - $\theta$: Model parameters (unspecified).
 - $\Theta$: Matrix of parameters. 
 
-# Training Details {.appendix} 
+# Technical Details of Our Approach {.appendix} 
 
 {{< include /paper/sections/other/constraints.qmd >}}
 
