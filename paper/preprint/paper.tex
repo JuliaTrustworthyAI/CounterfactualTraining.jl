@@ -184,11 +184,11 @@
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
 \theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\theoremstyle{definition}
 \newtheorem{exercise}{Parameters}[section]
 \theoremstyle{definition}
 \newtheorem{example}{Example}[section]
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -744,9 +744,9 @@ Intuitively, we think of this simply in terms ignoring implausibility
 costs with respect to immutable features, which effectively forces the
 model to instead seek plausibility with respect to the remaining
 features. This in turn results in lower overall sensitivity to immutable
-features, which we demonstrate empirically bellow and analytically for
-the linear case in Section~\ref{sec-app-constraints} of the
-supplementary appendix.
+features, which we demonstrate empirically below. Under certain
+assumptions this can also be shown to hold analytically
+Section~\ref{sec-app-constraints}.
 
 \section{Experiments}\label{sec-experiments}
 
@@ -824,6 +824,11 @@ In \emph{Proceedings of the 29th ACM SIGKDD Conference on Knowledge
 Discovery and Data Mining}, 577--89. KDD '23. New York, NY, USA:
 Association for Computing Machinery.
 \url{https://doi.org/10.1145/3580305.3599290}.
+
+\bibitem[\citeproctext]{ref-hastie2009elements}
+Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. 2009. \emph{The
+Elements of Statistical Learning}. Springer New York.
+\url{https://doi.org/10.1007/978-0-387-84858-7}.
 
 \bibitem[\citeproctext]{ref-kolter2023keynote}
 Kolter, Zico. 2023.{``{Keynote Addresses: SaTML 2023 }.''} In \emph{2023
@@ -955,46 +960,109 @@ Linguistics. \url{https://doi.org/10.18653/v1/2021.acl-long.523}.
 \subsection{Details on Encoding Mutability
 Constraints}\label{sec-app-constraints}
 
-In Section~\ref{sec-constraints} we explained that to avoid penalizing
-implausibility that arises due to mutability constraints for any feature
-\(d\), we impose a point mass prior on \(p(\mathbf{x})\) for that
-features. This is best explained through a simple example involving a
-binary linear classifier.
+In Section~\ref{sec-constraints} we explain that to avoid penalizing
+implausibility that arises due to mutability constraints, we impose a
+point mass prior on \(p(\mathbf{x})\) for the corresponding feature. We
+argue in Section~\ref{sec-constraints} that this approach induces models
+to be less sensitive to feature \(d\) vis-à-vis some other mutable
+feature \(m\) and demonstrate this empirically in
+Section~\ref{sec-experiments}. Below we derive this result analytically
+for linear classifier.
 
-Let \(\mathbf{M}_\theta(\mathbf{x})=\Theta\mathbf{x}\), with
-\(\mathbf{x} \in \mathbb{R}^2\) and \(y \in \{0,1\}\). Then for any
-given counterfactual with \(y^+ \sim p(y)=1\) we have:
+\subsubsection{Linear Classifier}\label{linear-classifier}
 
-\begin{equation}\phantomsection\label{eq-grad}{
-\nabla_\theta \left(\text{div}(\mathbf{x},\mathbf{x^\prime},\mathbf{y};\theta)\right) = \nabla_\theta \left(-\mathbf{M}_\theta(\mathbf{x})[y^+]\right) - \nabla_\theta \left(-\mathbf{M}_\theta(\mathbf{x}^\prime)[y^+]\right) = \begin{pmatrix} 0 & 0 \\ \mathbf{x}^\prime[1] - \mathbf{x}[1] & \mathbf{x}^\prime[2] - \mathbf{x}[2] \end{pmatrix}
+Let \(\mathbf{M}_\theta(\mathbf{x})=\Theta\mathbf{x}\) denote a linear
+classifier with \(y\in\{1,...,K\}=\mathcal{K}\) and
+\(\mathbf{x} \in \mathbb{R}^D\). Let \(d_{\text{mtbl}}\) and
+\(d_{\text{immtbl}}\) denote some mutable and immutable feature,
+respectively. Suppose that
+\(\mu_{y^-,d_{\text{immtbl}}} < \mu_{y^+,d_{\text{immtbl}}}\) and
+\(\mu_{y^-,d_{\text{mtbl}}} > \mu_{y^+,d_{\text{mtbl}}}\), where
+\(\mu_{k,d}\) denotes the conditional sample mean of feature \(d\) in
+class \(k\).
+
+Assuming multivariate Gaussian class densities with common diagonal
+covariance matrix \(\Sigma_k=\Sigma\) for all \(k \in \mathcal{K}\), we
+have for the log likelihood ratio between any two classes
+\(k,m \in \mathcal{K}\) (\citeproc{ref-hastie2009elements}{Hastie,
+Tibshirani, and Friedman 2009}):
+
+\begin{equation}\phantomsection\label{eq-loglike}{
+\log \frac{p(k|x_{d})}{p(m|x_{d})}=\frac{\mu_{k,d}-\mu_{m,d}}{\sigma_{d}^2} x_{d} + \text{const}
 }\end{equation}
 
-For the given counterfactual, contrastive divergence pushes down (up) on
-the coefficient \(\Theta[y^+,d]\) by the amount that feature \(d\) that
-is lower (higher) for counterfactuals than samples. This has the
-intended effect of aligning counterfactual explanations with the data,
-as discussed above.
+By Equation~\ref{eq-loglike} we have the
+\(\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}} < 0\)
+and \(\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}} > 0\),
+where \(\theta_{k,d}=\Theta[k,d]\) denotes the coefficient on feature
+\(d\) for class \(k\).
 
-\begin{example}[]\protect\hypertarget{exm-grad}{}\label{exm-grad}
+Let \(\mathbf{x}^\prime\) denote some randomly chosen individual from
+class \(y^-\) and let \(y^+ \sim p(y)\) denote the randomly chosen
+target class. Then the partial derivative of the contrastive divergence
+penalty Equation~\ref{eq-div} with respect to coefficient
+\(\theta_{y^+,d}\) is equal to
 
-Let feature \(d=1\) in Equation~\ref{eq-grad} represents \emph{age} and
-our model predicts the likelihood of credit default:
-\(y \in \{0:=\text{'no default'},1:=\text{'default'}\}\). Then if
-\(\mathbf{x}^\prime[1] < \mathbf{x}[1]\), contrastive divergence will
-push down on the corresponding coefficient,
-\(\Theta[\text{'default'},\text{'age'}]\). Intuitively, this has the
-effect of decreasing the effect of \emph{age} that the model attributes
-to the log odds of default, i.e.~the model learns to predict higher
-default risk for younger individuals.
+\begin{equation}\phantomsection\label{eq-grad}{
+\frac{\partial}{\partial\theta_{y^+,d}} \left(\text{div}(\mathbf{x},\mathbf{x^\prime},\mathbf{y};\theta)\right) = \frac{\partial}{\partial\theta_{y^+,d}} \left( \left(-\mathbf{M}_\theta(\mathbf{x})[y^+]\right) - \left(-\mathbf{M}_\theta(\mathbf{x}^\prime)[y^+]\right) \right) = x_{d}^\prime - x_{d}
+}\end{equation}
 
-If \(\Theta[y^+,d]<0\) even in absence of this force, then contrastive
-divergence exacerbates the existing effect. But if \emph{age} is
-immutable, then this corresponds to penalizing younger individuals for
-implausibility that arises due to a feature that they can change about
-themselves. This is precisely what we want to avoid, and therefore we
-impose \(\mathbf{x}^\prime[1] - \mathbf{x}[1]:=0\) in such cases. In
-doing so, we induce lower sensitivity with respect to \emph{age}
-compared to other mutable features (Figure~\ref{fig-mtblty}).
+and equal to zero everywhere else.
+
+Since \(\mu_{y^-,d_{\text{immtbl}}} < \mu_{y^+,d_{\text{immtbl}}}\) we
+are more likely to have
+\(x_{d_{\text{immtbl}}}^\prime - x_{d_{\text{immtbl}}} < 0\) than vice
+versa at initialization. Similarly, we are more likely to have
+\(x_{d_{\text{mtbl}}}^\prime - x_{d_{\text{mtbl}}} > 0\) by
+\(\mu_{y^-,d_{\text{mtbl}}} > \mu_{y^+,d_{\text{mtbl}}}\).
+
+This implies that if we do not protect feature \(d_{\text{immtbl}}\),
+the contrastive divergence penalty will push down on
+\(\theta_{y^-,d_{\text{immtbl}}}\) thereby exacerbating the existing
+effect
+\(\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}} < 0\).
+In words, not protecting the immutable feature would have the
+undesirable effect of making the classifier more sensitive to this
+feature, in that it would be more likely to predict class \(y^-\) as
+opposed to \(y^+\) for lower values of \(d_{\text{immtbl}}\).
+
+By the same rationale, the contrastive divergence penalty can generally
+be expected to push up on \(\theta_{y^-,d_{\text{mtbl}}}\) exacerbating
+\(\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}} > 0\). In
+words, this has the effect of making the classifier more sensitive to
+the mutable feature, in that it would be more likely to predict class
+\(y^-\) as opposed to \(y^+\) for higher values of \(d_{\text{mtbl}}\).
+
+Thus, our proposed approach of protecting feature \(d_{\text{immtbl}}\)
+has the net affect of decreasing the classifier's sensitivity to the
+immutable feature relative to the mutable feature (i.e.~no change in
+sensitivity for \(d_{\text{immtbl}}\) relative to increased sensitivity
+for \(d_{\text{mtbl}}\)).
+
+We provide an illustrative example in Example~\ref{exm-grad}.
+
+\begin{example}[Prediction of Consumer Credit
+Default]\protect\hypertarget{exm-grad}{}\label{exm-grad}
+
+Suppose now that \(d_{\text{immtbl}}\) represents an individual's
+\emph{age} and \(d_{\text{mtbl}}\) represents an individual's existing
+level of credit card debt. Assume that these two features are
+independent, the class conditional densities are Gaussian and we use no
+other features to predict the risk of individuals defaulting on a
+consumer loan using a linear classifier. We have simulated this scenario
+using synthetic data in Figure~\ref{fig-mtblty}.
+
+In panel (a) of Figure~\ref{fig-mtblty}, we have trained the linear
+classifier using counterfactual training, treating both features as
+mutable. The linear decision boundary is roughly equally sensitive to
+both \emph{age} and existing levels of \emph{debt}.
+
+Conversely, in panel (b) of Figure~\ref{fig-mtblty}, we have trained the
+same classifier using counterfactual training, but this time treating
+\emph{age} as an immutable feature. The result is a new decision
+boundary that has tilted in favor of higher sensitivity to the mutable
+feature (existing \emph{debt}) and lower sensitivity to the immutable
+feature (\emph{age}).
 
 \end{example}
 
@@ -1007,14 +1075,15 @@ compared to other mutable features (Figure~\ref{fig-mtblty}).
 }
 
 \caption{\label{fig-mtblty}Visual illustration of the effect of imposing
-mutability constraints.}
+mutability constraints. See Example~\ref{exm-grad} for details.}
 
 \end{figure}%
 
-\begin{tcolorbox}[enhanced jigsaw, opacitybacktitle=0.6, breakable, colback=white, toprule=.15mm, bottomrule=.15mm, arc=.35mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, colframe=quarto-callout-warning-color-frame, opacityback=0, left=2mm, toptitle=1mm, bottomtitle=1mm, titlerule=0mm, rightrule=.15mm, leftrule=.75mm, colbacktitle=quarto-callout-warning-color!10!white, coltitle=black]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, opacityback=0, rightrule=.15mm, leftrule=.75mm, colback=white, left=2mm, colframe=quarto-callout-warning-color-frame, opacitybacktitle=0.6, breakable, toprule=.15mm, colbacktitle=quarto-callout-warning-color!10!white, bottomrule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, bottomtitle=1mm]
 
-@Cynthia, @Arie, the above still needs to be polished. I'm not sure how
-to demonstrate/prove this last point analytically.
+@Cynthia, @Arie, let me know if you want to phrase the above in terms of
+a theorem and proof. This is something I've so far shied away from, but
+I can see how it might be appropriate here.
 
 \end{tcolorbox}
 
@@ -1036,12 +1105,78 @@ Phase]\protect\hypertarget{exr-gen-params-first-run-train}{}\label{exr-gen-param
 
 ~
 
+\begin{itemize}
+\tightlist
+\item
+  Generator Parameters:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \(\lambda_{\text{cost}}\): \texttt{0.0,\ 0.001,\ 0.1}
+  \item
+    \(\lambda_{\text{div}}\):
+    \texttt{0.01,\ 0.05,\ 0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0,\ 15.0}
+  \item
+    Learning Rate: \texttt{1.0}
+  \item
+    Maximum Iterations: \texttt{20,\ 50,\ 100}
+  \item
+    Optimizerimizer: \texttt{sgd}
+  \end{itemize}
+\item
+  Generator: \texttt{ecco,\ generic,\ omni,\ revise}
+\item
+  Training Parameters:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Objective: \texttt{full,\ vanilla}
+  \end{itemize}
+\end{itemize}
+
 \end{exercise}
 
 \begin{exercise}[Evaluation
 Phase]\protect\hypertarget{exr-gen-params-first-run-eval}{}\label{exr-gen-params-first-run-eval}
 
 ~
+
+\begin{itemize}
+\tightlist
+\item
+  Counterfactual Parameters:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Convergence: \texttt{max\_iter}
+  \item
+    Maximum Iterations: \texttt{100}
+  \item
+    No.~Individuals: \texttt{100}
+  \item
+    No.~Runs: \texttt{5}
+  \end{itemize}
+\item
+  Generator Parameters:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \(\lambda_{\text{cost}}\): \texttt{0.0}
+  \item
+    \(\lambda_{\text{div}}\):
+    \texttt{0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0,\ 20.0}
+  \item
+    Learning Rate: \texttt{1.0}
+  \item
+    Maximum Iterations: \texttt{50}
+  \item
+    Optimizerimizer: \texttt{sgd}
+  \end{itemize}
+\end{itemize}
 
 \end{exercise}
 
@@ -1075,27 +1210,135 @@ Phase]\protect\hypertarget{exr-gen-params-first-run-eval}{}\label{exr-gen-params
   \textbf{Accuracy}: Seems largely unaffected.
 \end{itemize}
 
-\begin{table}
+\begin{longtable}{ccccc}
 
 \caption{\label{tbl-lin_sep-lambda_energy_exper}Results for Linearly
 Separable data by energy penalty.}
 
-\centering{
+\tabularnewline
 
-}
+  \toprule
+  \textbf{Objective} & \textbf{$\lambda_{\text{div}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endfirsthead
+  \toprule
+  \textbf{Objective} & \textbf{$\lambda_{\text{div}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endhead
+  \bottomrule
+  \multicolumn{5}{r}{Continuing table below.}\\
+  \bottomrule
+  \endfoot
+  \endlastfoot
+  full & 0.01 & \textit{ECCo} & $-9.91 \cdot 10^{11}$ & $2.25 \cdot 10^{12}$ \\
+  full & 0.01 & \textit{Generic} & $-5.71 \cdot 10^{17}$ & $1.3 \cdot 10^{18}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.01}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.54}} & \color{blue}{\textbf{0.116}} \\
+  full & 0.01 & \textit{REVISE} & -15.6 & 13.2 \\
+  vanilla & 0.01 & \textit{ECCo} & -4.28 & 3.52 \\
+  vanilla & 0.01 & \textit{Generic} & -4.45 & 3.47 \\
+  vanilla & 0.01 & \textit{Omniscient} & -5.12 & 4.46 \\
+  vanilla & 0.01 & \textit{REVISE} & -4.91 & 4.24 \\
+  full & 0.05 & \textit{ECCo} & $-5.63 \cdot 10^{5}$ & $1.28 \cdot 10^{6}$ \\
+  full & 0.05 & \textit{Generic} & $-8.35 \cdot 10^{17}$ & $1.9 \cdot 10^{18}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.05}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.53}} & \color{blue}{\textbf{0.114}} \\
+  full & 0.05 & \textit{REVISE} & -15 & 12.6 \\
+  vanilla & 0.05 & \textit{ECCo} & -4.4 & 3.66 \\
+  vanilla & 0.05 & \textit{Generic} & -4.38 & 3.48 \\
+  vanilla & 0.05 & \textit{Omniscient} & -5.25 & 4.62 \\
+  vanilla & 0.05 & \textit{REVISE} & -4.94 & 4.22 \\
+  full & 0.1 & \textit{ECCo} & $-6.74 \cdot 10^{5}$ & $1.53 \cdot 10^{6}$ \\
+  full & 0.1 & \textit{Generic} & $-1.72 \cdot 10^{11}$ & $3.9 \cdot 10^{11}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.56}} & \color{blue}{\textbf{0.124}} \\
+  full & 0.1 & \textit{REVISE} & -15.6 & 13.2 \\
+  vanilla & 0.1 & \textit{ECCo} & -4.28 & 3.52 \\
+  vanilla & 0.1 & \textit{Generic} & -4.45 & 3.48 \\
+  vanilla & 0.1 & \textit{Omniscient} & -5.12 & 4.46 \\
+  vanilla & 0.1 & \textit{REVISE} & -4.91 & 4.25 \\
+  full & 0.5 & \textit{ECCo} & -11.8 & 9.83 \\
+  full & 0.5 & \textit{Generic} & $-1.06 \cdot 10^{18}$ & $2.42 \cdot 10^{18}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.5}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.54}} & \color{blue}{\textbf{0.123}} \\
+  full & 0.5 & \textit{REVISE} & -15 & 12.6 \\
+  vanilla & 0.5 & \textit{ECCo} & -4.4 & 3.65 \\
+  vanilla & 0.5 & \textit{Generic} & -4.38 & 3.48 \\
+  vanilla & 0.5 & \textit{Omniscient} & -5.25 & 4.61 \\
+  vanilla & 0.5 & \textit{REVISE} & -4.95 & 4.22 \\
+  full & 1 & \textit{ECCo} & -11.5 & 11.1 \\
+  full & 1 & \textit{Generic} & $-1.71 \cdot 10^{11}$ & $3.88 \cdot 10^{11}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.59}} & \color{blue}{\textbf{0.117}} \\
+  full & 1 & \textit{REVISE} & -15.7 & 13.3 \\
+  vanilla & 1 & \textit{ECCo} & -4.28 & 3.51 \\
+  vanilla & 1 & \textit{Generic} & -4.44 & 3.47 \\
+  vanilla & 1 & \textit{Omniscient} & -5.11 & 4.46 \\
+  vanilla & 1 & \textit{REVISE} & -4.91 & 4.25 \\
+  full & 5 & \textit{ECCo} & -3.99 & 3.12 \\
+  full & 5 & \textit{Generic} & $-4.88 \cdot 10^{17}$ & $1.11 \cdot 10^{18}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{5}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.53}} & \color{blue}{\textbf{0.117}} \\
+  full & 5 & \textit{REVISE} & -14.6 & 12.1 \\
+  vanilla & 5 & \textit{ECCo} & -4.4 & 3.65 \\
+  vanilla & 5 & \textit{Generic} & -4.38 & 3.48 \\
+  vanilla & 5 & \textit{Omniscient} & -5.25 & 4.61 \\
+  vanilla & 5 & \textit{REVISE} & -4.95 & 4.22 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{10}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-2.31}} & \color{blue}{\textbf{0.735}} \\
+  full & 10 & \textit{Generic} & $-1.7 \cdot 10^{11}$ & $3.86 \cdot 10^{11}$ \\
+  full & 10 & \textit{Omniscient} & -2.53 & 0.117 \\
+  full & 10 & \textit{REVISE} & -15.5 & 13 \\
+  vanilla & 10 & \textit{ECCo} & -4.28 & 3.51 \\
+  vanilla & 10 & \textit{Generic} & -4.44 & 3.47 \\
+  vanilla & 10 & \textit{Omniscient} & -5.12 & 4.46 \\
+  vanilla & 10 & \textit{REVISE} & -4.91 & 4.24 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{15}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-2.01}} & \color{blue}{\textbf{0.488}} \\
+  full & 15 & \textit{Generic} & $-4.91 \cdot 10^{17}$ & $1.12 \cdot 10^{18}$ \\
+  full & 15 & \textit{Omniscient} & -2.53 & 0.116 \\
+  full & 15 & \textit{REVISE} & -14.4 & 11.7 \\
+  vanilla & 15 & \textit{ECCo} & -4.4 & 3.65 \\
+  vanilla & 15 & \textit{Generic} & -4.38 & 3.48 \\
+  vanilla & 15 & \textit{Omniscient} & -5.25 & 4.6 \\
+  vanilla & 15 & \textit{REVISE} & -4.95 & 4.23 \\\bottomrule
 
-\end{table}%
+\end{longtable}
 
-\begin{table}
+\begin{longtable}{ccccc}
 
 \caption{\label{tbl-lin_sep-lambda_cost_exper}Results for Linearly
 Separable data by cost penalty.}
 
-\centering{
+\tabularnewline
 
-}
+  \toprule
+  \textbf{Objective} & \textbf{$\lambda_{\text{cost}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endfirsthead
+  \toprule
+  \textbf{Objective} & \textbf{$\lambda_{\text{cost}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endhead
+  \bottomrule
+  \multicolumn{5}{r}{Continuing table below.}\\
+  \bottomrule
+  \endfoot
+  \endlastfoot
+  full & 0 & \textit{ECCo} & $-5.32 \cdot 10^{3}$ & $1.21 \cdot 10^{4}$ \\
+  full & 0 & \textit{Generic} & $-1.03 \cdot 10^{18}$ & $2.34 \cdot 10^{18}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.64}} & \color{blue}{\textbf{0.125}} \\
+  full & 0 & \textit{REVISE} & -15.4 & 12.9 \\
+  vanilla & 0 & \textit{ECCo} & -4.34 & 3.58 \\
+  vanilla & 0 & \textit{Generic} & -4.41 & 3.48 \\
+  vanilla & 0 & \textit{Omniscient} & -5.18 & 4.54 \\
+  vanilla & 0 & \textit{REVISE} & -4.93 & 4.23 \\
+  full & 0.001 & \textit{ECCo} & -362 & 811 \\
+  full & 0.001 & \textit{Generic} & $-2.65 \cdot 10^{17}$ & $6.03 \cdot 10^{17}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.001}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.49}} & \color{blue}{\textbf{0.115}} \\
+  full & 0.001 & \textit{REVISE} & -15.5 & 13 \\
+  vanilla & 0.001 & \textit{ECCo} & -4.34 & 3.58 \\
+  vanilla & 0.001 & \textit{Generic} & -4.41 & 3.48 \\
+  vanilla & 0.001 & \textit{Omniscient} & -5.18 & 4.53 \\
+  vanilla & 0.001 & \textit{REVISE} & -4.93 & 4.23 \\
+  full & 0.1 & \textit{ECCo} & $-3.72 \cdot 10^{11}$ & $8.46 \cdot 10^{11}$ \\
+  full & 0.1 & \textit{Generic} & $-4.49 \cdot 10^{14}$ & $1.02 \cdot 10^{15}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.5}} & \color{blue}{\textbf{0.112}} \\
+  full & 0.1 & \textit{REVISE} & -14.6 & 12.2 \\
+  vanilla & 0.1 & \textit{ECCo} & -4.34 & 3.58 \\
+  vanilla & 0.1 & \textit{Generic} & -4.41 & 3.48 \\
+  vanilla & 0.1 & \textit{Omniscient} & -5.18 & 4.54 \\
+  vanilla & 0.1 & \textit{REVISE} & -4.93 & 4.24 \\\bottomrule
 
-\end{table}%
+\end{longtable}
 
 \paragraph{Moons}\label{moons}
 
@@ -1126,16 +1369,90 @@ Separable data by cost penalty.}
   \emph{REVISE} suffers a lot in general (around 10 percentage points).
 \end{itemize}
 
-\begin{table}
+\begin{longtable}{ccccc}
 
 \caption{\label{tbl-moons-lambda_energy_exper}Results for Moons data by
 energy penalty.}
 
-\centering{
+\tabularnewline
 
-}
+  \toprule
+  \textbf{Objective} & \textbf{$\lambda_{\text{div}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endfirsthead
+  \toprule
+  \textbf{Objective} & \textbf{$\lambda_{\text{div}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endhead
+  \bottomrule
+  \multicolumn{5}{r}{Continuing table below.}\\
+  \bottomrule
+  \endfoot
+  \endlastfoot
+  full & 0.01 & \textit{ECCo} & $-2.8 \cdot 10^{22}$ & $6.39 \cdot 10^{22}$ \\
+  full & 0.01 & \textit{Generic} & $-4.89 \cdot 10^{30}$ & $1.11 \cdot 10^{31}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.01}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.74}} & \color{blue}{\textbf{5.08}} \\
+  full & 0.01 & \textit{REVISE} & -572 & $1.25 \cdot 10^{3}$ \\
+  vanilla & 0.01 & \textit{ECCo} & -15.5 & 17.3 \\
+  vanilla & 0.01 & \textit{Generic} & -10.9 & 11.9 \\
+  vanilla & 0.01 & \textit{Omniscient} & -12.7 & 14.4 \\
+  vanilla & 0.01 & \textit{REVISE} & -11.2 & 13 \\
+  full & 0.05 & \textit{ECCo} & $-1.55 \cdot 10^{16}$ & $3.52 \cdot 10^{16}$ \\
+  full & 0.05 & \textit{Generic} & $-2.22 \cdot 10^{20}$ & $5 \cdot 10^{20}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.05}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.41}} & \color{blue}{\textbf{4.48}} \\
+  full & 0.05 & \textit{REVISE} & $-1.04 \cdot 10^{3}$ & $2.3 \cdot 10^{3}$ \\
+  vanilla & 0.05 & \textit{ECCo} & -15.5 & 17.2 \\
+  vanilla & 0.05 & \textit{Generic} & -11.7 & 12.8 \\
+  vanilla & 0.05 & \textit{Omniscient} & -12.4 & 14.1 \\
+  vanilla & 0.05 & \textit{REVISE} & -11.3 & 13.1 \\
+  full & 0.1 & \textit{ECCo} & $-3.41 \cdot 10^{3}$ & $7.73 \cdot 10^{3}$ \\
+  full & 0.1 & \textit{Generic} & $-5.22 \cdot 10^{30}$ & $1.19 \cdot 10^{31}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.78}} & \color{blue}{\textbf{5.12}} \\
+  full & 0.1 & \textit{REVISE} & -288 & 594 \\
+  vanilla & 0.1 & \textit{ECCo} & -15.5 & 17.2 \\
+  vanilla & 0.1 & \textit{Generic} & -10.9 & 11.9 \\
+  vanilla & 0.1 & \textit{Omniscient} & -12.7 & 14.4 \\
+  vanilla & 0.1 & \textit{REVISE} & -11.3 & 13.1 \\
+  full & 0.5 & \textit{ECCo} & -7.09 & 7.51 \\
+  full & 0.5 & \textit{Generic} & $-1.11 \cdot 10^{31}$ & $2.53 \cdot 10^{31}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.5}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.58}} & \color{blue}{\textbf{4.83}} \\
+  full & 0.5 & \textit{REVISE} & $-1.19 \cdot 10^{3}$ & $2.64 \cdot 10^{3}$ \\
+  vanilla & 0.5 & \textit{ECCo} & -15.5 & 17.2 \\
+  vanilla & 0.5 & \textit{Generic} & -11.7 & 12.8 \\
+  vanilla & 0.5 & \textit{Omniscient} & -12.4 & 14.1 \\
+  vanilla & 0.5 & \textit{REVISE} & -11.3 & 13.1 \\
+  full & 1 & \textit{ECCo} & -6.06 & 6.33 \\
+  full & 1 & \textit{Generic} & $-1.58 \cdot 10^{33}$ & $3.59 \cdot 10^{33}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.66}} & \color{blue}{\textbf{4.89}} \\
+  full & 1 & \textit{REVISE} & $-1.16 \cdot 10^{3}$ & $2.59 \cdot 10^{3}$ \\
+  vanilla & 1 & \textit{ECCo} & -15.5 & 17.3 \\
+  vanilla & 1 & \textit{Generic} & -10.9 & 11.9 \\
+  vanilla & 1 & \textit{Omniscient} & -12.7 & 14.4 \\
+  vanilla & 1 & \textit{REVISE} & -11.3 & 13.1 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{5}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-2.57}} & \color{blue}{\textbf{2.07}} \\
+  full & 5 & \textit{Generic} & $-1.17 \cdot 10^{28}$ & $2.66 \cdot 10^{28}$ \\
+  full & 5 & \textit{Omniscient} & -4.29 & 4.31 \\
+  full & 5 & \textit{REVISE} & -530 & $1.16 \cdot 10^{3}$ \\
+  vanilla & 5 & \textit{ECCo} & -15.5 & 17.2 \\
+  vanilla & 5 & \textit{Generic} & -11.7 & 12.7 \\
+  vanilla & 5 & \textit{Omniscient} & -12.4 & 14.1 \\
+  vanilla & 5 & \textit{REVISE} & -11.3 & 13.1 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{10}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.76}} & \color{blue}{\textbf{0.974}} \\
+  full & 10 & \textit{Generic} & $-1.54 \cdot 10^{33}$ & $3.51 \cdot 10^{33}$ \\
+  full & 10 & \textit{Omniscient} & -4.44 & 4.56 \\
+  full & 10 & \textit{REVISE} & $-1.52 \cdot 10^{3}$ & $3.4 \cdot 10^{3}$ \\
+  vanilla & 10 & \textit{ECCo} & -15.5 & 17.3 \\
+  vanilla & 10 & \textit{Generic} & -10.9 & 11.9 \\
+  vanilla & 10 & \textit{Omniscient} & -12.7 & 14.4 \\
+  vanilla & 10 & \textit{REVISE} & -11.3 & 13.1 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{15}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.37}} & \color{blue}{\textbf{0.365}} \\
+  full & 15 & \textit{Generic} & $-5.32 \cdot 10^{28}$ & $1.21 \cdot 10^{29}$ \\
+  full & 15 & \textit{Omniscient} & -4.34 & 4.38 \\
+  full & 15 & \textit{REVISE} & -473 & $1.03 \cdot 10^{3}$ \\
+  vanilla & 15 & \textit{ECCo} & -15.5 & 17.2 \\
+  vanilla & 15 & \textit{Generic} & -11.7 & 12.8 \\
+  vanilla & 15 & \textit{Omniscient} & -12.4 & 14.1 \\
+  vanilla & 15 & \textit{REVISE} & -11.3 & 13.1 \\\bottomrule
 
-\end{table}%
+\end{longtable}
 
 \paragraph{Circles}\label{circles}
 
@@ -1172,16 +1489,90 @@ energy penalty.}
   above.
 \end{itemize}
 
-\begin{table}
+\begin{longtable}{ccccc}
 
 \caption{\label{tbl-circles-lambda_energy_exper}Results for Circles data
 by energy penalty.}
 
-\centering{
+\tabularnewline
 
-}
+  \toprule
+  \textbf{Objective} & \textbf{$\lambda_{\text{div}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endfirsthead
+  \toprule
+  \textbf{Objective} & \textbf{$\lambda_{\text{div}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endhead
+  \bottomrule
+  \multicolumn{5}{r}{Continuing table below.}\\
+  \bottomrule
+  \endfoot
+  \endlastfoot
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.01}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.26}} & \color{blue}{\textbf{0.423}} \\
+  full & 0.01 & \textit{Generic} & -1.49 & 0.71 \\
+  full & 0.01 & \textit{Omniscient} & -5.21 & 5.25 \\
+  full & 0.01 & \textit{REVISE} & $-2.71 \cdot 10^{26}$ & $6.37 \cdot 10^{26}$ \\
+  vanilla & 0.01 & \textit{ECCo} & -9.33 & 7.34 \\
+  vanilla & 0.01 & \textit{Generic} & -8.89 & 6.88 \\
+  vanilla & 0.01 & \textit{Omniscient} & -8.67 & 6.87 \\
+  vanilla & 0.01 & \textit{REVISE} & -8.65 & 6.8 \\
+  full & 0.05 & \textit{ECCo} & -1.29 & 0.397 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.05}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-1.21}} & \color{blue}{\textbf{0.356}} \\
+  full & 0.05 & \textit{Omniscient} & -5.08 & 5.09 \\
+  full & 0.05 & \textit{REVISE} & $-5.91 \cdot 10^{27}$ & $1.36 \cdot 10^{28}$ \\
+  vanilla & 0.05 & \textit{ECCo} & -9.35 & 7.32 \\
+  vanilla & 0.05 & \textit{Generic} & -8.85 & 6.87 \\
+  vanilla & 0.05 & \textit{Omniscient} & -8.7 & 6.96 \\
+  vanilla & 0.05 & \textit{REVISE} & -8.52 & 6.76 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.1}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.2}} & \color{blue}{\textbf{0.383}} \\
+  full & 0.1 & \textit{Generic} & -1.5 & 0.735 \\
+  full & 0.1 & \textit{Omniscient} & -5.17 & 5.23 \\
+  full & 0.1 & \textit{REVISE} & $-3.06 \cdot 10^{26}$ & $7.7 \cdot 10^{26}$ \\
+  vanilla & 0.1 & \textit{ECCo} & -9.33 & 7.32 \\
+  vanilla & 0.1 & \textit{Generic} & -8.88 & 6.86 \\
+  vanilla & 0.1 & \textit{Omniscient} & -8.69 & 6.9 \\
+  vanilla & 0.1 & \textit{REVISE} & -8.68 & 6.81 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.5}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.12}} & \color{blue}{\textbf{0.217}} \\
+  full & 0.5 & \textit{Generic} & -1.21 & 0.352 \\
+  full & 0.5 & \textit{Omniscient} & -5.09 & 5.12 \\
+  full & 0.5 & \textit{REVISE} & $-5.97 \cdot 10^{27}$ & $1.37 \cdot 10^{28}$ \\
+  vanilla & 0.5 & \textit{ECCo} & -9.35 & 7.3 \\
+  vanilla & 0.5 & \textit{Generic} & -8.89 & 6.92 \\
+  vanilla & 0.5 & \textit{Omniscient} & -8.68 & 6.93 \\
+  vanilla & 0.5 & \textit{REVISE} & -8.53 & 6.75 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{1}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.1}} & \color{blue}{\textbf{0.163}} \\
+  full & 1 & \textit{Generic} & -1.49 & 0.726 \\
+  full & 1 & \textit{Omniscient} & -5.16 & 5.2 \\
+  full & 1 & \textit{REVISE} & $-3.09 \cdot 10^{26}$ & $7.22 \cdot 10^{26}$ \\
+  vanilla & 1 & \textit{ECCo} & -9.34 & 7.36 \\
+  vanilla & 1 & \textit{Generic} & -8.86 & 6.85 \\
+  vanilla & 1 & \textit{Omniscient} & -8.7 & 6.9 \\
+  vanilla & 1 & \textit{REVISE} & -8.69 & 6.85 \\
+  full & 5 & \textit{ECCo} & -1.75 & 0.154 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{5}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-1.21}} & \color{blue}{\textbf{0.363}} \\
+  full & 5 & \textit{Omniscient} & -5.14 & 5.16 \\
+  full & 5 & \textit{REVISE} & $-1.1 \cdot 10^{28}$ & $2.5 \cdot 10^{28}$ \\
+  vanilla & 5 & \textit{ECCo} & -9.36 & 7.32 \\
+  vanilla & 5 & \textit{Generic} & -8.88 & 6.91 \\
+  vanilla & 5 & \textit{Omniscient} & -8.7 & 6.93 \\
+  vanilla & 5 & \textit{REVISE} & -8.52 & 6.73 \\
+  full & 10 & \textit{ECCo} & $-1.02 \cdot 10^{6}$ & $2.32 \cdot 10^{6}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{10}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-1.49}} & \color{blue}{\textbf{0.702}} \\
+  full & 10 & \textit{Omniscient} & -5.13 & 5.16 \\
+  full & 10 & \textit{REVISE} & $-3.74 \cdot 10^{26}$ & $9.09 \cdot 10^{26}$ \\
+  vanilla & 10 & \textit{ECCo} & -9.31 & 7.33 \\
+  vanilla & 10 & \textit{Generic} & -8.87 & 6.86 \\
+  vanilla & 10 & \textit{Omniscient} & -8.7 & 6.89 \\
+  vanilla & 10 & \textit{REVISE} & -8.69 & 6.83 \\
+  full & 15 & \textit{ECCo} & $-3.31 \cdot 10^{13}$ & $7.54 \cdot 10^{13}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{15}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-1.22}} & \color{blue}{\textbf{0.37}} \\
+  full & 15 & \textit{Omniscient} & -5.2 & 5.23 \\
+  full & 15 & \textit{REVISE} & $-9.01 \cdot 10^{27}$ & $2.06 \cdot 10^{28}$ \\
+  vanilla & 15 & \textit{ECCo} & -9.38 & 7.34 \\
+  vanilla & 15 & \textit{Generic} & -8.86 & 6.87 \\
+  vanilla & 15 & \textit{Omniscient} & -8.69 & 6.96 \\
+  vanilla & 15 & \textit{REVISE} & -8.51 & 6.73 \\\bottomrule
 
-\end{table}%
+\end{longtable}
 
 
 

@@ -1,15 +1,10 @@
----
-execute: 
-  eval: false
----
-
 ```{julia}
+#| eval: false
+
 projectdir = splitpath(pwd()) |>
     ss -> joinpath(ss[1:findall([s == "CounterfactualTraining.jl" for s in ss])[1]]...) 
 cd(projectdir)
-```
 
-```{julia}
 using CTExperiments
 using CTExperiments.CounterfactualExplanations
 using CTExperiments.CounterfactualTraining
@@ -20,33 +15,61 @@ using CTExperiments.TaijaPlotting
 
 ## Details on Encoding Mutability Constraints {#sec-app-constraints}
 
-In @sec-constraints we explained that to avoid penalizing implausibility that arises due to mutability constraints for any feature $d$, we impose a point mass prior on $p(\mathbf{x})$ for that features. This is best explained through a simple example involving a binary linear classifier.
+In @sec-constraints we explain that to avoid penalizing implausibility that arises due to mutability constraints, we impose a point mass prior on $p(\mathbf{x})$ for the corresponding feature. We argue in @sec-constraints that this approach induces models to be less sensitive to feature $d$ vis-à-vis some other mutable feature $m$ and demonstrate this empirically in @sec-experiments. Below we derive this result analytically for linear classifier.
 
-Let $\mathbf{M}_\theta(\mathbf{x})=\Theta\mathbf{x}$, with $\mathbf{x} \in \mathbb{R}^2$ and $y \in \{0,1\}$. Then for any given counterfactual with $y^+ \sim p(y)=1$ we have:
+### Linear Classifier
+
+Let $\mathbf{M}_\theta(\mathbf{x})=\Theta\mathbf{x}$ denote a linear classifier with $y\in\{1,...,K\}=\mathcal{K}$ and $\mathbf{x} \in \mathbb{R}^D$. Let $d_{\text{mtbl}}$ and $d_{\text{immtbl}}$ denote some mutable and immutable feature, respectively. Suppose that $\mu_{y^-,d_{\text{immtbl}}} < \mu_{y^+,d_{\text{immtbl}}}$ and $\mu_{y^-,d_{\text{mtbl}}} > \mu_{y^+,d_{\text{mtbl}}}$, where $\mu_{k,d}$ denotes the conditional sample mean of feature $d$ in class $k$.
+
+Assuming multivariate Gaussian class densities with common diagonal covariance matrix $\Sigma_k=\Sigma$ for all $k \in \mathcal{K}$, we have for the log likelihood ratio between any two classes $k,m \in \mathcal{K}$ [@hastie2009elements]:
 
 $$
-\nabla_\theta \left(\text{div}(\mathbf{x},\mathbf{x^\prime},\mathbf{y};\theta)\right) = \nabla_\theta \left(-\mathbf{M}_\theta(\mathbf{x})[y^+]\right) - \nabla_\theta \left(-\mathbf{M}_\theta(\mathbf{x}^\prime)[y^+]\right) = \begin{pmatrix} 0 & 0 \\ \mathbf{x}^\prime[1] - \mathbf{x}[1] & \mathbf{x}^\prime[2] - \mathbf{x}[2] \end{pmatrix}
+\log \frac{p(k|x_{d})}{p(m|x_{d})}=\frac{\mu_{k,d}-\mu_{m,d}}{\sigma_{d}^2} x_{d} + \text{const}
+$$ {#eq-loglike}
+
+By @eq-loglike we have the $\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}} < 0$ and $\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}} > 0$, where $\theta_{k,d}=\Theta[k,d]$ denotes the coefficient on feature $d$ for class $k$. 
+
+Let $\mathbf{x}^\prime$ denote some randomly chosen individual from class $y^-$ and let $y^+ \sim p(y)$ denote the randomly chosen target class. Then the partial derivative of the contrastive divergence penalty [@eq-div] with respect to coefficient $\theta_{y^+,d}$ is equal to 
+
+$$
+\frac{\partial}{\partial\theta_{y^+,d}} \left(\text{div}(\mathbf{x},\mathbf{x^\prime},\mathbf{y};\theta)\right) = \frac{\partial}{\partial\theta_{y^+,d}} \left( \left(-\mathbf{M}_\theta(\mathbf{x})[y^+]\right) - \left(-\mathbf{M}_\theta(\mathbf{x}^\prime)[y^+]\right) \right) = x_{d}^\prime - x_{d}
 $$ {#eq-grad}
 
-For the given counterfactual, contrastive divergence pushes down (up) on the coefficient $\Theta[y^+,d]$ by the amount that feature $d$ that is lower (higher) for counterfactuals than samples. This has the intended effect of aligning counterfactual explanations with the data, as discussed above. 
+and equal to zero everywhere else.
+
+Since $\mu_{y^-,d_{\text{immtbl}}} < \mu_{y^+,d_{\text{immtbl}}}$ we are more likely to have $x_{d_{\text{immtbl}}}^\prime - x_{d_{\text{immtbl}}} < 0$ than vice versa at initialization. Similarly, we are more likely to have $x_{d_{\text{mtbl}}}^\prime - x_{d_{\text{mtbl}}} > 0$ by $\mu_{y^-,d_{\text{mtbl}}} > \mu_{y^+,d_{\text{mtbl}}}$.
+
+This implies that if we do not protect feature $d_{\text{immtbl}}$, the contrastive divergence penalty will push down on $\theta_{y^-,d_{\text{immtbl}}}$ thereby exacerbating the existing effect $\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}} < 0$. In words, not protecting the immutable feature would have the undesirable effect of making the classifier more sensitive to this feature, in that it would be more likely to predict class $y^-$ as opposed to $y^+$ for lower values of $d_{\text{immtbl}}$. 
+
+By the same rationale, the contrastive divergence penalty can generally be expected to push up on $\theta_{y^-,d_{\text{mtbl}}}$ exacerbating $\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}} > 0$. In words, this has the effect of making the classifier more sensitive to the mutable feature, in that it would be more likely to predict class $y^-$ as opposed to $y^+$ for higher values of $d_{\text{mtbl}}$.
+
+Thus, our proposed approach of protecting feature $d_{\text{immtbl}}$ has the net affect of decreasing the classifier's sensitivity to the immutable feature relative to the mutable feature (i.e. no change in sensitivity for $d_{\text{immtbl}}$ relative to increased sensitivity for $d_{\text{mtbl}}$).
+
+We provide an illustrative example in @exm-grad.
 
 ::: {#exm-grad}
 
-Let feature $d=1$ in @eq-grad represents *age* and our model predicts the likelihood of credit default: $y \in \{0:=\text{'no default'},1:=\text{'default'}\}$. Then if $\mathbf{x}^\prime[1] < \mathbf{x}[1]$, contrastive divergence will push down on the corresponding coefficient, $\Theta[\text{'default'},\text{'age'}]$. Intuitively, this has the effect of decreasing the effect of *age* that the model attributes to the log odds of default, i.e. the model learns to predict higher default risk for younger individuals. 
+## Prediction of Consumer Credit Default
 
-If $\Theta[y^+,d]<0$ even in absence of this force, then contrastive divergence exacerbates the existing effect. But if *age* is immutable, then this corresponds to penalizing younger individuals for implausibility that arises due to a feature that they can change about themselves. This is precisely what we want to avoid, and therefore we impose $\mathbf{x}^\prime[1] - \mathbf{x}[1]:=0$ in such cases. In doing so, we induce lower sensitivity with respect to *age* compared to other mutable features (@fig-mtblty).
+Suppose now that $d_{\text{immtbl}}$ represents an individual's *age* and $d_{\text{mtbl}}$ represents an individual's existing level of credit card debt. Assume that these two features are independent, the class conditional densities are Gaussian and we use no other features to predict the risk of individuals defaulting on a consumer loan using a linear classifier. We have simulated this scenario using synthetic data in @fig-mtblty.
+
+In panel (a) of @fig-mtblty, we have trained the linear classifier using counterfactual training, treating both features as mutable. The linear decision boundary is roughly equally sensitive to both *age* and existing levels of *debt*. 
+
+Conversely, in panel (b) of @fig-mtblty, we have trained the same classifier using counterfactual training, but this time treating *age* as an immutable feature. The result is a new decision boundary that has tilted in favor of higher sensitivity to the mutable feature (existing *debt*) and lower sensitivity to the immutable feature (*age*).
 
 :::
 
-![Visual illustration of the effect of imposing mutability constraints.](/paper/figures/app_mtblty.svg){#fig-mtblty}
+![Visual illustration of the effect of imposing mutability constraints. See @exm-grad for details.](/paper/figures/app_mtblty.svg){#fig-mtblty}
 
 ::: {.callout-warning}
 
-\@Cynthia, \@Arie, the above still needs to be polished. I'm not sure how to demonstrate/prove this last point analytically.
+\@Cynthia, \@Arie, let me know if you want to phrase the above in terms of a theorem and proof. This is something I've so far shied away from, but I can see how it might be appropriate here.
 
 :::
 
 ```{julia}
+#| eval: false
+
 using CTExperiments: 
     get_ce_data, 
     train_val_split, 
@@ -71,12 +94,13 @@ end
 # Data:
 constraints = [
     ["both", "both"],
-    ["none", "both"],
     ["both", "none"]
 ]
 ```
 
 ```{julia}
+#| eval: false
+
 using CounterfactualExplanations.Convergence
 using Random
 Random.seed!(42)
@@ -124,18 +148,24 @@ end
 ```
 
 ```{julia}
+#| eval: false
+
 using Plots.PlotMeasures
 plts = []
+titles = ["(a)", "(b)"]
+_xlab = "Existing Debt"
+_ylab = "Age"
 for (i,model) in enumerate(models)
     coeff = get_log_reg_params(model)
     db = get_decision_boundary(coeff)
-    xlab = constraints[i][1] == "both" ? "mutable" : "immutable"
-    ylab = constraints[i][2] == "both" ? "mutable" : "immutable"
-    plt = Plots.scatter(ce_data; xlab=xlab, ylab=ylab, bottom_margin = 5mm, left_margin = 5mm)
+    xlab = constraints[i][1] == "both" ? "$(_xlab) (mutable)" : "$(_xlab) (immutable)"
+    ylab = constraints[i][2] == "both" ? "$(_ylab) (mutable)" : "$(_ylab) (immutable)"
+    plt = Plots.scatter(ce_data; xlab=xlab, ylab=ylab, bottom_margin = 5mm, left_margin = 5mm, label=["Default" "No Default"], title=titles[i])
     Plots.abline!(plt, db.slope, db.intercept; lw=5, label="Dec. Boundary")
 
     push!(plts, plt)
 end
 
-Plots.plot(plts..., layout=(1,3), size=(900,300))
+plt = Plots.plot(plts..., layout=(1,2), size=(600,300))
+Plots.savefig(plt, "paper/figures/app_mtblty.svg")
 ```
