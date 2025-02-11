@@ -1,5 +1,34 @@
 # Experiments {#sec-experiments}
 
+In this section, we present experiments that we have conducted in order to answer the following research questions:
+
+::: {#cor-plaus}
+
+## Plausibility
+
+Does our proposed counterfactual training objective (@eq-obj) induce models to learn plausible explanations?
+
+:::
+
+::: {#cor-action}
+
+## Actionability
+
+Does our proposed counterfactual training objective (@eq-obj) yield more favorable algorithmic recourse outcomes in the presence of actionability constraints?
+
+:::
+
+Beyond this, we are also interested in understanding how robust our answers to @cor-plaus and @cor-action are:
+
+::: {#cor-hyper}
+
+## Hyperparameters 
+
+What are the effects of different hyperparameter choices with respect to @eq-obj?
+
+:::
+
+
 ## Experimental Setup
 
 ## Experimental Results

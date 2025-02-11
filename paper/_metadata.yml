@@ -21,6 +21,8 @@ keywords:
 crossref:
   exr-title: "Parameters"
   exr-prefix: "Parameters"
+  cor-title: "Research Question"
+  cor-prefix: "RQ"
 filters: [abstract-section]
 header-includes: |
   \usepackage{placeins}

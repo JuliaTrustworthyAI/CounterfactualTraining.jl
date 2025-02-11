@@ -184,13 +184,15 @@
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
 \theoremstyle{definition}
-\newtheorem{example}{Example}[section]
-\theoremstyle{definition}
 \newtheorem{exercise}{Parameters}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}[section]
 \theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
+\newtheorem{example}{Example}[section]
+\theoremstyle{plain}
+\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -773,6 +775,34 @@ Section~\ref{sec-discussion}.
 
 \section{Experiments}\label{sec-experiments}
 
+In this section, we present experiments that we have conducted in order
+to answer the following research questions:
+
+\begin{corollary}[Plausibility]\protect\hypertarget{cor-plaus}{}\label{cor-plaus}
+
+Does our proposed counterfactual training objective
+(Equation~\ref{eq-obj}) induce models to learn plausible explanations?
+
+\end{corollary}
+
+\begin{corollary}[Actionability]\protect\hypertarget{cor-action}{}\label{cor-action}
+
+Does our proposed counterfactual training objective
+(Equation~\ref{eq-obj}) yield more favorable algorithmic recourse
+outcomes in the presence of actionability constraints?
+
+\end{corollary}
+
+Beyond this, we are also interested in understanding how robust our
+answers to RQ~\ref{cor-plaus} and RQ~\ref{cor-action} are:
+
+\begin{corollary}[Hyperparameters]\protect\hypertarget{cor-hyper}{}\label{cor-hyper}
+
+What are the effects of different hyperparameter choices with respect to
+Equation~\ref{eq-obj}?
+
+\end{corollary}
+
 \subsection{Experimental Setup}\label{experimental-setup}
 
 \subsection{Experimental Results}\label{experimental-results}
@@ -1121,7 +1151,7 @@ mutability constraints. See Example~\ref{exm-grad} for details.}
 
 \end{figure}%
 
-\begin{tcolorbox}[enhanced jigsaw, left=2mm, toptitle=1mm, opacitybacktitle=0.6, breakable, colbacktitle=quarto-callout-warning-color!10!white, opacityback=0, colframe=quarto-callout-warning-color-frame, arc=.35mm, bottomtitle=1mm, rightrule=.15mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, titlerule=0mm, leftrule=.75mm, coltitle=black, bottomrule=.15mm, toprule=.15mm, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, colframe=quarto-callout-warning-color-frame, opacityback=0, coltitle=black, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, arc=.35mm, bottomrule=.15mm, colback=white, bottomtitle=1mm, toptitle=1mm, toprule=.15mm, colbacktitle=quarto-callout-warning-color!10!white, rightrule=.15mm, titlerule=0mm, leftrule=.75mm, opacitybacktitle=0.6, left=2mm]
 
 @Cynthia, @Arie, I have tentatively phrased the above in terms of a
 theorem and proof. This is something I've so far shied away from because
