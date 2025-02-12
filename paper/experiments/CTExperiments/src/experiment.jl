@@ -387,14 +387,15 @@ function remove_dummy!(exper::Experiment)
 end
 
 function get_log_reg_params(exper::Experiment)
-    @assert isa(exper.model_type,LinearModel) "Model needs to be linear model."
+    @assert isa(exper.model_type, LinearModel) "Model needs to be linear model."
     M = load_results(exper)[3]
     coeffs = get_log_reg_params(M.model)
     return coeffs
 end
 
 function get_log_reg_params(model)
-    coeffs = Flux.params(model) |>
+    coeffs =
+        Flux.params(model) |>
         W -> (β₀=W[2][1] - W[2][2], β₁=W[1][1, 1] - W[1][2, 1], β₂=W[1][1, 2] - W[1][2, 2])
     return coeffs
 end

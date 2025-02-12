@@ -28,8 +28,7 @@ else
     exper_grid = ExperimentGrid(config_file)
 
     # Generate list of experiments and run them:
-    exper_list = generate_list(exper_grid) |>
-        li -> li[needs_results.(li)]
+    exper_list = generate_list(exper_grid) |> li -> li[needs_results.(li)]
     @info "Running $(length(exper_list)) experiments ..."
 
     # Adjust parallelizer:

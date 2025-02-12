@@ -26,7 +26,9 @@ struct Omniscient <: AbstractGeneratorType end
 get_generator_name(gen::ECCo; pretty::Bool=false) = pretty ? "ECCo" : "ecco"
 get_generator_name(gen::Generic; pretty::Bool=false) = pretty ? "Generic" : "generic"
 get_generator_name(gen::REVISE; pretty::Bool=false) = pretty ? "REVISE" : "revise"
-get_generator_name(gen::Gravitational; pretty::Bool=false) = pretty ? "Gravitational" : "gravi"
+function get_generator_name(gen::Gravitational; pretty::Bool=false)
+    return pretty ? "Gravitational" : "gravi"
+end
 get_generator_name(gen::Omniscient; pretty::Bool=false) = pretty ? "Omniscient" : "omni"
 
 """

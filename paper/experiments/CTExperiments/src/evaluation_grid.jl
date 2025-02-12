@@ -3,7 +3,7 @@ using JLD2
 using UUIDs
 
 global _default_generator_params_eval_grid = (
-    type=["ecco","generic"],
+    type=["ecco", "generic"],
     lambda_cost=[0.0],
     lambda_energy=[0.1, 0.5, 1.0, 5.0, 10.0, 20.0],
 )
@@ -36,9 +36,7 @@ struct EvaluationGrid <: AbstractGridConfiguration
         fname = default_grid_config_name(save_dir)
 
         # Counterfactual params:
-        counterfactual_params = append_params(
-            counterfactual_params, CounterfactualParams()
-        )
+        counterfactual_params = append_params(counterfactual_params, CounterfactualParams())
 
         # Generator parameters:
         generator_params = append_params(generator_params, GeneratorParams())
@@ -53,14 +51,15 @@ struct EvaluationGrid <: AbstractGridConfiguration
         end
 
         # Instantiate grid: 
-        grid = new(grid_file, save_dir, counterfactual_params, generator_params, test_time, inherit)
+        grid = new(
+            grid_file, save_dir, counterfactual_params, generator_params, test_time, inherit
+        )
 
         # Store grid config:
         if !isdir(save_dir)
             mkpath(save_dir)
-        end  
-        if !isfile(fname) &&
-            !isfile(joinpath(save_dir, "template_eval_grid_config.toml"))
+        end
+        if !isfile(fname) && !isfile(joinpath(save_dir, "template_eval_grid_config.toml"))
             to_toml(grid, fname)
         end
 
@@ -146,7 +145,9 @@ function EvaluationGrid(
         eval_grid = (kwrgs -> EvaluationGrid(; kwrgs...))(CTExperiments.to_ntuple(dict))
     else
         @info "Supplied file path to `ExperimentGrid`. Using default parameters for `EvaluationGrid`."
-        eval_grid = (exper_grid -> EvaluationGrid(exper_grid; inherit=inherit))(ExperimentGrid(fname))
+        eval_grid = (exper_grid -> EvaluationGrid(exper_grid; inherit=inherit))(
+            ExperimentGrid(fname)
+        )
     end
     if !isnothing(new_save_dir)
         to_toml(eval_grid, default_grid_config_name(eval_grid))     # store in new save directory
@@ -191,9 +192,7 @@ function generate_list(
         save_dir = mkpath(joinpath(cfg.save_dir, evaluation_name))
 
         # Unpack:
-        dont_include = [
-            "inherit",
-        ]
+        dont_include = ["inherit"]
         _names = Symbol.([k for (k, _) in kwrgs if !(k in dont_include)])
         _values = [v for (k, v) in kwrgs if !(k in dont_include)]
 
@@ -222,7 +221,6 @@ function set_work_dir(
     eval_work_root::String,
     output_work_root::String,
 )
-
     work_dir = get_work_dir(grid, cfg, eval_work_root, output_work_root)
 
     # Evaluation specific:
@@ -263,7 +261,9 @@ end
 
 Get the root working directory for evaluation grid results.
 """
-function get_work_dir(grid::EvaluationGrid, eval_work_root::String, output_work_root::String)
+function get_work_dir(
+    grid::EvaluationGrid, eval_work_root::String, output_work_root::String
+)
     dir = replace(grid.save_dir, output_work_root => eval_work_root)
     return mkpath(dir)
 end
@@ -324,8 +324,7 @@ end
 get_data_set(grid::EvalConfigOrGrid) = get_data_set(ExperimentGrid(grid.grid_file).data)
 
 function get_data_seed(grid::EvalConfigOrGrid)
-    _seed = ExperimentGrid(grid.grid_file).data_params["train_test_seed"] |>
-        unique
+    _seed = ExperimentGrid(grid.grid_file).data_params["train_test_seed"] |> unique
     @assert length(_seed) == 1 "Did you specify multiple seeds?"
     return _seed[1]
 end
@@ -347,9 +346,7 @@ function get_data(cfg::AbstractEvaluationConfig)
     # Get data:
     data = (
         dataset_type -> (get_data(
-            dataset_type(;
-                train_test_seed=get_data_params(cfg, "train_test_seed"),
-            );
+            dataset_type(; train_test_seed=get_data_params(cfg, "train_test_seed"));
             n=nothing,
             test_set=cfg.test_time,
         ))

@@ -116,7 +116,9 @@ end
 
 Retrieves the config file name from the command line arguments. This is used for scripting.
 """
-function get_config_from_args(; new_save_dir::Union{Nothing,String}=nothing, return_adjusted::Bool=true)
+function get_config_from_args(;
+    new_save_dir::Union{Nothing,String}=nothing, return_adjusted::Bool=true
+)
 
     # Interactive sessions:
     if isinteractive() &&
@@ -178,9 +180,13 @@ function get_config_from_args(; new_save_dir::Union{Nothing,String}=nothing, ret
     if haskey(cfg, "name")
         cfg["model_type"] = cfg["model_type"] == "" ? "mlp" : cfg["model_type"]
         cfg["data"] = cfg["data"] == "" ? "lin_sep" : cfg["data"]
-        cfg["save_dir"] = default_save_dir(new_save_dir, cfg["name"], cfg["data"], cfg["model_type"])
+        cfg["save_dir"] = default_save_dir(
+            new_save_dir, cfg["name"], cfg["data"], cfg["model_type"]
+        )
         rootdir, fonly = (dirname(fname), splitdir(fname)[end])
-        fname = joinpath(default_save_dir(rootdir, cfg["name"], cfg["data"], cfg["model_type"]), fonly)
+        fname = joinpath(
+            default_save_dir(rootdir, cfg["name"], cfg["data"], cfg["model_type"]), fonly
+        )
         CTExperiments.to_toml(cfg, fname)
     end
 

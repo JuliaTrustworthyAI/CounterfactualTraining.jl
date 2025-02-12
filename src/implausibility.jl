@@ -8,7 +8,7 @@ Compute the implausibility (contrastive divergence) of the counterfactuals (`cou
 """
 function implausibility(model, counterfactual, samples, targets)
     E(x) = -model(x)                                            # energy
-    x = ((E(samples)) - (E(counterfactual)))[:,:]'targets       # contrastive divergence
+    x = ((E(samples)) - (E(counterfactual)))[:, :]'targets       # contrastive divergence
     # x = ((E(counterfactual)) - (E(samples)))'targets   # contrastive divergence
     return diag(x[:, :])
 end

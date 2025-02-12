@@ -87,16 +87,15 @@ function aggregate_data(
 
     # Filter:
     df = filter(row -> all(x -> !(x isa Number && (isinf(x))), row), df)
-    keep_rows = [!any(isnan.(x)) for x in df[:,y]]
+    keep_rows = [!any(isnan.(x)) for x in df[:, y]]
     df = df[keep_rows, :]
     if "value" in names(df)
         keep_rows = [!any(isnan.(x)) for x in df.value]
-        df = df[keep_rows,:]
+        df = df[keep_rows, :]
     end
 
     # Aggregate:
     if !isnothing(byvars)
-
         if isa(byvars, String)
             byvars = [byvars]
         end
@@ -262,7 +261,6 @@ function aggregate_counterfactuals(
     byvars::Union{Nothing,String,Vector{String}}=nothing,
     byvars_must_include=["factual", "target", "generator_type"],
 )
-
     if isa(byvars, String)
         byvars = [byvars]
     end

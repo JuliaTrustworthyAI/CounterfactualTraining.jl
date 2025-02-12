@@ -99,7 +99,7 @@ function boxplot_ce(
     colorvar::Union{Nothing,String}=nothing,
     rowvar::Union{Nothing,String}=nothing,
     colvar::Union{Nothing,String}="generator_type",
-    kwrgs...
+    kwrgs...,
 )
     x = isnothing(x) ? "generator_type" : x
 
@@ -109,7 +109,7 @@ function boxplot_ce(
     df_agg = aggregate_ce_evaluation(df, df_meta, df_eval; y=y, byvars=byvars)
 
     # Plotting:
-    plt = boxplot_ce(df_agg,x;colorvar, rowvar, colvar, kwrgs...)
+    plt = boxplot_ce(df_agg, x; colorvar, rowvar, colvar, kwrgs...)
 
     return plt, df_agg
 end

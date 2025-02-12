@@ -5,9 +5,8 @@ function get_ce_measures(;
     length_scale=get_global_param("length_scale", 5.0),
     compute_p=get_global_param("compute_p", nothing),
 )
-    
     measures = [
-         validity,
+        validity,
         plausibility_distance_from_target,
         plausibility_energy_differential,
         distance,
@@ -15,9 +14,13 @@ function get_ce_measures(;
     ]
 
     if use_mmd
-        push!(measures, MMD(;
-            kernel=with_lengthscale(KernelFunctions.GaussianKernel(), length_scale), compute_p=compute_p
-        ))
+        push!(
+            measures,
+            MMD(;
+                kernel=with_lengthscale(KernelFunctions.GaussianKernel(), length_scale),
+                compute_p=compute_p,
+            ),
+        )
     end
 
     return measures

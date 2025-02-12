@@ -8,7 +8,6 @@ using StatsBase
 using TaijaParallel
 
 function generate!()
-    
 end
 
 """
@@ -76,7 +75,7 @@ function generate!(
             immtble = findall(mtblty .!= :both)
             for j in immtble
                 # println(counterfactuals[i])
-                counterfactuals[i][j,:] = neighbours[i][j,:]
+                counterfactuals[i][j, :] = neighbours[i][j, :]
                 # println(counterfactuals[i])
             end
         end
@@ -120,7 +119,13 @@ function generate!(
 end
 
 function setup_counterfactual_search(
-    data, model, domain, input_encoder, mutability, nneighbours::Int64, nsamples::Union{Nothing,Int64}
+    data,
+    model,
+    domain,
+    input_encoder,
+    mutability,
+    nneighbours::Int64,
+    nsamples::Union{Nothing,Int64},
 )
 
     # Wrap training dataset in `CounterfactualData`:

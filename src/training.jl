@@ -267,7 +267,6 @@ function counterfactual_training(
             @info msg_adv
             @info msg_valid
         end
-
     end
     return model, log
 end

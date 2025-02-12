@@ -49,7 +49,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
         threaded,
         concatenate_output,
         verbose,
-        ndiv
+        ndiv,
     )
         if generator_params isa NamedTuple
             if haskey(generator_params, :type) && generator_params.type isa String
@@ -75,7 +75,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
             threaded,
             concatenate_output,
             verbose,
-            ndiv
+            ndiv,
         )
     end
 end
@@ -116,7 +116,6 @@ function evaluate_counterfactuals(
     generators::AbstractDict;
     measure::Vector{<:PenaltyOrFun}=get_ce_measures(),
 )
-
     grid = ExperimentGrid(cfg.grid_file)
     exper_list = load_list(grid)
 
@@ -130,7 +129,8 @@ function evaluate_counterfactuals(
         cfg.counterfactual_params.vertical_splits
     end
 
-    if cfg.counterfactual_params.store_ce == true || CounterfactualExplanations.Evaluation.includes_divergence_metric(measure)
+    if cfg.counterfactual_params.store_ce == true ||
+        CounterfactualExplanations.Evaluation.includes_divergence_metric(measure)
         @warn "Setting `_ce_transform` to `flatten` to avoid storing entire `CounterfactualExplanation` object."
         transformer = ExplicitCETransformer(CounterfactualExplanations.flatten)
         global_ce_transform(transformer)
@@ -138,30 +138,31 @@ function evaluate_counterfactuals(
 
     # Generate and benchmark counterfactuals:
     rng = get_data_set(cfg)() |> get_rng
-    bmk =
-        benchmark(
-            data;
-            models=models,
-            generators=generators,
-            measure=measure,
-            parallelizer=pllr,
-            suppress_training=true,
-            initialization=:identity,
-            n_individuals=cfg.counterfactual_params.n_individuals,
-            n_runs=cfg.counterfactual_params.n_runs,
-            convergence=conv,
-            store_ce=cfg.counterfactual_params.store_ce,
-            storage_path=interim_storage_path,
-            vertical_splits=vertical_splits,
-            concatenate_output=cfg.counterfactual_params.concatenate_output,
-            verbose=cfg.counterfactual_params.verbose,
-        ) 
+    bmk = benchmark(
+        data;
+        models=models,
+        generators=generators,
+        measure=measure,
+        parallelizer=pllr,
+        suppress_training=true,
+        initialization=:identity,
+        n_individuals=cfg.counterfactual_params.n_individuals,
+        n_runs=cfg.counterfactual_params.n_runs,
+        convergence=conv,
+        store_ce=cfg.counterfactual_params.store_ce,
+        storage_path=interim_storage_path,
+        vertical_splits=vertical_splits,
+        concatenate_output=cfg.counterfactual_params.concatenate_output,
+        verbose=cfg.counterfactual_params.verbose,
+    )
     if Evaluation.includes_divergence_metric(measure)
-        bmk = compute_divergence(bmk, measure, data; rng=rng, nsamples=cfg.counterfactual_params.ndiv)
+        bmk = compute_divergence(
+            bmk, measure, data; rng=rng, nsamples=cfg.counterfactual_params.ndiv
+        )
     end
 
     rm(interim_storage_path; recursive=true)
-    
+
     # Remove counterfactuals to save memory:
     if !cfg.counterfactual_params.store_ce && "ce" ∈ names(bmk.evaluation)
         @info "Removing counterfactuals from evaluation"
@@ -170,7 +171,6 @@ function evaluate_counterfactuals(
     else
         return bmk
     end
-    
 end
 
 """

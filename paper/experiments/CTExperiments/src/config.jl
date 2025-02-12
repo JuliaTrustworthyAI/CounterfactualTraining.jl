@@ -52,10 +52,10 @@ function to_toml(dict::AbstractDict, fname::Union{Nothing,String}=nothing)
         if isfile(fname)
             dict_old = TOML.parsefile(fname)
             if dict == dict_old
-                return 
+                return nothing
             end
         end
-        
+
         # Write only if file doesn't exist or content differs
         open(fname, "w") do io
             TOML.print(io, dict)
@@ -159,25 +159,33 @@ global LatexReplacements = Dict(
 function format_header(s::String; replacements::Dict=LatexReplacements)
     s =
         replace(s, "_type" => "") |>
-        s -> replace(s, "_params" => "_parameters") |>
-        s -> replace(s, "lr" => "learning_rate") |>
-        s -> replace(s, "maxiter" => "maximum_iterations") |>
-        s -> replace(s, "opt" => "optimizer") |>
-        s -> replace(s, "conv" => "convergence") |>
-        s -> replace(s, "opt" => "optimizer") |>
-        s -> replace(s, "n_" => "no._") |>
-        s -> if s in keys(replacements)
-            replacements[s]
-        else
-            s |>
+        s ->
+            replace(s, "_params" => "_parameters") |>
             s ->
-            split(s, "_") |> ss -> [uppercasefirst(s) for s in ss] |> ss -> join(ss, " ")
-        end
+                replace(s, "lr" => "learning_rate") |>
+                s ->
+                    replace(s, "maxiter" => "maximum_iterations") |>
+                    s ->
+                        replace(s, "opt" => "optimizer") |>
+                        s ->
+                            replace(s, "conv" => "convergence") |>
+                            s ->
+                                replace(s, "opt" => "optimizer") |>
+                                s ->
+                                    replace(s, "n_" => "no._") |>
+                                    s -> if s in keys(replacements)
+                                        replacements[s]
+                                    else
+                                        s |>
+                                        s ->
+                                            split(s, "_") |>
+                                            ss ->
+                                                [uppercasefirst(s) for s in ss] |> ss -> join(ss, " ")
+                                    end
     return s
 end
 
 function to_mkd(dict::Dict, level::Int=0; header::Union{Nothing,String}=nothing)
-
     drop_fields = [
         "name",
         "concatenate_output",
@@ -190,7 +198,7 @@ function to_mkd(dict::Dict, level::Int=0; header::Union{Nothing,String}=nothing)
         "inherit",
         "save_dir",
         "test_time",
-        "ndiv"
+        "ndiv",
     ]
     dict = filter(((k, v),) -> length(v) > 0 && !(k in drop_fields), dict)
 

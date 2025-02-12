@@ -75,6 +75,7 @@ function value_highlighter(
     backend::Val=Val(:text),
     byvars::Union{Nothing,String,Vector{String}}=nothing,
 )
+
     @assert value_var in names(df) "Provided variables $(value_var) is no in the dataframe"
     col_idx = findall(value_var .== names(df))
 
