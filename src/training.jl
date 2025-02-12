@@ -29,6 +29,7 @@ function counterfactual_training(
     mutability=nothing,
     verbose::Int=1,
     checkpoint_dir::Union{Nothing,String}=nothing,
+    callback::Union{Nothing,Function}=nothing,
     kwrgs...,
 )
 
@@ -146,6 +147,11 @@ function counterfactual_training(
             end
 
             Flux.update!(opt_state, model, grads[1])
+        end
+
+        if !isnothing(callback)
+            counterfactuals = reduce(hcat, [x[1] for x in counterfactual_dl])
+            callback(model, counterfactuals)
         end
 
         # Logging:

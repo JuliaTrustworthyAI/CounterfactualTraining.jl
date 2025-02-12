@@ -24,7 +24,6 @@ colorvar_ce = get_global_param("colorvar_ce", colorvar)
 rowvar_ce = get_global_param("rowvar_ce", rowvar)
 colvar_ce = get_global_param("colvar_ce", colvar)
 
-
 # Visualize logs:
 prefix = "logs"
 valid_y = CTExperiments.valid_y_logs(eval_grid)

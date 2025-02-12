@@ -1,0 +1,24 @@
+---
+engine: julia
+julia: 
+  exeflags: ["--project=../experiments/"]
+format:
+  arxiv-pdf:
+    keep-tex: true  
+    linenumbers: true
+    doublespacing: false
+    runninghead: "Counterfactual Training (A Preprint)"
+    authorcols: true
+---
+
+{{< include /paper/body.qmd >}}
+
+# References {-}
+
+::: {#refs}
+:::
+
+{{< pagebreak >}}
+
+{{< include /paper/sections/appendix.qmd >}}
+

@@ -196,7 +196,9 @@ end
 
 A working directory for evaluation results.
 """
-function set_work_dir(cfg::EvaluationConfig, eval_work_root::String, output_work_root::String)
+function set_work_dir(
+    cfg::EvaluationConfig, eval_work_root::String, output_work_root::String
+)
     work_dir = get_work_dir(cfg, eval_work_root, output_work_root)
     if !isfile(joinpath(work_dir, "eval_config.toml"))
         to_toml(cfg, joinpath(work_dir, "eval_config.toml"))

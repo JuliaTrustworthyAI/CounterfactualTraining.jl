@@ -7,6 +7,8 @@ using Flux
 using StatsBase
 using TaijaParallel
 
+function generate!() end
+
 """
     generate!(
         model,
@@ -65,6 +67,19 @@ function generate!(
             ]
         ).(ces)
 
+    # Adjust for mutability:
+    mtblty = counterfactual_data.mutability
+    if !isnothing(mtblty)
+        for (i, ce) in enumerate(counterfactuals)
+            immtble = findall(mtblty .!= :both)
+            for j in immtble
+                # println(counterfactuals[i])
+                counterfactuals[i][j, :] = neighbours[i][j, :]
+                # println(counterfactuals[i])
+            end
+        end
+    end
+
     aversarial_targets = []
     targets_enc = []
     percent_valid = 0.0
@@ -103,7 +118,13 @@ function generate!(
 end
 
 function setup_counterfactual_search(
-    data, model, domain, input_encoder, mutability, nneighbours::Int64, nsamples::Union{Nothing,Int64}
+    data,
+    model,
+    domain,
+    input_encoder,
+    mutability,
+    nneighbours::Int64,
+    nsamples::Union{Nothing,Int64},
 )
 
     # Wrap training dataset in `CounterfactualData`:
@@ -142,8 +163,9 @@ function setup_counterfactual_search(
     targets = Vector{Int}(undef, nsamples)
     all_labels = counterfactual_data.y_levels
     for (i, x) in enumerate(xs)
-        factual_labels[i] = argmax(M.model(x))[1]   # get factual label
-        targets[i] = rand(all_labels)               # choose a random target (including possibly the factual label)
+        factual_labels[i] = argmax(M.model(x))[1]                           # get factual label
+        # targets[i] = rand(all_labels)                                       # choose a random target (including possibly the factual label)
+        targets[i] = rand(all_labels[all_labels .!= factual_labels[i]])     # choose random target (excluding factual label)
     end
     factual_enc = Flux.onehotbatch(factual_labels, all_labels)
 

@@ -1,0 +1,13 @@
+{{< include /paper/sections/abstract.qmd >}}
+
+{{< include /paper/sections/intro.qmd >}}
+
+{{< include /paper/sections/related.qmd >}}
+
+{{< include /paper/sections/method.qmd >}}
+
+{{< include /paper/sections/experiments.qmd >}}
+
+{{< include /paper/sections/discussion.qmd >}}
+
+{{< include /paper/sections/conclusion.qmd >}}

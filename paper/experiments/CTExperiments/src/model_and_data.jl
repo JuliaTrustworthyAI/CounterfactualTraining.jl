@@ -15,9 +15,7 @@ function get_rng(d::Dataset)
     return Xoshiro(d.train_test_seed)
 end
 
-function get_ce_measures(d::Dataset)
-    
-end
+function get_ce_measures(d::Dataset) end
 
 """
     data_sets
@@ -81,7 +79,7 @@ function get_data(data::Dataset; n::Union{Nothing,Int}=nothing, test_set::Bool=f
         X = X[:, 1:ntrain]
         y = y[1:ntrain]
     else
-        X = X[:,(end - ntest + 1):end]
+        X = X[:, (end - ntest + 1):end]
         y = y[(end - ntest + 1):end]
     end
 
@@ -109,7 +107,6 @@ function take_subset(X, y, n; rng::AbstractRNG=Random.default_rng())
 end
 
 function get_ce_data(data::Dataset, n=nothing; test_set::Bool=false, train_only::Bool=false)
-
     ce_data = CounterfactualData(
         get_data(data; n=n, test_set=test_set)...;
         domain=get_domain(data),

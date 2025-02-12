@@ -81,7 +81,7 @@ struct ExperimentGrid <: AbstractGridConfiguration
             mkpath(save_dir)
         end
         if !isfile(default_grid_config_name(grid)) &&
-            !isfile(joinpath(save_dir, "template_grid_config.toml")) 
+            !isfile(joinpath(save_dir, "template_grid_config.toml"))
             to_toml(grid, default_grid_config_name(grid))
         end
 
@@ -101,7 +101,7 @@ Append default values to `params`. This is used for generating TOML files that c
 """
 function append_params(params::AbstractDict, default_values::Vector{<:Pair})
     newparams = Dict()
-    for (k,v) in default_values
+    for (k, v) in default_values
         k = string(k)
         if !(k in keys(params)) || params[k] == []
             newparams[k] = [to_dict(v)]
@@ -110,7 +110,6 @@ function append_params(params::AbstractDict, default_values::Vector{<:Pair})
         end
         if typeof(v) <: AbstractConfiguration
             newparams[k] = []
-
         end
     end
     return newparams
@@ -462,7 +461,9 @@ end
 
 Returns the path to the evaluation directory for the experiment grid `grid`. The evaluation directory is created under the `save_dir` of the grid and named "evaluation". If the directory does not exist, it is created.
 """
-function default_evaluation_dir(grid::ExperimentGrid; rootdir::Union{Nothing,String}=nothing)
+function default_evaluation_dir(
+    grid::ExperimentGrid; rootdir::Union{Nothing,String}=nothing
+)
     if isnothing(rootdir)
         # Use old directory:
         save_dir = grid.save_dir

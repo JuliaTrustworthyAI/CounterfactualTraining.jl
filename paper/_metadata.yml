@@ -1,0 +1,29 @@
+title: "Counterfactual Training: Teaching Models Plausible and Actionable Explanations"
+author: 
+  - name: Patrick Altmeyer
+    orcid: 0000-0003-4726-8613
+    email: p.altmeyer@tudelft.nl
+    affiliation:
+      - id: tu
+        name: Delft University of Technology
+        department: Faculty of Electrical Engineering, Mathematics and Computer Science
+  - name: Arie van Deursen
+    affiliation:
+      - id: tu
+  - name: Cynthia C. S. Liem
+    affiliation:
+      - id: tu
+bibliography: bib.bib
+keywords: 
+  - Counterfactual Explanations
+  - Explainable AI
+  - Representation Learning
+crossref:
+  exr-title: "Parameters"
+  exr-prefix: "Parameters"
+  cor-title: "Research Question"
+  cor-prefix: "RQ"
+filters: [abstract-section]
+header-includes: |
+  \usepackage{placeins}
+link-citations: true
