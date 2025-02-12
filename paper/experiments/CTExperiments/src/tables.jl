@@ -13,7 +13,7 @@ function tabulate_results(
 )
     df = inputs[1]
     other_inputs = inputs[2]
-    if isa(other_inputs.backend,Val{:latex})
+    if isa(other_inputs.backend, Val{:latex})
         formatters = PrettyTables.ft_latex_sn(3)
         tf = PrettyTables.tf_latex_booktabs
         tab = pretty_table(
@@ -28,21 +28,13 @@ function tabulate_results(
             kwrgs...,
         )
     else
-        tab = pretty_table(
-            df;
-            alignment=:c,
-            other_inputs...,
-            kwrgs...,
-        )
+        tab = pretty_table(df; alignment=:c, other_inputs..., kwrgs...)
     end
     return tab
 end
 
 function get_table_inputs(
-    df::DataFrame,
-    value_var::String="mean";
-    backend::Val=Val(:text),
-    kwrgs...
+    df::DataFrame, value_var::String="mean"; backend::Val=Val(:text), kwrgs...
 )
     df = deepcopy(df)
 
@@ -58,13 +50,13 @@ function get_table_inputs(
     return df, (; highlighters=hls, backend=backend, header=header)
 end
 
-format_generator(s::AbstractString) = get_generator_name(generator_types[s](), pretty=true)
+format_generator(s::AbstractString) = get_generator_name(generator_types[s](); pretty=true)
 
 global LatexHeaderReplacements = Dict(
-    "lambda_energy_exper" =>  latex_cell"$\lambda_{\text{div}} (\text{train})$",
-    "lambda_energy_eval" =>  latex_cell"$\lambda_{\text{div}} (\text{eval})$",
-    "lambda_cost_exper" =>  latex_cell"$\lambda_{\text{cost}} (\text{train})$",
-    "lambda_cost_eval" =>  latex_cell"$\lambda_{\text{cost}} (\text{eval})$",
+    "lambda_energy_exper" => LatexCell("\$\\lambda_{\\text{div}} (\\text{train})\$"),
+    "lambda_energy_eval" => LatexCell("\$\\lambda_{\\text{div}} (\\text{eval})\$"),
+    "lambda_cost_exper" => LatexCell("\$\\lambda_{\\text{cost}} (\\text{train})\$"),
+    "lambda_cost_eval" => LatexCell("\$\\lambda_{\\text{cost}} (\\text{eval})\$"),
 )
 
 function value_highlighter(
@@ -75,8 +67,7 @@ function value_highlighter(
     backend::Val=Val(:text),
     byvars::Union{Nothing,String,Vector{String}}=nothing,
 )
-
-    @assert value_var in names(df) "Provided variables $(value_var) is no in the dataframe"
+    @assert value_var in names(df) "Provided variables $(value_var) is not in the dataframe"
     col_idx = findall(value_var .== names(df))
 
     hls = []
@@ -96,7 +87,7 @@ function value_highlighter(
 
     # Color scale:
     if !isnothing(scheme)
-        lb, ub = (alpha/2, 1 - alpha/2)
+        lb, ub = (alpha / 2, 1 - alpha / 2)
         lims = (quantile(df[:, value_var], lb), quantile(df[:, value_var], ub))
         hl = color_scale_hl(lims, col_idx, backend, scheme)
         push!(hls, hl)
@@ -124,11 +115,8 @@ function color_scale_hl(
     return hl
 end
 
-function bolden_max_hl(max_idx::Vector{Int},col_idx::Vector{Int},backend::Val{:text})
-    hl = Highlighter(
-        (df, i, j) -> i in max_idx,
-        crayon"blue bold",
-    )
+function bolden_max_hl(max_idx::Vector{Int}, col_idx::Vector{Int}, backend::Val{:text})
+    hl = Highlighter((df, i, j) -> i in max_idx, crayon"blue bold")
     return hl
 end
 
@@ -145,8 +133,8 @@ function color_scale_hl(
     return hl
 end
 
-function bolden_max_hl(max_idx::Vector{Int},col_idx::Vector{Int},backend::Val{:latex})
-    hl = LatexHighlighter((df, i, j) -> i in max_idx, ["color{blue}", "textbf"])
+function bolden_max_hl(max_idx::Vector{Int}, col_idx::Vector{Int}, backend::Val{:latex})
+    return hl = LatexHighlighter((df, i, j) -> i in max_idx, ["color{blue}", "textbf"])
 end
 
 function generator_highlighter(df::DataFrame; backend::Val=Val(:text))
@@ -161,6 +149,6 @@ function generator_highlighter(col_idx::Int, backend::Val{:text})
 end
 
 function generator_highlighter(col_idx::Int, backend::Val{:latex})
-    hl = LatexHighlighter((df, i, j) -> j == col_idx,"textit")
+    hl = LatexHighlighter((df, i, j) -> j == col_idx, "textit")
     return hl
 end

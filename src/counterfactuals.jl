@@ -7,8 +7,7 @@ using Flux
 using StatsBase
 using TaijaParallel
 
-function generate!()
-end
+function generate!() end
 
 """
     generate!(
