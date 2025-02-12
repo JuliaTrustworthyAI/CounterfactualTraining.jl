@@ -185,14 +185,14 @@
 \usepackage{amsthm}
 \theoremstyle{definition}
 \newtheorem{exercise}{Parameters}[section]
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}[section]
-\theoremstyle{definition}
-\newtheorem{example}{Example}[section]
 \theoremstyle{plain}
 \newtheorem{corollary}{Research Question}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\theoremstyle{definition}
+\newtheorem{example}{Example}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -750,20 +750,22 @@ model to instead seek plausibility with respect to the remaining
 features. This in turn results in lower overall sensitivity to immutable
 features, which we demonstrate empirically for different classifiers in
 Section~\ref{sec-experiments}. Under certain conditions, this results
-holds theoretically\footnote{For the proof, see the supplementary
-  appendix.}:
+holds theoretically{[}For the proof, see the supplementary appendix.{]}:
 
 \begin{theorem}[Protecting Immutable
 Features]\protect\hypertarget{thm-mtblty}{}\label{thm-mtblty}
 
-Let \(\mathbf{M}_\theta(\mathbf{x})=\Theta\mathbf{x}\) denote a linear
-classifier with \(y\in\{1,...,K\}=\mathcal{K}\) and
-\(\mathbf{x} \in \mathbb{R}^D\). If we assume multivariate Gaussian
-class densities with common diagonal covariance matrix
-\(\Sigma_k=\Sigma\) for all \(k \in \mathcal{K}\), then protecting an
-immutable feature from the contrastive divergence penalty
-Equation~\ref{eq-div} will result in lower classifier sensitivity to
-that feature, provided that at least one other feature is mutable.
+Let
+\(f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})\)
+denote a linear classifier with softmax activation \(\mathcal{S}\)
+(i.e.~\emph{multinomial logistic regression}) where
+\(y\in\{1,...,K\}=\mathcal{K}\) and \(\mathbf{x} \in \mathbb{R}^D\). If
+we assume multivariate Gaussian class densities with common diagonal
+covariance matrix \(\Sigma_k=\Sigma\) for all \(k \in \mathcal{K}\),
+then protecting an immutable feature from the contrastive divergence
+penalty (Equation~\ref{eq-div}) will result in lower classifier
+sensitivity to that feature relative to the remaining features, provided
+that at least one of those is mutable.
 
 \end{theorem}
 
@@ -1062,11 +1064,23 @@ decomposes into:
 \log \frac{p(k|\mathbf{x})}{p(m|\mathbf{x})} = \sum_{d=1}^D \frac{\mu_{k,d}-\mu_{m,d}}{\sigma_{d}^2} x_{d} + \text{const}
 }\end{equation}
 
-By Equation~\ref{eq-loglike-decomp} we have the
-\(\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}} < 0\)
-and \(\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}} > 0\),
+By the properties of our classifier (\emph{multinomial logistic
+regression}), we have:
+
+\begin{equation}\phantomsection\label{eq-multi}{
+\log \frac{p(k|\mathbf{x})}{p(m|\mathbf{x})} = \sum_{d=1}^D \left( \theta_{k,d} - \theta_{m,d} \right)x_d + \text{const}
+}\end{equation}
+
 where \(\theta_{k,d}=\Theta[k,d]\) denotes the coefficient on feature
 \(d\) for class \(k\).
+
+Based on Equation~\ref{eq-loglike-decomp} and Equation~\ref{eq-multi} we
+can identify that
+\((\mu_{k,d}-\mu_{m,d}) \propto (\theta_{k,d} - \theta_{m,d})\) under
+the assumptions we made above. Hence, we have that
+\((\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}}) < 0\)
+and
+\((\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}}) > 0\)
 
 Let \(\mathbf{x}^\prime\) denote some randomly chosen individual from
 class \(y^-\) and let \(y^+ \sim p(y)\) denote the randomly chosen
@@ -1080,18 +1094,18 @@ penalty Equation~\ref{eq-div} with respect to coefficient
 
 and equal to zero everywhere else.
 
-Since \(\mu_{y^-,d_{\text{immtbl}}} < \mu_{y^+,d_{\text{immtbl}}}\) we
+Since \((\mu_{y^-,d_{\text{immtbl}}} < \mu_{y^+,d_{\text{immtbl}}})\) we
 are more likely to have
-\(x_{d_{\text{immtbl}}}^\prime - x_{d_{\text{immtbl}}} < 0\) than vice
+\((x_{d_{\text{immtbl}}}^\prime - x_{d_{\text{immtbl}}}) < 0\) than vice
 versa at initialization. Similarly, we are more likely to have
-\(x_{d_{\text{mtbl}}}^\prime - x_{d_{\text{mtbl}}} > 0\) by
-\(\mu_{y^-,d_{\text{mtbl}}} > \mu_{y^+,d_{\text{mtbl}}}\).
+\((x_{d_{\text{mtbl}}}^\prime - x_{d_{\text{mtbl}}}) > 0\) since
+\((\mu_{y^-,d_{\text{mtbl}}} > \mu_{y^+,d_{\text{mtbl}}})\).
 
 This implies that if we do not protect feature \(d_{\text{immtbl}}\),
 the contrastive divergence penalty will push down on
 \(\theta_{y^-,d_{\text{immtbl}}}\) thereby exacerbating the existing
 effect
-\(\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}} < 0\).
+\((\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}}) < 0\).
 In words, not protecting the immutable feature would have the
 undesirable effect of making the classifier more sensitive to this
 feature, in that it would be more likely to predict class \(y^-\) as
@@ -1099,8 +1113,8 @@ opposed to \(y^+\) for lower values of \(d_{\text{immtbl}}\).
 
 By the same rationale, the contrastive divergence penalty can generally
 be expected to push up on \(\theta_{y^-,d_{\text{mtbl}}}\) exacerbating
-\(\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}} > 0\). In
-words, this has the effect of making the classifier more sensitive to
+\((\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}}) > 0\).
+In words, this has the effect of making the classifier more sensitive to
 the mutable feature, in that it would be more likely to predict class
 \(y^-\) as opposed to \(y^+\) for higher values of \(d_{\text{mtbl}}\).
 
@@ -1151,7 +1165,7 @@ mutability constraints. See Example~\ref{exm-grad} for details.}
 
 \end{figure}%
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, colframe=quarto-callout-warning-color-frame, opacityback=0, coltitle=black, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, arc=.35mm, bottomrule=.15mm, colback=white, bottomtitle=1mm, toptitle=1mm, toprule=.15mm, colbacktitle=quarto-callout-warning-color!10!white, rightrule=.15mm, titlerule=0mm, leftrule=.75mm, opacitybacktitle=0.6, left=2mm]
+\begin{tcolorbox}[enhanced jigsaw, toprule=.15mm, colback=white, opacityback=0, coltitle=black, arc=.35mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, toptitle=1mm, colbacktitle=quarto-callout-warning-color!10!white, bottomrule=.15mm, colframe=quarto-callout-warning-color-frame, breakable, opacitybacktitle=0.6, rightrule=.15mm, left=2mm, bottomtitle=1mm, titlerule=0mm, leftrule=.75mm]
 
 @Cynthia, @Arie, I have tentatively phrased the above in terms of a
 theorem and proof. This is something I've so far shied away from because
@@ -1163,7 +1177,67 @@ correct.
 
 \section{Detailed Results}\label{detailed-results}
 
-\subsection{Initial Grid Search}\label{initial-grid-search}
+\begin{tcolorbox}[enhanced jigsaw, toprule=.15mm, colback=white, opacityback=0, coltitle=black, arc=.35mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, toptitle=1mm, colbacktitle=quarto-callout-warning-color!10!white, bottomrule=.15mm, colframe=quarto-callout-warning-color-frame, breakable, opacitybacktitle=0.6, rightrule=.15mm, left=2mm, bottomtitle=1mm, titlerule=0mm, leftrule=.75mm]
+
+@Cynthia, @Arie, I'm including some preliminary results here but will
+rerun experiments in the coming days. You'll notice some odd outlier
+results (huge values) for the initial grid search
+(Section~\ref{sec-app-initial}). My belief is that this is once again
+due to \emph{ECCo} overshooting for some hyperparameter choices, that we
+have discussed before. A simple solution to this story is to actually
+impose domain constraints. Let's see what the final results show us (I
+also still plan to make slight changes to the implementation), but in
+any case I think it might even be worth to report results for the
+initial grid search in the final appendix (they do include good results
+for CT for certain hyperparameter ranges and highlight limitations
+inherited from energy-based modelling).
+
+\end{tcolorbox}
+
+\subsection{Qualitative Findings for Image
+Data}\label{qualitative-findings-for-image-data}
+
+\begin{tcolorbox}[enhanced jigsaw, toprule=.15mm, colback=white, opacityback=0, coltitle=black, arc=.35mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, breakable, opacitybacktitle=0.6, rightrule=.15mm, left=2mm, bottomtitle=1mm, titlerule=0mm, leftrule=.75mm]
+
+@Cynthia, @Arie, Figure~\ref{fig-mnist} shows much more plausible
+(faithful) counterfactuals for a model with CT than the model with
+conventional training (Figure~\ref{fig-mnist-vanilla}). In fact, this is
+not even using \emph{ECCo+} and still showing better results than the
+best results we achieved in our AAAI paper for JEM ensembles.
+
+\end{tcolorbox}
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/figures/mnist_mlp.png}}
+
+}
+
+\caption{\label{fig-mnist}Counterfactual images for \emph{MLP} with
+counterfactual training. The underlying generator, \emph{ECCo}, aims to
+generate counterfactuals that are faithful to the model
+(\citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024}).}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/figures/mnist_mlp_vanilla.png}}
+
+}
+
+\caption{\label{fig-mnist-vanilla}Counterfactual images for \emph{MLP}
+with conventional training. The underlying generator, \emph{ECCo}, aims
+to generate counterfactuals that are faithful to the model
+(\citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024}).}
+
+\end{figure}%
+
+\subsection{Initial Grid Search}\label{sec-app-initial}
 
 For the initial round of experiments we
 

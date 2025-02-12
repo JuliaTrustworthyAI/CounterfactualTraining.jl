@@ -41,7 +41,25 @@ DotEnv.load!()
 
 # Detailed Results {.appendix}
 
-## Initial Grid Search
+::: {.callout-warning}
+
+\@Cynthia, \@Arie, I'm including some preliminary results here but will rerun experiments in the coming days. You'll notice some odd outlier results (huge values) for the initial grid search (@sec-app-initial). My belief is that this is once again due to *ECCo* overshooting for some hyperparameter choices, that we have discussed before. A simple solution to this story is to actually impose domain constraints. Let's see what the final results show us (I also still plan to make slight changes to the implementation), but in any case I think it might even be worth to report results for the initial grid search in the final appendix (they do include good results for CT for certain hyperparameter ranges and highlight limitations inherited from energy-based modelling).
+
+:::
+
+## Qualitative Findings for Image Data
+
+::: {.callout-note}
+
+\@Cynthia, \@Arie, @fig-mnist shows much more plausible (faithful) counterfactuals for a model with CT than the model with conventional training (@fig-mnist-vanilla). In fact, this is not even using *ECCo+* and still showing better results than the best results we achieved in our AAAI paper for JEM ensembles.
+
+:::
+
+![Counterfactual images for *MLP* with counterfactual training. The underlying generator, *ECCo*, aims to generate counterfactuals that are faithful to the model [@altmeyer2024faithful].](/paper/figures/mnist_mlp.png){#fig-mnist}
+
+![Counterfactual images for *MLP* with conventional training. The underlying generator, *ECCo*, aims to generate counterfactuals that are faithful to the model [@altmeyer2024faithful].](/paper/figures/mnist_mlp_vanilla.png){#fig-mnist-vanilla}
+
+## Initial Grid Search {#sec-app-initial}
 
 ```{julia}
 results_dir = ENV["INITIAL_RUN_RESULTS"]

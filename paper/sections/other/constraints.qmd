@@ -33,7 +33,15 @@ $$
 \log \frac{p(k|\mathbf{x})}{p(m|\mathbf{x})} = \sum_{d=1}^D \frac{\mu_{k,d}-\mu_{m,d}}{\sigma_{d}^2} x_{d} + \text{const}
 $$ {#eq-loglike-decomp}
 
-By @eq-loglike-decomp we have the $\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}} < 0$ and $\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}} > 0$, where $\theta_{k,d}=\Theta[k,d]$ denotes the coefficient on feature $d$ for class $k$. 
+By the properties of our classifier (*multinomial logistic regression*), we have:
+
+$$
+\log \frac{p(k|\mathbf{x})}{p(m|\mathbf{x})} = \sum_{d=1}^D \left( \theta_{k,d} - \theta_{m,d} \right)x_d + \text{const}
+$$ {#eq-multi}
+
+where $\theta_{k,d}=\Theta[k,d]$ denotes the coefficient on feature $d$ for class $k$. 
+
+Based on @eq-loglike-decomp and @eq-multi we can identify that $(\mu_{k,d}-\mu_{m,d}) \propto (\theta_{k,d} - \theta_{m,d})$ under the assumptions we made above. Hence, we have that $(\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}}) < 0$ and $(\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}}) > 0$
 
 Let $\mathbf{x}^\prime$ denote some randomly chosen individual from class $y^-$ and let $y^+ \sim p(y)$ denote the randomly chosen target class. Then the partial derivative of the contrastive divergence penalty [@eq-div] with respect to coefficient $\theta_{y^+,d}$ is equal to 
 
@@ -43,11 +51,11 @@ $$ {#eq-grad}
 
 and equal to zero everywhere else.
 
-Since $\mu_{y^-,d_{\text{immtbl}}} < \mu_{y^+,d_{\text{immtbl}}}$ we are more likely to have $x_{d_{\text{immtbl}}}^\prime - x_{d_{\text{immtbl}}} < 0$ than vice versa at initialization. Similarly, we are more likely to have $x_{d_{\text{mtbl}}}^\prime - x_{d_{\text{mtbl}}} > 0$ by $\mu_{y^-,d_{\text{mtbl}}} > \mu_{y^+,d_{\text{mtbl}}}$.
+Since $(\mu_{y^-,d_{\text{immtbl}}} < \mu_{y^+,d_{\text{immtbl}}})$ we are more likely to have $(x_{d_{\text{immtbl}}}^\prime - x_{d_{\text{immtbl}}}) < 0$ than vice versa at initialization. Similarly, we are more likely to have $(x_{d_{\text{mtbl}}}^\prime - x_{d_{\text{mtbl}}}) > 0$ since $(\mu_{y^-,d_{\text{mtbl}}} > \mu_{y^+,d_{\text{mtbl}}})$.
 
-This implies that if we do not protect feature $d_{\text{immtbl}}$, the contrastive divergence penalty will push down on $\theta_{y^-,d_{\text{immtbl}}}$ thereby exacerbating the existing effect $\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}} < 0$. In words, not protecting the immutable feature would have the undesirable effect of making the classifier more sensitive to this feature, in that it would be more likely to predict class $y^-$ as opposed to $y^+$ for lower values of $d_{\text{immtbl}}$. 
+This implies that if we do not protect feature $d_{\text{immtbl}}$, the contrastive divergence penalty will push down on $\theta_{y^-,d_{\text{immtbl}}}$ thereby exacerbating the existing effect $(\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}}) < 0$. In words, not protecting the immutable feature would have the undesirable effect of making the classifier more sensitive to this feature, in that it would be more likely to predict class $y^-$ as opposed to $y^+$ for lower values of $d_{\text{immtbl}}$. 
 
-By the same rationale, the contrastive divergence penalty can generally be expected to push up on $\theta_{y^-,d_{\text{mtbl}}}$ exacerbating $\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}} > 0$. In words, this has the effect of making the classifier more sensitive to the mutable feature, in that it would be more likely to predict class $y^-$ as opposed to $y^+$ for higher values of $d_{\text{mtbl}}$.
+By the same rationale, the contrastive divergence penalty can generally be expected to push up on $\theta_{y^-,d_{\text{mtbl}}}$ exacerbating $(\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}}) > 0$. In words, this has the effect of making the classifier more sensitive to the mutable feature, in that it would be more likely to predict class $y^-$ as opposed to $y^+$ for higher values of $d_{\text{mtbl}}$.
 
 Thus, our proposed approach of protecting feature $d_{\text{immtbl}}$ has the net affect of decreasing the classifier's sensitivity to the immutable feature relative to the mutable feature (i.e. no change in sensitivity for $d_{\text{immtbl}}$ relative to increased sensitivity for $d_{\text{mtbl}}$).
 

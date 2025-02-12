@@ -70,13 +70,13 @@ Since actionability constraints are binding at test time, we should also impose 
 2. We have $\mathbf{x}[d]>\mathbf{x}^\prime[d]$ but feature $d$ can only be decreased in practice.
 3. We have $\mathbf{x}[d]<\mathbf{x}^\prime[d]$ but feature $d$ can only be increased in practice.
 
-From a Bayesian perspective, setting $\mathbf{x}[d] := \mathbf{x}^\prime[d]$ can be understood as assuming a point mass prior for $p(\mathbf{x})$ with respect to feature $d$. Intuitively, we think of this simply in terms ignoring implausibility costs with respect to immutable features, which effectively forces the model to instead seek plausibility with respect to the remaining features. This in turn results in lower overall sensitivity to immutable features, which we demonstrate empirically for different classifiers in @sec-experiments. Under certain conditions, this results holds theoretically^[For the proof, see the supplementary appendix.]:
+From a Bayesian perspective, setting $\mathbf{x}[d] := \mathbf{x}^\prime[d]$ can be understood as assuming a point mass prior for $p(\mathbf{x})$ with respect to feature $d$. Intuitively, we think of this simply in terms ignoring implausibility costs with respect to immutable features, which effectively forces the model to instead seek plausibility with respect to the remaining features. This in turn results in lower overall sensitivity to immutable features, which we demonstrate empirically for different classifiers in @sec-experiments. Under certain conditions, this results holds theoretically[For the proof, see the supplementary appendix.]:
 
 ::: {#thm-mtblty}
 
 ## Protecting Immutable Features
 
-Let $\mathbf{M}_\theta(\mathbf{x})=\Theta\mathbf{x}$ denote a linear classifier with $y\in\{1,...,K\}=\mathcal{K}$ and $\mathbf{x} \in \mathbb{R}^D$. If we assume multivariate Gaussian class densities with common diagonal covariance matrix $\Sigma_k=\Sigma$ for all $k \in \mathcal{K}$, then protecting an immutable feature from the contrastive divergence penalty [@eq-div] will result in lower classifier sensitivity to that feature, provided that at least one other feature is mutable.
+Let $f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})$ denote a linear classifier with softmax activation $\mathcal{S}$ (i.e. *multinomial logistic regression*) where $y\in\{1,...,K\}=\mathcal{K}$ and $\mathbf{x} \in \mathbb{R}^D$. If we assume multivariate Gaussian class densities with common diagonal covariance matrix $\Sigma_k=\Sigma$ for all $k \in \mathcal{K}$, then protecting an immutable feature from the contrastive divergence penalty (@eq-div) will result in lower classifier sensitivity to that feature relative to the remaining features, provided that at least one of those is mutable.
 
 :::
 
