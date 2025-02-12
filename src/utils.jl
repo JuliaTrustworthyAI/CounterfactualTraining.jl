@@ -1,3 +1,5 @@
+using StatsBase
+
 """
     unwrap(train_set; labels=nothing)
 
@@ -31,4 +33,16 @@ function accuracy(model, train_set)
         acc += sum(yhat .== y)
     end
     return acc / (train_set.batchsize * length(train_set))
+end
+
+function infer_domain_constraints(X::AbstractArray; nstd=3)
+    bounds = Tuple[]
+    for x in eachrow(X)
+        xmin, xmax = extrema(x)
+        sigma = std(x)
+        mu = mean(x)
+        lb, ub = (mu - nstd * sigma, mu + nstd * sigma)
+        push!(bounds, (minimum([lb,xmin]), maximum([ub,xmax])))
+    end
+    return bounds
 end
