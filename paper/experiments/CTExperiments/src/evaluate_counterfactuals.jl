@@ -26,16 +26,17 @@ Struct holding keyword arguments relevant to the evaluation of counterfactual ex
 """
 Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
     generator_params::GeneratorParams = GeneratorParams()
-    n_individuals::Int = 100
-    n_runs::Int = 1
+    n_individuals::Int = get_global_param("n_individuals", 100)
+    n_runs::Int = get_global_param("n_runs", 5)
     conv::AbstractString = "max_iter"
     maxiter::Int = 100
-    vertical_splits::Int = 100
-    store_ce::Bool = true
+    vertical_splits::Int = get_global_param("vertical_splits", 100)
+    store_ce::Bool = false
     parallelizer::AbstractString = "mpi"
     threaded::Bool = false
-    concatenate_output::Bool = true
+    concatenate_output::Bool = get_global_param("concatenate_output", true)
     verbose::Bool = true
+    ndiv::Int = 100
     function CounterfactualParams(
         generator_params,
         n_individuals,
@@ -48,6 +49,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
         threaded,
         concatenate_output,
         verbose,
+        ndiv,
     )
         if generator_params isa NamedTuple
             if haskey(generator_params, :type) && generator_params.type isa String
@@ -59,12 +61,6 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
             else
                 generator_params = GeneratorParams(; generator_params...)
             end
-        end
-
-        if store_ce == true
-            @warn "Setting `_ce_transform` to `counterfactual` to avoid storing entire `CounterfactualExplanation` object."
-            transformer = ExplicitCETransformer(CounterfactualExplanations.flatten)
-            global_ce_transform(transformer)
         end
 
         return new(
@@ -79,6 +75,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
             threaded,
             concatenate_output,
             verbose,
+            ndiv,
         )
     end
 end
@@ -95,7 +92,7 @@ get_convergence(cfg::CounterfactualParams) = get_convergence(cfg.conv, cfg.maxit
         data::CounterfactualData,
         models::AbstractDict,
         generators::AbstractDict;
-        measure::Vector{<:PenaltyOrFun}=CE_MEASURES,
+        measure::Vector{<:PenaltyOrFun}=get_ce_measures(),
     )
 
 Evaluate the counterfactuals using the provided `models` and `generators`.
@@ -117,8 +114,11 @@ function evaluate_counterfactuals(
     data::CounterfactualData,
     models::AbstractDict,
     generators::AbstractDict;
-    measure::Vector{<:PenaltyOrFun}=CE_MEASURES,
+    measure::Vector{<:PenaltyOrFun}=get_ce_measures(),
 )
+    grid = ExperimentGrid(cfg.grid_file)
+    exper_list = load_list(grid)
+
     # Get parallelizer:
     pllr = get_parallelizer(cfg.counterfactual_params)
     conv = get_convergence(cfg.counterfactual_params)
@@ -129,27 +129,48 @@ function evaluate_counterfactuals(
         cfg.counterfactual_params.vertical_splits
     end
 
-    # Generate and benchmark counterfactuals:
-    bmk =
-        benchmark(
-            data;
-            models=models,
-            generators=generators,
-            measure=measure,
-            parallelizer=pllr,
-            suppress_training=true,
-            initialization=:identity,
-            n_individuals=cfg.counterfactual_params.n_individuals,
-            n_runs=cfg.counterfactual_params.n_runs,
-            convergence=conv,
-            store_ce=cfg.counterfactual_params.store_ce,
-            storage_path=interim_storage_path,
-            vertical_splits=vertical_splits,
-            concatenate_output=cfg.counterfactual_params.concatenate_output,
-            verbose=cfg.counterfactual_params.verbose,
-        ) |> bmk -> compute_divergence(bmk, measure, data)
+    if cfg.counterfactual_params.store_ce == true ||
+        CounterfactualExplanations.Evaluation.includes_divergence_metric(measure)
+        @warn "Setting `_ce_transform` to `flatten` to avoid storing entire `CounterfactualExplanation` object."
+        transformer = ExplicitCETransformer(CounterfactualExplanations.flatten)
+        global_ce_transform(transformer)
+    end
 
-    return bmk
+    # Generate and benchmark counterfactuals:
+    rng = get_data_set(cfg)() |> get_rng
+    bmk = benchmark(
+        data;
+        models=models,
+        generators=generators,
+        measure=measure,
+        parallelizer=pllr,
+        suppress_training=true,
+        initialization=:identity,
+        n_individuals=cfg.counterfactual_params.n_individuals,
+        n_runs=cfg.counterfactual_params.n_runs,
+        convergence=conv,
+        store_ce=cfg.counterfactual_params.store_ce,
+        storage_path=interim_storage_path,
+        vertical_splits=vertical_splits,
+        concatenate_output=cfg.counterfactual_params.concatenate_output,
+        verbose=cfg.counterfactual_params.verbose,
+    )
+    if Evaluation.includes_divergence_metric(measure)
+        bmk = compute_divergence(
+            bmk, measure, data; rng=rng, nsamples=cfg.counterfactual_params.ndiv
+        )
+    end
+
+    rm(interim_storage_path; recursive=true)
+
+    # Remove counterfactuals to save memory:
+    if !cfg.counterfactual_params.store_ce && "ce" ∈ names(bmk.evaluation)
+        @info "Removing counterfactuals from evaluation"
+        df = select(bmk.evaluation, Not(:ce))
+        return Benchmark(df)
+    else
+        return bmk
+    end
 end
 
 """
@@ -164,20 +185,20 @@ end
 """
     evaluate_counterfactuals(
         cfg::AbstractEvaluationConfig;
-        measure::Vector{<:PenaltyOrFun}=CE_MEASURES,
+        measure::Vector{<:PenaltyOrFun}=get_ce_measures(),
     )
 
 Generate and evaluate counterfactuals based on the provided configuration. This function generates counterfactuals and evaluates them using the specified measures. It returns a DataFrame containing the results of the evaluation.
 
 # Arguments
 - `cfg::AbstractEvaluationConfig`: Configuration for evaluation.
-- `measure::Vector{<:PenaltyOrFun}=CE_MEASURES`: Measures to evaluate the counterfactuals with.
+- `measure::Vector{<:PenaltyOrFun}=get_ce_measures()`: Measures to evaluate the counterfactuals with.
 
 # Returns
 - A DataFrame containing the results of the evaluation.
 """
 function evaluate_counterfactuals(
-    cfg::AbstractEvaluationConfig; measure::Vector{<:PenaltyOrFun}=CE_MEASURES
+    cfg::AbstractEvaluationConfig; measure::Vector{<:PenaltyOrFun}=get_ce_measures()
 )
     data, models, generators = load_data_models_generators(cfg)
 
@@ -191,7 +212,7 @@ end
     evaluate_counterfactuals(
         cfg::AbstractEvaluationConfig,
         comm::MPI.Comm;
-        measure::Vector{<:PenaltyOrFun}=CE_MEASURES,
+        measure::Vector{<:PenaltyOrFun}=get_ce_measures(),
     )
 
 Generate and evaluate counterfactuals based on the provided configuration. This method of `evaluate_counterfactuals` is dispatched for parallel evaluation using MPI (`comm::MPI.Comm`). The generation and evaluation of counterfactuals are distributed across the MPI processes.
@@ -199,7 +220,7 @@ Generate and evaluate counterfactuals based on the provided configuration. This 
 # Arguments
 - `cfg::AbstractEvaluationConfig`: Configuration for evaluation.
 - `comm::MPI.Comm`: MPI communicator.
-- `measure::Vector{<:PenaltyOrFun}=CE_MEASURES`: Measures to evaluate the counterfactuals with.
+- `measure::Vector{<:PenaltyOrFun}=get_ce_measures()`: Measures to evaluate the counterfactuals with.
 
 # Returns
 - A DataFrame containing the results of the evaluation. 
@@ -207,7 +228,7 @@ Generate and evaluate counterfactuals based on the provided configuration. This 
 function evaluate_counterfactuals(
     cfg::AbstractEvaluationConfig,
     comm::MPI.Comm;
-    measure::Vector{<:PenaltyOrFun}=CE_MEASURES,
+    measure::Vector{<:PenaltyOrFun}=get_ce_measures(),
 )
 
     # Initialize MPI:
@@ -284,14 +305,8 @@ function load_data_models_generators(cfg::AbstractEvaluationConfig)
     grid = ExperimentGrid(cfg.grid_file)
     exper_list = load_list(grid)
 
-    # Get all available test data:
-    data = (
-        dataset_type -> (dt -> CounterfactualData(dt...))(
-            get_data(dataset_type(); n=nothing, test_set=cfg.test_time)
-        )
-    )(
-        get_data_set(grid.data)
-    )
+    # Get data:
+    data = get_ce_data(cfg)
 
     # Get models:
     models = Logging.with_logger(Logging.NullLogger()) do

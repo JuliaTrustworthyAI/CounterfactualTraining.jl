@@ -23,11 +23,13 @@ struct Gravitational <: AbstractGeneratorType end
 
 struct Omniscient <: AbstractGeneratorType end
 
-get_generator_name(gen::ECCo) = "ecco"
-get_generator_name(gen::Generic) = "generic"
-get_generator_name(gen::REVISE) = "revise"
-get_generator_name(gen::Gravitational) = "gravi"
-get_generator_name(gen::Omniscient) = "omni"
+get_generator_name(gen::ECCo; pretty::Bool=false) = pretty ? "ECCo" : "ecco"
+get_generator_name(gen::Generic; pretty::Bool=false) = pretty ? "Generic" : "generic"
+get_generator_name(gen::REVISE; pretty::Bool=false) = pretty ? "REVISE" : "revise"
+function get_generator_name(gen::Gravitational; pretty::Bool=false)
+    return pretty ? "Gravitational" : "gravi"
+end
+get_generator_name(gen::Omniscient; pretty::Bool=false) = pretty ? "Omniscient" : "omni"
 
 """
     generator_types
@@ -79,7 +81,7 @@ Base.@kwdef struct GeneratorParams <: AbstractGeneratorParams
     type::AbstractGeneratorType = ECCo()
     lr::AbstractFloat = 1.0
     opt::AbstractString = "sgd"
-    maxiter::Int = 100
+    maxiter::Int = 50
     lambda_cost::AbstractFloat = 0.001
     lambda_energy::AbstractFloat = 5.0
 end
@@ -192,17 +194,17 @@ Base.@kwdef struct TrainingParams <: AbstractConfiguration
     lambda_energy_reg::AbstractFloat = CounterfactualTraining.default_energy_lambda[2]
     lambda_adversarial::AbstractFloat = CounterfactualTraining.default_adversarial_lambda
     class_loss::AbstractString = "logitcrossentropy"
-    burnin::AbstractFloat = 0.0f0
-    nepochs::Int = 100
+    burnin::AbstractFloat = get_global_param("burnin", 0.0f0)
+    nepochs::Int = get_global_param("nepochs", 50)
     generator_params::GeneratorParams = GeneratorParams()
-    nce::Int = 100
+    nce::Int = get_global_param("nce", 100)
     nneighbours::Int = 100
     conv::AbstractString = "max_iter"
     lr::AbstractFloat = 0.001
     opt::AbstractString = "adam"
     parallelizer::AbstractString = ""
-    threaded::Bool = false
-    verbose::Int = 1
+    threaded::Bool = true
+    verbose::Int = get_global_param("verbose", 1)
 end
 
 """

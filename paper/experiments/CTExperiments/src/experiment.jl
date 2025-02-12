@@ -71,6 +71,7 @@ function Experiment(
     model_params::NamedTuple=(;),
     training_params::NamedTuple=(;),
     generator_params::NamedTuple=(;),
+    store::Bool=true,
 )
 
     # Load the configuration file and set up the experiment:
@@ -100,7 +101,9 @@ function Experiment(
 
     # Experiment:
     exper = Experiment(data, model_type, training_params, meta_params)
-    to_toml(exper)
+    if store
+        to_toml(exper)
+    end
 
     return exper
 end
@@ -140,7 +143,7 @@ function setup(exper::AbstractExperiment, data::Dataset, model::ModelType)
 
     # Data:
     ce_data = get_ce_data(data)
-    val_size = data.n_validation / (ntotal(data) * data.train_test_ratio)
+    val_size = data.n_validation / (data.n_validation + data.n_train)
     train_set, val_set, _ = train_val_split(data, ce_data, val_size)
 
     # Model:
@@ -235,6 +238,7 @@ function run_training(exper::Experiment; checkpoint_dir::Union{Nothing,String}=n
     model, train_set, input_encoder, val_set = setup(exper)
     conv = get_convergence(exper.training_params)
     domain = get_domain(exper.data)
+    mutability = get_mutability(exper.data)
     pllr = get_parallelizer(exper.training_params)
 
     # Optimizer and model:
@@ -262,6 +266,7 @@ function run_training(exper::Experiment; checkpoint_dir::Union{Nothing,String}=n
         nce=exper.training_params.nce,
         nneighbours=exper.training_params.nneighbours,
         domain=domain,
+        mutability=mutability,
         input_encoder=input_encoder,
         checkpoint_dir=checkpoint_dir,
     )
@@ -379,4 +384,40 @@ function remove_dummy!(exper::Experiment)
         rm(exper.meta_params.save_dir; recursive=true)
         @info "Removed dummy experiment: $(exper.meta_params.save_dir)"
     end
+end
+
+function get_log_reg_params(exper::Experiment)
+    @assert isa(exper.model_type, LinearModel) "Model needs to be linear model."
+    M = load_results(exper)[3]
+    coeffs = get_log_reg_params(M.model)
+    return coeffs
+end
+
+function get_log_reg_params(model)
+    coeffs =
+        Flux.params(model) |>
+        W -> (β₀=W[2][1] - W[2][2], β₁=W[1][1, 1] - W[1][2, 1], β₂=W[1][1, 2] - W[1][2, 2])
+    return coeffs
+end
+
+struct DecisionBoundary
+    intercept::AbstractFloat
+    slope::AbstractFloat
+end
+
+(db::DecisionBoundary)(x::AbstractFloat) = db.intercept + db.slope * x
+
+function get_decision_boundary(exper::Experiment; flip_axis=false)
+    @assert input_dim(exper.data) == 2 "Decision boundary is only defined for 2D data."
+    coeffs = get_log_reg_params(exper)
+    return get_decision_boundary(coeffs; flip_axis=flip_axis)
+end
+
+function get_decision_boundary(coeffs; flip_axis=false)
+    if !flip_axis
+        dec_boundary = DecisionBoundary(-(coeffs.β₀ / coeffs.β₂), -(coeffs.β₁ / coeffs.β₂))
+    else
+        dec_boundary = DecisionBoundary(-(coeffs.β₀ / coeffs.β₁), -(coeffs.β₂ / coeffs.β₁))
+    end
+    return dec_boundary
 end

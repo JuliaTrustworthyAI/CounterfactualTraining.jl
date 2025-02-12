@@ -116,30 +116,52 @@ end
 
 Retrieves the config file name from the command line arguments. This is used for scripting.
 """
-function get_config_from_args()
-    haskey(ENV, "config") && return ENV["config"]
-    if isinteractive() && !any((x -> contains(x, "--config=")).(ARGS))
+function get_config_from_args(;
+    new_save_dir::Union{Nothing,String}=nothing, return_adjusted::Bool=true
+)
+
+    # Interactive sessions:
+    if isinteractive() &&
+        !any((x -> contains(x, "--config=")).(ARGS)) &&
+        !haskey(ENV, "CONFIG")
         println("Specify the path to your config file.")
         input = readline()
         println("Using config file: $input")
         push!(ARGS, "--config=$input")
-        ENV["config"] = input
+        ENV["CONFIG"] = input
     end
-    config_arg = ARGS[(x -> contains(x, "--config=")).(ARGS)]
-    @assert length(config_arg) == 1 "Please provide exactly one config file name."
-    fname = replace(config_arg[1], "--config=" => "")
-    @assert isfile(fname) "Config file not found: $fname"
+
+    # Command line:
+    if any((x -> contains(x, "--config=")).(ARGS))
+        config_arg = ARGS[(x -> contains(x, "--config=")).(ARGS)]
+        @assert length(config_arg) == 1 "Please provide exactly one config file name."
+        fname = replace(config_arg[1], "--config=" => "")
+        @assert isfile(fname) "Config file not found: $fname"
+    else
+        fname = ENV["CONFIG"]
+    end
+
+    # Do not return adjust path:
+    if !return_adjusted
+        return fname
+    end
+
+    if isnothing(new_save_dir)
+        # Use old directory:
+        new_save_dir = ""
+    end
+
+    # Load config:
+    cfg = CTExperiments.from_toml(fname)
 
     if any((x -> contains(x, "--data=")).(ARGS))
         requested_dataset =
             ARGS[(x -> contains(x, "--data=")).(ARGS)] |>
             x -> replace(x[1], "--data=" => "")
-        cfg = CTExperiments.from_toml(fname)
+        @assert requested_dataset in collect(keys(CTExperiments.data_sets)) "Requested dataset not available: $requested_data. Available datasets are $(collect(keys(CTExperiments.data_sets)))."
         if haskey(cfg, "data") && cfg["data"] != requested_dataset
-            @info "Using existing config with new dataset: $requested_dataset (was $(cfg["data"]))."
+            @info "Using existing config with new dataset: '$requested_dataset' (was '$(cfg["data"])')."
             cfg["data"] = requested_dataset
-            fname = replace(fname, ".toml" => "_$(requested_dataset).toml")
-            CTExperiments.to_toml(cfg, fname)
         end
     end
 
@@ -147,13 +169,25 @@ function get_config_from_args()
         requested_model =
             ARGS[(x -> contains(x, "--model=")).(ARGS)] |>
             x -> replace(x[1], "--model=" => "")
-        cfg = CTExperiments.from_toml(fname)
+        @assert requested_model in collect(keys(CTExperiments.model_types)) "Requested model type not available: $requested_model. Available models are $(collect(keys(CTExperiments.model_types)))."
         if haskey(cfg, "model_type") && cfg["model_type"] != requested_model
-            @info "Using existing config with new model type: $requested_model (was $(cfg["model_type"]))."
+            @info "Using existing config with new model type: '$requested_model' (was '$(cfg["model_type"])')."
             cfg["model_type"] = requested_model
-            fname = replace(fname, ".toml" => "_$(requested_model).toml")
-            CTExperiments.to_toml(cfg, fname)
         end
+    end
+
+    # Save copy:
+    if haskey(cfg, "name")
+        cfg["model_type"] = cfg["model_type"] == "" ? "mlp" : cfg["model_type"]
+        cfg["data"] = cfg["data"] == "" ? "lin_sep" : cfg["data"]
+        cfg["save_dir"] = default_save_dir(
+            new_save_dir, cfg["name"], cfg["data"], cfg["model_type"]
+        )
+        rootdir, fonly = (dirname(fname), splitdir(fname)[end])
+        fname = joinpath(
+            default_save_dir(rootdir, cfg["name"], cfg["data"], cfg["model_type"]), fonly
+        )
+        CTExperiments.to_toml(cfg, fname)
     end
 
     return fname

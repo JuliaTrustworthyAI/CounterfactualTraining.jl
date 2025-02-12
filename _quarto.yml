@@ -14,3 +14,9 @@ format:
     variant: -raw_html+tex_math_dollars
     wrap: preserve
     mermaid-format: png
+execute: 
+  freeze: auto
+  eval: true
+  echo: false
+  output: false
+  daemon: 60

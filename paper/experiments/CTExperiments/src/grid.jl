@@ -7,7 +7,7 @@ abstract type AbstractGridConfiguration <: AbstractConfiguration end
 """
     ExperimentGrid
 
-A keyword dictionary that contains the parameters for experiments. It is used to generate a list of [`MetaParams`](@ref) objects, one for each unique combination of the fields (see [`setup_experiments`](@ref)).
+A keyword dictionary that contains the parameters for experiments. It is used to generate a list of [`MetaParams`](@ref) objects, one for each unique combination of the fields (see [`generate_list`](@ref)).
 
 ## Fields
 
@@ -47,16 +47,16 @@ struct ExperimentGrid <: AbstractGridConfiguration
     )
 
         # Data parameters
-        data_params = append_params(data_params, fieldnames(get_data_set(data)))
+        data_params = append_params(data_params, get_data_set(data)())
 
         # Model parameters
-        model_params = append_params(model_params, fieldnames(get_model_type(model_type)))
+        model_params = append_params(model_params, get_model_type(model_type)())
 
         # Training parameters
-        training_params = append_params(training_params, fieldnames(TrainingParams))
+        training_params = append_params(training_params, TrainingParams())
 
         # Generator parameters
-        generator_params = append_params(generator_params, fieldnames(GeneratorParams))
+        generator_params = append_params(generator_params, GeneratorParams())
 
         # Instantiate grid: 
         grid = new(
@@ -72,6 +72,10 @@ struct ExperimentGrid <: AbstractGridConfiguration
             save_dir,
         )
 
+        if grid.save_dir == ""
+            return grid
+        end
+
         # Store grid config:
         if !isdir(save_dir)
             mkpath(save_dir)
@@ -85,29 +89,40 @@ struct ExperimentGrid <: AbstractGridConfiguration
     end
 end
 
-"""
-    append_params(params::AbstractDict, available_params)
-
-Append empty lists for parameters to a dictionary if they are not already present. The available parameters are specified in the `available_params` vector. This is used for generating TOML files that can be easily filled out by the user.
-"""
-function append_params(params::AbstractDict, available_params)
-    for x in available_params
-        x = string(x)
-        if !(x in keys(params))
-            params[x] = []
-        end
-    end
-    return params
+function append_params(params::Union{NamedTuple,AbstractDict}, cfg::AbstractConfiguration)
+    kvpairs = [k => getfield(cfg, k) for k in fieldnames(typeof(cfg))]
+    return append_params(params, kvpairs)
 end
 
 """
-    append_params(params::NamedTuple, available_params)
+    append_params(params::AbstractDict, default_values::Vector{<:Pair})
+
+Append default values to `params`. This is used for generating TOML files that can be easily filled out by the user.
+"""
+function append_params(params::AbstractDict, default_values::Vector{<:Pair})
+    newparams = Dict()
+    for (k, v) in default_values
+        k = string(k)
+        if !(k in keys(params)) || params[k] == []
+            newparams[k] = [to_dict(v)]
+        else
+            newparams[k] = params[k]
+        end
+        if typeof(v) <: AbstractConfiguration
+            newparams[k] = []
+        end
+    end
+    return newparams
+end
+
+"""
+    append_params(params::NamedTuple, default_values::Vector{<:Pair})
 
 Extends the [`append_params`](@ref) function to work with `NamedTuple` objects.
 """
-function append_params(params::NamedTuple, available_params)
+function append_params(params::NamedTuple, default_values::Vector{<:Pair})
     params = Dict(zip(string.(keys(params)), values(params)))
-    params = append_params(params, available_params)
+    params = append_params(params, default_values)
     return params
 end
 
@@ -125,7 +140,7 @@ end
         save_dir::String=mkpath(joinpath(tempdir(), name)),
     )
 
-Outer constructor tailored for the `ExperimentGrid` type. It takes a number of keyword arguments, each one (except `data` and `model_type`) being a vector of possible values to be explored by the grid search. Calling [`setup_experiments(cfg::ExperimentGrid)`](@ref) on an instance of type `ExperimentGrid` will generate a list of experiments for all combinations of these vectors.
+Outer constructor tailored for the `ExperimentGrid` type. It takes a number of keyword arguments, each one (except `data` and `model_type`) being a vector of possible values to be explored by the grid search. Calling [`generate_list(cfg::ExperimentGrid)`](@ref) on an instance of type `ExperimentGrid` will generate a list of experiments for all combinations of these vectors.
 """
 function ExperimentGrid(;
     name::String="grid_$(string(uuid1()))",
@@ -154,11 +169,11 @@ function ExperimentGrid(;
 end
 
 function default_save_dir(rootdir, name, data, model_type)
-    return mkpath(joinpath(rootdir, name, data, model_type))
+    return mkpath(joinpath(rootdir, name, model_type, data))
 end
 
 function default_save_dir(grid::ExperimentGrid; rootdir=tempdir())
-    return default_save_dir(rootdir, grid.name, grid.data, grid.model_type)
+    return default_save_dir(rootdir, grid.name, grid.model_type, grid.data)
 end
 
 """
@@ -170,13 +185,16 @@ function ExperimentGrid(fname::String; new_save_dir::Union{Nothing,String}=nothi
     @assert isfile(fname) "Experiment grid configuration file not found."
     dict = from_toml(fname)
     if !isnothing(new_save_dir)
+        new_save_dir = default_save_dir(
+            new_save_dir, dict["name"], dict["data"], dict["model_type"]
+        )
         mkpath(new_save_dir)
         dict["save_dir"] = new_save_dir
     end
     grid = (kwrgs -> ExperimentGrid(; kwrgs...))(CTExperiments.to_ntuple(dict))
     if !isnothing(new_save_dir)
-        to_toml(grid, default_grid_config_name(grid))        # store in new save directory
-        to_toml(grid, fname)                # over-write old file with new config
+        to_toml(grid, default_grid_config_name(grid))   # store in new save directory
+        to_toml(grid, fname)                            # over-write old file with new config
     end
     return grid
 end
@@ -191,12 +209,14 @@ function default_grid_config_name(grid::ExperimentGrid)
 end
 
 """
-    setup_experiments(cfg::ExperimentGrid)
+    generate_list(cfg::ExperimentGrid)
 
 Generates a list of experiments to be run. The list contains one experiment for every combination of the fields in `cfg`.
 """
-function setup_experiments(
-    cfg::ExperimentGrid; name_prefix::Union{Nothing,String}="experiment"
+function generate_list(
+    cfg::ExperimentGrid;
+    name_prefix::Union{Nothing,String}="experiment",
+    store_list::Bool=true,
 )
 
     # Expand grid:
@@ -218,16 +238,23 @@ function setup_experiments(
         # Get other params:
         idx_other = .!(idx_meta)
         other_kwrgs = (; zip(_names[idx_other], _values[idx_other])...)
-        save_dir = mkpath(joinpath(cfg.save_dir, experiment_name))
+        if cfg.save_dir != ""
+            save_dir = mkpath(joinpath(cfg.save_dir, experiment_name))
+        else
+            # This avoids setting up folders if no save directory is specified
+            save_dir = ""
+        end
         meta = MetaParams(;
             experiment_name=experiment_name, save_dir=save_dir, meta_kwrgs...
         )
-        exper = Experiment(meta; other_kwrgs...)
+        exper = Experiment(meta; store=store_list, other_kwrgs...)
         push!(exper_list, exper)
     end
 
-    # Store list of experiments:
-    save_list(cfg, exper_list)
+    # Store list of experiments (if explicitly requested or not yet stored)
+    if store_list || (!isfile(default_list_name(cfg)) && cfg.save_dir != "")
+        save_list(cfg, exper_list)
+    end
 
     return exper_list
 end
@@ -272,7 +299,14 @@ function expand_grid(
     return expanded_grid, experiment_names
 end
 
-ntasks(grid::AbstractGridConfiguration) = length(expand_grid(grid)[2])
+function ntasks(grid::AbstractGridConfiguration; include_completed::Bool=false)
+    if include_completed
+        return length(expand_grid(grid)[2])
+    else
+        task_list = CTExperiments.generate_list(grid; store_list=false)
+        return sum(needs_results.(task_list))
+    end
+end
 
 """
     expand_grid_to_df(cfg::AbstractGridConfiguration)
@@ -300,6 +334,9 @@ function expand_grid_to_df(
                 # If so, iterate over the key-value pairs in `v`
                 for (k2, v2) in pairs(v)
                     # Create a new Pair with the key `k2` and value `v2`
+                    if isa(v2, AbstractVector)
+                        v2 = tuple(v2...)
+                    end
                     new_params = vcat(new_params..., Pair(string(k2), v2))
                 end
             end
@@ -322,9 +359,12 @@ end
 Saves the list of experiments corresponding to the experiment grid. This is used to save the list of experiments for later.
 """
 function save_list(cfg::ExperimentGrid, exper_list::Vector{<:AbstractExperiment})
-    save_dir = cfg.save_dir
-    @info "Saving list of experiments to $(save_dir):"
-    return jldsave(joinpath(save_dir, "exper_list.jld2"); exper_list)
+    @info "Saving list of experiments to $(cfg.save_dir):"
+    return jldsave(default_list_name(cfg); exper_list)
+end
+
+function default_list_name(cfg::ExperimentGrid)
+    return joinpath(cfg.save_dir, "exper_list.jld2")
 end
 
 """
@@ -335,8 +375,8 @@ Loads the list of experiments corresponding to the experiment grid. This is used
 function load_list(cfg::ExperimentGrid)
     save_dir = cfg.save_dir
     @info "Loading list of experiments from $(save_dir):"
-    @assert isfile(joinpath(save_dir, "exper_list.jld2")) "No list of experiments found in $(save_dir). Did you accidentally delete it?"
-    exper_list = JLD2.load(joinpath(save_dir, "exper_list.jld2"), "exper_list")
+    @assert isfile(default_list_name(cfg)) "No list of experiments found in $(save_dir). Did you accidentally delete it?"
+    exper_list = JLD2.load(default_list_name(cfg), "exper_list")
     return exper_list
 end
 
@@ -417,10 +457,18 @@ function to_kv_pair(cfg::AbstractGridConfiguration)
 end
 
 """
-    default_evaluation_dir(grid::ExperimentGrid)
+    default_evaluation_dir(grid::ExperimentGrid; rootdir::Union{Nothing,String}=nothing)
 
 Returns the path to the evaluation directory for the experiment grid `grid`. The evaluation directory is created under the `save_dir` of the grid and named "evaluation". If the directory does not exist, it is created.
 """
-function default_evaluation_dir(grid::ExperimentGrid)
-    return mkpath(joinpath(grid.save_dir, "evaluation"))
+function default_evaluation_dir(
+    grid::ExperimentGrid; rootdir::Union{Nothing,String}=nothing
+)
+    if isnothing(rootdir)
+        # Use old directory:
+        save_dir = grid.save_dir
+    else
+        save_dir = default_save_dir(grid; rootdir=rootdir)
+    end
+    return mkpath(joinpath(save_dir, "evaluation"))
 end

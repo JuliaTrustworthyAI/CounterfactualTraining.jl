@@ -15,11 +15,12 @@ function CounterfactualTraining.generate!(
     input_encoder=nothing,
     verbose=1,
     domain=nothing,
+    mutability=nothing,
 )
 
     # Setup counterfactual search
     xs, factual_enc, targets, counterfactual_data, M = CounterfactualTraining.setup_counterfactual_search(
-        data, model, domain, input_encoder, nneighbours, nsamples
+        data, model, domain, input_encoder, mutability, nneighbours, nsamples
     )
 
     # Get neighbours in target class and set counterfactuals to neighbours:

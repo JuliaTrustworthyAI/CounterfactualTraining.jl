@@ -1,7 +1,7 @@
 name = "CounterfactualTraining"
 uuid = "c5e5e904-ed0d-4ddb-967e-dbb7fd41a507"
 authors = ["Patrick Altmeyer and contributors"]
-version = "0.0.2"
+version = "0.0.3"
 
 [deps]
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"

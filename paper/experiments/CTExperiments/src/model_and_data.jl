@@ -15,6 +15,8 @@ function get_rng(d::Dataset)
     return Xoshiro(d.train_test_seed)
 end
 
+function get_ce_measures(d::Dataset) end
+
 """
     data_sets
 
@@ -39,6 +41,10 @@ Retrieves the data set from the catalogue if available.
 """
 function get_data_set(s::String)
     s = lowercase(s)
+    if s == ""
+        @info "Dataset not specified. Using 'lin_sep'."
+        s = "lin_sep"
+    end
     @assert s in keys(data_sets) "Unknown data set: $s. Available sets are $(keys(data_sets))"
     return data_sets[s]
 end
@@ -52,7 +58,12 @@ function get_data(data::Dataset; n::Union{Nothing,Int}=nothing, test_set::Bool=f
     if exceeds_max(data)
         @warn "Requesting more data than available (using oversampling)."
     end
-    X, y = load_data(data, ntotal(data))    # load all available data
+    navailable = if isinf(nmax(data))
+        100_000
+    else
+        nmax(data)
+    end
+    X, y = load_data(data, navailable)  # load all available data
 
     # Set seed and shuffle data:
     X = Float32.(X)
@@ -61,13 +72,15 @@ function get_data(data::Dataset; n::Union{Nothing,Int}=nothing, test_set::Bool=f
     y = y[new_idx]
 
     # Split data into training and test sets:
-    ntrain = Int(round(data.train_test_ratio * size(X, 2)))
+    ntrain = data.n_train + data.n_validation
+    ntest = ntotal(data) - ntrain
+    @assert navailable >= ntrain + ntest
     if !test_set
         X = X[:, 1:ntrain]
         y = y[1:ntrain]
     else
-        X = X[:, (ntrain + 1):end]
-        y = y[(ntrain + 1):end]
+        X = X[:, (end - ntest + 1):end]
+        y = y[(end - ntest + 1):end]
     end
 
     # Subset:
@@ -127,6 +140,10 @@ Retrieves the model type from the catalogue if available.
 """
 function get_model_type(s::String)
     s = lowercase(s)
+    if s == ""
+        @info "Model type not specified. Using 'mlp'."
+        s = "mlp"
+    end
     @assert s in keys(model_types) "Unknown model type: $s. Available types are $(keys(model_types))"
     return model_types[s]
 end
@@ -136,7 +153,7 @@ end
 
 Helper function to get the dimension of the input data.
 """
-input_dim(data::Dataset) = size(get_data(data; n=1)[1], 2)
+input_dim(data::Dataset) = size(get_data(data; n=1)[1], 1)
 
 """
     get_mutability(data::Dataset)

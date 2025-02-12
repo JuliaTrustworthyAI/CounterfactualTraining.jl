@@ -26,12 +26,12 @@ if rank != 0
 else
 
     # Get config and set up grid:
-    grid_file = get_config_from_args()
+    grid_file = get_config_from_args(; new_save_dir=ENV["OUTPUT_DIR"])
     eval_grid = EvaluationGrid(grid_file)
     @assert length(eval_grid.counterfactual_params["parallelizer"]) <= 1 "It does not make sense to specify multiple parallelizers. Aborting ..."
 
     # Set up evaluation configuration:
-    eval_list = setup_evaluations(eval_grid)
+    eval_list = generate_list(eval_grid) |> li -> li[needs_results.(li)]
     @info "Running $(length(eval_list)) evaluations ..."
 
     # Adjust parallelizer:
@@ -54,13 +54,20 @@ for (i, eval_config) in enumerate(eval_list)
 
     # Setup:
     if rank != 0
-        @reset eval_config.save_dir = mkpath(joinpath(tempdir(), "dummy_rank_$rank"))   # disable saving evals for non-root ranks
+        @reset eval_config.save_dir = mkpath(
+            joinpath(eval_config.save_dir, "dummy_rank_$rank")
+        )   # disable saving evals for non-root ranks
         @reset eval_config.counterfactual_params.verbose = false
     end
 
     # Evaluate counterfactuals:
-    @info "Rank $(rank): Running evaluation $i of $(length(eval_list))."
-    bmk = evaluate_counterfactuals(eval_config)
+    if isfile(CTExperiments.default_bmk_name(eval_config))
+        @info "Rank $(rank): Evaluation already exists. Skipping evaluation."
+        continue
+    else
+        @info "Rank $(rank): Running evaluation $i of $(length(eval_list))."
+        bmk = evaluate_counterfactuals(eval_config)
+    end
 
     @info "Rank $(rank): Done evaluating all counterfactuals. Waiting at barrier ..."
     MPI.Barrier(comm)
@@ -80,7 +87,7 @@ for (i, eval_config) in enumerate(eval_list)
         generate_factual_target_pairs(eval_config)
 
         # Set up evaluation work dir:
-        set_work_dir(eval_grid, eval_config, joinpath(ENV["EVAL_WORK_DIR"]))
+        set_work_dir(eval_grid, eval_config, ENV["EVAL_WORK_DIR"], ENV["OUTPUT_DIR"])
     else
         rm(eval_config.save_dir; recursive=true)
     end

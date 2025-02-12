@@ -7,6 +7,8 @@ using Flux
 using StatsBase
 using TaijaParallel
 
+function generate!() end
+
 """
     generate!(
         model,
@@ -33,9 +35,10 @@ function generate!(
     input_encoder=nothing,
     verbose=1,
     domain=nothing,
+    mutability=nothing,
 )
     xs, factual_enc, targets, counterfactual_data, M = setup_counterfactual_search(
-        data, model, domain, input_encoder, nneighbours, nsamples
+        data, model, domain, input_encoder, mutability, nneighbours, nsamples
     )
 
     # Generate counterfactuals:
@@ -63,6 +66,19 @@ function generate!(
                 :, rand(1:end)
             ]
         ).(ces)
+
+    # Adjust for mutability:
+    mtblty = counterfactual_data.mutability
+    if !isnothing(mtblty)
+        for (i, ce) in enumerate(counterfactuals)
+            immtble = findall(mtblty .!= :both)
+            for j in immtble
+                # println(counterfactuals[i])
+                counterfactuals[i][j, :] = neighbours[i][j, :]
+                # println(counterfactuals[i])
+            end
+        end
+    end
 
     aversarial_targets = []
     targets_enc = []
@@ -102,14 +118,20 @@ function generate!(
 end
 
 function setup_counterfactual_search(
-    data, model, domain, input_encoder, nneighbours::Int64, nsamples::Union{Nothing,Int64}
+    data,
+    model,
+    domain,
+    input_encoder,
+    mutability,
+    nneighbours::Int64,
+    nsamples::Union{Nothing,Int64},
 )
 
     # Wrap training dataset in `CounterfactualData`:
     # NOTE: Using [1,...,n] for labels where n is the number of output classes. Exact label information is not necessary for training.
     X, y = unwrap(data)
     counterfactual_data = CounterfactualData(
-        X, y; domain=domain, input_encoder=input_encoder
+        X, y; domain=domain, input_encoder=input_encoder, mutability=mutability
     )
     # Wrap model:
     M = Models.Model(model, Models.FluxNN(); likelihood=:classification_multi)
@@ -141,8 +163,9 @@ function setup_counterfactual_search(
     targets = Vector{Int}(undef, nsamples)
     all_labels = counterfactual_data.y_levels
     for (i, x) in enumerate(xs)
-        factual_labels[i] = argmax(M.model(x))[1]   # get factual label
-        targets[i] = rand(all_labels)               # choose a random target (including possibly the factual label)
+        factual_labels[i] = argmax(M.model(x))[1]                           # get factual label
+        # targets[i] = rand(all_labels)                                       # choose a random target (including possibly the factual label)
+        targets[i] = rand(all_labels[all_labels .!= factual_labels[i]])     # choose random target (excluding factual label)
     end
     factual_enc = Flux.onehotbatch(factual_labels, all_labels)
 

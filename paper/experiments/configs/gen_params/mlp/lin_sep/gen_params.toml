@@ -1,0 +1,48 @@
+name = "gen_params"
+dim_reduction = []
+generator_type = ["ecco", "generic", "omni", "revise"]
+data = "lin_sep"
+model_type = "mlp"
+save_dir = "paper/experiments/output/gen_params/mlp/lin_sep"
+
+[data_params]
+datadir = []
+mutability = []
+domain = []
+n_validation = []
+train_test_ratio = []
+train_test_seed = []
+n_train = []
+batchsize = []
+
+[model_params]
+nlayers = []
+activation = []
+nhidden = []
+
+[generator_params]
+opt = ["sgd"]
+lambda_cost = [0.0, 0.001, 0.1]
+lr = [1.0]
+maxiter = [20, 50, 100]
+lambda_energy = [0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0, 15.0]
+type = []
+
+[training_params]
+opt = []
+lr = []
+objective = ["full", "vanilla"]
+lambda_class_loss = []
+lambda_energy_diff = []
+burnin = []
+nepochs = []
+lambda_adversarial = []
+parallelizer = []
+nce = []
+threaded = []
+class_loss = []
+lambda_energy_reg = []
+verbose = []
+generator_params = []
+conv = []
+nneighbours = []

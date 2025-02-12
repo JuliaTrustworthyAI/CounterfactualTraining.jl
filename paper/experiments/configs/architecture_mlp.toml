@@ -1,0 +1,48 @@
+name = "architecture"
+dim_reduction = []
+generator_type = ["ecco", "generic", "omni", "revise"]
+data = ""
+model_type = "mlp"
+save_dir = ""
+
+[data_params]
+datadir = []
+mutability = []
+domain = []
+n_validation = []
+train_test_ratio = []
+train_test_seed = []
+n_train = []
+batchsize = []
+
+[model_params]
+nlayers = [1, 2, 3]
+activation = ["relu", "swish"]
+nhidden = [16, 32, 64]
+
+[generator_params]
+opt = []
+lambda_cost = []
+lr = []
+maxiter = []
+lambda_energy = []
+type = []
+
+[training_params]
+opt = []
+nce = []
+lr = []
+threaded = []
+class_loss = []
+objective = ["full", "vanilla"]
+lambda_class_loss = []
+lambda_energy_diff = []
+burnin = []
+nepochs = []
+lambda_energy_reg = []
+verbose = []
+lambda_adversarial = []
+parallelizer = []
+generator_params = []
+conv = []
+nneighbours = []

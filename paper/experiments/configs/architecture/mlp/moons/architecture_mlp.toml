@@ -1,0 +1,48 @@
+name = "architecture"
+dim_reduction = []
+generator_type = ["ecco", "generic", "omni", "revise"]
+data = "moons"
+model_type = "mlp"
+save_dir = "paper/experiments/output/architecture/mlp/moons"
+
+[data_params]
+datadir = []
+mutability = []
+domain = []
+n_validation = []
+train_test_ratio = []
+train_test_seed = []
+n_train = []
+batchsize = []
+
+[model_params]
+nlayers = [1, 2, 3]
+activation = ["relu", "swish"]
+nhidden = [16, 32, 64]
+
+[generator_params]
+opt = []
+lambda_cost = []
+lr = []
+maxiter = []
+lambda_energy = []
+type = []
+
+[training_params]
+opt = []
+lr = []
+objective = ["full", "vanilla"]
+lambda_class_loss = []
+lambda_energy_diff = []
+burnin = []
+nepochs = []
+lambda_adversarial = []
+parallelizer = []
+nce = []
+threaded = []
+class_loss = []
+lambda_energy_reg = []
+verbose = []
+generator_params = []
+conv = []
+nneighbours = []

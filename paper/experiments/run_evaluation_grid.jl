@@ -26,12 +26,12 @@ if rank != 0
 else
 
     # Get config and set up grid:
-    grid_file = get_config_from_args()
+    grid_file = get_config_from_args(; new_save_dir=ENV["OUTPUT_DIR"])
     eval_grid = EvaluationGrid(grid_file)
     @assert length(eval_grid.counterfactual_params["parallelizer"]) <= 1 "It does not make sense to specify multiple parallelizers. Aborting ..."
 
     # Set up evaluation configuration:
-    eval_list = setup_evaluations(eval_grid)
+    eval_list = generate_list(eval_grid) |> li -> li[needs_results.(li)]
     @info "Running $(length(eval_list)) evaluations ..."
 
     # Adjust parallelizer:
@@ -110,7 +110,7 @@ for (i, eval_config) in enumerate(worker_chunk)
 
     # Working directory:
     if !isdummy(eval_config)
-        set_work_dir(eval_grid, eval_config, joinpath(ENV["EVAL_WORK_DIR"]))
+        set_work_dir(eval_grid, eval_config, ENV["EVAL_WORK_DIR"], ENV["OUTPUT_DIR"])
     else
         remove_dummy!(eval_config)
     end

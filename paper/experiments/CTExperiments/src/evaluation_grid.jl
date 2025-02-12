@@ -2,7 +2,11 @@ using Base.Iterators
 using JLD2
 using UUIDs
 
-global _default_generator_params_eval_grid = (lambda_energy=[0.1, 0.5, 1.0, 5.0, 10.0],)
+global _default_generator_params_eval_grid = (
+    type=["ecco", "generic"],
+    lambda_cost=[0.0],
+    lambda_energy=[0.1, 0.5, 1.0, 5.0, 10.0, 20.0],
+)
 
 """
     EvaluationGrid
@@ -23,33 +27,41 @@ struct EvaluationGrid <: AbstractGridConfiguration
     counterfactual_params::Union{AbstractDict,NamedTuple}
     generator_params::Union{AbstractDict,NamedTuple}
     test_time::Bool
+    inherit::Bool
     function EvaluationGrid(
-        grid_file, save_dir, counterfactual_params, generator_params, test_time
+        grid_file, save_dir, counterfactual_params, generator_params, test_time, inherit
     )
 
-        # Counterfactual params:
-        counterfactual_params = append_params(
-            counterfactual_params, fieldnames(CounterfactualParams)
-        )
+        # If grid file doesn't already exist, append parameters:
+        fname = default_grid_config_name(save_dir)
 
-        # Generator parameters (inherited from ExperimentGrid):
-        inherited_generator_params = CTExperiments.from_toml(grid_file)["generator_params"]
-        generator_params = append_params(generator_params, fieldnames(GeneratorParams))
-        merged_params = Dict{String,Any}()
-        for (k, v) in generator_params
-            merged_values = unique([inherited_generator_params[k]..., v...])
-            merged_params[k] = merged_values
+        # Counterfactual params:
+        counterfactual_params = append_params(counterfactual_params, CounterfactualParams())
+
+        # Generator parameters:
+        generator_params = append_params(generator_params, GeneratorParams())
+        if inherit && !isfile(fname)
+            inherited_generator_params = CTExperiments.from_toml(grid_file)["generator_params"]
+            merged_params = Dict{String,Any}()
+            for (k, v) in generator_params
+                merged_values = unique([inherited_generator_params[k]..., v...])
+                merged_params[k] = sort(merged_values)
+            end
+            generator_params = merged_params
         end
 
         # Instantiate grid: 
-        grid = new(grid_file, save_dir, counterfactual_params, merged_params, test_time)
+        grid = new(
+            grid_file, save_dir, counterfactual_params, generator_params, test_time, inherit
+        )
 
         # Store grid config:
         if !isdir(save_dir)
             mkpath(save_dir)
         end
-
-        to_toml(grid, default_grid_config_name(grid))
+        if !isfile(fname) && !isfile(joinpath(save_dir, "template_eval_grid_config.toml"))
+            to_toml(grid, fname)
+        end
 
         return grid
     end
@@ -76,6 +88,7 @@ function EvaluationGrid(
     counterfactual_params::NamedTuple=(;),
     generator_params::NamedTuple=_default_generator_params_eval_grid,
     test_time::Bool=false,
+    inherit::Bool=get_global_param("inherit", true),
 )
     save_dir = if isnothing(save_dir)
         default_evaluation_dir(grid)
@@ -84,7 +97,7 @@ function EvaluationGrid(
     end
     grid_file = isnothing(grid_file) ? default_grid_config_name(grid) : grid_file
     return EvaluationGrid(
-        grid_file, save_dir, counterfactual_params, generator_params, test_time
+        grid_file, save_dir, counterfactual_params, generator_params, test_time, inherit
     )
 end
 
@@ -105,9 +118,10 @@ function EvaluationGrid(;
     counterfactual_params::Union{AbstractDict,NamedTuple},
     generator_params::Union{AbstractDict,NamedTuple},
     test_time::Bool,
+    inherit::Bool,
 )
     return EvaluationGrid(
-        grid_file, save_dir, counterfactual_params, generator_params, test_time
+        grid_file, save_dir, counterfactual_params, generator_params, test_time, inherit
     )
 end
 
@@ -116,7 +130,11 @@ end
 
 Outer constructor dispatched over `fname::String`.
 """
-function EvaluationGrid(fname::String; new_save_dir::Union{Nothing,String}=nothing)
+function EvaluationGrid(
+    fname::String;
+    new_save_dir::Union{Nothing,String}=nothing,
+    inherit::Bool=get_global_param("inherit", true),
+)
     @assert isfile(fname) "Evaluation grid configuration file not found."
     dict = from_toml(fname)
     if !haskey(dict, "name")
@@ -127,7 +145,9 @@ function EvaluationGrid(fname::String; new_save_dir::Union{Nothing,String}=nothi
         eval_grid = (kwrgs -> EvaluationGrid(; kwrgs...))(CTExperiments.to_ntuple(dict))
     else
         @info "Supplied file path to `ExperimentGrid`. Using default parameters for `EvaluationGrid`."
-        eval_grid = (exper_grid -> EvaluationGrid(exper_grid))(ExperimentGrid(fname))
+        eval_grid = (exper_grid -> EvaluationGrid(exper_grid; inherit=inherit))(
+            ExperimentGrid(fname)
+        )
     end
     if !isnothing(new_save_dir)
         to_toml(eval_grid, default_grid_config_name(eval_grid))     # store in new save directory
@@ -142,16 +162,22 @@ end
 Returns the default name for the configuration file associated with this grid.
 """
 function default_grid_config_name(grid::EvaluationGrid)
-    return joinpath(grid.save_dir, "evaluation_grid_config.toml")
+    return default_grid_config_name(grid.save_dir)
+end
+
+function default_grid_config_name(save_dir::String)
+    return joinpath(save_dir, "evaluation_grid_config.toml")
 end
 
 """
-    setup_evaluations(cfg::EvaluationGrid)
+    generate_list(cfg::EvaluationGrid)
 
 Generates a list of evaluations to be run. The list contains one evaluation for every combination of the fields in `cfg`.
 """
-function setup_evaluations(
-    cfg::EvaluationGrid; name_prefix::Union{Nothing,String}="evaluation"
+function generate_list(
+    cfg::EvaluationGrid;
+    name_prefix::Union{Nothing,String}="evaluation",
+    store_list::Bool=true,
 )
 
     # Expand grid:
@@ -166,8 +192,9 @@ function setup_evaluations(
         save_dir = mkpath(joinpath(cfg.save_dir, evaluation_name))
 
         # Unpack:
-        _names = Symbol.([k for (k, _) in kwrgs])
-        _values = [v for (_, v) in kwrgs]
+        dont_include = ["inherit"]
+        _names = Symbol.([k for (k, _) in kwrgs if !(k in dont_include)])
+        _values = [v for (k, v) in kwrgs if !(k in dont_include)]
 
         evaluation = EvaluationConfig(;
             grid_file=cfg.grid_file, save_dir=save_dir, (; zip(_names, _values)...)...
@@ -176,7 +203,9 @@ function setup_evaluations(
     end
 
     # Store list of experiments:
-    save_list(cfg, eval_list)
+    if store_list
+        save_list(cfg, eval_list)
+    end
 
     return eval_list
 end
@@ -186,8 +215,13 @@ end
 
 A working directory for evaluation grid results.
 """
-function set_work_dir(grid::EvaluationGrid, cfg::EvaluationConfig, eval_work_root::String)
-    work_dir = get_work_dir(grid, cfg, eval_work_root)
+function set_work_dir(
+    grid::EvaluationGrid,
+    cfg::EvaluationConfig,
+    eval_work_root::String,
+    output_work_root::String,
+)
+    work_dir = get_work_dir(grid, cfg, eval_work_root, output_work_root)
 
     # Evaluation specific:
     if !isfile(joinpath(work_dir, "eval_config.toml"))
@@ -212,18 +246,26 @@ end
 
 Get the working directory for evaluation grid results.
 """
-function get_work_dir(grid::EvaluationGrid, cfg::EvaluationConfig, eval_work_root::String)
-    _root = get_work_dir(grid, eval_work_root)
+function get_work_dir(
+    grid::EvaluationGrid,
+    cfg::EvaluationConfig,
+    eval_work_root::String,
+    output_work_root::String,
+)
+    _root = get_work_dir(grid, eval_work_root, output_work_root)
     return mkpath(joinpath(_root, splitpath(cfg.save_dir)[end]))
 end
 
 """
-    get_work_dir(grid::EvaluationGrid, eval_work_root::String)
+    get_work_dir(grid::EvaluationGrid, eval_work_root::String, output_work_root::String)
 
 Get the root working directory for evaluation grid results.
 """
-function get_work_dir(grid::EvaluationGrid, eval_work_root::String)
-    return joinpath(eval_work_root, splitpath(grid.save_dir)[end - 1])
+function get_work_dir(
+    grid::EvaluationGrid, eval_work_root::String, output_work_root::String
+)
+    dir = replace(grid.save_dir, output_work_root => eval_work_root)
+    return mkpath(dir)
 end
 
 results_dir(grid::EvaluationGrid) = joinpath(grid.save_dir, "results")
@@ -280,3 +322,37 @@ function load_ce_evaluation(grid::EvaluationGrid)
 end
 
 get_data_set(grid::EvalConfigOrGrid) = get_data_set(ExperimentGrid(grid.grid_file).data)
+
+function get_data_seed(grid::EvalConfigOrGrid)
+    _seed = ExperimentGrid(grid.grid_file).data_params["train_test_seed"] |> unique
+    @assert length(_seed) == 1 "Did you specify multiple seeds?"
+    return _seed[1]
+end
+
+function get_data_params(grid::EvalConfigOrGrid, param::String)
+    data_params = ExperimentGrid(grid.grid_file).data_params
+    @assert param in keys(data_params)
+    val = data_params[param] |> unique
+    println(val)
+    @assert length(val) == 1 "Did you specify multiple values for $param?"
+    return val[1]
+end
+
+function get_ce_data(cfg::AbstractEvaluationConfig)
+    return (dt -> CounterfactualData(dt...))(get_data(cfg))
+end
+
+function get_data(cfg::AbstractEvaluationConfig)
+    # Get data:
+    data = (
+        dataset_type -> (get_data(
+            dataset_type(; train_test_seed=get_data_params(cfg, "train_test_seed"));
+            n=nothing,
+            test_set=cfg.test_time,
+        ))
+    )(
+        get_data_set(cfg)
+    )
+
+    return data
+end

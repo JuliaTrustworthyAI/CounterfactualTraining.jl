@@ -26,8 +26,10 @@ function counterfactual_training(
     convergence=Convergence.MaxIterConvergence(),
     input_encoder=nothing,
     domain=nothing,
+    mutability=nothing,
     verbose::Int=1,
     checkpoint_dir::Union{Nothing,String}=nothing,
+    callback::Union{Nothing,Function}=nothing,
     kwrgs...,
 )
 
@@ -90,6 +92,7 @@ function counterfactual_training(
                 parallelizer=parallelizer,
                 input_encoder=input_encoder,
                 domain=domain,
+                mutability=mutability,
                 verbose=verbose,
             )
         else
@@ -144,6 +147,11 @@ function counterfactual_training(
             end
 
             Flux.update!(opt_state, model, grads[1])
+        end
+
+        if !isnothing(callback)
+            counterfactuals = reduce(hcat, [x[1] for x in counterfactual_dl])
+            callback(model, counterfactuals)
         end
 
         # Logging:
@@ -204,7 +212,7 @@ function counterfactual_training(
             acc_plt = ""
             acc_val_plt = ""
             validity_plt = ""
-            if verbose > 1
+            if verbose > 1 && epoch > burnin
                 # Add plots:
                 acc_plt = lineplot(
                     [_log[1] for _log in log]; xlabel="Epochs", ylabel="Accuracy"

@@ -24,13 +24,11 @@ if MPI.Comm_rank(MPI.COMM_WORLD) != 0
 else
 
     # Get config and set up grid:
-    config_file = get_config_from_args()
-    root_name = CTExperiments.from_toml(config_file)["name"]
-    root_save_dir = joinpath(ENV["OUTPUT_DIR"], root_name)
-    exper_grid = ExperimentGrid(config_file; new_save_dir=root_save_dir)
+    config_file = get_config_from_args(; new_save_dir=ENV["OUTPUT_DIR"])
+    exper_grid = ExperimentGrid(config_file)
 
     # Generate list of experiments and run them:
-    exper_list = setup_experiments(exper_grid)
+    exper_list = generate_list(exper_grid) |> li -> li[needs_results.(li)]
     @info "Running $(length(exper_list)) experiments ..."
 
     # Adjust parallelizer:
@@ -113,6 +111,10 @@ for (i, experiment) in enumerate(worker_chunk)
     else
         remove_dummy!(experiment)
     end
+end
+
+if rank == 0
+    @info "All experiments for $(config_file) completed"
 end
 
 # Finalize MPI
