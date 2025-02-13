@@ -130,6 +130,9 @@ function setup_counterfactual_search(
     # Wrap training dataset in `CounterfactualData`:
     # NOTE: Using [1,...,n] for labels where n is the number of output classes. Exact label information is not necessary for training.
     X, y = unwrap(data)
+    if isnothing(domain)
+        domain = infer_domain_constraints(X)
+    end
     counterfactual_data = CounterfactualData(
         X, y; domain=domain, input_encoder=input_encoder, mutability=mutability
     )

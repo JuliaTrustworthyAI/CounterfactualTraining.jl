@@ -146,10 +146,20 @@ function get_config_from_args(;
         return fname
     end
 
+    # Output directory:
     if isnothing(new_save_dir)
         # Use old directory:
         new_save_dir = ""
     end
+    if any((x -> contains(x, "--subdir=")).(ARGS))
+        subdirname = ARGS[(x -> contains(x, "--subdir=")).(ARGS)]
+        @assert length(subdirname) == 1 "Please provide exactly one name for the subdirectory."
+        subdirname = replace(subdirname[1], "--subdir=" => "")
+    else
+        subdirname = ENV["OUTPUT_SUBDIR"]
+    end
+    new_save_dir = mkpath(joinpath(new_save_dir, subdirname))
+    @info "Storing results in $(new_save_dir)."
 
     # Load config:
     cfg = CTExperiments.from_toml(fname)

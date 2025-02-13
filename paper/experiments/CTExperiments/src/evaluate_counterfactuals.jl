@@ -200,98 +200,17 @@ Generate and evaluate counterfactuals based on the provided configuration. This 
 function evaluate_counterfactuals(
     cfg::AbstractEvaluationConfig; measure::Vector{<:PenaltyOrFun}=get_ce_measures()
 )
-    data, models, generators = load_data_models_generators(cfg)
+    input_list = load_data_models_generators(cfg)
 
     # Evaluate counterfactuals:
-    bmk = evaluate_counterfactuals(cfg, data, models, generators; measure=measure)
+    bmk = Benchmark[]
+    for (data, models, generators) in input_list
+        _bmk = evaluate_counterfactuals(cfg, data, models, generators; measure=measure)
+        push!(bmk, _bmk)
+    end
+    bmk = reduce(vcat, bmk)
 
     return bmk
-end
-
-"""
-    evaluate_counterfactuals(
-        cfg::AbstractEvaluationConfig,
-        comm::MPI.Comm;
-        measure::Vector{<:PenaltyOrFun}=get_ce_measures(),
-    )
-
-Generate and evaluate counterfactuals based on the provided configuration. This method of `evaluate_counterfactuals` is dispatched for parallel evaluation using MPI (`comm::MPI.Comm`). The generation and evaluation of counterfactuals are distributed across the MPI processes.
-
-# Arguments
-- `cfg::AbstractEvaluationConfig`: Configuration for evaluation.
-- `comm::MPI.Comm`: MPI communicator.
-- `measure::Vector{<:PenaltyOrFun}=get_ce_measures()`: Measures to evaluate the counterfactuals with.
-
-# Returns
-- A DataFrame containing the results of the evaluation. 
-"""
-function evaluate_counterfactuals(
-    cfg::AbstractEvaluationConfig,
-    comm::MPI.Comm;
-    measure::Vector{<:PenaltyOrFun}=get_ce_measures(),
-)
-
-    # Initialize MPI:
-    rank = MPI.Comm_rank(comm)
-    _size = MPI.Comm_size(comm)
-
-    # Root process loads all data
-    if rank == 0
-        data, all_models, generators = load_data_models_generators(cfg)
-        # Convert models dict to array for distribution
-        model_keys = collect(keys(all_models))
-        model_values = collect(values(all_models))
-    else
-        data = nothing
-        all_models = nothing
-        generators = nothing
-        model_keys = nothing
-        model_values = nothing
-    end
-
-    # Broadcast data and generators to all processes
-    data = MPI.bcast(data, 0, comm)
-    generators = MPI.bcast(generators, 0, comm)
-
-    # Distribute models across processes
-    if rank == 0
-        # Calculate chunks for each process
-        chunks_keys = TaijaParallel.split_obs(model_keys, _size)
-        chunks_values = TaijaParallel.split_obs(model_values, _size)
-    else
-        chunks_keys = nothing
-        chunks_values = nothing
-    end
-
-    # Scatter model chunks to processes
-    local_keys = MPI.scatter(chunks_keys, comm; root=0)
-    local_values = MPI.scatter(chunks_values, comm; root=0)
-
-    # Create local models dictionary
-    local_models = Dict(zip(local_keys, local_values))
-
-    # Evaluate counterfactuals on local models
-    local_results = evaluate_counterfactuals(
-        cfg, data, local_models, generators; measure=measure
-    )
-
-    MPI.Barrier(comm)  # Ensure all processes have completed local evaluation before gathering results
-
-    # Gather results from all processes (if needed)
-    if cfg.counterfactual_params.concatenate_output
-        # Gather results from all processes
-        all_results = MPI.gather(local_results, comm; root=0)
-
-        # Combine results on root process
-        if rank == 0
-            combined_results = reduce(vcat, all_results)
-            return combined_results
-        end
-    else
-        @info "Not concatenating results as configured."
-    end
-
-    return nothing
 end
 
 """
@@ -305,26 +224,37 @@ function load_data_models_generators(cfg::AbstractEvaluationConfig)
     grid = ExperimentGrid(cfg.grid_file)
     exper_list = load_list(grid)
 
-    # Get data:
-    data = get_ce_data(cfg)
-
-    # Get models:
-    models = Logging.with_logger(Logging.NullLogger()) do
-        Dict(
-            [
-                exper.meta_params.experiment_name => load_results(exper)[3] for
-                exper in exper_list
-            ]...,
-        )
-    end
-
-    # Counterfactual generators:
+    # Counterfactual generators (same for each exper):
     gen_params = cfg.counterfactual_params.generator_params
     _gen_name = get_generator_name(gen_params)
     _generator = get_generator(gen_params)
     generators = Dict(_gen_name => _generator)
 
-    return data, models, generators
+    # Get data:
+    unique_dataset = unique([exper.data for exper in exper_list])
+
+    out_list = Tuple[]
+
+    for dataset in unique_dataset
+        exper_with_this_dataset = [exper for exper in exper_list if exper.data == dataset]
+
+        # Data:
+        data = get_ce_data(dataset; test_set=true)
+
+        # Get models:
+        models = Logging.with_logger(Logging.NullLogger()) do
+            Dict(
+                [
+                    exper.meta_params.experiment_name => load_results(exper)[3] for
+                    exper in exper_with_this_dataset
+                ]...,
+            )
+        end
+
+        push!(out_list, (data, models, generators))
+    end
+
+    return out_list
 end
 
 """
@@ -458,8 +388,13 @@ function generate_factual_target_pairs(
         @info "Loading factual target pairs from $fname ..."
         output = load_results(cfg, Benchmark, fname)
     else
-        data, models, generators = load_data_models_generators(cfg)
-        output = generate_factual_target_pairs(cfg, data, models, generators)
+        input_list = load_data_models_generators(cfg)
+        output = Benchmark[]
+        for (data, models, generators) in input_list
+            _output = generate_factual_target_pairs(cfg, data, models, generators)
+            push!(output, _output)
+        end
+        output = reduce(vcat, output)
         @info "Saving results to $fname."
         save_results(cfg, output; fname=fname)
     end
