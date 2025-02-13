@@ -252,7 +252,6 @@ function load_data_models_generators(cfg::AbstractEvaluationConfig)
         end
 
         push!(out_list, (data, models, generators))
-
     end
 
     return out_list

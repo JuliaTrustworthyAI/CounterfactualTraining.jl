@@ -154,7 +154,7 @@ function get_config_from_args(;
     if any((x -> contains(x, "--subdir=")).(ARGS))
         subdirname = ARGS[(x -> contains(x, "--subdir=")).(ARGS)]
         @assert length(subdirname) == 1 "Please provide exactly one name for the subdirectory."
-        subdirname = replace(subdirname[1], "--subdir=" => "") 
+        subdirname = replace(subdirname[1], "--subdir=" => "")
     else
         subdirname = ENV["OUTPUT_SUBDIR"]
     end

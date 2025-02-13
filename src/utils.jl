@@ -42,7 +42,7 @@ function infer_domain_constraints(X::AbstractArray; nstd=3)
         sigma = std(x)
         mu = mean(x)
         lb, ub = (mu - nstd * sigma, mu + nstd * sigma)
-        push!(bounds, (minimum([lb,xmin]), maximum([ub,xmax])))
+        push!(bounds, (minimum([lb, xmin]), maximum([ub, xmax])))
     end
     return bounds
 end
