@@ -6,7 +6,7 @@ using DotEnv
 DotEnv.load!()
 
 # Get config and set up grid:
-eval_grid = EvaluationGrid(get_config_from_args())
+eval_grid = EvaluationGrid(get_config_from_args(; new_save_dir=ENV["OUTPUT_DIR"]))
 exper_grid = ExperimentGrid(eval_grid.grid_file)
 
 local_save_dir = get_work_dir(eval_grid, ENV["EVAL_WORK_DIR"], ENV["OUTPUT_DIR"])
@@ -19,9 +19,9 @@ valid_y = CTExperiments.valid_y_logs(eval_grid)
 params = PlotParams(; rowvar="generator_type", colvar="mutability")
 final_save_dir = save_dir(params, output_dir; prefix)
 for y in valid_y
-    plt = plot_errorbar_logs(eval_grid; y=y, params()...)
+    plt, _ = plot_errorbar_logs(eval_grid; y=y, params()...)
     display(plt)
-    save(joinpath(final_save_dir, "$y.png"), plt; px_per_unit=3)
+    CairoMakie.save(joinpath(final_save_dir, "$y.png"), plt; px_per_unit=3)
 end
 @info "Images stored in $final_save_dir/"
 
@@ -35,16 +35,16 @@ valid_y = CTExperiments.valid_y_ce(all_data[1])
 params = PlotParams(; rowvar="lambda_energy_eval", colvar="mutability")
 final_save_dir = save_dir(params, output_dir; prefix)
 for y in valid_y
-    plt = boxplot_ce(all_data...; y=y, params()...)
+    plt, _ = boxplot_ce(all_data...; y=y, params()...)
     display(plt)
-    save(joinpath(final_save_dir, "$y.png"), plt; px_per_unit=3)
+    CairoMakie.save(joinpath(final_save_dir, "$y.png"), plt; px_per_unit=3)
 end
 
 # Plot images:
 exper_list = load_list(exper_grid)
 eval_list = load_list(eval_grid)
-plot_ce(exper_list; layout=(4, 3))
-plot_ce(exper_list, eval_list[1]; layout=(4, 3), target=2)
-plot_ce(eval_grid; save_dir=final_save_dir, byvars=["objective"])
+# plot_ce(exper_list; layout=(4, 3))
+# plot_ce(exper_list, eval_list[1]; layout=(4, 3), target=2)
+plot_ce(eval_grid; save_dir=final_save_dir, byvars=["mutability"])
 
 @info "Images stored in $final_save_dir/"
