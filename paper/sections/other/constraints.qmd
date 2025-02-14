@@ -151,8 +151,8 @@ end
 
 # Data:
 specs = [
-    # ("(a)", VanillaObjective(needs_ce=true), ["both", "both"]),
-    # ("(b)", EnergyDifferentialObjective(lambda=[1.0,1.0,0.0]), ["both", "both"]),
+    ("(a)", VanillaObjective(needs_ce=true), ["both", "both"]),
+    ("(b)", EnergyDifferentialObjective(lambda=[1.0,1.0,0.0]), ["both", "both"]),
     ("(c)", EnergyDifferentialObjective(lambda=[1.0,1.0,0.0]), ["both", "none"]),
 ]
 ```
