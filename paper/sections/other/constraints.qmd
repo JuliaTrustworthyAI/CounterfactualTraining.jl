@@ -11,6 +11,7 @@ using CTExperiments.CounterfactualTraining
 using CTExperiments.Flux
 using CTExperiments.Plots
 using CTExperiments.TaijaPlotting
+using Plots.PlotMeasures
 ```
 
 ## Protecting Mutability Constraints with Linear Classifiers {#sec-app-constraints}
@@ -105,8 +106,28 @@ function plot_db(model, x; _xlab="Existing Debt", _ylab="Age")
     # Data and decision boundary:
     coeff = get_log_reg_params(model)
     db = get_decision_boundary(coeff)
-    plt = Plots.scatter(ce_data, label=["1=Default" "2=No Default"], xlab=xlab, ylab=ylab, title="Iteration $(_itercount)")
+    plt = Plots.scatter(
+        ce_data, 
+        title="Iteration $(_itercount)",
+        # label=["1=Default" "2=No Default"], 
+        # legend_position=:topright, 
+        bottom_margin = 5mm, 
+        left_margin = 5mm, 
+        xlab=xlab, ylab=ylab,  
+        axis=nothing, 
+        legend=false
+    )
     Plots.abline!(plt, db.slope, db.intercept; lw=5, label="Dec. Boundary")
+
+    # # Gradient field:
+    # u = []
+    # v = []
+    # for (x, y) in inputs
+    #     g = -loss_grads(generator, M, ce, [x, y][:,:])
+    #     push!(u, η * g[1])
+    #     push!(v, η * g[2])
+    # end
+    # Plots.quiver!(x1, x2, quiver=(u, v))
 
     # Counterfactuals:
     if !any(isnothing.(x))
@@ -115,7 +136,7 @@ function plot_db(model, x; _xlab="Existing Debt", _ylab="Age")
     end
     display(plt)
 
-    if _itercount == 1
+    if _itercount == 5
         push!(_plts, plt)
     end
     global _itercount += 1
@@ -123,9 +144,9 @@ end
 
 # Data:
 specs = [
-    (VanillaObjective(needs_ce=true), ["both", "both"]),
-    (EnergyDifferentialObjective(lambda=[1.0,1.0,0.0]), ["both", "both"]),
-    (EnergyDifferentialObjective(lambda=[1.0,1.0,0.0]), ["both", "none"]),
+    ("(a)", VanillaObjective(needs_ce=true), ["both", "both"]),
+    ("(b)", EnergyDifferentialObjective(lambda=[1.0,1.0,0.0]), ["both", "both"]),
+    ("(c)", EnergyDifferentialObjective(lambda=[1.0,1.0,0.0]), ["both", "none"]),
 ]
 ```
 
@@ -139,7 +160,7 @@ Random.seed!(42)
 models = []
 plts = []
 
-for (obj, constraint) in specs
+for (title, obj, constraint) in specs
 
     # Globals for the callback:
     global _constraint = constraint
@@ -173,7 +194,7 @@ for (obj, constraint) in specs
         train_set,
         opt_state;
         val_set = val_set,
-        nepochs = 10,
+        nepochs = 50,
         mutability = Symbol.(constraint),
         callback = plot_db,
         nce=50,
@@ -182,14 +203,14 @@ for (obj, constraint) in specs
 
     push!(models, model)
     push!(_plts, current())
-    push!(plts, _plts)
+    plt = Plots.plot(_plts..., plot_title = title, layout=(2,1))
+    push!(plts, plt)
 end
 ```
 
 ```{julia}
 #| eval: false
 
-using Plots.PlotMeasures
 plts = []
 titles = ["(a)", "(b)"]
 _xlab = "Existing Debt"
