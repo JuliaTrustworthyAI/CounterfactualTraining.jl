@@ -91,7 +91,7 @@ function generate!(
     ]
     @assert length(dl) == length(data)
 
-    return dl, percent_valid
+    return dl, percent_valid, ces
 end
 
 """

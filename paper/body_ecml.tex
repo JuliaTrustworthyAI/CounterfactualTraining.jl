@@ -479,20 +479,22 @@ model to instead seek plausibility with respect to the remaining
 features. This in turn results in lower overall sensitivity to immutable
 features, which we demonstrate empirically for different classifiers in
 Section~\ref{sec-experiments}. Under certain conditions, this results
-holds theoretically\footnote{For the proof, see the supplementary
-  appendix.}:
+holds theoretically{[}For the proof, see the supplementary appendix.{]}:
 
 \begin{theorem}[Protecting Immutable
 Features]\protect\hypertarget{thm-mtblty}{}\label{thm-mtblty}
 
-Let \(\mathbf{M}_\theta(\mathbf{x})=\Theta\mathbf{x}\) denote a linear
-classifier with \(y\in\{1,...,K\}=\mathcal{K}\) and
-\(\mathbf{x} \in \mathbb{R}^D\). If we assume multivariate Gaussian
-class densities with common diagonal covariance matrix
-\(\Sigma_k=\Sigma\) for all \(k \in \mathcal{K}\), then protecting an
-immutable feature from the contrastive divergence penalty
-Equation~\ref{eq-div} will result in lower classifier sensitivity to
-that feature, provided that at least one other feature is mutable.
+Let
+\(f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})\)
+denote a linear classifier with softmax activation \(\mathcal{S}\)
+(i.e.~\emph{multinomial logistic regression}) where
+\(y\in\{1,...,K\}=\mathcal{K}\) and \(\mathbf{x} \in \mathbb{R}^D\). If
+we assume multivariate Gaussian class densities with common diagonal
+covariance matrix \(\Sigma_k=\Sigma\) for all \(k \in \mathcal{K}\),
+then protecting an immutable feature from the contrastive divergence
+penalty (Equation~\ref{eq-div}) will result in lower classifier
+sensitivity to that feature relative to the remaining features, provided
+that at least one of those is mutable.
 
 \end{theorem}
 
@@ -501,6 +503,68 @@ independence of features. This raises a valid concern about the effect
 of protecting immutable features in the presence of proxy features that
 remain unprotected. We discuss this limitation in
 Section~\ref{sec-discussion}.
+
+\subsection{Illustration}\label{illustration}
+
+To better convey the intuition underlying our proposed method, we
+illustrate different model outcomes in Example~\ref{exm-grad}.
+
+\begin{example}[Prediction of Consumer Credit
+Default]\protect\hypertarget{exm-grad}{}\label{exm-grad}
+
+Suppose we are interested in predicting the likelihood that loan
+applicants default on their credit. We have access to historical data on
+previous loan takers comprised of a binary outcome variable
+(\(y\in\{1=\text{default},2=\text{no default}\}\)) two input features:
+1) the subjects' \emph{age}, which we define as immutable, and 2) the
+subjects' existing level of \emph{debt}, which we define as mutable.
+
+We have simulated this scenario using synthetic data with independent
+features and Gaussian class-conditional densities in
+Figure~\ref{fig-poc}. The four panels in Figure~\ref{fig-poc} show the
+outcomes for different training procedures using the same model
+architecture each time (a linear classifier). In each case, we show the
+linear decision boundary (green) and the training data colored according
+to their ground-truth label: orange points belong to the target class,
+\(y^+=2\), blue points belong to the non-target class, \(y^-=1\). Stars
+indicate counterfactuals in the target class generated at test time
+using generic gradient descent for a fixed number of iterations.
+
+In panel (a), we have trained our model conventionally, and we do not
+impose mutability constraints at test time. The generated
+counterfactuals are all valid, but not plausible: they are clearly
+distinguishable from the ground-truth data. In panel (b), we have
+trained our model with counterfactual training, once again not imposing
+mutability constraints at test time. We observe that the counterfactuals
+are clearly plausible, therefore meeting the first objective of
+Definition~\ref{def-explainability}.
+
+In panel (c), we have used conventional training again, this time
+imposing the mutability constraint on \emph{age} at test time.
+Counterfactuals are valid but involve some substantial reductions in
+\emph{debt} for some individuals. By comparison, counterfactual paths
+are shorter on average in panel (d), where we have used counterfactual
+training and protected immutable features as described in
+Section~\ref{sec-constraints}. The counterfactuals are also plausible
+with respect to the mutable feature. Thus, we consider the model in
+panel (d) as the most explainable according to
+Definition~\ref{def-explainability}.
+
+\end{example}
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{body_ecml_files/mediabag/../paper/figures/poc.pdf}}
+
+}
+
+\caption{\label{fig-poc}Visual illustration of how counterfactual
+training improves explainability. See Example~\ref{exm-grad} for
+details.}
+
+\end{figure}%
 
 \section{Experiments}\label{sec-experiments}
 

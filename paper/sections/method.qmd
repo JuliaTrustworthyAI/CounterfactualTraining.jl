@@ -81,3 +81,23 @@ Let $f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}
 :::
 
 It is worth highlighting that @thm-mtblty assumes independence of features. This raises a valid concern about the effect of protecting immutable features in the presence of proxy features that remain unprotected. We discuss this limitation in @sec-discussion.
+
+## Illustration
+
+To better convey the intuition underlying our proposed method, we illustrate different model outcomes in @exm-grad.
+
+::: {#exm-grad}
+
+## Prediction of Consumer Credit Default
+
+Suppose we are interested in predicting the likelihood that loan applicants default on their credit. We have access to historical data on previous loan takers comprised of a binary outcome variable ($y\in\{1=\text{default},2=\text{no default}\}$) two input features: 1) the subjects' *age*, which we define as immutable, and 2) the subjects' existing level of *debt*, which we define as mutable. 
+
+We have simulated this scenario using synthetic data with independent features and Gaussian class-conditional densities in @fig-poc. The four panels in @fig-poc show the outcomes for different training procedures using the same model architecture each time (a linear classifier). In each case, we show the linear decision boundary (green) and the training data colored according to their ground-truth label: orange points belong to the target class, $y^+=2$, blue points belong to the non-target class, $y^-=1$. Stars indicate counterfactuals in the target class generated at test time using generic gradient descent for a fixed number of iterations.
+
+In panel (a), we have trained our model conventionally, and we do not impose mutability constraints at test time. The generated counterfactuals are all valid, but not plausible: they are clearly distinguishable from the ground-truth data. In panel (b), we have trained our model with counterfactual training, once again not imposing mutability constraints at test time. We observe that the counterfactuals are clearly plausible, therefore meeting the first objective of @def-explainability.
+
+In panel (c), we have used conventional training again, this time imposing the mutability constraint on *age* at test time. Counterfactuals are valid but involve some substantial reductions in *debt* for some individuals. By comparison, counterfactual paths are shorter on average in panel (d), where we have used counterfactual training and protected immutable features as described in @sec-constraints. The counterfactuals are also plausible with respect to the mutable feature. Thus, we consider the model in panel (d) as the most explainable according to @def-explainability.
+
+:::
+
+![Visual illustration of how counterfactual training improves explainability. See @exm-grad for details.](/paper/figures/poc.svg){#fig-poc}

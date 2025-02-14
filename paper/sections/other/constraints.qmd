@@ -62,22 +62,6 @@ Thus, our proposed approach of protecting feature $d_{\text{immtbl}}$ has the ne
 
 :::
 
-We provide an illustrative example in @exm-grad.
-
-::: {#exm-grad}
-
-## Prediction of Consumer Credit Default
-
-Suppose now that $d_{\text{immtbl}}$ represents an individual's *age* and $d_{\text{mtbl}}$ represents an individual's existing level of credit card debt. Assume that these two features are independent, the class conditional densities are Gaussian and we use no other features to predict the risk of individuals defaulting on a consumer loan using a linear classifier. We have simulated this scenario using synthetic data in @fig-mtblty.
-
-In panel (a) of @fig-mtblty, we have trained the linear classifier using counterfactual training, treating both features as mutable. The linear decision boundary is roughly equally sensitive to both *age* and existing levels of *debt*. 
-
-Conversely, in panel (b) of @fig-mtblty, we have trained the same classifier using counterfactual training, but this time treating *age* as an immutable feature. The result is a new decision boundary that has tilted in favor of higher sensitivity to the mutable feature (existing *debt*) and lower sensitivity to the immutable feature (*age*).
-
-:::
-
-![Visual illustration of the effect of imposing mutability constraints. See @exm-grad for details.](/paper/figures/app_mtblty.svg){#fig-mtblty}
-
 ::: {.callout-warning}
 
 \@Cynthia, \@Arie, I have tentatively phrased the above in terms of a theorem and proof. This is something I've so far shied away from because I feel a bit out of my depth when it comes to mathematical proofs. The above makes intuitive sense to me, but I don't know for sure if it's correct. 
@@ -98,7 +82,10 @@ using CTExperiments:
 # Callback:
 using CTExperiments: get_log_reg_params, get_decision_boundary
 
-function plot_db(model, x; _xlab="Existing Debt", _ylab="Age")
+function plot_db(model, ces; _xlab="Debt", _ylab="Age")
+
+    x = (ce -> ce.counterfactual).(ces) |> xs -> reduce(hcat, xs)
+    x0 = (ce -> ce.factual).(ces) |> xs -> reduce(hcat, xs)
 
     xlab = _constraint[1] == "both" ? "$(_xlab) (mutable)" : "$(_xlab) (immutable)"
     ylab = _constraint[2] == "both" ? "$(_ylab) (mutable)" : "$(_ylab) (immutable)"
@@ -108,52 +95,45 @@ function plot_db(model, x; _xlab="Existing Debt", _ylab="Age")
     db = get_decision_boundary(coeff)
     plt = Plots.scatter(
         ce_data, 
-        title="Iteration $(_itercount)",
         # label=["1=Default" "2=No Default"], 
         # legend_position=:topright, 
-        bottom_margin = 5mm, 
-        left_margin = 5mm, 
         xlab=xlab, ylab=ylab,  
         axis=nothing, 
-        legend=false
+        legend=false,
+        title=_title
     )
     Plots.abline!(plt, db.slope, db.intercept; lw=5, label="Dec. Boundary")
-
-    # Gradient field:
-    targets = Flux.onehotbatch(fill(2,size(x,2)), [1,2])
-    samples = ce_data.X[:,ce_data.output_encoder.labels.==2][:,rand(1:end,size(x,2))]
-    CounterfactualTraining.protect_immutable!(eachcol(samples), eachcol(x), ce_data.mutability)
-    u = []
-    v = []
-    η = 0.5
-    for (i,ce) in enumerate(eachcol(x))
-        grads = Flux.gradient((m,x,s,t) -> implausibility(m,x,s,t)[1], model, ce, samples[:,i], targets[:,i])
-        g = CTExperiments.get_log_reg_params(grads[1].layers[1])
-        push!(u, η * g[2])
-        push!(v, η * g[3])
-    end
-    Plots.quiver!(x[1,:], x[2,:], quiver=(u, v))
 
     # Counterfactuals:
     if !any(isnothing.(x))
         yhat = [argmax(y) for y in eachcol(model(x))]
+        yhat0 = [argmax(y) for y in eachcol(model(x0))]
         if any(yhat.==2)
-            Plots.scatter!(x[1,yhat.==2], x[2,yhat.==2], label=["CE (y⁺=1)" "CE (y⁺=2)"], ms=15, shape=:star, color=yhat[yhat.==2], group=yhat[yhat.==2])
+
+            # Paths:
+            u = []
+            v = []
+            for (i,ce) in enumerate(eachcol(x))
+                Δ = ce - x0[:,i]
+                push!(u, Δ[1])
+                push!(v, Δ[2])
+            end
+            Plots.quiver!(x0[1,yhat.==2], x0[2,yhat.==2], quiver=(u[yhat.==2], v[yhat.==2]), color=1)
+            
+            # End points:
+            Plots.scatter!(x[1,yhat.==2], x[2,yhat.==2], label=["CE (y⁺=1)" "CE (y⁺=2)"], ms=15, shape=:star, color=yhat[yhat.==2], group=yhat[yhat.==2], mscolor=yhat0[yhat.==2])
+
         end
     end
     display(plt)
-
-    if _itercount == 5
-        push!(_plts, plt)
-    end
-    global _itercount += 1
 end
 
 # Data:
 specs = [
     ("(a)", VanillaObjective(needs_ce=true), ["both", "both"]),
     ("(b)", EnergyDifferentialObjective(lambda=[1.0,1.0,0.0]), ["both", "both"]),
-    ("(c)", EnergyDifferentialObjective(lambda=[1.0,1.0,0.0]), ["both", "none"]),
+    ("(c)", VanillaObjective(needs_ce=true), ["both", "none"]),
+    ("(d)", EnergyDifferentialObjective(lambda=[1.0,1.0,0.0]), ["both", "none"]),
 ]
 ```
 
@@ -170,9 +150,8 @@ plts = []
 for (title, obj, constraint) in specs
 
     # Globals for the callback:
+    global _title = title
     global _constraint = constraint
-    global _plts = []
-    global _itercount = 1
 
     # Data:
     data = LinearlySeparable(
@@ -201,7 +180,7 @@ for (title, obj, constraint) in specs
         train_set,
         opt_state;
         val_set = val_set,
-        nepochs = 25,
+        nepochs = 50,
         mutability = Symbol.(constraint),
         callback = plot_db,
         nce=50,
@@ -209,10 +188,24 @@ for (title, obj, constraint) in specs
     )
 
     push!(models, model)
-    push!(_plts, current())
-    plt = Plots.plot(_plts..., plot_title = title, layout=(2,1))
-    push!(plts, plt)
+    push!(plts, current())
 end
+```
+
+```{julia}
+#| eval: false
+
+plt = Plots.plot(
+    plts..., 
+    layout=(1,4), 
+    size=(1150,250),  
+    left_margin = 10mm, 
+    bottom_margin = 5mm,
+    top_margin = 3mm,
+    right_margin = 10mm,
+)
+display(plt)
+Plots.savefig(plt, "paper/figures/poc.svg")
 ```
 
 ```{julia}

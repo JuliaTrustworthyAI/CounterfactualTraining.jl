@@ -183,16 +183,16 @@
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
-\theoremstyle{definition}
-\newtheorem{exercise}{Parameters}[section]
-\theoremstyle{plain}
-\newtheorem{theorem}{Theorem}[section]
 \theoremstyle{plain}
 \newtheorem{corollary}{Research Question}[section]
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\theoremstyle{definition}
+\newtheorem{example}{Example}[section]
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
 \theoremstyle{definition}
-\newtheorem{example}{Example}[section]
+\newtheorem{exercise}{Parameters}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -775,6 +775,68 @@ of protecting immutable features in the presence of proxy features that
 remain unprotected. We discuss this limitation in
 Section~\ref{sec-discussion}.
 
+\subsection{Illustration}\label{illustration}
+
+To better convey the intuition underlying our proposed method, we
+illustrate different model outcomes in Example~\ref{exm-grad}.
+
+\begin{example}[Prediction of Consumer Credit
+Default]\protect\hypertarget{exm-grad}{}\label{exm-grad}
+
+Suppose we are interested in predicting the likelihood that loan
+applicants default on their credit. We have access to historical data on
+previous loan takers comprised of a binary outcome variable
+(\(y\in\{1=\text{default},2=\text{no default}\}\)) two input features:
+1) the subjects' \emph{age}, which we define as immutable, and 2) the
+subjects' existing level of \emph{debt}, which we define as mutable.
+
+We have simulated this scenario using synthetic data with independent
+features and Gaussian class-conditional densities in
+Figure~\ref{fig-poc}. The four panels in Figure~\ref{fig-poc} show the
+outcomes for different training procedures using the same model
+architecture each time (a linear classifier). In each case, we show the
+linear decision boundary (green) and the training data colored according
+to their ground-truth label: orange points belong to the target class,
+\(y^+=2\), blue points belong to the non-target class, \(y^-=1\). Stars
+indicate counterfactuals in the target class generated at test time
+using generic gradient descent for a fixed number of iterations.
+
+In panel (a), we have trained our model conventionally, and we do not
+impose mutability constraints at test time. The generated
+counterfactuals are all valid, but not plausible: they are clearly
+distinguishable from the ground-truth data. In panel (b), we have
+trained our model with counterfactual training, once again not imposing
+mutability constraints at test time. We observe that the counterfactuals
+are clearly plausible, therefore meeting the first objective of
+Definition~\ref{def-explainability}.
+
+In panel (c), we have used conventional training again, this time
+imposing the mutability constraint on \emph{age} at test time.
+Counterfactuals are valid but involve some substantial reductions in
+\emph{debt} for some individuals. By comparison, counterfactual paths
+are shorter on average in panel (d), where we have used counterfactual
+training and protected immutable features as described in
+Section~\ref{sec-constraints}. The counterfactuals are also plausible
+with respect to the mutable feature. Thus, we consider the model in
+panel (d) as the most explainable according to
+Definition~\ref{def-explainability}.
+
+\end{example}
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{paper_files/mediabag/../../paper/figures/poc.pdf}}
+
+}
+
+\caption{\label{fig-poc}Visual illustration of how counterfactual
+training improves explainability. See Example~\ref{exm-grad} for
+details.}
+
+\end{figure}%
+
 \section{Experiments}\label{sec-experiments}
 
 In this section, we present experiments that we have conducted in order
@@ -1125,47 +1187,7 @@ sensitivity for \(d_{\text{immtbl}}\) relative to increased sensitivity
 for \(d_{\text{mtbl}}\)).
 \end{proof}
 
-We provide an illustrative example in Example~\ref{exm-grad}.
-
-\begin{example}[Prediction of Consumer Credit
-Default]\protect\hypertarget{exm-grad}{}\label{exm-grad}
-
-Suppose now that \(d_{\text{immtbl}}\) represents an individual's
-\emph{age} and \(d_{\text{mtbl}}\) represents an individual's existing
-level of credit card debt. Assume that these two features are
-independent, the class conditional densities are Gaussian and we use no
-other features to predict the risk of individuals defaulting on a
-consumer loan using a linear classifier. We have simulated this scenario
-using synthetic data in Figure~\ref{fig-mtblty}.
-
-In panel (a) of Figure~\ref{fig-mtblty}, we have trained the linear
-classifier using counterfactual training, treating both features as
-mutable. The linear decision boundary is roughly equally sensitive to
-both \emph{age} and existing levels of \emph{debt}.
-
-Conversely, in panel (b) of Figure~\ref{fig-mtblty}, we have trained the
-same classifier using counterfactual training, but this time treating
-\emph{age} as an immutable feature. The result is a new decision
-boundary that has tilted in favor of higher sensitivity to the mutable
-feature (existing \emph{debt}) and lower sensitivity to the immutable
-feature (\emph{age}).
-
-\end{example}
-
-\begin{figure}
-
-\centering{
-
-\pandocbounded{\includegraphics[keepaspectratio]{paper_files/mediabag/../../paper/figures/app_mtblty.pdf}}
-
-}
-
-\caption{\label{fig-mtblty}Visual illustration of the effect of imposing
-mutability constraints. See Example~\ref{exm-grad} for details.}
-
-\end{figure}%
-
-\begin{tcolorbox}[enhanced jigsaw, toprule=.15mm, colback=white, opacityback=0, coltitle=black, arc=.35mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, toptitle=1mm, colbacktitle=quarto-callout-warning-color!10!white, bottomrule=.15mm, colframe=quarto-callout-warning-color-frame, breakable, opacitybacktitle=0.6, rightrule=.15mm, left=2mm, bottomtitle=1mm, titlerule=0mm, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, bottomtitle=1mm, coltitle=black, opacitybacktitle=0.6, rightrule=.15mm, toprule=.15mm, toptitle=1mm, colbacktitle=quarto-callout-warning-color!10!white, colback=white, breakable, left=2mm, leftrule=.75mm, titlerule=0mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, bottomrule=.15mm, opacityback=0, colframe=quarto-callout-warning-color-frame]
 
 @Cynthia, @Arie, I have tentatively phrased the above in terms of a
 theorem and proof. This is something I've so far shied away from because
@@ -1177,7 +1199,7 @@ correct.
 
 \section{Detailed Results}\label{detailed-results}
 
-\begin{tcolorbox}[enhanced jigsaw, toprule=.15mm, colback=white, opacityback=0, coltitle=black, arc=.35mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, toptitle=1mm, colbacktitle=quarto-callout-warning-color!10!white, bottomrule=.15mm, colframe=quarto-callout-warning-color-frame, breakable, opacitybacktitle=0.6, rightrule=.15mm, left=2mm, bottomtitle=1mm, titlerule=0mm, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, bottomtitle=1mm, coltitle=black, opacitybacktitle=0.6, rightrule=.15mm, toprule=.15mm, toptitle=1mm, colbacktitle=quarto-callout-warning-color!10!white, colback=white, breakable, left=2mm, leftrule=.75mm, titlerule=0mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, bottomrule=.15mm, opacityback=0, colframe=quarto-callout-warning-color-frame]
 
 @Cynthia, @Arie, I'm including some preliminary results here but will
 rerun experiments in the coming days. You'll notice some odd outlier
@@ -1197,7 +1219,7 @@ inherited from energy-based modelling).
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, toprule=.15mm, colback=white, opacityback=0, coltitle=black, arc=.35mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, breakable, opacitybacktitle=0.6, rightrule=.15mm, left=2mm, bottomtitle=1mm, titlerule=0mm, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, bottomtitle=1mm, coltitle=black, opacitybacktitle=0.6, rightrule=.15mm, toprule=.15mm, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, leftrule=.75mm, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, bottomrule=.15mm, opacityback=0, colframe=quarto-callout-note-color-frame]
 
 @Cynthia, @Arie, Figure~\ref{fig-mnist} shows much more plausible
 (faithful) counterfactuals for a model with CT than the model with
@@ -1393,7 +1415,7 @@ Separable data by energy penalty.}
   vanilla & 0.05 & \textit{Omniscient} & -5.25 & 4.62 \\
   vanilla & 0.05 & \textit{REVISE} & -4.94 & 4.22 \\
   full & 0.1 & \textit{ECCo} & $-6.74 \cdot 10^{5}$ & $1.53 \cdot 10^{6}$ \\
-  full & 0.1 & \textit{Generic} & $-1.72 \cdot 10^{11}$ & $3.9 \cdot 10^{11}$ \\
+  full & 0.1 & \textit{Generic} & $-1.71 \cdot 10^{11}$ & $3.9 \cdot 10^{11}$ \\
   \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.56}} & \color{blue}{\textbf{0.124}} \\
   full & 0.1 & \textit{REVISE} & -15.6 & 13.2 \\
   vanilla & 0.1 & \textit{ECCo} & -4.28 & 3.52 \\
@@ -1470,7 +1492,7 @@ Separable data by cost penalty.}
   vanilla & 0 & \textit{Omniscient} & -5.18 & 4.54 \\
   vanilla & 0 & \textit{REVISE} & -4.93 & 4.23 \\
   full & 0.001 & \textit{ECCo} & -362 & 811 \\
-  full & 0.001 & \textit{Generic} & $-2.65 \cdot 10^{17}$ & $6.03 \cdot 10^{17}$ \\
+  full & 0.001 & \textit{Generic} & $-2.65 \cdot 10^{17}$ & $6.04 \cdot 10^{17}$ \\
   \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.001}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.49}} & \color{blue}{\textbf{0.115}} \\
   full & 0.001 & \textit{REVISE} & -15.5 & 13 \\
   vanilla & 0.001 & \textit{ECCo} & -4.34 & 3.58 \\
@@ -1478,7 +1500,7 @@ Separable data by cost penalty.}
   vanilla & 0.001 & \textit{Omniscient} & -5.18 & 4.53 \\
   vanilla & 0.001 & \textit{REVISE} & -4.93 & 4.23 \\
   full & 0.1 & \textit{ECCo} & $-3.72 \cdot 10^{11}$ & $8.46 \cdot 10^{11}$ \\
-  full & 0.1 & \textit{Generic} & $-4.49 \cdot 10^{14}$ & $1.02 \cdot 10^{15}$ \\
+  full & 0.1 & \textit{Generic} & $-4.48 \cdot 10^{14}$ & $1.02 \cdot 10^{15}$ \\
   \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.5}} & \color{blue}{\textbf{0.112}} \\
   full & 0.1 & \textit{REVISE} & -14.6 & 12.2 \\
   vanilla & 0.1 & \textit{ECCo} & -4.34 & 3.58 \\
