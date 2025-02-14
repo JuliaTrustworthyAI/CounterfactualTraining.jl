@@ -7,8 +7,6 @@ using Flux
 using StatsBase
 using TaijaParallel
 
-function generate!() end
-
 """
     generate!(
         model,
@@ -56,35 +54,15 @@ function generate!(
         verbose=verbose > 1,
     )
 
-    counterfactuals = (ce -> ce.counterfactual).(ces)                               # get actual counterfactuals
-    targets = (ce -> ce.target).(ces)
-
-    # Get neighbours in target class: find `nneighbours` potential neighbours than randomly choose one for each counterfactual.
-    neighbours =
-        (
-            ce -> find_potential_neighbours(ce, counterfactual_data, nneighbours)[
-                :, rand(1:end)
-            ]
-        ).(ces)
-
-    # Adjust for mutability:
-    mtblty = counterfactual_data.mutability
-    if !isnothing(mtblty)
-        for (i, ce) in enumerate(counterfactuals)
-            immtble = findall(mtblty .!= :both)
-            for j in immtble
-                # println(counterfactuals[i])
-                counterfactuals[i][j, :] = neighbours[i][j, :]
-                # println(counterfactuals[i])
-            end
-        end
-    end
+    counterfactuals = (ce -> ce.counterfactual).(ces)                                   # get actual counterfactuals
+    targets = (ce -> ce.target).(ces)                                                   # get targets
+    neighbours = (ce -> find_potential_neighbours(ce, counterfactual_data, 1)).(ces)    # randomly draw a sample from the target class
+    protect_immutable!(neighbours, counterfactuals, counterfactual_data.mutability)     # adjust for mutability
 
     aversarial_targets = []
     targets_enc = []
     percent_valid = 0.0
     idx = sample(1:length(ces), 10; replace=false)
-    # @info "Index: $idx"
     for (i, ce) in enumerate(ces)
         target_enc = target_encoded(ce, counterfactual_data)
         push!(targets_enc, target_enc)
@@ -99,7 +77,6 @@ function generate!(
     end
 
     n_total = length(counterfactuals)
-    # @info "Counter: $(percent_valid)"
     percent_valid = percent_valid / n_total
     group_indices = TaijaParallel.split_obs(1:n_total, length(data))
 
@@ -117,6 +94,54 @@ function generate!(
     return dl, percent_valid
 end
 
+"""
+    protect_immutable!(
+        samples::AbstractArray,
+        counterfactuals::AbstractArray,
+        mutability::Union{Nothing,AbstractArray},
+    )
+
+Protects immutable features from the contrastive divergence penalty.
+"""
+function protect_immutable!(
+    samples::AbstractArray,
+    counterfactuals::AbstractArray,
+    mutability::Union{Nothing,AbstractArray},
+)
+    if !isnothing(mutability)
+        
+        direction_handlers = Dict(
+            :both => (cf, s) -> s,
+            :none => (cf, s) -> cf,
+            :increase => (cf, s) -> cf > s ? cf : s,
+            :decrease => (cf, s) -> cf < s ? cf : s,
+        )
+
+        for (i, ce) in enumerate(counterfactuals)
+            for (j, allowed_direction) in enumerate(mutability)
+                samples[i][j, :] = direction_handlers[allowed_direction](
+                    counterfactuals[i][j, :], samples[i][j, :]
+                )
+            end
+        end
+
+    end
+    return samples
+end
+
+"""
+    setup_counterfactual_search(
+        data,
+        model,
+        domain,
+        input_encoder,
+        mutability,
+        nneighbours::Int64,
+        nsamples::Union{Nothing,Int64},
+    )
+
+Sets up the counterfactual search.
+"""
 function setup_counterfactual_search(
     data,
     model,

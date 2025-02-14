@@ -118,7 +118,7 @@ function counterfactual_training(
                     regs = reg_loss(m, perturbed_input, neighbours, targets_enc)
                     # Validity loss (counterfactual):
                     yhat_ce = m(perturbed_input)
-                    adversarial_loss = Flux.Losses.logitcrossentropy(
+                    adversarial_loss = loss.class_loss(
                         yhat_ce, adversarial_targets
                     )
                 else

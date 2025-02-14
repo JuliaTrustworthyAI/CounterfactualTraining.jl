@@ -97,20 +97,35 @@ using CTExperiments:
 # Callback:
 using CTExperiments: get_log_reg_params, get_decision_boundary
 
-function plot_db(model, x)
+function plot_db(model, x; _xlab="Existing Debt", _ylab="Age")
+
+    xlab = _constraint[1] == "both" ? "$(_xlab) (mutable)" : "$(_xlab) (immutable)"
+    ylab = _constraint[2] == "both" ? "$(_ylab) (mutable)" : "$(_ylab) (immutable)"
+
+    # Data and decision boundary:
     coeff = get_log_reg_params(model)
     db = get_decision_boundary(coeff)
-    plt = Plots.scatter(ce_data)
-    yhat = [argmax(y) for y in eachcol(model(x))]
-    Plots.scatter!(x[1,:], x[2,:], label="Counterfactuals", ms=15, shape=:star, color=yhat)
+    plt = Plots.scatter(ce_data, label=["1=Default" "2=No Default"], xlab=xlab, ylab=ylab, title="Iteration $(_itercount)")
     Plots.abline!(plt, db.slope, db.intercept; lw=5, label="Dec. Boundary")
+
+    # Counterfactuals:
+    if !any(isnothing.(x))
+        yhat = [argmax(y) for y in eachcol(model(x))]
+        Plots.scatter!(x[1,:], x[2,:], label=["CE (y⁺=1)" "CE (y⁺=2)"], ms=15, shape=:star, color=yhat, group=yhat)
+    end
     display(plt)
+
+    if _itercount == 1
+        push!(_plts, plt)
+    end
+    global _itercount += 1
 end
 
 # Data:
-constraints = [
-    ["both", "both"],
-    ["both", "none"]
+specs = [
+    (VanillaObjective(needs_ce=true), ["both", "both"]),
+    (EnergyDifferentialObjective(lambda=[1.0,1.0,0.0]), ["both", "both"]),
+    (EnergyDifferentialObjective(lambda=[1.0,1.0,0.0]), ["both", "none"]),
 ]
 ```
 
@@ -122,15 +137,22 @@ using Random
 Random.seed!(42)
 
 models = []
+plts = []
 
-for constraint in constraints
+for (obj, constraint) in specs
+
+    # Globals for the callback:
+    global _constraint = constraint
+    global _plts = []
+    global _itercount = 1
+
     # Data:
     data = LinearlySeparable(
         n_train=500,
         batchsize=50,
         mutability=constraint
     )
-    ce_data = get_ce_data(data)
+    global ce_data = get_ce_data(data)
     val_size = data.n_validation / (data.n_validation + data.n_train)
     train_set, val_set, _ = train_val_split(data, ce_data, val_size)
 
@@ -140,7 +162,6 @@ for constraint in constraints
     model = build_model(LinearModel(), nin, nout)
 
     # Objective:
-    obj = EnergyDifferentialObjective(lambda=[1.0,1.0,0.0])
     generator = GenericGenerator()
     opt_state = Flux.setup(Descent(), model)
     conv = MaxIterConvergence()
@@ -152,7 +173,7 @@ for constraint in constraints
         train_set,
         opt_state;
         val_set = val_set,
-        nepochs = 50,
+        nepochs = 10,
         mutability = Symbol.(constraint),
         callback = plot_db,
         nce=50,
@@ -160,6 +181,8 @@ for constraint in constraints
     )
 
     push!(models, model)
+    push!(_plts, current())
+    push!(plts, _plts)
 end
 ```
 
