@@ -393,11 +393,15 @@ function get_log_reg_params(exper::Experiment)
     return coeffs
 end
 
-function get_log_reg_params(model)
+function get_log_reg_params(model::Flux.Chain)
     coeffs =
         Flux.params(model) |>
-        W -> (β₀=W[2][1] - W[2][2], β₁=W[1][1, 1] - W[1][2, 1], β₂=W[1][1, 2] - W[1][2, 2])
+        get_log_reg_params
     return coeffs
+end
+
+function get_log_reg_params(W)
+    return (β₀=W[2][1] - W[2][2], β₁=W[1][1, 1] - W[1][2, 1], β₂=W[1][1, 2] - W[1][2, 2])
 end
 
 struct DecisionBoundary
