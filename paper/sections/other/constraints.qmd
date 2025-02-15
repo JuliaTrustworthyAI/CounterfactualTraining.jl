@@ -105,10 +105,13 @@ function plot_db(model, ces; _xlab="Debt", _ylab="Age")
     Plots.abline!(plt, db.slope, db.intercept; lw=5, label="Dec. Boundary")
 
     # Counterfactuals:
+    target = 2
+    factual = 1
     if !any(isnothing.(x))
         yhat = [argmax(y) for y in eachcol(model(x))]
         yhat0 = [argmax(y) for y in eachcol(model(x0))]
-        if any(yhat.==2)
+        idx_plotted = yhat.==target .&& yhat0.==factual
+        if any(idx_plotted)
 
             # Paths:
             u = []
@@ -118,10 +121,10 @@ function plot_db(model, ces; _xlab="Debt", _ylab="Age")
                 push!(u, Δ[1])
                 push!(v, Δ[2])
             end
-            Plots.quiver!(x0[1,yhat.==2], x0[2,yhat.==2], quiver=(u[yhat.==2], v[yhat.==2]), color=1)
+            Plots.quiver!(x0[1,idx_plotted], x0[2,idx_plotted], quiver=(u[idx_plotted], v[idx_plotted]), color=factual)
             
             # End points:
-            Plots.scatter!(x[1,yhat.==2], x[2,yhat.==2], label=["CE (y⁺=1)" "CE (y⁺=2)"], ms=15, shape=:star, color=yhat[yhat.==2], group=yhat[yhat.==2], mscolor=yhat0[yhat.==2])
+            Plots.scatter!(x[1,idx_plotted], x[2,idx_plotted], label=["CE (y⁺=1)" "CE (y⁺=2)"], ms=15, shape=:star, color=yhat[idx_plotted], group=yhat[idx_plotted], mscolor=yhat0[idx_plotted])
 
         end
     end
@@ -131,9 +134,9 @@ end
 # Data:
 specs = [
     ("(a)", VanillaObjective(needs_ce=true), ["both", "both"]),
-    ("(b)", EnergyDifferentialObjective(lambda=[1.0,1.0,0.0]), ["both", "both"]),
+    ("(b)", FullObjective(lambda=[1.0,1.0,0.0,1.0]), ["both", "both"]),
     ("(c)", VanillaObjective(needs_ce=true), ["both", "none"]),
-    ("(d)", EnergyDifferentialObjective(lambda=[1.0,1.0,0.0]), ["both", "none"]),
+    ("(d)", FullObjective(lambda=[1.0,1.0,0.0,1.0]), ["both", "none"]),
 ]
 ```
 
@@ -171,7 +174,7 @@ for (title, obj, constraint) in specs
     # Objective:
     generator = GenericGenerator()
     opt_state = Flux.setup(Descent(), model)
-    conv = MaxIterConvergence()
+    conv = MaxIterConvergence(5)
 
     model, logs = counterfactual_training(
         obj,
@@ -185,6 +188,7 @@ for (title, obj, constraint) in specs
         callback = plot_db,
         nce=50,
         convergence=conv, 
+        verbose=3
     )
 
     push!(models, model)

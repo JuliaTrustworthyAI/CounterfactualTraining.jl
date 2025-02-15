@@ -184,7 +184,7 @@
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
 \theoremstyle{plain}
-\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{definition}
 \newtheorem{exercise}{Parameters}[section]
 \theoremstyle{definition}
@@ -192,7 +192,7 @@
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
 \theoremstyle{plain}
-\newtheorem{corollary}{Research Question}[section]
+\newtheorem{theorem}{Theorem}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -813,13 +813,16 @@ Definition~\ref{def-explainability}.
 In panel (c), we have used conventional training again, this time
 imposing the mutability constraint on \emph{age} at test time.
 Counterfactuals are valid but involve some substantial reductions in
-\emph{debt} for some individuals. By comparison, counterfactual paths
-are shorter on average in panel (d), where we have used counterfactual
-training and protected immutable features as described in
-Section~\ref{sec-constraints}. The counterfactuals are also plausible
-with respect to the mutable feature. Thus, we consider the model in
-panel (d) as the most explainable according to
-Definition~\ref{def-explainability}.
+\emph{debt} for some individuals, in particular very young applicants.
+By comparison, counterfactual paths are shorter on average in panel (d),
+where we have used counterfactual training and protected immutable
+features as described in Section~\ref{sec-constraints}. In particular,
+we observe that due to the classifier's lower sensitivity to \emph{age},
+recourse recommendations with respect to \emph{debt} are much more
+homogenous, in that they do not disproportionately punish younger
+individuals. The counterfactuals are also plausible with respect to the
+mutable feature. Thus, we consider the model in panel (d) as the most
+explainable according to Definition~\ref{def-explainability}.
 
 \end{example}
 
@@ -1187,7 +1190,7 @@ sensitivity for \(d_{\text{immtbl}}\) relative to increased sensitivity
 for \(d_{\text{mtbl}}\)).
 \end{proof}
 
-\begin{tcolorbox}[enhanced jigsaw, opacityback=0, breakable, left=2mm, coltitle=black, colbacktitle=quarto-callout-warning-color!10!white, titlerule=0mm, opacitybacktitle=0.6, colback=white, bottomtitle=1mm, toptitle=1mm, bottomrule=.15mm, arc=.35mm, colframe=quarto-callout-warning-color-frame, rightrule=.15mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, toprule=.15mm, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, colframe=quarto-callout-warning-color-frame, toprule=.15mm, opacityback=0, left=2mm, breakable, colback=white, bottomtitle=1mm, rightrule=.15mm, titlerule=0mm, opacitybacktitle=0.6, colbacktitle=quarto-callout-warning-color!10!white, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, coltitle=black, toptitle=1mm, arc=.35mm, bottomrule=.15mm]
 
 @Cynthia, @Arie, I have tentatively phrased the above in terms of a
 theorem and proof. This is something I've so far shied away from because
@@ -1199,7 +1202,7 @@ correct.
 
 \section{Detailed Results}\label{detailed-results}
 
-\begin{tcolorbox}[enhanced jigsaw, opacityback=0, breakable, left=2mm, coltitle=black, colbacktitle=quarto-callout-warning-color!10!white, titlerule=0mm, opacitybacktitle=0.6, colback=white, bottomtitle=1mm, toptitle=1mm, bottomrule=.15mm, arc=.35mm, colframe=quarto-callout-warning-color-frame, rightrule=.15mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, toprule=.15mm, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, colframe=quarto-callout-warning-color-frame, toprule=.15mm, opacityback=0, left=2mm, breakable, colback=white, bottomtitle=1mm, rightrule=.15mm, titlerule=0mm, opacitybacktitle=0.6, colbacktitle=quarto-callout-warning-color!10!white, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, coltitle=black, toptitle=1mm, arc=.35mm, bottomrule=.15mm]
 
 @Cynthia, @Arie, I'm including some preliminary results here but will
 rerun experiments in the coming days. You'll notice some odd outlier
@@ -1219,7 +1222,7 @@ inherited from energy-based modelling).
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, opacityback=0, breakable, left=2mm, coltitle=black, colbacktitle=quarto-callout-note-color!10!white, titlerule=0mm, opacitybacktitle=0.6, colback=white, bottomtitle=1mm, toptitle=1mm, bottomrule=.15mm, arc=.35mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, toprule=.15mm, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, opacityback=0, left=2mm, breakable, colback=white, bottomtitle=1mm, rightrule=.15mm, titlerule=0mm, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, coltitle=black, toptitle=1mm, arc=.35mm, bottomrule=.15mm]
 
 @Cynthia, @Arie, Figure~\ref{fig-mnist} shows much more plausible
 (faithful) counterfactuals for a model with CT than the model with

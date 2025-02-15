@@ -117,9 +117,13 @@ function counterfactual_training(
                 if !isnothing(perturbed_input)
                     implaus = implausibility(m, perturbed_input, neighbours, targets_enc)
                     regs = reg_loss(m, perturbed_input, neighbours, targets_enc)
-                    # Validity loss (counterfactual):
-                    yhat_ce = m(perturbed_input)
-                    adversarial_loss = loss.class_loss(yhat_ce, targets_enc)
+                    adversarial_loss = adv_loss(
+                        m,
+                        perturbed_input,
+                        perturbations,
+                        targets_enc;
+                        validities=validities,
+                    )
                 else
                     implaus = [0.0f0]
                     regs = [0.0f0]
