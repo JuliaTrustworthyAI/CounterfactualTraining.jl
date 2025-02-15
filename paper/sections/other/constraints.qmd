@@ -110,7 +110,7 @@ function plot_db(model, ces; _xlab="Debt", _ylab="Age")
     if !any(isnothing.(x))
         yhat = [argmax(y) for y in eachcol(model(x))]
         yhat0 = [argmax(y) for y in eachcol(model(x0))]
-        idx_plotted = yhat.==target .&& yhat0.==factual
+        idx_plotted = yhat0.==factual
         if any(idx_plotted)
 
             # Paths:
