@@ -2,8 +2,6 @@
 format:
   latex:
     template: templates/body.tex
-    template-partials: 
-      - templates/graphics.tex
     filters: [cite.lua, abstract-section]
 ---
 

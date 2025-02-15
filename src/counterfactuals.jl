@@ -1,6 +1,7 @@
 using Base.Iterators
 using CounterfactualExplanations
 using CounterfactualExplanations: Convergence
+using CounterfactualExplanations: Evaluation
 using CounterfactualExplanations: Models
 using CounterfactualExplanations: find_potential_neighbours
 using Flux
@@ -55,29 +56,15 @@ function generate!(
     )
 
     counterfactuals = (ce -> ce.counterfactual).(ces)                                   # get actual counterfactuals
+    perturbations = (ce -> ce.counterfactual - ce.factual).(ces)                        # get perturbations
     targets = (ce -> ce.target).(ces)                                                   # get targets
     neighbours = (ce -> find_potential_neighbours(ce, counterfactual_data, 1)).(ces)    # randomly draw a sample from the target class
     protect_immutable!(neighbours, counterfactuals, counterfactual_data.mutability)     # adjust for mutability
-
-    aversarial_targets = []
-    targets_enc = []
-    percent_valid = 0.0
-    idx = sample(1:length(ces), 10; replace=false)
-    for (i, ce) in enumerate(ces)
-        target_enc = target_encoded(ce, counterfactual_data)
-        push!(targets_enc, target_enc)
-        if argmax(vec(model(ce.counterfactual))) == argmax(vec(target_enc))
-            # If model predicts target class, use target for adversarial loss:
-            push!(aversarial_targets, target_enc)
-            percent_valid += 1.0
-        else
-            # Otherwise, use factual label for adversarial loss:
-            push!(aversarial_targets, factual_enc[:, i])
-        end
-    end
+    targets_enc = (ce -> target_encoded(ce, counterfactual_data)).(ces)                 # one-hot encoded targets
+    validities = (ce -> Evaluation.validity(ce,model, counterfactual_data)).(ces)       # validity (label flip rate)
 
     n_total = length(counterfactuals)
-    percent_valid = percent_valid / n_total
+    percent_valid = sum(reduce(vcat, validities)) / n_total
     group_indices = TaijaParallel.split_obs(1:n_total, length(data))
 
     # Partition data:
@@ -86,12 +73,17 @@ function generate!(
             stack(hcat(counterfactuals[i]...)),
             stack(hcat(targets_enc[i]...)),
             stack(hcat(neighbours[i]...)),
-            stack(hcat(aversarial_targets[i]...)),
+            stack(hcat(perturbations[i]...)),
+            stack(hcat(validities[i]...)),
         ) for i in group_indices
     ]
     @assert length(dl) == length(data)
 
     return dl, percent_valid, ces
+end
+
+function Evaluation.validity(ce, model, data)
+    return argmax(vec(model(ce.counterfactual))) == argmax(vec(target_encoded(ce, data)))
 end
 
 """

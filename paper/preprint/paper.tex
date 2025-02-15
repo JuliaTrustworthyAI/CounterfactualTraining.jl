@@ -184,15 +184,15 @@
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
 \theoremstyle{plain}
-\newtheorem{corollary}{Research Question}[section]
-\theoremstyle{plain}
 \newtheorem{theorem}{Theorem}[section]
+\theoremstyle{definition}
+\newtheorem{exercise}{Parameters}[section]
 \theoremstyle{definition}
 \newtheorem{example}{Example}[section]
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
-\theoremstyle{definition}
-\newtheorem{exercise}{Parameters}[section]
+\theoremstyle{plain}
+\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -1187,7 +1187,7 @@ sensitivity for \(d_{\text{immtbl}}\) relative to increased sensitivity
 for \(d_{\text{mtbl}}\)).
 \end{proof}
 
-\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, bottomtitle=1mm, coltitle=black, opacitybacktitle=0.6, rightrule=.15mm, toprule=.15mm, toptitle=1mm, colbacktitle=quarto-callout-warning-color!10!white, colback=white, breakable, left=2mm, leftrule=.75mm, titlerule=0mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, bottomrule=.15mm, opacityback=0, colframe=quarto-callout-warning-color-frame]
+\begin{tcolorbox}[enhanced jigsaw, opacityback=0, breakable, left=2mm, coltitle=black, colbacktitle=quarto-callout-warning-color!10!white, titlerule=0mm, opacitybacktitle=0.6, colback=white, bottomtitle=1mm, toptitle=1mm, bottomrule=.15mm, arc=.35mm, colframe=quarto-callout-warning-color-frame, rightrule=.15mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, toprule=.15mm, leftrule=.75mm]
 
 @Cynthia, @Arie, I have tentatively phrased the above in terms of a
 theorem and proof. This is something I've so far shied away from because
@@ -1199,7 +1199,7 @@ correct.
 
 \section{Detailed Results}\label{detailed-results}
 
-\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, bottomtitle=1mm, coltitle=black, opacitybacktitle=0.6, rightrule=.15mm, toprule=.15mm, toptitle=1mm, colbacktitle=quarto-callout-warning-color!10!white, colback=white, breakable, left=2mm, leftrule=.75mm, titlerule=0mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, bottomrule=.15mm, opacityback=0, colframe=quarto-callout-warning-color-frame]
+\begin{tcolorbox}[enhanced jigsaw, opacityback=0, breakable, left=2mm, coltitle=black, colbacktitle=quarto-callout-warning-color!10!white, titlerule=0mm, opacitybacktitle=0.6, colback=white, bottomtitle=1mm, toptitle=1mm, bottomrule=.15mm, arc=.35mm, colframe=quarto-callout-warning-color-frame, rightrule=.15mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, toprule=.15mm, leftrule=.75mm]
 
 @Cynthia, @Arie, I'm including some preliminary results here but will
 rerun experiments in the coming days. You'll notice some odd outlier
@@ -1219,7 +1219,7 @@ inherited from energy-based modelling).
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, bottomtitle=1mm, coltitle=black, opacitybacktitle=0.6, rightrule=.15mm, toprule=.15mm, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, leftrule=.75mm, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, bottomrule=.15mm, opacityback=0, colframe=quarto-callout-note-color-frame]
+\begin{tcolorbox}[enhanced jigsaw, opacityback=0, breakable, left=2mm, coltitle=black, colbacktitle=quarto-callout-note-color!10!white, titlerule=0mm, opacitybacktitle=0.6, colback=white, bottomtitle=1mm, toptitle=1mm, bottomrule=.15mm, arc=.35mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, toprule=.15mm, leftrule=.75mm]
 
 @Cynthia, @Arie, Figure~\ref{fig-mnist} shows much more plausible
 (faithful) counterfactuals for a model with CT than the model with
