@@ -44,4 +44,22 @@ function adv_loss(
     end
 end
 
+abstract type AbstractAECriterium end
+
+Base.@kwdef struct NormBound <: AbstractAECriterium
+    epsilon::AbstractFloat = 0.5
+    p::Real = Inf
+end
+
+(nmb::NormBound)(perturbation::AbstractArray) = isadvexm(perturbation, nmb.epsilon, nmb.p)
+
 isadvexm(perturbation, epsilon, p) = abs(norm(perturbation, p)) <= epsilon
+
+global _global_ae_criterium = NormBound()
+
+get_global_ae_criterium() = _global_ae_criterium
+
+function set_global_ae_criterium(aecrit::AbstractAECriterium)
+    global _global_ae_criterium = aecrit
+    return _global_ae_criterium
+end

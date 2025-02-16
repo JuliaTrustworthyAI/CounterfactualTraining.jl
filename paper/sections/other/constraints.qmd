@@ -78,7 +78,6 @@ using CTExperiments:
     LinearModel, 
     get_input_encoder
 
-
 # Callback:
 using CTExperiments: get_log_reg_params, get_decision_boundary
 

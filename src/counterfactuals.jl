@@ -35,6 +35,7 @@ function generate!(
     verbose=1,
     domain=nothing,
     mutability=nothing,
+    callback::Function=get_last_valid_ae,
 )
     xs, factual_enc, targets, counterfactual_data, M = setup_counterfactual_search(
         data, model, domain, input_encoder, mutability, nneighbours, nsamples
@@ -53,9 +54,11 @@ function generate!(
         initialization=:identity,
         return_flattened=true,
         verbose=verbose > 1,
+        callback=callback
     )
 
     counterfactuals = (ce -> ce.counterfactual).(ces)                                   # get actual counterfactuals
+    advexms = (ce -> ce.search[:last_valid_ce])                                         # get adversarial example
     perturbations = (ce -> ce.counterfactual - ce.factual).(ces)                        # get perturbations
     targets = (ce -> ce.target).(ces)                                                   # get targets
     neighbours = (ce -> find_potential_neighbours(ce, counterfactual_data, 1)).(ces)    # randomly draw a sample from the target class
@@ -71,6 +74,7 @@ function generate!(
     dl = [
         (
             stack(hcat(counterfactuals[i]...)),
+            stack(hcat(advexms[i]...)),
             stack(hcat(targets_enc[i]...)),
             stack(hcat(neighbours[i]...)),
             stack(hcat(perturbations[i]...)),
@@ -82,6 +86,26 @@ function generate!(
     return dl, percent_valid, ces
 end
 
+"""
+    get_last_valid_ae(ce::CounterfactualExplanation)
+
+A callback function used to store the last counterfactual that is also a valid adversarial example based on the global AE criterium (see [`get_global_ae_criterium`](@ref)).
+"""
+function get_last_valid_ae(ce::CounterfactualExplanation)
+    # Find last counterfactual that meets imperceptability criterium:
+    xs = ce.search[:path]
+    aecrit = get_global_ae_criterium()
+    idx_advexm = [aecrit(x) for x in xs]
+    println(idx_advexm)
+    last_valid_ae = xs[idx_advexm][end]
+    ce.search[:last_valid_ae] = last_valid_ae
+end
+
+"""
+    Evaluation.validity(ce, model, data)
+
+Extends the `Evaluation.validity` method.
+"""
 function Evaluation.validity(ce, model, data)
     return argmax(vec(model(ce.counterfactual))) == argmax(vec(target_encoded(ce, data)))
 end

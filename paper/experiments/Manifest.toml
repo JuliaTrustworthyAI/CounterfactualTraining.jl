@@ -476,7 +476,7 @@ version = "0.6.3"
 
 [[deps.CounterfactualExplanations]]
 deps = ["CategoricalArrays", "CausalInference", "ChainRulesCore", "DataFrames", "Distributions", "EnergySamplers", "Flux", "Graphs", "KernelFunctions", "LazyArtifacts", "LinearAlgebra", "Logging", "MLJBase", "MLJDecisionTreeInterface", "MLUtils", "MultivariateStats", "PackageExtensionCompat", "ProgressMeter", "Random", "Serialization", "Statistics", "StatsBase", "Tables", "TaijaBase", "UUIDs"]
-git-tree-sha1 = "5a8461319e7a2604b6f567e8893f1a1832f20532"
+git-tree-sha1 = "8961c7ae673c53c4a2abbb93ee7d544acb5f5be6"
 repo-rev = "counterfactual-training"
 repo-url = "https://github.com/JuliaTrustworthyAI/CounterfactualExplanations.jl.git"
 uuid = "2f13d31b-18db-44c1-bc43-ebaf2cff0be0"
