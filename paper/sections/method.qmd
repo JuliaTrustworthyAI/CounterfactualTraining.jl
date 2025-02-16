@@ -36,10 +36,10 @@ where $\text{yloss}(\cdot)$ is any conventional classification loss that induces
 A key empirical finding in @altmeyer2024faithful was that JEMs tend to do well with respect to the plausibility objective in @def-explainability. If we consider samples drawn from $p_\theta(\mathbf{x})$ as counterfactuals, this is an expected finding, because the JEM objective effectively minimizes the divergence between the conditional posterior and $p(\mathbf{x}|\mathbf{y}^{+})$. To generate samples, @grathwohl2020your rely on Stochastic Gradient Langevin Dynamics (SGLD) using an uninformative prior for initialization. This is where we depart from their methodology: instead of generating samples through SGLD, we propose using counterfactual explainers to generate counterfactuals for observed training samples. Specifically, we have
 
 $$
-\text{div}(\mathbf{x},\mathbf{x^\prime},y;\theta) = \mathcal{E}_\theta(\mathbf{x},y) - \mathcal{E}_\theta(\mathbf{x}^\prime,y)
+\text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) = \mathcal{E}_\theta(\mathbf{x},y) - \mathcal{E}_\theta(\mathbf{x}_T^\prime,y)
 $$ {#eq-div}
 
-where $\mathcal{E}_\theta(\cdot)$ denotes the energy function. We generate samples $\mathbf{x}^\prime$ by first randomly sampling the target class $y^+ \sim p(y)$ and then generating a counterfactual explanation for that target, similar to how conditional sampling is used to draw from $p_\theta(\mathbf{x})$ in @grathwohl2020your. In particular, we set $\mathcal{E}_\theta(\mathbf{x},\mathbf{y})=-\mathbf{M}_\theta(\mathbf{x})[y^+]$ where $y^+$ denotes the index of the target class.
+where $\mathcal{E}_\theta(\cdot)$ denotes the energy function. In particular, we set $\mathcal{E}_\theta(\mathbf{x},\mathbf{y})=-\mathbf{M}_\theta(\mathbf{x})[y^+]$ where $y^+$ denotes the index of the target class. We generate samples $\mathbf{x}_T^\prime$ by first randomly sampling the target class $y^+ \sim p(y)$ and then generating a counterfactual explanation for that target over $T$ iterations using a gradient-based counterfactual generator. This is similar to how conditional sampling is used to draw from $p_\theta(\mathbf{x})$ in @grathwohl2020your. 
 
 Intuitively, the gradient of @eq-div decreases the energy of observed training samples (positive samples) while at same time increasing the energy of counterfactuals (negative samples) [@du2019implicit]. As the generated counterfactuals get more plausible (@def-explainability) over the cause of training, these two opposing effects gradually balance each out [@lippe2024uvadlc]. 
 
@@ -51,10 +51,8 @@ Based on our analysis in @sec-lit, counterfactuals $\mathbf{x}^\prime$ can be re
 
 $$
 \begin{aligned}
-\text{advloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),\mathbf{y};\varepsilon)&=\begin{cases}
-\text{yloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),\mathbf{y}) & \text{if} \ ||\Delta||_\infty \leq \varepsilon \\
-0 & \text{otherwise.}
-\end{cases}
+\text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y};\varepsilon)&=\text{yloss}(\mathbf{M}_\theta(\mathbf{x}_{t_\varepsilon}^\prime),\mathbf{y}) \\
+t_\varepsilon &= \max_t \{t: ||\Delta||_\infty < \varepsilon\}
 \end{aligned}
 $$ {#eq-adv}
 
