@@ -183,8 +183,6 @@
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
-\theoremstyle{plain}
-\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{definition}
 \newtheorem{exercise}{Parameters}[section]
 \theoremstyle{definition}
@@ -193,6 +191,8 @@
 \newtheorem{definition}{Definition}[section]
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}[section]
+\theoremstyle{plain}
+\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -592,24 +592,26 @@ tasks for reasons discussed in Section~\ref{sec-discussion}.
 
 \subsection{Our Proposed Objective}\label{our-proposed-objective}
 
-To train models with high explainability as defined in
-Definition~\ref{def-explainability}, we propose the following objective,
+Let \(\mathbf{x}_t^\prime\) for \(t=0,...,T\) denote iteratively
+generated counterfactuals. To train models with high explainability as
+defined in Definition~\ref{def-explainability}, we propose to leverage
+counterfactuals in the following objective,
 
 \begin{equation}\phantomsection\label{eq-obj}{
-\text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x^\prime},y;\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),\mathbf{y})
+\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y})
 }\end{equation}
 
-where \(\text{yloss}(\cdot)\) denotes any conventional classification
-loss function (e.g.~cross-entropy) that induces discriminative
-(predictive) performance. The two additional components in
-Equation~\ref{eq-obj} are explained in more detail below. For now, they
-can be sufficiently described as inducing explainability directly and
-indirectly by penalizing: 1) the contrastive divergence,
-\(\text{div}(\cdot)\), between counterfactuals \(x^\prime\) and observed
-samples \(x\) and, 2) the adversarial loss, \(\text{advloss}(.)\), with
-respect to counterfactuals. The tradeoff between the different
-components can be governed by adjusting the strengths of the penalties
-\(\lambda_{\text{div}}\) and \(\lambda_{\text{adv}}\).
+where \(\text{yloss}(\cdot)\) is any conventional classification loss
+that induces discriminative performance (e.g.~cross-entropy). The two
+additional components in Equation~\ref{eq-obj} are explained in more
+detail below. For now, they can be sufficiently described as inducing
+explainability directly and indirectly by penalizing: 1) the contrastive
+divergence, \(\text{div}(\cdot)\), between counterfactuals
+\(\mathbf{x}_T^\prime\) and observed samples \(x\) and, 2) the
+adversarial loss, \(\text{advloss}(.)\), with respect to nascent
+counterfactuals \(\mathbf{x}_{t\leq T}^\prime\). The tradeoff between
+the different components can be governed by adjusting the strengths of
+the penalties \(\lambda_{\text{div}}\) and \(\lambda_{\text{adv}}\).
 
 \subsubsection{Directly Inducing Explainability through Contrastive
 Divergence}\label{directly-inducing-explainability-through-contrastive-divergence}
@@ -1190,7 +1192,7 @@ sensitivity for \(d_{\text{immtbl}}\) relative to increased sensitivity
 for \(d_{\text{mtbl}}\)).
 \end{proof}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, colframe=quarto-callout-warning-color-frame, toprule=.15mm, opacityback=0, left=2mm, breakable, colback=white, bottomtitle=1mm, rightrule=.15mm, titlerule=0mm, opacitybacktitle=0.6, colbacktitle=quarto-callout-warning-color!10!white, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, coltitle=black, toptitle=1mm, arc=.35mm, bottomrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, breakable, leftrule=.75mm, coltitle=black, bottomtitle=1mm, toprule=.15mm, opacitybacktitle=0.6, colbacktitle=quarto-callout-warning-color!10!white, arc=.35mm, bottomrule=.15mm, left=2mm, titlerule=0mm, opacityback=0, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, rightrule=.15mm, colframe=quarto-callout-warning-color-frame, toptitle=1mm]
 
 @Cynthia, @Arie, I have tentatively phrased the above in terms of a
 theorem and proof. This is something I've so far shied away from because
@@ -1202,7 +1204,7 @@ correct.
 
 \section{Detailed Results}\label{detailed-results}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, colframe=quarto-callout-warning-color-frame, toprule=.15mm, opacityback=0, left=2mm, breakable, colback=white, bottomtitle=1mm, rightrule=.15mm, titlerule=0mm, opacitybacktitle=0.6, colbacktitle=quarto-callout-warning-color!10!white, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, coltitle=black, toptitle=1mm, arc=.35mm, bottomrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, breakable, leftrule=.75mm, coltitle=black, bottomtitle=1mm, toprule=.15mm, opacitybacktitle=0.6, colbacktitle=quarto-callout-warning-color!10!white, arc=.35mm, bottomrule=.15mm, left=2mm, titlerule=0mm, opacityback=0, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, rightrule=.15mm, colframe=quarto-callout-warning-color-frame, toptitle=1mm]
 
 @Cynthia, @Arie, I'm including some preliminary results here but will
 rerun experiments in the coming days. You'll notice some odd outlier
@@ -1222,7 +1224,7 @@ inherited from energy-based modelling).
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, opacityback=0, left=2mm, breakable, colback=white, bottomtitle=1mm, rightrule=.15mm, titlerule=0mm, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, coltitle=black, toptitle=1mm, arc=.35mm, bottomrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, breakable, leftrule=.75mm, coltitle=black, bottomtitle=1mm, toprule=.15mm, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, bottomrule=.15mm, left=2mm, titlerule=0mm, opacityback=0, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, rightrule=.15mm, colframe=quarto-callout-note-color-frame, toptitle=1mm]
 
 @Cynthia, @Arie, Figure~\ref{fig-mnist} shows much more plausible
 (faithful) counterfactuals for a model with CT than the model with
