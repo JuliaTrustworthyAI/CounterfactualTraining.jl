@@ -106,7 +106,7 @@ function counterfactual_training(
 
             # Unpack:
             input, label = batch
-            perturbed_input, advexms, targets_enc, neighbours, perturbations, validities = counterfactual_dl[i]
+            perturbed_input, advexms, targets_enc, neighbours, factual_enc = counterfactual_dl[i]
 
             val, grads = Flux.withgradient(model) do m
 
@@ -117,7 +117,7 @@ function counterfactual_training(
                 if !isnothing(perturbed_input)
                     implaus = implausibility(m, perturbed_input, neighbours, targets_enc)
                     regs = reg_loss(m, perturbed_input, neighbours, targets_enc)
-                    adversarial_loss = loss.class_loss(m(advexms), label)
+                    adversarial_loss = loss.class_loss(m(advexms), factual_enc)
                 else
                     implaus = [0.0f0]
                     regs = [0.0f0]

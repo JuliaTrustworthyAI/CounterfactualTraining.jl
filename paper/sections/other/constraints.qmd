@@ -173,7 +173,7 @@ for (title, obj, constraint) in specs
     # Objective:
     generator = GenericGenerator()
     opt_state = Flux.setup(Descent(), model)
-    conv = MaxIterConvergence(5)
+    conv = MaxIterConvergence(25)
 
     model, logs = counterfactual_training(
         obj,
@@ -182,7 +182,7 @@ for (title, obj, constraint) in specs
         train_set,
         opt_state;
         val_set = val_set,
-        nepochs = 50,
+        nepochs = 100,
         mutability = Symbol.(constraint),
         callback = plot_db,
         nce=50,

@@ -58,7 +58,7 @@ function generate!(
     )
 
     counterfactuals = (ce -> ce.counterfactual).(ces)                                   # get actual counterfactuals
-    advexms = (ce -> ce.search[:last_valid_ce])                                         # get adversarial example
+    advexms = (ce -> ce.search[:last_valid_ae]).(ces)                                   # get adversarial example
     perturbations = (ce -> ce.counterfactual - ce.factual).(ces)                        # get perturbations
     targets = (ce -> ce.target).(ces)                                                   # get targets
     neighbours = (ce -> find_potential_neighbours(ce, counterfactual_data, 1)).(ces)    # randomly draw a sample from the target class
@@ -77,8 +77,7 @@ function generate!(
             stack(hcat(advexms[i]...)),
             stack(hcat(targets_enc[i]...)),
             stack(hcat(neighbours[i]...)),
-            stack(hcat(perturbations[i]...)),
-            stack(hcat(validities[i]...)),
+            stack(hcat(eachcol(factual_enc)[i]...)),
         ) for i in group_indices
     ]
     @assert length(dl) == length(data)
@@ -94,9 +93,9 @@ A callback function used to store the last counterfactual that is also a valid a
 function get_last_valid_ae(ce::CounterfactualExplanation)
     # Find last counterfactual that meets imperceptability criterium:
     xs = ce.search[:path]
+    perturbations = [x - ce.factual for x in xs]
     aecrit = get_global_ae_criterium()
-    idx_advexm = [aecrit(x) for x in xs]
-    println(idx_advexm)
+    idx_advexm = [aecrit(x) for x in perturbations]
     last_valid_ae = xs[idx_advexm][end]
     ce.search[:last_valid_ae] = last_valid_ae
 end
