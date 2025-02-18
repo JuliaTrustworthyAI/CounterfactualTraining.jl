@@ -54,7 +54,7 @@ function generate!(
         initialization=:identity,
         return_flattened=true,
         verbose=verbose > 1,
-        callback=callback
+        callback=callback,
     )
 
     counterfactuals = (ce -> ce.counterfactual).(ces)                                   # get actual counterfactuals
@@ -64,7 +64,7 @@ function generate!(
     neighbours = (ce -> find_potential_neighbours(ce, counterfactual_data, 1)).(ces)    # randomly draw a sample from the target class
     protect_immutable!(neighbours, counterfactuals, counterfactual_data.mutability)     # adjust for mutability
     targets_enc = (ce -> target_encoded(ce, counterfactual_data)).(ces)                 # one-hot encoded targets
-    validities = (ce -> Evaluation.validity(ce,model, counterfactual_data)).(ces)       # validity (label flip rate)
+    validities = (ce -> Evaluation.validity(ce, model, counterfactual_data)).(ces)       # validity (label flip rate)
 
     n_total = length(counterfactuals)
     percent_valid = sum(reduce(vcat, validities)) / n_total
@@ -97,7 +97,7 @@ function get_last_valid_ae(ce::CounterfactualExplanation)
     aecrit = get_global_ae_criterium()
     idx_advexm = [aecrit(x) for x in perturbations]
     last_valid_ae = xs[idx_advexm][end]
-    ce.search[:last_valid_ae] = last_valid_ae
+    return ce.search[:last_valid_ae] = last_valid_ae
 end
 
 """
@@ -124,7 +124,6 @@ function protect_immutable!(
     mutability::Union{Nothing,AbstractArray},
 )
     if !isnothing(mutability)
-        
         direction_handlers = Dict(
             :both => (cf, s) -> s,
             :none => (cf, s) -> cf,
@@ -139,7 +138,6 @@ function protect_immutable!(
                 )
             end
         end
-
     end
     return samples
 end

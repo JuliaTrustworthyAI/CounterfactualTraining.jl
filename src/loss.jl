@@ -31,15 +31,23 @@ end
 Adversarial loss function.
 """
 function adv_loss(
-    model, counterfactual, perturbations, targets; epsilon=0.5, p::Real=Inf, validities=nothing
+    model,
+    counterfactual,
+    perturbations,
+    targets;
+    epsilon=0.5,
+    p::Real=Inf,
+    validities=nothing,
 )
     # Identify adversarial examples
-    idx_advexm = [isadvexm(perturbation, epsilon, p) for perturbation in eachcol(perturbations)]
+    idx_advexm = [
+        isadvexm(perturbation, epsilon, p) for perturbation in eachcol(perturbations)
+    ]
     if sum(idx_advexm) > 0
         println("Percent AE: $(sum(idx_advexm)/length(idx_advexm))")
-        yhat_ce = model(counterfactual[:,idx_advexm])   # predictions
-        return Flux.logitcrossentropy(yhat_ce, targets[:,idx_advexm])
-    else 
+        yhat_ce = model(counterfactual[:, idx_advexm])   # predictions
+        return Flux.logitcrossentropy(yhat_ce, targets[:, idx_advexm])
+    else
         return 0.0f0
     end
 end

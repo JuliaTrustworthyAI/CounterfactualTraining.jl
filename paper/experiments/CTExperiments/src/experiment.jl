@@ -394,9 +394,7 @@ function get_log_reg_params(exper::Experiment)
 end
 
 function get_log_reg_params(model::Flux.Chain)
-    coeffs =
-        Flux.params(model) |>
-        get_log_reg_params
+    coeffs = Flux.params(model) |> get_log_reg_params
     return coeffs
 end
 
