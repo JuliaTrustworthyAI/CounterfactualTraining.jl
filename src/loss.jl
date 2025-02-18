@@ -65,6 +65,11 @@ isadvexm(perturbation, epsilon, p) = abs(norm(perturbation, p)) <= epsilon
 
 global _global_ae_criterium = NormBound()
 
+"""
+    get_global_ae_criterium()
+
+Get the global AE criterium.
+"""
 get_global_ae_criterium() = _global_ae_criterium
 
 function set_global_ae_criterium(aecrit::AbstractAECriterium)
