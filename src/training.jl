@@ -82,7 +82,7 @@ function counterfactual_training(
 
         # Generate counterfactuals:
         if epoch > burnin && needs_counterfactuals(loss)
-            counterfactual_dl, percent_valid = generate!(
+            counterfactual_dl, percent_valid, ces = generate!(
                 model,
                 train_set,
                 generator;
@@ -98,6 +98,7 @@ function counterfactual_training(
         else
             counterfactual_dl = fill(ntuple(_ -> nothing, 4), length(train_set))
             percent_valid = nothing
+            ces = nothing
         end
 
         # Backprop:
@@ -105,7 +106,7 @@ function counterfactual_training(
 
             # Unpack:
             input, label = batch
-            perturbed_input, targets_enc, neighbours, adversarial_targets = counterfactual_dl[i]
+            perturbed_input, advexms, targets_enc, neighbours, factual_enc = counterfactual_dl[i]
 
             val, grads = Flux.withgradient(model) do m
 
@@ -116,11 +117,7 @@ function counterfactual_training(
                 if !isnothing(perturbed_input)
                     implaus = implausibility(m, perturbed_input, neighbours, targets_enc)
                     regs = reg_loss(m, perturbed_input, neighbours, targets_enc)
-                    # Validity loss (counterfactual):
-                    yhat_ce = m(perturbed_input)
-                    adversarial_loss = Flux.Losses.logitcrossentropy(
-                        yhat_ce, adversarial_targets
-                    )
+                    adversarial_loss = loss.class_loss(m(advexms), factual_enc)
                 else
                     implaus = [0.0f0]
                     regs = [0.0f0]
@@ -150,8 +147,7 @@ function counterfactual_training(
         end
 
         if !isnothing(callback)
-            counterfactuals = reduce(hcat, [x[1] for x in counterfactual_dl])
-            callback(model, counterfactuals)
+            callback(model, ces)
         end
 
         # Logging:

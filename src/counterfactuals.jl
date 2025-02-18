@@ -1,13 +1,12 @@
 using Base.Iterators
 using CounterfactualExplanations
 using CounterfactualExplanations: Convergence
+using CounterfactualExplanations: Evaluation
 using CounterfactualExplanations: Models
 using CounterfactualExplanations: find_potential_neighbours
 using Flux
 using StatsBase
 using TaijaParallel
-
-function generate!() end
 
 """
     generate!(
@@ -36,6 +35,7 @@ function generate!(
     verbose=1,
     domain=nothing,
     mutability=nothing,
+    callback::Function=get_last_valid_ae,
 )
     xs, factual_enc, targets, counterfactual_data, M = setup_counterfactual_search(
         data, model, domain, input_encoder, mutability, nneighbours, nsamples
@@ -54,69 +54,107 @@ function generate!(
         initialization=:identity,
         return_flattened=true,
         verbose=verbose > 1,
+        callback=callback,
     )
 
-    counterfactuals = (ce -> ce.counterfactual).(ces)                               # get actual counterfactuals
-    targets = (ce -> ce.target).(ces)
-
-    # Get neighbours in target class: find `nneighbours` potential neighbours than randomly choose one for each counterfactual.
-    neighbours =
-        (
-            ce -> find_potential_neighbours(ce, counterfactual_data, nneighbours)[
-                :, rand(1:end)
-            ]
-        ).(ces)
-
-    # Adjust for mutability:
-    mtblty = counterfactual_data.mutability
-    if !isnothing(mtblty)
-        for (i, ce) in enumerate(counterfactuals)
-            immtble = findall(mtblty .!= :both)
-            for j in immtble
-                # println(counterfactuals[i])
-                counterfactuals[i][j, :] = neighbours[i][j, :]
-                # println(counterfactuals[i])
-            end
-        end
-    end
-
-    aversarial_targets = []
-    targets_enc = []
-    percent_valid = 0.0
-    idx = sample(1:length(ces), 10; replace=false)
-    # @info "Index: $idx"
-    for (i, ce) in enumerate(ces)
-        target_enc = target_encoded(ce, counterfactual_data)
-        push!(targets_enc, target_enc)
-        if argmax(vec(model(ce.counterfactual))) == argmax(vec(target_enc))
-            # If model predicts target class, use target for adversarial loss:
-            push!(aversarial_targets, target_enc)
-            percent_valid += 1.0
-        else
-            # Otherwise, use factual label for adversarial loss:
-            push!(aversarial_targets, factual_enc[:, i])
-        end
-    end
+    counterfactuals = (ce -> ce.counterfactual).(ces)                                   # get actual counterfactuals
+    advexms = (ce -> ce.search[:last_valid_ae]).(ces)                                   # get adversarial example
+    perturbations = (ce -> ce.counterfactual - ce.factual).(ces)                        # get perturbations
+    targets = (ce -> ce.target).(ces)                                                   # get targets
+    neighbours = (ce -> find_potential_neighbours(ce, counterfactual_data, 1)).(ces)    # randomly draw a sample from the target class
+    protect_immutable!(neighbours, counterfactuals, counterfactual_data.mutability)     # adjust for mutability
+    targets_enc = (ce -> target_encoded(ce, counterfactual_data)).(ces)                 # one-hot encoded targets
+    validities = (ce -> isvalid(ce, model, counterfactual_data)).(ces)                  # validity (label flip rate)
 
     n_total = length(counterfactuals)
-    # @info "Counter: $(percent_valid)"
-    percent_valid = percent_valid / n_total
+    percent_valid = sum(reduce(vcat, validities)) / n_total
     group_indices = TaijaParallel.split_obs(1:n_total, length(data))
 
     # Partition data:
     dl = [
         (
             stack(hcat(counterfactuals[i]...)),
+            stack(hcat(advexms[i]...)),
             stack(hcat(targets_enc[i]...)),
             stack(hcat(neighbours[i]...)),
-            stack(hcat(aversarial_targets[i]...)),
+            stack(hcat(eachcol(factual_enc)[i]...)),
         ) for i in group_indices
     ]
     @assert length(dl) == length(data)
 
-    return dl, percent_valid
+    return dl, percent_valid, ces
 end
 
+"""
+    get_last_valid_ae(ce::CounterfactualExplanation)
+
+A callback function used to store the last counterfactual that is also a valid adversarial example based on the global AE criterium (see [`get_global_ae_criterium`](@ref)).
+"""
+function get_last_valid_ae(ce::CounterfactualExplanation)
+    # Find last counterfactual that meets imperceptability criterium:
+    xs = ce.search[:path]
+    perturbations = [x - ce.factual for x in xs]
+    aecrit = get_global_ae_criterium()
+    idx_advexm = [aecrit(x) for x in perturbations]
+    last_valid_ae = xs[idx_advexm][end]
+    return ce.search[:last_valid_ae] = last_valid_ae
+end
+
+"""
+    isvalid(ce, model, data)
+
+Checks if the label has been flipped.
+"""
+function isvalid(ce::CounterfactualExplanation, model, data)
+    return argmax(vec(model(ce.counterfactual))) == argmax(vec(target_encoded(ce, data)))
+end
+
+"""
+    protect_immutable!(
+        samples::AbstractArray,
+        counterfactuals::AbstractArray,
+        mutability::Union{Nothing,AbstractArray},
+    )
+
+Protects immutable features from the contrastive divergence penalty.
+"""
+function protect_immutable!(
+    samples::AbstractArray,
+    counterfactuals::AbstractArray,
+    mutability::Union{Nothing,AbstractArray},
+)
+    if !isnothing(mutability)
+        direction_handlers = Dict(
+            :both => (cf, s) -> s,
+            :none => (cf, s) -> cf,
+            :increase => (cf, s) -> cf > s ? cf : s,
+            :decrease => (cf, s) -> cf < s ? cf : s,
+        )
+
+        for (i, ce) in enumerate(counterfactuals)
+            for (j, allowed_direction) in enumerate(mutability)
+                samples[i][j, :] = direction_handlers[allowed_direction](
+                    counterfactuals[i][j, :], samples[i][j, :]
+                )
+            end
+        end
+    end
+    return samples
+end
+
+"""
+    setup_counterfactual_search(
+        data,
+        model,
+        domain,
+        input_encoder,
+        mutability,
+        nneighbours::Int64,
+        nsamples::Union{Nothing,Int64},
+    )
+
+Sets up the counterfactual search.
+"""
 function setup_counterfactual_search(
     data,
     model,

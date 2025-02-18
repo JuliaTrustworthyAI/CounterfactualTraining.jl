@@ -184,13 +184,13 @@
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
 \theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\theoremstyle{definition}
 \newtheorem{exercise}{Parameters}[section]
 \theoremstyle{plain}
-\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}{Proposition}[section]
 \theoremstyle{plain}
 \newtheorem{corollary}{Research Question}[section]
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
 \theoremstyle{definition}
 \newtheorem{example}{Example}[section]
 \theoremstyle{remark}
@@ -420,20 +420,25 @@ datasets. Specifically, their approach relies on, firstly, identifying
 similar input samples with different annotations and, secondly, ensuring
 that the gradient of the classifier aligns with the vector between pairs
 of counterfactual inputs using the cosine distance as a loss function.
+
 In the natural language processing (NLP) domain, counterfactuals have
 similarly been used to improve models through data augmentation: Wu et
-al. (\citeproc{ref-wu2021polyjuice}{2021}), propose \emph{POLYJUICE}, a
+al. (\citeproc{ref-wu2021polyjuice}{2021}), propose \emph{Polyjuice}, a
 general-purpose counterfactual generator for language models. They
 demonstrate empirically that augmenting training data through
-\emph{POLYJUICE} counterfactuals improves robustness in a number of NLP
-tasks. Luu and Inoue (\citeproc{ref-luu2023counterfactual}{2023})
-introduce Counterfactual Adversarial Training (CAT), which also aims at
-improving generalization and robustness of language models.
-Specifically, they propose to proceed as follows: firstly, they identify
-training samples that are subject to high predictive uncertainty;
-secondly, they generate counterfactual explanations for those samples;
-and, finally, they fine-tune the given language model on the augmented
-dataset that includes the generated counterfactuals.
+\emph{Polyjuice} counterfactuals improves robustness in a number of NLP
+tasks. Balashankar et al.
+(\citeproc{ref-balashankar2023improving}{2023}) also use
+\emph{Polyjuice} to augment NLP datasets through diverse counterfactuals
+and show that classifier robustness improves up to 20\%. Finally, Luu
+and Inoue (\citeproc{ref-luu2023counterfactual}{2023}) introduce
+Counterfactual Adversarial Training (CAT), which also aims at improving
+generalization and robustness of language models. Specifically, they
+propose to proceed as follows: firstly, they identify training samples
+that are subject to high predictive uncertainty; secondly, they generate
+counterfactual explanations for those samples; and, finally, they
+fine-tune the given language model on the augmented dataset that
+includes the generated counterfactuals.
 
 There have also been several attempts at formalizing the relationship
 between counterfactual explanations (CE) and adversarial examples (AE).
@@ -592,24 +597,26 @@ tasks for reasons discussed in Section~\ref{sec-discussion}.
 
 \subsection{Our Proposed Objective}\label{our-proposed-objective}
 
-To train models with high explainability as defined in
-Definition~\ref{def-explainability}, we propose the following objective,
+Let \(\mathbf{x}_t^\prime\) for \(t=0,...,T\) denote iteratively
+generated counterfactuals. To train models with high explainability as
+defined in Definition~\ref{def-explainability}, we propose to leverage
+counterfactuals in the following objective,
 
 \begin{equation}\phantomsection\label{eq-obj}{
-\text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x^\prime},y;\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),\mathbf{y})
+\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y})
 }\end{equation}
 
-where \(\text{yloss}(\cdot)\) denotes any conventional classification
-loss function (e.g.~cross-entropy) that induces discriminative
-(predictive) performance. The two additional components in
-Equation~\ref{eq-obj} are explained in more detail below. For now, they
-can be sufficiently described as inducing explainability directly and
-indirectly by penalizing: 1) the contrastive divergence,
-\(\text{div}(\cdot)\), between counterfactuals \(x^\prime\) and observed
-samples \(x\) and, 2) the adversarial loss, \(\text{advloss}(.)\), with
-respect to counterfactuals. The tradeoff between the different
-components can be governed by adjusting the strengths of the penalties
-\(\lambda_{\text{div}}\) and \(\lambda_{\text{adv}}\).
+where \(\text{yloss}(\cdot)\) is any conventional classification loss
+that induces discriminative performance (e.g.~cross-entropy). The two
+additional components in Equation~\ref{eq-obj} are explained in more
+detail below. For now, they can be sufficiently described as inducing
+explainability directly and indirectly by penalizing: 1) the contrastive
+divergence, \(\text{div}(\cdot)\), between counterfactuals
+\(\mathbf{x}_T^\prime\) and observed samples \(x\) and, 2) the
+adversarial loss, \(\text{advloss}(.)\), with respect to nascent
+counterfactuals \(\mathbf{x}_{t\leq T}^\prime\). The tradeoff between
+the different components can be governed by adjusting the strengths of
+the penalties \(\lambda_{\text{div}}\) and \(\lambda_{\text{adv}}\).
 
 \subsubsection{Directly Inducing Explainability through Contrastive
 Divergence}\label{directly-inducing-explainability-through-contrastive-divergence}
@@ -643,17 +650,19 @@ explainers to generate counterfactuals for observed training samples.
 Specifically, we have
 
 \begin{equation}\phantomsection\label{eq-div}{
-\text{div}(\mathbf{x},\mathbf{x^\prime},y;\theta) = \mathcal{E}_\theta(\mathbf{x},y) - \mathcal{E}_\theta(\mathbf{x}^\prime,y)
+\text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) = \mathcal{E}_\theta(\mathbf{x},y) - \mathcal{E}_\theta(\mathbf{x}_T^\prime,y)
 }\end{equation}
 
-where \(\mathcal{E}_\theta(\cdot)\) denotes the energy function. We
-generate samples \(\mathbf{x}^\prime\) by first randomly sampling the
-target class \(y^+ \sim p(y)\) and then generating a counterfactual
-explanation for that target, similar to how conditional sampling is used
-to draw from \(p_\theta(\mathbf{x})\) in Grathwohl et al.
-(\citeproc{ref-grathwohl2020your}{2020}). In particular, we set
+where \(\mathcal{E}_\theta(\cdot)\) denotes the energy function. In
+particular, we set
 \(\mathcal{E}_\theta(\mathbf{x},\mathbf{y})=-\mathbf{M}_\theta(\mathbf{x})[y^+]\)
-where \(y^+\) denotes the index of the target class.
+where \(y^+\) denotes the index of the target class. We generate samples
+\(\mathbf{x}_T^\prime\) by first randomly sampling the target class
+\(y^+ \sim p(y)\) and then generating a counterfactual explanation for
+that target over \(T\) iterations using a gradient-based counterfactual
+generator. This is similar to how conditional sampling is used to draw
+from \(p_\theta(\mathbf{x})\) in Grathwohl et al.
+(\citeproc{ref-grathwohl2020your}{2020}).
 
 Intuitively, the gradient of Equation~\ref{eq-div} decreases the energy
 of observed training samples (positive samples) while at same time
@@ -678,7 +687,8 @@ Robustness}\label{indirectly-inducing-explainability-through-adversarial-robustn
 
 Based on our analysis in Section~\ref{sec-lit}, counterfactuals
 \(\mathbf{x}^\prime\) can be repurposed as additional training samples
-(\citeproc{ref-luu2023counterfactual}{Luu and Inoue 2023}) or
+(\citeproc{ref-luu2023counterfactual}{Luu and Inoue 2023};
+\citeproc{ref-balashankar2023improving}{Balashankar et al. 2023}) or
 adversarial examples
 (\citeproc{ref-freiesleben2022intriguing}{Freiesleben 2022};
 \citeproc{ref-pawelczyk2022exploring}{Pawelczyk et al. 2022}). This
@@ -689,17 +699,23 @@ inspired by adversarial training:
 
 \begin{equation}\phantomsection\label{eq-adv}{
 \begin{aligned}
-\text{advloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),\mathbf{y};\varepsilon)&=\begin{cases}
-\text{yloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),\mathbf{y}) & \text{if} \ ||\Delta||_\infty \leq \varepsilon \\
-0 & \text{otherwise.}
-\end{cases}
+\text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y};\varepsilon)&=\text{yloss}(\mathbf{M}_\theta(\mathbf{x}_{t_\varepsilon}^\prime),\mathbf{y}) \\
+t_\varepsilon &= \max_t \{t: ||\Delta_t||_\infty < \varepsilon\}
 \end{aligned}
 }\end{equation}
 
-Under this choice we treat the counterfactual \(\mathbf{x}^\prime\) as
-an adversarial example iff it is imperceptible, i.e.~the magnitude of
-the perturbation of any individual feature is upper-bounded at
-\(\varepsilon\).
+Under this choice, we consider nascent counterfactuals
+\(\mathbf{x}_{t\leq T}^\prime\) as adversarial examples as long as the
+magnitude of the perturbation to any individual feature is at most
+\(\varepsilon\). This is closely aligned with Szegedy et al.
+(\citeproc{ref-szegedy2013intriguing}{2013}), who define an adversarial
+attack as an ``imperceptible non-random perturbation''. Thus, we choose
+to work with a different distinction between CE and AE than Freiesleben
+(\citeproc{ref-freiesleben2022intriguing}{2022}), who considers
+misclassification as the key distinguishing feature of AE. One of the
+key observations in this work is that we can leverage counterfactual
+explanations during training and get adversarial examples, essentially
+for free.
 
 \subsection{Encoding Actionability Constraints}\label{sec-constraints}
 
@@ -752,8 +768,8 @@ features, which we demonstrate empirically for different classifiers in
 Section~\ref{sec-experiments}. Under certain conditions, this results
 holds theoretically{[}For the proof, see the supplementary appendix.{]}:
 
-\begin{theorem}[Protecting Immutable
-Features]\protect\hypertarget{thm-mtblty}{}\label{thm-mtblty}
+\begin{proposition}[Protecting Immutable
+Features]\protect\hypertarget{prp-mtblty}{}\label{prp-mtblty}
 
 Let
 \(f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})\)
@@ -765,15 +781,80 @@ covariance matrix \(\Sigma_k=\Sigma\) for all \(k \in \mathcal{K}\),
 then protecting an immutable feature from the contrastive divergence
 penalty (Equation~\ref{eq-div}) will result in lower classifier
 sensitivity to that feature relative to the remaining features, provided
-that at least one of those is mutable.
+that at least one of those is mutable and discriminative.
 
-\end{theorem}
+\end{proposition}
 
-It is worth highlighting that Theorem~\ref{thm-mtblty} assumes
+It is worth highlighting that Proposition~\ref{prp-mtblty} assumes
 independence of features. This raises a valid concern about the effect
 of protecting immutable features in the presence of proxy features that
 remain unprotected. We discuss this limitation in
 Section~\ref{sec-discussion}.
+
+\subsection{Illustration}\label{illustration}
+
+To better convey the intuition underlying our proposed method, we
+illustrate different model outcomes in Example~\ref{exm-grad}.
+
+\begin{example}[Prediction of Consumer Credit
+Default]\protect\hypertarget{exm-grad}{}\label{exm-grad}
+
+Suppose we are interested in predicting the likelihood that loan
+applicants default on their credit. We have access to historical data on
+previous loan takers comprised of a binary outcome variable
+(\(y\in\{1=\text{default},2=\text{no default}\}\)) two input features:
+1) the subjects' \emph{age}, which we define as immutable, and 2) the
+subjects' existing level of \emph{debt}, which we define as mutable.
+
+We have simulated this scenario using synthetic data with independent
+features and Gaussian class-conditional densities in
+Figure~\ref{fig-poc}. The four panels in Figure~\ref{fig-poc} show the
+outcomes for different training procedures using the same model
+architecture each time (a linear classifier). In each case, we show the
+linear decision boundary (green) and the training data colored according
+to their ground-truth label: orange points belong to the target class,
+\(y^+=2\), blue points belong to the non-target class, \(y^-=1\). Stars
+indicate counterfactuals in the target class generated at test time
+using generic gradient descent for a fixed number of iterations.
+
+In panel (a), we have trained our model conventionally, and we do not
+impose mutability constraints at test time. The generated
+counterfactuals are all valid, but not plausible: they are clearly
+distinguishable from the ground-truth data. In panel (b), we have
+trained our model with counterfactual training, once again not imposing
+mutability constraints at test time. We observe that the counterfactuals
+are clearly plausible, therefore meeting the first objective of
+Definition~\ref{def-explainability}.
+
+In panel (c), we have used conventional training again, this time
+imposing the mutability constraint on \emph{age} at test time.
+Counterfactuals are valid but involve some substantial reductions in
+\emph{debt} for some individuals, in particular very young applicants.
+By comparison, counterfactual paths are shorter on average in panel (d),
+where we have used counterfactual training and protected immutable
+features as described in Section~\ref{sec-constraints}. In particular,
+we observe that due to the classifier's lower sensitivity to \emph{age},
+recourse recommendations with respect to \emph{debt} are much more
+homogenous, in that they do not disproportionately punish younger
+individuals. The counterfactuals are also plausible with respect to the
+mutable feature. Thus, we consider the model in panel (d) as the most
+explainable according to Definition~\ref{def-explainability}.
+
+\end{example}
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{paper_files/mediabag/../../paper/figures/poc.pdf}}
+
+}
+
+\caption{\label{fig-poc}Visual illustration of how counterfactual
+training improves explainability. See Example~\ref{exm-grad} for
+details.}
+
+\end{figure}%
 
 \section{Experiments}\label{sec-experiments}
 
@@ -818,6 +899,8 @@ Equation~\ref{eq-obj}?
   Limited to classification models.
 \item
   Proxy attributes of immutable features.
+\item
+  Increased training time.
 \end{enumerate}
 
 \section{Conclusion}\label{sec-conclusion}
@@ -850,6 +933,13 @@ Augustin, Maximilian, Alexander Meinke, and Matthias Hein. 2020.
 {``Adversarial Robustness on in-and Out-Distribution Improves
 Explainability.''} In \emph{European Conference on Computer Vision},
 228--45. Springer.
+
+\bibitem[\citeproctext]{ref-balashankar2023improving}
+Balashankar, Ananth, Xuezhi Wang, Yao Qin, Ben Packer, Nithum Thain, Ed
+Chi, Jilin Chen, and Alex Beutel. 2023. {``Improving Classifier
+Robustness Through Active Generative Counterfactual Data
+Augmentation.''} In \emph{Findings of the Association for Computational
+Linguistics: EMNLP 2023}, 127--39.
 
 \bibitem[\citeproctext]{ref-du2019implicit}
 Du, Yilun, and Igor Mordatch. 2020. {``Implicit Generation and
@@ -1034,7 +1124,7 @@ point mass prior on \(p(\mathbf{x})\) for the corresponding feature. We
 argue in Section~\ref{sec-constraints} that this approach induces models
 to be less sensitive to immutable features and demonstrate this
 empirically in Section~\ref{sec-experiments}. Below we derive the
-analytical results in Theorem~\ref{thm-mtblty}.
+analytical results in Proposition~\ref{prp-mtblty}.
 
 \begin{proof}
 Let \(d_{\text{mtbl}}\) and \(d_{\text{immtbl}}\) denote some mutable
@@ -1102,7 +1192,7 @@ versa at initialization. Similarly, we are more likely to have
 \((\mu_{y^-,d_{\text{mtbl}}} > \mu_{y^+,d_{\text{mtbl}}})\).
 
 This implies that if we do not protect feature \(d_{\text{immtbl}}\),
-the contrastive divergence penalty will push down on
+the contrastive divergence penalty will decrease
 \(\theta_{y^-,d_{\text{immtbl}}}\) thereby exacerbating the existing
 effect
 \((\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}}) < 0\).
@@ -1112,7 +1202,7 @@ feature, in that it would be more likely to predict class \(y^-\) as
 opposed to \(y^+\) for lower values of \(d_{\text{immtbl}}\).
 
 By the same rationale, the contrastive divergence penalty can generally
-be expected to push up on \(\theta_{y^-,d_{\text{mtbl}}}\) exacerbating
+be expected to increase \(\theta_{y^-,d_{\text{mtbl}}}\) exacerbating
 \((\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}}) > 0\).
 In words, this has the effect of making the classifier more sensitive to
 the mutable feature, in that it would be more likely to predict class
@@ -1125,47 +1215,7 @@ sensitivity for \(d_{\text{immtbl}}\) relative to increased sensitivity
 for \(d_{\text{mtbl}}\)).
 \end{proof}
 
-We provide an illustrative example in Example~\ref{exm-grad}.
-
-\begin{example}[Prediction of Consumer Credit
-Default]\protect\hypertarget{exm-grad}{}\label{exm-grad}
-
-Suppose now that \(d_{\text{immtbl}}\) represents an individual's
-\emph{age} and \(d_{\text{mtbl}}\) represents an individual's existing
-level of credit card debt. Assume that these two features are
-independent, the class conditional densities are Gaussian and we use no
-other features to predict the risk of individuals defaulting on a
-consumer loan using a linear classifier. We have simulated this scenario
-using synthetic data in Figure~\ref{fig-mtblty}.
-
-In panel (a) of Figure~\ref{fig-mtblty}, we have trained the linear
-classifier using counterfactual training, treating both features as
-mutable. The linear decision boundary is roughly equally sensitive to
-both \emph{age} and existing levels of \emph{debt}.
-
-Conversely, in panel (b) of Figure~\ref{fig-mtblty}, we have trained the
-same classifier using counterfactual training, but this time treating
-\emph{age} as an immutable feature. The result is a new decision
-boundary that has tilted in favor of higher sensitivity to the mutable
-feature (existing \emph{debt}) and lower sensitivity to the immutable
-feature (\emph{age}).
-
-\end{example}
-
-\begin{figure}
-
-\centering{
-
-\pandocbounded{\includegraphics[keepaspectratio]{paper_files/mediabag/../../paper/figures/app_mtblty.pdf}}
-
-}
-
-\caption{\label{fig-mtblty}Visual illustration of the effect of imposing
-mutability constraints. See Example~\ref{exm-grad} for details.}
-
-\end{figure}%
-
-\begin{tcolorbox}[enhanced jigsaw, toprule=.15mm, colback=white, opacityback=0, coltitle=black, arc=.35mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, toptitle=1mm, colbacktitle=quarto-callout-warning-color!10!white, bottomrule=.15mm, colframe=quarto-callout-warning-color-frame, breakable, opacitybacktitle=0.6, rightrule=.15mm, left=2mm, bottomtitle=1mm, titlerule=0mm, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, colback=white, titlerule=0mm, opacityback=0, coltitle=black, colframe=quarto-callout-warning-color-frame, bottomrule=.15mm, toprule=.15mm, colbacktitle=quarto-callout-warning-color!10!white, opacitybacktitle=0.6, rightrule=.15mm, bottomtitle=1mm, toptitle=1mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, arc=.35mm, breakable, leftrule=.75mm]
 
 @Cynthia, @Arie, I have tentatively phrased the above in terms of a
 theorem and proof. This is something I've so far shied away from because
@@ -1177,7 +1227,7 @@ correct.
 
 \section{Detailed Results}\label{detailed-results}
 
-\begin{tcolorbox}[enhanced jigsaw, toprule=.15mm, colback=white, opacityback=0, coltitle=black, arc=.35mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, toptitle=1mm, colbacktitle=quarto-callout-warning-color!10!white, bottomrule=.15mm, colframe=quarto-callout-warning-color-frame, breakable, opacitybacktitle=0.6, rightrule=.15mm, left=2mm, bottomtitle=1mm, titlerule=0mm, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, colback=white, titlerule=0mm, opacityback=0, coltitle=black, colframe=quarto-callout-warning-color-frame, bottomrule=.15mm, toprule=.15mm, colbacktitle=quarto-callout-warning-color!10!white, opacitybacktitle=0.6, rightrule=.15mm, bottomtitle=1mm, toptitle=1mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, arc=.35mm, breakable, leftrule=.75mm]
 
 @Cynthia, @Arie, I'm including some preliminary results here but will
 rerun experiments in the coming days. You'll notice some odd outlier
@@ -1197,7 +1247,7 @@ inherited from energy-based modelling).
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, toprule=.15mm, colback=white, opacityback=0, coltitle=black, arc=.35mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, breakable, opacitybacktitle=0.6, rightrule=.15mm, left=2mm, bottomtitle=1mm, titlerule=0mm, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, colback=white, titlerule=0mm, opacityback=0, coltitle=black, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, rightrule=.15mm, bottomtitle=1mm, toptitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, arc=.35mm, breakable, leftrule=.75mm]
 
 @Cynthia, @Arie, Figure~\ref{fig-mnist} shows much more plausible
 (faithful) counterfactuals for a model with CT than the model with
@@ -1393,7 +1443,7 @@ Separable data by energy penalty.}
   vanilla & 0.05 & \textit{Omniscient} & -5.25 & 4.62 \\
   vanilla & 0.05 & \textit{REVISE} & -4.94 & 4.22 \\
   full & 0.1 & \textit{ECCo} & $-6.74 \cdot 10^{5}$ & $1.53 \cdot 10^{6}$ \\
-  full & 0.1 & \textit{Generic} & $-1.72 \cdot 10^{11}$ & $3.9 \cdot 10^{11}$ \\
+  full & 0.1 & \textit{Generic} & $-1.71 \cdot 10^{11}$ & $3.9 \cdot 10^{11}$ \\
   \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.56}} & \color{blue}{\textbf{0.124}} \\
   full & 0.1 & \textit{REVISE} & -15.6 & 13.2 \\
   vanilla & 0.1 & \textit{ECCo} & -4.28 & 3.52 \\
@@ -1470,7 +1520,7 @@ Separable data by cost penalty.}
   vanilla & 0 & \textit{Omniscient} & -5.18 & 4.54 \\
   vanilla & 0 & \textit{REVISE} & -4.93 & 4.23 \\
   full & 0.001 & \textit{ECCo} & -362 & 811 \\
-  full & 0.001 & \textit{Generic} & $-2.65 \cdot 10^{17}$ & $6.03 \cdot 10^{17}$ \\
+  full & 0.001 & \textit{Generic} & $-2.65 \cdot 10^{17}$ & $6.04 \cdot 10^{17}$ \\
   \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.001}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.49}} & \color{blue}{\textbf{0.115}} \\
   full & 0.001 & \textit{REVISE} & -15.5 & 13 \\
   vanilla & 0.001 & \textit{ECCo} & -4.34 & 3.58 \\
@@ -1478,7 +1528,7 @@ Separable data by cost penalty.}
   vanilla & 0.001 & \textit{Omniscient} & -5.18 & 4.53 \\
   vanilla & 0.001 & \textit{REVISE} & -4.93 & 4.23 \\
   full & 0.1 & \textit{ECCo} & $-3.72 \cdot 10^{11}$ & $8.46 \cdot 10^{11}$ \\
-  full & 0.1 & \textit{Generic} & $-4.49 \cdot 10^{14}$ & $1.02 \cdot 10^{15}$ \\
+  full & 0.1 & \textit{Generic} & $-4.48 \cdot 10^{14}$ & $1.02 \cdot 10^{15}$ \\
   \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.5}} & \color{blue}{\textbf{0.112}} \\
   full & 0.1 & \textit{REVISE} & -14.6 & 12.2 \\
   vanilla & 0.1 & \textit{ECCo} & -4.34 & 3.58 \\

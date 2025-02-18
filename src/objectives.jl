@@ -20,13 +20,14 @@ The `VanillaObjective` is a concrete implementation of the `AbstractObjective` a
 struct VanillaObjective <: AbstractObjective
     class_loss::Function
     lambda::Vector{<:AbstractFloat}
-    function VanillaObjective(class_loss, lambda)
+    needs_ce::Bool
+    function VanillaObjective(class_loss, lambda, needs_ce)
         @assert length(lambda) == 1 "Need exactly one values in lambda for the class loss."
-        return new(class_loss, lambda)
+        return new(class_loss, lambda, needs_ce)
     end
 end
 
-needs_counterfactuals(obj::VanillaObjective) = false
+needs_counterfactuals(obj::VanillaObjective) = obj.needs_ce
 
 """
     VanillaObjective(;
@@ -39,8 +40,9 @@ Outer constructor for the `VanillaObjective` type.
 function VanillaObjective(;
     class_loss::Function=Flux.Losses.logitcrossentropy,
     lambda::Vector{<:AbstractFloat}=[1.0],
+    needs_ce::Bool=false,
 )
-    return VanillaObjective(class_loss, lambda)
+    return VanillaObjective(class_loss, lambda, needs_ce)
 end
 
 """

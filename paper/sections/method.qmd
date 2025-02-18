@@ -21,13 +21,13 @@ The definitions of faithfulness and plausibility in @def-explainability are the 
 
 ## Our Proposed Objective
 
-To train models with high explainability as defined in @def-explainability, we propose the following objective,
+Let $\mathbf{x}_t^\prime$ for $t=0,...,T$ denote iteratively generated counterfactuals. To train models with high explainability as defined in @def-explainability, we propose to leverage counterfactuals in the following objective,
 
 $$
-\text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x^\prime},y;\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),\mathbf{y})
+\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y})
 $$ {#eq-obj}
 
-where $\text{yloss}(\cdot)$ denotes any conventional classification loss function (e.g. cross-entropy) that induces discriminative (predictive) performance. The two additional components in @eq-obj are explained in more detail below. For now, they can be sufficiently described as inducing explainability directly and indirectly by penalizing: 1) the contrastive divergence, $\text{div}(\cdot)$, between counterfactuals $x^\prime$ and observed samples $x$ and, 2) the adversarial loss, $\text{advloss}(.)$, with respect to counterfactuals. The tradeoff between the different components can be governed by adjusting the strengths of the penalties $\lambda_{\text{div}}$ and $\lambda_{\text{adv}}$.
+where $\text{yloss}(\cdot)$ is any conventional classification loss that induces discriminative performance (e.g. cross-entropy). The two additional components in @eq-obj are explained in more detail below. For now, they can be sufficiently described as inducing explainability directly and indirectly by penalizing: 1) the contrastive divergence, $\text{div}(\cdot)$, between counterfactuals $\mathbf{x}_T^\prime$ and observed samples $x$ and, 2) the adversarial loss, $\text{advloss}(.)$, with respect to nascent counterfactuals $\mathbf{x}_{t\leq T}^\prime$. The tradeoff between the different components can be governed by adjusting the strengths of the penalties $\lambda_{\text{div}}$ and $\lambda_{\text{adv}}$.
 
 ### Directly Inducing Explainability through Contrastive Divergence
 
@@ -36,10 +36,10 @@ where $\text{yloss}(\cdot)$ denotes any conventional classification loss functio
 A key empirical finding in @altmeyer2024faithful was that JEMs tend to do well with respect to the plausibility objective in @def-explainability. If we consider samples drawn from $p_\theta(\mathbf{x})$ as counterfactuals, this is an expected finding, because the JEM objective effectively minimizes the divergence between the conditional posterior and $p(\mathbf{x}|\mathbf{y}^{+})$. To generate samples, @grathwohl2020your rely on Stochastic Gradient Langevin Dynamics (SGLD) using an uninformative prior for initialization. This is where we depart from their methodology: instead of generating samples through SGLD, we propose using counterfactual explainers to generate counterfactuals for observed training samples. Specifically, we have
 
 $$
-\text{div}(\mathbf{x},\mathbf{x^\prime},y;\theta) = \mathcal{E}_\theta(\mathbf{x},y) - \mathcal{E}_\theta(\mathbf{x}^\prime,y)
+\text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) = \mathcal{E}_\theta(\mathbf{x},y) - \mathcal{E}_\theta(\mathbf{x}_T^\prime,y)
 $$ {#eq-div}
 
-where $\mathcal{E}_\theta(\cdot)$ denotes the energy function. We generate samples $\mathbf{x}^\prime$ by first randomly sampling the target class $y^+ \sim p(y)$ and then generating a counterfactual explanation for that target, similar to how conditional sampling is used to draw from $p_\theta(\mathbf{x})$ in @grathwohl2020your. In particular, we set $\mathcal{E}_\theta(\mathbf{x},\mathbf{y})=-\mathbf{M}_\theta(\mathbf{x})[y^+]$ where $y^+$ denotes the index of the target class.
+where $\mathcal{E}_\theta(\cdot)$ denotes the energy function. In particular, we set $\mathcal{E}_\theta(\mathbf{x},\mathbf{y})=-\mathbf{M}_\theta(\mathbf{x})[y^+]$ where $y^+$ denotes the index of the target class. We generate samples $\mathbf{x}_T^\prime$ by first randomly sampling the target class $y^+ \sim p(y)$ and then generating a counterfactual explanation for that target over $T$ iterations using a gradient-based counterfactual generator. This is similar to how conditional sampling is used to draw from $p_\theta(\mathbf{x})$ in @grathwohl2020your. 
 
 Intuitively, the gradient of @eq-div decreases the energy of observed training samples (positive samples) while at same time increasing the energy of counterfactuals (negative samples) [@du2019implicit]. As the generated counterfactuals get more plausible (@def-explainability) over the cause of training, these two opposing effects gradually balance each out [@lippe2024uvadlc]. 
 
@@ -47,18 +47,16 @@ The departure from SGLD allows us to tap into the vast repertoire of explainers 
 
 ### Indirectly Inducing Explainability through Adversarial Robustness
 
-Based on our analysis in @sec-lit, counterfactuals $\mathbf{x}^\prime$ can be repurposed as additional training samples [@luu2023counterfactual] or adversarial examples [@freiesleben2022intriguing;@pawelczyk2022exploring]. This leaves some flexibility with respect to the exact choice for $\text{advloss}(\cdot)$ in @eq-obj. An intuitive functional form to use, though likely not the only reasonable choice, is inspired by adversarial training:
+Based on our analysis in @sec-lit, counterfactuals $\mathbf{x}^\prime$ can be repurposed as additional training samples [@luu2023counterfactual;@balashankar2023improving] or adversarial examples [@freiesleben2022intriguing;@pawelczyk2022exploring]. This leaves some flexibility with respect to the exact choice for $\text{advloss}(\cdot)$ in @eq-obj. An intuitive functional form to use, though likely not the only reasonable choice, is inspired by adversarial training:
 
 $$
 \begin{aligned}
-\text{advloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),\mathbf{y};\varepsilon)&=\begin{cases}
-\text{yloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),\mathbf{y}) & \text{if} \ ||\Delta||_\infty \leq \varepsilon \\
-0 & \text{otherwise.}
-\end{cases}
+\text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y};\varepsilon)&=\text{yloss}(\mathbf{M}_\theta(\mathbf{x}_{t_\varepsilon}^\prime),\mathbf{y}) \\
+t_\varepsilon &= \max_t \{t: ||\Delta_t||_\infty < \varepsilon\}
 \end{aligned}
 $$ {#eq-adv}
 
-Under this choice we treat the counterfactual $\mathbf{x}^\prime$ as an adversarial example iff it is imperceptible, i.e. the magnitude of the perturbation of any individual feature is upper-bounded at $\varepsilon$.
+Under this choice, we consider nascent counterfactuals $\mathbf{x}_{t\leq T}^\prime$ as adversarial examples as long as the magnitude of the perturbation to any individual feature is at most $\varepsilon$. This is closely aligned with @szegedy2013intriguing, who define an adversarial attack as an "imperceptible non-random perturbation". Thus, we choose to work with a different distinction between CE and AE than @freiesleben2022intriguing, who considers misclassification as the key distinguishing feature of AE. One of the key observations in this work is that we can leverage counterfactual explanations during training and get adversarial examples, essentially for free. 
 
 ## Encoding Actionability Constraints {#sec-constraints}
 
@@ -72,12 +70,32 @@ Since actionability constraints are binding at test time, we should also impose 
 
 From a Bayesian perspective, setting $\mathbf{x}[d] := \mathbf{x}^\prime[d]$ can be understood as assuming a point mass prior for $p(\mathbf{x})$ with respect to feature $d$. Intuitively, we think of this simply in terms ignoring implausibility costs with respect to immutable features, which effectively forces the model to instead seek plausibility with respect to the remaining features. This in turn results in lower overall sensitivity to immutable features, which we demonstrate empirically for different classifiers in @sec-experiments. Under certain conditions, this results holds theoretically[For the proof, see the supplementary appendix.]:
 
-::: {#thm-mtblty}
+::: {#prp-mtblty}
 
 ## Protecting Immutable Features
 
-Let $f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})$ denote a linear classifier with softmax activation $\mathcal{S}$ (i.e. *multinomial logistic regression*) where $y\in\{1,...,K\}=\mathcal{K}$ and $\mathbf{x} \in \mathbb{R}^D$. If we assume multivariate Gaussian class densities with common diagonal covariance matrix $\Sigma_k=\Sigma$ for all $k \in \mathcal{K}$, then protecting an immutable feature from the contrastive divergence penalty (@eq-div) will result in lower classifier sensitivity to that feature relative to the remaining features, provided that at least one of those is mutable.
+Let $f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})$ denote a linear classifier with softmax activation $\mathcal{S}$ (i.e. *multinomial logistic regression*) where $y\in\{1,...,K\}=\mathcal{K}$ and $\mathbf{x} \in \mathbb{R}^D$. If we assume multivariate Gaussian class densities with common diagonal covariance matrix $\Sigma_k=\Sigma$ for all $k \in \mathcal{K}$, then protecting an immutable feature from the contrastive divergence penalty (@eq-div) will result in lower classifier sensitivity to that feature relative to the remaining features, provided that at least one of those is mutable and discriminative.
 
 :::
 
-It is worth highlighting that @thm-mtblty assumes independence of features. This raises a valid concern about the effect of protecting immutable features in the presence of proxy features that remain unprotected. We discuss this limitation in @sec-discussion.
+It is worth highlighting that @prp-mtblty assumes independence of features. This raises a valid concern about the effect of protecting immutable features in the presence of proxy features that remain unprotected. We discuss this limitation in @sec-discussion.
+
+## Illustration
+
+To better convey the intuition underlying our proposed method, we illustrate different model outcomes in @exm-grad.
+
+::: {#exm-grad}
+
+## Prediction of Consumer Credit Default
+
+Suppose we are interested in predicting the likelihood that loan applicants default on their credit. We have access to historical data on previous loan takers comprised of a binary outcome variable ($y\in\{1=\text{default},2=\text{no default}\}$) two input features: 1) the subjects' *age*, which we define as immutable, and 2) the subjects' existing level of *debt*, which we define as mutable. 
+
+We have simulated this scenario using synthetic data with independent features and Gaussian class-conditional densities in @fig-poc. The four panels in @fig-poc show the outcomes for different training procedures using the same model architecture each time (a linear classifier). In each case, we show the linear decision boundary (green) and the training data colored according to their ground-truth label: orange points belong to the target class, $y^+=2$, blue points belong to the non-target class, $y^-=1$. Stars indicate counterfactuals in the target class generated at test time using generic gradient descent for a fixed number of iterations.
+
+In panel (a), we have trained our model conventionally, and we do not impose mutability constraints at test time. The generated counterfactuals are all valid, but not plausible: they are clearly distinguishable from the ground-truth data. In panel (b), we have trained our model with counterfactual training, once again not imposing mutability constraints at test time. We observe that the counterfactuals are clearly plausible, therefore meeting the first objective of @def-explainability.
+
+In panel (c), we have used conventional training again, this time imposing the mutability constraint on *age* at test time. Counterfactuals are valid but involve some substantial reductions in *debt* for some individuals, in particular very young applicants. By comparison, counterfactual paths are shorter on average in panel (d), where we have used counterfactual training and protected immutable features as described in @sec-constraints. In particular, we observe that due to the classifier's lower sensitivity to *age*, recourse recommendations with respect to *debt* are much more homogenous, in that they do not disproportionately punish younger individuals. The counterfactuals are also plausible with respect to the mutable feature. Thus, we consider the model in panel (d) as the most explainable according to @def-explainability.
+
+:::
+
+![Visual illustration of how counterfactual training improves explainability. See @exm-grad for details.](/paper/figures/poc.svg){#fig-poc}
