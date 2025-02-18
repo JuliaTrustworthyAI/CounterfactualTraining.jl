@@ -64,7 +64,7 @@ function generate!(
     neighbours = (ce -> find_potential_neighbours(ce, counterfactual_data, 1)).(ces)    # randomly draw a sample from the target class
     protect_immutable!(neighbours, counterfactuals, counterfactual_data.mutability)     # adjust for mutability
     targets_enc = (ce -> target_encoded(ce, counterfactual_data)).(ces)                 # one-hot encoded targets
-    validities = (ce -> Evaluation.validity(ce, model, counterfactual_data)).(ces)       # validity (label flip rate)
+    validities = (ce -> isvalid(ce, model, counterfactual_data)).(ces)                  # validity (label flip rate)
 
     n_total = length(counterfactuals)
     percent_valid = sum(reduce(vcat, validities)) / n_total
@@ -101,11 +101,11 @@ function get_last_valid_ae(ce::CounterfactualExplanation)
 end
 
 """
-    Evaluation.validity(ce, model, data)
+    isvalid(ce, model, data)
 
-Extends the `Evaluation.validity` method.
+Checks if the label has been flipped.
 """
-function Evaluation.validity(ce::CounterfactualExplanation, model, data)
+function isvalid(ce::CounterfactualExplanation, model, data)
     return argmax(vec(model(ce.counterfactual))) == argmax(vec(target_encoded(ce, data)))
 end
 
