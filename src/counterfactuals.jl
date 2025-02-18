@@ -105,7 +105,7 @@ end
 
 Extends the `Evaluation.validity` method.
 """
-function Evaluation.validity(ce, model, data)
+function Evaluation.validity(ce::CounterfactualExplanation, model, data)
     return argmax(vec(model(ce.counterfactual))) == argmax(vec(target_encoded(ce, data)))
 end
 
