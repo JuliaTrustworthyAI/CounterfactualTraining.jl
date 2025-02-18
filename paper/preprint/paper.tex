@@ -184,15 +184,15 @@
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
 \theoremstyle{definition}
-\newtheorem{exercise}{Parameters}[section]
-\theoremstyle{definition}
-\newtheorem{example}{Example}[section]
-\theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
+\theoremstyle{definition}
+\newtheorem{exercise}{Parameters}[section]
 \theoremstyle{plain}
-\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}{Proposition}[section]
 \theoremstyle{plain}
 \newtheorem{corollary}{Research Question}[section]
+\theoremstyle{definition}
+\newtheorem{example}{Example}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -420,20 +420,25 @@ datasets. Specifically, their approach relies on, firstly, identifying
 similar input samples with different annotations and, secondly, ensuring
 that the gradient of the classifier aligns with the vector between pairs
 of counterfactual inputs using the cosine distance as a loss function.
+
 In the natural language processing (NLP) domain, counterfactuals have
 similarly been used to improve models through data augmentation: Wu et
-al. (\citeproc{ref-wu2021polyjuice}{2021}), propose \emph{POLYJUICE}, a
+al. (\citeproc{ref-wu2021polyjuice}{2021}), propose \emph{Polyjuice}, a
 general-purpose counterfactual generator for language models. They
 demonstrate empirically that augmenting training data through
-\emph{POLYJUICE} counterfactuals improves robustness in a number of NLP
-tasks. Luu and Inoue (\citeproc{ref-luu2023counterfactual}{2023})
-introduce Counterfactual Adversarial Training (CAT), which also aims at
-improving generalization and robustness of language models.
-Specifically, they propose to proceed as follows: firstly, they identify
-training samples that are subject to high predictive uncertainty;
-secondly, they generate counterfactual explanations for those samples;
-and, finally, they fine-tune the given language model on the augmented
-dataset that includes the generated counterfactuals.
+\emph{Polyjuice} counterfactuals improves robustness in a number of NLP
+tasks. Balashankar et al.
+(\citeproc{ref-balashankar2023improving}{2023}) also use
+\emph{Polyjuice} to augment NLP datasets through diverse counterfactuals
+and show that classifier robustness improves up to 20\%. Finally, Luu
+and Inoue (\citeproc{ref-luu2023counterfactual}{2023}) introduce
+Counterfactual Adversarial Training (CAT), which also aims at improving
+generalization and robustness of language models. Specifically, they
+propose to proceed as follows: firstly, they identify training samples
+that are subject to high predictive uncertainty; secondly, they generate
+counterfactual explanations for those samples; and, finally, they
+fine-tune the given language model on the augmented dataset that
+includes the generated counterfactuals.
 
 There have also been several attempts at formalizing the relationship
 between counterfactual explanations (CE) and adversarial examples (AE).
@@ -645,17 +650,19 @@ explainers to generate counterfactuals for observed training samples.
 Specifically, we have
 
 \begin{equation}\phantomsection\label{eq-div}{
-\text{div}(\mathbf{x},\mathbf{x^\prime},y;\theta) = \mathcal{E}_\theta(\mathbf{x},y) - \mathcal{E}_\theta(\mathbf{x}^\prime,y)
+\text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) = \mathcal{E}_\theta(\mathbf{x},y) - \mathcal{E}_\theta(\mathbf{x}_T^\prime,y)
 }\end{equation}
 
-where \(\mathcal{E}_\theta(\cdot)\) denotes the energy function. We
-generate samples \(\mathbf{x}^\prime\) by first randomly sampling the
-target class \(y^+ \sim p(y)\) and then generating a counterfactual
-explanation for that target, similar to how conditional sampling is used
-to draw from \(p_\theta(\mathbf{x})\) in Grathwohl et al.
-(\citeproc{ref-grathwohl2020your}{2020}). In particular, we set
+where \(\mathcal{E}_\theta(\cdot)\) denotes the energy function. In
+particular, we set
 \(\mathcal{E}_\theta(\mathbf{x},\mathbf{y})=-\mathbf{M}_\theta(\mathbf{x})[y^+]\)
-where \(y^+\) denotes the index of the target class.
+where \(y^+\) denotes the index of the target class. We generate samples
+\(\mathbf{x}_T^\prime\) by first randomly sampling the target class
+\(y^+ \sim p(y)\) and then generating a counterfactual explanation for
+that target over \(T\) iterations using a gradient-based counterfactual
+generator. This is similar to how conditional sampling is used to draw
+from \(p_\theta(\mathbf{x})\) in Grathwohl et al.
+(\citeproc{ref-grathwohl2020your}{2020}).
 
 Intuitively, the gradient of Equation~\ref{eq-div} decreases the energy
 of observed training samples (positive samples) while at same time
@@ -680,7 +687,8 @@ Robustness}\label{indirectly-inducing-explainability-through-adversarial-robustn
 
 Based on our analysis in Section~\ref{sec-lit}, counterfactuals
 \(\mathbf{x}^\prime\) can be repurposed as additional training samples
-(\citeproc{ref-luu2023counterfactual}{Luu and Inoue 2023}) or
+(\citeproc{ref-luu2023counterfactual}{Luu and Inoue 2023};
+\citeproc{ref-balashankar2023improving}{Balashankar et al. 2023}) or
 adversarial examples
 (\citeproc{ref-freiesleben2022intriguing}{Freiesleben 2022};
 \citeproc{ref-pawelczyk2022exploring}{Pawelczyk et al. 2022}). This
@@ -691,17 +699,23 @@ inspired by adversarial training:
 
 \begin{equation}\phantomsection\label{eq-adv}{
 \begin{aligned}
-\text{advloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),\mathbf{y};\varepsilon)&=\begin{cases}
-\text{yloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),\mathbf{y}) & \text{if} \ ||\Delta||_\infty \leq \varepsilon \\
-0 & \text{otherwise.}
-\end{cases}
+\text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y};\varepsilon)&=\text{yloss}(\mathbf{M}_\theta(\mathbf{x}_{t_\varepsilon}^\prime),\mathbf{y}) \\
+t_\varepsilon &= \max_t \{t: ||\Delta_t||_\infty < \varepsilon\}
 \end{aligned}
 }\end{equation}
 
-Under this choice we treat the counterfactual \(\mathbf{x}^\prime\) as
-an adversarial example iff it is imperceptible, i.e.~the magnitude of
-the perturbation of any individual feature is upper-bounded at
-\(\varepsilon\).
+Under this choice, we consider nascent counterfactuals
+\(\mathbf{x}_{t\leq T}^\prime\) as adversarial examples as long as the
+magnitude of the perturbation to any individual feature is at most
+\(\varepsilon\). This is closely aligned with Szegedy et al.
+(\citeproc{ref-szegedy2013intriguing}{2013}), who define an adversarial
+attack as an ``imperceptible non-random perturbation''. Thus, we choose
+to work with a different distinction between CE and AE than Freiesleben
+(\citeproc{ref-freiesleben2022intriguing}{2022}), who considers
+misclassification as the key distinguishing feature of AE. One of the
+key observations in this work is that we can leverage counterfactual
+explanations during training and get adversarial examples, essentially
+for free.
 
 \subsection{Encoding Actionability Constraints}\label{sec-constraints}
 
@@ -754,8 +768,8 @@ features, which we demonstrate empirically for different classifiers in
 Section~\ref{sec-experiments}. Under certain conditions, this results
 holds theoretically{[}For the proof, see the supplementary appendix.{]}:
 
-\begin{theorem}[Protecting Immutable
-Features]\protect\hypertarget{thm-mtblty}{}\label{thm-mtblty}
+\begin{proposition}[Protecting Immutable
+Features]\protect\hypertarget{prp-mtblty}{}\label{prp-mtblty}
 
 Let
 \(f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})\)
@@ -767,11 +781,11 @@ covariance matrix \(\Sigma_k=\Sigma\) for all \(k \in \mathcal{K}\),
 then protecting an immutable feature from the contrastive divergence
 penalty (Equation~\ref{eq-div}) will result in lower classifier
 sensitivity to that feature relative to the remaining features, provided
-that at least one of those is mutable.
+that at least one of those is mutable and discriminative.
 
-\end{theorem}
+\end{proposition}
 
-It is worth highlighting that Theorem~\ref{thm-mtblty} assumes
+It is worth highlighting that Proposition~\ref{prp-mtblty} assumes
 independence of features. This raises a valid concern about the effect
 of protecting immutable features in the presence of proxy features that
 remain unprotected. We discuss this limitation in
@@ -885,6 +899,8 @@ Equation~\ref{eq-obj}?
   Limited to classification models.
 \item
   Proxy attributes of immutable features.
+\item
+  Increased training time.
 \end{enumerate}
 
 \section{Conclusion}\label{sec-conclusion}
@@ -917,6 +933,13 @@ Augustin, Maximilian, Alexander Meinke, and Matthias Hein. 2020.
 {``Adversarial Robustness on in-and Out-Distribution Improves
 Explainability.''} In \emph{European Conference on Computer Vision},
 228--45. Springer.
+
+\bibitem[\citeproctext]{ref-balashankar2023improving}
+Balashankar, Ananth, Xuezhi Wang, Yao Qin, Ben Packer, Nithum Thain, Ed
+Chi, Jilin Chen, and Alex Beutel. 2023. {``Improving Classifier
+Robustness Through Active Generative Counterfactual Data
+Augmentation.''} In \emph{Findings of the Association for Computational
+Linguistics: EMNLP 2023}, 127--39.
 
 \bibitem[\citeproctext]{ref-du2019implicit}
 Du, Yilun, and Igor Mordatch. 2020. {``Implicit Generation and
@@ -1101,7 +1124,7 @@ point mass prior on \(p(\mathbf{x})\) for the corresponding feature. We
 argue in Section~\ref{sec-constraints} that this approach induces models
 to be less sensitive to immutable features and demonstrate this
 empirically in Section~\ref{sec-experiments}. Below we derive the
-analytical results in Theorem~\ref{thm-mtblty}.
+analytical results in Proposition~\ref{prp-mtblty}.
 
 \begin{proof}
 Let \(d_{\text{mtbl}}\) and \(d_{\text{immtbl}}\) denote some mutable
@@ -1169,7 +1192,7 @@ versa at initialization. Similarly, we are more likely to have
 \((\mu_{y^-,d_{\text{mtbl}}} > \mu_{y^+,d_{\text{mtbl}}})\).
 
 This implies that if we do not protect feature \(d_{\text{immtbl}}\),
-the contrastive divergence penalty will push down on
+the contrastive divergence penalty will decrease
 \(\theta_{y^-,d_{\text{immtbl}}}\) thereby exacerbating the existing
 effect
 \((\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}}) < 0\).
@@ -1179,7 +1202,7 @@ feature, in that it would be more likely to predict class \(y^-\) as
 opposed to \(y^+\) for lower values of \(d_{\text{immtbl}}\).
 
 By the same rationale, the contrastive divergence penalty can generally
-be expected to push up on \(\theta_{y^-,d_{\text{mtbl}}}\) exacerbating
+be expected to increase \(\theta_{y^-,d_{\text{mtbl}}}\) exacerbating
 \((\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}}) > 0\).
 In words, this has the effect of making the classifier more sensitive to
 the mutable feature, in that it would be more likely to predict class
@@ -1192,7 +1215,7 @@ sensitivity for \(d_{\text{immtbl}}\) relative to increased sensitivity
 for \(d_{\text{mtbl}}\)).
 \end{proof}
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, breakable, leftrule=.75mm, coltitle=black, bottomtitle=1mm, toprule=.15mm, opacitybacktitle=0.6, colbacktitle=quarto-callout-warning-color!10!white, arc=.35mm, bottomrule=.15mm, left=2mm, titlerule=0mm, opacityback=0, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, rightrule=.15mm, colframe=quarto-callout-warning-color-frame, toptitle=1mm]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, colback=white, titlerule=0mm, opacityback=0, coltitle=black, colframe=quarto-callout-warning-color-frame, bottomrule=.15mm, toprule=.15mm, colbacktitle=quarto-callout-warning-color!10!white, opacitybacktitle=0.6, rightrule=.15mm, bottomtitle=1mm, toptitle=1mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, arc=.35mm, breakable, leftrule=.75mm]
 
 @Cynthia, @Arie, I have tentatively phrased the above in terms of a
 theorem and proof. This is something I've so far shied away from because
@@ -1204,7 +1227,7 @@ correct.
 
 \section{Detailed Results}\label{detailed-results}
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, breakable, leftrule=.75mm, coltitle=black, bottomtitle=1mm, toprule=.15mm, opacitybacktitle=0.6, colbacktitle=quarto-callout-warning-color!10!white, arc=.35mm, bottomrule=.15mm, left=2mm, titlerule=0mm, opacityback=0, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, rightrule=.15mm, colframe=quarto-callout-warning-color-frame, toptitle=1mm]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, colback=white, titlerule=0mm, opacityback=0, coltitle=black, colframe=quarto-callout-warning-color-frame, bottomrule=.15mm, toprule=.15mm, colbacktitle=quarto-callout-warning-color!10!white, opacitybacktitle=0.6, rightrule=.15mm, bottomtitle=1mm, toptitle=1mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, arc=.35mm, breakable, leftrule=.75mm]
 
 @Cynthia, @Arie, I'm including some preliminary results here but will
 rerun experiments in the coming days. You'll notice some odd outlier
@@ -1224,7 +1247,7 @@ inherited from energy-based modelling).
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, breakable, leftrule=.75mm, coltitle=black, bottomtitle=1mm, toprule=.15mm, opacitybacktitle=0.6, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, bottomrule=.15mm, left=2mm, titlerule=0mm, opacityback=0, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, rightrule=.15mm, colframe=quarto-callout-note-color-frame, toptitle=1mm]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, colback=white, titlerule=0mm, opacityback=0, coltitle=black, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, rightrule=.15mm, bottomtitle=1mm, toptitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, arc=.35mm, breakable, leftrule=.75mm]
 
 @Cynthia, @Arie, Figure~\ref{fig-mnist} shows much more plausible
 (faithful) counterfactuals for a model with CT than the model with

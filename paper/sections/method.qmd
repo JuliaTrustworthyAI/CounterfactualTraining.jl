@@ -47,16 +47,16 @@ The departure from SGLD allows us to tap into the vast repertoire of explainers 
 
 ### Indirectly Inducing Explainability through Adversarial Robustness
 
-Based on our analysis in @sec-lit, counterfactuals $\mathbf{x}^\prime$ can be repurposed as additional training samples [@luu2023counterfactual] or adversarial examples [@freiesleben2022intriguing;@pawelczyk2022exploring]. This leaves some flexibility with respect to the exact choice for $\text{advloss}(\cdot)$ in @eq-obj. An intuitive functional form to use, though likely not the only reasonable choice, is inspired by adversarial training:
+Based on our analysis in @sec-lit, counterfactuals $\mathbf{x}^\prime$ can be repurposed as additional training samples [@luu2023counterfactual;@balashankar2023improving] or adversarial examples [@freiesleben2022intriguing;@pawelczyk2022exploring]. This leaves some flexibility with respect to the exact choice for $\text{advloss}(\cdot)$ in @eq-obj. An intuitive functional form to use, though likely not the only reasonable choice, is inspired by adversarial training:
 
 $$
 \begin{aligned}
 \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y};\varepsilon)&=\text{yloss}(\mathbf{M}_\theta(\mathbf{x}_{t_\varepsilon}^\prime),\mathbf{y}) \\
-t_\varepsilon &= \max_t \{t: ||\Delta||_\infty < \varepsilon\}
+t_\varepsilon &= \max_t \{t: ||\Delta_t||_\infty < \varepsilon\}
 \end{aligned}
 $$ {#eq-adv}
 
-Under this choice we treat the counterfactual $\mathbf{x}^\prime$ as an adversarial example iff it is imperceptible, i.e. the magnitude of the perturbation of any individual feature is upper-bounded at $\varepsilon$.
+Under this choice, we consider nascent counterfactuals $\mathbf{x}_{t\leq T}^\prime$ as adversarial examples as long as the magnitude of the perturbation to any individual feature is at most $\varepsilon$. This is closely aligned with @szegedy2013intriguing, who define an adversarial attack as an "imperceptible non-random perturbation". Thus, we choose to work with a different distinction between CE and AE than @freiesleben2022intriguing, who considers misclassification as the key distinguishing feature of AE. One of the key observations in this work is that we can leverage counterfactual explanations during training and get adversarial examples, essentially for free. 
 
 ## Encoding Actionability Constraints {#sec-constraints}
 
@@ -70,15 +70,15 @@ Since actionability constraints are binding at test time, we should also impose 
 
 From a Bayesian perspective, setting $\mathbf{x}[d] := \mathbf{x}^\prime[d]$ can be understood as assuming a point mass prior for $p(\mathbf{x})$ with respect to feature $d$. Intuitively, we think of this simply in terms ignoring implausibility costs with respect to immutable features, which effectively forces the model to instead seek plausibility with respect to the remaining features. This in turn results in lower overall sensitivity to immutable features, which we demonstrate empirically for different classifiers in @sec-experiments. Under certain conditions, this results holds theoretically[For the proof, see the supplementary appendix.]:
 
-::: {#thm-mtblty}
+::: {#prp-mtblty}
 
 ## Protecting Immutable Features
 
-Let $f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})$ denote a linear classifier with softmax activation $\mathcal{S}$ (i.e. *multinomial logistic regression*) where $y\in\{1,...,K\}=\mathcal{K}$ and $\mathbf{x} \in \mathbb{R}^D$. If we assume multivariate Gaussian class densities with common diagonal covariance matrix $\Sigma_k=\Sigma$ for all $k \in \mathcal{K}$, then protecting an immutable feature from the contrastive divergence penalty (@eq-div) will result in lower classifier sensitivity to that feature relative to the remaining features, provided that at least one of those is mutable.
+Let $f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})$ denote a linear classifier with softmax activation $\mathcal{S}$ (i.e. *multinomial logistic regression*) where $y\in\{1,...,K\}=\mathcal{K}$ and $\mathbf{x} \in \mathbb{R}^D$. If we assume multivariate Gaussian class densities with common diagonal covariance matrix $\Sigma_k=\Sigma$ for all $k \in \mathcal{K}$, then protecting an immutable feature from the contrastive divergence penalty (@eq-div) will result in lower classifier sensitivity to that feature relative to the remaining features, provided that at least one of those is mutable and discriminative.
 
 :::
 
-It is worth highlighting that @thm-mtblty assumes independence of features. This raises a valid concern about the effect of protecting immutable features in the presence of proxy features that remain unprotected. We discuss this limitation in @sec-discussion.
+It is worth highlighting that @prp-mtblty assumes independence of features. This raises a valid concern about the effect of protecting immutable features in the presence of proxy features that remain unprotected. We discuss this limitation in @sec-discussion.
 
 ## Illustration
 

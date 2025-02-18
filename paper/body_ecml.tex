@@ -423,14 +423,21 @@ inspired by adversarial training:
 \begin{equation}\phantomsection\label{eq-adv}{
 \begin{aligned}
 \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y};\varepsilon)&=\text{yloss}(\mathbf{M}_\theta(\mathbf{x}_{t_\varepsilon}^\prime),\mathbf{y}) \\
-t_\varepsilon &= \max_t \{t: ||\Delta||_\infty < \varepsilon\}
+t_\varepsilon &= \max_t \{t: ||\Delta_t||_\infty < \varepsilon\}
 \end{aligned}
 }\end{equation}
 
-Under this choice we treat the counterfactual \(\mathbf{x}^\prime\) as
-an adversarial example iff it is imperceptible, i.e.~the magnitude of
-the perturbation of any individual feature is upper-bounded at
-\(\varepsilon\).
+Under this choice, we consider nascent counterfactuals
+\(\mathbf{x}_{t\leq T}^\prime\) as adversarial examples as long as the
+magnitude of the perturbation to any individual feature is at most
+\(\varepsilon\). This is closely aligned with
+\cite{szegedy2013intriguing}, who define an adversarial attack as an
+``imperceptible non-random perturbation''. Thus, we choose to work with
+a different distinction between CE and AE than
+\cite{freiesleben2022intriguing}, who considers misclassification as the
+key distinguishing feature of AE. One of the key observations in this
+work is that we can leverage counterfactual explanations during training
+and get adversarial examples, essentially for free.
 
 \subsection{Encoding Actionability Constraints}\label{sec-constraints}
 
@@ -482,8 +489,8 @@ features, which we demonstrate empirically for different classifiers in
 Section~\ref{sec-experiments}. Under certain conditions, this results
 holds theoretically{[}For the proof, see the supplementary appendix.{]}:
 
-\begin{theorem}[Protecting Immutable
-Features]\protect\hypertarget{thm-mtblty}{}\label{thm-mtblty}
+\begin{proposition}[Protecting Immutable
+Features]\protect\hypertarget{prp-mtblty}{}\label{prp-mtblty}
 
 Let
 \(f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})\)
@@ -495,11 +502,11 @@ covariance matrix \(\Sigma_k=\Sigma\) for all \(k \in \mathcal{K}\),
 then protecting an immutable feature from the contrastive divergence
 penalty (Equation~\ref{eq-div}) will result in lower classifier
 sensitivity to that feature relative to the remaining features, provided
-that at least one of those is mutable.
+that at least one of those is mutable and discriminative.
 
-\end{theorem}
+\end{proposition}
 
-It is worth highlighting that Theorem~\ref{thm-mtblty} assumes
+It is worth highlighting that Proposition~\ref{prp-mtblty} assumes
 independence of features. This raises a valid concern about the effect
 of protecting immutable features in the presence of proxy features that
 remain unprotected. We discuss this limitation in
@@ -521,15 +528,15 @@ previous loan takers comprised of a binary outcome variable
 subjects' existing level of \emph{debt}, which we define as mutable.
 
 We have simulated this scenario using synthetic data with independent
-features and Gaussian class-conditional densities in
-Figure~\ref{fig-poc}. The four panels in Figure~\ref{fig-poc} show the
-outcomes for different training procedures using the same model
-architecture each time (a linear classifier). In each case, we show the
-linear decision boundary (green) and the training data colored according
-to their ground-truth label: orange points belong to the target class,
-\(y^+=2\), blue points belong to the non-target class, \(y^-=1\). Stars
-indicate counterfactuals in the target class generated at test time
-using generic gradient descent for a fixed number of iterations.
+features and Gaussian class-conditional densities in \textbf{?@fig-poc}.
+The four panels in \textbf{?@fig-poc} show the outcomes for different
+training procedures using the same model architecture each time (a
+linear classifier). In each case, we show the linear decision boundary
+(green) and the training data colored according to their ground-truth
+label: orange points belong to the target class, \(y^+=2\), blue points
+belong to the non-target class, \(y^-=1\). Stars indicate
+counterfactuals in the target class generated at test time using generic
+gradient descent for a fixed number of iterations.
 
 In panel (a), we have trained our model conventionally, and we do not
 impose mutability constraints at test time. The generated
@@ -555,20 +562,6 @@ mutable feature. Thus, we consider the model in panel (d) as the most
 explainable according to Definition~\ref{def-explainability}.
 
 \end{example}
-
-\begin{figure}
-
-\centering{
-
-\pandocbounded{\includegraphics[keepaspectratio]{body_ecml_files/mediabag/../paper/figures/poc.pdf}}
-
-}
-
-\caption{\label{fig-poc}Visual illustration of how counterfactual
-training improves explainability. See Example~\ref{exm-grad} for
-details.}
-
-\end{figure}%
 
 \section{Experiments}\label{sec-experiments}
 
@@ -618,15 +611,3 @@ Equation~\ref{eq-obj}?
 \end{enumerate}
 
 \section{Conclusion}\label{sec-conclusion}
-
-\begin{credits}
-\subsubsection{\ackname} 
-
-- Aleks
-- DelftBlue
-- Julia packages: Julia paper itself, PrettyTables, Flux, Plots, AlgebraOfGraphics
-
-\subsubsection{\discintname}
-
-The authors have no competing interests to declare that are relevant to the content of this article.
-\end{credits}
