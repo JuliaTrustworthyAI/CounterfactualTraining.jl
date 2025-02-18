@@ -1,1 +1,13 @@
 # Conclusion {#sec-conclusion}
+
+\begin{credits}
+\subsubsection{\ackname} 
+
+- Aleks
+- DelftBlue
+- Julia packages: Julia paper itself, PrettyTables, Flux, Plots, AlgebraOfGraphics
+
+\subsubsection{\discintname}
+
+The authors have no competing interests to declare that are relevant to the content of this article.
+\end{credits}

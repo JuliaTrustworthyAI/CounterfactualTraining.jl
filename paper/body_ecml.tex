@@ -255,7 +255,7 @@ explicit objective of aligning representations with plausible
 explanations that comply with user requirements. In the context of CE,
 plausibility has broadly been defined as the degree to which
 counterfactuals comply with the underlying data generating process
-\cite{poyiadzi2020face, guidotti2022counterfactual, altmeyer2024faithful}.
+\cite{poyiadzi2020face,guidotti2022counterfactual,altmeyer2024faithful}.
 Plausibility is a necessary but insufficient condition for using CE to
 provide algorithmic recourse (AR) to individuals affected by opaque
 models in practice. This is because for recourse recommendations to be
@@ -328,24 +328,26 @@ for reasons discussed in Section~\ref{sec-discussion}.
 
 \subsection{Our Proposed Objective}\label{our-proposed-objective}
 
-To train models with high explainability as defined in
-Definition~\ref{def-explainability}, we propose the following objective,
+Let \(\mathbf{x}_t^\prime\) for \(t=0,...,T\) denote iteratively
+generated counterfactuals. To train models with high explainability as
+defined in Definition~\ref{def-explainability}, we propose to leverage
+counterfactuals in the following objective,
 
 \begin{equation}\phantomsection\label{eq-obj}{
-\text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x^\prime},y;\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),\mathbf{y})
+\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y})
 }\end{equation}
 
-where \(\text{yloss}(\cdot)\) denotes any conventional classification
-loss function (e.g.~cross-entropy) that induces discriminative
-(predictive) performance. The two additional components in
-Equation~\ref{eq-obj} are explained in more detail below. For now, they
-can be sufficiently described as inducing explainability directly and
-indirectly by penalizing: 1) the contrastive divergence,
-\(\text{div}(\cdot)\), between counterfactuals \(x^\prime\) and observed
-samples \(x\) and, 2) the adversarial loss, \(\text{advloss}(.)\), with
-respect to counterfactuals. The tradeoff between the different
-components can be governed by adjusting the strengths of the penalties
-\(\lambda_{\text{div}}\) and \(\lambda_{\text{adv}}\).
+where \(\text{yloss}(\cdot)\) is any conventional classification loss
+that induces discriminative performance (e.g.~cross-entropy). The two
+additional components in Equation~\ref{eq-obj} are explained in more
+detail below. For now, they can be sufficiently described as inducing
+explainability directly and indirectly by penalizing: 1) the contrastive
+divergence, \(\text{div}(\cdot)\), between counterfactuals
+\(\mathbf{x}_T^\prime\) and observed samples \(x\) and, 2) the
+adversarial loss, \(\text{advloss}(.)\), with respect to nascent
+counterfactuals \(\mathbf{x}_{t\leq T}^\prime\). The tradeoff between
+the different components can be governed by adjusting the strengths of
+the penalties \(\lambda_{\text{div}}\) and \(\lambda_{\text{adv}}\).
 
 \subsubsection{Directly Inducing Explainability through Contrastive
 Divergence}\label{directly-inducing-explainability-through-contrastive-divergence}
@@ -376,17 +378,18 @@ explainers to generate counterfactuals for observed training samples.
 Specifically, we have
 
 \begin{equation}\phantomsection\label{eq-div}{
-\text{div}(\mathbf{x},\mathbf{x^\prime},y;\theta) = \mathcal{E}_\theta(\mathbf{x},y) - \mathcal{E}_\theta(\mathbf{x}^\prime,y)
+\text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) = \mathcal{E}_\theta(\mathbf{x},y) - \mathcal{E}_\theta(\mathbf{x}_T^\prime,y)
 }\end{equation}
 
-where \(\mathcal{E}_\theta(\cdot)\) denotes the energy function. We
-generate samples \(\mathbf{x}^\prime\) by first randomly sampling the
-target class \(y^+ \sim p(y)\) and then generating a counterfactual
-explanation for that target, similar to how conditional sampling is used
-to draw from \(p_\theta(\mathbf{x})\) in \cite{grathwohl2020your}. In
+where \(\mathcal{E}_\theta(\cdot)\) denotes the energy function. In
 particular, we set
 \(\mathcal{E}_\theta(\mathbf{x},\mathbf{y})=-\mathbf{M}_\theta(\mathbf{x})[y^+]\)
-where \(y^+\) denotes the index of the target class.
+where \(y^+\) denotes the index of the target class. We generate samples
+\(\mathbf{x}_T^\prime\) by first randomly sampling the target class
+\(y^+ \sim p(y)\) and then generating a counterfactual explanation for
+that target over \(T\) iterations using a gradient-based counterfactual
+generator. This is similar to how conditional sampling is used to draw
+from \(p_\theta(\mathbf{x})\) in \cite{grathwohl2020your}.
 
 Intuitively, the gradient of Equation~\ref{eq-div} decreases the energy
 of observed training samples (positive samples) while at same time
@@ -411,7 +414,7 @@ Robustness}\label{indirectly-inducing-explainability-through-adversarial-robustn
 Based on our analysis in Section~\ref{sec-lit}, counterfactuals
 \(\mathbf{x}^\prime\) can be repurposed as additional training samples
 \cite{luu2023counterfactual} or adversarial examples
-\cite{freiesleben2022intriguing, pawelczyk2022exploring}. This leaves
+\cite{freiesleben2022intriguing,pawelczyk2022exploring}. This leaves
 some flexibility with respect to the exact choice for
 \(\text{advloss}(\cdot)\) in Equation~\ref{eq-obj}. An intuitive
 functional form to use, though likely not the only reasonable choice, is
@@ -419,10 +422,8 @@ inspired by adversarial training:
 
 \begin{equation}\phantomsection\label{eq-adv}{
 \begin{aligned}
-\text{advloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),\mathbf{y};\varepsilon)&=\begin{cases}
-\text{yloss}(\mathbf{M}_\theta(\mathbf{x^\prime}),\mathbf{y}) & \text{if} \ ||\Delta||_\infty \leq \varepsilon \\
-0 & \text{otherwise.}
-\end{cases}
+\text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y};\varepsilon)&=\text{yloss}(\mathbf{M}_\theta(\mathbf{x}_{t_\varepsilon}^\prime),\mathbf{y}) \\
+t_\varepsilon &= \max_t \{t: ||\Delta||_\infty < \varepsilon\}
 \end{aligned}
 }\end{equation}
 
@@ -542,13 +543,16 @@ Definition~\ref{def-explainability}.
 In panel (c), we have used conventional training again, this time
 imposing the mutability constraint on \emph{age} at test time.
 Counterfactuals are valid but involve some substantial reductions in
-\emph{debt} for some individuals. By comparison, counterfactual paths
-are shorter on average in panel (d), where we have used counterfactual
-training and protected immutable features as described in
-Section~\ref{sec-constraints}. The counterfactuals are also plausible
-with respect to the mutable feature. Thus, we consider the model in
-panel (d) as the most explainable according to
-Definition~\ref{def-explainability}.
+\emph{debt} for some individuals, in particular very young applicants.
+By comparison, counterfactual paths are shorter on average in panel (d),
+where we have used counterfactual training and protected immutable
+features as described in Section~\ref{sec-constraints}. In particular,
+we observe that due to the classifier's lower sensitivity to \emph{age},
+recourse recommendations with respect to \emph{debt} are much more
+homogenous, in that they do not disproportionately punish younger
+individuals. The counterfactuals are also plausible with respect to the
+mutable feature. Thus, we consider the model in panel (d) as the most
+explainable according to Definition~\ref{def-explainability}.
 
 \end{example}
 
@@ -609,6 +613,20 @@ Equation~\ref{eq-obj}?
   Limited to classification models.
 \item
   Proxy attributes of immutable features.
+\item
+  Increased training time.
 \end{enumerate}
 
 \section{Conclusion}\label{sec-conclusion}
+
+\begin{credits}
+\subsubsection{\ackname} 
+
+- Aleks
+- DelftBlue
+- Julia packages: Julia paper itself, PrettyTables, Flux, Plots, AlgebraOfGraphics
+
+\subsubsection{\discintname}
+
+The authors have no competing interests to declare that are relevant to the content of this article.
+\end{credits}
