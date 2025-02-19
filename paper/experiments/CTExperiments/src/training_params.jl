@@ -199,7 +199,7 @@ Base.@kwdef struct TrainingParams <: AbstractConfiguration
     generator_params::GeneratorParams = GeneratorParams()
     nce::Int = get_global_param("nce", 100)
     nneighbours::Int = 100
-    conv::AbstractString = "max_iter"
+    conv::AbstractString = "threshold"
     lr::AbstractFloat = 0.001
     opt::AbstractString = "adam"
     parallelizer::AbstractString = ""

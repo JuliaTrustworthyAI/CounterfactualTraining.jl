@@ -183,16 +183,16 @@
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
-\theoremstyle{plain}
-\newtheorem{corollary}{Research Question}[section]
-\theoremstyle{definition}
-\newtheorem{exercise}{Parameters}[section]
 \theoremstyle{definition}
 \newtheorem{example}{Example}[section]
+\theoremstyle{definition}
+\newtheorem{exercise}{Parameters}[section]
 \theoremstyle{plain}
 \newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
+\theoremstyle{plain}
+\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -1140,7 +1140,22 @@ discuss how we define convergence in this context
 \subsubsection{Convergence}\label{sec-app-conv}
 
 An important consideration when generating counterfactual explanations
-using gradient-based methods is how to defined convergence.
+using gradient-based methods is how to define convergence. Two common
+choices are to 1) perform gradient descent over a fixed number of
+iterations \(T\), or 2) conclude the search as soon as the predicted
+probability for the target class has reached a pre-determined threshold,
+\(\tau\):
+\(\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}^\prime))[y^+] \geq \tau\). We
+prefer the latter for our purposes, because it explicitly defines
+convergence in terms of the black-box model, \(\mathbf{M}(\mathbf{x})\).
+
+Defining convergence in this way allows for a more intuitive
+interpretation of the resulting counterfactual outcomes than with fixed
+\(T\). Specifically, it allows us to think of counterfactuals as
+explaining `high-confidence' predictions by the model for the target
+class \(y^+\). Depending on the context and application, different
+choices of \(\tau\) can be considered as representing `high-confidence'
+predictions.
 
 \subsection{Protecting Mutability Constraints with Linear
 Classifiers}\label{sec-app-constraints}
@@ -1242,7 +1257,7 @@ sensitivity for \(d_{\text{immtbl}}\) relative to increased sensitivity
 for \(d_{\text{mtbl}}\)).
 \end{proof}
 
-\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, leftrule=.75mm, colbacktitle=quarto-callout-warning-color!10!white, bottomrule=.15mm, opacityback=0, coltitle=black, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, left=2mm, arc=.35mm, toptitle=1mm, breakable, toprule=.15mm, titlerule=0mm, bottomtitle=1mm, colframe=quarto-callout-warning-color-frame, opacitybacktitle=0.6, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, opacitybacktitle=0.6, titlerule=0mm, colback=white, opacityback=0, bottomrule=.15mm, colbacktitle=quarto-callout-warning-color!10!white, coltitle=black, arc=.35mm, toptitle=1mm, toprule=.15mm, bottomtitle=1mm, rightrule=.15mm, leftrule=.75mm, colframe=quarto-callout-warning-color-frame, left=2mm]
 
 @Cynthia, @Arie, I have tentatively phrased the above in terms of a
 theorem and proof. This is something I've so far shied away from because
@@ -1285,7 +1300,7 @@ the application.
 
 \section{Detailed Results}\label{detailed-results}
 
-\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, leftrule=.75mm, colbacktitle=quarto-callout-warning-color!10!white, bottomrule=.15mm, opacityback=0, coltitle=black, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, left=2mm, arc=.35mm, toptitle=1mm, breakable, toprule=.15mm, titlerule=0mm, bottomtitle=1mm, colframe=quarto-callout-warning-color-frame, opacitybacktitle=0.6, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, opacitybacktitle=0.6, titlerule=0mm, colback=white, opacityback=0, bottomrule=.15mm, colbacktitle=quarto-callout-warning-color!10!white, coltitle=black, arc=.35mm, toptitle=1mm, toprule=.15mm, bottomtitle=1mm, rightrule=.15mm, leftrule=.75mm, colframe=quarto-callout-warning-color-frame, left=2mm]
 
 @Cynthia, @Arie, I'm including some preliminary results here but will
 rerun experiments in the coming days. You'll notice some odd outlier
@@ -1305,7 +1320,7 @@ inherited from energy-based modelling).
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, opacityback=0, coltitle=black, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, left=2mm, arc=.35mm, toptitle=1mm, breakable, toprule=.15mm, titlerule=0mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, opacitybacktitle=0.6, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, opacitybacktitle=0.6, titlerule=0mm, colback=white, opacityback=0, bottomrule=.15mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, arc=.35mm, toptitle=1mm, toprule=.15mm, bottomtitle=1mm, rightrule=.15mm, leftrule=.75mm, colframe=quarto-callout-note-color-frame, left=2mm]
 
 @Cynthia, @Arie, Figure~\ref{fig-mnist} shows much more plausible
 (faithful) counterfactuals for a model with CT than the model with

@@ -6,4 +6,6 @@ In this section, we provide some background on gradient-based counterfactual gen
 
 ### Convergence {#sec-app-conv}
 
-An important consideration when generating counterfactual explanations using gradient-based methods is how to define convergence. 
+An important consideration when generating counterfactual explanations using gradient-based methods is how to define convergence. Two common choices are to 1) perform gradient descent over a fixed number of iterations $T$, or 2) conclude the search as soon as the predicted probability for the target class has reached a pre-determined threshold, $\tau$: $\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}^\prime))[y^+] \geq \tau$. We prefer the latter for our purposes, because it explicitly defines convergence in terms of the black-box model, $\mathbf{M}(\mathbf{x})$.
+
+Defining convergence in this way allows for a more intuitive interpretation of the resulting counterfactual outcomes than with fixed $T$. Specifically, it allows us to think of counterfactuals as explaining 'high-confidence' predictions by the model for the target class $y^+$. Depending on the context and application, different choices of $\tau$ can be considered as representing 'high-confidence' predictions.
