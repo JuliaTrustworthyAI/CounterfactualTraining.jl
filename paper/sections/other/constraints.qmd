@@ -232,3 +232,18 @@ end
 plt = Plots.plot(plts..., layout=(1,2), size=(600,300))
 Plots.savefig(plt, "paper/figures/app_mtblty.svg")
 ```
+
+## Domain Constraints
+
+We apply domain constraints on counterfactuals during training and evaluation. There are at least two good reasons for doing so. Firstly, within the context of explainability and algorithmic recourse, real-world attributes are often domain constrained: the *age* feature, for example, is lower bounded by zero and upper bounded by the maximum human lifespan. Secondly, domain constraints help mitigate training instabilities commonly associated with energy-based modelling [@grathwohl2020your;@altmeyer2024faithful].
+
+For our image datasets, features are pixel values and hence the domain is constrained by the lower and upper bound of values that pixels can take depending on how they are scaled (in our case $[-1,1]$). For all other features $d$ in our synthetic and tabular datasets, we automatically infer domain constraints $[x_d^{\text{LB}},x_d^{\text{UB}}]$  as follows,
+
+$$
+\begin{aligned}
+x_d^{\text{LB}} &= \arg\min_{x_d} \{\mu_d - n_{\sigma_d}\sigma_d, \arg \min_{x_d} x_d\} \\
+x_d^{\text{UB}} &= \arg\max_{x_d} \{\mu_d + n_{\sigma_d}\sigma_d, \arg \max_{x_d} x_d\} 
+\end{aligned}
+$$ {#eq-domain}
+
+where $\mu_d$ and $\sigma_d$ denote the sample mean and standard deviation of feature $d$. We set $n_{\sigma_d}=3$ across the board but higher values and hence wider bounds may be appropriate depending on the application.

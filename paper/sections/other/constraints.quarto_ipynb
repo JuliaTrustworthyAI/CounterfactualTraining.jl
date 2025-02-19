@@ -18,7 +18,7 @@
         "using CTExperiments.TaijaPlotting\n",
         "using Plots.PlotMeasures"
       ],
-      "id": "175b65be",
+      "id": "ff901c1e",
       "execution_count": null,
       "outputs": []
     },
@@ -28,7 +28,7 @@
       "source": [
         "## Protecting Mutability Constraints with Linear Classifiers {#sec-app-constraints}\n",
         "\n",
-        "In @sec-constraints we explain that to avoid penalizing implausibility that arises due to mutability constraints, we impose a point mass prior on $p(\\mathbf{x})$ for the corresponding feature. We argue in @sec-constraints that this approach induces models to be less sensitive to immutable features and demonstrate this empirically in @sec-experiments. Below we derive the analytical results in @thm-mtblty.\n",
+        "In @sec-constraints we explain that to avoid penalizing implausibility that arises due to mutability constraints, we impose a point mass prior on $p(\\mathbf{x})$ for the corresponding feature. We argue in @sec-constraints that this approach induces models to be less sensitive to immutable features and demonstrate this empirically in @sec-experiments. Below we derive the analytical results in @prp-mtblty.\n",
         "\n",
         "::: {.proof}\n",
         "\n",
@@ -66,29 +66,13 @@
         "\n",
         "Since $(\\mu_{y^-,d_{\\text{immtbl}}} < \\mu_{y^+,d_{\\text{immtbl}}})$ we are more likely to have $(x_{d_{\\text{immtbl}}}^\\prime - x_{d_{\\text{immtbl}}}) < 0$ than vice versa at initialization. Similarly, we are more likely to have $(x_{d_{\\text{mtbl}}}^\\prime - x_{d_{\\text{mtbl}}}) > 0$ since $(\\mu_{y^-,d_{\\text{mtbl}}} > \\mu_{y^+,d_{\\text{mtbl}}})$.\n",
         "\n",
-        "This implies that if we do not protect feature $d_{\\text{immtbl}}$, the contrastive divergence penalty will push down on $\\theta_{y^-,d_{\\text{immtbl}}}$ thereby exacerbating the existing effect $(\\theta_{y^-,d_{\\text{immtbl}}} - \\theta_{y^+,d_{\\text{immtbl}}}) < 0$. In words, not protecting the immutable feature would have the undesirable effect of making the classifier more sensitive to this feature, in that it would be more likely to predict class $y^-$ as opposed to $y^+$ for lower values of $d_{\\text{immtbl}}$. \n",
+        "This implies that if we do not protect feature $d_{\\text{immtbl}}$, the contrastive divergence penalty will decrease $\\theta_{y^-,d_{\\text{immtbl}}}$ thereby exacerbating the existing effect $(\\theta_{y^-,d_{\\text{immtbl}}} - \\theta_{y^+,d_{\\text{immtbl}}}) < 0$. In words, not protecting the immutable feature would have the undesirable effect of making the classifier more sensitive to this feature, in that it would be more likely to predict class $y^-$ as opposed to $y^+$ for lower values of $d_{\\text{immtbl}}$. \n",
         "\n",
-        "By the same rationale, the contrastive divergence penalty can generally be expected to push up on $\\theta_{y^-,d_{\\text{mtbl}}}$ exacerbating $(\\theta_{y^-,d_{\\text{mtbl}}} - \\theta_{y^+,d_{\\text{mtbl}}}) > 0$. In words, this has the effect of making the classifier more sensitive to the mutable feature, in that it would be more likely to predict class $y^-$ as opposed to $y^+$ for higher values of $d_{\\text{mtbl}}$.\n",
+        "By the same rationale, the contrastive divergence penalty can generally be expected to increase $\\theta_{y^-,d_{\\text{mtbl}}}$ exacerbating $(\\theta_{y^-,d_{\\text{mtbl}}} - \\theta_{y^+,d_{\\text{mtbl}}}) > 0$. In words, this has the effect of making the classifier more sensitive to the mutable feature, in that it would be more likely to predict class $y^-$ as opposed to $y^+$ for higher values of $d_{\\text{mtbl}}$.\n",
         "\n",
         "Thus, our proposed approach of protecting feature $d_{\\text{immtbl}}$ has the net affect of decreasing the classifier's sensitivity to the immutable feature relative to the mutable feature (i.e. no change in sensitivity for $d_{\\text{immtbl}}$ relative to increased sensitivity for $d_{\\text{mtbl}}$).\n",
         "\n",
         ":::\n",
-        "\n",
-        "We provide an illustrative example in @exm-grad.\n",
-        "\n",
-        "::: {#exm-grad}\n",
-        "\n",
-        "## Prediction of Consumer Credit Default\n",
-        "\n",
-        "Suppose now that $d_{\\text{immtbl}}$ represents an individual's *age* and $d_{\\text{mtbl}}$ represents an individual's existing level of credit card debt. Assume that these two features are independent, the class conditional densities are Gaussian and we use no other features to predict the risk of individuals defaulting on a consumer loan using a linear classifier. We have simulated this scenario using synthetic data in @fig-mtblty.\n",
-        "\n",
-        "In panel (a) of @fig-mtblty, we have trained the linear classifier using counterfactual training, treating both features as mutable. The linear decision boundary is roughly equally sensitive to both *age* and existing levels of *debt*. \n",
-        "\n",
-        "Conversely, in panel (b) of @fig-mtblty, we have trained the same classifier using counterfactual training, but this time treating *age* as an immutable feature. The result is a new decision boundary that has tilted in favor of higher sensitivity to the mutable feature (existing *debt*) and lower sensitivity to the immutable feature (*age*).\n",
-        "\n",
-        ":::\n",
-        "\n",
-        "![Visual illustration of the effect of imposing mutability constraints. See @exm-grad for details.](/paper/figures/app_mtblty.svg){#fig-mtblty}\n",
         "\n",
         "::: {.callout-warning}\n",
         "\n",
@@ -96,7 +80,7 @@
         "\n",
         ":::\n"
       ],
-      "id": "51454e0e"
+      "id": "41e27c54"
     },
     {
       "cell_type": "code",
@@ -110,7 +94,6 @@
         "    build_model, \n",
         "    LinearModel, \n",
         "    get_input_encoder\n",
-        "\n",
         "\n",
         "# Callback:\n",
         "using CTExperiments: get_log_reg_params, get_decision_boundary\n",
@@ -138,10 +121,13 @@
         "    Plots.abline!(plt, db.slope, db.intercept; lw=5, label=\"Dec. Boundary\")\n",
         "\n",
         "    # Counterfactuals:\n",
+        "    target = 2\n",
+        "    factual = 1\n",
         "    if !any(isnothing.(x))\n",
         "        yhat = [argmax(y) for y in eachcol(model(x))]\n",
         "        yhat0 = [argmax(y) for y in eachcol(model(x0))]\n",
-        "        if any(yhat.==2)\n",
+        "        idx_plotted = yhat0.==factual\n",
+        "        if any(idx_plotted)\n",
         "\n",
         "            # Paths:\n",
         "            u = []\n",
@@ -151,10 +137,10 @@
         "                push!(u, Δ[1])\n",
         "                push!(v, Δ[2])\n",
         "            end\n",
-        "            Plots.quiver!(x0[1,yhat.==2], x0[2,yhat.==2], quiver=(u[yhat.==2], v[yhat.==2]), color=1)\n",
+        "            Plots.quiver!(x0[1,idx_plotted], x0[2,idx_plotted], quiver=(u[idx_plotted], v[idx_plotted]), color=factual)\n",
         "            \n",
         "            # End points:\n",
-        "            Plots.scatter!(x[1,yhat.==2], x[2,yhat.==2], label=[\"CE (y⁺=1)\" \"CE (y⁺=2)\"], ms=15, shape=:star, color=yhat[yhat.==2], group=yhat[yhat.==2], mscolor=yhat0[yhat.==2])\n",
+        "            Plots.scatter!(x[1,idx_plotted], x[2,idx_plotted], label=[\"CE (y⁺=1)\" \"CE (y⁺=2)\"], ms=15, shape=:star, color=yhat[idx_plotted], group=yhat[idx_plotted], mscolor=yhat0[idx_plotted])\n",
         "\n",
         "        end\n",
         "    end\n",
@@ -164,12 +150,12 @@
         "# Data:\n",
         "specs = [\n",
         "    (\"(a)\", VanillaObjective(needs_ce=true), [\"both\", \"both\"]),\n",
-        "    (\"(b)\", EnergyDifferentialObjective(lambda=[1.0,1.0,0.0]), [\"both\", \"both\"]),\n",
+        "    (\"(b)\", FullObjective(lambda=[1.0,1.0,0.0,1.0]), [\"both\", \"both\"]),\n",
         "    (\"(c)\", VanillaObjective(needs_ce=true), [\"both\", \"none\"]),\n",
-        "    (\"(d)\", EnergyDifferentialObjective(lambda=[1.0,1.0,0.0]), [\"both\", \"none\"]),\n",
+        "    (\"(d)\", FullObjective(lambda=[1.0,1.0,0.0,1.0]), [\"both\", \"none\"]),\n",
         "]"
       ],
-      "id": "8d5e9682",
+      "id": "e90e4783",
       "execution_count": null,
       "outputs": []
     },
@@ -210,7 +196,7 @@
         "    # Objective:\n",
         "    generator = GenericGenerator()\n",
         "    opt_state = Flux.setup(Descent(), model)\n",
-        "    conv = MaxIterConvergence()\n",
+        "    conv = MaxIterConvergence(25)\n",
         "\n",
         "    model, logs = counterfactual_training(\n",
         "        obj,\n",
@@ -219,18 +205,19 @@
         "        train_set,\n",
         "        opt_state;\n",
         "        val_set = val_set,\n",
-        "        nepochs = 50,\n",
+        "        nepochs = 100,\n",
         "        mutability = Symbol.(constraint),\n",
         "        callback = plot_db,\n",
         "        nce=50,\n",
         "        convergence=conv, \n",
+        "        verbose=3\n",
         "    )\n",
         "\n",
         "    push!(models, model)\n",
         "    push!(plts, current())\n",
         "end"
       ],
-      "id": "ba6f1d05",
+      "id": "a3916b07",
       "execution_count": null,
       "outputs": []
     },
@@ -238,6 +225,8 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+        "#| eval: false\n",
+        "\n",
         "plt = Plots.plot(\n",
         "    plts..., \n",
         "    layout=(1,4), \n",
@@ -250,7 +239,7 @@
         "display(plt)\n",
         "Plots.savefig(plt, \"paper/figures/poc.svg\")"
       ],
-      "id": "3a1b48c1",
+      "id": "7c2ea9a3",
       "execution_count": null,
       "outputs": []
     },
@@ -278,9 +267,17 @@
         "plt = Plots.plot(plts..., layout=(1,2), size=(600,300))\n",
         "Plots.savefig(plt, \"paper/figures/app_mtblty.svg\")"
       ],
-      "id": "6e489ccd",
+      "id": "7493404a",
       "execution_count": null,
       "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Domain Constraints\n"
+      ],
+      "id": "bea29ff4"
     }
   ],
   "metadata": {

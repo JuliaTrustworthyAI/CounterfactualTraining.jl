@@ -35,6 +35,11 @@ function accuracy(model, train_set)
     return acc / (train_set.batchsize * length(train_set))
 end
 
+"""
+    infer_domain_constraints(X::AbstractArray; nstd=3)
+
+Automatically infers reasonable domain constraints for the counterfactuals. 
+"""
 function infer_domain_constraints(X::AbstractArray; nstd=3)
     bounds = Tuple[]
     for x in eachrow(X)
