@@ -6,9 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## Version [0.0.4]
 
+### Added
+
+- Added `apply_inferred_domain!` function to ensure that the same domain constraints are applied during training and evaluation.
+
 ### Changed
 
-- Treating nascent counterfactuals as adversarial exampels. [#19]
+- Treating nascent counterfactuals as adversarial examples. [#19]
 - Ensure that domain and mutability constraints are respected at evaluation time. [#15]
 
 ## Version [0.0.3] 
