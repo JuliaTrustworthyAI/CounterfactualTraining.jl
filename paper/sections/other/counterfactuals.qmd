@@ -1,0 +1,9 @@
+## Generating Counterfactuals through Gradient Descent {#sec-app-ce}
+
+In this section, we provide some background on gradient-based counterfactual generators (@sec-app-ce-background) and discuss how we define convergence in this context (@sec-app-conv).
+
+### Background {#sec-app-ce-background}
+
+### Convergence {#sec-app-conv}
+
+An important consideration when generating counterfactual explanations using gradient-based methods is how to define convergence. 

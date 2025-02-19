@@ -8,7 +8,7 @@
         "    ss -> joinpath(ss[1:findall([s == \"CounterfactualTraining.jl\" for s in ss])[1]]...) \n",
         "cd(projectdir)"
       ],
-      "id": "c3dcbc72",
+      "id": "d3ac0690",
       "execution_count": null,
       "outputs": []
     },
@@ -24,7 +24,7 @@
         "using DotEnv\n",
         "DotEnv.load!()"
       ],
-      "id": "764988e0",
+      "id": "9c2f9c32",
       "execution_count": null,
       "outputs": []
     },
@@ -53,9 +53,16 @@
         "- $\\theta$: Model parameters (unspecified).\n",
         "- $\\Theta$: Matrix of parameters. \n",
         "\n",
-        "# Technical Details of Our Approach {.appendix} \n"
+        "# Technical Details of Our Approach {.appendix} \n",
+        "\n",
+        "\n",
+        "# Background on Gradient-Based Counterfactual Generators {#sec-app-ce .appendix}\n",
+        "\n",
+        "## Convergence {#sec-app}\n",
+        "\n",
+        "An important consideration when generating counterfactual explanations using gradient-based methods is how to defined convergence. \n"
       ],
-      "id": "3dbe9083"
+      "id": "ea881d50"
     },
     {
       "cell_type": "code",
@@ -75,7 +82,7 @@
         "using CTExperiments.TaijaPlotting\n",
         "using Plots.PlotMeasures"
       ],
-      "id": "5a3b7fa0",
+      "id": "cec5b31a",
       "execution_count": null,
       "outputs": []
     },
@@ -137,7 +144,7 @@
         "\n",
         ":::"
       ],
-      "id": "c618e365"
+      "id": "0d6b526d"
     },
     {
       "cell_type": "code",
@@ -155,7 +162,7 @@
         "# Callback:\n",
         "using CTExperiments: get_log_reg_params, get_decision_boundary\n",
         "\n",
-        "function plot_db(model, ces; _xlab=\"Debt\", _ylab=\"Age\")\n",
+        "function plot_db(model, ces; _xlab=\"Debt\", _ylab=\"Age\", plot_contour::Bool=false)\n",
         "\n",
         "    x = (ce -> ce.counterfactual).(ces) |> xs -> reduce(hcat, xs)\n",
         "    x0 = (ce -> ce.factual).(ces) |> xs -> reduce(hcat, xs)\n",
@@ -212,7 +219,7 @@
         "    (\"(d)\", FullObjective(lambda=[1.0,1.0,0.0,1.0]), [\"both\", \"none\"]),\n",
         "]"
       ],
-      "id": "f44ccc2d",
+      "id": "707349ab",
       "execution_count": null,
       "outputs": []
     },
@@ -253,7 +260,7 @@
         "    # Objective:\n",
         "    generator = GenericGenerator()\n",
         "    opt_state = Flux.setup(Descent(), model)\n",
-        "    conv = MaxIterConvergence(25)\n",
+        "    conv = DecisionThresholdConvergence(decision_threshold=0.90)\n",
         "\n",
         "    model, logs = counterfactual_training(\n",
         "        obj,\n",
@@ -262,7 +269,7 @@
         "        train_set,\n",
         "        opt_state;\n",
         "        val_set = val_set,\n",
-        "        nepochs = 100,\n",
+        "        nepochs = 50,\n",
         "        mutability = Symbol.(constraint),\n",
         "        callback = plot_db,\n",
         "        nce=50,\n",
@@ -274,7 +281,7 @@
         "    push!(plts, current())\n",
         "end"
       ],
-      "id": "2084fbbe",
+      "id": "adc32aee",
       "execution_count": null,
       "outputs": []
     },
@@ -296,7 +303,7 @@
         "display(plt)\n",
         "Plots.savefig(plt, \"paper/figures/poc.svg\")"
       ],
-      "id": "02ada4fe",
+      "id": "5bb9d45d",
       "execution_count": null,
       "outputs": []
     },
@@ -324,7 +331,7 @@
         "plt = Plots.plot(plts..., layout=(1,2), size=(600,300))\n",
         "Plots.savefig(plt, \"paper/figures/app_mtblty.svg\")"
       ],
-      "id": "26c769a4",
+      "id": "270f0005",
       "execution_count": null,
       "outputs": []
     },
@@ -334,6 +341,18 @@
       "source": [
         "## Domain Constraints\n",
         "\n",
+        "We apply domain constraints on counterfactuals during training and evaluation. There are at least two good reasons for doing so. Firstly, within the context of explainability and algorithmic recourse, real-world attributes are often domain constrained: the *age* feature, for example, is lower bounded by zero and upper bounded by the maximum human lifespan. Secondly, domain constraints help mitigate training instabilities commonly associated with energy-based modelling [@grathwohl2020your;@altmeyer2024faithful].\n",
+        "\n",
+        "For our image datasets, features are pixel values and hence the domain is constrained by the lower and upper bound of values that pixels can take depending on how they are scaled (in our case $[-1,1]$). For all other features $d$ in our synthetic and tabular datasets, we automatically infer domain constraints $[x_d^{\\text{LB}},x_d^{\\text{UB}}]$  as follows,\n",
+        "\n",
+        "$$\n",
+        "\\begin{aligned}\n",
+        "x_d^{\\text{LB}} &= \\arg\\min_{x_d} \\{\\mu_d - n_{\\sigma_d}\\sigma_d, \\arg \\min_{x_d} x_d\\} \\\\\n",
+        "x_d^{\\text{UB}} &= \\arg\\max_{x_d} \\{\\mu_d + n_{\\sigma_d}\\sigma_d, \\arg \\max_{x_d} x_d\\} \n",
+        "\\end{aligned}\n",
+        "$$ {#eq-domain}\n",
+        "\n",
+        "where $\\mu_d$ and $\\sigma_d$ denote the sample mean and standard deviation of feature $d$. We set $n_{\\sigma_d}=3$ across the board but higher values and hence wider bounds may be appropriate depending on the application.\n",
         "\n",
         "\n",
         "\n",
@@ -359,7 +378,7 @@
         "\n",
         "## Initial Grid Search {#sec-app-initial}\n"
       ],
-      "id": "79cba2be"
+      "id": "e3a29f3a"
     },
     {
       "cell_type": "code",
@@ -368,7 +387,7 @@
         "results_dir = ENV[\"INITIAL_RUN_RESULTS\"]\n",
         "config_dir = ENV[\"INITIAL_RUN_CONFIG\"]"
       ],
-      "id": "2fc96d45",
+      "id": "fdac9610",
       "execution_count": null,
       "outputs": []
     },
@@ -386,7 +405,7 @@
         "\n",
         "## Training Phase\n"
       ],
-      "id": "670fcb46"
+      "id": "b8ae7b0f"
     },
     {
       "cell_type": "code",
@@ -396,7 +415,7 @@
         "dict = CTExperiments.from_toml(joinpath(config_dir,\"gen_params.toml\")) \n",
         "println(CTExperiments.dict_to_quarto_markdown(dict))"
       ],
-      "id": "995994db",
+      "id": "661d088f",
       "execution_count": null,
       "outputs": []
     },
@@ -411,7 +430,7 @@
         "\n",
         "## Evaluation Phase\n"
       ],
-      "id": "bd2da3ea"
+      "id": "e7ad46cb"
     },
     {
       "cell_type": "code",
@@ -421,7 +440,7 @@
         "dict = CTExperiments.from_toml(joinpath(results_dir, \"gen_params/mlp/lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
         "println(CTExperiments.dict_to_quarto_markdown(dict))"
       ],
-      "id": "07a9b400",
+      "id": "7747aceb",
       "execution_count": null,
       "outputs": []
     },
@@ -431,7 +450,7 @@
       "source": [
         ":::\n"
       ],
-      "id": "d2fa2c7c"
+      "id": "a4e17fbf"
     },
     {
       "cell_type": "code",
@@ -439,7 +458,7 @@
       "source": [
         "gen_params_dir = joinpath(results_dir, \"gen_params/mlp\")"
       ],
-      "id": "659c16b5",
+      "id": "0fbc6cd4",
       "execution_count": null,
       "outputs": []
     },
@@ -455,7 +474,7 @@
         "- **Validity**: *ECCo* almost always valid except for very low values during training and high values at evaluation time. *Generic* often has poor validity.\n",
         "- **Accuracy**: Seems largely unaffected.\n"
       ],
-      "id": "d5251847"
+      "id": "97f592eb"
     },
     {
       "cell_type": "code",
@@ -466,7 +485,7 @@
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
         "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type])"
       ],
-      "id": "d9935c12",
+      "id": "b956de6d",
       "execution_count": null,
       "outputs": []
     },
@@ -478,7 +497,7 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}\n"
       ],
-      "id": "a3079570"
+      "id": "fb31fac7"
     },
     {
       "cell_type": "code",
@@ -488,7 +507,7 @@
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs; wrap_table=false)"
       ],
-      "id": "10ea79c5",
+      "id": "24f3625b",
       "execution_count": null,
       "outputs": []
     },
@@ -504,7 +523,7 @@
         "\n",
         "<!-- Cost -->\n"
       ],
-      "id": "a3e48cd7"
+      "id": "9a815397"
     },
     {
       "cell_type": "code",
@@ -515,7 +534,7 @@
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
         "  df -> sort(df, [:lambda_cost_exper, :objective, :generator_type])"
       ],
-      "id": "6e9f7d1e",
+      "id": "55a32c32",
       "execution_count": null,
       "outputs": []
     },
@@ -527,7 +546,7 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}\n"
       ],
-      "id": "b7338a20"
+      "id": "19482a3c"
     },
     {
       "cell_type": "code",
@@ -537,7 +556,7 @@
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_cost_exper\", backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs; wrap_table=false)"
       ],
-      "id": "c00dc0df",
+      "id": "66bd83d7",
       "execution_count": null,
       "outputs": []
     },
@@ -560,7 +579,7 @@
         "- **Validity**: *ECCo* generally achieves full validity except for very low choices the energy penalty during training and high choices at evaluation time. *Generic* performs poorly for high choices of the energy penalty during evaluation.\n",
         "- **Accuracy**: Largely unaffected although *ECCo* suffers a bit for very low choices the energy penalty during training. *REVISE* suffers a lot in general (around 10 percentage points).\n"
       ],
-      "id": "6efac4aa"
+      "id": "a9c5b37e"
     },
     {
       "cell_type": "code",
@@ -571,7 +590,7 @@
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
         "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) "
       ],
-      "id": "7b3ca798",
+      "id": "a297cc0c",
       "execution_count": null,
       "outputs": []
     },
@@ -583,7 +602,7 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}\n"
       ],
-      "id": "d568587c"
+      "id": "5170b38a"
     },
     {
       "cell_type": "code",
@@ -593,7 +612,7 @@
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs)"
       ],
-      "id": "a3c66954",
+      "id": "d956ad5f",
       "execution_count": null,
       "outputs": []
     },
@@ -615,7 +634,7 @@
         "- **Validity**: *ECCo* tends to outperform its *Vanilla* counterpart, though primarily for low to medium choices of the energy penalty (<=5) during training and evaluation. *Vanilla* typically worse across the board.\n",
         "- **Accuracy**: Mostly unaffected, but *REVISE* again consistently some deterioration and *ECCo* deteriorates for high choices of energy penalty during training, reflecting other outcomes above.\n"
       ],
-      "id": "886f06b2"
+      "id": "d80afceb"
     },
     {
       "cell_type": "code",
@@ -626,7 +645,7 @@
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
         "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) "
       ],
-      "id": "556f9408",
+      "id": "d4efe8bb",
       "execution_count": null,
       "outputs": []
     },
@@ -638,7 +657,7 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}\n"
       ],
-      "id": "a40abf03"
+      "id": "3d600a81"
     },
     {
       "cell_type": "code",
@@ -648,7 +667,7 @@
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs)"
       ],
-      "id": "e4d86725",
+      "id": "1875b652",
       "execution_count": null,
       "outputs": []
     },
@@ -662,7 +681,7 @@
         "\n",
         ":::"
       ],
-      "id": "9f4315b3"
+      "id": "2ecf40ff"
     }
   ],
   "metadata": {

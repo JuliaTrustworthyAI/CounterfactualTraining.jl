@@ -37,6 +37,8 @@ DotEnv.load!()
 
 # Technical Details of Our Approach {.appendix} 
 
+{{< include /paper/sections/other/counterfactuals.qmd >}}
+
 {{< include /paper/sections/other/constraints.qmd >}}
 
 # Detailed Results {.appendix}
