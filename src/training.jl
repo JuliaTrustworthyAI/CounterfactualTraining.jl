@@ -179,7 +179,8 @@ function counterfactual_training(
             else
                 msg_valid = "n/a"
             end
-            msg_iter = !isnothing(avg_iter) ? "Average no. of iterations: $(avg_iter)" : "n/a"
+            msg_iter =
+                !isnothing(avg_iter) ? "Average no. of iterations: $(avg_iter)" : "n/a"
         else
             implaus = nothing
             log_reg_loss = nothing

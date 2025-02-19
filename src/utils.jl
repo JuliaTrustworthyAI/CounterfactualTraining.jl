@@ -32,7 +32,7 @@ function accuracy(model, train_set)
         y = Flux.onecold(y)
         acc += sum(yhat .== y)
     end
-    return acc / size(train_set.data[1],2)
+    return acc / size(train_set.data[1], 2)
 end
 
 """
