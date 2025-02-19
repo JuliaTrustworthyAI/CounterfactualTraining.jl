@@ -1,7 +1,20 @@
+using CounterfactualTraining
 using MultivariateStats
 using Random
 using Serialization
 using TaijaData
+
+"""
+    apply_inferred_domain!(d::Dataset)
+
+Applies the domain constraints that would outherwise be inferred by `CounterfactualTraining`. This is to ensure that the same domain constraints are applied during training and evaluation.
+"""
+function apply_inferred_domain!(d::Dataset)
+    if d.domain == "none"
+        d.domain = get_data(d)[1] |> CounterfactualTraining.infer_domain_constraints
+    end
+    return d
+end
 
 nmax(d::Dataset) = Inf
 
@@ -186,8 +199,10 @@ function get_domain(d::Dataset)
         else
             throw(ArgumentError("Domain must be a vector or 'none'."))
         end
-    elseif length(d.domain) == 2
+    elseif typeof(d.domain) <: Vector{<:Real}
         domain = tuple(d.domain...)
+    elseif typeof(d.domain) <: Vector{<:Tuple}
+        domain = d.domain
     end
     return domain
 end

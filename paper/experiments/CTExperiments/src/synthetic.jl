@@ -11,7 +11,7 @@ using TaijaData
 
 Keyword container for the `Moons` data set. Can specify the number of samples `n`, the batch size `batchsize`.
 """
-Base.@kwdef struct Moons <: Dataset
+Base.@kwdef mutable struct Moons <: Dataset
     n_train::Int = 3000
     batchsize::Int = 30
     n_validation::Int = 600
@@ -31,7 +31,7 @@ load_data(d::Moons, n::Int; seed=TaijaData.data_seed) = load_moons(n; seed=seed)
 
 Keyword container for the `LinearlySeparable` data set. Can specify the number of samples `n`, the batch size `batchsize`.
 """
-Base.@kwdef struct LinearlySeparable <: Dataset
+Base.@kwdef mutable struct LinearlySeparable <: Dataset
     n_train::Int = 3000
     batchsize::Int = 30
     n_validation::Int = 600
@@ -53,7 +53,7 @@ end
 
 Keyword container for the `Overlapping` data set. Can specify the number of samples `n`, the batch size `batchsize`.
 """
-Base.@kwdef struct Overlapping <: Dataset
+Base.@kwdef mutable struct Overlapping <: Dataset
     n_train::Int = 3000
     batchsize::Int = 30
     n_validation::Int = 600
@@ -75,7 +75,7 @@ end
 
 Keyword container for the `Circles` data set. Can specify the number of samples `n`, the batch size `batchsize`.
 """
-Base.@kwdef struct Circles <: Dataset
+Base.@kwdef mutable struct Circles <: Dataset
     n_train::Int = 3000
     batchsize::Int = 30
     n_validation::Int = 600
