@@ -12,7 +12,7 @@ using TaijaData
 
 Keyword container for the `GMSC` data set. Can specify the number of samples `n`, the batch size `batchsize`.
 """
-Base.@kwdef struct GMSC <: Dataset
+Base.@kwdef mutable struct GMSC <: Dataset
     n_train::Int = 12371
     batchsize::Int = 1000
     n_validation::Int = 1000
@@ -34,7 +34,7 @@ load_data(d::GMSC, n::Int) = load_gmsc(n)
 
 Keyword container for the `CaliHousing` (california housing) data set. Can specify the number of samples `n`, the batch size `batchsize`.
 """
-Base.@kwdef struct CaliHousing <: Dataset
+Base.@kwdef mutable struct CaliHousing <: Dataset
     n_train::Int = 15504
     batchsize::Int = 1000
     n_validation::Int = 1000
@@ -56,7 +56,7 @@ load_data(d::CaliHousing, n::Int) = load_california_housing(n)
 
 Keyword container for the `Adult` data set.
 """
-Base.@kwdef struct Adult <: Dataset
+Base.@kwdef mutable struct Adult <: Dataset
     n_train::Int = 25049
     batchsize::Int = 1000
     n_validation::Int = 1000

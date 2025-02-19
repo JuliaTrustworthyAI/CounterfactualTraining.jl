@@ -8,7 +8,7 @@
         "    ss -> joinpath(ss[1:findall([s == \"CounterfactualTraining.jl\" for s in ss])[1]]...) \n",
         "cd(projectdir)"
       ],
-      "id": "63f82576",
+      "id": "d3ac0690",
       "execution_count": null,
       "outputs": []
     },
@@ -24,7 +24,7 @@
         "using DotEnv\n",
         "DotEnv.load!()"
       ],
-      "id": "a367b13b",
+      "id": "9c2f9c32",
       "execution_count": null,
       "outputs": []
     },
@@ -53,9 +53,16 @@
         "- $\\theta$: Model parameters (unspecified).\n",
         "- $\\Theta$: Matrix of parameters. \n",
         "\n",
-        "# Technical Details of Our Approach {.appendix} \n"
+        "# Technical Details of Our Approach {.appendix} \n",
+        "\n",
+        "\n",
+        "# Background on Gradient-Based Counterfactual Generators {#sec-app-ce .appendix}\n",
+        "\n",
+        "## Convergence {#sec-app}\n",
+        "\n",
+        "An important consideration when generating counterfactual explanations using gradient-based methods is how to defined convergence. \n"
       ],
-      "id": "deed1707"
+      "id": "ea881d50"
     },
     {
       "cell_type": "code",
@@ -75,7 +82,7 @@
         "using CTExperiments.TaijaPlotting\n",
         "using Plots.PlotMeasures"
       ],
-      "id": "76ad5aff",
+      "id": "cec5b31a",
       "execution_count": null,
       "outputs": []
     },
@@ -85,7 +92,7 @@
       "source": [
         "## Protecting Mutability Constraints with Linear Classifiers {#sec-app-constraints}\n",
         "\n",
-        "In @sec-constraints we explain that to avoid penalizing implausibility that arises due to mutability constraints, we impose a point mass prior on $p(\\mathbf{x})$ for the corresponding feature. We argue in @sec-constraints that this approach induces models to be less sensitive to immutable features and demonstrate this empirically in @sec-experiments. Below we derive the analytical results in @thm-mtblty.\n",
+        "In @sec-constraints we explain that to avoid penalizing implausibility that arises due to mutability constraints, we impose a point mass prior on $p(\\mathbf{x})$ for the corresponding feature. We argue in @sec-constraints that this approach induces models to be less sensitive to immutable features and demonstrate this empirically in @sec-experiments. Below we derive the analytical results in @prp-mtblty.\n",
         "\n",
         "::: {.proof}\n",
         "\n",
@@ -123,29 +130,13 @@
         "\n",
         "Since $(\\mu_{y^-,d_{\\text{immtbl}}} < \\mu_{y^+,d_{\\text{immtbl}}})$ we are more likely to have $(x_{d_{\\text{immtbl}}}^\\prime - x_{d_{\\text{immtbl}}}) < 0$ than vice versa at initialization. Similarly, we are more likely to have $(x_{d_{\\text{mtbl}}}^\\prime - x_{d_{\\text{mtbl}}}) > 0$ since $(\\mu_{y^-,d_{\\text{mtbl}}} > \\mu_{y^+,d_{\\text{mtbl}}})$.\n",
         "\n",
-        "This implies that if we do not protect feature $d_{\\text{immtbl}}$, the contrastive divergence penalty will push down on $\\theta_{y^-,d_{\\text{immtbl}}}$ thereby exacerbating the existing effect $(\\theta_{y^-,d_{\\text{immtbl}}} - \\theta_{y^+,d_{\\text{immtbl}}}) < 0$. In words, not protecting the immutable feature would have the undesirable effect of making the classifier more sensitive to this feature, in that it would be more likely to predict class $y^-$ as opposed to $y^+$ for lower values of $d_{\\text{immtbl}}$. \n",
+        "This implies that if we do not protect feature $d_{\\text{immtbl}}$, the contrastive divergence penalty will decrease $\\theta_{y^-,d_{\\text{immtbl}}}$ thereby exacerbating the existing effect $(\\theta_{y^-,d_{\\text{immtbl}}} - \\theta_{y^+,d_{\\text{immtbl}}}) < 0$. In words, not protecting the immutable feature would have the undesirable effect of making the classifier more sensitive to this feature, in that it would be more likely to predict class $y^-$ as opposed to $y^+$ for lower values of $d_{\\text{immtbl}}$. \n",
         "\n",
-        "By the same rationale, the contrastive divergence penalty can generally be expected to push up on $\\theta_{y^-,d_{\\text{mtbl}}}$ exacerbating $(\\theta_{y^-,d_{\\text{mtbl}}} - \\theta_{y^+,d_{\\text{mtbl}}}) > 0$. In words, this has the effect of making the classifier more sensitive to the mutable feature, in that it would be more likely to predict class $y^-$ as opposed to $y^+$ for higher values of $d_{\\text{mtbl}}$.\n",
+        "By the same rationale, the contrastive divergence penalty can generally be expected to increase $\\theta_{y^-,d_{\\text{mtbl}}}$ exacerbating $(\\theta_{y^-,d_{\\text{mtbl}}} - \\theta_{y^+,d_{\\text{mtbl}}}) > 0$. In words, this has the effect of making the classifier more sensitive to the mutable feature, in that it would be more likely to predict class $y^-$ as opposed to $y^+$ for higher values of $d_{\\text{mtbl}}$.\n",
         "\n",
         "Thus, our proposed approach of protecting feature $d_{\\text{immtbl}}$ has the net affect of decreasing the classifier's sensitivity to the immutable feature relative to the mutable feature (i.e. no change in sensitivity for $d_{\\text{immtbl}}$ relative to increased sensitivity for $d_{\\text{mtbl}}$).\n",
         "\n",
         ":::\n",
-        "\n",
-        "We provide an illustrative example in @exm-grad.\n",
-        "\n",
-        "::: {#exm-grad}\n",
-        "\n",
-        "## Prediction of Consumer Credit Default\n",
-        "\n",
-        "Suppose now that $d_{\\text{immtbl}}$ represents an individual's *age* and $d_{\\text{mtbl}}$ represents an individual's existing level of credit card debt. Assume that these two features are independent, the class conditional densities are Gaussian and we use no other features to predict the risk of individuals defaulting on a consumer loan using a linear classifier. We have simulated this scenario using synthetic data in @fig-mtblty.\n",
-        "\n",
-        "In panel (a) of @fig-mtblty, we have trained the linear classifier using counterfactual training, treating both features as mutable. The linear decision boundary is roughly equally sensitive to both *age* and existing levels of *debt*. \n",
-        "\n",
-        "Conversely, in panel (b) of @fig-mtblty, we have trained the same classifier using counterfactual training, but this time treating *age* as an immutable feature. The result is a new decision boundary that has tilted in favor of higher sensitivity to the mutable feature (existing *debt*) and lower sensitivity to the immutable feature (*age*).\n",
-        "\n",
-        ":::\n",
-        "\n",
-        "![Visual illustration of the effect of imposing mutability constraints. See @exm-grad for details.](/paper/figures/app_mtblty.svg){#fig-mtblty}\n",
         "\n",
         "::: {.callout-warning}\n",
         "\n",
@@ -153,7 +144,7 @@
         "\n",
         ":::"
       ],
-      "id": "faa329cf"
+      "id": "0d6b526d"
     },
     {
       "cell_type": "code",
@@ -168,11 +159,10 @@
         "    LinearModel, \n",
         "    get_input_encoder\n",
         "\n",
-        "\n",
         "# Callback:\n",
         "using CTExperiments: get_log_reg_params, get_decision_boundary\n",
         "\n",
-        "function plot_db(model, ces; _xlab=\"Debt\", _ylab=\"Age\")\n",
+        "function plot_db(model, ces; _xlab=\"Debt\", _ylab=\"Age\", plot_contour::Bool=false)\n",
         "\n",
         "    x = (ce -> ce.counterfactual).(ces) |> xs -> reduce(hcat, xs)\n",
         "    x0 = (ce -> ce.factual).(ces) |> xs -> reduce(hcat, xs)\n",
@@ -195,10 +185,13 @@
         "    Plots.abline!(plt, db.slope, db.intercept; lw=5, label=\"Dec. Boundary\")\n",
         "\n",
         "    # Counterfactuals:\n",
+        "    target = 2\n",
+        "    factual = 1\n",
         "    if !any(isnothing.(x))\n",
         "        yhat = [argmax(y) for y in eachcol(model(x))]\n",
         "        yhat0 = [argmax(y) for y in eachcol(model(x0))]\n",
-        "        if any(yhat.==2)\n",
+        "        idx_plotted = yhat0.==factual\n",
+        "        if any(idx_plotted)\n",
         "\n",
         "            # Paths:\n",
         "            u = []\n",
@@ -208,10 +201,10 @@
         "                push!(u, Δ[1])\n",
         "                push!(v, Δ[2])\n",
         "            end\n",
-        "            Plots.quiver!(x0[1,yhat.==2], x0[2,yhat.==2], quiver=(u[yhat.==2], v[yhat.==2]), color=1)\n",
+        "            Plots.quiver!(x0[1,idx_plotted], x0[2,idx_plotted], quiver=(u[idx_plotted], v[idx_plotted]), color=factual)\n",
         "            \n",
         "            # End points:\n",
-        "            Plots.scatter!(x[1,yhat.==2], x[2,yhat.==2], label=[\"CE (y⁺=1)\" \"CE (y⁺=2)\"], ms=15, shape=:star, color=yhat[yhat.==2], group=yhat[yhat.==2], mscolor=yhat0[yhat.==2])\n",
+        "            Plots.scatter!(x[1,idx_plotted], x[2,idx_plotted], label=[\"CE (y⁺=1)\" \"CE (y⁺=2)\"], ms=15, shape=:star, color=yhat[idx_plotted], group=yhat[idx_plotted], mscolor=yhat0[idx_plotted])\n",
         "\n",
         "        end\n",
         "    end\n",
@@ -221,12 +214,12 @@
         "# Data:\n",
         "specs = [\n",
         "    (\"(a)\", VanillaObjective(needs_ce=true), [\"both\", \"both\"]),\n",
-        "    (\"(b)\", EnergyDifferentialObjective(lambda=[1.0,1.0,0.0]), [\"both\", \"both\"]),\n",
+        "    (\"(b)\", FullObjective(lambda=[1.0,1.0,0.0,1.0]), [\"both\", \"both\"]),\n",
         "    (\"(c)\", VanillaObjective(needs_ce=true), [\"both\", \"none\"]),\n",
-        "    (\"(d)\", EnergyDifferentialObjective(lambda=[1.0,1.0,0.0]), [\"both\", \"none\"]),\n",
+        "    (\"(d)\", FullObjective(lambda=[1.0,1.0,0.0,1.0]), [\"both\", \"none\"]),\n",
         "]"
       ],
-      "id": "7fc89e4f",
+      "id": "707349ab",
       "execution_count": null,
       "outputs": []
     },
@@ -267,7 +260,7 @@
         "    # Objective:\n",
         "    generator = GenericGenerator()\n",
         "    opt_state = Flux.setup(Descent(), model)\n",
-        "    conv = MaxIterConvergence()\n",
+        "    conv = DecisionThresholdConvergence(decision_threshold=0.90)\n",
         "\n",
         "    model, logs = counterfactual_training(\n",
         "        obj,\n",
@@ -281,13 +274,14 @@
         "        callback = plot_db,\n",
         "        nce=50,\n",
         "        convergence=conv, \n",
+        "        verbose=3\n",
         "    )\n",
         "\n",
         "    push!(models, model)\n",
         "    push!(plts, current())\n",
         "end"
       ],
-      "id": "f5e12fdb",
+      "id": "adc32aee",
       "execution_count": null,
       "outputs": []
     },
@@ -295,6 +289,8 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+        "#| eval: false\n",
+        "\n",
         "plt = Plots.plot(\n",
         "    plts..., \n",
         "    layout=(1,4), \n",
@@ -307,7 +303,7 @@
         "display(plt)\n",
         "Plots.savefig(plt, \"paper/figures/poc.svg\")"
       ],
-      "id": "f9d01dae",
+      "id": "5bb9d45d",
       "execution_count": null,
       "outputs": []
     },
@@ -335,7 +331,7 @@
         "plt = Plots.plot(plts..., layout=(1,2), size=(600,300))\n",
         "Plots.savefig(plt, \"paper/figures/app_mtblty.svg\")"
       ],
-      "id": "8f1439c6",
+      "id": "270f0005",
       "execution_count": null,
       "outputs": []
     },
@@ -343,6 +339,23 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
+        "## Domain Constraints\n",
+        "\n",
+        "We apply domain constraints on counterfactuals during training and evaluation. There are at least two good reasons for doing so. Firstly, within the context of explainability and algorithmic recourse, real-world attributes are often domain constrained: the *age* feature, for example, is lower bounded by zero and upper bounded by the maximum human lifespan. Secondly, domain constraints help mitigate training instabilities commonly associated with energy-based modelling [@grathwohl2020your;@altmeyer2024faithful].\n",
+        "\n",
+        "For our image datasets, features are pixel values and hence the domain is constrained by the lower and upper bound of values that pixels can take depending on how they are scaled (in our case $[-1,1]$). For all other features $d$ in our synthetic and tabular datasets, we automatically infer domain constraints $[x_d^{\\text{LB}},x_d^{\\text{UB}}]$  as follows,\n",
+        "\n",
+        "$$\n",
+        "\\begin{aligned}\n",
+        "x_d^{\\text{LB}} &= \\arg\\min_{x_d} \\{\\mu_d - n_{\\sigma_d}\\sigma_d, \\arg \\min_{x_d} x_d\\} \\\\\n",
+        "x_d^{\\text{UB}} &= \\arg\\max_{x_d} \\{\\mu_d + n_{\\sigma_d}\\sigma_d, \\arg \\max_{x_d} x_d\\} \n",
+        "\\end{aligned}\n",
+        "$$ {#eq-domain}\n",
+        "\n",
+        "where $\\mu_d$ and $\\sigma_d$ denote the sample mean and standard deviation of feature $d$. We set $n_{\\sigma_d}=3$ across the board but higher values and hence wider bounds may be appropriate depending on the application.\n",
+        "\n",
+        "\n",
+        "\n",
         "# Detailed Results {.appendix}\n",
         "\n",
         "::: {.callout-warning}\n",
@@ -365,7 +378,7 @@
         "\n",
         "## Initial Grid Search {#sec-app-initial}\n"
       ],
-      "id": "efd5314d"
+      "id": "e3a29f3a"
     },
     {
       "cell_type": "code",
@@ -374,7 +387,7 @@
         "results_dir = ENV[\"INITIAL_RUN_RESULTS\"]\n",
         "config_dir = ENV[\"INITIAL_RUN_CONFIG\"]"
       ],
-      "id": "c2722439",
+      "id": "fdac9610",
       "execution_count": null,
       "outputs": []
     },
@@ -392,7 +405,7 @@
         "\n",
         "## Training Phase\n"
       ],
-      "id": "3ceea530"
+      "id": "b8ae7b0f"
     },
     {
       "cell_type": "code",
@@ -402,7 +415,7 @@
         "dict = CTExperiments.from_toml(joinpath(config_dir,\"gen_params.toml\")) \n",
         "println(CTExperiments.dict_to_quarto_markdown(dict))"
       ],
-      "id": "93ddb3e2",
+      "id": "661d088f",
       "execution_count": null,
       "outputs": []
     },
@@ -417,7 +430,7 @@
         "\n",
         "## Evaluation Phase\n"
       ],
-      "id": "fc938ba2"
+      "id": "e7ad46cb"
     },
     {
       "cell_type": "code",
@@ -427,7 +440,7 @@
         "dict = CTExperiments.from_toml(joinpath(results_dir, \"gen_params/mlp/lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
         "println(CTExperiments.dict_to_quarto_markdown(dict))"
       ],
-      "id": "e6a37247",
+      "id": "7747aceb",
       "execution_count": null,
       "outputs": []
     },
@@ -437,7 +450,7 @@
       "source": [
         ":::\n"
       ],
-      "id": "d720596c"
+      "id": "a4e17fbf"
     },
     {
       "cell_type": "code",
@@ -445,7 +458,7 @@
       "source": [
         "gen_params_dir = joinpath(results_dir, \"gen_params/mlp\")"
       ],
-      "id": "0563ec87",
+      "id": "0fbc6cd4",
       "execution_count": null,
       "outputs": []
     },
@@ -461,7 +474,7 @@
         "- **Validity**: *ECCo* almost always valid except for very low values during training and high values at evaluation time. *Generic* often has poor validity.\n",
         "- **Accuracy**: Seems largely unaffected.\n"
       ],
-      "id": "fd241f36"
+      "id": "97f592eb"
     },
     {
       "cell_type": "code",
@@ -472,7 +485,7 @@
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
         "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type])"
       ],
-      "id": "06d90440",
+      "id": "b956de6d",
       "execution_count": null,
       "outputs": []
     },
@@ -484,7 +497,7 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}\n"
       ],
-      "id": "e7a0d317"
+      "id": "fb31fac7"
     },
     {
       "cell_type": "code",
@@ -494,7 +507,7 @@
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs; wrap_table=false)"
       ],
-      "id": "3a4002d0",
+      "id": "24f3625b",
       "execution_count": null,
       "outputs": []
     },
@@ -510,7 +523,7 @@
         "\n",
         "<!-- Cost -->\n"
       ],
-      "id": "fb666c81"
+      "id": "9a815397"
     },
     {
       "cell_type": "code",
@@ -521,7 +534,7 @@
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
         "  df -> sort(df, [:lambda_cost_exper, :objective, :generator_type])"
       ],
-      "id": "bd1f691a",
+      "id": "55a32c32",
       "execution_count": null,
       "outputs": []
     },
@@ -533,7 +546,7 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}\n"
       ],
-      "id": "b443fac5"
+      "id": "19482a3c"
     },
     {
       "cell_type": "code",
@@ -543,7 +556,7 @@
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_cost_exper\", backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs; wrap_table=false)"
       ],
-      "id": "4020fee9",
+      "id": "66bd83d7",
       "execution_count": null,
       "outputs": []
     },
@@ -566,7 +579,7 @@
         "- **Validity**: *ECCo* generally achieves full validity except for very low choices the energy penalty during training and high choices at evaluation time. *Generic* performs poorly for high choices of the energy penalty during evaluation.\n",
         "- **Accuracy**: Largely unaffected although *ECCo* suffers a bit for very low choices the energy penalty during training. *REVISE* suffers a lot in general (around 10 percentage points).\n"
       ],
-      "id": "d9296703"
+      "id": "a9c5b37e"
     },
     {
       "cell_type": "code",
@@ -577,7 +590,7 @@
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
         "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) "
       ],
-      "id": "fac5cdf8",
+      "id": "a297cc0c",
       "execution_count": null,
       "outputs": []
     },
@@ -589,7 +602,7 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}\n"
       ],
-      "id": "bd76d42b"
+      "id": "5170b38a"
     },
     {
       "cell_type": "code",
@@ -599,7 +612,7 @@
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs)"
       ],
-      "id": "3ebe5522",
+      "id": "d956ad5f",
       "execution_count": null,
       "outputs": []
     },
@@ -621,7 +634,7 @@
         "- **Validity**: *ECCo* tends to outperform its *Vanilla* counterpart, though primarily for low to medium choices of the energy penalty (<=5) during training and evaluation. *Vanilla* typically worse across the board.\n",
         "- **Accuracy**: Mostly unaffected, but *REVISE* again consistently some deterioration and *ECCo* deteriorates for high choices of energy penalty during training, reflecting other outcomes above.\n"
       ],
-      "id": "e8dc50f1"
+      "id": "d80afceb"
     },
     {
       "cell_type": "code",
@@ -632,7 +645,7 @@
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
         "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) "
       ],
-      "id": "1f007f2c",
+      "id": "d4efe8bb",
       "execution_count": null,
       "outputs": []
     },
@@ -644,7 +657,7 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}\n"
       ],
-      "id": "0a011604"
+      "id": "3d600a81"
     },
     {
       "cell_type": "code",
@@ -654,7 +667,7 @@
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs)"
       ],
-      "id": "4ee7d30c",
+      "id": "1875b652",
       "execution_count": null,
       "outputs": []
     },
@@ -668,7 +681,7 @@
         "\n",
         ":::"
       ],
-      "id": "e311b750"
+      "id": "2ecf40ff"
     }
   ],
   "metadata": {

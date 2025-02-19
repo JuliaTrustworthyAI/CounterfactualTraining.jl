@@ -1,6 +1,6 @@
 name = "architecture"
 dim_reduction = []
-generator_type = ["ecco", "generic", "omni", "revise"]
+generator_type = ["ecco", "generic", "revise"]
 data = "lin_sep"
 model_type = "mlp"
 save_dir = "paper/experiments/output/architecture/mlp/lin_sep"

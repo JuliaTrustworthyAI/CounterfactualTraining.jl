@@ -81,7 +81,7 @@ using CTExperiments:
 # Callback:
 using CTExperiments: get_log_reg_params, get_decision_boundary
 
-function plot_db(model, ces; _xlab="Debt", _ylab="Age")
+function plot_db(model, ces; _xlab="Debt", _ylab="Age", plot_contour::Bool=false)
 
     x = (ce -> ce.counterfactual).(ces) |> xs -> reduce(hcat, xs)
     x0 = (ce -> ce.factual).(ces) |> xs -> reduce(hcat, xs)
@@ -132,9 +132,9 @@ end
 
 # Data:
 specs = [
-    ("(a)", VanillaObjective(needs_ce=true), ["both", "both"]),
-    ("(b)", FullObjective(lambda=[1.0,1.0,0.0,1.0]), ["both", "both"]),
-    ("(c)", VanillaObjective(needs_ce=true), ["both", "none"]),
+    # ("(a)", VanillaObjective(needs_ce=true), ["both", "both"]),
+    # ("(b)", FullObjective(lambda=[1.0,1.0,0.0,1.0]), ["both", "both"]),
+    # ("(c)", VanillaObjective(needs_ce=true), ["both", "none"]),
     ("(d)", FullObjective(lambda=[1.0,1.0,0.0,1.0]), ["both", "none"]),
 ]
 ```
@@ -171,9 +171,9 @@ for (title, obj, constraint) in specs
     model = build_model(LinearModel(), nin, nout)
 
     # Objective:
-    generator = GenericGenerator()
+    generator = ECCoGenerator(λ=[0.1,0.1])
     opt_state = Flux.setup(Descent(), model)
-    conv = MaxIterConvergence(25)
+    conv = DecisionThresholdConvergence(decision_threshold=0.90)
 
     model, logs = counterfactual_training(
         obj,
@@ -182,7 +182,7 @@ for (title, obj, constraint) in specs
         train_set,
         opt_state;
         val_set = val_set,
-        nepochs = 100,
+        nepochs = 50,
         mutability = Symbol.(constraint),
         callback = plot_db,
         nce=50,
@@ -232,3 +232,18 @@ end
 plt = Plots.plot(plts..., layout=(1,2), size=(600,300))
 Plots.savefig(plt, "paper/figures/app_mtblty.svg")
 ```
+
+## Domain Constraints
+
+We apply domain constraints on counterfactuals during training and evaluation. There are at least two good reasons for doing so. Firstly, within the context of explainability and algorithmic recourse, real-world attributes are often domain constrained: the *age* feature, for example, is lower bounded by zero and upper bounded by the maximum human lifespan. Secondly, domain constraints help mitigate training instabilities commonly associated with energy-based modelling [@grathwohl2020your;@altmeyer2024faithful].
+
+For our image datasets, features are pixel values and hence the domain is constrained by the lower and upper bound of values that pixels can take depending on how they are scaled (in our case $[-1,1]$). For all other features $d$ in our synthetic and tabular datasets, we automatically infer domain constraints $[x_d^{\text{LB}},x_d^{\text{UB}}]$  as follows,
+
+$$
+\begin{aligned}
+x_d^{\text{LB}} &= \arg\min_{x_d} \{\mu_d - n_{\sigma_d}\sigma_d, \arg \min_{x_d} x_d\} \\
+x_d^{\text{UB}} &= \arg\max_{x_d} \{\mu_d + n_{\sigma_d}\sigma_d, \arg \max_{x_d} x_d\} 
+\end{aligned}
+$$ {#eq-domain}
+
+where $\mu_d$ and $\sigma_d$ denote the sample mean and standard deviation of feature $d$. We set $n_{\sigma_d}=3$ across the board but higher values and hence wider bounds may be appropriate depending on the application.

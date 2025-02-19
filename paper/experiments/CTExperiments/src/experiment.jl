@@ -90,6 +90,7 @@ function Experiment(
 
     # Model and data:
     data = get_data_set(meta_params.data)(; data_params...)
+    apply_inferred_domain!(data)
     model_type = get_model_type(meta_params.model_type)(; model_params...)
 
     # Training parameters:

@@ -184,15 +184,15 @@
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
 \theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
+\newtheorem{example}{Example}[section]
 \theoremstyle{definition}
 \newtheorem{exercise}{Parameters}[section]
 \theoremstyle{plain}
 \newtheorem{proposition}{Proposition}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
 \theoremstyle{plain}
 \newtheorem{corollary}{Research Question}[section]
-\theoremstyle{definition}
-\newtheorem{example}{Example}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -551,10 +551,12 @@ input space \(\mathcal{X}\) to representations
 space \(\mathcal{Y}\). Assume that for any given input-output pair
 \(\{\mathbf{x},\mathbf{y}\}_i\) there exists a counterfactual
 \(\mathbf{x}^{\prime} = \mathbf{x} + \Delta: \mathbf{M}_\theta(\mathbf{x}^{\prime}) = \mathbf{y}^{+} \neq \mathbf{y} = \mathbf{M}_\theta(\mathbf{x})\)
-where \(\mathbf{y}^{+}\) denotes some target output. We say that
-\(\mathbf{M}_\theta\) is \textbf{explainable} to the extent that
-faithfully generated counterfactuals are plausible (i.e.~consistent with
-the data) and actionable. Formally, we define these properties as
+where \(\arg\max_y{\mathbf{y}^{+}}=y^+\) and \(y^+\) denotes the index
+of the target class.
+
+We say that \(\mathbf{M}_\theta\) is \textbf{explainable} to the extent
+that faithfully generated counterfactuals are plausible (i.e.~consistent
+with the data) and actionable. Formally, we define these properties as
 follows:
 
 \begin{enumerate}
@@ -562,7 +564,7 @@ follows:
 \tightlist
 \item
   (Plausibility)
-  \(\int^{A} p(\mathbf{x}|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1\)
+  \(\int^{A} p(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1\)
   where \(A\) is some small region around \(\mathbf{x}^{\prime}\).
 \item
   (Actionability) Permutations \(\Delta\) are subject to actionability
@@ -580,7 +582,7 @@ over inputs, then formally:
 \tightlist
 \item
   (Faithfulness)
-  \(\int^{A} p_\theta(\mathbf{x}|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1\)
+  \(\int^{A} p_\theta(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1\)
   where \(A\) is defined as above.
 \end{enumerate}
 
@@ -597,9 +599,19 @@ tasks for reasons discussed in Section~\ref{sec-discussion}.
 
 \subsection{Our Proposed Objective}\label{our-proposed-objective}
 
-Let \(\mathbf{x}_t^\prime\) for \(t=0,...,T\) denote iteratively
-generated counterfactuals. To train models with high explainability as
-defined in Definition~\ref{def-explainability}, we propose to leverage
+Let \(\mathbf{x}_t^\prime\) for \(t=0,...,T\) denote a counterfactual
+explanation generated through gradient descent over \(T\) iterations as
+initially proposed by Wachter, Mittelstadt, and Russell
+(\citeproc{ref-wachter2017counterfactual}{2017}). For our purposes, we
+let \(T\) vary and consider the counterfactual search as converged as
+soon as the predicted probability for the target class has reached a
+pre-determined threshold, \(\tau\):
+\(\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}^\prime))[y^+] \geq \tau\)\footnote{For
+  detailed background information on gradient-based counterfactual
+  search and convergence see Section~\ref{sec-app-ce}.}.
+
+To train models with high explainability as defined in
+Definition~\ref{def-explainability}, we propose to leverage
 counterfactuals in the following objective,
 
 \begin{equation}\phantomsection\label{eq-obj}{
@@ -815,7 +827,7 @@ linear decision boundary (green) and the training data colored according
 to their ground-truth label: orange points belong to the target class,
 \(y^+=2\), blue points belong to the non-target class, \(y^-=1\). Stars
 indicate counterfactuals in the target class generated at test time
-using generic gradient descent for a fixed number of iterations.
+using generic gradient descent until convergence.
 
 In panel (a), we have trained our model conventionally, and we do not
 impose mutability constraints at test time. The generated
@@ -1115,6 +1127,36 @@ Linguistics. \url{https://doi.org/10.18653/v1/2021.acl-long.523}.
 \section{Technical Details of Our
 Approach}\label{technical-details-of-our-approach}
 
+\subsection{Generating Counterfactuals through Gradient
+Descent}\label{sec-app-ce}
+
+In this section, we provide some background on gradient-based
+counterfactual generators (Section~\ref{sec-app-ce-background}) and
+discuss how we define convergence in this context
+(Section~\ref{sec-app-conv}).
+
+\subsubsection{Background}\label{sec-app-ce-background}
+
+\subsubsection{Convergence}\label{sec-app-conv}
+
+An important consideration when generating counterfactual explanations
+using gradient-based methods is how to define convergence. Two common
+choices are to 1) perform gradient descent over a fixed number of
+iterations \(T\), or 2) conclude the search as soon as the predicted
+probability for the target class has reached a pre-determined threshold,
+\(\tau\):
+\(\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}^\prime))[y^+] \geq \tau\). We
+prefer the latter for our purposes, because it explicitly defines
+convergence in terms of the black-box model, \(\mathbf{M}(\mathbf{x})\).
+
+Defining convergence in this way allows for a more intuitive
+interpretation of the resulting counterfactual outcomes than with fixed
+\(T\). Specifically, it allows us to think of counterfactuals as
+explaining `high-confidence' predictions by the model for the target
+class \(y^+\). Depending on the context and application, different
+choices of \(\tau\) can be considered as representing `high-confidence'
+predictions.
+
 \subsection{Protecting Mutability Constraints with Linear
 Classifiers}\label{sec-app-constraints}
 
@@ -1215,7 +1257,7 @@ sensitivity for \(d_{\text{immtbl}}\) relative to increased sensitivity
 for \(d_{\text{mtbl}}\)).
 \end{proof}
 
-\begin{tcolorbox}[enhanced jigsaw, left=2mm, colback=white, titlerule=0mm, opacityback=0, coltitle=black, colframe=quarto-callout-warning-color-frame, bottomrule=.15mm, toprule=.15mm, colbacktitle=quarto-callout-warning-color!10!white, opacitybacktitle=0.6, rightrule=.15mm, bottomtitle=1mm, toptitle=1mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, arc=.35mm, breakable, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, breakable, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, opacitybacktitle=0.6, titlerule=0mm, colback=white, opacityback=0, bottomrule=.15mm, colbacktitle=quarto-callout-warning-color!10!white, coltitle=black, arc=.35mm, toptitle=1mm, toprule=.15mm, bottomtitle=1mm, rightrule=.15mm, leftrule=.75mm, colframe=quarto-callout-warning-color-frame, left=2mm]
 
 @Cynthia, @Arie, I have tentatively phrased the above in terms of a
 theorem and proof. This is something I've so far shied away from because
@@ -1225,9 +1267,40 @@ correct.
 
 \end{tcolorbox}
 
+\subsection{Domain Constraints}\label{domain-constraints}
+
+We apply domain constraints on counterfactuals during training and
+evaluation. There are at least two good reasons for doing so. Firstly,
+within the context of explainability and algorithmic recourse,
+real-world attributes are often domain constrained: the \emph{age}
+feature, for example, is lower bounded by zero and upper bounded by the
+maximum human lifespan. Secondly, domain constraints help mitigate
+training instabilities commonly associated with energy-based modelling
+(\citeproc{ref-grathwohl2020your}{Grathwohl et al. 2020};
+\citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024}).
+
+For our image datasets, features are pixel values and hence the domain
+is constrained by the lower and upper bound of values that pixels can
+take depending on how they are scaled (in our case \([-1,1]\)). For all
+other features \(d\) in our synthetic and tabular datasets, we
+automatically infer domain constraints
+\([x_d^{\text{LB}},x_d^{\text{UB}}]\) as follows,
+
+\begin{equation}\phantomsection\label{eq-domain}{
+\begin{aligned}
+x_d^{\text{LB}} &= \arg\min_{x_d} \{\mu_d - n_{\sigma_d}\sigma_d, \arg \min_{x_d} x_d\} \\
+x_d^{\text{UB}} &= \arg\max_{x_d} \{\mu_d + n_{\sigma_d}\sigma_d, \arg \max_{x_d} x_d\} 
+\end{aligned}
+}\end{equation}
+
+where \(\mu_d\) and \(\sigma_d\) denote the sample mean and standard
+deviation of feature \(d\). We set \(n_{\sigma_d}=3\) across the board
+but higher values and hence wider bounds may be appropriate depending on
+the application.
+
 \section{Detailed Results}\label{detailed-results}
 
-\begin{tcolorbox}[enhanced jigsaw, left=2mm, colback=white, titlerule=0mm, opacityback=0, coltitle=black, colframe=quarto-callout-warning-color-frame, bottomrule=.15mm, toprule=.15mm, colbacktitle=quarto-callout-warning-color!10!white, opacitybacktitle=0.6, rightrule=.15mm, bottomtitle=1mm, toptitle=1mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, arc=.35mm, breakable, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, breakable, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, opacitybacktitle=0.6, titlerule=0mm, colback=white, opacityback=0, bottomrule=.15mm, colbacktitle=quarto-callout-warning-color!10!white, coltitle=black, arc=.35mm, toptitle=1mm, toprule=.15mm, bottomtitle=1mm, rightrule=.15mm, leftrule=.75mm, colframe=quarto-callout-warning-color-frame, left=2mm]
 
 @Cynthia, @Arie, I'm including some preliminary results here but will
 rerun experiments in the coming days. You'll notice some odd outlier
@@ -1247,7 +1320,7 @@ inherited from energy-based modelling).
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, left=2mm, colback=white, titlerule=0mm, opacityback=0, coltitle=black, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, rightrule=.15mm, bottomtitle=1mm, toptitle=1mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, arc=.35mm, breakable, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, breakable, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, opacitybacktitle=0.6, titlerule=0mm, colback=white, opacityback=0, bottomrule=.15mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, arc=.35mm, toptitle=1mm, toprule=.15mm, bottomtitle=1mm, rightrule=.15mm, leftrule=.75mm, colframe=quarto-callout-note-color-frame, left=2mm]
 
 @Cynthia, @Arie, Figure~\ref{fig-mnist} shows much more plausible
 (faithful) counterfactuals for a model with CT than the model with

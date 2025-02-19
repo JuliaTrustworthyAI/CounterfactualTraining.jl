@@ -6,14 +6,16 @@ Counterfactual training combines ideas from adversarial training, energy-based m
 
 ## Model Explainability
 
-Let $\mathbf{M}_\theta: \mathcal{X} \mapsto \mathcal{Y}$ denote a supervised classification model that maps from the $D$-dimensional input space $\mathcal{X}$ to representations $\phi(\mathbf{x};\theta)$ and finally to the $K$-dimensional output space $\mathcal{Y}$. Assume that for any given input-output pair $\{\mathbf{x},\mathbf{y}\}_i$ there exists a counterfactual $\mathbf{x}^{\prime} = \mathbf{x} + \Delta: \mathbf{M}_\theta(\mathbf{x}^{\prime}) = \mathbf{y}^{+} \neq \mathbf{y} = \mathbf{M}_\theta(\mathbf{x})$ where $\mathbf{y}^{+}$ denotes some target output. We say that $\mathbf{M}_\theta$ is **explainable** to the extent that faithfully generated counterfactuals are plausible (i.e. consistent with the data) and actionable. Formally, we define these properties as follows:
+Let $\mathbf{M}_\theta: \mathcal{X} \mapsto \mathcal{Y}$ denote a supervised classification model that maps from the $D$-dimensional input space $\mathcal{X}$ to representations $\phi(\mathbf{x};\theta)$ and finally to the $K$-dimensional output space $\mathcal{Y}$. Assume that for any given input-output pair $\{\mathbf{x},\mathbf{y}\}_i$ there exists a counterfactual $\mathbf{x}^{\prime} = \mathbf{x} + \Delta: \mathbf{M}_\theta(\mathbf{x}^{\prime}) = \mathbf{y}^{+} \neq \mathbf{y} = \mathbf{M}_\theta(\mathbf{x})$ where $\arg\max_y{\mathbf{y}^{+}}=y^+$ and $y^+$ denotes the index of the target class. 
 
-1. (Plausibility) $\int^{A} p(\mathbf{x}|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$ where $A$ is some small region around $\mathbf{x}^{\prime}$.
+We say that $\mathbf{M}_\theta$ is **explainable** to the extent that faithfully generated counterfactuals are plausible (i.e. consistent with the data) and actionable. Formally, we define these properties as follows:
+
+1. (Plausibility) $\int^{A} p(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$ where $A$ is some small region around $\mathbf{x}^{\prime}$.
 2. (Actionability) Permutations $\Delta$ are subject to actionability constraints.
 
 We consider counterfactuals as faithful to the extent that they are consistent with what the model has learned about the input data. Let $p_\theta(\mathbf{x}|\mathbf{y}^{+})$ denote the conditional posterior over inputs, then formally:
 
-3. (Faithfulness) $\int^{A} p_\theta(\mathbf{x}|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$ where $A$ is defined as above.
+3. (Faithfulness) $\int^{A} p_\theta(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$ where $A$ is defined as above.
 
 :::
 
@@ -21,7 +23,9 @@ The definitions of faithfulness and plausibility in @def-explainability are the 
 
 ## Our Proposed Objective
 
-Let $\mathbf{x}_t^\prime$ for $t=0,...,T$ denote iteratively generated counterfactuals. To train models with high explainability as defined in @def-explainability, we propose to leverage counterfactuals in the following objective,
+Let $\mathbf{x}_t^\prime$ for $t=0,...,T$ denote a counterfactual explanation generated through gradient descent over $T$ iterations as initially proposed by @wachter2017counterfactual. For our purposes, we let $T$ vary and consider the counterfactual search as converged as soon as the predicted probability for the target class has reached a pre-determined threshold, $\tau$: $\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}^\prime))[y^+] \geq \tau$^[For detailed background information on gradient-based counterfactual search and convergence see @sec-app-ce.].
+
+To train models with high explainability as defined in @def-explainability, we propose to leverage counterfactuals in the following objective,
 
 $$
 \min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y})
@@ -90,7 +94,7 @@ To better convey the intuition underlying our proposed method, we illustrate dif
 
 Suppose we are interested in predicting the likelihood that loan applicants default on their credit. We have access to historical data on previous loan takers comprised of a binary outcome variable ($y\in\{1=\text{default},2=\text{no default}\}$) two input features: 1) the subjects' *age*, which we define as immutable, and 2) the subjects' existing level of *debt*, which we define as mutable. 
 
-We have simulated this scenario using synthetic data with independent features and Gaussian class-conditional densities in @fig-poc. The four panels in @fig-poc show the outcomes for different training procedures using the same model architecture each time (a linear classifier). In each case, we show the linear decision boundary (green) and the training data colored according to their ground-truth label: orange points belong to the target class, $y^+=2$, blue points belong to the non-target class, $y^-=1$. Stars indicate counterfactuals in the target class generated at test time using generic gradient descent for a fixed number of iterations.
+We have simulated this scenario using synthetic data with independent features and Gaussian class-conditional densities in @fig-poc. The four panels in @fig-poc show the outcomes for different training procedures using the same model architecture each time (a linear classifier). In each case, we show the linear decision boundary (green) and the training data colored according to their ground-truth label: orange points belong to the target class, $y^+=2$, blue points belong to the non-target class, $y^-=1$. Stars indicate counterfactuals in the target class generated at test time using generic gradient descent until convergence.
 
 In panel (a), we have trained our model conventionally, and we do not impose mutability constraints at test time. The generated counterfactuals are all valid, but not plausible: they are clearly distinguishable from the ground-truth data. In panel (b), we have trained our model with counterfactual training, once again not imposing mutability constraints at test time. We observe that the counterfactuals are clearly plausible, therefore meeting the first objective of @def-explainability.
 

@@ -11,7 +11,7 @@ using TaijaData
 
 Keyword container for the `MNIST` data set. Can specify the number of samples `n`, the batch size `batchsize`.
 """
-Base.@kwdef struct MNIST <: Dataset
+Base.@kwdef mutable struct MNIST <: Dataset
     n_train::Int = get_global_param("n_train", 10_000)
     batchsize::Int = 1000
     n_validation::Int = 1000

@@ -29,6 +29,16 @@ to_dict(generator_type::AbstractGeneratorType) = String(nameof(typeof(generator_
 When called on any configuration `config`, returns a dictionary representation of its fields and their values. 
 """
 function to_dict(config::AbstractConfiguration)
+
+    # println(config)
+
+    # Adjust for inferred domain constraints:
+    if hasfield(typeof(config), :domain)
+        if isa(config.domain, Vector{<:Tuple})
+            config.domain = "none"
+        end
+    end
+
     return Dict{String,Any}(
         String.(fieldnames(typeof(config))) .=>
             to_dict.(getfield.(Ref(config), fieldnames(typeof(config)))),

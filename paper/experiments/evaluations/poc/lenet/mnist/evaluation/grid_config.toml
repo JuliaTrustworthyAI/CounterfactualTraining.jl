@@ -1,6 +1,6 @@
 name = "poc"
 dim_reduction = []
-generator_type = ["ecco", "generic", "omni", "revise"]
+generator_type = ["ecco", "generic", "revise"]
 data = "mnist"
 model_type = "lenet"
 save_dir = "paper/experiments/output/poc/lenet/mnist"

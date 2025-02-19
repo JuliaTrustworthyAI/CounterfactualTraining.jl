@@ -95,10 +95,16 @@ function counterfactual_training(
                 mutability=mutability,
                 verbose=verbose,
             )
+            if !isnothing(ces[1])
+                avg_iter = (ce -> ce.search[:iteration_count]).(ces) |> mean
+            else
+                avg_iter = nothing
+            end
         else
             counterfactual_dl = fill(ntuple(_ -> nothing, 4), length(train_set))
             percent_valid = nothing
             ces = nothing
+            avg_iter = nothing
         end
 
         # Backprop:
@@ -146,7 +152,7 @@ function counterfactual_training(
             Flux.update!(opt_state, model, grads[1])
         end
 
-        if !isnothing(callback)
+        if !isnothing(callback) && !isnothing(ces)
             callback(model, ces)
         end
 
@@ -173,6 +179,8 @@ function counterfactual_training(
             else
                 msg_valid = "n/a"
             end
+            msg_iter =
+                !isnothing(avg_iter) ? "Average no. of iterations: $(avg_iter)" : "n/a"
         else
             implaus = nothing
             log_reg_loss = nothing
@@ -181,6 +189,7 @@ function counterfactual_training(
             msg_reg = "n/a"
             msg_adv = "n/a"
             msg_valid = "n/a"
+            msg_iter = "n/a"
         end
 
         push!(
@@ -194,6 +203,7 @@ function counterfactual_training(
                 log_adv_loss,
                 time_taken,
                 percent_valid,
+                avg_iter,
             ),
         )
 
@@ -238,6 +248,7 @@ function counterfactual_training(
             - *Regularization loss*: $msg_reg
             - *Adversarial loss*: $msg_adv
             - *Percent valid*: $msg_valid
+            - *Iterations*: $msg_iter
 
             ## History
 
@@ -262,6 +273,7 @@ function counterfactual_training(
             @info msg_reg
             @info msg_adv
             @info msg_valid
+            @info msg_iter
         end
     end
     return model, log

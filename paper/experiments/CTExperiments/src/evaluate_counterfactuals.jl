@@ -28,7 +28,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
     generator_params::GeneratorParams = GeneratorParams()
     n_individuals::Int = get_global_param("n_individuals", 100)
     n_runs::Int = get_global_param("n_runs", 5)
-    conv::AbstractString = "max_iter"
+    conv::AbstractString = "threshold"
     maxiter::Int = 100
     vertical_splits::Int = get_global_param("vertical_splits", 100)
     store_ce::Bool = false
