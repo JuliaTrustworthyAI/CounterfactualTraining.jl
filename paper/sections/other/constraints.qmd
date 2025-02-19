@@ -81,7 +81,7 @@ using CTExperiments:
 # Callback:
 using CTExperiments: get_log_reg_params, get_decision_boundary
 
-function plot_db(model, ces; _xlab="Debt", _ylab="Age")
+function plot_db(model, ces; _xlab="Debt", _ylab="Age", plot_contour::Bool=false)
 
     x = (ce -> ce.counterfactual).(ces) |> xs -> reduce(hcat, xs)
     x0 = (ce -> ce.factual).(ces) |> xs -> reduce(hcat, xs)
@@ -173,7 +173,7 @@ for (title, obj, constraint) in specs
     # Objective:
     generator = GenericGenerator()
     opt_state = Flux.setup(Descent(), model)
-    conv = MaxIterConvergence(25)
+    conv = DecisionThresholdConvergence(decision_threshold=0.99)
 
     model, logs = counterfactual_training(
         obj,

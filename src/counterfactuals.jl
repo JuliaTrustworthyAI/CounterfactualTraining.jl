@@ -105,7 +105,7 @@ end
 
 Checks if the label has been flipped.
 """
-function isvalid(ce::CounterfactualExplanation, model, data)
+function isvalid(ce::AbstractCounterfactualExplanation, model, data)
     return argmax(vec(model(ce.counterfactual))) == argmax(vec(target_encoded(ce, data)))
 end
 
