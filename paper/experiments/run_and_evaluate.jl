@@ -6,8 +6,8 @@ DotEnv.load!()
 
 # Run grid:
 set_mpi_finalize(false)
-include("run_grid.jl")
+include("run_grid_sequentially.jl")
 
 # Run evaluation:
 set_mpi_finalize(true)
-include("run_evaluation_grid.jl")
+include("run_evaluation_grid_sequentially.jl")

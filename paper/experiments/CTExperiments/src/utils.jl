@@ -164,6 +164,7 @@ function get_config_from_args(;
     # Load config:
     cfg = CTExperiments.from_toml(fname)
 
+    # Overwrite 'data' if specified:
     if any((x -> contains(x, "--data=")).(ARGS))
         requested_dataset =
             ARGS[(x -> contains(x, "--data=")).(ARGS)] |>
@@ -175,6 +176,7 @@ function get_config_from_args(;
         end
     end
 
+    # Overwrite 'model' if specified:
     if any((x -> contains(x, "--model=")).(ARGS))
         requested_model =
             ARGS[(x -> contains(x, "--model=")).(ARGS)] |>
@@ -203,7 +205,7 @@ function get_config_from_args(;
     return fname
 end
 
-const _mpi_finalize = true
+global _mpi_finalize = true
 
 mpi_should_finalize() = _mpi_finalize
 

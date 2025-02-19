@@ -23,7 +23,6 @@ export get_global_param
 
 include("config.jl")
 include("utils.jl")
-include("omniscient.jl")
 include("grid.jl")
 include("experiment.jl")
 include("evaluate.jl")

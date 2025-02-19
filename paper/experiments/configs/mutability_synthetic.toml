@@ -1,6 +1,6 @@
 name = "mutability"
 dim_reduction = []
-generator_type = ["ecco", "generic", "omni", "revise"]
+generator_type = ["ecco", "generic", "revise"]
 data = ""
 model_type = ""
 save_dir = ""

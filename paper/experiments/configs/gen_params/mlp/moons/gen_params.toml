@@ -1,6 +1,6 @@
 name = "gen_params"
 dim_reduction = []
-generator_type = ["ecco", "generic", "omni", "revise"]
+generator_type = ["ecco", "generic", "revise"]
 data = "moons"
 model_type = "mlp"
 save_dir = "paper/experiments/output/gen_params/mlp/moons"

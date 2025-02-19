@@ -95,7 +95,11 @@ function counterfactual_training(
                 mutability=mutability,
                 verbose=verbose,
             )
-            avg_iter = (ce -> ce.search[:iteration_count]).(ces) |> mean
+            if !isnothing(ces[1])
+                avg_iter = (ce -> ce.search[:iteration_count]).(ces) |> mean
+            else
+                avg_iter = nothing
+            end
         else
             counterfactual_dl = fill(ntuple(_ -> nothing, 4), length(train_set))
             percent_valid = nothing
@@ -148,7 +152,7 @@ function counterfactual_training(
             Flux.update!(opt_state, model, grads[1])
         end
 
-        if !isnothing(callback)
+        if !isnothing(callback) && !isnothing(ces)
             callback(model, ces)
         end
 

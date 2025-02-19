@@ -1,6 +1,6 @@
-name = "test"
+name = "single"
 dim_reduction = []
-generator_type = ["ecco", "generic", "omni", "revise"]
+generator_type = ["ecco", "generic", "revise"]
 data = ""
 model_type = ""
 save_dir = ""
@@ -16,9 +16,9 @@ n_train = []
 batchsize = []
 
 [model_params]
-nlayers = [3]
-activation = ["swish"]
-nhidden = [16]
+nlayers = []
+activation = []
+nhidden = []
 
 [generator_params]
 opt = []

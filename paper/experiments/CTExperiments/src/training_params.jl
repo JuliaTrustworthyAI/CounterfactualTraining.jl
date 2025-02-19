@@ -21,15 +21,12 @@ struct Generic <: AbstractGeneratorType end
 "Type for the GravitationalGenerator."
 struct Gravitational <: AbstractGeneratorType end
 
-struct Omniscient <: AbstractGeneratorType end
-
 get_generator_name(gen::ECCo; pretty::Bool=false) = pretty ? "ECCo" : "ecco"
 get_generator_name(gen::Generic; pretty::Bool=false) = pretty ? "Generic" : "generic"
 get_generator_name(gen::REVISE; pretty::Bool=false) = pretty ? "REVISE" : "revise"
 function get_generator_name(gen::Gravitational; pretty::Bool=false)
     return pretty ? "Gravitational" : "gravi"
 end
-get_generator_name(gen::Omniscient; pretty::Bool=false) = pretty ? "Omniscient" : "omni"
 
 """
     generator_types
@@ -41,7 +38,6 @@ const generator_types = Dict(
     get_generator_name(Generic()) => Generic,
     get_generator_name(REVISE()) => REVISE,
     get_generator_name(Gravitational()) => Gravitational,
-    get_generator_name(Omniscient()) => Omniscient,
 )
 
 """
@@ -133,15 +129,6 @@ function get_generator(params::GeneratorParams, generator_type::Gravitational)
     return GravitationalGenerator(;
         opt=get_opt(params), λ=[params.lambda_cost, params.lambda_energy]
     )
-end
-
-"""
-    get_generator(params::GeneratorParams, generator_type::Omniscient)
-
-Instantiates an `OmniscientGenerator` with the given parameters.
-"""
-function get_generator(params::GeneratorParams, generator_type::Omniscient)
-    return OmniscientGenerator()
 end
 
 """

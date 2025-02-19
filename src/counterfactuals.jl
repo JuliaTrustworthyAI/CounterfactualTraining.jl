@@ -92,11 +92,15 @@ A callback function used to store the last counterfactual that is also a valid a
 """
 function get_last_valid_ae(ce::CounterfactualExplanation)
     # Find last counterfactual that meets imperceptability criterium:
-    xs = ce.search[:path]
+    xs = [CounterfactualExplanations.decode_state(ce, x) for x in ce.search[:path]]
     perturbations = [x - ce.factual for x in xs]
     aecrit = get_global_ae_criterium()
     idx_advexm = [aecrit(x) for x in perturbations]
-    last_valid_ae = xs[idx_advexm][end]
+    if length(xs[idx_advexm]) > 0
+        last_valid_ae = xs[idx_advexm][end]
+    else
+        last_valid_ae = ce.factual
+    end
     return ce.search[:last_valid_ae] = last_valid_ae
 end
 
