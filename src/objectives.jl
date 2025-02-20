@@ -5,8 +5,8 @@ using StatsBase
 "Base type of training objectives."
 abstract type AbstractObjective end
 
-const default_energy_lambda = [0.5, 0.0001]
-const default_adversarial_lambda = 0.1
+const default_energy_lambda = [1.0, 0.0001]
+const default_adversarial_lambda = 1.0
 
 needs_counterfactuals(obj::AbstractObjective) = true
 

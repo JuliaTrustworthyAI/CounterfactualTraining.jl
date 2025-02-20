@@ -32,6 +32,7 @@ params = PlotParams(;
     rowvar=get_global_param("rowvar_logs", rowvar),
     colvar=get_global_param("colvar_logs", colvar),
 )
+@info "Logs Errorbars"
 @info params
 final_save_dir = save_dir(params, output_dir; prefix)
 for y in valid_y
@@ -52,6 +53,8 @@ params = PlotParams(;
     rowvar=get_global_param("rowvar_ce", rowvar_ce),
     colvar=get_global_param("colvar_ce", colvar_ce),
 )
+@info "CE Boxplots"
+@info params
 final_save_dir = save_dir(params, output_dir; prefix)
 for y in valid_y
     plt, tbl = boxplot_ce(all_data...; y=y, params()...)

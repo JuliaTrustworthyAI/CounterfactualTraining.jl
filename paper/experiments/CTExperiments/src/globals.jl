@@ -38,7 +38,7 @@ function get_global_param(argname::String, defaultval::T) where {T<:Any}
             return JSON.parse(val)
         else
             # Original behavior for single values
-            if !(T <: Nothing)
+            if !(T <: Nothing || T <: String)
                 return parse(T, val)
             else
                 return val
