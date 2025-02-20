@@ -14,9 +14,9 @@ local_save_dir = get_work_dir(eval_grid, ENV["EVAL_WORK_DIR"], ENV["OUTPUT_DIR"]
 output_dir = results_dir(eval_grid)
 
 # Get variables:
-colorvar = get_global_param("colorvar", nothing)
-rowvar = get_global_param("rowvar", nothing)
-colvar = get_global_param("colvar", nothing)
+colorvar = get_global_param("colorvar", CTExperiments._colorvar)
+rowvar = get_global_param("rowvar", CTExperiments._rowvar)
+colvar = get_global_param("colvar", CTExperiments._colvar)
 colorvar_logs = get_global_param("colorvar_logs", colorvar)
 rowvar_logs = get_global_param("rowvar_logs", rowvar)
 colvar_logs = get_global_param("colvar_logs", colvar)

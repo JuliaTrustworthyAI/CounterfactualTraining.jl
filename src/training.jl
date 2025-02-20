@@ -101,7 +101,7 @@ function counterfactual_training(
                 avg_iter = nothing
             end
         else
-            counterfactual_dl = fill(ntuple(_ -> nothing, 4), length(train_set))
+            counterfactual_dl = fill(ntuple(_ -> nothing, 5), length(train_set))
             percent_valid = nothing
             ces = nothing
             avg_iter = nothing

@@ -11,3 +11,8 @@ include("run_grid_sequentially.jl")
 # Run evaluation:
 set_mpi_finalize(true)
 include("run_evaluation_grid_sequentially.jl")
+
+# Present:
+global CTExperiments._colvar = "generator"
+global CTExperiments._rowvar = "objective"
+include("present_results.jl")

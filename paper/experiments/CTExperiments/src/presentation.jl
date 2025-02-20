@@ -6,6 +6,11 @@ using Plots: Plots, PlotMeasures
 using PrettyTables
 using TaijaPlotting
 
+# Global parameters:
+global _colorvar = nothing
+global _colvar = nothing
+global _rowvar = nothing
+
 include("plots.jl")
 include("tables.jl")
 
