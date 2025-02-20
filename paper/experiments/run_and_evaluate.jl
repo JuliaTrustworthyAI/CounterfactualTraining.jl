@@ -13,4 +13,6 @@ set_mpi_finalize(true)
 include("run_evaluation_grid_sequentially.jl")
 
 # Present:
-include("present_results.jl")
+if ENV["PRESENT"] == "yes"
+    include("present_results.jl")
+end

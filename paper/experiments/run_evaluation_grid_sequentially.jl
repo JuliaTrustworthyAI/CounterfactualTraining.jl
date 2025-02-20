@@ -84,7 +84,7 @@ for (i, eval_config) in enumerate(eval_list)
         end
 
         # Generate factual target pairs for plotting:
-        generate_factual_target_pairs(eval_config)
+        generate_factual_target_pairs(eval_config; nce=10)
 
         # Set up evaluation work dir:
         set_work_dir(eval_grid, eval_config, ENV["EVAL_WORK_DIR"], ENV["OUTPUT_DIR"])

@@ -66,8 +66,6 @@ end
 # # Plot images:
 plot_ce(
     eval_grid;
-    overwrite=true,
-    nce=10,
     save_dir=final_save_dir,
     byvars=get_global_param("byvars_ce", CTExperiments._byvars_ce),
 )
