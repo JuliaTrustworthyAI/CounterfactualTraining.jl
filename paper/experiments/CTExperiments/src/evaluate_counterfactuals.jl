@@ -29,6 +29,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
     n_individuals::Int = get_global_param("n_individuals", 100)
     n_runs::Int = get_global_param("n_runs", 5)
     conv::AbstractString = "threshold"
+    decision_threshold::AbstractFloat = 0.9
     maxiter::Int = 100
     vertical_splits::Int = get_global_param("vertical_splits", 100)
     store_ce::Bool = false
@@ -42,6 +43,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
         n_individuals,
         n_runs,
         conv,
+        decision_threshold,
         maxiter,
         vertical_splits,
         store_ce,
@@ -68,6 +70,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
             n_individuals,
             n_runs,
             conv,
+            decision_threshold,
             maxiter,
             vertical_splits,
             store_ce,
@@ -84,7 +87,7 @@ function get_parallelizer(cfg::CounterfactualParams)
     return get_parallelizer(cfg.parallelizer; threaded=cfg.threaded)
 end
 
-get_convergence(cfg::CounterfactualParams) = get_convergence(cfg.conv, cfg.maxiter)
+get_convergence(cfg::CounterfactualParams) = get_convergence(cfg.conv, cfg.maxiter, cfg.decision_threshold)
 
 """
     evaluate_counterfactuals(
@@ -117,7 +120,6 @@ function evaluate_counterfactuals(
     measure::Vector{<:PenaltyOrFun}=get_ce_measures(),
 )
     grid = ExperimentGrid(cfg.grid_file)
-    exper_list = load_list(grid)
 
     # Get parallelizer:
     pllr = get_parallelizer(cfg.counterfactual_params)

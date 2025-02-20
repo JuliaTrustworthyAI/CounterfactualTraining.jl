@@ -78,6 +78,7 @@ Base.@kwdef struct GeneratorParams <: AbstractGeneratorParams
     lr::AbstractFloat = 1.0
     opt::AbstractString = "sgd"
     maxiter::Int = 50
+    decision_threshold::AbstractFloat = 0.9
     lambda_cost::AbstractFloat = 0.001
     lambda_energy::AbstractFloat = 5.0
 end
@@ -283,13 +284,17 @@ const conv_catalogue = Dict(
     "gen_con" => Convergence.GeneratorConditionsConvergence,
 )
 
-function get_convergence(s::String, maxiter::Int)
+function get_convergence(s::String, max_iter::Int, decision_threshold::AbstractFloat)
     s = lowercase(s)
     @assert s in keys(conv_catalogue) "Unknown convergence type: $s. Available types are $(keys(conv_catalogue))"
-    conv = conv_catalogue[s](; max_iter=maxiter)
+    if s=="threshold"
+        conv = conv_catalogue[s](; max_iter, decision_threshold)
+    else
+        conv = conv_catalogue[s](; max_iter)
+    end
     return conv
 end
 
 function get_convergence(params::TrainingParams)
-    return get_convergence(params.conv, params.generator_params.maxiter)
+    return get_convergence(params.conv, params.generator_params.maxiter, params.generator_params.decision_threshold)
 end

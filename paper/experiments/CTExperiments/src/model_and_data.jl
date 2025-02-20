@@ -201,9 +201,7 @@ function get_domain(d::Dataset)
         end
     elseif typeof(d.domain) <: Vector{<:Real}
         domain = tuple(d.domain...)
-    elseif typeof(d.domain) <: Vector{Vector{<:Real}}
-        domain = [tuple(x...) for x in d.domain]
-    elseif typeof(d.domain) <: Vector{<:Tuple}
+    else
         domain = d.domain
     end
     return domain
