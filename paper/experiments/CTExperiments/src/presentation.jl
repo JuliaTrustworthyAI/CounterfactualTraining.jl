@@ -10,6 +10,9 @@ using TaijaPlotting
 global _colorvar = nothing
 global _colvar = nothing
 global _rowvar = nothing
+global _rowvar_ce = nothing
+global _colvar_ce = nothing
+global _byvars_ce = nothing
 
 include("plots.jl")
 include("tables.jl")
@@ -88,10 +91,12 @@ function aggregate_data(
     y::String,
     byvars::Union{Nothing,String,Vector{String}}=nothing;
     byvars_must_include::Union{Nothing,Vector{String}}=nothing,
+    agg_fun::Union{Symbol,Function}=mean,
 )
 
     # Filter:
     df = filter(row -> all(x -> !(x isa Number && (isinf(x))), row), df)
+    df = filter(row -> all(x -> !(isnothing(x)), row), df)
     keep_rows = [!any(isnan.(x)) for x in df[:, y]]
     df = df[keep_rows, :]
     if "value" in names(df)
@@ -114,8 +119,13 @@ function aggregate_data(
         # If nothing is specified, aggregate data by epoch:
         df_agg = groupby(df, byvars_must_include)
     end
-    df_agg = combine(df_agg, y => (y -> (mean=mean(y), std=std(y))) => AsTable)
-    return sort(df_agg)
+    if agg_fun == :identity
+        df_agg = combine(df_agg, y => (y -> (mean=y, std=y)) => AsTable)
+        return df_agg
+    else
+        df_agg = combine(df_agg, y => (y -> (mean=agg_fun(y), std=std(y))) => AsTable)
+        return sort(df_agg)
+    end
 end
 
 """
@@ -162,7 +172,7 @@ function aggregate_logs(
 end
 
 function valid_y_logs(logs::DataFrame)
-    return names(logs)[eltype.(eachcol(logs)) .<: AbstractFloat]
+    return names(logs)[eltype.(eachcol(logs)) .<: Union{Nothing,AbstractFloat}]
 end
 
 function valid_y_logs(cfg::EvalConfigOrGrid)
@@ -251,8 +261,8 @@ function aggregate_counterfactuals(eval_grid::EvaluationGrid; kwrgs...)
     return aggregate_counterfactuals.(eval_list)
 end
 
-function aggregate_counterfactuals(eval_config::EvaluationConfig; kwrgs...)
-    bmk = generate_factual_target_pairs(eval_config)
+function aggregate_counterfactuals(eval_config::EvaluationConfig; overwrite::Bool=false, nce::Int=1, kwrgs...)
+    bmk = generate_factual_target_pairs(eval_config; overwrite, nce)
     df = innerjoin(bmk.evaluation, bmk.counterfactuals; on=:sample)
     rename!(df, :model => :id)
     all_data = CTExperiments.merge_with_meta(eval_config, df)
@@ -282,5 +292,5 @@ function aggregate_counterfactuals(
     end
 
     # Aggregate:
-    return aggregate_data(df, "ce", byvars; byvars_must_include=byvars_must_include)
+    return aggregate_data(df, "ce", byvars; byvars_must_include=byvars_must_include, agg_fun=:identity)
 end

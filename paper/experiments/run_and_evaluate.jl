@@ -13,6 +13,8 @@ set_mpi_finalize(true)
 include("run_evaluation_grid_sequentially.jl")
 
 # Present:
-global CTExperiments._colvar = "generator"
-global CTExperiments._rowvar = "objective"
+global CTExperiments._colvar = "generator_type"
+global CTExperiments._colorvar = "objective"
+global CTExperiments._byvars_ce = "objective"
+global CTExperiments._rowvar_ce = "lambda_energy_eval"
 include("present_results.jl")

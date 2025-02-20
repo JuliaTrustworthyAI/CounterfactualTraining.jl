@@ -382,6 +382,7 @@ function generate_factual_target_pairs(
     cfg::AbstractEvaluationConfig;
     fname::Union{Nothing,String}=nothing,
     overwrite::Bool=false,
+    nce::Int=1
 )
     fname = if isnothing(fname)
         default_factual_target_pairs_name(cfg)
@@ -393,7 +394,7 @@ function generate_factual_target_pairs(
         input_list = load_data_models_generators(cfg)
         output = Benchmark[]
         for (data, models, generators) in input_list
-            _output = generate_factual_target_pairs(cfg, data, models, generators)
+            _output = generate_factual_target_pairs(cfg, data, models, generators; nce=nce)
             push!(output, _output)
         end
         output = reduce(vcat, output)
@@ -421,7 +422,8 @@ function generate_factual_target_pairs(
     cfg::AbstractEvaluationConfig,
     data::CounterfactualData,
     models::AbstractDict,
-    generators::AbstractDict,
+    generators::AbstractDict;
+    nce::Int=1
 )
 
     # Targets and factuals:
@@ -436,7 +438,7 @@ function generate_factual_target_pairs(
     output = Benchmark[]
 
     for factual in factuals
-        chosen = rand(findall(data.output_encoder.labels .== factual))
+        chosen = rand(findall(data.output_encoder.labels .== factual), nce)
         x = select_factual(data, chosen)
         for target in targets
             if cfg.counterfactual_params.verbose

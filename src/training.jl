@@ -98,13 +98,13 @@ function counterfactual_training(
             if !isnothing(ces[1])
                 avg_iter = (ce -> ce.search[:iteration_count]).(ces) |> mean
             else
-                avg_iter = nothing
+                avg_iter = 0
             end
         else
             counterfactual_dl = fill(ntuple(_ -> nothing, 5), length(train_set))
-            percent_valid = nothing
+            percent_valid = 1.0
             ces = nothing
-            avg_iter = nothing
+            avg_iter = 0
         end
 
         # Backprop:

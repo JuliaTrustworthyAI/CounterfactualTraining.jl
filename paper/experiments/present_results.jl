@@ -21,8 +21,8 @@ colorvar_logs = get_global_param("colorvar_logs", colorvar)
 rowvar_logs = get_global_param("rowvar_logs", rowvar)
 colvar_logs = get_global_param("colvar_logs", colvar)
 colorvar_ce = get_global_param("colorvar_ce", colorvar)
-rowvar_ce = get_global_param("rowvar_ce", rowvar)
-colvar_ce = get_global_param("colvar_ce", colvar)
+rowvar_ce = get_global_param("rowvar_ce", CTExperiments._rowvar_ce)
+colvar_ce = get_global_param("colvar_ce", CTExperiments._colvar_ce)
 
 # Visualize logs:
 prefix = "logs"
@@ -32,6 +32,7 @@ params = PlotParams(;
     rowvar=get_global_param("rowvar_logs", rowvar),
     colvar=get_global_param("colvar_logs", colvar),
 )
+@info params
 final_save_dir = save_dir(params, output_dir; prefix)
 for y in valid_y
     plt, _ = plot_errorbar_logs(eval_grid; y=y, params()...)
@@ -47,9 +48,9 @@ all_data = CTExperiments.merge_with_meta(
 )
 valid_y = CTExperiments.valid_y_ce(all_data[1])
 params = PlotParams(;
-    colorvar=get_global_param("colorvar_ce", colorvar),
-    rowvar=get_global_param("rowvar_ce", rowvar),
-    colvar=get_global_param("colvar_ce", colvar),
+    colorvar=get_global_param("colorvar_ce", colorvar_ce),
+    rowvar=get_global_param("rowvar_ce", rowvar_ce),
+    colvar=get_global_param("colvar_ce", colvar_ce),
 )
 final_save_dir = save_dir(params, output_dir; prefix)
 for y in valid_y
@@ -60,7 +61,13 @@ for y in valid_y
 end
 
 # # Plot images:
-plot_ce(eval_grid; save_dir=final_save_dir, byvars=get_global_param("byvars_ce", nothing))
+plot_ce(
+    eval_grid;
+    overwrite=true,
+    nce=10,
+    save_dir=final_save_dir,
+    byvars=get_global_param("byvars_ce", CTExperiments._byvars_ce),
+)
 # exper_list = load_list(exper_grid)
 # eval_list = load_list(eval_grid)
 # plot_ce(exper_list; layout=(4, 3))

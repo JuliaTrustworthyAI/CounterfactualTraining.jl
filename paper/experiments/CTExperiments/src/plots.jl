@@ -140,11 +140,20 @@ function boxplot_ce(
     return plt
 end
 
-function plot_ce(cfg::EvalConfigOrGrid; save_dir=nothing, kwrgs...)
-    return plot_ce(CTExperiments.get_data_set(cfg)(), cfg; save_dir=save_dir, kwrgs...)
+function plot_ce(
+    cfg::EvalConfigOrGrid; save_dir=nothing, overwrite::Bool=false, nce::Int=1, kwrgs...
+)
+    return plot_ce(CTExperiments.get_data_set(cfg)(), cfg; save_dir=save_dir, overwrite, nce, kwrgs...)
 end
 
-function plot_ce(dataset::Dataset, eval_grid::EvaluationGrid; save_dir=nothing, kwrgs...)
+function plot_ce(
+    dataset::Dataset,
+    eval_grid::EvaluationGrid;
+    overwrite::Bool=false,
+    nce::Int=1,
+    save_dir=nothing,
+    kwrgs...,
+)
     eval_list = load_list(eval_grid)
     plt_list = []
 
@@ -156,7 +165,7 @@ function plot_ce(dataset::Dataset, eval_grid::EvaluationGrid; save_dir=nothing, 
         else
             local_save_dir = nothing
         end
-        plt = plot_ce(dataset, eval_config; save_dir=local_save_dir, kwrgs...)
+        plt = plot_ce(dataset, eval_config; save_dir=local_save_dir, overwrite, nce, kwrgs...)
         push!(plt_list, plt)
     end
     return plt_list
@@ -169,10 +178,12 @@ function plot_ce(
     axis=default_axis,
     dpi=300,
     save_dir=nothing,
+    overwrite::Bool=false,
+    nce::Int=1,
 )
 
     # Aggregate:
-    df_agg = aggregate_counterfactuals(eval_config; byvars=byvars)
+    df_agg = aggregate_counterfactuals(eval_config; byvars=byvars, overwrite, nce)
 
     # Plotting:
     generators = sort(unique(df_agg.generator_type))
@@ -296,15 +307,14 @@ function plot_ce(data::Dataset, df::DataFrame, factual::Int, target::Int; axis=d
     plt = Plots.plot(data)
     x = filter(x -> x.factual .== factual && x.target .== target, df).mean
     if length(x) > 0
-        @assert length(x) == 1 "Expected 1 value, got $(length(x))."
-        x = x[1]
+        x = reduce(hcat, x)
         @assert size(x, 1) == 2 "Can only plot 2-D data."
         if target == factual
             title = ""
             Plots.scatter!(
                 plt,
-                [x[1]],
-                [x[2]];
+                x[1,:],
+                x[2,:];
                 label="Factual",
                 size=values(axis),
                 title=title,
@@ -315,8 +325,8 @@ function plot_ce(data::Dataset, df::DataFrame, factual::Int, target::Int; axis=d
             title = "$factual→$target"
             Plots.scatter!(
                 plt,
-                [x[1]],
-                [x[2]];
+                x[1,:],
+                x[2,:];
                 label="Counterfactual",
                 size=values(axis),
                 title=title,
