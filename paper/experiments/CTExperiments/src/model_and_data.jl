@@ -193,7 +193,6 @@ end
 Helper function to get the domain constraints for the dataset. If `data.domain` is a string other than "none", it throws an error. If it's a vector of two elements, it converts them to a tuple.
 """
 function get_domain(d::Dataset)
-    apply_inferred_domain!(d::Dataset)
     if d.domain isa String
         if d.domain == "none"
             domain = nothing

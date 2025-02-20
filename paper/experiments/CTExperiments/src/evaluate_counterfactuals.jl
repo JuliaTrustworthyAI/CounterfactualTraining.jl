@@ -239,7 +239,7 @@ function load_data_models_generators(cfg::AbstractEvaluationConfig)
         exper_with_this_dataset = [exper for exper in exper_list if exper.data == dataset]
 
         # Data:
-        data = get_ce_data(dataset; test_set=true)
+        data = get_ce_data(dataset; test_set=cfg.test_time)
 
         # Get models:
         models = Logging.with_logger(Logging.NullLogger()) do
