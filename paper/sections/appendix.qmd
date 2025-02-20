@@ -221,3 +221,10 @@ get_table_inputs(df, "value"; alpha=0.9, byvars="lambda_energy_exper", backend=V
 Results for Circles data by energy penalty.
 
 :::
+
+# Compute {.appendix}
+
+<!-- [@DHPC2022] -->
+
+We performed our experiments on a high-performance cluster. Details about the cluster will be disclosed upon publication to avoid revealing information that might interfere with the double-blind review process. Since our experiments have largely involved highly parallel tasks and small models, we have made extensive use of multi-processing.
+

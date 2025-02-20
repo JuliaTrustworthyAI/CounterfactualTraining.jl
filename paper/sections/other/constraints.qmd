@@ -76,6 +76,7 @@ using CTExperiments:
     train_val_split, 
     build_model, 
     LinearModel, 
+    MLPModel,
     get_input_encoder
 
 # Callback:
@@ -90,8 +91,6 @@ function plot_db(model, ces; _xlab="Debt", _ylab="Age", plot_contour::Bool=false
     ylab = _constraint[2] == "both" ? "$(_ylab) (mutable)" : "$(_ylab) (immutable)"
 
     # Data and decision boundary:
-    coeff = get_log_reg_params(model)
-    db = get_decision_boundary(coeff)
     plt = Plots.scatter(
         ce_data, 
         # label=["1=Default" "2=No Default"], 
@@ -101,7 +100,11 @@ function plot_db(model, ces; _xlab="Debt", _ylab="Age", plot_contour::Bool=false
         legend=false,
         title=_title
     )
-    Plots.abline!(plt, db.slope, db.intercept; lw=5, label="Dec. Boundary")
+    if length(model) == 1
+        coeff = get_log_reg_params(model)
+        db = get_decision_boundary(coeff)
+        Plots.abline!(plt, db.slope, db.intercept; lw=5, label="Dec. Boundary")
+    end
 
     # Counterfactuals:
     target = 2
@@ -133,9 +136,9 @@ end
 # Data:
 specs = [
     # ("(a)", VanillaObjective(needs_ce=true), ["both", "both"]),
-    # ("(b)", FullObjective(lambda=[1.0,1.0,0.0,1.0]), ["both", "both"]),
+    ("(b)", FullObjective(lambda=[1.0,0.5,0.01,1.0]), ["both", "both"]),
     # ("(c)", VanillaObjective(needs_ce=true), ["both", "none"]),
-    ("(d)", FullObjective(lambda=[1.0,1.0,0.0,1.0]), ["both", "none"]),
+    # ("(d)", FullObjective(lambda=[1.0,1.0,0.0,1.0]), ["both", "none"]),
 ]
 ```
 
@@ -157,7 +160,7 @@ for (title, obj, constraint) in specs
 
     # Data:
     data = LinearlySeparable(
-        n_train=500,
+        n_train=5000,
         batchsize=50,
         mutability=constraint
     )
@@ -168,12 +171,12 @@ for (title, obj, constraint) in specs
     # Model:
     nin = size(first(train_set)[1], 1)
     nout = size(first(train_set)[2], 1)
-    model = build_model(LinearModel(), nin, nout)
+    model = build_model(MLPModel(), nin, nout)
 
     # Objective:
-    generator = ECCoGenerator(λ=[0.1,0.1])
+    generator = ECCoGenerator()
     opt_state = Flux.setup(Descent(), model)
-    conv = DecisionThresholdConvergence(decision_threshold=0.90)
+    conv = DecisionThresholdConvergence(decision_threshold=0.95, max_iter=25)
 
     model, logs = counterfactual_training(
         obj,
@@ -185,7 +188,7 @@ for (title, obj, constraint) in specs
         nepochs = 50,
         mutability = Symbol.(constraint),
         callback = plot_db,
-        nce=50,
+        nce=1000,
         convergence=conv, 
         verbose=3
     )

@@ -9,7 +9,7 @@ using ProgressMeter
 using TaijaParallel
 using UnicodePlots
 
-global _min_nce_ratio = 0.1
+global _min_nce_ratio = 0.5
 
 function counterfactual_training(
     loss::AbstractObjective,
@@ -38,7 +38,7 @@ function counterfactual_training(
     nce = isnothing(nce) ? length(train_set) : nce
     nce_per_batch = Int(ceil(nce / length(train_set)))
     nce_batch_ratio = nce_per_batch / train_set.batchsize
-    if nce_batch_ratio < 0.1
+    if nce_batch_ratio < _min_nce_ratio
         @warn "The ratio of counterfactuals to training examples is less than $(_min_nce_ratio * 100)% ($(nce_batch_ratio * 100)%). Consider increasing  the `nce` parameter." maxlog =
             1
     end
@@ -79,9 +79,10 @@ function counterfactual_training(
         reg_losses = Float32[]
         validity_losses = Float32[]
         start = time()
-
+        
         # Generate counterfactuals:
         if epoch > burnin && needs_counterfactuals(loss)
+
             counterfactual_dl, percent_valid, ces = generate!(
                 model,
                 train_set,
