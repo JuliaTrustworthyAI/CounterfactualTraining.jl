@@ -112,18 +112,18 @@ function plot_db(model, ces; _xlab="Debt", _ylab="Age", plot_contour::Bool=false
     if !any(isnothing.(x))
         yhat = [argmax(y) for y in eachcol(model(x))]
         yhat0 = [argmax(y) for y in eachcol(model(x0))]
-        idx_plotted = yhat0.==factual
+        idx_plotted = yhat0.==factual .|| yhat0.==target
         if any(idx_plotted)
 
-            # Paths:
-            u = []
-            v = []
-            for (i,ce) in enumerate(eachcol(x))
-                Δ = ce - x0[:,i]
-                push!(u, Δ[1])
-                push!(v, Δ[2])
-            end
-            Plots.quiver!(x0[1,idx_plotted], x0[2,idx_plotted], quiver=(u[idx_plotted], v[idx_plotted]), color=factual)
+            # # Paths:
+            # u = []
+            # v = []
+            # for (i,ce) in enumerate(eachcol(x))
+            #     Δ = ce - x0[:,i]
+            #     push!(u, Δ[1])
+            #     push!(v, Δ[2])
+            # end
+            # Plots.quiver!(x0[1,idx_plotted], x0[2,idx_plotted], quiver=(u[idx_plotted], v[idx_plotted]), color=yhat0[idx_plotted])
             
             # End points:
             Plots.scatter!(x[1,idx_plotted], x[2,idx_plotted], label=["CE (y⁺=1)" "CE (y⁺=2)"], ms=15, shape=:star, color=yhat[idx_plotted], group=yhat[idx_plotted], mscolor=yhat0[idx_plotted])
@@ -136,9 +136,9 @@ end
 # Data:
 specs = [
     # ("(a)", VanillaObjective(needs_ce=true), ["both", "both"]),
-    ("(b)", FullObjective(lambda=[1.0,0.5,0.01,1.0]), ["both", "both"]),
+    # ("(b)", FullObjective(lambda=[1.0,0.5,0.01,0.1]), ["both", "both"]),
     # ("(c)", VanillaObjective(needs_ce=true), ["both", "none"]),
-    # ("(d)", FullObjective(lambda=[1.0,1.0,0.0,1.0]), ["both", "none"]),
+    ("(d)", FullObjective(lambda=[1.0,0.5,0.01,0.1]), ["both", "none"]),
 ]
 ```
 
@@ -174,9 +174,10 @@ for (title, obj, constraint) in specs
     model = build_model(MLPModel(), nin, nout)
 
     # Objective:
-    generator = ECCoGenerator()
-    opt_state = Flux.setup(Descent(), model)
-    conv = DecisionThresholdConvergence(decision_threshold=0.95, max_iter=30)
+    opt = AMSGrad()
+    generator = GenericGenerator(opt=Descent(0.1))
+    opt_state = Flux.setup(opt, model)
+    conv = DecisionThresholdConvergence(decision_threshold=0.75, max_iter=30)
 
     model, logs = counterfactual_training(
         obj,
