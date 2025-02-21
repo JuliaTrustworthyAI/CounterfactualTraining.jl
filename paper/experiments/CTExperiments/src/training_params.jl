@@ -77,8 +77,8 @@ Base.@kwdef struct GeneratorParams <: AbstractGeneratorParams
     type::AbstractGeneratorType = ECCo()
     lr::AbstractFloat = 1.0
     opt::AbstractString = "sgd"
-    maxiter::Int = 50
-    decision_threshold::AbstractFloat = 0.9
+    maxiter::Int = 30
+    decision_threshold::AbstractFloat = 0.75
     lambda_cost::AbstractFloat = 0.001
     lambda_energy::AbstractFloat = 5.0
 end
@@ -185,7 +185,7 @@ Base.@kwdef struct TrainingParams <: AbstractConfiguration
     burnin::AbstractFloat = get_global_param("burnin", 0.0f0)
     nepochs::Int = get_global_param("nepochs", 100)
     generator_params::GeneratorParams = GeneratorParams()
-    nce::Int = get_global_param("nce", 100)
+    nce::Int = get_global_param("nce", 1000)
     nneighbours::Int = 100
     conv::AbstractString = "threshold"
     lr::AbstractFloat = 0.001
