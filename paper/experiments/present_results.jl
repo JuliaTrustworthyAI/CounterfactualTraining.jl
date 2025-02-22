@@ -64,11 +64,16 @@ for y in valid_y
 end
 
 # # Plot images:
-plot_ce(
-    eval_grid;
-    save_dir=final_save_dir,
-    byvars=get_global_param("byvars_ce", CTExperiments._byvars_ce),
-)
+try
+    plot_ce(
+        eval_grid;
+        save_dir=final_save_dir,
+        byvars=get_global_param("byvars_ce", CTExperiments._byvars_ce),
+    )
+catch
+    @info "Skipping CE plots for multi-dim data."
+end
+
 # exper_list = load_list(exper_grid)
 # eval_list = load_list(eval_grid)
 # plot_ce(exper_list; layout=(4, 3))

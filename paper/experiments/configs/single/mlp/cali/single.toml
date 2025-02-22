@@ -3,7 +3,7 @@ dim_reduction = []
 generator_type = ["ecco", "generic", "revise"]
 data = "cali"
 model_type = "mlp"
-save_dir = "paper/experiments/output/test_run/single/mlp/cali"
+save_dir = "paper/experiments/output/single/mlp/cali"
 
 [data_params]
 datadir = []
