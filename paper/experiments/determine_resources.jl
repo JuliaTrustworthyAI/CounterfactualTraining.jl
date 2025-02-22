@@ -5,9 +5,9 @@ using DotEnv
 DotEnv.load!()
 
 # Get config and set up grid:
-config_file = get_config_from_args()
+config_file = get_config_from_args(; new_save_dir=ENV["OUTPUT_DIR"])
 root_name = CTExperiments.from_toml(config_file)["name"]
-exper_grid = ExperimentGrid(config_file; new_save_dir=ENV["OUTPUT_DIR"])
+exper_grid = ExperimentGrid(config_file)
 
 # Determine number of slurm tasks:
 total_tasks = ntasks(exper_grid)
