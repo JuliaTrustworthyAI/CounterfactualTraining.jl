@@ -155,8 +155,10 @@ function get_config_from_args(;
         subdirname = ARGS[(x -> contains(x, "--subdir=")).(ARGS)]
         @assert length(subdirname) == 1 "Please provide exactly one name for the subdirectory."
         subdirname = replace(subdirname[1], "--subdir=" => "")
-    else
+    elseif haskey(ENV, "OUTPUT_SUBDIR")
         subdirname = ENV["OUTPUT_SUBDIR"]
+    else
+        subdirname = ""
     end
     new_save_dir = mkpath(joinpath(new_save_dir, subdirname))
     @info "Storing results in $(new_save_dir)."

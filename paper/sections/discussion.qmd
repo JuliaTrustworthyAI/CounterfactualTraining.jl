@@ -4,3 +4,4 @@
 2. Proxy attributes of immutable features.
 3. Increased training time.
 4. Training instabilities
+5. Fairness and caveats (aware it's not a classical approach in this context, but there is a clear link).
