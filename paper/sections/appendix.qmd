@@ -41,6 +41,8 @@ DotEnv.load!()
 
 {{< include /paper/sections/other/constraints.qmd >}}
 
+{{< include /paper/sections/other/training.qmd >}}
+
 # Detailed Results {.appendix}
 
 ::: {.callout-warning}
@@ -68,7 +70,7 @@ results_dir = ENV["INITIAL_RUN_RESULTS"]
 config_dir = ENV["INITIAL_RUN_CONFIG"]
 ```
 
-For the initial round of experiments we 
+For the initial round of experiments we employed a different training objective and procedure that led to promising results for some hyperparameter choices, but suffered from training instabilities.
 
 ### Generator Parameters
 
@@ -222,9 +224,14 @@ Results for Circles data by energy penalty.
 
 :::
 
-# Compute {.appendix}
+# Computation Details {.appendix}
 
 <!-- [@DHPC2022] -->
+## Hardware
 
 We performed our experiments on a high-performance cluster. Details about the cluster will be disclosed upon publication to avoid revealing information that might interfere with the double-blind review process. Since our experiments have largely involved highly parallel tasks and small models, we have made extensive use of multi-processing.
+
+## Software
+
+All computations were performed in the Julia Programming Language [@bezanson2017julia]. We have developed a package for counterfactual training that leverages and extends the functionality provided by several existing packages, most notably [CounterfactualExplanations.jl](https://github.com/JuliaTrustworthyAI/CounterfactualExplanations.jl) [@altmeyer2023explaining] and the [Flux.jl](https://fluxml.ai/Flux.jl/v0.16/) library for deep learning [@innes2018fashionable;@innes2018flux]. For data-wrangling and presentation-ready tables we relied on [DataFrames.jl](https://dataframes.juliadata.org/v1.7/) [@milan2023dataframes] and [PrettyTables.jl](https://ronisbr.github.io/PrettyTables.jl/v2.4/) [@chagas2024pretty], respectively. For plots and visualizations we used both [Plots.jl](https://docs.juliaplots.org/v1.40/) [@PlotsJL] and [Makie.jl](https://docs.makie.org/v0.22/) [@danisch2021makie], in particular [AlgebraOfGraphics.jl](https://aog.makie.org/v0.9.3/). 
 

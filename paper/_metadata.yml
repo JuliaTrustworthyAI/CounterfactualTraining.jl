@@ -7,12 +7,15 @@ author:
       - id: tu
         name: Delft University of Technology
         department: Faculty of Electrical Engineering, Mathematics and Computer Science
+  - name: Aleksander Buszydlik
+    affiliation:
+      - ref: tu
   - name: Arie van Deursen
     affiliation:
-      - id: tu
+      - ref: tu
   - name: Cynthia C. S. Liem
     affiliation:
-      - id: tu
+      - ref: tu
 bibliography: bib.bib
 keywords: 
   - Counterfactual Explanations
