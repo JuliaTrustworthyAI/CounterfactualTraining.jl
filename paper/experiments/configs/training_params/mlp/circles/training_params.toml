@@ -3,7 +3,7 @@ dim_reduction = []
 generator_type = ["ecco", "generic", "revise"]
 data = "circles"
 model_type = "mlp"
-save_dir = "paper/experiments/output/training_params/mlp/circles"
+save_dir = "paper/experiments/output/second_run/training_params/mlp/circles"
 
 [data_params]
 datadir = []
@@ -29,16 +29,16 @@ lambda_energy = []
 type = []
 
 [training_params]
-opt = ["adam"]
+opt = []
 lr = []
-objective = ["full", "vanilla"]
-lambda_class_loss = [1.0]
+objective = ["full"]
+lambda_class_loss = []
 lambda_energy_diff = [0.01, 0.1, 1.0]
 burnin = [0.0, 0.5]
 nepochs = []
-lambda_adversarial = []
+lambda_adversarial = [0.25, 1.0]
 parallelizer = []
-nce = [100, 300, 500]
+nce = [100, 1000]
 threaded = []
 class_loss = []
 lambda_energy_reg = [0.0, 0.01, 0.1]
