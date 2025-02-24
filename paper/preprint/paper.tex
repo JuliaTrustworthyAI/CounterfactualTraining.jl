@@ -183,16 +183,16 @@
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
-\theoremstyle{definition}
-\newtheorem{exercise}{Parameters}[section]
-\theoremstyle{definition}
-\newtheorem{example}{Example}[section]
 \theoremstyle{plain}
 \newtheorem{corollary}{Research Question}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\theoremstyle{definition}
+\newtheorem{exercise}{Parameters}[section]
 \theoremstyle{plain}
 \newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
+\newtheorem{example}{Example}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -213,7 +213,7 @@
 \urlstyle{same} % disable monospaced font for URLs
 \hypersetup{
   pdftitle={Counterfactual Training: Teaching Models Plausible and Actionable Explanations},
-  pdfauthor={Patrick Altmeyer; Arie van Deursen; Cynthia C. S. Liem},
+  pdfauthor={Patrick Altmeyer; Aleksander Buszydlik; Arie van Deursen; Cynthia C. S. Liem},
   pdfkeywords={Counterfactual Explanations, Explainable
 AI, Representation Learning},
   colorlinks=true,
@@ -235,10 +235,12 @@ Explanations}
 \author{\textbf{Patrick
 Altmeyer}~\orcidlink{0000-0003-4726-8613}\\Faculty of Electrical
 Engineering, Mathematics and Computer Science\\Delft University of
-Technology\\\\\href{mailto:p.altmeyer@tudelft.nl}{p.altmeyer@tudelft.nl}\asep\textbf{Arie
-van Deursen}\\Faculty of Electrical Engineering, Mathematics and
-Computer Science\\Delft University of Technology\\\\\asep\textbf{Cynthia
-C. S. Liem}\\Faculty of Electrical Engineering, Mathematics and Computer
+Technology\\\\\href{mailto:p.altmeyer@tudelft.nl}{p.altmeyer@tudelft.nl}\asep\textbf{Aleksander
+Buszydlik}\\Faculty of Electrical Engineering, Mathematics and Computer
+Science\\Delft University of Technology\\\\\asep\textbf{Arie van
+Deursen}\\Faculty of Electrical Engineering, Mathematics and Computer
+Science\\Delft University of Technology\\\\\asep\textbf{Cynthia C. S.
+Liem}\\Faculty of Electrical Engineering, Mathematics and Computer
 Science\\Delft University of Technology\\\\}
 \date{}
 \begin{document}
@@ -1301,7 +1303,7 @@ sensitivity for \(d_{\text{immtbl}}\) relative to increased sensitivity
 for \(d_{\text{mtbl}}\)).
 \end{proof}
 
-\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, breakable, coltitle=black, colframe=quarto-callout-warning-color-frame, bottomtitle=1mm, toptitle=1mm, titlerule=0mm, leftrule=.75mm, left=2mm, colbacktitle=quarto-callout-warning-color!10!white, arc=.35mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, opacityback=0, bottomrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, colbacktitle=quarto-callout-warning-color!10!white, opacitybacktitle=0.6, breakable, bottomrule=.15mm, colframe=quarto-callout-warning-color-frame, coltitle=black, opacityback=0, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, toprule=.15mm, toptitle=1mm, left=2mm, leftrule=.75mm, bottomtitle=1mm, titlerule=0mm, arc=.35mm, rightrule=.15mm]
 
 @Cynthia, @Arie, I have tentatively phrased the above in terms of a
 theorem and proof. This is something I've so far shied away from because
@@ -1351,7 +1353,7 @@ counterfactual training.
 
 \section{Detailed Results}\label{detailed-results}
 
-\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, breakable, coltitle=black, colframe=quarto-callout-warning-color-frame, bottomtitle=1mm, toptitle=1mm, titlerule=0mm, leftrule=.75mm, left=2mm, colbacktitle=quarto-callout-warning-color!10!white, arc=.35mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, opacityback=0, bottomrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, colbacktitle=quarto-callout-warning-color!10!white, opacitybacktitle=0.6, breakable, bottomrule=.15mm, colframe=quarto-callout-warning-color-frame, coltitle=black, opacityback=0, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, toprule=.15mm, toptitle=1mm, left=2mm, leftrule=.75mm, bottomtitle=1mm, titlerule=0mm, arc=.35mm, rightrule=.15mm]
 
 @Cynthia, @Arie, I'm including some preliminary results here but will
 rerun experiments in the coming days. You'll notice some odd outlier
@@ -1371,7 +1373,7 @@ inherited from energy-based modelling).
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, breakable, coltitle=black, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, toptitle=1mm, titlerule=0mm, leftrule=.75mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, opacityback=0, bottomrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, breakable, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, coltitle=black, opacityback=0, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, toprule=.15mm, toptitle=1mm, left=2mm, leftrule=.75mm, bottomtitle=1mm, titlerule=0mm, arc=.35mm, rightrule=.15mm]
 
 @Cynthia, @Arie, Figure~\ref{fig-mnist} shows much more plausible
 (faithful) counterfactuals for a model with CT than the model with
