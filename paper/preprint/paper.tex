@@ -183,16 +183,16 @@
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
-\theoremstyle{plain}
-\newtheorem{corollary}{Research Question}[section]
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
 \theoremstyle{definition}
 \newtheorem{exercise}{Parameters}[section]
+\theoremstyle{definition}
+\newtheorem{example}{Example}[section]
 \theoremstyle{plain}
 \newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}
-\newtheorem{example}{Example}[section]
+\newtheorem{definition}{Definition}[section]
+\theoremstyle{plain}
+\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -970,6 +970,12 @@ Bouchet-Valat, Milan, and Bogumił Kamiński. 2023. {``DataFrames.jl:
 Flexible and Fast Tabular Data in Julia.''} \emph{Journal of Statistical
 Software} 107 (4): 1--32. \url{https://doi.org/10.18637/jss.v107.i04}.
 
+\bibitem[\citeproctext]{ref-byrne2021mpi}
+Byrne, Simon, Lucas C. Wilcox, and Valentin Churavy. 2021. {``MPI.jl:
+Julia Bindings for the Message Passing Interface.''} \emph{Proceedings
+of the JuliaCon Conferences} 1 (1): 68.
+\url{https://doi.org/10.21105/jcon.00068}.
+
 \bibitem[\citeproctext]{ref-chagas2024pretty}
 Chagas, Ronan Arraes Jardim, Ben Baumgold, Glen Hertz, Hendrik Ranocha,
 Mark Wells, Nathan Boyer, Nicholas Ritchie, et al. 2024.
@@ -1041,6 +1047,12 @@ Viral Shah. 2018. {``Fashionable Modelling with Flux.''}
 Innes, Mike. 2018. {``Flux: {Elegant} Machine Learning with {Julia}.''}
 \emph{Journal of Open Source Software} 3 (25): 602.
 \url{https://doi.org/10.21105/joss.00602}.
+
+\bibitem[\citeproctext]{ref-joshi2019realistic}
+Joshi, Shalmali, Oluwasanmi Koyejo, Warut Vijitbenjaronk, Been Kim, and
+Joydeep Ghosh. 2019. {``Towards Realistic Individual Recourse and
+Actionable Explanations in Black-Box Decision Making Systems.''}
+\url{https://arxiv.org/abs/1907.09615}.
 
 \bibitem[\citeproctext]{ref-kolter2023keynote}
 Kolter, Zico. 2023.{``{Keynote Addresses: SaTML 2023 }.''} In \emph{2023
@@ -1183,6 +1195,40 @@ discuss how we define convergence in this context
 
 \subsubsection{Background}\label{sec-app-ce-background}
 
+Gradient-based counterfactual search was originally proposed by Wachter,
+Mittelstadt, and Russell
+(\citeproc{ref-wachter2017counterfactual}{2017}). It generally solves
+the following unconstrained objective,
+
+\[
+\begin{aligned}
+\min_{\mathbf{z}^\prime \in \mathcal{Z}^L} \left\{  {\text{yloss}(\mathbf{M}_{\theta}(g(\mathbf{z}^\prime)),\mathbf{y}^+)}+ \lambda {\text{cost}(g(\mathbf{z}^\prime)) }  \right\} 
+\end{aligned} 
+\]
+
+where \(g: \mathcal{Z} \mapsto \mathcal{X}\) is an invertible function
+that maps from the \(L\)-dimensional counterfactual state space to the
+feature space and \(\text{cost}(\cdot)\) denotes one or more penalties
+that are used to induce certain properties of the counterfactual
+outcome. As above, \(\mathbf{y}^+\) denotes the target output and
+\(\mathbf{M}_{\theta}(\mathbf{x})\) returns the logit predictions of the
+underlying classifier for \(\mathbf{x}=g(\mathbf{z})\).
+
+For all generators used in this work we use standard logit crossentropy
+loss for \(\text{yloss}(\cdot)\). All generators also penalize the
+distance (\(\ell_1\)-norm) of counterfactuals from their original
+factual state. For \emph{Generic} and \emph{ECCo}, we have
+\(\mathcal{Z}:=\mathcal{X}\) and
+\(g(\mathbf{z})=g(\mathbf{z})^{-1}=\mathbf{z}\), that is counterfactual
+are searched directly in the feature space. Conversely, \emph{REVISE}
+traverses the latent space of a variational autoencoder (VAE) fitted to
+the training data, where \(g(\cdot)\) corresponds to the decoder
+(\citeproc{ref-joshi2019realistic}{Joshi et al. 2019}). In addition to
+the distance penalty, \emph{ECCo} uses an additional penalty component
+that regularizes the energy associated with the counterfactual,
+\(\mathbf{x}^\prime\) (\citeproc{ref-altmeyer2024faithful}{Altmeyer et
+al. 2024}).
+
 \subsubsection{Convergence}\label{sec-app-conv}
 
 An important consideration when generating counterfactual explanations
@@ -1303,7 +1349,7 @@ sensitivity for \(d_{\text{immtbl}}\) relative to increased sensitivity
 for \(d_{\text{mtbl}}\)).
 \end{proof}
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, colbacktitle=quarto-callout-warning-color!10!white, opacitybacktitle=0.6, breakable, bottomrule=.15mm, colframe=quarto-callout-warning-color-frame, coltitle=black, opacityback=0, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, toprule=.15mm, toptitle=1mm, left=2mm, leftrule=.75mm, bottomtitle=1mm, titlerule=0mm, arc=.35mm, rightrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, opacitybacktitle=0.6, breakable, left=2mm, colback=white, coltitle=black, bottomtitle=1mm, rightrule=.15mm, colframe=quarto-callout-warning-color-frame, toprule=.15mm, bottomrule=.15mm, arc=.35mm, titlerule=0mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, opacityback=0, leftrule=.75mm, toptitle=1mm, colbacktitle=quarto-callout-warning-color!10!white]
 
 @Cynthia, @Arie, I have tentatively phrased the above in terms of a
 theorem and proof. This is something I've so far shied away from because
@@ -1353,7 +1399,7 @@ counterfactual training.
 
 \section{Detailed Results}\label{detailed-results}
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, colbacktitle=quarto-callout-warning-color!10!white, opacitybacktitle=0.6, breakable, bottomrule=.15mm, colframe=quarto-callout-warning-color-frame, coltitle=black, opacityback=0, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, toprule=.15mm, toptitle=1mm, left=2mm, leftrule=.75mm, bottomtitle=1mm, titlerule=0mm, arc=.35mm, rightrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, opacitybacktitle=0.6, breakable, left=2mm, colback=white, coltitle=black, bottomtitle=1mm, rightrule=.15mm, colframe=quarto-callout-warning-color-frame, toprule=.15mm, bottomrule=.15mm, arc=.35mm, titlerule=0mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, opacityback=0, leftrule=.75mm, toptitle=1mm, colbacktitle=quarto-callout-warning-color!10!white]
 
 @Cynthia, @Arie, I'm including some preliminary results here but will
 rerun experiments in the coming days. You'll notice some odd outlier
@@ -1373,7 +1419,7 @@ inherited from energy-based modelling).
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, breakable, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, coltitle=black, opacityback=0, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, toprule=.15mm, toptitle=1mm, left=2mm, leftrule=.75mm, bottomtitle=1mm, titlerule=0mm, arc=.35mm, rightrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, opacitybacktitle=0.6, breakable, left=2mm, colback=white, coltitle=black, bottomtitle=1mm, rightrule=.15mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, bottomrule=.15mm, arc=.35mm, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, opacityback=0, leftrule=.75mm, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white]
 
 @Cynthia, @Arie, Figure~\ref{fig-mnist} shows much more plausible
 (faithful) counterfactuals for a model with CT than the model with
@@ -1852,8 +1898,11 @@ by energy penalty.}
 We performed our experiments on a high-performance cluster. Details
 about the cluster will be disclosed upon publication to avoid revealing
 information that might interfere with the double-blind review process.
-Since our experiments have largely involved highly parallel tasks and
-small models, we have made extensive use of multi-processing.
+Since our experiments involve highly parallel tasks and rather small
+models by today's standard, we have relied on distributed computing
+across multiple central processing units (CPU). Graphical processing
+units (GPU) were not required. For larger grid searches we used up to
+but typically less than 100 CPUs.
 
 \subsection{Software}\label{software}
 
@@ -1879,6 +1928,9 @@ plots and visualizations we used both
 \href{https://docs.makie.org/v0.22/}{Makie.jl}
 (\citeproc{ref-danisch2021makie}{Danisch and Krumbiegel 2021}), in
 particular \href{https://aog.makie.org/v0.9.3/}{AlgebraOfGraphics.jl}.
+To distribute computational tasks across multiple processors, we have
+relied on \href{https://juliaparallel.org/MPI.jl/v0.20/}{MPI.jl}
+(\citeproc{ref-byrne2021mpi}{Byrne, Wilcox, and Churavy 2021}).
 
 
 
