@@ -183,16 +183,16 @@
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
+\theoremstyle{plain}
+\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{definition}
-\newtheorem{example}{Example}[section]
+\newtheorem{definition}{Definition}[section]
 \theoremstyle{definition}
 \newtheorem{exercise}{Parameters}[section]
 \theoremstyle{plain}
 \newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
-\theoremstyle{plain}
-\newtheorem{corollary}{Research Question}[section]
+\newtheorem{example}{Example}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -213,7 +213,7 @@
 \urlstyle{same} % disable monospaced font for URLs
 \hypersetup{
   pdftitle={Counterfactual Training: Teaching Models Plausible and Actionable Explanations},
-  pdfauthor={Patrick Altmeyer; Arie van Deursen; Cynthia C. S. Liem},
+  pdfauthor={Patrick Altmeyer; Aleksander Buszydlik; Arie van Deursen; Cynthia C. S. Liem},
   pdfkeywords={Counterfactual Explanations, Explainable
 AI, Representation Learning},
   colorlinks=true,
@@ -235,10 +235,12 @@ Explanations}
 \author{\textbf{Patrick
 Altmeyer}~\orcidlink{0000-0003-4726-8613}\\Faculty of Electrical
 Engineering, Mathematics and Computer Science\\Delft University of
-Technology\\\\\href{mailto:p.altmeyer@tudelft.nl}{p.altmeyer@tudelft.nl}\asep\textbf{Arie
-van Deursen}\\Faculty of Electrical Engineering, Mathematics and
-Computer Science\\Delft University of Technology\\\\\asep\textbf{Cynthia
-C. S. Liem}\\Faculty of Electrical Engineering, Mathematics and Computer
+Technology\\\\\href{mailto:p.altmeyer@tudelft.nl}{p.altmeyer@tudelft.nl}\asep\textbf{Aleksander
+Buszydlik}\\Faculty of Electrical Engineering, Mathematics and Computer
+Science\\Delft University of Technology\\\\\asep\textbf{Arie van
+Deursen}\\Faculty of Electrical Engineering, Mathematics and Computer
+Science\\Delft University of Technology\\\\\asep\textbf{Cynthia C. S.
+Liem}\\Faculty of Electrical Engineering, Mathematics and Computer
 Science\\Delft University of Technology\\\\}
 \date{}
 \begin{document}
@@ -913,6 +915,11 @@ Equation~\ref{eq-obj}?
   Proxy attributes of immutable features.
 \item
   Increased training time.
+\item
+  Training instabilities
+\item
+  Fairness and caveats (aware it's not a classical approach in this
+  context, but there is a clear link).
 \end{enumerate}
 
 \section{Conclusion}\label{sec-conclusion}
@@ -952,6 +959,34 @@ Chi, Jilin Chen, and Alex Beutel. 2023. {``Improving Classifier
 Robustness Through Active Generative Counterfactual Data
 Augmentation.''} In \emph{Findings of the Association for Computational
 Linguistics: EMNLP 2023}, 127--39.
+
+\bibitem[\citeproctext]{ref-bezanson2017julia}
+Bezanson, Jeff, Alan Edelman, Stefan Karpinski, and Viral B Shah. 2017.
+{``Julia: A Fresh Approach to Numerical Computing.''} \emph{SIAM Review}
+59 (1): 65--98. \url{https://doi.org/10.1137/141000671}.
+
+\bibitem[\citeproctext]{ref-milan2023dataframes}
+Bouchet-Valat, Milan, and Bogumił Kamiński. 2023. {``DataFrames.jl:
+Flexible and Fast Tabular Data in Julia.''} \emph{Journal of Statistical
+Software} 107 (4): 1--32. \url{https://doi.org/10.18637/jss.v107.i04}.
+
+\bibitem[\citeproctext]{ref-chagas2024pretty}
+Chagas, Ronan Arraes Jardim, Ben Baumgold, Glen Hertz, Hendrik Ranocha,
+Mark Wells, Nathan Boyer, Nicholas Ritchie, et al. 2024.
+{``Ronisbr/PrettyTables.jl: V2.4.0.''} Zenodo.
+\url{https://doi.org/10.5281/zenodo.13835553}.
+
+\bibitem[\citeproctext]{ref-PlotsJL}
+Christ, Simon, Daniel Schwabeneder, Christopher Rackauckas, Michael
+Krabbe Borregaard, and Thomas Breloff. 2023. {``Plots.jl -- a User
+Extendable Plotting API for the Julia Programming Language.''}
+https://doi.org/\url{https://doi.org/10.5334/jors.431}.
+
+\bibitem[\citeproctext]{ref-danisch2021makie}
+Danisch, Simon, and Julius Krumbiegel. 2021. {``{Makie.jl}: Flexible
+High-Performance Data Visualization for {Julia}.''} \emph{Journal of
+Open Source Software} 6 (65): 3349.
+\url{https://doi.org/10.21105/joss.03349}.
 
 \bibitem[\citeproctext]{ref-du2019implicit}
 Du, Yilun, and Igor Mordatch. 2020. {``Implicit Generation and
@@ -995,6 +1030,17 @@ Association for Computing Machinery.
 Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. 2009. \emph{The
 Elements of Statistical Learning}. Springer New York.
 \url{https://doi.org/10.1007/978-0-387-84858-7}.
+
+\bibitem[\citeproctext]{ref-innes2018fashionable}
+Innes, Michael, Elliot Saba, Keno Fischer, Dhairya Gandhi, Marco
+Concetto Rudilosso, Neethu Mariya Joy, Tejan Karmali, Avik Pal, and
+Viral Shah. 2018. {``Fashionable Modelling with Flux.''}
+\url{https://arxiv.org/abs/1811.01457}.
+
+\bibitem[\citeproctext]{ref-innes2018flux}
+Innes, Mike. 2018. {``Flux: {Elegant} Machine Learning with {Julia}.''}
+\emph{Journal of Open Source Software} 3 (25): 602.
+\url{https://doi.org/10.21105/joss.00602}.
 
 \bibitem[\citeproctext]{ref-kolter2023keynote}
 Kolter, Zico. 2023.{``{Keynote Addresses: SaTML 2023 }.''} In \emph{2023
@@ -1257,7 +1303,7 @@ sensitivity for \(d_{\text{immtbl}}\) relative to increased sensitivity
 for \(d_{\text{mtbl}}\)).
 \end{proof}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, opacitybacktitle=0.6, titlerule=0mm, colback=white, opacityback=0, bottomrule=.15mm, colbacktitle=quarto-callout-warning-color!10!white, coltitle=black, arc=.35mm, toptitle=1mm, toprule=.15mm, bottomtitle=1mm, rightrule=.15mm, leftrule=.75mm, colframe=quarto-callout-warning-color-frame, left=2mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, colbacktitle=quarto-callout-warning-color!10!white, opacitybacktitle=0.6, breakable, bottomrule=.15mm, colframe=quarto-callout-warning-color-frame, coltitle=black, opacityback=0, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, toprule=.15mm, toptitle=1mm, left=2mm, leftrule=.75mm, bottomtitle=1mm, titlerule=0mm, arc=.35mm, rightrule=.15mm]
 
 @Cynthia, @Arie, I have tentatively phrased the above in terms of a
 theorem and proof. This is something I've so far shied away from because
@@ -1298,9 +1344,16 @@ deviation of feature \(d\). We set \(n_{\sigma_d}=3\) across the board
 but higher values and hence wider bounds may be appropriate depending on
 the application.
 
+\subsection{Training Details}\label{sec-app-training}
+
+In this section, we describe the training procedure in detail. While the
+details laid out here are not crucial for understanding our proposed
+approach, they are of importance to anyone looking to implement
+counterfactual training.
+
 \section{Detailed Results}\label{detailed-results}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, opacitybacktitle=0.6, titlerule=0mm, colback=white, opacityback=0, bottomrule=.15mm, colbacktitle=quarto-callout-warning-color!10!white, coltitle=black, arc=.35mm, toptitle=1mm, toprule=.15mm, bottomtitle=1mm, rightrule=.15mm, leftrule=.75mm, colframe=quarto-callout-warning-color-frame, left=2mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, colbacktitle=quarto-callout-warning-color!10!white, opacitybacktitle=0.6, breakable, bottomrule=.15mm, colframe=quarto-callout-warning-color-frame, coltitle=black, opacityback=0, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, toprule=.15mm, toptitle=1mm, left=2mm, leftrule=.75mm, bottomtitle=1mm, titlerule=0mm, arc=.35mm, rightrule=.15mm]
 
 @Cynthia, @Arie, I'm including some preliminary results here but will
 rerun experiments in the coming days. You'll notice some odd outlier
@@ -1320,7 +1373,7 @@ inherited from energy-based modelling).
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, opacitybacktitle=0.6, titlerule=0mm, colback=white, opacityback=0, bottomrule=.15mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, arc=.35mm, toptitle=1mm, toprule=.15mm, bottomtitle=1mm, rightrule=.15mm, leftrule=.75mm, colframe=quarto-callout-note-color-frame, left=2mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, breakable, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, coltitle=black, opacityback=0, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, toprule=.15mm, toptitle=1mm, left=2mm, leftrule=.75mm, bottomtitle=1mm, titlerule=0mm, arc=.35mm, rightrule=.15mm]
 
 @Cynthia, @Arie, Figure~\ref{fig-mnist} shows much more plausible
 (faithful) counterfactuals for a model with CT than the model with
@@ -1362,7 +1415,9 @@ to generate counterfactuals that are faithful to the model
 
 \subsection{Initial Grid Search}\label{sec-app-initial}
 
-For the initial round of experiments we
+For the initial round of experiments we employed a different training
+objective and procedure that led to promising results for some
+hyperparameter choices, but suffered from training instabilities.
 
 \subsubsection{Generator Parameters}\label{generator-parameters}
 
@@ -1384,19 +1439,18 @@ Phase]\protect\hypertarget{exr-gen-params-first-run-train}{}\label{exr-gen-param
   \begin{itemize}
   \tightlist
   \item
-    \(\lambda_{\text{cost}}\): \texttt{0.0,\ 0.001,\ 0.1}
+    Decisiono. Threshold: \texttt{0.75,\ 0.9,\ 0.95}
   \item
-    \(\lambda_{\text{div}}\):
-    \texttt{0.01,\ 0.05,\ 0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0,\ 15.0}
+    \(\lambda_{\text{cost}}\): \texttt{0.0,\ 0.1}
   \item
-    Learning Rate: \texttt{1.0}
+    \(\lambda_{\text{div}}\): \texttt{0.1,\ 0.5,\ 1.0,\ 10.0}
   \item
-    Maximum Iterations: \texttt{20,\ 50,\ 100}
+    Maximum Iterations: \texttt{5,\ 25,\ 50}
   \item
     Optimizerimizer: \texttt{sgd}
   \end{itemize}
 \item
-  Generator: \texttt{ecco,\ generic,\ omni,\ revise}
+  Generator: \texttt{ecco,\ generic,\ revise}
 \item
   Training Parameters:
 
@@ -1501,67 +1555,51 @@ Separable data by energy penalty.}
   \endlastfoot
   full & 0.01 & \textit{ECCo} & $-9.91 \cdot 10^{11}$ & $2.25 \cdot 10^{12}$ \\
   full & 0.01 & \textit{Generic} & $-5.71 \cdot 10^{17}$ & $1.3 \cdot 10^{18}$ \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.01}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.54}} & \color{blue}{\textbf{0.116}} \\
-  full & 0.01 & \textit{REVISE} & -15.6 & 13.2 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.01}} & \color{blue}{\textbf{REVISE}} & \color{blue}{\textbf{-15.6}} & \color{blue}{\textbf{13.2}} \\
   vanilla & 0.01 & \textit{ECCo} & -4.28 & 3.52 \\
   vanilla & 0.01 & \textit{Generic} & -4.45 & 3.47 \\
-  vanilla & 0.01 & \textit{Omniscient} & -5.12 & 4.46 \\
   vanilla & 0.01 & \textit{REVISE} & -4.91 & 4.24 \\
   full & 0.05 & \textit{ECCo} & $-5.63 \cdot 10^{5}$ & $1.28 \cdot 10^{6}$ \\
   full & 0.05 & \textit{Generic} & $-8.35 \cdot 10^{17}$ & $1.9 \cdot 10^{18}$ \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.05}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.53}} & \color{blue}{\textbf{0.114}} \\
   full & 0.05 & \textit{REVISE} & -15 & 12.6 \\
   vanilla & 0.05 & \textit{ECCo} & -4.4 & 3.66 \\
-  vanilla & 0.05 & \textit{Generic} & -4.38 & 3.48 \\
-  vanilla & 0.05 & \textit{Omniscient} & -5.25 & 4.62 \\
+  \color{blue}{\textbf{vanilla}} & \color{blue}{\textbf{0.05}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-4.38}} & \color{blue}{\textbf{3.48}} \\
   vanilla & 0.05 & \textit{REVISE} & -4.94 & 4.22 \\
   full & 0.1 & \textit{ECCo} & $-6.74 \cdot 10^{5}$ & $1.53 \cdot 10^{6}$ \\
   full & 0.1 & \textit{Generic} & $-1.71 \cdot 10^{11}$ & $3.9 \cdot 10^{11}$ \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.56}} & \color{blue}{\textbf{0.124}} \\
   full & 0.1 & \textit{REVISE} & -15.6 & 13.2 \\
   vanilla & 0.1 & \textit{ECCo} & -4.28 & 3.52 \\
   vanilla & 0.1 & \textit{Generic} & -4.45 & 3.48 \\
-  vanilla & 0.1 & \textit{Omniscient} & -5.12 & 4.46 \\
   vanilla & 0.1 & \textit{REVISE} & -4.91 & 4.25 \\
-  full & 0.5 & \textit{ECCo} & -11.8 & 9.83 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.5}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-11.8}} & \color{blue}{\textbf{9.83}} \\
   full & 0.5 & \textit{Generic} & $-1.06 \cdot 10^{18}$ & $2.42 \cdot 10^{18}$ \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.5}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.54}} & \color{blue}{\textbf{0.123}} \\
   full & 0.5 & \textit{REVISE} & -15 & 12.6 \\
   vanilla & 0.5 & \textit{ECCo} & -4.4 & 3.65 \\
   vanilla & 0.5 & \textit{Generic} & -4.38 & 3.48 \\
-  vanilla & 0.5 & \textit{Omniscient} & -5.25 & 4.61 \\
   vanilla & 0.5 & \textit{REVISE} & -4.95 & 4.22 \\
   full & 1 & \textit{ECCo} & -11.5 & 11.1 \\
   full & 1 & \textit{Generic} & $-1.71 \cdot 10^{11}$ & $3.88 \cdot 10^{11}$ \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.59}} & \color{blue}{\textbf{0.117}} \\
-  full & 1 & \textit{REVISE} & -15.7 & 13.3 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{1}} & \color{blue}{\textbf{REVISE}} & \color{blue}{\textbf{-15.7}} & \color{blue}{\textbf{13.3}} \\
   vanilla & 1 & \textit{ECCo} & -4.28 & 3.51 \\
   vanilla & 1 & \textit{Generic} & -4.44 & 3.47 \\
-  vanilla & 1 & \textit{Omniscient} & -5.11 & 4.46 \\
   vanilla & 1 & \textit{REVISE} & -4.91 & 4.25 \\
   full & 5 & \textit{ECCo} & -3.99 & 3.12 \\
   full & 5 & \textit{Generic} & $-4.88 \cdot 10^{17}$ & $1.11 \cdot 10^{18}$ \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{5}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.53}} & \color{blue}{\textbf{0.117}} \\
   full & 5 & \textit{REVISE} & -14.6 & 12.1 \\
   vanilla & 5 & \textit{ECCo} & -4.4 & 3.65 \\
-  vanilla & 5 & \textit{Generic} & -4.38 & 3.48 \\
-  vanilla & 5 & \textit{Omniscient} & -5.25 & 4.61 \\
+  \color{blue}{\textbf{vanilla}} & \color{blue}{\textbf{5}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-4.38}} & \color{blue}{\textbf{3.48}} \\
   vanilla & 5 & \textit{REVISE} & -4.95 & 4.22 \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{10}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-2.31}} & \color{blue}{\textbf{0.735}} \\
+  full & 10 & \textit{ECCo} & -2.31 & 0.735 \\
   full & 10 & \textit{Generic} & $-1.7 \cdot 10^{11}$ & $3.86 \cdot 10^{11}$ \\
-  full & 10 & \textit{Omniscient} & -2.53 & 0.117 \\
   full & 10 & \textit{REVISE} & -15.5 & 13 \\
   vanilla & 10 & \textit{ECCo} & -4.28 & 3.51 \\
   vanilla & 10 & \textit{Generic} & -4.44 & 3.47 \\
-  vanilla & 10 & \textit{Omniscient} & -5.12 & 4.46 \\
   vanilla & 10 & \textit{REVISE} & -4.91 & 4.24 \\
   \color{blue}{\textbf{full}} & \color{blue}{\textbf{15}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-2.01}} & \color{blue}{\textbf{0.488}} \\
   full & 15 & \textit{Generic} & $-4.91 \cdot 10^{17}$ & $1.12 \cdot 10^{18}$ \\
-  full & 15 & \textit{Omniscient} & -2.53 & 0.116 \\
   full & 15 & \textit{REVISE} & -14.4 & 11.7 \\
   vanilla & 15 & \textit{ECCo} & -4.4 & 3.65 \\
   vanilla & 15 & \textit{Generic} & -4.38 & 3.48 \\
-  vanilla & 15 & \textit{Omniscient} & -5.25 & 4.6 \\
   vanilla & 15 & \textit{REVISE} & -4.95 & 4.23 \\\bottomrule
 
 \end{longtable}
@@ -1586,27 +1624,21 @@ Separable data by cost penalty.}
   \endlastfoot
   full & 0 & \textit{ECCo} & $-5.32 \cdot 10^{3}$ & $1.21 \cdot 10^{4}$ \\
   full & 0 & \textit{Generic} & $-1.03 \cdot 10^{18}$ & $2.34 \cdot 10^{18}$ \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.64}} & \color{blue}{\textbf{0.125}} \\
-  full & 0 & \textit{REVISE} & -15.4 & 12.9 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0}} & \color{blue}{\textbf{REVISE}} & \color{blue}{\textbf{-15.4}} & \color{blue}{\textbf{12.9}} \\
   vanilla & 0 & \textit{ECCo} & -4.34 & 3.58 \\
   vanilla & 0 & \textit{Generic} & -4.41 & 3.48 \\
-  vanilla & 0 & \textit{Omniscient} & -5.18 & 4.54 \\
   vanilla & 0 & \textit{REVISE} & -4.93 & 4.23 \\
   full & 0.001 & \textit{ECCo} & -362 & 811 \\
   full & 0.001 & \textit{Generic} & $-2.65 \cdot 10^{17}$ & $6.04 \cdot 10^{17}$ \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.001}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.49}} & \color{blue}{\textbf{0.115}} \\
   full & 0.001 & \textit{REVISE} & -15.5 & 13 \\
   vanilla & 0.001 & \textit{ECCo} & -4.34 & 3.58 \\
-  vanilla & 0.001 & \textit{Generic} & -4.41 & 3.48 \\
-  vanilla & 0.001 & \textit{Omniscient} & -5.18 & 4.53 \\
+  \color{blue}{\textbf{vanilla}} & \color{blue}{\textbf{0.001}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-4.41}} & \color{blue}{\textbf{3.48}} \\
   vanilla & 0.001 & \textit{REVISE} & -4.93 & 4.23 \\
   full & 0.1 & \textit{ECCo} & $-3.72 \cdot 10^{11}$ & $8.46 \cdot 10^{11}$ \\
   full & 0.1 & \textit{Generic} & $-4.48 \cdot 10^{14}$ & $1.02 \cdot 10^{15}$ \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-2.5}} & \color{blue}{\textbf{0.112}} \\
   full & 0.1 & \textit{REVISE} & -14.6 & 12.2 \\
   vanilla & 0.1 & \textit{ECCo} & -4.34 & 3.58 \\
   vanilla & 0.1 & \textit{Generic} & -4.41 & 3.48 \\
-  vanilla & 0.1 & \textit{Omniscient} & -5.18 & 4.54 \\
   vanilla & 0.1 & \textit{REVISE} & -4.93 & 4.24 \\\bottomrule
 
 \end{longtable}
@@ -1660,67 +1692,51 @@ energy penalty.}
   \endlastfoot
   full & 0.01 & \textit{ECCo} & $-2.8 \cdot 10^{22}$ & $6.39 \cdot 10^{22}$ \\
   full & 0.01 & \textit{Generic} & $-4.89 \cdot 10^{30}$ & $1.11 \cdot 10^{31}$ \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.01}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.74}} & \color{blue}{\textbf{5.08}} \\
-  full & 0.01 & \textit{REVISE} & -572 & $1.25 \cdot 10^{3}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.01}} & \color{blue}{\textbf{REVISE}} & \color{blue}{\textbf{-572}} & \color{blue}{\textbf{$1.25 \cdot 10^{3}$}} \\
   vanilla & 0.01 & \textit{ECCo} & -15.5 & 17.3 \\
   vanilla & 0.01 & \textit{Generic} & -10.9 & 11.9 \\
-  vanilla & 0.01 & \textit{Omniscient} & -12.7 & 14.4 \\
   vanilla & 0.01 & \textit{REVISE} & -11.2 & 13 \\
   full & 0.05 & \textit{ECCo} & $-1.55 \cdot 10^{16}$ & $3.52 \cdot 10^{16}$ \\
   full & 0.05 & \textit{Generic} & $-2.22 \cdot 10^{20}$ & $5 \cdot 10^{20}$ \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.05}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.41}} & \color{blue}{\textbf{4.48}} \\
   full & 0.05 & \textit{REVISE} & $-1.04 \cdot 10^{3}$ & $2.3 \cdot 10^{3}$ \\
   vanilla & 0.05 & \textit{ECCo} & -15.5 & 17.2 \\
-  vanilla & 0.05 & \textit{Generic} & -11.7 & 12.8 \\
-  vanilla & 0.05 & \textit{Omniscient} & -12.4 & 14.1 \\
+  \color{blue}{\textbf{vanilla}} & \color{blue}{\textbf{0.05}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-11.7}} & \color{blue}{\textbf{12.8}} \\
   vanilla & 0.05 & \textit{REVISE} & -11.3 & 13.1 \\
   full & 0.1 & \textit{ECCo} & $-3.41 \cdot 10^{3}$ & $7.73 \cdot 10^{3}$ \\
   full & 0.1 & \textit{Generic} & $-5.22 \cdot 10^{30}$ & $1.19 \cdot 10^{31}$ \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.78}} & \color{blue}{\textbf{5.12}} \\
   full & 0.1 & \textit{REVISE} & -288 & 594 \\
   vanilla & 0.1 & \textit{ECCo} & -15.5 & 17.2 \\
   vanilla & 0.1 & \textit{Generic} & -10.9 & 11.9 \\
-  vanilla & 0.1 & \textit{Omniscient} & -12.7 & 14.4 \\
   vanilla & 0.1 & \textit{REVISE} & -11.3 & 13.1 \\
-  full & 0.5 & \textit{ECCo} & -7.09 & 7.51 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.5}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-7.09}} & \color{blue}{\textbf{7.51}} \\
   full & 0.5 & \textit{Generic} & $-1.11 \cdot 10^{31}$ & $2.53 \cdot 10^{31}$ \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.5}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.58}} & \color{blue}{\textbf{4.83}} \\
   full & 0.5 & \textit{REVISE} & $-1.19 \cdot 10^{3}$ & $2.64 \cdot 10^{3}$ \\
   vanilla & 0.5 & \textit{ECCo} & -15.5 & 17.2 \\
   vanilla & 0.5 & \textit{Generic} & -11.7 & 12.8 \\
-  vanilla & 0.5 & \textit{Omniscient} & -12.4 & 14.1 \\
   vanilla & 0.5 & \textit{REVISE} & -11.3 & 13.1 \\
   full & 1 & \textit{ECCo} & -6.06 & 6.33 \\
   full & 1 & \textit{Generic} & $-1.58 \cdot 10^{33}$ & $3.59 \cdot 10^{33}$ \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{1}} & \color{blue}{\textbf{Omniscient}} & \color{blue}{\textbf{-4.66}} & \color{blue}{\textbf{4.89}} \\
-  full & 1 & \textit{REVISE} & $-1.16 \cdot 10^{3}$ & $2.59 \cdot 10^{3}$ \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{1}} & \color{blue}{\textbf{REVISE}} & \color{blue}{\textbf{$-1.16 \cdot 10^{3}$}} & \color{blue}{\textbf{$2.59 \cdot 10^{3}$}} \\
   vanilla & 1 & \textit{ECCo} & -15.5 & 17.3 \\
   vanilla & 1 & \textit{Generic} & -10.9 & 11.9 \\
-  vanilla & 1 & \textit{Omniscient} & -12.7 & 14.4 \\
   vanilla & 1 & \textit{REVISE} & -11.3 & 13.1 \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{5}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-2.57}} & \color{blue}{\textbf{2.07}} \\
+  full & 5 & \textit{ECCo} & -2.57 & 2.07 \\
   full & 5 & \textit{Generic} & $-1.17 \cdot 10^{28}$ & $2.66 \cdot 10^{28}$ \\
-  full & 5 & \textit{Omniscient} & -4.29 & 4.31 \\
   full & 5 & \textit{REVISE} & -530 & $1.16 \cdot 10^{3}$ \\
   vanilla & 5 & \textit{ECCo} & -15.5 & 17.2 \\
-  vanilla & 5 & \textit{Generic} & -11.7 & 12.7 \\
-  vanilla & 5 & \textit{Omniscient} & -12.4 & 14.1 \\
+  \color{blue}{\textbf{vanilla}} & \color{blue}{\textbf{5}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-11.7}} & \color{blue}{\textbf{12.7}} \\
   vanilla & 5 & \textit{REVISE} & -11.3 & 13.1 \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{10}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.76}} & \color{blue}{\textbf{0.974}} \\
+  full & 10 & \textit{ECCo} & -1.76 & 0.974 \\
   full & 10 & \textit{Generic} & $-1.54 \cdot 10^{33}$ & $3.51 \cdot 10^{33}$ \\
-  full & 10 & \textit{Omniscient} & -4.44 & 4.56 \\
   full & 10 & \textit{REVISE} & $-1.52 \cdot 10^{3}$ & $3.4 \cdot 10^{3}$ \\
   vanilla & 10 & \textit{ECCo} & -15.5 & 17.3 \\
-  vanilla & 10 & \textit{Generic} & -10.9 & 11.9 \\
-  vanilla & 10 & \textit{Omniscient} & -12.7 & 14.4 \\
+  \color{blue}{\textbf{vanilla}} & \color{blue}{\textbf{10}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-10.9}} & \color{blue}{\textbf{11.9}} \\
   vanilla & 10 & \textit{REVISE} & -11.3 & 13.1 \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{15}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.37}} & \color{blue}{\textbf{0.365}} \\
+  full & 15 & \textit{ECCo} & -1.37 & 0.365 \\
   full & 15 & \textit{Generic} & $-5.32 \cdot 10^{28}$ & $1.21 \cdot 10^{29}$ \\
-  full & 15 & \textit{Omniscient} & -4.34 & 4.38 \\
   full & 15 & \textit{REVISE} & -473 & $1.03 \cdot 10^{3}$ \\
   vanilla & 15 & \textit{ECCo} & -15.5 & 17.2 \\
   vanilla & 15 & \textit{Generic} & -11.7 & 12.8 \\
-  vanilla & 15 & \textit{Omniscient} & -12.4 & 14.1 \\
   vanilla & 15 & \textit{REVISE} & -11.3 & 13.1 \\\bottomrule
 
 \end{longtable}
@@ -1780,70 +1796,89 @@ by energy penalty.}
   \endlastfoot
   \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.01}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.26}} & \color{blue}{\textbf{0.423}} \\
   full & 0.01 & \textit{Generic} & -1.49 & 0.71 \\
-  full & 0.01 & \textit{Omniscient} & -5.21 & 5.25 \\
   full & 0.01 & \textit{REVISE} & $-2.71 \cdot 10^{26}$ & $6.37 \cdot 10^{26}$ \\
   vanilla & 0.01 & \textit{ECCo} & -9.33 & 7.34 \\
   vanilla & 0.01 & \textit{Generic} & -8.89 & 6.88 \\
-  vanilla & 0.01 & \textit{Omniscient} & -8.67 & 6.87 \\
   vanilla & 0.01 & \textit{REVISE} & -8.65 & 6.8 \\
   full & 0.05 & \textit{ECCo} & -1.29 & 0.397 \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.05}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-1.21}} & \color{blue}{\textbf{0.356}} \\
-  full & 0.05 & \textit{Omniscient} & -5.08 & 5.09 \\
+  full & 0.05 & \textit{Generic} & -1.21 & 0.356 \\
   full & 0.05 & \textit{REVISE} & $-5.91 \cdot 10^{27}$ & $1.36 \cdot 10^{28}$ \\
-  vanilla & 0.05 & \textit{ECCo} & -9.35 & 7.32 \\
+  \color{blue}{\textbf{vanilla}} & \color{blue}{\textbf{0.05}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-9.35}} & \color{blue}{\textbf{7.32}} \\
   vanilla & 0.05 & \textit{Generic} & -8.85 & 6.87 \\
-  vanilla & 0.05 & \textit{Omniscient} & -8.7 & 6.96 \\
   vanilla & 0.05 & \textit{REVISE} & -8.52 & 6.76 \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.1}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.2}} & \color{blue}{\textbf{0.383}} \\
+  full & 0.1 & \textit{ECCo} & -1.2 & 0.383 \\
   full & 0.1 & \textit{Generic} & -1.5 & 0.735 \\
-  full & 0.1 & \textit{Omniscient} & -5.17 & 5.23 \\
   full & 0.1 & \textit{REVISE} & $-3.06 \cdot 10^{26}$ & $7.7 \cdot 10^{26}$ \\
   vanilla & 0.1 & \textit{ECCo} & -9.33 & 7.32 \\
-  vanilla & 0.1 & \textit{Generic} & -8.88 & 6.86 \\
-  vanilla & 0.1 & \textit{Omniscient} & -8.69 & 6.9 \\
+  \color{blue}{\textbf{vanilla}} & \color{blue}{\textbf{0.1}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-8.88}} & \color{blue}{\textbf{6.86}} \\
   vanilla & 0.1 & \textit{REVISE} & -8.68 & 6.81 \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.5}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.12}} & \color{blue}{\textbf{0.217}} \\
+  full & 0.5 & \textit{ECCo} & -1.12 & 0.217 \\
   full & 0.5 & \textit{Generic} & -1.21 & 0.352 \\
-  full & 0.5 & \textit{Omniscient} & -5.09 & 5.12 \\
   full & 0.5 & \textit{REVISE} & $-5.97 \cdot 10^{27}$ & $1.37 \cdot 10^{28}$ \\
   vanilla & 0.5 & \textit{ECCo} & -9.35 & 7.3 \\
   vanilla & 0.5 & \textit{Generic} & -8.89 & 6.92 \\
-  vanilla & 0.5 & \textit{Omniscient} & -8.68 & 6.93 \\
   vanilla & 0.5 & \textit{REVISE} & -8.53 & 6.75 \\
   \color{blue}{\textbf{full}} & \color{blue}{\textbf{1}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.1}} & \color{blue}{\textbf{0.163}} \\
   full & 1 & \textit{Generic} & -1.49 & 0.726 \\
-  full & 1 & \textit{Omniscient} & -5.16 & 5.2 \\
   full & 1 & \textit{REVISE} & $-3.09 \cdot 10^{26}$ & $7.22 \cdot 10^{26}$ \\
   vanilla & 1 & \textit{ECCo} & -9.34 & 7.36 \\
   vanilla & 1 & \textit{Generic} & -8.86 & 6.85 \\
-  vanilla & 1 & \textit{Omniscient} & -8.7 & 6.9 \\
   vanilla & 1 & \textit{REVISE} & -8.69 & 6.85 \\
   full & 5 & \textit{ECCo} & -1.75 & 0.154 \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{5}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-1.21}} & \color{blue}{\textbf{0.363}} \\
-  full & 5 & \textit{Omniscient} & -5.14 & 5.16 \\
-  full & 5 & \textit{REVISE} & $-1.1 \cdot 10^{28}$ & $2.5 \cdot 10^{28}$ \\
+  full & 5 & \textit{Generic} & -1.21 & 0.363 \\
+  \color{blue}{\textbf{full}} & \color{blue}{\textbf{5}} & \color{blue}{\textbf{REVISE}} & \color{blue}{\textbf{$-1.1 \cdot 10^{28}$}} & \color{blue}{\textbf{$2.5 \cdot 10^{28}$}} \\
   vanilla & 5 & \textit{ECCo} & -9.36 & 7.32 \\
   vanilla & 5 & \textit{Generic} & -8.88 & 6.91 \\
-  vanilla & 5 & \textit{Omniscient} & -8.7 & 6.93 \\
   vanilla & 5 & \textit{REVISE} & -8.52 & 6.73 \\
   full & 10 & \textit{ECCo} & $-1.02 \cdot 10^{6}$ & $2.32 \cdot 10^{6}$ \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{10}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-1.49}} & \color{blue}{\textbf{0.702}} \\
-  full & 10 & \textit{Omniscient} & -5.13 & 5.16 \\
+  full & 10 & \textit{Generic} & -1.49 & 0.702 \\
   full & 10 & \textit{REVISE} & $-3.74 \cdot 10^{26}$ & $9.09 \cdot 10^{26}$ \\
   vanilla & 10 & \textit{ECCo} & -9.31 & 7.33 \\
   vanilla & 10 & \textit{Generic} & -8.87 & 6.86 \\
-  vanilla & 10 & \textit{Omniscient} & -8.7 & 6.89 \\
-  vanilla & 10 & \textit{REVISE} & -8.69 & 6.83 \\
+  \color{blue}{\textbf{vanilla}} & \color{blue}{\textbf{10}} & \color{blue}{\textbf{REVISE}} & \color{blue}{\textbf{-8.69}} & \color{blue}{\textbf{6.83}} \\
   full & 15 & \textit{ECCo} & $-3.31 \cdot 10^{13}$ & $7.54 \cdot 10^{13}$ \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{15}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-1.22}} & \color{blue}{\textbf{0.37}} \\
-  full & 15 & \textit{Omniscient} & -5.2 & 5.23 \\
+  full & 15 & \textit{Generic} & -1.22 & 0.37 \\
   full & 15 & \textit{REVISE} & $-9.01 \cdot 10^{27}$ & $2.06 \cdot 10^{28}$ \\
   vanilla & 15 & \textit{ECCo} & -9.38 & 7.34 \\
   vanilla & 15 & \textit{Generic} & -8.86 & 6.87 \\
-  vanilla & 15 & \textit{Omniscient} & -8.69 & 6.96 \\
   vanilla & 15 & \textit{REVISE} & -8.51 & 6.73 \\\bottomrule
 
 \end{longtable}
+
+\section{Computation Details}\label{computation-details}
+
+\subsection{Hardware}\label{hardware}
+
+We performed our experiments on a high-performance cluster. Details
+about the cluster will be disclosed upon publication to avoid revealing
+information that might interfere with the double-blind review process.
+Since our experiments have largely involved highly parallel tasks and
+small models, we have made extensive use of multi-processing.
+
+\subsection{Software}\label{software}
+
+All computations were performed in the Julia Programming Language
+(\citeproc{ref-bezanson2017julia}{Bezanson et al. 2017}). We have
+developed a package for counterfactual training that leverages and
+extends the functionality provided by several existing packages, most
+notably
+\href{https://github.com/JuliaTrustworthyAI/CounterfactualExplanations.jl}{CounterfactualExplanations.jl}
+(\citeproc{ref-altmeyer2023explaining}{Altmeyer, Deursen, et al. 2023})
+and the \href{https://fluxml.ai/Flux.jl/v0.16/}{Flux.jl} library for
+deep learning (\citeproc{ref-innes2018fashionable}{Michael Innes et al.
+2018}; \citeproc{ref-innes2018flux}{Mike Innes 2018}). For
+data-wrangling and presentation-ready tables we relied on
+\href{https://dataframes.juliadata.org/v1.7/}{DataFrames.jl}
+(\citeproc{ref-milan2023dataframes}{Bouchet-Valat and Kamiński 2023})
+and
+\href{https://ronisbr.github.io/PrettyTables.jl/v2.4/}{PrettyTables.jl}
+(\citeproc{ref-chagas2024pretty}{Chagas et al. 2024}), respectively. For
+plots and visualizations we used both
+\href{https://docs.juliaplots.org/v1.40/}{Plots.jl}
+(\citeproc{ref-PlotsJL}{Christ et al. 2023}) and
+\href{https://docs.makie.org/v0.22/}{Makie.jl}
+(\citeproc{ref-danisch2021makie}{Danisch and Krumbiegel 2021}), in
+particular \href{https://aog.makie.org/v0.9.3/}{AlgebraOfGraphics.jl}.
 
 
 

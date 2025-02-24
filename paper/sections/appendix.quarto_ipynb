@@ -8,7 +8,7 @@
         "    ss -> joinpath(ss[1:findall([s == \"CounterfactualTraining.jl\" for s in ss])[1]]...) \n",
         "cd(projectdir)"
       ],
-      "id": "d3ac0690",
+      "id": "f8842ede",
       "execution_count": null,
       "outputs": []
     },
@@ -24,7 +24,7 @@
         "using DotEnv\n",
         "DotEnv.load!()"
       ],
-      "id": "9c2f9c32",
+      "id": "32c4c789",
       "execution_count": null,
       "outputs": []
     },
@@ -56,13 +56,19 @@
         "# Technical Details of Our Approach {.appendix} \n",
         "\n",
         "\n",
-        "# Background on Gradient-Based Counterfactual Generators {#sec-app-ce .appendix}\n",
+        "## Generating Counterfactuals through Gradient Descent {#sec-app-ce}\n",
         "\n",
-        "## Convergence {#sec-app}\n",
+        "In this section, we provide some background on gradient-based counterfactual generators (@sec-app-ce-background) and discuss how we define convergence in this context (@sec-app-conv).\n",
         "\n",
-        "An important consideration when generating counterfactual explanations using gradient-based methods is how to defined convergence. \n"
+        "### Background {#sec-app-ce-background}\n",
+        "\n",
+        "### Convergence {#sec-app-conv}\n",
+        "\n",
+        "An important consideration when generating counterfactual explanations using gradient-based methods is how to define convergence. Two common choices are to 1) perform gradient descent over a fixed number of iterations $T$, or 2) conclude the search as soon as the predicted probability for the target class has reached a pre-determined threshold, $\\tau$: $\\mathcal{S}(\\mathbf{M}_\\theta(\\mathbf{x}^\\prime))[y^+] \\geq \\tau$. We prefer the latter for our purposes, because it explicitly defines convergence in terms of the black-box model, $\\mathbf{M}(\\mathbf{x})$.\n",
+        "\n",
+        "Defining convergence in this way allows for a more intuitive interpretation of the resulting counterfactual outcomes than with fixed $T$. Specifically, it allows us to think of counterfactuals as explaining 'high-confidence' predictions by the model for the target class $y^+$. Depending on the context and application, different choices of $\\tau$ can be considered as representing 'high-confidence' predictions.\n"
       ],
-      "id": "ea881d50"
+      "id": "a3cba833"
     },
     {
       "cell_type": "code",
@@ -82,7 +88,7 @@
         "using CTExperiments.TaijaPlotting\n",
         "using Plots.PlotMeasures"
       ],
-      "id": "cec5b31a",
+      "id": "1396bafd",
       "execution_count": null,
       "outputs": []
     },
@@ -144,7 +150,7 @@
         "\n",
         ":::"
       ],
-      "id": "0d6b526d"
+      "id": "6dd83834"
     },
     {
       "cell_type": "code",
@@ -157,6 +163,7 @@
         "    train_val_split, \n",
         "    build_model, \n",
         "    LinearModel, \n",
+        "    MLPModel,\n",
         "    get_input_encoder\n",
         "\n",
         "# Callback:\n",
@@ -171,8 +178,6 @@
         "    ylab = _constraint[2] == \"both\" ? \"$(_ylab) (mutable)\" : \"$(_ylab) (immutable)\"\n",
         "\n",
         "    # Data and decision boundary:\n",
-        "    coeff = get_log_reg_params(model)\n",
-        "    db = get_decision_boundary(coeff)\n",
         "    plt = Plots.scatter(\n",
         "        ce_data, \n",
         "        # label=[\"1=Default\" \"2=No Default\"], \n",
@@ -182,7 +187,11 @@
         "        legend=false,\n",
         "        title=_title\n",
         "    )\n",
-        "    Plots.abline!(plt, db.slope, db.intercept; lw=5, label=\"Dec. Boundary\")\n",
+        "    if length(model) == 1\n",
+        "        coeff = get_log_reg_params(model)\n",
+        "        db = get_decision_boundary(coeff)\n",
+        "        Plots.abline!(plt, db.slope, db.intercept; lw=5, label=\"Dec. Boundary\")\n",
+        "    end\n",
         "\n",
         "    # Counterfactuals:\n",
         "    target = 2\n",
@@ -190,18 +199,18 @@
         "    if !any(isnothing.(x))\n",
         "        yhat = [argmax(y) for y in eachcol(model(x))]\n",
         "        yhat0 = [argmax(y) for y in eachcol(model(x0))]\n",
-        "        idx_plotted = yhat0.==factual\n",
+        "        idx_plotted = yhat0.==factual .|| yhat0.==target\n",
         "        if any(idx_plotted)\n",
         "\n",
-        "            # Paths:\n",
-        "            u = []\n",
-        "            v = []\n",
-        "            for (i,ce) in enumerate(eachcol(x))\n",
-        "                Δ = ce - x0[:,i]\n",
-        "                push!(u, Δ[1])\n",
-        "                push!(v, Δ[2])\n",
-        "            end\n",
-        "            Plots.quiver!(x0[1,idx_plotted], x0[2,idx_plotted], quiver=(u[idx_plotted], v[idx_plotted]), color=factual)\n",
+        "            # # Paths:\n",
+        "            # u = []\n",
+        "            # v = []\n",
+        "            # for (i,ce) in enumerate(eachcol(x))\n",
+        "            #     Δ = ce - x0[:,i]\n",
+        "            #     push!(u, Δ[1])\n",
+        "            #     push!(v, Δ[2])\n",
+        "            # end\n",
+        "            # Plots.quiver!(x0[1,idx_plotted], x0[2,idx_plotted], quiver=(u[idx_plotted], v[idx_plotted]), color=yhat0[idx_plotted])\n",
         "            \n",
         "            # End points:\n",
         "            Plots.scatter!(x[1,idx_plotted], x[2,idx_plotted], label=[\"CE (y⁺=1)\" \"CE (y⁺=2)\"], ms=15, shape=:star, color=yhat[idx_plotted], group=yhat[idx_plotted], mscolor=yhat0[idx_plotted])\n",
@@ -213,13 +222,13 @@
         "\n",
         "# Data:\n",
         "specs = [\n",
-        "    (\"(a)\", VanillaObjective(needs_ce=true), [\"both\", \"both\"]),\n",
-        "    (\"(b)\", FullObjective(lambda=[1.0,1.0,0.0,1.0]), [\"both\", \"both\"]),\n",
-        "    (\"(c)\", VanillaObjective(needs_ce=true), [\"both\", \"none\"]),\n",
-        "    (\"(d)\", FullObjective(lambda=[1.0,1.0,0.0,1.0]), [\"both\", \"none\"]),\n",
+        "    # (\"(a)\", VanillaObjective(needs_ce=true), [\"both\", \"both\"]),\n",
+        "    # (\"(b)\", FullObjective(lambda=[1.0,0.5,0.01,0.1]), [\"both\", \"both\"]),\n",
+        "    # (\"(c)\", VanillaObjective(needs_ce=true), [\"both\", \"none\"]),\n",
+        "    (\"(d)\", FullObjective(lambda=[1.0,0.5,0.01,0.1]), [\"both\", \"none\"]),\n",
         "]"
       ],
-      "id": "707349ab",
+      "id": "22a28a21",
       "execution_count": null,
       "outputs": []
     },
@@ -244,7 +253,7 @@
         "\n",
         "    # Data:\n",
         "    data = LinearlySeparable(\n",
-        "        n_train=500,\n",
+        "        n_train=3000,\n",
         "        batchsize=50,\n",
         "        mutability=constraint\n",
         "    )\n",
@@ -255,12 +264,13 @@
         "    # Model:\n",
         "    nin = size(first(train_set)[1], 1)\n",
         "    nout = size(first(train_set)[2], 1)\n",
-        "    model = build_model(LinearModel(), nin, nout)\n",
+        "    model = build_model(MLPModel(), nin, nout)\n",
         "\n",
         "    # Objective:\n",
-        "    generator = GenericGenerator()\n",
-        "    opt_state = Flux.setup(Descent(), model)\n",
-        "    conv = DecisionThresholdConvergence(decision_threshold=0.90)\n",
+        "    opt = AMSGrad()\n",
+        "    generator = GenericGenerator(opt=Descent(0.1))\n",
+        "    opt_state = Flux.setup(opt, model)\n",
+        "    conv = DecisionThresholdConvergence(decision_threshold=0.75, max_iter=30)\n",
         "\n",
         "    model, logs = counterfactual_training(\n",
         "        obj,\n",
@@ -269,10 +279,10 @@
         "        train_set,\n",
         "        opt_state;\n",
         "        val_set = val_set,\n",
-        "        nepochs = 50,\n",
+        "        nepochs = 100,\n",
         "        mutability = Symbol.(constraint),\n",
         "        callback = plot_db,\n",
-        "        nce=50,\n",
+        "        nce=1000,\n",
         "        convergence=conv, \n",
         "        verbose=3\n",
         "    )\n",
@@ -281,7 +291,7 @@
         "    push!(plts, current())\n",
         "end"
       ],
-      "id": "adc32aee",
+      "id": "9f61496d",
       "execution_count": null,
       "outputs": []
     },
@@ -303,7 +313,7 @@
         "display(plt)\n",
         "Plots.savefig(plt, \"paper/figures/poc.svg\")"
       ],
-      "id": "5bb9d45d",
+      "id": "9ae812b5",
       "execution_count": null,
       "outputs": []
     },
@@ -331,7 +341,7 @@
         "plt = Plots.plot(plts..., layout=(1,2), size=(600,300))\n",
         "Plots.savefig(plt, \"paper/figures/app_mtblty.svg\")"
       ],
-      "id": "270f0005",
+      "id": "b8d17052",
       "execution_count": null,
       "outputs": []
     },
@@ -353,6 +363,12 @@
         "$$ {#eq-domain}\n",
         "\n",
         "where $\\mu_d$ and $\\sigma_d$ denote the sample mean and standard deviation of feature $d$. We set $n_{\\sigma_d}=3$ across the board but higher values and hence wider bounds may be appropriate depending on the application.\n",
+        "\n",
+        "\n",
+        "## Training Details {#sec-app-training}\n",
+        "\n",
+        "In this section, we describe the training procedure in detail. While the details laid out here are not crucial for understanding our proposed approach, they are of importance to anyone looking to implement counterfactual training. \n",
+        "\n",
         "\n",
         "\n",
         "\n",
@@ -378,7 +394,7 @@
         "\n",
         "## Initial Grid Search {#sec-app-initial}\n"
       ],
-      "id": "e3a29f3a"
+      "id": "e06c45f6"
     },
     {
       "cell_type": "code",
@@ -387,7 +403,7 @@
         "results_dir = ENV[\"INITIAL_RUN_RESULTS\"]\n",
         "config_dir = ENV[\"INITIAL_RUN_CONFIG\"]"
       ],
-      "id": "fdac9610",
+      "id": "6c29dd8d",
       "execution_count": null,
       "outputs": []
     },
@@ -395,7 +411,7 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
-        "For the initial round of experiments we \n",
+        "For the initial round of experiments we employed a different training objective and procedure that led to promising results for some hyperparameter choices, but suffered from training instabilities.\n",
         "\n",
         "### Generator Parameters\n",
         "\n",
@@ -405,7 +421,7 @@
         "\n",
         "## Training Phase\n"
       ],
-      "id": "b8ae7b0f"
+      "id": "96654b30"
     },
     {
       "cell_type": "code",
@@ -415,7 +431,7 @@
         "dict = CTExperiments.from_toml(joinpath(config_dir,\"gen_params.toml\")) \n",
         "println(CTExperiments.dict_to_quarto_markdown(dict))"
       ],
-      "id": "661d088f",
+      "id": "6c135fd9",
       "execution_count": null,
       "outputs": []
     },
@@ -430,7 +446,7 @@
         "\n",
         "## Evaluation Phase\n"
       ],
-      "id": "e7ad46cb"
+      "id": "031b45fd"
     },
     {
       "cell_type": "code",
@@ -440,7 +456,7 @@
         "dict = CTExperiments.from_toml(joinpath(results_dir, \"gen_params/mlp/lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
         "println(CTExperiments.dict_to_quarto_markdown(dict))"
       ],
-      "id": "7747aceb",
+      "id": "cbd38d99",
       "execution_count": null,
       "outputs": []
     },
@@ -450,7 +466,7 @@
       "source": [
         ":::\n"
       ],
-      "id": "a4e17fbf"
+      "id": "d7964a8d"
     },
     {
       "cell_type": "code",
@@ -458,7 +474,7 @@
       "source": [
         "gen_params_dir = joinpath(results_dir, \"gen_params/mlp\")"
       ],
-      "id": "0fbc6cd4",
+      "id": "0314a17e",
       "execution_count": null,
       "outputs": []
     },
@@ -474,7 +490,7 @@
         "- **Validity**: *ECCo* almost always valid except for very low values during training and high values at evaluation time. *Generic* often has poor validity.\n",
         "- **Accuracy**: Seems largely unaffected.\n"
       ],
-      "id": "97f592eb"
+      "id": "4003a254"
     },
     {
       "cell_type": "code",
@@ -485,7 +501,7 @@
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
         "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type])"
       ],
-      "id": "b956de6d",
+      "id": "e61cbb63",
       "execution_count": null,
       "outputs": []
     },
@@ -497,7 +513,7 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}\n"
       ],
-      "id": "fb31fac7"
+      "id": "bf8baf23"
     },
     {
       "cell_type": "code",
@@ -507,7 +523,7 @@
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs; wrap_table=false)"
       ],
-      "id": "24f3625b",
+      "id": "820fcb6a",
       "execution_count": null,
       "outputs": []
     },
@@ -523,7 +539,7 @@
         "\n",
         "<!-- Cost -->\n"
       ],
-      "id": "9a815397"
+      "id": "354841ec"
     },
     {
       "cell_type": "code",
@@ -534,7 +550,7 @@
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
         "  df -> sort(df, [:lambda_cost_exper, :objective, :generator_type])"
       ],
-      "id": "55a32c32",
+      "id": "3d57f59c",
       "execution_count": null,
       "outputs": []
     },
@@ -546,7 +562,7 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}\n"
       ],
-      "id": "19482a3c"
+      "id": "6b8665d4"
     },
     {
       "cell_type": "code",
@@ -556,7 +572,7 @@
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_cost_exper\", backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs; wrap_table=false)"
       ],
-      "id": "66bd83d7",
+      "id": "dc0705a9",
       "execution_count": null,
       "outputs": []
     },
@@ -579,7 +595,7 @@
         "- **Validity**: *ECCo* generally achieves full validity except for very low choices the energy penalty during training and high choices at evaluation time. *Generic* performs poorly for high choices of the energy penalty during evaluation.\n",
         "- **Accuracy**: Largely unaffected although *ECCo* suffers a bit for very low choices the energy penalty during training. *REVISE* suffers a lot in general (around 10 percentage points).\n"
       ],
-      "id": "a9c5b37e"
+      "id": "e3bd4731"
     },
     {
       "cell_type": "code",
@@ -590,7 +606,7 @@
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
         "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) "
       ],
-      "id": "a297cc0c",
+      "id": "eb651b5c",
       "execution_count": null,
       "outputs": []
     },
@@ -602,7 +618,7 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}\n"
       ],
-      "id": "5170b38a"
+      "id": "4d385a00"
     },
     {
       "cell_type": "code",
@@ -612,7 +628,7 @@
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs)"
       ],
-      "id": "d956ad5f",
+      "id": "3886ae9b",
       "execution_count": null,
       "outputs": []
     },
@@ -634,7 +650,7 @@
         "- **Validity**: *ECCo* tends to outperform its *Vanilla* counterpart, though primarily for low to medium choices of the energy penalty (<=5) during training and evaluation. *Vanilla* typically worse across the board.\n",
         "- **Accuracy**: Mostly unaffected, but *REVISE* again consistently some deterioration and *ECCo* deteriorates for high choices of energy penalty during training, reflecting other outcomes above.\n"
       ],
-      "id": "d80afceb"
+      "id": "74f7a90e"
     },
     {
       "cell_type": "code",
@@ -645,7 +661,7 @@
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
         "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) "
       ],
-      "id": "d4efe8bb",
+      "id": "03b965d1",
       "execution_count": null,
       "outputs": []
     },
@@ -657,7 +673,7 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}\n"
       ],
-      "id": "3d600a81"
+      "id": "8f6b8002"
     },
     {
       "cell_type": "code",
@@ -667,7 +683,7 @@
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs)"
       ],
-      "id": "1875b652",
+      "id": "9af1849f",
       "execution_count": null,
       "outputs": []
     },
@@ -679,9 +695,18 @@
         "\n",
         "Results for Circles data by energy penalty.\n",
         "\n",
-        ":::"
+        ":::\n",
+        "\n",
+        "# Computation Details {.appendix}\n",
+        "\n",
+        "<!-- [@DHPC2022] -->\n",
+        "## Hardware\n",
+        "\n",
+        "We performed our experiments on a high-performance cluster. Details about the cluster will be disclosed upon publication to avoid revealing information that might interfere with the double-blind review process. Since our experiments have largely involved highly parallel tasks and small models, we have made extensive use of multi-processing.\n",
+        "\n",
+        "## Software\n"
       ],
-      "id": "2ecf40ff"
+      "id": "9b1c6687"
     }
   ],
   "metadata": {

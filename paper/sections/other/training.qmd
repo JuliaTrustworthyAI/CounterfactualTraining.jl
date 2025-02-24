@@ -1,0 +1,4 @@
+## Training Details {#sec-app-training}
+
+In this section, we describe the training procedure in detail. While the details laid out here are not crucial for understanding our proposed approach, they are of importance to anyone looking to implement counterfactual training. 
+
