@@ -27,13 +27,7 @@ DotEnv.load!()
 
 <!-- # Supplementary Material {.appendix} -->
 
-# Notation {.appendix}
-
-- $y^+$: The target class and also the index of the target class.
-- $y^-$: The non-target class and also the index of non-the target class.
-- $\mathbf{y}^+$: The one-hot encoded output vector for the target class. 
-- $\theta$: Model parameters (unspecified).
-- $\Theta$: Matrix of parameters. 
+{{< include /paper/sections/other/notation.qmd >}}
 
 # Technical Details of Our Approach {.appendix} 
 
@@ -47,7 +41,7 @@ DotEnv.load!()
 
 ::: {.callout-warning}
 
-\@Cynthia, \@Arie, I'm including some preliminary results here but will rerun experiments in the coming days. You'll notice some odd outlier results (huge values) for the initial grid search (@sec-app-initial). My belief is that this is once again due to *ECCo* overshooting for some hyperparameter choices, that we have discussed before. A simple solution to this story is to actually impose domain constraints. Let's see what the final results show us (I also still plan to make slight changes to the implementation), but in any case I think it might even be worth to report results for the initial grid search in the final appendix (they do include good results for CT for certain hyperparameter ranges and highlight limitations inherited from energy-based modelling).
+I'm including some preliminary results here but will rerun experiments in the coming days. You'll notice some odd outlier results (huge values) for the initial grid search (@sec-app-initial). My belief is that this is once again due to *ECCo* overshooting for some hyperparameter choices, that we have discussed before. A simple solution to this story is to actually impose domain constraints. Let's see what the final results show us (I also still plan to make slight changes to the implementation), but in any case I think it might even be worth to report results for the initial grid search in the final appendix (they do include good results for CT for certain hyperparameter ranges and highlight limitations inherited from energy-based modelling).
 
 :::
 
@@ -55,7 +49,7 @@ DotEnv.load!()
 
 ::: {.callout-note}
 
-\@Cynthia, \@Arie, @fig-mnist shows much more plausible (faithful) counterfactuals for a model with CT than the model with conventional training (@fig-mnist-vanilla). In fact, this is not even using *ECCo+* and still showing better results than the best results we achieved in our AAAI paper for JEM ensembles.
+@fig-mnist shows much more plausible (faithful) counterfactuals for a model with CT than the model with conventional training (@fig-mnist-vanilla). In fact, this is not even using *ECCo+* and still showing better results than the best results we achieved in our AAAI paper for JEM ensembles.
 
 :::
 
@@ -224,14 +218,5 @@ Results for Circles data by energy penalty.
 
 :::
 
-# Computation Details {.appendix}
-
-<!-- [@DHPC2022] -->
-## Hardware
-
-We performed our experiments on a high-performance cluster. Details about the cluster will be disclosed upon publication to avoid revealing information that might interfere with the double-blind review process. Since our experiments involve highly parallel tasks and rather small models by today's standard, we have relied on distributed computing across multiple central processing units (CPU). Graphical processing units (GPU) were not required. For larger grid searches we used up to but typically less than 100 CPUs. 
-
-## Software
-
-All computations were performed in the Julia Programming Language [@bezanson2017julia]. We have developed a package for counterfactual training that leverages and extends the functionality provided by several existing packages, most notably [CounterfactualExplanations.jl](https://github.com/JuliaTrustworthyAI/CounterfactualExplanations.jl) [@altmeyer2023explaining] and the [Flux.jl](https://fluxml.ai/Flux.jl/v0.16/) library for deep learning [@innes2018fashionable;@innes2018flux]. For data-wrangling and presentation-ready tables we relied on [DataFrames.jl](https://dataframes.juliadata.org/v1.7/) [@milan2023dataframes] and [PrettyTables.jl](https://ronisbr.github.io/PrettyTables.jl/v2.4/) [@chagas2024pretty], respectively. For plots and visualizations we used both [Plots.jl](https://docs.juliaplots.org/v1.40/) [@PlotsJL] and [Makie.jl](https://docs.makie.org/v0.22/) [@danisch2021makie], in particular [AlgebraOfGraphics.jl](https://aog.makie.org/v0.9.3/). To distribute computational tasks across multiple processors, we have relied on [MPI.jl](https://juliaparallel.org/MPI.jl/v0.20/) [@byrne2021mpi].
+{{< include /paper/sections/other/compute.qmd >}}
 
