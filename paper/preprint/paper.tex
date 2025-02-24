@@ -246,7 +246,7 @@ Science\\Delft University of Technology\\\\}
 \begin{document}
 \maketitle
 \begin{abstract}
-Counterfactual Explanations have emerged as a popular tool to explain
+Counterfactual explanations have emerged as a popular tool to explain
 predictions made by opaque machine learning models: they explain how
 factual inputs need to change in order for some fitted model to produce
 some desired output. Much existing research has focused on identifying
@@ -299,9 +299,9 @@ standards (\citeproc{ref-kolter2023keynote}{Kolter 2023}).
 
 Part of the problem is that high degrees of freedom provide room for
 many solutions that are locally optimal with respect to narrow
-objectives (\citeproc{ref-wilson2020case}{Wilson 2020})\footnote{For
+objectives (\citeproc{ref-wilson2020case}{Wilson 2020}).\footnote{For
   clarity: we follow standard ML convention in using ``degrees of
-  freedom'' to refer to the number of parameters estimated from data.}.
+  freedom'' to refer to the number of parameters estimated from data.}
 Based purely on predictive performance, these solutions may seem to
 provide compelling explanations for the data, when in fact they are
 based on purely associative, semantically meaningless patterns. This
@@ -538,7 +538,7 @@ Ignoring all other features, this complies with the definition of
 plausibility if 40-year-old individuals are in fact more credit-worthy
 on average than young adults. But of course this CE does not qualify for
 providing actionable recourse to the applicant since \emph{age} is not a
-mutable feature. For our intents and purposes, counterfactual training
+(directly) mutable feature. For our intents and purposes, counterfactual training
 aims at improving model explainability by aligning models with
 counterfactuals that meet both desiderata, plausibility and
 actionability. Formally, we define explainability as follows:
@@ -569,7 +569,7 @@ follows:
   \(\int^{A} p(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1\)
   where \(A\) is some small region around \(\mathbf{x}^{\prime}\).
 \item
-  (Actionability) Permutations \(\Delta\) are subject to actionability
+  (Actionability) Permutations \(\Delta\) are subject to some actionability
   constraints.
 \end{enumerate}
 
@@ -608,9 +608,9 @@ initially proposed by Wachter, Mittelstadt, and Russell
 let \(T\) vary and consider the counterfactual search as converged as
 soon as the predicted probability for the target class has reached a
 pre-determined threshold, \(\tau\):
-\(\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}^\prime))[y^+] \geq \tau\)\footnote{For
+\(\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}^\prime))[y^+] \geq \tau\), where \(\mathcal{S}\) is the softmax function.\footnote{For
   detailed background information on gradient-based counterfactual
-  search and convergence see Section~\ref{sec-app-ce}.}.
+  search and convergence see Section~\ref{sec-app-ce}.}
 
 To train models with high explainability as defined in
 Definition~\ref{def-explainability}, we propose to leverage
@@ -683,7 +683,7 @@ of observed training samples (positive samples) while at same time
 increasing the energy of counterfactuals (negative samples)
 (\citeproc{ref-du2019implicit}{Du and Mordatch 2020}). As the generated
 counterfactuals get more plausible (Definition~\ref{def-explainability})
-over the cause of training, these two opposing effects gradually balance
+over the course of training, these two opposing effects gradually balance
 each out (\citeproc{ref-lippe2024uvadlc}{Lippe 2024}).
 
 The departure from SGLD allows us to tap into the vast repertoire of
@@ -728,7 +728,7 @@ to work with a different distinction between CE and AE than Freiesleben
 (\citeproc{ref-freiesleben2022intriguing}{2022}), who considers
 misclassification as the key distinguishing feature of AE. One of the
 key observations in this work is that we can leverage counterfactual
-explanations during training and get adversarial examples, essentially
+explanations during training and get adversarial examples essentially
 for free.
 
 \subsection{Encoding Actionability Constraints}\label{sec-constraints}
