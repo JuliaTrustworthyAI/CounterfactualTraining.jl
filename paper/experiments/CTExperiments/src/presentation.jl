@@ -13,6 +13,9 @@ global _rowvar = nothing
 global _rowvar_ce = nothing
 global _colvar_ce = nothing
 global _byvars_ce = nothing
+global _lnstyvar = nothing
+global _dodgevar = nothing
+global _sidevar = nothing
 
 include("plots.jl")
 include("tables.jl")
@@ -243,7 +246,7 @@ function aggregate_ce_evaluation(
 
     # Aggregate:
     if "run" in names(df) 
-        df_agg = aggregate_data(df, y, byvars; byvars_must_include=["run"])
+        df_agg = aggregate_data(df, y, byvars; byvars_must_include=["run", "lambda_energy_eval"])
         if agg_runs
             # Compute mean of means and std of means:
             df_agg = groupby(df_agg, byvars) |>

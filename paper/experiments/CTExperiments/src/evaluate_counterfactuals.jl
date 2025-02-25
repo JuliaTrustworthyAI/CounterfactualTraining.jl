@@ -29,8 +29,8 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
     n_individuals::Int = get_global_param("n_individuals", 100)
     n_runs::Int = get_global_param("n_runs", 5)
     conv::AbstractString = "threshold"
-    decision_threshold::AbstractFloat = 0.75
-    maxiter::Int = 100
+    decision_threshold::AbstractFloat = 0.95
+    maxiter::Int = 50
     vertical_splits::Int = get_global_param("vertical_splits", 100)
     store_ce::Bool = false
     parallelizer::AbstractString = "mpi"
