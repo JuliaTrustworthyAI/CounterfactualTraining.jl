@@ -267,8 +267,8 @@ function aggregate_ce_evaluation(
         other_names = objectives[lowercase.(objectives) .!= "vanilla"]
         for obj in other_names
             df_agg[:, Symbol(obj)] .=
-                100 .* (df_agg[:, Symbol(vanilla_name)] .- df_agg[:, Symbol(obj)]) ./
-                df_agg[:, Symbol(vanilla_name)]
+                100 .* (df_agg[:, Symbol(obj)] .- df_agg[:, Symbol(vanilla_name)]) ./
+                abs.(df_agg[:, Symbol(vanilla_name)])
         end
         df_agg = DataFrames.stack(
             df_agg[:, Not(Symbol(vanilla_name))],

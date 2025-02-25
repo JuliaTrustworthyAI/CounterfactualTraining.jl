@@ -25,7 +25,7 @@ rowvar_ce = get_global_param("rowvar_ce", CTExperiments._rowvar_ce)
 colvar_ce = get_global_param("colvar_ce", CTExperiments._colvar_ce)
 lnstyvar = get_global_param("lnstyvar", CTExperiments._lnstyvar)
 sidevar = get_global_param("sidevar", CTExperiments._sidevar)
-dodgevar = get_global_param("dodgevar", CTExperiments._dodgevar)
+dodgevar = get_global_param("dodgevar", colorvar_ce)
 
 global _save_plots = get_global_param("save_plots", true)
 

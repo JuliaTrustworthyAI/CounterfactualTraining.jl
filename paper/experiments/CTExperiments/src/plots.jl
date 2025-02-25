@@ -84,7 +84,11 @@ function plot_errorbar_logs(
     plt = data(df_agg)
     if use_line_plot
         if !isnothing(lnstyvar)
-            layers = visual(Lines) * mapping(; linestyle=lnstyvar => nonnumeric) 
+            layers =
+                visual(Lines) * mapping(;
+                    linestyle=lnstyvar =>
+                        nonnumeric => CTExperiments.format_header(lnstyvar),
+                )
         else
             layers = visual(Lines)
         end
@@ -93,7 +97,7 @@ function plot_errorbar_logs(
         plt = plt * mapping(:epoch => "Epoch", :mean => "Value", :std) * visual(Errorbars)
     end
     if !isnothing(colorvar)
-        plt = plt * mapping(; color=colorvar => nonnumeric)
+        plt = plt * mapping(; color=colorvar => nonnumeric => CTExperiments.format_header(colorvar))
     end
     if !isnothing(rowvar)
         plt = plt * mapping(; row=rowvar => nonnumeric)
