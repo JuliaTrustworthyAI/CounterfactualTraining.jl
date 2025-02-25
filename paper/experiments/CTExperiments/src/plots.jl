@@ -75,7 +75,7 @@ function plot_errorbar_logs(
     byvars = gather_byvars(byvars, colorvar, rowvar, colvar, lnstyvar)
 
     # Aggregate logs:
-    df_agg = aggregate_logs(cfg; y=y, byvars=byvars)
+    df_agg = aggregate_logs(cfg; y=y, byvars=byvars) |> format_plot_data
     if isnothing(use_line_plot)
         use_line_plot = all(isnan.(df_agg.std))
     end
@@ -126,7 +126,8 @@ function plot_measure_ce(
     byvars = gather_byvars(byvars, colorvar, rowvar, colvar, sidevar, dodgevar, x)
 
     # Aggregate:
-    df_agg = aggregate_ce_evaluation(df, df_meta, df_eval; y=y, byvars=byvars, agg_runs=false)
+    df_agg = aggregate_ce_evaluation(df, df_meta, df_eval; y=y, byvars=byvars, agg_runs=false) |>
+        format_plot_data
 
     # Plotting:
     plt = plot_measure_ce(df_agg, x; colorvar, rowvar, colvar, sidevar, dodgevar, kwrgs...)
@@ -150,7 +151,7 @@ function plot_measure_ce(
     # Plotting:
     plt =
         data(df_agg) *
-        mapping(Symbol(x), :mean => "Value") *
+        mapping(:generator_type => "Generator", :mean => "Value") *
         vis
     if !isnothing(colorvar)
         plt = plt * mapping(; color=colorvar => nonnumeric)
@@ -485,4 +486,16 @@ function plot_ce(
     w, h = (_cols * 2default_axis.width, _rows * 2default_axis.height)
 
     return Plots.plot(plts...; layout=layout, size=(w, h))
+end
+
+format_objective(str::String) = uppercasefirst(str)
+
+function format_plot_data(df)
+    if "generator_type" in names(df)
+        df.generator_type = CTExperiments.format_generator.(df.generator_type)
+    end
+    if "objective" in names(df)
+        df.objective = format_objective.(df.objective)
+    end
+    return df
 end

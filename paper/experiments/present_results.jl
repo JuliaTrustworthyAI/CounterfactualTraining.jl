@@ -78,19 +78,19 @@ for y in valid_y
 end
 
 # # Plot images:
-try
-    plot_ce(
-        eval_grid;
-        save_dir=final_save_dir,
-        byvars=get_global_param("byvars_ce", CTExperiments._byvars_ce),
-    )
-catch
-    @info "Skipping CE plots for multi-dim data."
-end
+# try
+#     plot_ce(
+#         eval_grid;
+#         save_dir=final_save_dir,
+#         byvars=get_global_param("byvars_ce", CTExperiments._byvars_ce),
+#     )
+# catch
+#     @info "Skipping CE plots for multi-dim data."
+# end
 
 # exper_list = load_list(exper_grid)
 # eval_list = load_list(eval_grid)
 # plot_ce(exper_list; layout=(4, 3))
 # plot_ce(exper_list, eval_list[1]; layout=(4, 3), target=2)
 
-@info "Images stored in $final_save_dir/"
+# @info "Images stored in $final_save_dir/"
