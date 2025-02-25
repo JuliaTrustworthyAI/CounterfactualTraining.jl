@@ -118,6 +118,7 @@ function plot_measure_ce(
     colvar::Union{Nothing,String}="generator_type",
     sidevar::Union{Nothing,String}=nothing,
     dodgevar::Union{Nothing,String}=nothing,
+    rebase::Bool=true,
     lnstyvar=nothing,
     kwrgs...,
 )
@@ -126,11 +127,11 @@ function plot_measure_ce(
     byvars = gather_byvars(byvars, colorvar, rowvar, colvar, sidevar, dodgevar, x)
 
     # Aggregate:
-    df_agg = aggregate_ce_evaluation(df, df_meta, df_eval; y=y, byvars=byvars, agg_runs=false) |>
+    df_agg = aggregate_ce_evaluation(df, df_meta, df_eval; y=y, byvars=byvars, agg_runs=false, rebase) |>
         format_plot_data
 
     # Plotting:
-    plt = plot_measure_ce(df_agg, x; colorvar, rowvar, colvar, sidevar, dodgevar, kwrgs...)
+    plt = plot_measure_ce(df_agg, x; colorvar, rowvar, colvar, sidevar, dodgevar, rebase, kwrgs...)
 
     return plt, df_agg
 end
@@ -142,19 +143,21 @@ function plot_measure_ce(
     rowvar::Union{Nothing,String}=nothing,
     colvar::Union{Nothing,String}=nothing,
     sidevar::Union{Nothing,String}=nothing,
+    rebase::Bool=true,
     dodgevar::Union{Nothing,String}=nothing,
-    lnstyvar=nothing,
     facet=default_facet,
     axis=default_axis,
     vis=visual(BoxPlot),
+    lnstyvar=nothing,
 )
     # Plotting:
+    ylab = rebase ? "Change (%)" : "Value"
     plt =
         data(df_agg) *
-        mapping(:generator_type => "Generator", :mean => "Value") *
+        mapping(:generator_type => "Generator", :mean => ylab) *
         vis
     if !isnothing(colorvar)
-        plt = plt * mapping(; color=colorvar => nonnumeric)
+        plt = plt * mapping(; color=colorvar => nonnumeric => CTExperiments.format_header(colorvar))
     end
     if !isnothing(rowvar)
         plt = plt * mapping(; row=rowvar => nonnumeric)
@@ -169,7 +172,13 @@ function plot_measure_ce(
         plt = plt * mapping(; dodge=dodgevar => nonnumeric)
     end
 
-    plt = draw(plt; facet=facet, axis=axis)
+    # Horizontal line
+    if rebase
+        plt_hline = mapping([0]) * visual(HLines)
+        plt = plt + plt_hline
+    end
+
+    plt = draw(plt; facet=facet, axis=axis, legend=(position=:top, titleposition=:left))    
 
     return plt
 end

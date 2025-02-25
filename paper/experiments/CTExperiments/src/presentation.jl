@@ -230,7 +230,8 @@ function aggregate_ce_evaluation(
     df_eval::DataFrame;
     y::String="plausibility_distance_from_target",
     byvars::Union{Nothing,String,Vector{String}}=nothing,
-    agg_runs::Bool=false
+    agg_runs::Bool=false,
+    rebase::Bool=true,
 )
     # Assertions:
     valid_y = valid_y_ce(df)
@@ -246,16 +247,38 @@ function aggregate_ce_evaluation(
 
     # Aggregate:
     if "run" in names(df) 
-        df_agg = aggregate_data(df, y, byvars; byvars_must_include=["run", "lambda_energy_eval"])
+        df_agg = aggregate_data(df, y, byvars; byvars_must_include=["run", "lambda_energy_eval", "objective"])
         if agg_runs
             # Compute mean of means and std of means:
             df_agg = groupby(df_agg, byvars) |>
                 df -> combine(df, :mean => (y -> (mean=mean(y), std=std(y))) => AsTable)
         end
-        return df_agg
+        df_agg
     else
-        return aggregate_data(df, y, byvars)
+        df_agg = aggregate_data(df, y, byvars)
     end
+
+    # Subtract from Vanilla:
+    if rebase
+        @assert "objective" in names(df_agg) "Cannot rebase with respect to 'vanilla' objective is the 'objective' column is not present."
+        objectives = unique(df_agg.objective)
+        df_agg = DataFrames.unstack(df_agg[:, Not(:std)], :objective, :mean)
+        vanilla_name = objectives[lowercase.(objectives) .== "vanilla"][1]
+        other_names = objectives[lowercase.(objectives) .!= "vanilla"]
+        for obj in other_names
+            df_agg[:, Symbol(obj)] .=
+                100 .* (df_agg[:, Symbol(vanilla_name)] .- df_agg[:, Symbol(obj)]) ./
+                df_agg[:, Symbol(vanilla_name)]
+        end
+        df_agg = DataFrames.stack(
+            df_agg[:, Not(Symbol(vanilla_name))],
+            Symbol.(other_names);
+            value_name=:mean,
+            variable_name=:objective,
+        )
+    end
+
+    return df_agg
 end
 
 function valid_y_ce(df::DataFrame)

@@ -172,30 +172,33 @@ global LatexReplacements = Dict(
 
 function format_header(s::String; replacements::Dict=LatexReplacements)
     s =
-        replace(s, "_type" => "") |>
+        replace(s, "_exper" => "") |>
         s ->
-            replace(s, "_params" => "_parameters") |>
+            replace(s, "_eval" => "") |>
+            s -> replace(s, "_type" => "") |>
             s ->
-                replace(s, "lr" => "learning_rate") |>
+                replace(s, "_params" => "_parameters") |>
                 s ->
-                    replace(s, "maxiter" => "maximum_iterations") |>
+                    replace(s, "lr" => "learning_rate") |>
                     s ->
-                        replace(s, "opt" => "optimizer") |>
+                        replace(s, "maxiter" => "maximum_iterations") |>
                         s ->
-                            replace(s, "conv" => "convergence") |>
+                            replace(s, "opt" => "optimizer") |>
                             s ->
-                                replace(s, "opt" => "optimizer") |>
+                                replace(s, "conv" => "convergence") |>
                                 s ->
-                                    replace(s, "n_" => "no._") |>
-                                    s -> if s in keys(replacements)
-                                        replacements[s]
-                                    else
-                                        s |>
-                                        s ->
-                                            split(s, "_") |>
-                                            ss ->
-                                                [uppercasefirst(s) for s in ss] |> ss -> join(ss, " ")
-                                    end
+                                    replace(s, "opt" => "optimizer") |>
+                                    s ->
+                                        replace(s, r"^n_" => "no._") |>
+                                        s -> if s in keys(replacements)
+                                            replacements[s]
+                                        else
+                                            s |>
+                                            s ->
+                                                split(s, "_") |>
+                                                ss ->
+                                                    [uppercasefirst(s) for s in ss] |> ss -> join(ss, " ")
+                                        end
     return s
 end
 
