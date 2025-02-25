@@ -142,7 +142,10 @@ function get_config_from_args(;
     end
 
     # Do not return adjust path:
-    if !return_adjusted
+    if !return_adjusted || isinteractive()
+        if isinteractive()
+            @warn "Interactive session: returning unadjusted filepath."
+        end
         return fname
     end
 

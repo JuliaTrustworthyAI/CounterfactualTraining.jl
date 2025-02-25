@@ -42,7 +42,7 @@ export generate_factual_target_pairs
 export to_toml
 export aggregate_logs, aggregate_ce_evaluation
 export PlotParams, useful_byvars
-export plot_errorbar_logs, boxplot_ce, plot_ce
+export plot_errorbar_logs, plot_measure_ce, plot_ce
 export set_work_dir, get_work_dir, results_dir
 export save_dir
 export get_config_from_args

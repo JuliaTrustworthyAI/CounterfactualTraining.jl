@@ -12,6 +12,9 @@ Base.@kwdef struct PlotParams
     colorvar::Union{Nothing,String} = get_global_param("colorvar", nothing)
     rowvar::Union{Nothing,String} = get_global_param("rowvar", nothing)
     colvar::Union{Nothing,String} = get_global_param("colvar", nothing)
+    lnstyvar::Union{Nothing,String} = get_global_param("lnstyvar", nothing)
+    sidevar::Union{Nothing,String} = get_global_param("sidevar", nothing)
+    dodgevar::Union{Nothing,String} = get_global_param("dodgevar", nothing)
 end
 
 function (params::PlotParams)()
@@ -21,6 +24,9 @@ function (params::PlotParams)()
         colorvar=params.colorvar,
         rowvar=params.rowvar,
         colvar=params.colvar,
+        lnstyvar=params.lnstyvar,
+        sidevar=params.sidevar,
+        dodgevar=params.dodgevar,
     )
 end
 
@@ -53,25 +59,36 @@ A Makie plot object displaying error bars for aggregated logs.
 """
 function plot_errorbar_logs(
     cfg::EvalConfigOrGrid;
-    x::Nothing=nothing,
     y::String="acc_val",
     byvars::Union{Nothing,String,Vector{String}}=nothing,
     colorvar::Union{Nothing,String}=nothing,
     rowvar::Union{Nothing,String}=nothing,
     colvar::Union{Nothing,String}="generator_type",
+    lnstyvar::Union{Nothing,String}=nothing,
     facet=default_facet,
     axis=default_axis,
+    use_line_plot::Bool=true,
+    x=nothing,
+    sidevar=nothing,
+    dodgevar=nothing,
 )
-    byvars = gather_byvars(byvars, colorvar, rowvar, colvar)
+    byvars = gather_byvars(byvars, colorvar, rowvar, colvar, lnstyvar)
 
     # Aggregate logs:
     df_agg = aggregate_logs(cfg; y=y, byvars=byvars)
-    use_line_plot = all(isnan.(df_agg.std))
+    if isnothing(use_line_plot)
+        use_line_plot = all(isnan.(df_agg.std))
+    end
 
     # Plotting:
     plt = data(df_agg)
     if use_line_plot
-        plt = plt * mapping(:epoch => "Epoch", :mean => "Value") * visual(Lines)
+        if !isnothing(lnstyvar)
+            layers = visual(Lines) * mapping(; linestyle=lnstyvar => nonnumeric) 
+        else
+            layers = visual(Lines)
+        end
+        plt = plt * layers * mapping(:epoch => "Epoch", :mean => "Value")
     else
         plt = plt * mapping(:epoch => "Epoch", :mean => "Value", :std) * visual(Errorbars)
     end
@@ -89,7 +106,7 @@ function plot_errorbar_logs(
     return plt, df_agg
 end
 
-function boxplot_ce(
+function plot_measure_ce(
     df::DataFrame,
     df_meta::DataFrame,
     df_eval::DataFrame;
@@ -99,32 +116,42 @@ function boxplot_ce(
     colorvar::Union{Nothing,String}=nothing,
     rowvar::Union{Nothing,String}=nothing,
     colvar::Union{Nothing,String}="generator_type",
+    sidevar::Union{Nothing,String}=nothing,
+    dodgevar::Union{Nothing,String}=nothing,
+    lnstyvar=nothing,
     kwrgs...,
 )
     x = isnothing(x) ? "generator_type" : x
 
-    byvars = gather_byvars(byvars, colorvar, rowvar, colvar, x)
+    byvars = gather_byvars(byvars, colorvar, rowvar, colvar, sidevar, dodgevar, x)
 
     # Aggregate:
-    df_agg = aggregate_ce_evaluation(df, df_meta, df_eval; y=y, byvars=byvars)
+    df_agg = aggregate_ce_evaluation(df, df_meta, df_eval; y=y, byvars=byvars, agg_runs=false)
 
     # Plotting:
-    plt = boxplot_ce(df_agg, x; colorvar, rowvar, colvar, kwrgs...)
+    plt = plot_measure_ce(df_agg, x; colorvar, rowvar, colvar, sidevar, dodgevar, kwrgs...)
 
     return plt, df_agg
 end
 
-function boxplot_ce(
+function plot_measure_ce(
     df_agg::DataFrame,
     x::Union{Nothing,String}="generator_type";
     colorvar::Union{Nothing,String}=nothing,
     rowvar::Union{Nothing,String}=nothing,
     colvar::Union{Nothing,String}=nothing,
+    sidevar::Union{Nothing,String}=nothing,
+    dodgevar::Union{Nothing,String}=nothing,
+    lnstyvar=nothing,
     facet=default_facet,
     axis=default_axis,
+    vis=visual(BoxPlot),
 )
     # Plotting:
-    plt = data(df_agg) * mapping(Symbol(x), :mean => "Value") * visual(BoxPlot)
+    plt =
+        data(df_agg) *
+        mapping(Symbol(x), :mean => "Value") *
+        vis
     if !isnothing(colorvar)
         plt = plt * mapping(; color=colorvar => nonnumeric)
     end
@@ -133,6 +160,12 @@ function boxplot_ce(
     end
     if !isnothing(colvar)
         plt = plt * mapping(; col=colvar => nonnumeric)
+    end
+    if !isnothing(sidevar)
+        plt = plt * mapping(; side=sidevar => nonnumeric)
+    end
+    if !isnothing(dodgevar)
+        plt = plt * mapping(; dodge=dodgevar => nonnumeric)
     end
 
     plt = draw(plt; facet=facet, axis=axis)

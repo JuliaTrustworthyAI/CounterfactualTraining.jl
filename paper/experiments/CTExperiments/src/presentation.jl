@@ -227,6 +227,7 @@ function aggregate_ce_evaluation(
     df_eval::DataFrame;
     y::String="plausibility_distance_from_target",
     byvars::Union{Nothing,String,Vector{String}}=nothing,
+    agg_runs::Bool=false
 )
     # Assertions:
     valid_y = valid_y_ce(df)
@@ -241,8 +242,14 @@ function aggregate_ce_evaluation(
     select!(df, Not(:variable))
 
     # Aggregate:
-    if "run" in names(df)
-        return aggregate_data(df, y, byvars; byvars_must_include=["run"])
+    if "run" in names(df) 
+        df_agg = aggregate_data(df, y, byvars; byvars_must_include=["run"])
+        if agg_runs
+            # Compute mean of means and std of means:
+            df_agg = groupby(df_agg, byvars) |>
+                df -> combine(df, :mean => (y -> (mean=mean(y), std=std(y))) => AsTable)
+        end
+        return df_agg
     else
         return aggregate_data(df, y, byvars)
     end

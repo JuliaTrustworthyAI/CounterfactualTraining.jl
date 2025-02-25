@@ -24,6 +24,8 @@ colorvar_ce = get_global_param("colorvar_ce", colorvar)
 rowvar_ce = get_global_param("rowvar_ce", CTExperiments._rowvar_ce)
 colvar_ce = get_global_param("colvar_ce", CTExperiments._colvar_ce)
 
+global _save_plots = false
+
 # Visualize logs:
 prefix = "logs"
 valid_y = CTExperiments.valid_y_logs(eval_grid)
@@ -31,16 +33,21 @@ params = PlotParams(;
     colorvar=get_global_param("colorvar_logs", colorvar),
     rowvar=get_global_param("rowvar_logs", rowvar),
     colvar=get_global_param("colvar_logs", colvar),
+    lnstyvar=get_global_param("lnstyvar", lnstyvar)
 )
 @info "Logs Errorbars"
 @info params
 final_save_dir = save_dir(params, output_dir; prefix)
 for y in valid_y
-    plt, _ = plot_errorbar_logs(eval_grid; y=y, params()...)
+    plt, df_agg = plot_errorbar_logs(eval_grid; y=y, params()...)
     display(plt)
-    save(joinpath(final_save_dir, "$y.png"), plt; px_per_unit=3)
+    if _save_plots
+        save(joinpath(final_save_dir, "$y.png"), plt; px_per_unit=3)
+    end
 end
-@info "Images stored in $final_save_dir/"
+if _save_plots
+    @info "Images stored in $final_save_dir/"
+end
 
 # Visualize CE:
 prefix = "ce"
@@ -52,15 +59,19 @@ params = PlotParams(;
     colorvar=get_global_param("colorvar_ce", colorvar_ce),
     rowvar=get_global_param("rowvar_ce", rowvar_ce),
     colvar=get_global_param("colvar_ce", colvar_ce),
+    sidevar=get_global_param("sidevar", sidevar),
+    dodgevar=get_global_param("dodgevar", dodgevar),
 )
 @info "CE Boxplots"
 @info params
 final_save_dir = save_dir(params, output_dir; prefix)
 for y in valid_y
-    plt, tbl = boxplot_ce(all_data...; y=y, params()...)
+    plt, tbl = plot_measure_ce(all_data...; y=y, params()...)
     display(plt)
-    save(joinpath(final_save_dir, "$y.png"), plt; px_per_unit=3)
-    CSV.write(joinpath(final_save_dir, "$y.csv"), tbl)
+    if _save_plots
+        save(joinpath(final_save_dir, "$y.png"), plt; px_per_unit=3)
+        CSV.write(joinpath(final_save_dir, "$y.csv"), tbl)
+    end
 end
 
 # # Plot images:
