@@ -8,6 +8,7 @@ using TaijaParallel
 using Flux
 
 const Opt = Flux.Optimise.AbstractOptimiser
+const default_ce_search_lr = 0.25
 
 "Type for the ECCoGenerator."
 struct ECCo <: AbstractGeneratorType end
@@ -75,7 +76,7 @@ Mutable struct holding keyword arguments relevant to counterfactual generator.
 """
 Base.@kwdef struct GeneratorParams <: AbstractGeneratorParams
     type::AbstractGeneratorType = ECCo()
-    lr::AbstractFloat = 1.0
+    lr::AbstractFloat = default_ce_search_lr
     opt::AbstractString = "sgd"
     maxiter::Int = 30
     decision_threshold::AbstractFloat = 0.75
