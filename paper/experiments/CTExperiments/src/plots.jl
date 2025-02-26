@@ -97,7 +97,9 @@ function plot_errorbar_logs(
         plt = plt * mapping(:epoch => "Epoch", :mean => "Value", :std) * visual(Errorbars)
     end
     if !isnothing(colorvar)
-        plt = plt * mapping(; color=colorvar => nonnumeric => CTExperiments.format_header(colorvar))
+        plt =
+            plt *
+            mapping(; color=colorvar => nonnumeric => CTExperiments.format_header(colorvar))
     end
     if !isnothing(rowvar)
         plt = plt * mapping(; row=rowvar => nonnumeric)
@@ -131,11 +133,15 @@ function plot_measure_ce(
     byvars = gather_byvars(byvars, colorvar, rowvar, colvar, sidevar, dodgevar, x)
 
     # Aggregate:
-    df_agg = aggregate_ce_evaluation(df, df_meta, df_eval; y=y, byvars=byvars, agg_runs=false, rebase) |>
-        format_plot_data
+    df_agg =
+        aggregate_ce_evaluation(
+            df, df_meta, df_eval; y=y, byvars=byvars, agg_runs=false, rebase
+        ) |> format_plot_data
 
     # Plotting:
-    plt = plot_measure_ce(df_agg, x; colorvar, rowvar, colvar, sidevar, dodgevar, rebase, kwrgs...)
+    plt = plot_measure_ce(
+        df_agg, x; colorvar, rowvar, colvar, sidevar, dodgevar, rebase, kwrgs...
+    )
 
     return plt, df_agg
 end
@@ -162,16 +168,17 @@ function plot_measure_ce(
             plt_hline = mapping([0]) * visual(HLines)
         else
             hl = unique(df_agg.avg_baseline)
-            plt_hline = mapping(hl) * visual(HLines, label="Baseline Average", linestyle=:dot, color=:red)
+            plt_hline =
+                mapping(hl) *
+                visual(HLines; label="Baseline Average", linestyle=:dot, color=:red)
         end
     end
 
-    plt =
-        data(df_agg) *
-        mapping(:generator_type => "Generator", :mean => ylab) *
-        vis
+    plt = data(df_agg) * mapping(:generator_type => "Generator", :mean => ylab) * vis
     if !isnothing(colorvar)
-        plt = plt * mapping(; color=colorvar => nonnumeric => CTExperiments.format_header(colorvar))
+        plt =
+            plt *
+            mapping(; color=colorvar => nonnumeric => CTExperiments.format_header(colorvar))
     end
     if !isnothing(rowvar)
         plt = plt * mapping(; row=rowvar => nonnumeric)
@@ -191,7 +198,7 @@ function plot_measure_ce(
         plt = plt + plt_hline
     end
 
-    plt = draw(plt; facet=facet, axis=axis, legend=(position=:top, titleposition=:left))    
+    plt = draw(plt; facet=facet, axis=axis, legend=(position=:top, titleposition=:left))
 
     return plt
 end
@@ -199,7 +206,9 @@ end
 function plot_ce(
     cfg::EvalConfigOrGrid; save_dir=nothing, overwrite::Bool=false, nce::Int=1, kwrgs...
 )
-    return plot_ce(CTExperiments.get_data_set(cfg)(), cfg; save_dir=save_dir, overwrite, nce, kwrgs...)
+    return plot_ce(
+        CTExperiments.get_data_set(cfg)(), cfg; save_dir=save_dir, overwrite, nce, kwrgs...
+    )
 end
 
 function plot_ce(
@@ -221,7 +230,9 @@ function plot_ce(
         else
             local_save_dir = nothing
         end
-        plt = plot_ce(dataset, eval_config; save_dir=local_save_dir, overwrite, nce, kwrgs...)
+        plt = plot_ce(
+            dataset, eval_config; save_dir=local_save_dir, overwrite, nce, kwrgs...
+        )
         push!(plt_list, plt)
     end
     return plt_list
@@ -369,8 +380,8 @@ function plot_ce(data::Dataset, df::DataFrame, factual::Int, target::Int; axis=d
             title = ""
             Plots.scatter!(
                 plt,
-                x[1,:],
-                x[2,:];
+                x[1, :],
+                x[2, :];
                 label="Factual",
                 size=values(axis),
                 title=title,
@@ -381,8 +392,8 @@ function plot_ce(data::Dataset, df::DataFrame, factual::Int, target::Int; axis=d
             title = "$factual→$target"
             Plots.scatter!(
                 plt,
-                x[1,:],
-                x[2,:];
+                x[1, :],
+                x[2, :];
                 label="Counterfactual",
                 size=values(axis),
                 title=title,

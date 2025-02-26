@@ -87,7 +87,9 @@ function get_parallelizer(cfg::CounterfactualParams)
     return get_parallelizer(cfg.parallelizer; threaded=cfg.threaded)
 end
 
-get_convergence(cfg::CounterfactualParams) = get_convergence(cfg.conv, cfg.maxiter, cfg.decision_threshold)
+function get_convergence(cfg::CounterfactualParams)
+    return get_convergence(cfg.conv, cfg.maxiter, cfg.decision_threshold)
+end
 
 """
     evaluate_counterfactuals(
@@ -382,7 +384,7 @@ function generate_factual_target_pairs(
     cfg::AbstractEvaluationConfig;
     fname::Union{Nothing,String}=nothing,
     overwrite::Bool=false,
-    nce::Int=1
+    nce::Int=1,
 )
     fname = if isnothing(fname)
         default_factual_target_pairs_name(cfg)
@@ -423,7 +425,7 @@ function generate_factual_target_pairs(
     data::CounterfactualData,
     models::AbstractDict,
     generators::AbstractDict;
-    nce::Int=1
+    nce::Int=1,
 )
 
     # Targets and factuals:

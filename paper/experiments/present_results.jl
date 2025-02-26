@@ -36,7 +36,7 @@ params = PlotParams(;
     colorvar=get_global_param("colorvar_logs", colorvar),
     rowvar=get_global_param("rowvar_logs", rowvar),
     colvar=get_global_param("colvar_logs", colvar),
-    lnstyvar=get_global_param("lnstyvar", lnstyvar)
+    lnstyvar=get_global_param("lnstyvar", lnstyvar),
 )
 @info "Logs Errorbars"
 @info params

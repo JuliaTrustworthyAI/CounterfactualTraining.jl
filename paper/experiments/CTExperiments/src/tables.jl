@@ -42,7 +42,7 @@ function get_table_inputs(
     hls = value_highlighter(df, value_var; backend=backend, kwrgs...)
     if "generator_type" in names(df)
         # Filter out "omni":
-        df = df[df.generator_type .!= "omni",:]
+        df = df[df.generator_type .!= "omni", :]
         df.generator_type = format_generator.(df.generator_type)
         gen_hl = generator_highlighter(df; backend=backend)
         hls = (hls..., gen_hl)

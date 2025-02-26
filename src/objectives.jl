@@ -34,7 +34,8 @@ needs_counterfactuals(obj::VanillaObjective) = obj.needs_ce
 
 Outer constructor to allow passing just `class_loss` and `lambda` as positional arguments.
 """
-VanillaObjective(class_loss, lambda; needs_ce=false) = VanillaObjective(class_loss, lambda, needs_ce)
+VanillaObjective(class_loss, lambda; needs_ce=false) =
+    VanillaObjective(class_loss, lambda, needs_ce)
 
 """
     VanillaObjective(;

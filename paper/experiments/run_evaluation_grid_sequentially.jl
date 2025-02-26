@@ -84,7 +84,9 @@ for (i, eval_config) in enumerate(eval_list)
         end
 
         # Generate factual target pairs for plotting:
-        generate_factual_target_pairs(eval_config; nce=CTExperiments.get_global_param("nce_pairs", 10))
+        generate_factual_target_pairs(
+            eval_config; nce=CTExperiments.get_global_param("nce_pairs", 10)
+        )
 
         # Set up evaluation work dir:
         set_work_dir(eval_grid, eval_config, ENV["EVAL_WORK_DIR"], ENV["OUTPUT_DIR"])

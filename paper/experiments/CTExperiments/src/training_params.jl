@@ -288,7 +288,7 @@ const conv_catalogue = Dict(
 function get_convergence(s::String, max_iter::Int, decision_threshold::AbstractFloat)
     s = lowercase(s)
     @assert s in keys(conv_catalogue) "Unknown convergence type: $s. Available types are $(keys(conv_catalogue))"
-    if s=="threshold"
+    if s == "threshold"
         conv = conv_catalogue[s](; max_iter, decision_threshold)
     else
         conv = conv_catalogue[s](; max_iter)
@@ -297,5 +297,9 @@ function get_convergence(s::String, max_iter::Int, decision_threshold::AbstractF
 end
 
 function get_convergence(params::TrainingParams)
-    return get_convergence(params.conv, params.generator_params.maxiter, params.generator_params.decision_threshold)
+    return get_convergence(
+        params.conv,
+        params.generator_params.maxiter,
+        params.generator_params.decision_threshold,
+    )
 end

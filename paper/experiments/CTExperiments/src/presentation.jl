@@ -246,11 +246,14 @@ function aggregate_ce_evaluation(
     select!(df, Not(:variable))
 
     # Aggregate:
-    if "run" in names(df) 
-        df_agg = aggregate_data(df, y, byvars; byvars_must_include=["run", "lambda_energy_eval", "objective"])
+    if "run" in names(df)
+        df_agg = aggregate_data(
+            df, y, byvars; byvars_must_include=["run", "lambda_energy_eval", "objective"]
+        )
         if agg_runs
             # Compute mean of means and std of means:
-            df_agg = groupby(df_agg, byvars) |>
+            df_agg =
+                groupby(df_agg, byvars) |>
                 df -> combine(df, :mean => (y -> (mean=mean(y), std=std(y))) => AsTable)
         end
         df_agg
@@ -259,7 +262,7 @@ function aggregate_ce_evaluation(
     end
 
     # Subtract from Vanilla:
-    if rebase 
+    if rebase
         @assert "objective" in names(df_agg) "Cannot rebase with respect to 'vanilla' objective is the 'objective' column is not present."
         objectives = unique(df_agg.objective)
         df_agg = DataFrames.unstack(df_agg[:, Not(:std)], :objective, :mean)
@@ -268,21 +271,23 @@ function aggregate_ce_evaluation(
         for obj in other_names
 
             # Compute differences:
-            df_agg[:, Symbol(obj)] .= (df_agg[:, Symbol(obj)] .- df_agg[:, Symbol(vanilla_name)])
+            df_agg[:, Symbol(obj)] .= (
+                df_agg[:, Symbol(obj)] .- df_agg[:, Symbol(vanilla_name)]
+            )
             df_agg.is_pct .= false
-            
+
             # Further adjustment
             if !any(df_agg[:, Symbol(vanilla_name)] .== 0) .&&
                 y ∉ ["validity_strict", "validity", "redundancy"]
                 # Compute percentage if only non-zero:
-                df_agg[:, Symbol(obj)] .= 100 .* df_agg[:, Symbol(obj)] ./ abs.(df_agg[:, Symbol(vanilla_name)])
+                df_agg[:, Symbol(obj)] .=
+                    100 .* df_agg[:, Symbol(obj)] ./ abs.(df_agg[:, Symbol(vanilla_name)])
                 df_agg.is_pct .= true
             else
                 # Otherwise store average level of baseline:
                 df_agg.avg_baseline .= mean(df_agg[:, Symbol(vanilla_name)])
                 df_agg[:, Symbol(obj)] .+= df_agg.avg_baseline
             end
-
         end
         df_agg = DataFrames.stack(
             df_agg[:, Not(Symbol(vanilla_name))],
@@ -308,7 +313,9 @@ function aggregate_counterfactuals(eval_grid::EvaluationGrid; kwrgs...)
     return aggregate_counterfactuals.(eval_list)
 end
 
-function aggregate_counterfactuals(eval_config::EvaluationConfig; overwrite::Bool=false, nce::Int=1, kwrgs...)
+function aggregate_counterfactuals(
+    eval_config::EvaluationConfig; overwrite::Bool=false, nce::Int=1, kwrgs...
+)
     bmk = generate_factual_target_pairs(eval_config; overwrite, nce)
     df = innerjoin(bmk.evaluation, bmk.counterfactuals; on=:sample)
     rename!(df, :model => :id)
@@ -339,5 +346,7 @@ function aggregate_counterfactuals(
     end
 
     # Aggregate:
-    return aggregate_data(df, "ce", byvars; byvars_must_include=byvars_must_include, agg_fun=:identity)
+    return aggregate_data(
+        df, "ce", byvars; byvars_must_include=byvars_must_include, agg_fun=:identity
+    )
 end
