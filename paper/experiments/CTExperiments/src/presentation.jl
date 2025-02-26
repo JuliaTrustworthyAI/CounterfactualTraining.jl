@@ -272,7 +272,8 @@ function aggregate_ce_evaluation(
             df_agg.is_pct .= false
             
             # Further adjustment
-            if !any(df_agg[:, Symbol(vanilla_name)] .== 0) .&& y ∉ ["validity", "redundancy"]
+            if !any(df_agg[:, Symbol(vanilla_name)] .== 0) .&&
+                y ∉ ["validity_strict", "validity", "redundancy"]
                 # Compute percentage if only non-zero:
                 df_agg[:, Symbol(obj)] .= 100 .* df_agg[:, Symbol(obj)] ./ abs.(df_agg[:, Symbol(vanilla_name)])
                 df_agg.is_pct .= true

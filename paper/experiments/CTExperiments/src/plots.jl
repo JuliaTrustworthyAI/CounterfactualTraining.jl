@@ -158,14 +158,14 @@ function plot_measure_ce(
     ylab = "Value"
     if rebase
         if unique(df_agg.is_pct)[1]
-            ylab = "Change (%)"
+            ylab = "Change from baseline (%)"
             plt_hline = mapping([0]) * visual(HLines)
         else
             hl = unique(df_agg.avg_baseline)
             plt_hline = mapping(hl) * visual(HLines, label="Baseline Average", linestyle=:dot, color=:red)
         end
     end
-    
+
     plt =
         data(df_agg) *
         mapping(:generator_type => "Generator", :mean => ylab) *

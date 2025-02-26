@@ -187,7 +187,7 @@ function format_header(s::String; replacements::Dict=LatexReplacements)
                             s ->
                                 replace(s, "conv" => "convergence") |>
                                 s ->
-                                    replace(s, "opt" => "optimizer") |>
+                                    replace(s, r"\bopt\b" => "optimizer") |>
                                     s ->
                                         replace(s, r"^n_" => "no._") |>
                                         s -> if s in keys(replacements)
