@@ -259,16 +259,29 @@ function aggregate_ce_evaluation(
     end
 
     # Subtract from Vanilla:
-    if rebase
+    if rebase 
         @assert "objective" in names(df_agg) "Cannot rebase with respect to 'vanilla' objective is the 'objective' column is not present."
         objectives = unique(df_agg.objective)
         df_agg = DataFrames.unstack(df_agg[:, Not(:std)], :objective, :mean)
         vanilla_name = objectives[lowercase.(objectives) .== "vanilla"][1]
         other_names = objectives[lowercase.(objectives) .!= "vanilla"]
         for obj in other_names
-            df_agg[:, Symbol(obj)] .=
-                100 .* (df_agg[:, Symbol(obj)] .- df_agg[:, Symbol(vanilla_name)]) ./
-                abs.(df_agg[:, Symbol(vanilla_name)])
+
+            # Compute differences:
+            df_agg[:, Symbol(obj)] .= (df_agg[:, Symbol(obj)] .- df_agg[:, Symbol(vanilla_name)])
+            df_agg.is_pct .= false
+            
+            # Further adjustment
+            if !any(df_agg[:, Symbol(vanilla_name)] .== 0) .&& y ∉ ["validity", "redundancy"]
+                # Compute percentage if only non-zero:
+                df_agg[:, Symbol(obj)] .= 100 .* df_agg[:, Symbol(obj)] ./ abs.(df_agg[:, Symbol(vanilla_name)])
+                df_agg.is_pct .= true
+            else
+                # Otherwise store average level of baseline:
+                df_agg.avg_baseline .= mean(df_agg[:, Symbol(vanilla_name)])
+                df_agg[:, Symbol(obj)] .+= df_agg.avg_baseline
+            end
+
         end
         df_agg = DataFrames.stack(
             df_agg[:, Not(Symbol(vanilla_name))],
