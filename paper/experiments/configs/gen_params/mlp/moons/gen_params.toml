@@ -3,7 +3,7 @@ dim_reduction = []
 generator_type = ["ecco", "generic", "revise"]
 data = "moons"
 model_type = "mlp"
-save_dir = "paper/experiments/output/second_run/gen_params/mlp/moons"
+save_dir = "paper/experiments/output/final_run/gen_params/mlp/moons"
 
 [data_params]
 datadir = []
@@ -25,7 +25,7 @@ opt = ["sgd"]
 lambda_cost = []
 lr = []
 maxiter = [5, 25, 50]
-lambda_energy = [0.1, 0.5, 5.0]
+lambda_energy = [0.1, 0.5, 5.0, 10.0, 20.0]
 decision_threshold = [0.75, 0.9, 0.95]
 type = []
 
