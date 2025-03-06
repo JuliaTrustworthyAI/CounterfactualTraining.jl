@@ -3,7 +3,7 @@ dim_reduction = []
 generator_type = ["ecco", "generic", "revise"]
 data = "moons"
 model_type = "mlp"
-save_dir = "paper/experiments/output/final_run/penalties/mlp/moons"
+save_dir = "paper/experiments/output/test_run/penalties/mlp/moons"
 
 [data_params]
 datadir = []
@@ -41,7 +41,7 @@ parallelizer = []
 nce = []
 threaded = []
 class_loss = []
-lambda_energy_reg = [0.0, 0.01, 0.1]
+lambda_energy_reg = [0.0, 0.01, 0.1, 0.25, 0.5]
 verbose = []
 generator_params = []
 conv = []

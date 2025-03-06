@@ -183,16 +183,16 @@
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
+\theoremstyle{definition}
+\newtheorem{example}{Example}[section]
 \theoremstyle{plain}
 \newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}
-\newtheorem{example}{Example}[section]
-\theoremstyle{definition}
 \newtheorem{exercise}{Parameters}[section]
-\theoremstyle{plain}
-\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
+\theoremstyle{plain}
+\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -1392,7 +1392,7 @@ counterfactual training.
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, colbacktitle=quarto-callout-note-color!10!white, toprule=.15mm, titlerule=0mm, coltitle=black, left=2mm, bottomtitle=1mm, breakable, opacityback=0, rightrule=.15mm, toptitle=1mm, arc=.35mm, bottomrule=.15mm, colback=white, colframe=quarto-callout-note-color-frame, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, opacitybacktitle=0.6, arc=.35mm, toptitle=1mm, leftrule=.75mm, colframe=quarto-callout-note-color-frame, colback=white, breakable, toprule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, opacityback=0, bottomtitle=1mm, bottomrule=.15mm, titlerule=0mm, coltitle=black]
 
 Figure~\ref{fig-mnist} shows much more plausible (faithful)
 counterfactuals for a model with CT than the model with conventional
@@ -1596,139 +1596,139 @@ Separable data by energy penalty.}
   \endfoot
   \endlastfoot
   0.75 & 0.1 & 5 & \textit{ECCo} & -15.9 & 16.7 \\
-  \color{green}{\textbf{0.75}} & \color{green}{\textbf{0.1}} & \color{green}{\textbf{5}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{41.9}} & \color{green}{\textbf{8.13}} \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{41.9}} & \color{Green}{\textbf{8.13}} \\
   0.75 & 0.1 & 5 & \textit{REVISE} & -64.4 & 3.58 \\
-  \color{green}{\textbf{0.75}} & \color{green}{\textbf{0.1}} & \color{green}{\textbf{25}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{28.9}} & \color{green}{\textbf{2.28}} \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{28.9}} & \color{Green}{\textbf{2.28}} \\
   0.75 & 0.1 & 25 & \textit{Generic} & -11.3 & 11.5 \\
   0.75 & 0.1 & 25 & \textit{REVISE} & -55.3 & 4.18 \\
-  \color{green}{\textbf{0.75}} & \color{green}{\textbf{0.1}} & \color{green}{\textbf{50}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{10.9}} & \color{green}{\textbf{7.47}} \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{10.9}} & \color{Green}{\textbf{7.47}} \\
   0.75 & 0.1 & 50 & \textit{Generic} & -32.3 & 16.6 \\
   0.75 & 0.1 & 50 & \textit{REVISE} & -44.1 & 4.24 \\
   0.9 & 0.1 & 5 & \textit{ECCo} & -13.7 & 13.7 \\
-  \color{green}{\textbf{0.9}} & \color{green}{\textbf{0.1}} & \color{green}{\textbf{5}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{22.3}} & \color{green}{\textbf{4.87}} \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{22.3}} & \color{Green}{\textbf{4.87}} \\
   0.9 & 0.1 & 5 & \textit{REVISE} & -27.8 & 6.26 \\
   0.9 & 0.1 & 25 & \textit{ECCo} & 8.84 & 7.13 \\
-  \color{green}{\textbf{0.9}} & \color{green}{\textbf{0.1}} & \color{green}{\textbf{25}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{30.7}} & \color{green}{\textbf{5.77}} \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{30.7}} & \color{Green}{\textbf{5.77}} \\
   0.9 & 0.1 & 25 & \textit{REVISE} & -72.7 & 34.9 \\
-  \color{green}{\textbf{0.9}} & \color{green}{\textbf{0.1}} & \color{green}{\textbf{50}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{17.1}} & \color{green}{\textbf{7.98}} \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{17.1}} & \color{Green}{\textbf{7.98}} \\
   0.9 & 0.1 & 50 & \textit{Generic} & 3.82 & 8.86 \\
   0.9 & 0.1 & 50 & \textit{REVISE} & -45.8 & 2.79 \\
-  \color{green}{\textbf{0.95}} & \color{green}{\textbf{0.1}} & \color{green}{\textbf{5}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{35.7}} & \color{green}{\textbf{7.56}} \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{35.7}} & \color{Green}{\textbf{7.56}} \\
   0.95 & 0.1 & 5 & \textit{Generic} & -13.3 & 5.73 \\
   0.95 & 0.1 & 5 & \textit{REVISE} & -54.9 & 5.43 \\
-  \color{green}{\textbf{0.95}} & \color{green}{\textbf{0.1}} & \color{green}{\textbf{25}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{37}} & \color{green}{\textbf{5.31}} \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{37}} & \color{Green}{\textbf{5.31}} \\
   0.95 & 0.1 & 25 & \textit{Generic} & 29 & 8.6 \\
   0.95 & 0.1 & 25 & \textit{REVISE} & -40.5 & 41 \\
   0.95 & 0.1 & 50 & \textit{ECCo} & 13.2 & 4.89 \\
-  \color{green}{\textbf{0.95}} & \color{green}{\textbf{0.1}} & \color{green}{\textbf{50}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{35.5}} & \color{green}{\textbf{4.27}} \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{35.5}} & \color{Green}{\textbf{4.27}} \\
   0.95 & 0.1 & 50 & \textit{REVISE} & -60.4 & 45.8 \\
-  \color{red}{\textbf{0.75}} & \color{red}{\textbf{0.5}} & \color{red}{\textbf{5}} & \color{red}{\textbf{ECCo}} & \color{red}{\textbf{-0.94}} & \color{red}{\textbf{17.6}} \\
+  \color{Red}{\textbf{0.75}} & \color{Red}{\textbf{0.5}} & \color{Red}{\textbf{5}} & \color{Red}{\textbf{ECCo}} & \color{Red}{\textbf{-0.94}} & \color{Red}{\textbf{17.6}} \\
   0.75 & 0.5 & 5 & \textit{Generic} & -11.7 & 17.4 \\
   0.75 & 0.5 & 5 & \textit{REVISE} & -37.7 & 3.92 \\
   0.75 & 0.5 & 25 & \textit{ECCo} & 14.7 & 6.32 \\
-  \color{green}{\textbf{0.75}} & \color{green}{\textbf{0.5}} & \color{green}{\textbf{25}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{32.3}} & \color{green}{\textbf{3.49}} \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{0.5}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{32.3}} & \color{Green}{\textbf{3.49}} \\
   0.75 & 0.5 & 25 & \textit{REVISE} & -39.9 & 7.21 \\
-  \color{green}{\textbf{0.75}} & \color{green}{\textbf{0.5}} & \color{green}{\textbf{50}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{28.3}} & \color{green}{\textbf{5.05}} \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{0.5}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{28.3}} & \color{Green}{\textbf{5.05}} \\
   0.75 & 0.5 & 50 & \textit{Generic} & -9.72 & 9.19 \\
   0.75 & 0.5 & 50 & \textit{REVISE} & -30 & 5.22 \\
   0.9 & 0.5 & 5 & \textit{ECCo} & -7.38 & 13.6 \\
-  \color{red}{\textbf{0.9}} & \color{red}{\textbf{0.5}} & \color{red}{\textbf{5}} & \color{red}{\textbf{Generic}} & \color{red}{\textbf{-0.0952}} & \color{red}{\textbf{17.1}} \\
+  \color{Red}{\textbf{0.9}} & \color{Red}{\textbf{0.5}} & \color{Red}{\textbf{5}} & \color{Red}{\textbf{Generic}} & \color{Red}{\textbf{-0.0952}} & \color{Red}{\textbf{17.1}} \\
   0.9 & 0.5 & 5 & \textit{REVISE} & -50.6 & 4.77 \\
-  \color{green}{\textbf{0.9}} & \color{green}{\textbf{0.5}} & \color{green}{\textbf{25}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{39.1}} & \color{green}{\textbf{8.3}} \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{0.5}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{39.1}} & \color{Green}{\textbf{8.3}} \\
   0.9 & 0.5 & 25 & \textit{Generic} & 38.6 & 6.03 \\
   0.9 & 0.5 & 25 & \textit{REVISE} & -56.9 & 4.28 \\
   0.9 & 0.5 & 50 & \textit{ECCo} & -6.53 & 10.9 \\
-  \color{green}{\textbf{0.9}} & \color{green}{\textbf{0.5}} & \color{green}{\textbf{50}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{13.6}} & \color{green}{\textbf{12.8}} \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{0.5}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{13.6}} & \color{Green}{\textbf{12.8}} \\
   0.9 & 0.5 & 50 & \textit{REVISE} & -24.1 & 12.5 \\
   0.95 & 0.5 & 5 & \textit{ECCo} & 0.596 & 1.11 \\
-  \color{green}{\textbf{0.95}} & \color{green}{\textbf{0.5}} & \color{green}{\textbf{5}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{4.57}} & \color{green}{\textbf{5.88}} \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{0.5}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{4.57}} & \color{Green}{\textbf{5.88}} \\
   0.95 & 0.5 & 5 & \textit{REVISE} & -34.3 & 6.09 \\
   0.95 & 0.5 & 25 & \textit{ECCo} & 16.5 & 3.53 \\
-  \color{green}{\textbf{0.95}} & \color{green}{\textbf{0.5}} & \color{green}{\textbf{25}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{19.1}} & \color{green}{\textbf{4.43}} \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{0.5}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{19.1}} & \color{Green}{\textbf{4.43}} \\
   0.95 & 0.5 & 25 & \textit{REVISE} & -37.2 & 39.2 \\
   0.95 & 0.5 & 50 & \textit{ECCo} & -31 & 14.2 \\
-  \color{green}{\textbf{0.95}} & \color{green}{\textbf{0.5}} & \color{green}{\textbf{50}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{24.8}} & \color{green}{\textbf{4.78}} \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{0.5}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{24.8}} & \color{Green}{\textbf{4.78}} \\
   0.95 & 0.5 & 50 & \textit{REVISE} & -1.28 & 2.7 \\
-  \color{green}{\textbf{0.75}} & \color{green}{\textbf{5}} & \color{green}{\textbf{5}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{37}} & \color{green}{\textbf{9.21}} \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{37}} & \color{Green}{\textbf{9.21}} \\
   0.75 & 5 & 5 & \textit{Generic} & 0.977 & 21.1 \\
   0.75 & 5 & 5 & \textit{REVISE} & -55.2 & 4.75 \\
-  \color{green}{\textbf{0.75}} & \color{green}{\textbf{5}} & \color{green}{\textbf{25}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{21.8}} & \color{green}{\textbf{5.97}} \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{21.8}} & \color{Green}{\textbf{5.97}} \\
   0.75 & 5 & 25 & \textit{Generic} & 17.8 & 5.33 \\
   0.75 & 5 & 25 & \textit{REVISE} & -68.1 & 8.69 \\
   0.75 & 5 & 50 & \textit{ECCo} & 0.864 & 9.51 \\
-  \color{green}{\textbf{0.75}} & \color{green}{\textbf{5}} & \color{green}{\textbf{50}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{8.56}} & \color{green}{\textbf{13.6}} \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{8.56}} & \color{Green}{\textbf{13.6}} \\
   0.75 & 5 & 50 & \textit{REVISE} & -71.8 & 3.18 \\
   0.9 & 5 & 5 & \textit{ECCo} & -3.59 & 20.3 \\
-  \color{red}{\textbf{0.9}} & \color{red}{\textbf{5}} & \color{red}{\textbf{5}} & \color{red}{\textbf{Generic}} & \color{red}{\textbf{-1.18}} & \color{red}{\textbf{16.7}} \\
+  \color{Red}{\textbf{0.9}} & \color{Red}{\textbf{5}} & \color{Red}{\textbf{5}} & \color{Red}{\textbf{Generic}} & \color{Red}{\textbf{-1.18}} & \color{Red}{\textbf{16.7}} \\
   0.9 & 5 & 5 & \textit{REVISE} & -58.6 & 3.55 \\
   0.9 & 5 & 25 & \textit{ECCo} & -1.73 & 9.07 \\
-  \color{green}{\textbf{0.9}} & \color{green}{\textbf{5}} & \color{green}{\textbf{25}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{21.9}} & \color{green}{\textbf{7.48}} \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{21.9}} & \color{Green}{\textbf{7.48}} \\
   0.9 & 5 & 25 & \textit{REVISE} & -44.4 & 4.23 \\
-  \color{green}{\textbf{0.9}} & \color{green}{\textbf{5}} & \color{green}{\textbf{50}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{30.8}} & \color{green}{\textbf{10.7}} \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{30.8}} & \color{Green}{\textbf{10.7}} \\
   0.9 & 5 & 50 & \textit{Generic} & 16.3 & 11.1 \\
   0.9 & 5 & 50 & \textit{REVISE} & -53.3 & 6.73 \\
-  \color{red}{\textbf{0.95}} & \color{red}{\textbf{5}} & \color{red}{\textbf{5}} & \color{red}{\textbf{ECCo}} & \color{red}{\textbf{-5.29}} & \color{red}{\textbf{24.5}} \\
+  \color{Red}{\textbf{0.95}} & \color{Red}{\textbf{5}} & \color{Red}{\textbf{5}} & \color{Red}{\textbf{ECCo}} & \color{Red}{\textbf{-5.29}} & \color{Red}{\textbf{24.5}} \\
   0.95 & 5 & 5 & \textit{Generic} & -5.71 & 17.4 \\
   0.95 & 5 & 5 & \textit{REVISE} & -36.5 & 4.01 \\
-  \color{green}{\textbf{0.95}} & \color{green}{\textbf{5}} & \color{green}{\textbf{25}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{26.9}} & \color{green}{\textbf{4.08}} \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{26.9}} & \color{Green}{\textbf{4.08}} \\
   0.95 & 5 & 25 & \textit{Generic} & 19.5 & 5.49 \\
   0.95 & 5 & 25 & \textit{REVISE} & -25 & 5 \\
   0.95 & 5 & 50 & \textit{ECCo} & 4.6 & 7.46 \\
-  \color{green}{\textbf{0.95}} & \color{green}{\textbf{5}} & \color{green}{\textbf{50}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{16.6}} & \color{green}{\textbf{4.3}} \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{16.6}} & \color{Green}{\textbf{4.3}} \\
   0.95 & 5 & 50 & \textit{REVISE} & -50.4 & 46.4 \\
-  \color{green}{\textbf{0.75}} & \color{green}{\textbf{10}} & \color{green}{\textbf{5}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{2.47}} & \color{green}{\textbf{8.57}} \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{2.47}} & \color{Green}{\textbf{8.57}} \\
   0.75 & 10 & 5 & \textit{Generic} & -7.23 & 9.13 \\
   0.75 & 10 & 5 & \textit{REVISE} & -67.2 & 5.75 \\
-  \color{green}{\textbf{0.75}} & \color{green}{\textbf{10}} & \color{green}{\textbf{25}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{29.9}} & \color{green}{\textbf{15.8}} \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{29.9}} & \color{Green}{\textbf{15.8}} \\
   0.75 & 10 & 25 & \textit{Generic} & 4.47 & 8.22 \\
   0.75 & 10 & 25 & \textit{REVISE} & -52 & 5.51 \\
   0.75 & 10 & 50 & \textit{ECCo} & 6.23 & 6.11 \\
-  \color{green}{\textbf{0.75}} & \color{green}{\textbf{10}} & \color{green}{\textbf{50}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{15.2}} & \color{green}{\textbf{10.2}} \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{15.2}} & \color{Green}{\textbf{10.2}} \\
   0.75 & 10 & 50 & \textit{REVISE} & -17 & 5.46 \\
   0.9 & 10 & 5 & \textit{ECCo} & -6.93 & 14.7 \\
-  \color{green}{\textbf{0.9}} & \color{green}{\textbf{10}} & \color{green}{\textbf{5}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{6.88}} & \color{green}{\textbf{5.11}} \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{6.88}} & \color{Green}{\textbf{5.11}} \\
   0.9 & 10 & 5 & \textit{REVISE} & -45.6 & 47.8 \\
   0.9 & 10 & 25 & \textit{ECCo} & 6.2 & 6.75 \\
-  \color{green}{\textbf{0.9}} & \color{green}{\textbf{10}} & \color{green}{\textbf{25}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{34.7}} & \color{green}{\textbf{9.74}} \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{34.7}} & \color{Green}{\textbf{9.74}} \\
   0.9 & 10 & 25 & \textit{REVISE} & -55.7 & 6.04 \\
   0.9 & 10 & 50 & \textit{ECCo} & 30.1 & 14.2 \\
-  \color{green}{\textbf{0.9}} & \color{green}{\textbf{10}} & \color{green}{\textbf{50}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{35}} & \color{green}{\textbf{7.11}} \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{35}} & \color{Green}{\textbf{7.11}} \\
   0.9 & 10 & 50 & \textit{REVISE} & -48.8 & 3.3 \\
-  \color{green}{\textbf{0.95}} & \color{green}{\textbf{10}} & \color{green}{\textbf{5}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{35.7}} & \color{green}{\textbf{3.83}} \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{35.7}} & \color{Green}{\textbf{3.83}} \\
   0.95 & 10 & 5 & \textit{Generic} & 2.85 & 7.9 \\
   0.95 & 10 & 5 & \textit{REVISE} & -34.9 & 4.56 \\
-  \color{green}{\textbf{0.95}} & \color{green}{\textbf{10}} & \color{green}{\textbf{25}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{33}} & \color{green}{\textbf{6.45}} \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{33}} & \color{Green}{\textbf{6.45}} \\
   0.95 & 10 & 25 & \textit{Generic} & 24.8 & 4.59 \\
   0.95 & 10 & 25 & \textit{REVISE} & -55.7 & 44 \\
-  \color{green}{\textbf{0.95}} & \color{green}{\textbf{10}} & \color{green}{\textbf{50}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{8.07}} & \color{green}{\textbf{7.68}} \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{8.07}} & \color{Green}{\textbf{7.68}} \\
   0.95 & 10 & 50 & \textit{Generic} & -7.11 & 9.2 \\
   0.95 & 10 & 50 & \textit{REVISE} & -26.1 & 18.6 \\
   0.75 & 20 & 5 & \textit{ECCo} & -10.8 & 20.8 \\
-  \color{green}{\textbf{0.75}} & \color{green}{\textbf{20}} & \color{green}{\textbf{5}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{12.6}} & \color{green}{\textbf{17.6}} \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{12.6}} & \color{Green}{\textbf{17.6}} \\
   0.75 & 20 & 5 & \textit{REVISE} & -21.6 & 3.34 \\
-  \color{green}{\textbf{0.75}} & \color{green}{\textbf{20}} & \color{green}{\textbf{25}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{17.2}} & \color{green}{\textbf{4.25}} \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{17.2}} & \color{Green}{\textbf{4.25}} \\
   0.75 & 20 & 25 & \textit{Generic} & -10.3 & 9.59 \\
   0.75 & 20 & 25 & \textit{REVISE} & -59 & 3.66 \\
-  \color{green}{\textbf{0.75}} & \color{green}{\textbf{20}} & \color{green}{\textbf{50}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{15.6}} & \color{green}{\textbf{8.38}} \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{15.6}} & \color{Green}{\textbf{8.38}} \\
   0.75 & 20 & 50 & \textit{Generic} & 3.92 & 6.2 \\
   0.75 & 20 & 50 & \textit{REVISE} & -70.9 & 5.16 \\
-  \color{green}{\textbf{0.9}} & \color{green}{\textbf{20}} & \color{green}{\textbf{5}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{26.3}} & \color{green}{\textbf{6.62}} \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{26.3}} & \color{Green}{\textbf{6.62}} \\
   0.9 & 20 & 5 & \textit{Generic} & 2.35 & 7.04 \\
   0.9 & 20 & 5 & \textit{REVISE} & -64.8 & 4.31 \\
   0.9 & 20 & 25 & \textit{ECCo} & 21.1 & 11.6 \\
-  \color{green}{\textbf{0.9}} & \color{green}{\textbf{20}} & \color{green}{\textbf{25}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{39}} & \color{green}{\textbf{5.98}} \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{39}} & \color{Green}{\textbf{5.98}} \\
   0.9 & 20 & 25 & \textit{REVISE} & -50.7 & 13.8 \\
-  \color{green}{\textbf{0.9}} & \color{green}{\textbf{20}} & \color{green}{\textbf{50}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{15.1}} & \color{green}{\textbf{7.46}} \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{15.1}} & \color{Green}{\textbf{7.46}} \\
   0.9 & 20 & 50 & \textit{Generic} & 8.53 & 6.95 \\
   0.9 & 20 & 50 & \textit{REVISE} & -36 & 6.14 \\
   0.95 & 20 & 5 & \textit{ECCo} & -23.8 & 17.8 \\
-  \color{green}{\textbf{0.95}} & \color{green}{\textbf{20}} & \color{green}{\textbf{5}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{7.23}} & \color{green}{\textbf{4.74}} \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{7.23}} & \color{Green}{\textbf{4.74}} \\
   0.95 & 20 & 5 & \textit{REVISE} & -34 & 4.11 \\
-  \color{green}{\textbf{0.95}} & \color{green}{\textbf{20}} & \color{green}{\textbf{25}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{19.3}} & \color{green}{\textbf{14.6}} \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{19.3}} & \color{Green}{\textbf{14.6}} \\
   0.95 & 20 & 25 & \textit{Generic} & -1.35 & 7.71 \\
   0.95 & 20 & 25 & \textit{REVISE} & -52.8 & 5.11 \\
   0.95 & 20 & 50 & \textit{ECCo} & 18.7 & 3.84 \\
-  \color{green}{\textbf{0.95}} & \color{green}{\textbf{20}} & \color{green}{\textbf{50}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{37.3}} & \color{green}{\textbf{7.78}} \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{37.3}} & \color{Green}{\textbf{7.78}} \\
   0.95 & 20 & 50 & \textit{REVISE} & -28.3 & 15 \\\bottomrule
 
 \end{longtable}

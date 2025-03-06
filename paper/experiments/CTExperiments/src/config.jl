@@ -146,7 +146,7 @@ function is_empty_value(v::Any)
     if v isa String
         return isempty(v)
     elseif v isa Vector
-        return isempty(v)
+        return isempty(v) || length(v) == 1
     elseif v isa Dict
         # A dictionary is empty if it's empty itself or if all its filtered values would be empty
         filtered = filter_dict(v)
@@ -160,6 +160,11 @@ end
 function filter_dict(dict::Dict; drop_fields=["name", "data", "data_params"])
     # Filter out empty values and specified fields
     return filter(dict) do (k, v)
+        if v isa Dict
+            v = filter_dict(v; drop_fields)
+        end
+        @info "$k"
+        println(v)
         !is_empty_value(v) && !(k in drop_fields)
     end
 end
