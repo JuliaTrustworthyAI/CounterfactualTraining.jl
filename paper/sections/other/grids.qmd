@@ -20,9 +20,9 @@ res_dir = ENV["FINAL_GRID_RESULTS"]
 
 ### Generator Parameters
 
-The hyperparameter grid with varying generator parameters during training is shown in @exr-gen-params-final-run-train. The corresponding evaluation grid used for these experiments is shown in @exr-gen-params-final-run-eval.
+The hyperparameter grid with varying generator parameters during training is shown in @nte-gen-params-final-run-train. The corresponding evaluation grid used for these experiments is shown in @nte-gen-params-final-run-eval.
 
-::: {#exr-gen-params-final-run-train}
+::: {#nte-gen-params-final-run-train .callout-note}
 
 ## Training Phase
 
@@ -34,8 +34,7 @@ println(CTExperiments.dict_to_quarto_markdown(dict))
 
 :::
 
-
-::: {#exr-gen-params-final-run-eval}
+::: {#nte-gen-params-final-run-eval .callout-note}
 
 ## Evaluation Phase
 

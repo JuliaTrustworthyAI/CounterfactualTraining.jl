@@ -158,15 +158,20 @@ end
 
 # Function to filter dictionary
 function filter_dict(dict::Dict; drop_fields=["name", "data", "data_params"])
-    # Filter out empty values and specified fields
-    return filter(dict) do (k, v)
+
+    # Take care of nested dicts:
+    for (k, v) in dict
         if v isa Dict
-            v = filter_dict(v; drop_fields)
+            dict[k] = filter_dict(v; drop_fields)
         end
-        @info "$k"
-        println(v)
+    end
+
+    # Filter out empty values and specified fields
+    dict = filter(dict) do (k, v)
         !is_empty_value(v) && !(k in drop_fields)
     end
+
+    return dict
 end
 
 global LatexReplacements = Dict(

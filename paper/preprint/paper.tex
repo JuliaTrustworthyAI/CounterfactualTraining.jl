@@ -184,15 +184,13 @@
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
 \theoremstyle{definition}
-\newtheorem{example}{Example}[section]
-\theoremstyle{plain}
-\newtheorem{proposition}{Proposition}[section]
-\theoremstyle{definition}
-\newtheorem{exercise}{Parameters}[section]
-\theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
 \theoremstyle{plain}
+\newtheorem{proposition}{Proposition}[section]
+\theoremstyle{plain}
 \newtheorem{corollary}{Research Question}[section]
+\theoremstyle{definition}
+\newtheorem{example}{Example}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -206,6 +204,8 @@
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
 \makeatother
+\newcounter{quartocalloutnteno}
+\newcommand{\quartocalloutnte}[1]{\refstepcounter{quartocalloutnteno}\label{#1}}
 
 \usepackage{bookmark}
 
@@ -246,20 +246,23 @@ Science\\Delft University of Technology\\\\}
 \begin{document}
 \maketitle
 \begin{abstract}
-Counterfactual Explanations have emerged as a popular tool to explain
-predictions made by opaque machine learning models: they explain how
-factual inputs need to change in order for some fitted model to produce
-some desired output. Much existing research has focused on identifying
-explanations that are not only valid but also deemed plausible and
-desirable with respect to the underlying data and stakeholder
-requirements. Recent work has shown that under this premise, the task of
-learning plausible explanations is effectively reassigned from the model
-itself to the (post-hoc) counterfactual explainer. Building on that
-work, we propose a novel model objective that leverages counterfactuals
-during the training phase (ad-hoc) in order to minimize the divergence
-between learned representations and plausible explanations. Through
-extensive experiments, we demonstrate that our proposed methodology
-facilitates training models that inherently deliver plausible
+We propose a novel model objective that leverages counterfactual
+explanations to increase the explanatory capacity of trained models.
+Counterfactual explanations have emerged as a popular tool to explain
+predictions made by opaque machine learning models: they inform how
+factual inputs would need to change in order for a model to produce some
+desired output. Much existing research has focused on generating
+counterfactuals that are not only valid but also deemed acceptable with
+respect to the stakeholder requirements and plausible with respect to
+the underlying data. Recent work has shown that under this premise, the
+task of learning plausible explanations---ones that respect the
+conditional distribution of the target class---is effectively reassigned
+from the model itself to the post-hoc counterfactual explainer. Building
+on that work, we propose a novel objective function that employs
+counterfactuals (ad-hoc) during the training phase to minimize the
+divergence between the learned representations and the explanations.
+Through extensive experiments, we demonstrate that our proposed method
+facilitates training models that deliver inherently plausible
 explanations while maintaining high predictive performance.
 \end{abstract}
 {\bfseries \emph Keywords}
@@ -1392,7 +1395,7 @@ counterfactual training.
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, left=2mm, opacitybacktitle=0.6, arc=.35mm, toptitle=1mm, leftrule=.75mm, colframe=quarto-callout-note-color-frame, colback=white, breakable, toprule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, opacityback=0, bottomtitle=1mm, bottomrule=.15mm, titlerule=0mm, coltitle=black]
+\begin{tcolorbox}[enhanced jigsaw, breakable, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, coltitle=black, titlerule=0mm, left=2mm, colframe=quarto-callout-note-color-frame, toptitle=1mm, bottomrule=.15mm, leftrule=.75mm, title={Note}, colback=white, rightrule=.15mm, toprule=.15mm, bottomtitle=1mm, opacitybacktitle=0.6, opacityback=0]
 
 Figure~\ref{fig-mnist} shows much more plausible (faithful)
 counterfactuals for a model with CT than the model with conventional
@@ -1437,14 +1440,13 @@ to generate counterfactuals that are faithful to the model
 \subsubsection{Generator Parameters}\label{generator-parameters}
 
 The hyperparameter grid with varying generator parameters during
-training is shown in Parameters~\ref{exr-gen-params-final-run-train}.
-The corresponding evaluation grid used for these experiments is shown in
-Parameters~\ref{exr-gen-params-final-run-eval}.
+training is shown in Note~\ref{nte-gen-params-final-run-train}. The
+corresponding evaluation grid used for these experiments is shown in
+Note~\ref{nte-gen-params-final-run-eval}.
 
-\begin{exercise}[Training
-Phase]\protect\hypertarget{exr-gen-params-final-run-train}{}\label{exr-gen-params-final-run-train}
+\begin{tcolorbox}[enhanced jigsaw, breakable, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, coltitle=black, titlerule=0mm, left=2mm, colframe=quarto-callout-note-color-frame, toptitle=1mm, bottomrule=.15mm, leftrule=.75mm, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, colback=white, rightrule=.15mm, toprule=.15mm, bottomtitle=1mm, opacitybacktitle=0.6, opacityback=0]
 
-~
+\quartocalloutnte{nte-gen-params-final-run-train} 
 
 \begin{itemize}
 \tightlist
@@ -1456,30 +1458,12 @@ Phase]\protect\hypertarget{exr-gen-params-final-run-train}{}\label{exr-gen-param
   \item
     Decision Threshold: \texttt{0.75,\ 0.9,\ 0.95}
   \item
-    \(\lambda_{\text{cost}}\): \texttt{0.001}
-  \item
     \(\lambda_{\text{energy}}\): \texttt{0.1,\ 0.5,\ 5.0,\ 10.0,\ 20.0}
   \item
-    Learning Rate: \texttt{0.25}
-  \item
     Maximum Iterations: \texttt{5,\ 25,\ 50}
-  \item
-    Optimizer: \texttt{sgd}
   \end{itemize}
 \item
   Generator: \texttt{ecco,\ generic,\ revise}
-\item
-  Model Parameters:
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Activation: \texttt{relu}
-  \item
-    No.~Hidden: \texttt{32}
-  \item
-    No.~Layers: \texttt{1}
-  \end{itemize}
 \item
   Model: \texttt{mlp}
 \item
@@ -1488,80 +1472,29 @@ Phase]\protect\hypertarget{exr-gen-params-final-run-train}{}\label{exr-gen-param
   \begin{itemize}
   \tightlist
   \item
-    Burnin: \texttt{0.0}
-  \item
-    Class Loss: \texttt{logitcrossentropy}
-  \item
-    Convergence: \texttt{threshold}
-  \item
-    \(\lambda_{\text{adv}}\): \texttt{0.25}
-  \item
-    \(\lambda_{\text{yloss}}\): \texttt{1.0}
-  \item
-    \(\lambda_{\text{div}}\): \texttt{0.5}
-  \item
-    \(\lambda_{\text{reg}}\): \texttt{0.01}
-  \item
-    Learning Rate: \texttt{0.001}
-  \item
-    No.~Counterfactuals: \texttt{1000}
-  \item
-    No.~Epochs: \texttt{100}
-  \item
-    No.~Neighbours: \texttt{100}
-  \item
     Objective: \texttt{full,\ vanilla}
-  \item
-    Optimizer: \texttt{adam}
   \end{itemize}
 \end{itemize}
 
-\end{exercise}
+\end{tcolorbox}
 
-\begin{exercise}[Evaluation
-Phase]\protect\hypertarget{exr-gen-params-final-run-eval}{}\label{exr-gen-params-final-run-eval}
+\begin{tcolorbox}[enhanced jigsaw, breakable, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, coltitle=black, titlerule=0mm, left=2mm, colframe=quarto-callout-note-color-frame, toptitle=1mm, bottomrule=.15mm, leftrule=.75mm, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, colback=white, rightrule=.15mm, toprule=.15mm, bottomtitle=1mm, opacitybacktitle=0.6, opacityback=0]
 
-~
+\quartocalloutnte{nte-gen-params-final-run-eval} 
 
 \begin{itemize}
 \tightlist
-\item
-  Counterfactual Parameters:
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Convergence: \texttt{threshold}
-  \item
-    Decision Threshold: \texttt{0.95}
-  \item
-    Maximum Iterations: \texttt{50}
-  \item
-    No.~Individuals: \texttt{100}
-  \item
-    No.~Runs: \texttt{5}
-  \end{itemize}
 \item
   Generator Parameters:
 
   \begin{itemize}
   \tightlist
   \item
-    Decision Threshold: \texttt{0.75}
-  \item
-    \(\lambda_{\text{cost}}\): \texttt{0.0}
-  \item
     \(\lambda_{\text{energy}}\): \texttt{0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0}
-  \item
-    Learning Rate: \texttt{0.25}
-  \item
-    Maximum Iterations: \texttt{30}
-  \item
-    Optimizer: \texttt{sgd}
   \end{itemize}
 \end{itemize}
 
-\end{exercise}
+\end{tcolorbox}
 
 \subsubsection{High-Level Findings}\label{high-level-findings}
 
@@ -1585,10 +1518,10 @@ Separable data by energy penalty.}
 \tabularnewline
 
   \toprule
-  \textbf{Decision Threshold} & \textbf{Lambda Energy} & \textbf{Maximum Iterations} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \textbf{Decision Threshold} & \textbf{$\lambda_{\text{energy}}$} & \textbf{Maximum Iterations} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
   \endfirsthead
   \toprule
-  \textbf{Decision Threshold} & \textbf{Lambda Energy} & \textbf{Maximum Iterations} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \textbf{Decision Threshold} & \textbf{$\lambda_{\text{energy}}$} & \textbf{Maximum Iterations} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
   \endhead
   \bottomrule
   \multicolumn{6}{r}{Continuing table below.}\\

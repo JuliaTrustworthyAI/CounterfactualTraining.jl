@@ -54,11 +54,14 @@ end
 
 format_generator(s::AbstractString) = get_generator_name(generator_types[s](); pretty=true)
 
-global LatexHeaderReplacements = Dict(
-    "lambda_energy_exper" => LatexCell("\$\\lambda_{\\text{div}} (\\text{train})\$"),
-    "lambda_energy_eval" => LatexCell("\$\\lambda_{\\text{div}} (\\text{eval})\$"),
-    "lambda_cost_exper" => LatexCell("\$\\lambda_{\\text{cost}} (\\text{train})\$"),
-    "lambda_cost_eval" => LatexCell("\$\\lambda_{\\text{cost}} (\\text{eval})\$"),
+global LatexHeaderReplacements = merge(
+    Dict(
+        "lambda_energy_exper" => LatexCell("\$\\lambda_{\\text{div}} (\\text{train})\$"),
+        "lambda_energy_eval" => LatexCell("\$\\lambda_{\\text{div}} (\\text{eval})\$"),
+        "lambda_cost_exper" => LatexCell("\$\\lambda_{\\text{cost}} (\\text{train})\$"),
+        "lambda_cost_eval" => LatexCell("\$\\lambda_{\\text{cost}} (\\text{eval})\$"),
+    ),
+    Dict(k => LatexCell(v) for (k, v) in CTExperiments.LatexReplacements),
 )
 
 function value_highlighter(
