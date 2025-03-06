@@ -7,7 +7,7 @@ $endif$
 $if(blind-review)$
 \author{Author information scrubbed for double-blind reviewing}
 $else$
-\author{$for(by-author)$$if(it.name.literal)$$it.name.literal$$endif$$if(it.affiliations)$\inst{$for(it.affiliations)$$it.number$$sep$,$endfor$}$endif$$if(it.attributes.corresponding)$\corr$endif$$if(it.orcid)$\orcidID{$it.orcid$}$endif$$sep$ \and $endfor$}
+\author{$for(by-author)$$if(it.name.literal)$$it.name.literal$$endif$$if(it.affiliations)$\inst{$for(it.affiliations)$$it.number$$sep$,$endfor$}$endif$$if(it.attributes.corresponding)$ \corr$endif$$if(it.orcid)$\orcidID{$it.orcid$}$endif$$sep$ \and $endfor$}
 
 $if(author-running)$
 \authorrunning{$author-running$}

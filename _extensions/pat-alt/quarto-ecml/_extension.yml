@@ -20,15 +20,23 @@ contributes:
         fig-prefix: Fig.
     pdf:
       include-in-header: header.tex
+      format-resources:
+        - llncs.cls
+        - splncs04.bst
+        - remove_caption.lua
       template-partials:
         - partials/before-title.tex
         - partials/title.tex
         - partials/doc-class.tex
         - partials/before-body.tex
+        - partials/biblio.tex
+      filters:
+        - cite.lua
       indent: true
       block-headings: false
-      csl: slncs.csl
       nolinks: true
+      microtypeoptions:
+        - activate=false
     html:
       css: styles.css
 
