@@ -115,12 +115,12 @@
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 % \usepackage{amsthm}
-% \theoremstyle{plain}
-% \newtheorem{corollary}{Research Question}[section]
-% \theoremstyle{plain}
-% \newtheorem{proposition}{Proposition}[section]
 % \theoremstyle{definition}
 % \newtheorem{example}{Example}[section]
+% \theoremstyle{plain}
+% \newtheorem{proposition}{Proposition}[section]
+% \theoremstyle{plain}
+% \newtheorem{corollary}{Research Question}[section]
 % \theoremstyle{definition}
 % \newtheorem{definition}{Definition}[section]
 % \theoremstyle{remark}
@@ -146,8 +146,9 @@
 \hypersetup{
   pdftitle={Counterfactual Training: Teaching Models Plausible and Actionable Explanations},
   pdfauthor={Patrick Altmeyer; Aleksander Buszydlik; Arie van Deursen; Cynthia C. S. Liem},
-  pdfkeywords={Counterfactual Explanations, Explainable
-AI, Representation Learning},
+  pdfkeywords={Counterfactual Explanations, Algorithmic
+Recourse, Explainable AI, Adversarial Robustness, Representation
+Learning},
   colorlinks=true,
   linkcolor={black},
   filecolor={Maroon},
@@ -187,8 +188,9 @@ Through extensive experiments, we demonstrate that our proposed method
 facilitates training models that deliver inherently plausible
 explanations while maintaining high predictive performance.
 
-\keywords{Counterfactual Explanations \and Explainable
-AI \and Representation Learning}
+\keywords{Counterfactual Explanations \and Algorithmic
+Recourse \and Explainable AI \and Adversarial
+Robustness \and Representation Learning}
 
 \end{abstract}
 
@@ -819,6 +821,9 @@ Equation~\ref{eq-obj}?
 
 \section{Conclusion}\label{sec-conclusion}
 
+\subsection*{References}\label{references}
+\addcontentsline{toc}{subsection}{References}
+
 \newpage{}
 
 \FloatBarrier
@@ -1056,7 +1061,7 @@ counterfactual training.
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, titlerule=0mm, bottomrule=.15mm, coltitle=black, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, opacityback=0, bottomtitle=1mm, leftrule=.75mm, breakable, colframe=quarto-callout-note-color-frame, left=2mm, colback=white, toptitle=1mm, toprule=.15mm, rightrule=.15mm, opacitybacktitle=0.6, title={Note}]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, coltitle=black, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, leftrule=.75mm, arc=.35mm, titlerule=0mm, opacitybacktitle=0.6, toptitle=1mm, colback=white, title={Note}, bottomtitle=1mm, bottomrule=.15mm, toprule=.15mm, opacityback=0, colframe=quarto-callout-note-color-frame, breakable]
 
 Figure~\ref{fig-mnist} shows much more plausible (faithful)
 counterfactuals for a model with CT than the model with conventional
@@ -1105,7 +1110,7 @@ training is shown in Note~\ref{nte-gen-params-final-run-train}. The
 corresponding evaluation grid used for these experiments is shown in
 Note~\ref{nte-gen-params-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, titlerule=0mm, bottomrule=.15mm, coltitle=black, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, opacityback=0, bottomtitle=1mm, leftrule=.75mm, breakable, colframe=quarto-callout-note-color-frame, left=2mm, colback=white, toptitle=1mm, toprule=.15mm, rightrule=.15mm, opacitybacktitle=0.6, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, coltitle=black, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, leftrule=.75mm, arc=.35mm, titlerule=0mm, opacitybacktitle=0.6, toptitle=1mm, colback=white, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, bottomtitle=1mm, bottomrule=.15mm, toprule=.15mm, opacityback=0, colframe=quarto-callout-note-color-frame, breakable]
 
 \quartocalloutnte{nte-gen-params-final-run-train} 
 
@@ -1139,7 +1144,7 @@ Note~\ref{nte-gen-params-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, titlerule=0mm, bottomrule=.15mm, coltitle=black, arc=.35mm, colbacktitle=quarto-callout-note-color!10!white, opacityback=0, bottomtitle=1mm, leftrule=.75mm, breakable, colframe=quarto-callout-note-color-frame, left=2mm, colback=white, toptitle=1mm, toprule=.15mm, rightrule=.15mm, opacitybacktitle=0.6, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, coltitle=black, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, leftrule=.75mm, arc=.35mm, titlerule=0mm, opacitybacktitle=0.6, toptitle=1mm, colback=white, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, bottomtitle=1mm, bottomrule=.15mm, toprule=.15mm, opacityback=0, colframe=quarto-callout-note-color-frame, breakable]
 
 \quartocalloutnte{nte-gen-params-final-run-eval} 
 

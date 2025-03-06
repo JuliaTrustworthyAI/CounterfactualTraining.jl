@@ -20,7 +20,9 @@ author:
 bibliography: bib.bib
 keywords: 
   - Counterfactual Explanations
+  - Algorithmic Recourse
   - Explainable AI
+  - Adversarial Robustness
   - Representation Learning
 crossref:
   exr-title: "Parameters"
