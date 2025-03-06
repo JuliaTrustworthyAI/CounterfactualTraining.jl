@@ -17,6 +17,19 @@ global _lnstyvar = nothing
 global _dodgevar = nothing
 global _sidevar = nothing
 
+function adjust_plot_var(x::Union{Nothing,String}, cfg::CTExperiments.EvalConfigOrGrid)
+    if isnothing(x)
+        return x
+    else
+        if typeof(cfg) == EvaluationConfig
+            x = replace(x, "_exper" => "")
+            return x
+        else
+            return x
+        end
+    end
+end
+
 include("plots.jl")
 include("tables.jl")
 
@@ -247,8 +260,13 @@ function aggregate_ce_evaluation(
 
     # Aggregate:
     if "run" in names(df)
+        byvars_must_include = ["run", "lambda_energy_eval", "objective"]
+        byvars_must_include = byvars_must_include[[x in names(df) for x in byvars_must_include]]
         df_agg = aggregate_data(
-            df, y, byvars; byvars_must_include=["run", "lambda_energy_eval", "objective"]
+            df,
+            y,
+            byvars;
+            byvars_must_include=byvars_must_include,
         )
         if agg_runs
             # Compute mean of means and std of means:

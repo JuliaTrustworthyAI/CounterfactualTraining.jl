@@ -2,12 +2,14 @@ using CTExperiments
 using CTExperiments.CairoMakie
 using CTExperiments.CSV
 using CTExperiments.DataFrames
+using CTExperiments: adjust_plot_var
 using DotEnv
 
 DotEnv.load!()
 
 # Get config and set up grid:
 eval_grid = EvaluationGrid(get_config_from_args(; new_save_dir=ENV["OUTPUT_DIR"]))
+eval_list = load_list(eval_grid)
 exper_grid = ExperimentGrid(eval_grid.grid_file)
 
 local_save_dir = get_work_dir(eval_grid, ENV["EVAL_WORK_DIR"], ENV["OUTPUT_DIR"])
@@ -54,16 +56,17 @@ end
 
 # Visualize CE:
 prefix = "ce"
+cfg = eval_grid
 all_data = CTExperiments.merge_with_meta(
-    eval_grid, CTExperiments.load_ce_evaluation(eval_grid)
+    cfg, CTExperiments.load_ce_evaluation(cfg)
 )
 valid_y = CTExperiments.valid_y_ce(all_data[1])
 params = PlotParams(;
-    colorvar=get_global_param("colorvar_ce", colorvar_ce),
-    rowvar=get_global_param("rowvar_ce", rowvar_ce),
-    colvar=get_global_param("colvar_ce", colvar_ce),
-    sidevar=get_global_param("sidevar", sidevar),
-    dodgevar=get_global_param("dodgevar", dodgevar),
+    colorvar=get_global_param("colorvar_ce", colorvar_ce) |> x -> adjust_plot_var(x,cfg),
+    rowvar=get_global_param("rowvar_ce", rowvar_ce) |> x -> adjust_plot_var(x, cfg),
+    colvar=get_global_param("colvar_ce", colvar_ce) |> x -> adjust_plot_var(x, cfg),
+    sidevar=get_global_param("sidevar", sidevar) |> x -> adjust_plot_var(x, cfg),
+    dodgevar=get_global_param("dodgevar", dodgevar) |> x -> adjust_plot_var(x, cfg),
 )
 @info "CE Boxplots"
 @info params
