@@ -43,7 +43,7 @@ function get_table_inputs(
     if "generator_type" in names(df)
         # Filter out "omni":
         df = df[df.generator_type .!= "omni", :]
-        df.generator_type = format_generator.(df.generator_type)
+        # df.generator_type = format_generator.(df.generator_type)
         gen_hl = generator_highlighter(df; backend=backend)
         hls = (hls..., gen_hl)
     end
@@ -78,13 +78,15 @@ function value_highlighter(
     if !isnothing(byvars)
         byvars = isa(byvars, String) ? [byvars] : byvars
         df.row .= 1:nrow(df)
-        max_idx = combine(groupby(df, byvars...)) do sdf
+        max_idx = combine(groupby(df, byvars)) do sdf
             (max_idx=sdf.row[argmax(sdf[:, value_var])],)
         end
         max_idx = max_idx.max_idx
         select!(df, Not(:row))
         hl = bolden_max_hl(max_idx, col_idx, backend)
         push!(hls, hl)
+        hl_bad = bolden_max_hl_bad(max_idx, col_idx, backend)
+        push!(hls, hl_bad)
     end
 
     # Color scale:
@@ -136,7 +138,11 @@ function color_scale_hl(
 end
 
 function bolden_max_hl(max_idx::Vector{Int}, col_idx::Vector{Int}, backend::Val{:latex})
-    return hl = LatexHighlighter((df, i, j) -> i in max_idx, ["color{blue}", "textbf"])
+    return hl = LatexHighlighter((df, i, j) -> (i in max_idx) && df[i,:value]>0, ["color{Green}", "textbf"])
+end
+
+function bolden_max_hl_bad(max_idx::Vector{Int}, col_idx::Vector{Int}, backend::Val{:latex})
+    return hl = LatexHighlighter((df, i, j) -> (i in max_idx) && df[i,:value]<0, ["color{Red}", "textbf"])
 end
 
 function generator_highlighter(df::DataFrame; backend::Val=Val(:text))

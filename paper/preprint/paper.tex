@@ -183,16 +183,16 @@
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
-\theoremstyle{definition}
-\newtheorem{exercise}{Parameters}[section]
-\theoremstyle{definition}
-\newtheorem{example}{Example}[section]
 \theoremstyle{plain}
 \newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
+\newtheorem{example}{Example}[section]
+\theoremstyle{definition}
+\newtheorem{exercise}{Parameters}[section]
 \theoremstyle{plain}
 \newtheorem{corollary}{Research Question}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -1349,16 +1349,6 @@ sensitivity for \(d_{\text{immtbl}}\) relative to increased sensitivity
 for \(d_{\text{mtbl}}\)).
 \end{proof}
 
-\begin{tcolorbox}[enhanced jigsaw, opacitybacktitle=0.6, breakable, left=2mm, colback=white, coltitle=black, bottomtitle=1mm, rightrule=.15mm, colframe=quarto-callout-warning-color-frame, toprule=.15mm, bottomrule=.15mm, arc=.35mm, titlerule=0mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, opacityback=0, leftrule=.75mm, toptitle=1mm, colbacktitle=quarto-callout-warning-color!10!white]
-
-@Cynthia, @Arie, I have tentatively phrased the above in terms of a
-theorem and proof. This is something I've so far shied away from because
-I feel a bit out of my depth when it comes to mathematical proofs. The
-above makes intuitive sense to me, but I don't know for sure if it's
-correct.
-
-\end{tcolorbox}
-
 \subsection{Domain Constraints}\label{domain-constraints}
 
 We apply domain constraints on counterfactuals during training and
@@ -1399,33 +1389,16 @@ counterfactual training.
 
 \section{Detailed Results}\label{detailed-results}
 
-\begin{tcolorbox}[enhanced jigsaw, opacitybacktitle=0.6, breakable, left=2mm, colback=white, coltitle=black, bottomtitle=1mm, rightrule=.15mm, colframe=quarto-callout-warning-color-frame, toprule=.15mm, bottomrule=.15mm, arc=.35mm, titlerule=0mm, title=\textcolor{quarto-callout-warning-color}{\faExclamationTriangle}\hspace{0.5em}{Warning}, opacityback=0, leftrule=.75mm, toptitle=1mm, colbacktitle=quarto-callout-warning-color!10!white]
-
-@Cynthia, @Arie, I'm including some preliminary results here but will
-rerun experiments in the coming days. You'll notice some odd outlier
-results (huge values) for the initial grid search
-(Section~\ref{sec-app-initial}). My belief is that this is once again
-due to \emph{ECCo} overshooting for some hyperparameter choices, that we
-have discussed before. A simple solution to this story is to actually
-impose domain constraints. Let's see what the final results show us (I
-also still plan to make slight changes to the implementation), but in
-any case I think it might even be worth to report results for the
-initial grid search in the final appendix (they do include good results
-for CT for certain hyperparameter ranges and highlight limitations
-inherited from energy-based modelling).
-
-\end{tcolorbox}
-
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, opacitybacktitle=0.6, breakable, left=2mm, colback=white, coltitle=black, bottomtitle=1mm, rightrule=.15mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, bottomrule=.15mm, arc=.35mm, titlerule=0mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, opacityback=0, leftrule=.75mm, toptitle=1mm, colbacktitle=quarto-callout-note-color!10!white]
+\begin{tcolorbox}[enhanced jigsaw, leftrule=.75mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, colbacktitle=quarto-callout-note-color!10!white, toprule=.15mm, titlerule=0mm, coltitle=black, left=2mm, bottomtitle=1mm, breakable, opacityback=0, rightrule=.15mm, toptitle=1mm, arc=.35mm, bottomrule=.15mm, colback=white, colframe=quarto-callout-note-color-frame, opacitybacktitle=0.6]
 
-@Cynthia, @Arie, Figure~\ref{fig-mnist} shows much more plausible
-(faithful) counterfactuals for a model with CT than the model with
-conventional training (Figure~\ref{fig-mnist-vanilla}). In fact, this is
-not even using \emph{ECCo+} and still showing better results than the
-best results we achieved in our AAAI paper for JEM ensembles.
+Figure~\ref{fig-mnist} shows much more plausible (faithful)
+counterfactuals for a model with CT than the model with conventional
+training (Figure~\ref{fig-mnist-vanilla}). In fact, this is not even
+using \emph{ECCo+} and still showing better results than the best
+results we achieved in our AAAI paper for JEM ensembles.
 
 \end{tcolorbox}
 
@@ -1459,21 +1432,17 @@ to generate counterfactuals that are faithful to the model
 
 \end{figure}%
 
-\subsection{Initial Grid Search}\label{sec-app-initial}
-
-For the initial round of experiments we employed a different training
-objective and procedure that led to promising results for some
-hyperparameter choices, but suffered from training instabilities.
+\subsection{Grid Searches}\label{sec-app-grid}
 
 \subsubsection{Generator Parameters}\label{generator-parameters}
 
-The hyperparameter grids for the first investigation of the effect of
-generator parameters are shown in
-Parameters~\ref{exr-gen-params-first-run-train} and
-Parameters~\ref{exr-gen-params-first-run-eval}.
+The hyperparameter grid with varying generator parameters during
+training is shown in Parameters~\ref{exr-gen-params-final-run-train}.
+The corresponding evaluation grid used for these experiments is shown in
+Parameters~\ref{exr-gen-params-final-run-eval}.
 
 \begin{exercise}[Training
-Phase]\protect\hypertarget{exr-gen-params-first-run-train}{}\label{exr-gen-params-first-run-train}
+Phase]\protect\hypertarget{exr-gen-params-final-run-train}{}\label{exr-gen-params-final-run-train}
 
 ~
 
@@ -1485,32 +1454,72 @@ Phase]\protect\hypertarget{exr-gen-params-first-run-train}{}\label{exr-gen-param
   \begin{itemize}
   \tightlist
   \item
-    Decisiono. Threshold: \texttt{0.75,\ 0.9,\ 0.95}
+    Decision Threshold: \texttt{0.75,\ 0.9,\ 0.95}
   \item
-    \(\lambda_{\text{cost}}\): \texttt{0.0,\ 0.1}
+    \(\lambda_{\text{cost}}\): \texttt{0.001}
   \item
-    \(\lambda_{\text{div}}\): \texttt{0.1,\ 0.5,\ 1.0,\ 10.0}
+    \(\lambda_{\text{energy}}\): \texttt{0.1,\ 0.5,\ 5.0,\ 10.0,\ 20.0}
+  \item
+    Learning Rate: \texttt{0.25}
   \item
     Maximum Iterations: \texttt{5,\ 25,\ 50}
   \item
-    Optimizerimizer: \texttt{sgd}
+    Optimizer: \texttt{sgd}
   \end{itemize}
 \item
   Generator: \texttt{ecco,\ generic,\ revise}
+\item
+  Model Parameters:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Activation: \texttt{relu}
+  \item
+    No.~Hidden: \texttt{32}
+  \item
+    No.~Layers: \texttt{1}
+  \end{itemize}
+\item
+  Model: \texttt{mlp}
 \item
   Training Parameters:
 
   \begin{itemize}
   \tightlist
   \item
+    Burnin: \texttt{0.0}
+  \item
+    Class Loss: \texttt{logitcrossentropy}
+  \item
+    Convergence: \texttt{threshold}
+  \item
+    \(\lambda_{\text{adv}}\): \texttt{0.25}
+  \item
+    \(\lambda_{\text{yloss}}\): \texttt{1.0}
+  \item
+    \(\lambda_{\text{div}}\): \texttt{0.5}
+  \item
+    \(\lambda_{\text{reg}}\): \texttt{0.01}
+  \item
+    Learning Rate: \texttt{0.001}
+  \item
+    No.~Counterfactuals: \texttt{1000}
+  \item
+    No.~Epochs: \texttt{100}
+  \item
+    No.~Neighbours: \texttt{100}
+  \item
     Objective: \texttt{full,\ vanilla}
+  \item
+    Optimizer: \texttt{adam}
   \end{itemize}
 \end{itemize}
 
 \end{exercise}
 
 \begin{exercise}[Evaluation
-Phase]\protect\hypertarget{exr-gen-params-first-run-eval}{}\label{exr-gen-params-first-run-eval}
+Phase]\protect\hypertarget{exr-gen-params-final-run-eval}{}\label{exr-gen-params-final-run-eval}
 
 ~
 
@@ -1522,9 +1531,11 @@ Phase]\protect\hypertarget{exr-gen-params-first-run-eval}{}\label{exr-gen-params
   \begin{itemize}
   \tightlist
   \item
-    Convergence: \texttt{max\_iter}
+    Convergence: \texttt{threshold}
   \item
-    Maximum Iterations: \texttt{100}
+    Decision Threshold: \texttt{0.95}
+  \item
+    Maximum Iterations: \texttt{50}
   \item
     No.~Individuals: \texttt{100}
   \item
@@ -1536,52 +1547,37 @@ Phase]\protect\hypertarget{exr-gen-params-first-run-eval}{}\label{exr-gen-params
   \begin{itemize}
   \tightlist
   \item
+    Decision Threshold: \texttt{0.75}
+  \item
     \(\lambda_{\text{cost}}\): \texttt{0.0}
   \item
-    \(\lambda_{\text{div}}\):
-    \texttt{0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0,\ 20.0}
+    \(\lambda_{\text{energy}}\): \texttt{0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0}
   \item
-    Learning Rate: \texttt{1.0}
+    Learning Rate: \texttt{0.25}
   \item
-    Maximum Iterations: \texttt{50}
+    Maximum Iterations: \texttt{30}
   \item
-    Optimizerimizer: \texttt{sgd}
+    Optimizer: \texttt{sgd}
   \end{itemize}
 \end{itemize}
 
 \end{exercise}
 
+\subsubsection{High-Level Findings}\label{high-level-findings}
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/moons/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/plausibility_distance_from_target.png}}
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/moons/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/distance.png}}
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/moons/evaluation/results/logs/objective---lambda_energy---generator_type---maxiter/percent_valid.png}}
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/moons/evaluation/results/logs/objective---lambda_energy---generator_type---maxiter/acc_val.png}}
+
+\subsubsection{Detailed Findings}\label{detailed-findings}
+
 \paragraph{Linearly Separable}\label{linearly-separable}
 
-\begin{itemize}
-\tightlist
-\item
-  \textbf{Energy Penalty} (Table~\ref{tbl-lin_sep-lambda_energy_exper}):
-  \emph{ECCo} generally does yield better results than \emph{Vanilla}
-  for higher choices of the energy penalty (10,15) during training.
-  \emph{Generic} performs poorly accross the board. \emph{Omni} seems to
-  have an anchoring effect, in that it never performs terribly but also
-  never as good as the best \emph{ECCo} results. \emph{REVISE} performs
-  poorly across the board.
-\item
-  \textbf{Cost} (Table~\ref{tbl-lin_sep-lambda_cost_exper}): Results for
-  all generators (except \emph{Omni}) are quite bad, which can likely be
-  attributed to extremely bad results for some choices of the
-  \textbf{Energy Penalty} (results here are averaged). For \emph{ECCo}
-  and \emph{Generic}, higher cost values generally lead to worse
-  results.
-\item
-  \textbf{Maximum Iterations}: No clear patterns recognizable, so it
-  seems that smaller choices are ok.
-\item
-  \textbf{Validity}: \emph{ECCo} almost always valid except for very low
-  values during training and high values at evaluation time.
-  \emph{Generic} often has poor validity.
-\item
-  \textbf{Accuracy}: Seems largely unaffected.
-\end{itemize}
-
-\begin{longtable}{ccccc}
+\begin{longtable}{cccccc}
 
 \caption{\label{tbl-lin_sep-lambda_energy_exper}Results for Linearly
 Separable data by energy penalty.}
@@ -1589,305 +1585,151 @@ Separable data by energy penalty.}
 \tabularnewline
 
   \toprule
-  \textbf{Objective} & \textbf{$\lambda_{\text{div}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \textbf{Decision Threshold} & \textbf{Lambda Energy} & \textbf{Maximum Iterations} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
   \endfirsthead
   \toprule
-  \textbf{Objective} & \textbf{$\lambda_{\text{div}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \textbf{Decision Threshold} & \textbf{Lambda Energy} & \textbf{Maximum Iterations} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
   \endhead
   \bottomrule
-  \multicolumn{5}{r}{Continuing table below.}\\
+  \multicolumn{6}{r}{Continuing table below.}\\
   \bottomrule
   \endfoot
   \endlastfoot
-  full & 0.01 & \textit{ECCo} & $-9.91 \cdot 10^{11}$ & $2.25 \cdot 10^{12}$ \\
-  full & 0.01 & \textit{Generic} & $-5.71 \cdot 10^{17}$ & $1.3 \cdot 10^{18}$ \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.01}} & \color{blue}{\textbf{REVISE}} & \color{blue}{\textbf{-15.6}} & \color{blue}{\textbf{13.2}} \\
-  vanilla & 0.01 & \textit{ECCo} & -4.28 & 3.52 \\
-  vanilla & 0.01 & \textit{Generic} & -4.45 & 3.47 \\
-  vanilla & 0.01 & \textit{REVISE} & -4.91 & 4.24 \\
-  full & 0.05 & \textit{ECCo} & $-5.63 \cdot 10^{5}$ & $1.28 \cdot 10^{6}$ \\
-  full & 0.05 & \textit{Generic} & $-8.35 \cdot 10^{17}$ & $1.9 \cdot 10^{18}$ \\
-  full & 0.05 & \textit{REVISE} & -15 & 12.6 \\
-  vanilla & 0.05 & \textit{ECCo} & -4.4 & 3.66 \\
-  \color{blue}{\textbf{vanilla}} & \color{blue}{\textbf{0.05}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-4.38}} & \color{blue}{\textbf{3.48}} \\
-  vanilla & 0.05 & \textit{REVISE} & -4.94 & 4.22 \\
-  full & 0.1 & \textit{ECCo} & $-6.74 \cdot 10^{5}$ & $1.53 \cdot 10^{6}$ \\
-  full & 0.1 & \textit{Generic} & $-1.71 \cdot 10^{11}$ & $3.9 \cdot 10^{11}$ \\
-  full & 0.1 & \textit{REVISE} & -15.6 & 13.2 \\
-  vanilla & 0.1 & \textit{ECCo} & -4.28 & 3.52 \\
-  vanilla & 0.1 & \textit{Generic} & -4.45 & 3.48 \\
-  vanilla & 0.1 & \textit{REVISE} & -4.91 & 4.25 \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.5}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-11.8}} & \color{blue}{\textbf{9.83}} \\
-  full & 0.5 & \textit{Generic} & $-1.06 \cdot 10^{18}$ & $2.42 \cdot 10^{18}$ \\
-  full & 0.5 & \textit{REVISE} & -15 & 12.6 \\
-  vanilla & 0.5 & \textit{ECCo} & -4.4 & 3.65 \\
-  vanilla & 0.5 & \textit{Generic} & -4.38 & 3.48 \\
-  vanilla & 0.5 & \textit{REVISE} & -4.95 & 4.22 \\
-  full & 1 & \textit{ECCo} & -11.5 & 11.1 \\
-  full & 1 & \textit{Generic} & $-1.71 \cdot 10^{11}$ & $3.88 \cdot 10^{11}$ \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{1}} & \color{blue}{\textbf{REVISE}} & \color{blue}{\textbf{-15.7}} & \color{blue}{\textbf{13.3}} \\
-  vanilla & 1 & \textit{ECCo} & -4.28 & 3.51 \\
-  vanilla & 1 & \textit{Generic} & -4.44 & 3.47 \\
-  vanilla & 1 & \textit{REVISE} & -4.91 & 4.25 \\
-  full & 5 & \textit{ECCo} & -3.99 & 3.12 \\
-  full & 5 & \textit{Generic} & $-4.88 \cdot 10^{17}$ & $1.11 \cdot 10^{18}$ \\
-  full & 5 & \textit{REVISE} & -14.6 & 12.1 \\
-  vanilla & 5 & \textit{ECCo} & -4.4 & 3.65 \\
-  \color{blue}{\textbf{vanilla}} & \color{blue}{\textbf{5}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-4.38}} & \color{blue}{\textbf{3.48}} \\
-  vanilla & 5 & \textit{REVISE} & -4.95 & 4.22 \\
-  full & 10 & \textit{ECCo} & -2.31 & 0.735 \\
-  full & 10 & \textit{Generic} & $-1.7 \cdot 10^{11}$ & $3.86 \cdot 10^{11}$ \\
-  full & 10 & \textit{REVISE} & -15.5 & 13 \\
-  vanilla & 10 & \textit{ECCo} & -4.28 & 3.51 \\
-  vanilla & 10 & \textit{Generic} & -4.44 & 3.47 \\
-  vanilla & 10 & \textit{REVISE} & -4.91 & 4.24 \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{15}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-2.01}} & \color{blue}{\textbf{0.488}} \\
-  full & 15 & \textit{Generic} & $-4.91 \cdot 10^{17}$ & $1.12 \cdot 10^{18}$ \\
-  full & 15 & \textit{REVISE} & -14.4 & 11.7 \\
-  vanilla & 15 & \textit{ECCo} & -4.4 & 3.65 \\
-  vanilla & 15 & \textit{Generic} & -4.38 & 3.48 \\
-  vanilla & 15 & \textit{REVISE} & -4.95 & 4.23 \\\bottomrule
-
-\end{longtable}
-
-\begin{longtable}{ccccc}
-
-\caption{\label{tbl-lin_sep-lambda_cost_exper}Results for Linearly
-Separable data by cost penalty.}
-
-\tabularnewline
-
-  \toprule
-  \textbf{Objective} & \textbf{$\lambda_{\text{cost}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
-  \endfirsthead
-  \toprule
-  \textbf{Objective} & \textbf{$\lambda_{\text{cost}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
-  \endhead
-  \bottomrule
-  \multicolumn{5}{r}{Continuing table below.}\\
-  \bottomrule
-  \endfoot
-  \endlastfoot
-  full & 0 & \textit{ECCo} & $-5.32 \cdot 10^{3}$ & $1.21 \cdot 10^{4}$ \\
-  full & 0 & \textit{Generic} & $-1.03 \cdot 10^{18}$ & $2.34 \cdot 10^{18}$ \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0}} & \color{blue}{\textbf{REVISE}} & \color{blue}{\textbf{-15.4}} & \color{blue}{\textbf{12.9}} \\
-  vanilla & 0 & \textit{ECCo} & -4.34 & 3.58 \\
-  vanilla & 0 & \textit{Generic} & -4.41 & 3.48 \\
-  vanilla & 0 & \textit{REVISE} & -4.93 & 4.23 \\
-  full & 0.001 & \textit{ECCo} & -362 & 811 \\
-  full & 0.001 & \textit{Generic} & $-2.65 \cdot 10^{17}$ & $6.04 \cdot 10^{17}$ \\
-  full & 0.001 & \textit{REVISE} & -15.5 & 13 \\
-  vanilla & 0.001 & \textit{ECCo} & -4.34 & 3.58 \\
-  \color{blue}{\textbf{vanilla}} & \color{blue}{\textbf{0.001}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-4.41}} & \color{blue}{\textbf{3.48}} \\
-  vanilla & 0.001 & \textit{REVISE} & -4.93 & 4.23 \\
-  full & 0.1 & \textit{ECCo} & $-3.72 \cdot 10^{11}$ & $8.46 \cdot 10^{11}$ \\
-  full & 0.1 & \textit{Generic} & $-4.48 \cdot 10^{14}$ & $1.02 \cdot 10^{15}$ \\
-  full & 0.1 & \textit{REVISE} & -14.6 & 12.2 \\
-  vanilla & 0.1 & \textit{ECCo} & -4.34 & 3.58 \\
-  vanilla & 0.1 & \textit{Generic} & -4.41 & 3.48 \\
-  vanilla & 0.1 & \textit{REVISE} & -4.93 & 4.24 \\\bottomrule
-
-\end{longtable}
-
-\paragraph{Moons}\label{moons}
-
-\begin{itemize}
-\tightlist
-\item
-  \textbf{Energy Penalty} (Table~\ref{tbl-moons-lambda_energy_exper}):
-  \emph{ECCo} consistently yields better results than \emph{Vanilla},
-  except for very low choices of the energy penalty during training for
-  which it performs abismal. \emph{Generic} performs quite badly across
-  the board for high enough choices of the energy penalty at evaluation
-  time. \emph{Omni} has small positive effect. \emph{REVISE} performs
-  poorly across the board.
-\item
-  \textbf{Cost (distance penalty)}: \emph{Generic} generally does better
-  for higher values, while \emph{ECCo} does better for lower values.
-\item
-  \textbf{Maximum Iterations}: No clear patterns recognizable, so it
-  seems that smaller choices are ok.
-\item
-  \textbf{Validity}: \emph{ECCo} generally achieves full validity except
-  for very low choices the energy penalty during training and high
-  choices at evaluation time. \emph{Generic} performs poorly for high
-  choices of the energy penalty during evaluation.
-\item
-  \textbf{Accuracy}: Largely unaffected although \emph{ECCo} suffers a
-  bit for very low choices the energy penalty during training.
-  \emph{REVISE} suffers a lot in general (around 10 percentage points).
-\end{itemize}
-
-\begin{longtable}{ccccc}
-
-\caption{\label{tbl-moons-lambda_energy_exper}Results for Moons data by
-energy penalty.}
-
-\tabularnewline
-
-  \toprule
-  \textbf{Objective} & \textbf{$\lambda_{\text{div}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
-  \endfirsthead
-  \toprule
-  \textbf{Objective} & \textbf{$\lambda_{\text{div}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
-  \endhead
-  \bottomrule
-  \multicolumn{5}{r}{Continuing table below.}\\
-  \bottomrule
-  \endfoot
-  \endlastfoot
-  full & 0.01 & \textit{ECCo} & $-2.8 \cdot 10^{22}$ & $6.39 \cdot 10^{22}$ \\
-  full & 0.01 & \textit{Generic} & $-4.89 \cdot 10^{30}$ & $1.11 \cdot 10^{31}$ \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.01}} & \color{blue}{\textbf{REVISE}} & \color{blue}{\textbf{-572}} & \color{blue}{\textbf{$1.25 \cdot 10^{3}$}} \\
-  vanilla & 0.01 & \textit{ECCo} & -15.5 & 17.3 \\
-  vanilla & 0.01 & \textit{Generic} & -10.9 & 11.9 \\
-  vanilla & 0.01 & \textit{REVISE} & -11.2 & 13 \\
-  full & 0.05 & \textit{ECCo} & $-1.55 \cdot 10^{16}$ & $3.52 \cdot 10^{16}$ \\
-  full & 0.05 & \textit{Generic} & $-2.22 \cdot 10^{20}$ & $5 \cdot 10^{20}$ \\
-  full & 0.05 & \textit{REVISE} & $-1.04 \cdot 10^{3}$ & $2.3 \cdot 10^{3}$ \\
-  vanilla & 0.05 & \textit{ECCo} & -15.5 & 17.2 \\
-  \color{blue}{\textbf{vanilla}} & \color{blue}{\textbf{0.05}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-11.7}} & \color{blue}{\textbf{12.8}} \\
-  vanilla & 0.05 & \textit{REVISE} & -11.3 & 13.1 \\
-  full & 0.1 & \textit{ECCo} & $-3.41 \cdot 10^{3}$ & $7.73 \cdot 10^{3}$ \\
-  full & 0.1 & \textit{Generic} & $-5.22 \cdot 10^{30}$ & $1.19 \cdot 10^{31}$ \\
-  full & 0.1 & \textit{REVISE} & -288 & 594 \\
-  vanilla & 0.1 & \textit{ECCo} & -15.5 & 17.2 \\
-  vanilla & 0.1 & \textit{Generic} & -10.9 & 11.9 \\
-  vanilla & 0.1 & \textit{REVISE} & -11.3 & 13.1 \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.5}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-7.09}} & \color{blue}{\textbf{7.51}} \\
-  full & 0.5 & \textit{Generic} & $-1.11 \cdot 10^{31}$ & $2.53 \cdot 10^{31}$ \\
-  full & 0.5 & \textit{REVISE} & $-1.19 \cdot 10^{3}$ & $2.64 \cdot 10^{3}$ \\
-  vanilla & 0.5 & \textit{ECCo} & -15.5 & 17.2 \\
-  vanilla & 0.5 & \textit{Generic} & -11.7 & 12.8 \\
-  vanilla & 0.5 & \textit{REVISE} & -11.3 & 13.1 \\
-  full & 1 & \textit{ECCo} & -6.06 & 6.33 \\
-  full & 1 & \textit{Generic} & $-1.58 \cdot 10^{33}$ & $3.59 \cdot 10^{33}$ \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{1}} & \color{blue}{\textbf{REVISE}} & \color{blue}{\textbf{$-1.16 \cdot 10^{3}$}} & \color{blue}{\textbf{$2.59 \cdot 10^{3}$}} \\
-  vanilla & 1 & \textit{ECCo} & -15.5 & 17.3 \\
-  vanilla & 1 & \textit{Generic} & -10.9 & 11.9 \\
-  vanilla & 1 & \textit{REVISE} & -11.3 & 13.1 \\
-  full & 5 & \textit{ECCo} & -2.57 & 2.07 \\
-  full & 5 & \textit{Generic} & $-1.17 \cdot 10^{28}$ & $2.66 \cdot 10^{28}$ \\
-  full & 5 & \textit{REVISE} & -530 & $1.16 \cdot 10^{3}$ \\
-  vanilla & 5 & \textit{ECCo} & -15.5 & 17.2 \\
-  \color{blue}{\textbf{vanilla}} & \color{blue}{\textbf{5}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-11.7}} & \color{blue}{\textbf{12.7}} \\
-  vanilla & 5 & \textit{REVISE} & -11.3 & 13.1 \\
-  full & 10 & \textit{ECCo} & -1.76 & 0.974 \\
-  full & 10 & \textit{Generic} & $-1.54 \cdot 10^{33}$ & $3.51 \cdot 10^{33}$ \\
-  full & 10 & \textit{REVISE} & $-1.52 \cdot 10^{3}$ & $3.4 \cdot 10^{3}$ \\
-  vanilla & 10 & \textit{ECCo} & -15.5 & 17.3 \\
-  \color{blue}{\textbf{vanilla}} & \color{blue}{\textbf{10}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-10.9}} & \color{blue}{\textbf{11.9}} \\
-  vanilla & 10 & \textit{REVISE} & -11.3 & 13.1 \\
-  full & 15 & \textit{ECCo} & -1.37 & 0.365 \\
-  full & 15 & \textit{Generic} & $-5.32 \cdot 10^{28}$ & $1.21 \cdot 10^{29}$ \\
-  full & 15 & \textit{REVISE} & -473 & $1.03 \cdot 10^{3}$ \\
-  vanilla & 15 & \textit{ECCo} & -15.5 & 17.2 \\
-  vanilla & 15 & \textit{Generic} & -11.7 & 12.8 \\
-  vanilla & 15 & \textit{REVISE} & -11.3 & 13.1 \\\bottomrule
-
-\end{longtable}
-
-\paragraph{Circles}\label{circles}
-
-\begin{itemize}
-\tightlist
-\item
-  \textbf{Energy Penalty} (Table~\ref{tbl-circles-lambda_energy_exper}):
-  \emph{ECCo} consistently yields better results than \emph{Vanilla},
-  though primarily for low to medium choices of the energy penalty
-  (\textless=5) during training. The same goes for \emph{Generic}, which
-  sometimes outperforms \emph{ECCo} (for small energy penalty at
-  evaluation time). \emph{Omni} does alright for lower energy penalty at
-  evaluation time, but loses out for higher choices. \emph{REVISE}
-  performs poorly across the board (except very low choices at
-  evaluation time).
-\item
-  \textbf{Cost (distance penalty)}: \emph{ECCo} and \emph{Generic}
-  generally achieve the best results when no cost penalty is used during
-  training. Both \emph{Omni} and \emph{REVISE} are largely unaffected.
-\item
-  \textbf{Maximum Iterations}: \emph{ECCo} consistently yields better
-  results for higher numbers of iterations. \emph{Generic} generally
-  does best for a medium number (50). \emph{Omni} is sometimes invalid
-  (\textbf{???}).
-\item
-  \textbf{Validity}: \emph{ECCo} tends to outperform its \emph{Vanilla}
-  counterpart, though primarily for low to medium choices of the energy
-  penalty (\textless=5) during training and evaluation. \emph{Vanilla}
-  typically worse across the board.
-\item
-  \textbf{Accuracy}: Mostly unaffected, but \emph{REVISE} again
-  consistently some deterioration and \emph{ECCo} deteriorates for high
-  choices of energy penalty during training, reflecting other outcomes
-  above.
-\end{itemize}
-
-\begin{longtable}{ccccc}
-
-\caption{\label{tbl-circles-lambda_energy_exper}Results for Circles data
-by energy penalty.}
-
-\tabularnewline
-
-  \toprule
-  \textbf{Objective} & \textbf{$\lambda_{\text{div}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
-  \endfirsthead
-  \toprule
-  \textbf{Objective} & \textbf{$\lambda_{\text{div}} (\text{train})$} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
-  \endhead
-  \bottomrule
-  \multicolumn{5}{r}{Continuing table below.}\\
-  \bottomrule
-  \endfoot
-  \endlastfoot
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{0.01}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.26}} & \color{blue}{\textbf{0.423}} \\
-  full & 0.01 & \textit{Generic} & -1.49 & 0.71 \\
-  full & 0.01 & \textit{REVISE} & $-2.71 \cdot 10^{26}$ & $6.37 \cdot 10^{26}$ \\
-  vanilla & 0.01 & \textit{ECCo} & -9.33 & 7.34 \\
-  vanilla & 0.01 & \textit{Generic} & -8.89 & 6.88 \\
-  vanilla & 0.01 & \textit{REVISE} & -8.65 & 6.8 \\
-  full & 0.05 & \textit{ECCo} & -1.29 & 0.397 \\
-  full & 0.05 & \textit{Generic} & -1.21 & 0.356 \\
-  full & 0.05 & \textit{REVISE} & $-5.91 \cdot 10^{27}$ & $1.36 \cdot 10^{28}$ \\
-  \color{blue}{\textbf{vanilla}} & \color{blue}{\textbf{0.05}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-9.35}} & \color{blue}{\textbf{7.32}} \\
-  vanilla & 0.05 & \textit{Generic} & -8.85 & 6.87 \\
-  vanilla & 0.05 & \textit{REVISE} & -8.52 & 6.76 \\
-  full & 0.1 & \textit{ECCo} & -1.2 & 0.383 \\
-  full & 0.1 & \textit{Generic} & -1.5 & 0.735 \\
-  full & 0.1 & \textit{REVISE} & $-3.06 \cdot 10^{26}$ & $7.7 \cdot 10^{26}$ \\
-  vanilla & 0.1 & \textit{ECCo} & -9.33 & 7.32 \\
-  \color{blue}{\textbf{vanilla}} & \color{blue}{\textbf{0.1}} & \color{blue}{\textbf{Generic}} & \color{blue}{\textbf{-8.88}} & \color{blue}{\textbf{6.86}} \\
-  vanilla & 0.1 & \textit{REVISE} & -8.68 & 6.81 \\
-  full & 0.5 & \textit{ECCo} & -1.12 & 0.217 \\
-  full & 0.5 & \textit{Generic} & -1.21 & 0.352 \\
-  full & 0.5 & \textit{REVISE} & $-5.97 \cdot 10^{27}$ & $1.37 \cdot 10^{28}$ \\
-  vanilla & 0.5 & \textit{ECCo} & -9.35 & 7.3 \\
-  vanilla & 0.5 & \textit{Generic} & -8.89 & 6.92 \\
-  vanilla & 0.5 & \textit{REVISE} & -8.53 & 6.75 \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{1}} & \color{blue}{\textbf{ECCo}} & \color{blue}{\textbf{-1.1}} & \color{blue}{\textbf{0.163}} \\
-  full & 1 & \textit{Generic} & -1.49 & 0.726 \\
-  full & 1 & \textit{REVISE} & $-3.09 \cdot 10^{26}$ & $7.22 \cdot 10^{26}$ \\
-  vanilla & 1 & \textit{ECCo} & -9.34 & 7.36 \\
-  vanilla & 1 & \textit{Generic} & -8.86 & 6.85 \\
-  vanilla & 1 & \textit{REVISE} & -8.69 & 6.85 \\
-  full & 5 & \textit{ECCo} & -1.75 & 0.154 \\
-  full & 5 & \textit{Generic} & -1.21 & 0.363 \\
-  \color{blue}{\textbf{full}} & \color{blue}{\textbf{5}} & \color{blue}{\textbf{REVISE}} & \color{blue}{\textbf{$-1.1 \cdot 10^{28}$}} & \color{blue}{\textbf{$2.5 \cdot 10^{28}$}} \\
-  vanilla & 5 & \textit{ECCo} & -9.36 & 7.32 \\
-  vanilla & 5 & \textit{Generic} & -8.88 & 6.91 \\
-  vanilla & 5 & \textit{REVISE} & -8.52 & 6.73 \\
-  full & 10 & \textit{ECCo} & $-1.02 \cdot 10^{6}$ & $2.32 \cdot 10^{6}$ \\
-  full & 10 & \textit{Generic} & -1.49 & 0.702 \\
-  full & 10 & \textit{REVISE} & $-3.74 \cdot 10^{26}$ & $9.09 \cdot 10^{26}$ \\
-  vanilla & 10 & \textit{ECCo} & -9.31 & 7.33 \\
-  vanilla & 10 & \textit{Generic} & -8.87 & 6.86 \\
-  \color{blue}{\textbf{vanilla}} & \color{blue}{\textbf{10}} & \color{blue}{\textbf{REVISE}} & \color{blue}{\textbf{-8.69}} & \color{blue}{\textbf{6.83}} \\
-  full & 15 & \textit{ECCo} & $-3.31 \cdot 10^{13}$ & $7.54 \cdot 10^{13}$ \\
-  full & 15 & \textit{Generic} & -1.22 & 0.37 \\
-  full & 15 & \textit{REVISE} & $-9.01 \cdot 10^{27}$ & $2.06 \cdot 10^{28}$ \\
-  vanilla & 15 & \textit{ECCo} & -9.38 & 7.34 \\
-  vanilla & 15 & \textit{Generic} & -8.86 & 6.87 \\
-  vanilla & 15 & \textit{REVISE} & -8.51 & 6.73 \\\bottomrule
+  0.75 & 0.1 & 5 & \textit{ECCo} & -15.9 & 16.7 \\
+  \color{green}{\textbf{0.75}} & \color{green}{\textbf{0.1}} & \color{green}{\textbf{5}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{41.9}} & \color{green}{\textbf{8.13}} \\
+  0.75 & 0.1 & 5 & \textit{REVISE} & -64.4 & 3.58 \\
+  \color{green}{\textbf{0.75}} & \color{green}{\textbf{0.1}} & \color{green}{\textbf{25}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{28.9}} & \color{green}{\textbf{2.28}} \\
+  0.75 & 0.1 & 25 & \textit{Generic} & -11.3 & 11.5 \\
+  0.75 & 0.1 & 25 & \textit{REVISE} & -55.3 & 4.18 \\
+  \color{green}{\textbf{0.75}} & \color{green}{\textbf{0.1}} & \color{green}{\textbf{50}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{10.9}} & \color{green}{\textbf{7.47}} \\
+  0.75 & 0.1 & 50 & \textit{Generic} & -32.3 & 16.6 \\
+  0.75 & 0.1 & 50 & \textit{REVISE} & -44.1 & 4.24 \\
+  0.9 & 0.1 & 5 & \textit{ECCo} & -13.7 & 13.7 \\
+  \color{green}{\textbf{0.9}} & \color{green}{\textbf{0.1}} & \color{green}{\textbf{5}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{22.3}} & \color{green}{\textbf{4.87}} \\
+  0.9 & 0.1 & 5 & \textit{REVISE} & -27.8 & 6.26 \\
+  0.9 & 0.1 & 25 & \textit{ECCo} & 8.84 & 7.13 \\
+  \color{green}{\textbf{0.9}} & \color{green}{\textbf{0.1}} & \color{green}{\textbf{25}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{30.7}} & \color{green}{\textbf{5.77}} \\
+  0.9 & 0.1 & 25 & \textit{REVISE} & -72.7 & 34.9 \\
+  \color{green}{\textbf{0.9}} & \color{green}{\textbf{0.1}} & \color{green}{\textbf{50}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{17.1}} & \color{green}{\textbf{7.98}} \\
+  0.9 & 0.1 & 50 & \textit{Generic} & 3.82 & 8.86 \\
+  0.9 & 0.1 & 50 & \textit{REVISE} & -45.8 & 2.79 \\
+  \color{green}{\textbf{0.95}} & \color{green}{\textbf{0.1}} & \color{green}{\textbf{5}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{35.7}} & \color{green}{\textbf{7.56}} \\
+  0.95 & 0.1 & 5 & \textit{Generic} & -13.3 & 5.73 \\
+  0.95 & 0.1 & 5 & \textit{REVISE} & -54.9 & 5.43 \\
+  \color{green}{\textbf{0.95}} & \color{green}{\textbf{0.1}} & \color{green}{\textbf{25}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{37}} & \color{green}{\textbf{5.31}} \\
+  0.95 & 0.1 & 25 & \textit{Generic} & 29 & 8.6 \\
+  0.95 & 0.1 & 25 & \textit{REVISE} & -40.5 & 41 \\
+  0.95 & 0.1 & 50 & \textit{ECCo} & 13.2 & 4.89 \\
+  \color{green}{\textbf{0.95}} & \color{green}{\textbf{0.1}} & \color{green}{\textbf{50}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{35.5}} & \color{green}{\textbf{4.27}} \\
+  0.95 & 0.1 & 50 & \textit{REVISE} & -60.4 & 45.8 \\
+  \color{red}{\textbf{0.75}} & \color{red}{\textbf{0.5}} & \color{red}{\textbf{5}} & \color{red}{\textbf{ECCo}} & \color{red}{\textbf{-0.94}} & \color{red}{\textbf{17.6}} \\
+  0.75 & 0.5 & 5 & \textit{Generic} & -11.7 & 17.4 \\
+  0.75 & 0.5 & 5 & \textit{REVISE} & -37.7 & 3.92 \\
+  0.75 & 0.5 & 25 & \textit{ECCo} & 14.7 & 6.32 \\
+  \color{green}{\textbf{0.75}} & \color{green}{\textbf{0.5}} & \color{green}{\textbf{25}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{32.3}} & \color{green}{\textbf{3.49}} \\
+  0.75 & 0.5 & 25 & \textit{REVISE} & -39.9 & 7.21 \\
+  \color{green}{\textbf{0.75}} & \color{green}{\textbf{0.5}} & \color{green}{\textbf{50}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{28.3}} & \color{green}{\textbf{5.05}} \\
+  0.75 & 0.5 & 50 & \textit{Generic} & -9.72 & 9.19 \\
+  0.75 & 0.5 & 50 & \textit{REVISE} & -30 & 5.22 \\
+  0.9 & 0.5 & 5 & \textit{ECCo} & -7.38 & 13.6 \\
+  \color{red}{\textbf{0.9}} & \color{red}{\textbf{0.5}} & \color{red}{\textbf{5}} & \color{red}{\textbf{Generic}} & \color{red}{\textbf{-0.0952}} & \color{red}{\textbf{17.1}} \\
+  0.9 & 0.5 & 5 & \textit{REVISE} & -50.6 & 4.77 \\
+  \color{green}{\textbf{0.9}} & \color{green}{\textbf{0.5}} & \color{green}{\textbf{25}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{39.1}} & \color{green}{\textbf{8.3}} \\
+  0.9 & 0.5 & 25 & \textit{Generic} & 38.6 & 6.03 \\
+  0.9 & 0.5 & 25 & \textit{REVISE} & -56.9 & 4.28 \\
+  0.9 & 0.5 & 50 & \textit{ECCo} & -6.53 & 10.9 \\
+  \color{green}{\textbf{0.9}} & \color{green}{\textbf{0.5}} & \color{green}{\textbf{50}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{13.6}} & \color{green}{\textbf{12.8}} \\
+  0.9 & 0.5 & 50 & \textit{REVISE} & -24.1 & 12.5 \\
+  0.95 & 0.5 & 5 & \textit{ECCo} & 0.596 & 1.11 \\
+  \color{green}{\textbf{0.95}} & \color{green}{\textbf{0.5}} & \color{green}{\textbf{5}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{4.57}} & \color{green}{\textbf{5.88}} \\
+  0.95 & 0.5 & 5 & \textit{REVISE} & -34.3 & 6.09 \\
+  0.95 & 0.5 & 25 & \textit{ECCo} & 16.5 & 3.53 \\
+  \color{green}{\textbf{0.95}} & \color{green}{\textbf{0.5}} & \color{green}{\textbf{25}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{19.1}} & \color{green}{\textbf{4.43}} \\
+  0.95 & 0.5 & 25 & \textit{REVISE} & -37.2 & 39.2 \\
+  0.95 & 0.5 & 50 & \textit{ECCo} & -31 & 14.2 \\
+  \color{green}{\textbf{0.95}} & \color{green}{\textbf{0.5}} & \color{green}{\textbf{50}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{24.8}} & \color{green}{\textbf{4.78}} \\
+  0.95 & 0.5 & 50 & \textit{REVISE} & -1.28 & 2.7 \\
+  \color{green}{\textbf{0.75}} & \color{green}{\textbf{5}} & \color{green}{\textbf{5}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{37}} & \color{green}{\textbf{9.21}} \\
+  0.75 & 5 & 5 & \textit{Generic} & 0.977 & 21.1 \\
+  0.75 & 5 & 5 & \textit{REVISE} & -55.2 & 4.75 \\
+  \color{green}{\textbf{0.75}} & \color{green}{\textbf{5}} & \color{green}{\textbf{25}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{21.8}} & \color{green}{\textbf{5.97}} \\
+  0.75 & 5 & 25 & \textit{Generic} & 17.8 & 5.33 \\
+  0.75 & 5 & 25 & \textit{REVISE} & -68.1 & 8.69 \\
+  0.75 & 5 & 50 & \textit{ECCo} & 0.864 & 9.51 \\
+  \color{green}{\textbf{0.75}} & \color{green}{\textbf{5}} & \color{green}{\textbf{50}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{8.56}} & \color{green}{\textbf{13.6}} \\
+  0.75 & 5 & 50 & \textit{REVISE} & -71.8 & 3.18 \\
+  0.9 & 5 & 5 & \textit{ECCo} & -3.59 & 20.3 \\
+  \color{red}{\textbf{0.9}} & \color{red}{\textbf{5}} & \color{red}{\textbf{5}} & \color{red}{\textbf{Generic}} & \color{red}{\textbf{-1.18}} & \color{red}{\textbf{16.7}} \\
+  0.9 & 5 & 5 & \textit{REVISE} & -58.6 & 3.55 \\
+  0.9 & 5 & 25 & \textit{ECCo} & -1.73 & 9.07 \\
+  \color{green}{\textbf{0.9}} & \color{green}{\textbf{5}} & \color{green}{\textbf{25}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{21.9}} & \color{green}{\textbf{7.48}} \\
+  0.9 & 5 & 25 & \textit{REVISE} & -44.4 & 4.23 \\
+  \color{green}{\textbf{0.9}} & \color{green}{\textbf{5}} & \color{green}{\textbf{50}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{30.8}} & \color{green}{\textbf{10.7}} \\
+  0.9 & 5 & 50 & \textit{Generic} & 16.3 & 11.1 \\
+  0.9 & 5 & 50 & \textit{REVISE} & -53.3 & 6.73 \\
+  \color{red}{\textbf{0.95}} & \color{red}{\textbf{5}} & \color{red}{\textbf{5}} & \color{red}{\textbf{ECCo}} & \color{red}{\textbf{-5.29}} & \color{red}{\textbf{24.5}} \\
+  0.95 & 5 & 5 & \textit{Generic} & -5.71 & 17.4 \\
+  0.95 & 5 & 5 & \textit{REVISE} & -36.5 & 4.01 \\
+  \color{green}{\textbf{0.95}} & \color{green}{\textbf{5}} & \color{green}{\textbf{25}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{26.9}} & \color{green}{\textbf{4.08}} \\
+  0.95 & 5 & 25 & \textit{Generic} & 19.5 & 5.49 \\
+  0.95 & 5 & 25 & \textit{REVISE} & -25 & 5 \\
+  0.95 & 5 & 50 & \textit{ECCo} & 4.6 & 7.46 \\
+  \color{green}{\textbf{0.95}} & \color{green}{\textbf{5}} & \color{green}{\textbf{50}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{16.6}} & \color{green}{\textbf{4.3}} \\
+  0.95 & 5 & 50 & \textit{REVISE} & -50.4 & 46.4 \\
+  \color{green}{\textbf{0.75}} & \color{green}{\textbf{10}} & \color{green}{\textbf{5}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{2.47}} & \color{green}{\textbf{8.57}} \\
+  0.75 & 10 & 5 & \textit{Generic} & -7.23 & 9.13 \\
+  0.75 & 10 & 5 & \textit{REVISE} & -67.2 & 5.75 \\
+  \color{green}{\textbf{0.75}} & \color{green}{\textbf{10}} & \color{green}{\textbf{25}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{29.9}} & \color{green}{\textbf{15.8}} \\
+  0.75 & 10 & 25 & \textit{Generic} & 4.47 & 8.22 \\
+  0.75 & 10 & 25 & \textit{REVISE} & -52 & 5.51 \\
+  0.75 & 10 & 50 & \textit{ECCo} & 6.23 & 6.11 \\
+  \color{green}{\textbf{0.75}} & \color{green}{\textbf{10}} & \color{green}{\textbf{50}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{15.2}} & \color{green}{\textbf{10.2}} \\
+  0.75 & 10 & 50 & \textit{REVISE} & -17 & 5.46 \\
+  0.9 & 10 & 5 & \textit{ECCo} & -6.93 & 14.7 \\
+  \color{green}{\textbf{0.9}} & \color{green}{\textbf{10}} & \color{green}{\textbf{5}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{6.88}} & \color{green}{\textbf{5.11}} \\
+  0.9 & 10 & 5 & \textit{REVISE} & -45.6 & 47.8 \\
+  0.9 & 10 & 25 & \textit{ECCo} & 6.2 & 6.75 \\
+  \color{green}{\textbf{0.9}} & \color{green}{\textbf{10}} & \color{green}{\textbf{25}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{34.7}} & \color{green}{\textbf{9.74}} \\
+  0.9 & 10 & 25 & \textit{REVISE} & -55.7 & 6.04 \\
+  0.9 & 10 & 50 & \textit{ECCo} & 30.1 & 14.2 \\
+  \color{green}{\textbf{0.9}} & \color{green}{\textbf{10}} & \color{green}{\textbf{50}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{35}} & \color{green}{\textbf{7.11}} \\
+  0.9 & 10 & 50 & \textit{REVISE} & -48.8 & 3.3 \\
+  \color{green}{\textbf{0.95}} & \color{green}{\textbf{10}} & \color{green}{\textbf{5}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{35.7}} & \color{green}{\textbf{3.83}} \\
+  0.95 & 10 & 5 & \textit{Generic} & 2.85 & 7.9 \\
+  0.95 & 10 & 5 & \textit{REVISE} & -34.9 & 4.56 \\
+  \color{green}{\textbf{0.95}} & \color{green}{\textbf{10}} & \color{green}{\textbf{25}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{33}} & \color{green}{\textbf{6.45}} \\
+  0.95 & 10 & 25 & \textit{Generic} & 24.8 & 4.59 \\
+  0.95 & 10 & 25 & \textit{REVISE} & -55.7 & 44 \\
+  \color{green}{\textbf{0.95}} & \color{green}{\textbf{10}} & \color{green}{\textbf{50}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{8.07}} & \color{green}{\textbf{7.68}} \\
+  0.95 & 10 & 50 & \textit{Generic} & -7.11 & 9.2 \\
+  0.95 & 10 & 50 & \textit{REVISE} & -26.1 & 18.6 \\
+  0.75 & 20 & 5 & \textit{ECCo} & -10.8 & 20.8 \\
+  \color{green}{\textbf{0.75}} & \color{green}{\textbf{20}} & \color{green}{\textbf{5}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{12.6}} & \color{green}{\textbf{17.6}} \\
+  0.75 & 20 & 5 & \textit{REVISE} & -21.6 & 3.34 \\
+  \color{green}{\textbf{0.75}} & \color{green}{\textbf{20}} & \color{green}{\textbf{25}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{17.2}} & \color{green}{\textbf{4.25}} \\
+  0.75 & 20 & 25 & \textit{Generic} & -10.3 & 9.59 \\
+  0.75 & 20 & 25 & \textit{REVISE} & -59 & 3.66 \\
+  \color{green}{\textbf{0.75}} & \color{green}{\textbf{20}} & \color{green}{\textbf{50}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{15.6}} & \color{green}{\textbf{8.38}} \\
+  0.75 & 20 & 50 & \textit{Generic} & 3.92 & 6.2 \\
+  0.75 & 20 & 50 & \textit{REVISE} & -70.9 & 5.16 \\
+  \color{green}{\textbf{0.9}} & \color{green}{\textbf{20}} & \color{green}{\textbf{5}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{26.3}} & \color{green}{\textbf{6.62}} \\
+  0.9 & 20 & 5 & \textit{Generic} & 2.35 & 7.04 \\
+  0.9 & 20 & 5 & \textit{REVISE} & -64.8 & 4.31 \\
+  0.9 & 20 & 25 & \textit{ECCo} & 21.1 & 11.6 \\
+  \color{green}{\textbf{0.9}} & \color{green}{\textbf{20}} & \color{green}{\textbf{25}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{39}} & \color{green}{\textbf{5.98}} \\
+  0.9 & 20 & 25 & \textit{REVISE} & -50.7 & 13.8 \\
+  \color{green}{\textbf{0.9}} & \color{green}{\textbf{20}} & \color{green}{\textbf{50}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{15.1}} & \color{green}{\textbf{7.46}} \\
+  0.9 & 20 & 50 & \textit{Generic} & 8.53 & 6.95 \\
+  0.9 & 20 & 50 & \textit{REVISE} & -36 & 6.14 \\
+  0.95 & 20 & 5 & \textit{ECCo} & -23.8 & 17.8 \\
+  \color{green}{\textbf{0.95}} & \color{green}{\textbf{20}} & \color{green}{\textbf{5}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{7.23}} & \color{green}{\textbf{4.74}} \\
+  0.95 & 20 & 5 & \textit{REVISE} & -34 & 4.11 \\
+  \color{green}{\textbf{0.95}} & \color{green}{\textbf{20}} & \color{green}{\textbf{25}} & \color{green}{\textbf{ECCo}} & \color{green}{\textbf{19.3}} & \color{green}{\textbf{14.6}} \\
+  0.95 & 20 & 25 & \textit{Generic} & -1.35 & 7.71 \\
+  0.95 & 20 & 25 & \textit{REVISE} & -52.8 & 5.11 \\
+  0.95 & 20 & 50 & \textit{ECCo} & 18.7 & 3.84 \\
+  \color{green}{\textbf{0.95}} & \color{green}{\textbf{20}} & \color{green}{\textbf{50}} & \color{green}{\textbf{Generic}} & \color{green}{\textbf{37.3}} & \color{green}{\textbf{7.78}} \\
+  0.95 & 20 & 50 & \textit{REVISE} & -28.3 & 15 \\\bottomrule
 
 \end{longtable}
 

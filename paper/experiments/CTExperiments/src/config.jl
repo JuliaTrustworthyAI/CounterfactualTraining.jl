@@ -157,21 +157,26 @@ function is_empty_value(v::Any)
 end
 
 # Function to filter dictionary
-function filter_dict(dict::Dict)
+function filter_dict(dict::Dict; drop_fields=["name", "data", "data_params"])
     # Filter out empty values and specified fields
-    drop_fields = ["name"]
     return filter(dict) do (k, v)
         !is_empty_value(v) && !(k in drop_fields)
     end
 end
 
 global LatexReplacements = Dict(
-    "lambda_energy" => "\$\\lambda_{\\text{div}}\$",
+    "lambda_energy" => "\$\\lambda_{\\text{energy}}\$",
     "lambda_cost" => "\$\\lambda_{\\text{cost}}\$",
+    "lambda_adversarial" => "\$\\lambda_{\\text{adv}}\$",
+    "lambda_energy_diff" => "\$\\lambda_{\\text{div}}\$",
+    "lambda_energy_reg" => "\$\\lambda_{\\text{reg}}\$",
+    "lambda_class_loss" => "\$\\lambda_{\\text{yloss}}\$",
 )
 
 function format_header(s::String; replacements::Dict=LatexReplacements)
     s =
+        replace(s, "nce" => "ncounterfactuals") |>
+        s ->
         replace(s, "_exper" => "") |>
         s ->
             replace(s, "_eval" => "") |>
@@ -190,7 +195,9 @@ function format_header(s::String; replacements::Dict=LatexReplacements)
                                     s ->
                                         replace(s, r"\bopt\b" => "optimizer") |>
                                         s ->
-                                            replace(s, r"^n_" => "no._") |>
+                                            replace(s, r"^n" => "no._") |>
+                                                s ->
+                                                    replace(s, "__" => "_") |>
                                             s -> if s in keys(replacements)
                                                 replacements[s]
                                             else

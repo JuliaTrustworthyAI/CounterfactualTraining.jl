@@ -57,12 +57,10 @@ end
 # Visualize CE:
 prefix = "ce"
 cfg = eval_grid
-all_data = CTExperiments.merge_with_meta(
-    cfg, CTExperiments.load_ce_evaluation(cfg)
-)
+all_data = CTExperiments.merge_with_meta(cfg, CTExperiments.load_ce_evaluation(cfg))
 valid_y = CTExperiments.valid_y_ce(all_data[1])
 params = PlotParams(;
-    colorvar=get_global_param("colorvar_ce", colorvar_ce) |> x -> adjust_plot_var(x,cfg),
+    colorvar=get_global_param("colorvar_ce", colorvar_ce) |> x -> adjust_plot_var(x, cfg),
     rowvar=get_global_param("rowvar_ce", rowvar_ce) |> x -> adjust_plot_var(x, cfg),
     colvar=get_global_param("colvar_ce", colvar_ce) |> x -> adjust_plot_var(x, cfg),
     sidevar=get_global_param("sidevar", sidevar) |> x -> adjust_plot_var(x, cfg),

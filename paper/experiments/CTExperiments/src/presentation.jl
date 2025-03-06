@@ -261,13 +261,10 @@ function aggregate_ce_evaluation(
     # Aggregate:
     if "run" in names(df)
         byvars_must_include = ["run", "lambda_energy_eval", "objective"]
-        byvars_must_include = byvars_must_include[[x in names(df) for x in byvars_must_include]]
-        df_agg = aggregate_data(
-            df,
-            y,
-            byvars;
-            byvars_must_include=byvars_must_include,
-        )
+        byvars_must_include = byvars_must_include[[
+            x in names(df) for x in byvars_must_include
+        ]]
+        df_agg = aggregate_data(df, y, byvars; byvars_must_include=byvars_must_include)
         if agg_runs
             # Compute mean of means and std of means:
             df_agg =
