@@ -183,14 +183,14 @@
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
+\theoremstyle{plain}
+\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{plain}
 \newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\theoremstyle{definition}
 \newtheorem{example}{Example}[section]
-\theoremstyle{plain}
-\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -910,17 +910,30 @@ Equation~\ref{eq-obj}?
 
 \section{Discussion}\label{sec-discussion}
 
+\subsection{Approach/Future Directions}\label{approachfuture-directions}
+
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   Limited to classification models.
 \item
+  Training instabilities.
+\item
+  Hyperparameter sensitivity -\textgreater{} can we do better than grid
+  search? (Bayes opt, \ldots)
+\end{enumerate}
+
+\subsection{Limitations}\label{limitations}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{2}
+\tightlist
+\item
   Proxy attributes of immutable features.
 \item
   Increased training time.
-\item
-  Training instabilities
 \item
   Fairness and caveats (aware it's not a classical approach in this
   context, but there is a clear link).
@@ -1396,7 +1409,7 @@ counterfactual training.
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, left=2mm, coltitle=black, toptitle=1mm, breakable, bottomtitle=1mm, opacitybacktitle=0.6, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, title={Note}, titlerule=0mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, opacityback=0, bottomrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, coltitle=black, rightrule=.15mm, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacitybacktitle=0.6, title={Note}, opacityback=0, leftrule=.75mm]
 
 Figure~\ref{fig-mnist} shows much more plausible (faithful)
 counterfactuals for a model with CT than the model with conventional
@@ -1445,7 +1458,7 @@ training is shown in Note~\ref{nte-gen-params-final-run-train}. The
 corresponding evaluation grid used for these experiments is shown in
 Note~\ref{nte-gen-params-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, left=2mm, coltitle=black, toptitle=1mm, breakable, bottomtitle=1mm, opacitybacktitle=0.6, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, titlerule=0mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, opacityback=0, bottomrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, coltitle=black, rightrule=.15mm, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacitybacktitle=0.6, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, opacityback=0, leftrule=.75mm]
 
 \quartocalloutnte{nte-gen-params-final-run-train} 
 
@@ -1479,7 +1492,7 @@ Note~\ref{nte-gen-params-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, left=2mm, coltitle=black, toptitle=1mm, breakable, bottomtitle=1mm, opacitybacktitle=0.6, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, titlerule=0mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, opacityback=0, bottomrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, coltitle=black, rightrule=.15mm, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacitybacktitle=0.6, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, opacityback=0, leftrule=.75mm]
 
 \quartocalloutnte{nte-gen-params-final-run-eval} 
 
@@ -1621,7 +1634,7 @@ is shown in Note~\ref{nte-pen-final-run-train}. The corresponding
 evaluation grid used for these experiments is shown in
 Note~\ref{nte-pen-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, left=2mm, coltitle=black, toptitle=1mm, breakable, bottomtitle=1mm, opacitybacktitle=0.6, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, titlerule=0mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, opacityback=0, bottomrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, coltitle=black, rightrule=.15mm, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacitybacktitle=0.6, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, opacityback=0, leftrule=.75mm]
 
 \quartocalloutnte{nte-pen-final-run-train} 
 
@@ -1649,7 +1662,7 @@ Note~\ref{nte-pen-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, left=2mm, coltitle=black, toptitle=1mm, breakable, bottomtitle=1mm, opacitybacktitle=0.6, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, titlerule=0mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, opacityback=0, bottomrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, coltitle=black, rightrule=.15mm, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacitybacktitle=0.6, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, opacityback=0, leftrule=.75mm]
 
 \quartocalloutnte{nte-pen-final-run-eval} 
 
@@ -1779,6 +1792,175 @@ measure across hyperparameters. Data: Moons.}
 }
 
 \caption{\label{fig-grid-pen-cost-over}Average outcomes for the cost
+measure across hyperparameters. Data: Overlapping.}
+
+\end{figure}%
+
+\subsubsection{Training Parameters}\label{training-parameters}
+
+The hyperparameter grid with other varying training parameters is shown
+in Note~\ref{nte-train-final-run-train}. The corresponding evaluation
+grid used for these experiments is shown in
+Note~\ref{nte-train-final-run-eval}.
+
+\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, coltitle=black, rightrule=.15mm, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacitybacktitle=0.6, title={Note \ref*{nte-train-final-run-train}: Training Phase}, opacityback=0, leftrule=.75mm]
+
+\quartocalloutnte{nte-train-final-run-train} 
+
+\begin{itemize}
+\tightlist
+\item
+  Generator: \texttt{ecco,\ generic,\ revise}
+\item
+  Model: \texttt{mlp}
+\item
+  Training Parameters:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Burnin: \texttt{0.0,\ 0.5}
+  \item
+    No.~Counterfactuals: \texttt{100,\ 1000}
+  \item
+    No.~Epochs: \texttt{50,\ 100}
+  \item
+    Objective: \texttt{full,\ vanilla}
+  \end{itemize}
+\end{itemize}
+
+\end{tcolorbox}
+
+\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, coltitle=black, rightrule=.15mm, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacitybacktitle=0.6, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, opacityback=0, leftrule=.75mm]
+
+\quartocalloutnte{nte-train-final-run-eval} 
+
+\begin{itemize}
+\tightlist
+\item
+  Generator Parameters:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \(\lambda_{\text{energy}}\): \texttt{0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0}
+  \end{itemize}
+\end{itemize}
+
+\end{tcolorbox}
+
+\paragraph{Plausibility}\label{plausibility-3}
+
+The results with respect to the plausibility measure are shown in
+Figure~\ref{fig-grid-train-plaus-circles} to
+Figure~\ref{fig-grid-train-plaus-over}.
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/circles/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/plausibility_distance_from_target.png}}
+
+}
+
+\caption{\label{fig-grid-train-plaus-circles}Average outcomes for the
+plausibility measure across hyperparameters. Data: Circles.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/lin_sep/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/plausibility_distance_from_target.png}}
+
+}
+
+\caption{\label{fig-grid-train-plaus-lin_sep}Average outcomes for the
+plausibility measure across hyperparameters. Data: Linearly Separable.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/moons/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/plausibility_distance_from_target.png}}
+
+}
+
+\caption{\label{fig-grid-train-plaus-moons}Average outcomes for the
+plausibility measure across hyperparameters. Data: Moons.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/over/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/plausibility_distance_from_target.png}}
+
+}
+
+\caption{\label{fig-grid-train-plaus-over}Average outcomes for the
+plausibility measure across hyperparameters. Data: Overlapping.}
+
+\end{figure}%
+
+\paragraph{Cost}\label{cost-2}
+
+The results with respect to the cost measure are shown in
+Figure~\ref{fig-grid-train-cost-circles} to
+Figure~\ref{fig-grid-train-cost-over}.
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/circles/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/distance.png}}
+
+}
+
+\caption{\label{fig-grid-train-cost-circles}Average outcomes for the
+cost measure across hyperparameters. Data: Circles.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/lin_sep/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/distance.png}}
+
+}
+
+\caption{\label{fig-grid-train-cost-lin_sep}Average outcomes for the
+cost measure across hyperparameters. Data: Linearly Separable.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/moons/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/distance.png}}
+
+}
+
+\caption{\label{fig-grid-train-cost-moons}Average outcomes for the cost
+measure across hyperparameters. Data: Moons.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/over/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/distance.png}}
+
+}
+
+\caption{\label{fig-grid-train-cost-over}Average outcomes for the cost
 measure across hyperparameters. Data: Overlapping.}
 
 \end{figure}%
