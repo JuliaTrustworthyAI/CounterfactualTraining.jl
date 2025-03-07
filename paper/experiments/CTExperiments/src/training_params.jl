@@ -22,10 +22,10 @@ struct Generic <: AbstractGeneratorType end
 "Type for the GravitationalGenerator."
 struct Gravitational <: AbstractGeneratorType end
 
-get_generator_name(gen::ECCo; pretty::Bool=false) = pretty ? "ECCo" : "ecco"
-get_generator_name(gen::Generic; pretty::Bool=false) = pretty ? "Generic" : "generic"
-get_generator_name(gen::REVISE; pretty::Bool=false) = pretty ? "REVISE" : "revise"
-function get_generator_name(gen::Gravitational; pretty::Bool=false)
+get_name(gen::ECCo; pretty::Bool=false) = pretty ? "ECCo" : "ecco"
+get_name(gen::Generic; pretty::Bool=false) = pretty ? "Generic" : "generic"
+get_name(gen::REVISE; pretty::Bool=false) = pretty ? "REVISE" : "revise"
+function get_name(gen::Gravitational; pretty::Bool=false)
     return pretty ? "Gravitational" : "gravi"
 end
 
@@ -35,10 +35,10 @@ end
 Catalogue of available generator types.
 """
 const generator_types = Dict(
-    get_generator_name(ECCo()) => ECCo,
-    get_generator_name(Generic()) => Generic,
-    get_generator_name(REVISE()) => REVISE,
-    get_generator_name(Gravitational()) => Gravitational,
+    get_name(ECCo()) => ECCo,
+    get_name(Generic()) => Generic,
+    get_name(REVISE()) => REVISE,
+    get_name(Gravitational()) => Gravitational,
 )
 
 """
@@ -84,7 +84,7 @@ Base.@kwdef struct GeneratorParams <: AbstractGeneratorParams
     lambda_energy::AbstractFloat = 5.0
 end
 
-get_generator_name(params::GeneratorParams) = get_generator_name(params.type)
+get_name(params::GeneratorParams) = get_name(params.type)
 
 """
     get_generator(params::GeneratorParams)

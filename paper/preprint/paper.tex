@@ -187,10 +187,10 @@
 \newtheorem{definition}{Definition}[section]
 \theoremstyle{plain}
 \newtheorem{proposition}{Proposition}[section]
-\theoremstyle{plain}
-\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{definition}
 \newtheorem{example}{Example}[section]
+\theoremstyle{plain}
+\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -214,8 +214,9 @@
 \hypersetup{
   pdftitle={Counterfactual Training: Teaching Models Plausible and Actionable Explanations},
   pdfauthor={Patrick Altmeyer; Aleksander Buszydlik; Arie van Deursen; Cynthia C. S. Liem},
-  pdfkeywords={Counterfactual Explanations, Explainable
-AI, Representation Learning},
+  pdfkeywords={Counterfactual Training, Counterfactual
+Explanations, Algorithmic Recourse, Explainable AI, Representation
+Learning},
   colorlinks=true,
   linkcolor={blue},
   filecolor={Maroon},
@@ -246,28 +247,28 @@ Science\\Delft University of Technology\\\\}
 \begin{document}
 \maketitle
 \begin{abstract}
-We propose a novel model objective that leverages counterfactual
-explanations to increase the explanatory capacity of trained models.
-Counterfactual explanations have emerged as a popular tool to explain
-predictions made by opaque machine learning models: they inform how
-factual inputs would need to change in order for a model to produce some
-desired output. Much existing research has focused on generating
-counterfactuals that are not only valid but also deemed acceptable with
-respect to the stakeholder requirements and plausible with respect to
-the underlying data. Recent work has shown that under this premise, the
-task of learning plausible explanations---ones that respect the
-conditional distribution of the target class---is effectively reassigned
-from the model itself to the post-hoc counterfactual explainer. Building
-on that work, we propose a novel objective function that employs
-counterfactuals (ad-hoc) during the training phase to minimize the
-divergence between the learned representations and the explanations.
-Through extensive experiments, we demonstrate that our proposed method
-facilitates training models that deliver inherently plausible
-explanations while maintaining high predictive performance.
+We propose a novel training regime called Counterfactual Training that
+leverages counterfactual explanations to increase the explanatory
+capacity of models. Counterfactual explanations have emerged as a
+popular post-hoc explanation method for opaque machine learning models:
+they inform how factual inputs would need to change in order for a model
+to produce some desired output. To be useful in real-word
+decision-making systems, counterfactuals should be plausible with
+respect to the underlying data and actionable with respect to
+stakeholder requirements. Much existing research has therefore focused
+on developing post-hoc methods to generate counterfactuals that meet
+these desiderata. In this work, we instead hold models directly
+accountable for this desired end goal: Counterfactual Training employs
+counterfactuals ad-hoc during the training phase to minimize the
+divergence between learned representations and plausible, actionable
+explanations. We demonstrate empirically and theoretically that our
+proposed method facilitates training models that deliver inherently
+desirable explanations while maintaining high predictive performance.
 \end{abstract}
 {\bfseries \emph Keywords}
 \def\sep{\textbullet\ }
-Counterfactual Explanations \sep Explainable AI \sep 
+Counterfactual Training \sep Counterfactual
+Explanations \sep Algorithmic Recourse \sep Explainable AI \sep 
 Representation Learning
 
 
@@ -1395,7 +1396,7 @@ counterfactual training.
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, coltitle=black, titlerule=0mm, left=2mm, colframe=quarto-callout-note-color-frame, toptitle=1mm, bottomrule=.15mm, leftrule=.75mm, title={Note}, colback=white, rightrule=.15mm, toprule=.15mm, bottomtitle=1mm, opacitybacktitle=0.6, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, left=2mm, coltitle=black, toptitle=1mm, breakable, bottomtitle=1mm, opacitybacktitle=0.6, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, title={Note}, titlerule=0mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, opacityback=0, bottomrule=.15mm]
 
 Figure~\ref{fig-mnist} shows much more plausible (faithful)
 counterfactuals for a model with CT than the model with conventional
@@ -1444,7 +1445,7 @@ training is shown in Note~\ref{nte-gen-params-final-run-train}. The
 corresponding evaluation grid used for these experiments is shown in
 Note~\ref{nte-gen-params-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, coltitle=black, titlerule=0mm, left=2mm, colframe=quarto-callout-note-color-frame, toptitle=1mm, bottomrule=.15mm, leftrule=.75mm, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, colback=white, rightrule=.15mm, toprule=.15mm, bottomtitle=1mm, opacitybacktitle=0.6, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, left=2mm, coltitle=black, toptitle=1mm, breakable, bottomtitle=1mm, opacitybacktitle=0.6, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, titlerule=0mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, opacityback=0, bottomrule=.15mm]
 
 \quartocalloutnte{nte-gen-params-final-run-train} 
 
@@ -1478,7 +1479,7 @@ Note~\ref{nte-gen-params-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, coltitle=black, titlerule=0mm, left=2mm, colframe=quarto-callout-note-color-frame, toptitle=1mm, bottomrule=.15mm, leftrule=.75mm, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, colback=white, rightrule=.15mm, toprule=.15mm, bottomtitle=1mm, opacitybacktitle=0.6, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, left=2mm, coltitle=black, toptitle=1mm, breakable, bottomtitle=1mm, opacitybacktitle=0.6, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, titlerule=0mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, opacityback=0, bottomrule=.15mm]
 
 \quartocalloutnte{nte-gen-params-final-run-eval} 
 
@@ -1496,175 +1497,291 @@ Note~\ref{nte-gen-params-final-run-eval}.
 
 \end{tcolorbox}
 
-\subsubsection{High-Level Findings}\label{high-level-findings}
+\paragraph{Plausibility}\label{plausibility-1}
+
+The results with respect to the plausibility measure are shown in
+Figure~\ref{fig-grid-gen_params-plaus-circles} to
+Figure~\ref{fig-grid-gen_params-plaus-over}.
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/circles/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/plausibility_distance_from_target.png}}
+
+}
+
+\caption{\label{fig-grid-gen_params-plaus-circles}Average outcomes for
+the plausibility measure across hyperparameters. Data: Circles.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/lin_sep/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/plausibility_distance_from_target.png}}
+
+}
+
+\caption{\label{fig-grid-gen_params-plaus-lin_sep}Average outcomes for
+the plausibility measure across hyperparameters. Data: Linearly
+Separable.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
 
 \pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/moons/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/plausibility_distance_from_target.png}}
 
+}
+
+\caption{\label{fig-grid-gen_params-plaus-moons}Average outcomes for the
+plausibility measure across hyperparameters. Data: Moons.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/over/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/plausibility_distance_from_target.png}}
+
+}
+
+\caption{\label{fig-grid-gen_params-plaus-over}Average outcomes for the
+plausibility measure across hyperparameters. Data: Overlapping.}
+
+\end{figure}%
+
+\paragraph{Cost}\label{cost}
+
+The results with respect to the cost measure are shown in
+Figure~\ref{fig-grid-gen_params-cost-circles} to
+Figure~\ref{fig-grid-gen_params-cost-over}.
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/circles/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/distance.png}}
+
+}
+
+\caption{\label{fig-grid-gen_params-cost-circles}Average outcomes for
+the cost measure across hyperparameters. Data: Circles.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/lin_sep/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/distance.png}}
+
+}
+
+\caption{\label{fig-grid-gen_params-cost-lin_sep}Average outcomes for
+the cost measure across hyperparameters. Data: Linearly Separable.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
 \pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/moons/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/distance.png}}
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/moons/evaluation/results/logs/objective---lambda_energy---generator_type---maxiter/percent_valid.png}}
+}
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/moons/evaluation/results/logs/objective---lambda_energy---generator_type---maxiter/acc_val.png}}
+\caption{\label{fig-grid-gen_params-cost-moons}Average outcomes for the
+cost measure across hyperparameters. Data: Moons.}
 
-\subsubsection{Detailed Findings}\label{detailed-findings}
+\end{figure}%
 
-\paragraph{Linearly Separable}\label{linearly-separable}
+\begin{figure}
 
-\begin{longtable}{cccccc}
+\centering{
 
-\caption{\label{tbl-lin_sep-lambda_energy_exper}Results for Linearly
-Separable data by energy penalty.}
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/over/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/distance.png}}
 
-\tabularnewline
+}
 
-  \toprule
-  \textbf{Decision Threshold} & \textbf{$\lambda_{\text{energy}}$} & \textbf{Maximum Iterations} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
-  \endfirsthead
-  \toprule
-  \textbf{Decision Threshold} & \textbf{$\lambda_{\text{energy}}$} & \textbf{Maximum Iterations} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
-  \endhead
-  \bottomrule
-  \multicolumn{6}{r}{Continuing table below.}\\
-  \bottomrule
-  \endfoot
-  \endlastfoot
-  0.75 & 0.1 & 5 & \textit{ECCo} & -15.9 & 16.7 \\
-  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{41.9}} & \color{Green}{\textbf{8.13}} \\
-  0.75 & 0.1 & 5 & \textit{REVISE} & -64.4 & 3.58 \\
-  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{28.9}} & \color{Green}{\textbf{2.28}} \\
-  0.75 & 0.1 & 25 & \textit{Generic} & -11.3 & 11.5 \\
-  0.75 & 0.1 & 25 & \textit{REVISE} & -55.3 & 4.18 \\
-  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{10.9}} & \color{Green}{\textbf{7.47}} \\
-  0.75 & 0.1 & 50 & \textit{Generic} & -32.3 & 16.6 \\
-  0.75 & 0.1 & 50 & \textit{REVISE} & -44.1 & 4.24 \\
-  0.9 & 0.1 & 5 & \textit{ECCo} & -13.7 & 13.7 \\
-  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{22.3}} & \color{Green}{\textbf{4.87}} \\
-  0.9 & 0.1 & 5 & \textit{REVISE} & -27.8 & 6.26 \\
-  0.9 & 0.1 & 25 & \textit{ECCo} & 8.84 & 7.13 \\
-  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{30.7}} & \color{Green}{\textbf{5.77}} \\
-  0.9 & 0.1 & 25 & \textit{REVISE} & -72.7 & 34.9 \\
-  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{17.1}} & \color{Green}{\textbf{7.98}} \\
-  0.9 & 0.1 & 50 & \textit{Generic} & 3.82 & 8.86 \\
-  0.9 & 0.1 & 50 & \textit{REVISE} & -45.8 & 2.79 \\
-  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{35.7}} & \color{Green}{\textbf{7.56}} \\
-  0.95 & 0.1 & 5 & \textit{Generic} & -13.3 & 5.73 \\
-  0.95 & 0.1 & 5 & \textit{REVISE} & -54.9 & 5.43 \\
-  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{37}} & \color{Green}{\textbf{5.31}} \\
-  0.95 & 0.1 & 25 & \textit{Generic} & 29 & 8.6 \\
-  0.95 & 0.1 & 25 & \textit{REVISE} & -40.5 & 41 \\
-  0.95 & 0.1 & 50 & \textit{ECCo} & 13.2 & 4.89 \\
-  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{35.5}} & \color{Green}{\textbf{4.27}} \\
-  0.95 & 0.1 & 50 & \textit{REVISE} & -60.4 & 45.8 \\
-  \color{Red}{\textbf{0.75}} & \color{Red}{\textbf{0.5}} & \color{Red}{\textbf{5}} & \color{Red}{\textbf{ECCo}} & \color{Red}{\textbf{-0.94}} & \color{Red}{\textbf{17.6}} \\
-  0.75 & 0.5 & 5 & \textit{Generic} & -11.7 & 17.4 \\
-  0.75 & 0.5 & 5 & \textit{REVISE} & -37.7 & 3.92 \\
-  0.75 & 0.5 & 25 & \textit{ECCo} & 14.7 & 6.32 \\
-  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{0.5}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{32.3}} & \color{Green}{\textbf{3.49}} \\
-  0.75 & 0.5 & 25 & \textit{REVISE} & -39.9 & 7.21 \\
-  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{0.5}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{28.3}} & \color{Green}{\textbf{5.05}} \\
-  0.75 & 0.5 & 50 & \textit{Generic} & -9.72 & 9.19 \\
-  0.75 & 0.5 & 50 & \textit{REVISE} & -30 & 5.22 \\
-  0.9 & 0.5 & 5 & \textit{ECCo} & -7.38 & 13.6 \\
-  \color{Red}{\textbf{0.9}} & \color{Red}{\textbf{0.5}} & \color{Red}{\textbf{5}} & \color{Red}{\textbf{Generic}} & \color{Red}{\textbf{-0.0952}} & \color{Red}{\textbf{17.1}} \\
-  0.9 & 0.5 & 5 & \textit{REVISE} & -50.6 & 4.77 \\
-  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{0.5}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{39.1}} & \color{Green}{\textbf{8.3}} \\
-  0.9 & 0.5 & 25 & \textit{Generic} & 38.6 & 6.03 \\
-  0.9 & 0.5 & 25 & \textit{REVISE} & -56.9 & 4.28 \\
-  0.9 & 0.5 & 50 & \textit{ECCo} & -6.53 & 10.9 \\
-  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{0.5}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{13.6}} & \color{Green}{\textbf{12.8}} \\
-  0.9 & 0.5 & 50 & \textit{REVISE} & -24.1 & 12.5 \\
-  0.95 & 0.5 & 5 & \textit{ECCo} & 0.596 & 1.11 \\
-  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{0.5}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{4.57}} & \color{Green}{\textbf{5.88}} \\
-  0.95 & 0.5 & 5 & \textit{REVISE} & -34.3 & 6.09 \\
-  0.95 & 0.5 & 25 & \textit{ECCo} & 16.5 & 3.53 \\
-  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{0.5}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{19.1}} & \color{Green}{\textbf{4.43}} \\
-  0.95 & 0.5 & 25 & \textit{REVISE} & -37.2 & 39.2 \\
-  0.95 & 0.5 & 50 & \textit{ECCo} & -31 & 14.2 \\
-  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{0.5}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{24.8}} & \color{Green}{\textbf{4.78}} \\
-  0.95 & 0.5 & 50 & \textit{REVISE} & -1.28 & 2.7 \\
-  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{37}} & \color{Green}{\textbf{9.21}} \\
-  0.75 & 5 & 5 & \textit{Generic} & 0.977 & 21.1 \\
-  0.75 & 5 & 5 & \textit{REVISE} & -55.2 & 4.75 \\
-  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{21.8}} & \color{Green}{\textbf{5.97}} \\
-  0.75 & 5 & 25 & \textit{Generic} & 17.8 & 5.33 \\
-  0.75 & 5 & 25 & \textit{REVISE} & -68.1 & 8.69 \\
-  0.75 & 5 & 50 & \textit{ECCo} & 0.864 & 9.51 \\
-  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{8.56}} & \color{Green}{\textbf{13.6}} \\
-  0.75 & 5 & 50 & \textit{REVISE} & -71.8 & 3.18 \\
-  0.9 & 5 & 5 & \textit{ECCo} & -3.59 & 20.3 \\
-  \color{Red}{\textbf{0.9}} & \color{Red}{\textbf{5}} & \color{Red}{\textbf{5}} & \color{Red}{\textbf{Generic}} & \color{Red}{\textbf{-1.18}} & \color{Red}{\textbf{16.7}} \\
-  0.9 & 5 & 5 & \textit{REVISE} & -58.6 & 3.55 \\
-  0.9 & 5 & 25 & \textit{ECCo} & -1.73 & 9.07 \\
-  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{21.9}} & \color{Green}{\textbf{7.48}} \\
-  0.9 & 5 & 25 & \textit{REVISE} & -44.4 & 4.23 \\
-  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{30.8}} & \color{Green}{\textbf{10.7}} \\
-  0.9 & 5 & 50 & \textit{Generic} & 16.3 & 11.1 \\
-  0.9 & 5 & 50 & \textit{REVISE} & -53.3 & 6.73 \\
-  \color{Red}{\textbf{0.95}} & \color{Red}{\textbf{5}} & \color{Red}{\textbf{5}} & \color{Red}{\textbf{ECCo}} & \color{Red}{\textbf{-5.29}} & \color{Red}{\textbf{24.5}} \\
-  0.95 & 5 & 5 & \textit{Generic} & -5.71 & 17.4 \\
-  0.95 & 5 & 5 & \textit{REVISE} & -36.5 & 4.01 \\
-  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{26.9}} & \color{Green}{\textbf{4.08}} \\
-  0.95 & 5 & 25 & \textit{Generic} & 19.5 & 5.49 \\
-  0.95 & 5 & 25 & \textit{REVISE} & -25 & 5 \\
-  0.95 & 5 & 50 & \textit{ECCo} & 4.6 & 7.46 \\
-  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{16.6}} & \color{Green}{\textbf{4.3}} \\
-  0.95 & 5 & 50 & \textit{REVISE} & -50.4 & 46.4 \\
-  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{2.47}} & \color{Green}{\textbf{8.57}} \\
-  0.75 & 10 & 5 & \textit{Generic} & -7.23 & 9.13 \\
-  0.75 & 10 & 5 & \textit{REVISE} & -67.2 & 5.75 \\
-  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{29.9}} & \color{Green}{\textbf{15.8}} \\
-  0.75 & 10 & 25 & \textit{Generic} & 4.47 & 8.22 \\
-  0.75 & 10 & 25 & \textit{REVISE} & -52 & 5.51 \\
-  0.75 & 10 & 50 & \textit{ECCo} & 6.23 & 6.11 \\
-  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{15.2}} & \color{Green}{\textbf{10.2}} \\
-  0.75 & 10 & 50 & \textit{REVISE} & -17 & 5.46 \\
-  0.9 & 10 & 5 & \textit{ECCo} & -6.93 & 14.7 \\
-  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{6.88}} & \color{Green}{\textbf{5.11}} \\
-  0.9 & 10 & 5 & \textit{REVISE} & -45.6 & 47.8 \\
-  0.9 & 10 & 25 & \textit{ECCo} & 6.2 & 6.75 \\
-  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{34.7}} & \color{Green}{\textbf{9.74}} \\
-  0.9 & 10 & 25 & \textit{REVISE} & -55.7 & 6.04 \\
-  0.9 & 10 & 50 & \textit{ECCo} & 30.1 & 14.2 \\
-  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{35}} & \color{Green}{\textbf{7.11}} \\
-  0.9 & 10 & 50 & \textit{REVISE} & -48.8 & 3.3 \\
-  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{35.7}} & \color{Green}{\textbf{3.83}} \\
-  0.95 & 10 & 5 & \textit{Generic} & 2.85 & 7.9 \\
-  0.95 & 10 & 5 & \textit{REVISE} & -34.9 & 4.56 \\
-  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{33}} & \color{Green}{\textbf{6.45}} \\
-  0.95 & 10 & 25 & \textit{Generic} & 24.8 & 4.59 \\
-  0.95 & 10 & 25 & \textit{REVISE} & -55.7 & 44 \\
-  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{8.07}} & \color{Green}{\textbf{7.68}} \\
-  0.95 & 10 & 50 & \textit{Generic} & -7.11 & 9.2 \\
-  0.95 & 10 & 50 & \textit{REVISE} & -26.1 & 18.6 \\
-  0.75 & 20 & 5 & \textit{ECCo} & -10.8 & 20.8 \\
-  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{12.6}} & \color{Green}{\textbf{17.6}} \\
-  0.75 & 20 & 5 & \textit{REVISE} & -21.6 & 3.34 \\
-  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{17.2}} & \color{Green}{\textbf{4.25}} \\
-  0.75 & 20 & 25 & \textit{Generic} & -10.3 & 9.59 \\
-  0.75 & 20 & 25 & \textit{REVISE} & -59 & 3.66 \\
-  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{15.6}} & \color{Green}{\textbf{8.38}} \\
-  0.75 & 20 & 50 & \textit{Generic} & 3.92 & 6.2 \\
-  0.75 & 20 & 50 & \textit{REVISE} & -70.9 & 5.16 \\
-  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{26.3}} & \color{Green}{\textbf{6.62}} \\
-  0.9 & 20 & 5 & \textit{Generic} & 2.35 & 7.04 \\
-  0.9 & 20 & 5 & \textit{REVISE} & -64.8 & 4.31 \\
-  0.9 & 20 & 25 & \textit{ECCo} & 21.1 & 11.6 \\
-  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{39}} & \color{Green}{\textbf{5.98}} \\
-  0.9 & 20 & 25 & \textit{REVISE} & -50.7 & 13.8 \\
-  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{15.1}} & \color{Green}{\textbf{7.46}} \\
-  0.9 & 20 & 50 & \textit{Generic} & 8.53 & 6.95 \\
-  0.9 & 20 & 50 & \textit{REVISE} & -36 & 6.14 \\
-  0.95 & 20 & 5 & \textit{ECCo} & -23.8 & 17.8 \\
-  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{7.23}} & \color{Green}{\textbf{4.74}} \\
-  0.95 & 20 & 5 & \textit{REVISE} & -34 & 4.11 \\
-  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{19.3}} & \color{Green}{\textbf{14.6}} \\
-  0.95 & 20 & 25 & \textit{Generic} & -1.35 & 7.71 \\
-  0.95 & 20 & 25 & \textit{REVISE} & -52.8 & 5.11 \\
-  0.95 & 20 & 50 & \textit{ECCo} & 18.7 & 3.84 \\
-  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{37.3}} & \color{Green}{\textbf{7.78}} \\
-  0.95 & 20 & 50 & \textit{REVISE} & -28.3 & 15 \\\bottomrule
+\caption{\label{fig-grid-gen_params-cost-over}Average outcomes for the
+cost measure across hyperparameters. Data: Overlapping.}
 
-\end{longtable}
+\end{figure}%
+
+\subsubsection{Penalty Strengths}\label{penalty-strengths}
+
+The hyperparameter grid with varying penalty strengths during training
+is shown in Note~\ref{nte-pen-final-run-train}. The corresponding
+evaluation grid used for these experiments is shown in
+Note~\ref{nte-pen-final-run-eval}.
+
+\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, left=2mm, coltitle=black, toptitle=1mm, breakable, bottomtitle=1mm, opacitybacktitle=0.6, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, titlerule=0mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, opacityback=0, bottomrule=.15mm]
+
+\quartocalloutnte{nte-pen-final-run-train} 
+
+\begin{itemize}
+\tightlist
+\item
+  Generator: \texttt{ecco,\ generic,\ revise}
+\item
+  Model: \texttt{mlp}
+\item
+  Training Parameters:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \(\lambda_{\text{adv}}\): \texttt{0.1,\ 0.25,\ 1.0}
+  \item
+    \(\lambda_{\text{div}}\): \texttt{0.01,\ 0.1,\ 1.0}
+  \item
+    \(\lambda_{\text{reg}}\): \texttt{0.0,\ 0.01,\ 0.1}
+  \item
+    Objective: \texttt{full,\ vanilla}
+  \end{itemize}
+\end{itemize}
+
+\end{tcolorbox}
+
+\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, left=2mm, coltitle=black, toptitle=1mm, breakable, bottomtitle=1mm, opacitybacktitle=0.6, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, titlerule=0mm, arc=.35mm, toprule=.15mm, rightrule=.15mm, opacityback=0, bottomrule=.15mm]
+
+\quartocalloutnte{nte-pen-final-run-eval} 
+
+\begin{itemize}
+\tightlist
+\item
+  Generator Parameters:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \(\lambda_{\text{energy}}\): \texttt{0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0}
+  \end{itemize}
+\end{itemize}
+
+\end{tcolorbox}
+
+\paragraph{Plausibility}\label{plausibility-2}
+
+The results with respect to the plausibility measure are shown in
+Figure~\ref{fig-grid-pen-plaus-circles} to
+Figure~\ref{fig-grid-pen-plaus-over}.
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/circles/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/plausibility_distance_from_target.png}}
+
+}
+
+\caption{\label{fig-grid-pen-plaus-circles}Average outcomes for the
+plausibility measure across hyperparameters. Data: Circles.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/lin_sep/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/plausibility_distance_from_target.png}}
+
+}
+
+\caption{\label{fig-grid-pen-plaus-lin_sep}Average outcomes for the
+plausibility measure across hyperparameters. Data: Linearly Separable.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/moons/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/plausibility_distance_from_target.png}}
+
+}
+
+\caption{\label{fig-grid-pen-plaus-moons}Average outcomes for the
+plausibility measure across hyperparameters. Data: Moons.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/over/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/plausibility_distance_from_target.png}}
+
+}
+
+\caption{\label{fig-grid-pen-plaus-over}Average outcomes for the
+plausibility measure across hyperparameters. Data: Overlapping.}
+
+\end{figure}%
+
+\paragraph{Cost}\label{cost-1}
+
+The results with respect to the cost measure are shown in
+Figure~\ref{fig-grid-pen-cost-circles} to
+Figure~\ref{fig-grid-pen-cost-over}.
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/circles/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/distance.png}}
+
+}
+
+\caption{\label{fig-grid-pen-cost-circles}Average outcomes for the cost
+measure across hyperparameters. Data: Circles.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/lin_sep/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/distance.png}}
+
+}
+
+\caption{\label{fig-grid-pen-cost-lin_sep}Average outcomes for the cost
+measure across hyperparameters. Data: Linearly Separable.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/moons/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/distance.png}}
+
+}
+
+\caption{\label{fig-grid-pen-cost-moons}Average outcomes for the cost
+measure across hyperparameters. Data: Moons.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/over/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/distance.png}}
+
+}
+
+\caption{\label{fig-grid-pen-cost-over}Average outcomes for the cost
+measure across hyperparameters. Data: Overlapping.}
+
+\end{figure}%
 
 \section{Computation Details}\label{computation-details}
 

@@ -20,6 +20,13 @@ res_dir = ENV["FINAL_GRID_RESULTS"]
 
 ### Generator Parameters
 
+```{julia}
+grid_dir = joinpath(res_dir, "gen_params/mlp")
+data_dirs = readdir(grid_dir) |> x -> joinpath.(grid_dir, x) |> x -> x[isdir.(x)]
+data_names = basename.(data_dirs)
+suffix = "evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/"
+```
+
 The hyperparameter grid with varying generator parameters during training is shown in @nte-gen-params-final-run-train. The corresponding evaluation grid used for these experiments is shown in @nte-gen-params-final-run-eval.
 
 ::: {#nte-gen-params-final-run-train .callout-note}
@@ -28,7 +35,7 @@ The hyperparameter grid with varying generator parameters during training is sho
 
 ```{julia}
 #| output: asis
-dict = CTExperiments.from_toml(joinpath(res_dir,"gen_params/mlp/lin_sep/grid_config.toml")) 
+dict = CTExperiments.from_toml(joinpath(grid_dir, "lin_sep/grid_config.toml")) 
 println(CTExperiments.dict_to_quarto_markdown(dict))
 ```
 
@@ -40,54 +47,131 @@ println(CTExperiments.dict_to_quarto_markdown(dict))
 
 ```{julia}
 #| output: asis
-dict = CTExperiments.from_toml(joinpath(res_dir, "gen_params/mlp/lin_sep/evaluation/evaluation_grid_config.toml"))
+dict = CTExperiments.from_toml(joinpath(grid_dir, "lin_sep/evaluation/evaluation_grid_config.toml"))
 println(CTExperiments.dict_to_quarto_markdown(dict))
 ```
 
 :::
 
-### High-Level Findings
-
-![](/paper/experiments/output/final_run/gen_params/mlp/moons/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/plausibility_distance_from_target.png)
-
-![](/paper/experiments/output/final_run/gen_params/mlp/moons/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/distance.png)
-
-![](/paper/experiments/output/final_run/gen_params/mlp/moons/evaluation/results/logs/objective---lambda_energy---generator_type---maxiter/percent_valid.png)
-
-![](/paper/experiments/output/final_run/gen_params/mlp/moons/evaluation/results/logs/objective---lambda_energy---generator_type---maxiter/acc_val.png)
-
-### Detailed Findings
-
-```{julia}
-gen_params_dir = joinpath(res_dir, "gen_params/mlp")
-```
-
-#### Linearly Separable 
-
-```{julia}
-df = CSV.read("$(gen_params_dir)/lin_sep/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/plausibility_distance_from_target.csv", DataFrame)
-select!(df, Not(:objective))
-df = groupby(df, Not(:run, :mean, :lambda_energy_eval, :is_pct)) |> 
-  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>
-  df -> sort(df, [:lambda_energy_exper, :decision_threshold_exper, :maxiter_exper, :generator_type])
-```
-
-::: {#tbl-lin_sep-lambda_energy_exper}
-
-::: {.content-hidden unless-format="pdf"}
+#### Plausibility
 
 ```{julia}
 #| output: asis
 
-using CTExperiments.ColorSchemes
-get_table_inputs(df, "value"; alpha=0.9, byvars=["lambda_energy_exper", "decision_threshold_exper", "maxiter_exper"], backend=Val(:latex)) |>
-    inputs -> tabulate_results(inputs; wrap_table=false)
+fig_label_prefix = "grid-gen_params-plaus"
+fig_labels = (nm -> "fig-$(fig_label_prefix)-$nm").(data_names)
+_str = "The results with respect to the plausibility measure are shown in @$(fig_labels[1]) to @$(fig_labels[end])."
+println(_str)
+```
+
+```{julia}
+#| output: asis
+ 
+imgfname = "plausibility_distance_from_target.png"
+fig_caption = "Average outcomes for the plausibility measure across hyperparameters."
+full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))
+include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption) 
+_str = join(include_img_commands, "\n\n")
+println(_str)
+```
+
+#### Cost
+
+```{julia}
+#| output: asis
+
+fig_label_prefix = "grid-gen_params-cost"
+fig_labels = (nm -> "fig-$(fig_label_prefix)-$nm").(data_names)
+_str = "The results with respect to the cost measure are shown in @$(fig_labels[1]) to @$(fig_labels[end])."
+println(_str)
+```
+
+```{julia}
+#| output: asis
+ 
+imgfname = "distance.png"
+fig_caption = "Average outcomes for the cost measure across hyperparameters."
+full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))
+include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption)
+_str = join(include_img_commands, "\n\n")
+println(_str)
+```
+
+### Penalty Strengths
+
+```{julia}
+grid_dir = joinpath(res_dir, "penalties/mlp")
+data_dirs = readdir(grid_dir) |> x -> joinpath.(grid_dir, x) |> x -> x[isdir.(x)]
+data_names = basename.(data_dirs)
+suffix = "evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/"
+```
+
+The hyperparameter grid with varying penalty strengths during training is shown in @nte-pen-final-run-train. The corresponding evaluation grid used for these experiments is shown in @nte-pen-final-run-eval.
+
+::: {#nte-pen-final-run-train .callout-note}
+
+## Training Phase
+
+```{julia}
+#| output: asis
+dict = CTExperiments.from_toml(joinpath(grid_dir, "lin_sep/grid_config.toml")) 
+println(CTExperiments.dict_to_quarto_markdown(dict))
 ```
 
 :::
 
-Results for Linearly Separable data by energy penalty.
+::: {#nte-pen-final-run-eval .callout-note}
+
+## Evaluation Phase
+
+```{julia}
+#| output: asis
+dict = CTExperiments.from_toml(joinpath(grid_dir, "lin_sep/evaluation/evaluation_grid_config.toml"))
+println(CTExperiments.dict_to_quarto_markdown(dict))
+```
 
 :::
 
+#### Plausibility
 
+```{julia}
+#| output: asis
+
+fig_label_prefix = "grid-pen-plaus"
+fig_labels = (nm -> "fig-$(fig_label_prefix)-$nm").(data_names)
+_str = "The results with respect to the plausibility measure are shown in @$(fig_labels[1]) to @$(fig_labels[end])."
+println(_str)
+```
+
+```{julia}
+#| output: asis
+ 
+imgfname = "plausibility_distance_from_target.png"
+fig_caption = "Average outcomes for the plausibility measure across hyperparameters."
+full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))
+include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption) 
+_str = join(include_img_commands, "\n\n")
+println(_str)
+```
+
+#### Cost
+
+```{julia}
+#| output: asis
+
+fig_label_prefix = "grid-pen-cost"
+fig_labels = (nm -> "fig-$(fig_label_prefix)-$nm").(data_names)
+_str = "The results with respect to the cost measure are shown in @$(fig_labels[1]) to @$(fig_labels[end])."
+println(_str)
+```
+
+```{julia}
+#| output: asis
+ 
+imgfname = "distance.png"
+fig_caption = "Average outcomes for the cost measure across hyperparameters."
+full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))
+include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption)
+_str = join(include_img_commands, "\n\n")
+println(_str)
+```

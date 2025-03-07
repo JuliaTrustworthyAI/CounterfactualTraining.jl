@@ -230,7 +230,7 @@ function load_data_models_generators(cfg::AbstractEvaluationConfig)
 
     # Counterfactual generators (same for each exper):
     gen_params = cfg.counterfactual_params.generator_params
-    _gen_name = get_generator_name(gen_params)
+    _gen_name = get_name(gen_params)
     _generator = get_generator(gen_params)
     generators = Dict(_gen_name => _generator)
 

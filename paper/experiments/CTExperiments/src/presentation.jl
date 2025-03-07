@@ -365,3 +365,8 @@ function aggregate_counterfactuals(
         df, "ce", byvars; byvars_must_include=byvars_must_include, agg_fun=:identity
     )
 end
+
+function get_img_command(data_names, full_paths, fig_labels; fig_caption="")
+    fig_cap = fig_caption == "" ? fig_caption : "$fig_caption "
+    return ["![$(fig_cap)Data: $(CTExperiments.get_data_name(nm)).](/$pth){#$(lbl)}" for (nm, pth, lbl) in zip(data_names,full_paths,fig_labels)]
+end

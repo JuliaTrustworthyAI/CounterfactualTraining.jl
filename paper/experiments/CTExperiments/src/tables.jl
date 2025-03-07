@@ -52,7 +52,7 @@ function get_table_inputs(
     return df, (; highlighters=hls, backend=backend, header=header)
 end
 
-format_generator(s::AbstractString) = get_generator_name(generator_types[s](); pretty=true)
+format_generator(s::AbstractString) = get_name(generator_types[s](); pretty=true)
 
 global LatexHeaderReplacements = merge(
     Dict(

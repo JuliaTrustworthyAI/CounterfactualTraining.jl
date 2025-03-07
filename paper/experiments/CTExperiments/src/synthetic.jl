@@ -91,3 +91,12 @@ dname(d::Circles) = "circles"
 function load_data(d::Circles, n::Int; seed=TaijaData.data_seed)
     return load_circles(n; seed=seed)
 end
+
+get_data_name(str::String; pretty=true) = get_name(data_sets[str](); pretty)
+
+get_name(d::Moons; pretty::Bool=false) = pretty ? "Moons" : "moons"
+function get_name(d::LinearlySeparable; pretty::Bool=false)
+    return pretty ? "Linearly Separable" : "lin_sep"
+end
+get_name(d::Circles; pretty::Bool=false) = pretty ? "Circles" : "circles"
+get_name(d::Overlapping; pretty::Bool=false) = pretty ? "Overlapping" : "over"

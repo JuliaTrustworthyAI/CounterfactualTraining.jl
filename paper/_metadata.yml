@@ -19,10 +19,10 @@ author:
       - ref: tu
 bibliography: bib.bib
 keywords: 
+  - Counterfactual Training
   - Counterfactual Explanations
   - Algorithmic Recourse
   - Explainable AI
-  - Adversarial Robustness
   - Representation Learning
 crossref:
   exr-title: "Parameters"
