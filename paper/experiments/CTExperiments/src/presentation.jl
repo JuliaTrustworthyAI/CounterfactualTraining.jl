@@ -312,9 +312,9 @@ function aggregate_ce_evaluation(
         )
     end
 
-    # Filter out rows with missing, Inf, or NaN values in the mean column
+    # Filter out rows with missing, Inf, or NaN values in the mean column 
     filtered_df = filter(row -> !ismissing(row.mean) && isfinite(row.mean), df_agg)
-
+    
     return filtered_df
 end
 
