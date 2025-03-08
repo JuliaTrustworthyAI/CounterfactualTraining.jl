@@ -6,6 +6,24 @@ const default_ce = (; width=400, height=400)
 
 const default_facet = (; linkyaxes=:minimal, linkxaxes=:minimal)
 
+function format_for_makie_latex(str::String)
+    # Remove surrounding $ signs if they exist
+    content = startswith(str, '$') && endswith(str, '$') ? str[2:(end - 1)] : str
+
+    # Replace double backslashes with single backslashes
+    # This handles cases where the input string has already been escaped for other contexts
+    content = replace(content, "\\\\" => "\\")
+
+    # Create the LaTeX string properly escaped
+    # Note: We escape the dollar signs to avoid string interpolation
+    return """L"\$$(content)\$" """
+end
+
+global LatexMakieReplacements = Dict(
+    k => CTExperiments.format_for_makie_latex(v) |> x -> eval(Meta.parse(x)) for
+    (k, v) in CTExperiments.LatexReplacements
+)
+
 Base.@kwdef struct PlotParams
     x::Union{Nothing,String} = nothing
     byvars::Union{Nothing,String,Vector{String}} = nothing
@@ -87,7 +105,7 @@ function plot_errorbar_logs(
             layers =
                 visual(Lines) * mapping(;
                     linestyle=lnstyvar =>
-                        nonnumeric => CTExperiments.format_header(lnstyvar),
+                        nonnumeric => CTExperiments.format_header(lnstyvar; replacements=LatexMakieReplacements),
                 )
         else
             layers = visual(Lines)
@@ -99,7 +117,12 @@ function plot_errorbar_logs(
     if !isnothing(colorvar)
         plt =
             plt *
-            mapping(; color=colorvar => nonnumeric => CTExperiments.format_header(colorvar))
+            mapping(;
+                color=colorvar =>
+                    nonnumeric => CTExperiments.format_header(
+                        colorvar; replacements=LatexMakieReplacements
+                    ),
+            )
     end
     if !isnothing(rowvar)
         plt = plt * mapping(; row=rowvar => nonnumeric)
@@ -178,7 +201,12 @@ function plot_measure_ce(
     if !isnothing(colorvar)
         plt =
             plt *
-            mapping(; color=colorvar => nonnumeric => CTExperiments.format_header(colorvar))
+            mapping(;
+                color=colorvar =>
+                    nonnumeric => CTExperiments.format_header(
+                        colorvar; replacements=LatexMakieReplacements
+                    ),
+            )
     end
     if !isnothing(rowvar)
         plt = plt * mapping(; row=rowvar => nonnumeric)
