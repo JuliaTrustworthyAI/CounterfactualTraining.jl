@@ -188,9 +188,9 @@
 \theoremstyle{plain}
 \newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
-\theoremstyle{definition}
 \newtheorem{example}{Example}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -1409,7 +1409,7 @@ counterfactual training.
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, coltitle=black, rightrule=.15mm, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacitybacktitle=0.6, title={Note}, opacityback=0, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, toprule=.15mm, bottomrule=.15mm, coltitle=black, colback=white, titlerule=0mm, opacityback=0, rightrule=.15mm, bottomtitle=1mm, title={Note}, arc=.35mm, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, colframe=quarto-callout-note-color-frame, breakable, toptitle=1mm, left=2mm]
 
 Figure~\ref{fig-mnist} shows much more plausible (faithful)
 counterfactuals for a model with CT than the model with conventional
@@ -1458,7 +1458,7 @@ training is shown in Note~\ref{nte-gen-params-final-run-train}. The
 corresponding evaluation grid used for these experiments is shown in
 Note~\ref{nte-gen-params-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, coltitle=black, rightrule=.15mm, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacitybacktitle=0.6, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, opacityback=0, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, toprule=.15mm, bottomrule=.15mm, coltitle=black, colback=white, titlerule=0mm, opacityback=0, rightrule=.15mm, bottomtitle=1mm, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, arc=.35mm, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, colframe=quarto-callout-note-color-frame, breakable, toptitle=1mm, left=2mm]
 
 \quartocalloutnte{nte-gen-params-final-run-train} 
 
@@ -1492,7 +1492,7 @@ Note~\ref{nte-gen-params-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, coltitle=black, rightrule=.15mm, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacitybacktitle=0.6, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, opacityback=0, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, toprule=.15mm, bottomrule=.15mm, coltitle=black, colback=white, titlerule=0mm, opacityback=0, rightrule=.15mm, bottomtitle=1mm, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, arc=.35mm, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, colframe=quarto-callout-note-color-frame, breakable, toptitle=1mm, left=2mm]
 
 \quartocalloutnte{nte-gen-params-final-run-eval} 
 
@@ -1634,7 +1634,7 @@ is shown in Note~\ref{nte-pen-final-run-train}. The corresponding
 evaluation grid used for these experiments is shown in
 Note~\ref{nte-pen-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, coltitle=black, rightrule=.15mm, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacitybacktitle=0.6, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, opacityback=0, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, toprule=.15mm, bottomrule=.15mm, coltitle=black, colback=white, titlerule=0mm, opacityback=0, rightrule=.15mm, bottomtitle=1mm, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, arc=.35mm, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, colframe=quarto-callout-note-color-frame, breakable, toptitle=1mm, left=2mm]
 
 \quartocalloutnte{nte-pen-final-run-train} 
 
@@ -1654,7 +1654,7 @@ Note~\ref{nte-pen-final-run-eval}.
   \item
     \(\lambda_{\text{div}}\): \texttt{0.01,\ 0.1,\ 1.0}
   \item
-    \(\lambda_{\text{reg}}\): \texttt{0.0,\ 0.01,\ 0.1}
+    \(\lambda_{\text{reg}}\): \texttt{0.0,\ 0.01,\ 0.1,\ 0.25,\ 0.5}
   \item
     Objective: \texttt{full,\ vanilla}
   \end{itemize}
@@ -1662,7 +1662,7 @@ Note~\ref{nte-pen-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, coltitle=black, rightrule=.15mm, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacitybacktitle=0.6, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, opacityback=0, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, toprule=.15mm, bottomrule=.15mm, coltitle=black, colback=white, titlerule=0mm, opacityback=0, rightrule=.15mm, bottomtitle=1mm, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, arc=.35mm, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, colframe=quarto-callout-note-color-frame, breakable, toptitle=1mm, left=2mm]
 
 \quartocalloutnte{nte-pen-final-run-eval} 
 
@@ -1803,7 +1803,7 @@ in Note~\ref{nte-train-final-run-train}. The corresponding evaluation
 grid used for these experiments is shown in
 Note~\ref{nte-train-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, coltitle=black, rightrule=.15mm, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacitybacktitle=0.6, title={Note \ref*{nte-train-final-run-train}: Training Phase}, opacityback=0, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, toprule=.15mm, bottomrule=.15mm, coltitle=black, colback=white, titlerule=0mm, opacityback=0, rightrule=.15mm, bottomtitle=1mm, title={Note \ref*{nte-train-final-run-train}: Training Phase}, arc=.35mm, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, colframe=quarto-callout-note-color-frame, breakable, toptitle=1mm, left=2mm]
 
 \quartocalloutnte{nte-train-final-run-train} 
 
@@ -1831,7 +1831,7 @@ Note~\ref{nte-train-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, coltitle=black, rightrule=.15mm, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacitybacktitle=0.6, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, opacityback=0, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, toprule=.15mm, bottomrule=.15mm, coltitle=black, colback=white, titlerule=0mm, opacityback=0, rightrule=.15mm, bottomtitle=1mm, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, arc=.35mm, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, colframe=quarto-callout-note-color-frame, breakable, toptitle=1mm, left=2mm]
 
 \quartocalloutnte{nte-train-final-run-eval} 
 
@@ -1975,8 +1975,15 @@ information that might interfere with the double-blind review process.
 Since our experiments involve highly parallel tasks and rather small
 models by today's standard, we have relied on distributed computing
 across multiple central processing units (CPU). Graphical processing
-units (GPU) were not required. For larger grid searches we used up to
-but typically less than 100 CPUs.
+units (GPU) were not required. Model training for the largest grid
+searches with 270 unique parameter combinations was parallelized across
+34 CPUs with 2GB memory each. The time to completion varied by dataset
+for reasons discussed in Section~\ref{sec-discussion}: 0h49m
+(\emph{Moons}), 1h4m (\emph{Linearly Separable}), 1h49m
+(\emph{Circles}), 3h52m (\emph{Overlapping}). Model evaluations for
+large grid searches were parallelized across 20 CPUs with 3GB memory
+each. Evaluations for all data sets took less than one hour
+(\textless1h) to complete.
 
 \subsection{Software}\label{software}
 
