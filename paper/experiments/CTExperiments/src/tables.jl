@@ -86,9 +86,9 @@ function value_highlighter(
         end
         max_idx = max_idx.max_idx
         select!(df, Not(:row))
-        hl = bolden_max_hl(max_idx, col_idx, backend)
+        hl = bolden_max_hl(max_idx, col_idx, backend, value_var)
         push!(hls, hl)
-        hl_bad = bolden_max_hl_bad(max_idx, col_idx, backend)
+        hl_bad = bolden_max_hl_bad(max_idx, col_idx, backend, value_var)
         push!(hls, hl_bad)
     end
 
@@ -140,12 +140,18 @@ function color_scale_hl(
     return hl
 end
 
-function bolden_max_hl(max_idx::Vector{Int}, col_idx::Vector{Int}, backend::Val{:latex})
-    return hl = LatexHighlighter((df, i, j) -> (i in max_idx) && df[i,:value]>0, ["color{Green}", "textbf"])
+function bolden_max_hl(max_idx::Vector{Int}, col_idx::Vector{Int}, backend::Val{:latex}, value_var)
+    return hl = LatexHighlighter(
+        (df, i, j) -> (i in max_idx) && df[i, value_var] > 0, ["color{Green}", "textbf"]
+    )
 end
 
-function bolden_max_hl_bad(max_idx::Vector{Int}, col_idx::Vector{Int}, backend::Val{:latex})
-    return hl = LatexHighlighter((df, i, j) -> (i in max_idx) && df[i,:value]<0, ["color{Red}", "textbf"])
+function bolden_max_hl_bad(
+    max_idx::Vector{Int}, col_idx::Vector{Int}, backend::Val{:latex}, value_var
+)
+    return hl = LatexHighlighter(
+        (df, i, j) -> (i in max_idx) && df[i, value_var] < 0, ["color{Red}", "textbf"]
+    )
 end
 
 function generator_highlighter(df::DataFrame; backend::Val=Val(:text))

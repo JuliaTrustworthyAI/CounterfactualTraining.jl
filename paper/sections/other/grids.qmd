@@ -18,11 +18,30 @@ DotEnv.load!()
 res_dir = ENV["FINAL_GRID_RESULTS"]
 ```
 
-### Generator Parameters
+To assess the hyperparameter sensitivity of our proposed training regime we ran multiple large grid searches for all of our synthetic datasets. We have grouped these grid searches into multiple categories: 
+
+1. **Generator Parameters** (@sec-app-grid-gen): Investigates the effect of changing hyperparameters that affect the counterfactual outcomes during the training phase.
+2. **Penalty Strengths** (@sec-app-grid-pen): Investigates the effect of changing the penalty strengths in out proposed objective (@eq-obj).
+3. **Other Parameters** (@sec-app-grid-train): Investigates the effect of changing other training parameters, including the total number of generated counterfactuals in each epoch.
+
+We begin by summarizing the high-level findings in @sec-app-grid-hl. For each of the categories, @sec-app-grid-gen to @sec-app-grid-train then present all details including the parameter grids, average performance outcomes and key evaluation metrics for the generated counterfactuals. 
+
+### High-Level Findings {#sec-app-grid-hl}
+
+Overall, we find that Counterfactual Training (CT) achieves it key objectives consistently across all hyperparameter settings and also broadly across datasets. We do observe strong sensitivity to certain hyperparameters, but clear and manageable patterns emerge in those cases. With respect to the underlying training data distribution, we find that outcomes for CT seem to depend to some degree on class separability.
+
+#### Predictive Performance
+
+We find that CT is associated with little to no decrease in average predictive performance for our synthetic datasets: test accuracy and F1-scores decrease by at most ~1 percentage point, but generally much less (@tbl-acc-gen, @tbl-acc-pen, @tbl-acc-train). 
+
+#### Key Counterfactual Outcomes
+
+### Generator Parameters {#sec-app-grid-gen}
 
 ```{julia}
 grid_dir = joinpath(res_dir, "gen_params/mlp")
 data_dirs = readdir(grid_dir) |> x -> joinpath.(grid_dir, x) |> x -> x[isdir.(x)]
+eval_grids = (p -> EvaluationGrid(joinpath(p,"grid_config.toml"))).(data_dirs)
 data_names = basename.(data_dirs)
 suffix = "evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/"
 ```
@@ -50,6 +69,25 @@ println(CTExperiments.dict_to_quarto_markdown(dict))
 dict = CTExperiments.from_toml(joinpath(grid_dir, "lin_sep/evaluation/evaluation_grid_config.toml"))
 println(CTExperiments.dict_to_quarto_markdown(dict))
 ```
+
+:::
+
+#### Accuracy
+
+::: {#tbl-acc-gen}
+
+::: {.content-hidden unless-format="pdf"}
+
+```{julia}
+#| output: asis
+df = CTExperiments.aggregate_performance(eval_grids; byvars=["objective"]) 
+get_table_inputs(df, "mean";backend=Val(:latex)) |>
+    inputs -> tabulate_results(inputs; wrap_table=false)
+```
+
+:::
+
+Predictive performance measures by dataset and objective averaged across training-phase parameters (@nte-gen-params-final-run-train) and evaluation-phase parameters (@nte-gen-params-final-run-eval).
 
 :::
 
@@ -97,11 +135,12 @@ _str = join(include_img_commands, "\n\n")
 println(_str)
 ```
 
-### Penalty Strengths
+### Penalty Strengths {#sec-app-grid-pen}
 
 ```{julia}
 grid_dir = joinpath(res_dir, "penalties/mlp")
 data_dirs = readdir(grid_dir) |> x -> joinpath.(grid_dir, x) |> x -> x[isdir.(x)]
+eval_grids = (p -> EvaluationGrid(joinpath(p,"grid_config.toml"))).(data_dirs)
 data_names = basename.(data_dirs)
 suffix = "evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/"
 ```
@@ -129,6 +168,25 @@ println(CTExperiments.dict_to_quarto_markdown(dict))
 dict = CTExperiments.from_toml(joinpath(grid_dir, "lin_sep/evaluation/evaluation_grid_config.toml"))
 println(CTExperiments.dict_to_quarto_markdown(dict))
 ```
+
+:::
+
+#### Accuracy
+
+::: {#tbl-acc-pen}
+
+::: {.content-hidden unless-format="pdf"}
+
+```{julia}
+#| output: asis
+df = CTExperiments.aggregate_performance(eval_grids; byvars=["objective"]) 
+get_table_inputs(df, "mean";backend=Val(:latex)) |>
+    inputs -> tabulate_results(inputs; wrap_table=false)
+```
+
+:::
+
+Predictive performance measures by dataset and objective averaged across training-phase parameters (@nte-pen-final-run-train) and evaluation-phase parameters (@nte-pen-final-run-eval).
 
 :::
 
@@ -176,11 +234,12 @@ _str = join(include_img_commands, "\n\n")
 println(_str)
 ```
 
-### Training Parameters
+### Other Parameters {#sec-app-grid-train}
 
 ```{julia}
 grid_dir = joinpath(res_dir, "training_params/mlp")
 data_dirs = readdir(grid_dir) |> x -> joinpath.(grid_dir, x) |> x -> x[isdir.(x)]
+eval_grids = (p -> EvaluationGrid(joinpath(p,"grid_config.toml"))).(data_dirs)
 data_names = basename.(data_dirs)
 suffix = "evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/"
 ```
@@ -208,6 +267,25 @@ println(CTExperiments.dict_to_quarto_markdown(dict))
 dict = CTExperiments.from_toml(joinpath(grid_dir, "lin_sep/evaluation/evaluation_grid_config.toml"))
 println(CTExperiments.dict_to_quarto_markdown(dict))
 ```
+
+:::
+
+#### Accuracy
+
+::: {#tbl-acc-train}
+
+::: {.content-hidden unless-format="pdf"}
+
+```{julia}
+#| output: asis
+df = CTExperiments.aggregate_performance(eval_grids; byvars=["objective"]) 
+get_table_inputs(df, "mean";backend=Val(:latex)) |>
+    inputs -> tabulate_results(inputs; wrap_table=false)
+```
+
+:::
+
+Predictive performance measures by dataset and objective averaged across training-phase parameters (@nte-train-final-run-train) and evaluation-phase parameters (@nte-train-final-run-eval).
 
 :::
 

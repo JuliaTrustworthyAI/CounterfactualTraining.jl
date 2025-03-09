@@ -115,6 +115,12 @@ function to_toml(eval_config::EvaluationConfig)
     return to_toml(eval_config, default_eval_config_name(eval_config))
 end
 
+function adjust_name(name::String)
+    s = replace(name, "multi-class ``F_β`` score" => "f1-score") |>
+        s -> uppercasefirst(s) 
+    return s
+end
+
 function compute_performance_measures(
     exper, ytest, yhat; measure=[accuracy, multiclass_f1score], return_df::Bool=false
 )
@@ -129,8 +135,8 @@ function compute_performance_measures(
     df = DataFrame(
         "id" => exper.meta_params.experiment_name,
         [
-            StatisticalMeasures.StatisticalMeasuresBase.human_name(m) => res for
-            (m, res) in zip(measure, results)
+            StatisticalMeasures.StatisticalMeasuresBase.human_name(m) |> adjust_name => res
+            for (m, res) in zip(measure, results)
         ]...,
     )
     df = stack(df, 2:size(df, 2))
