@@ -127,12 +127,13 @@ function compute_performance_measures(
 
     # Wrap in data frame
     df = DataFrame(
-        "experiment_name" => exper.meta_params.experiment_name,
+        "id" => exper.meta_params.experiment_name,
         [
             StatisticalMeasures.StatisticalMeasuresBase.human_name(m) => res for
             (m, res) in zip(measure, results)
         ]...,
     )
+    df = stack(df, 2:size(df, 2))
     return df
 end
 

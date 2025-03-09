@@ -145,6 +145,49 @@ function aggregate_data(
 end
 
 """
+    aggregate_performance(
+        cfg::EvaluationConfig;
+        y::String="acc_val",
+        byvars::Union{Nothing,String,Vector{String}}=nothing,
+    )
+
+Aggregate performance variable `y` from an experiment grid by columns specified in `byvars`.
+"""
+function aggregate_performance(cfg::EvalConfigOrGrid; kwrgs...)
+
+    # Load data:
+    exper_grid = ExperimentGrid(cfg.grid_file)
+    df, df_meta, df_perf = merge_with_meta(cfg, CTExperiments.test_performance(exper_grid; return_df=true))
+
+    return aggregate_performance(df, df_meta, df_perf; kwrgs...)
+end
+
+function aggregate_performance(
+    df::DataFrame,
+    df_meta::DataFrame,
+    df_perf::DataFrame;
+    y::String="accuracy",
+    byvars::Union{Nothing,String,Vector{String}}=nothing,
+)
+    # Assertions:
+    valid_y = valid_y_perf(df_perf)
+    @assert y in valid_y "Variable `y` must be one of the following: $valid_y."
+    if isa(byvars, String)
+        byvars = [byvars]
+    end
+    @assert byvars isa Nothing || all(col -> col in names(df_meta), byvars) "Columns specified in `byvars` must be one of the following: $(names(df_meta))."
+
+    # Aggregate data:
+    df = aggregate_data(df, "value", byvars; byvars_must_include=["variable"])
+    df = df[df.variable .== y,:]
+    return select!(df,Not(:variable))
+end
+
+function valid_y_perf(df::DataFrame)
+    return sort(unique(df.variable))
+end
+
+"""
     aggregate_logs(
         cfg::EvaluationConfig;
         y::String="acc_val",
@@ -375,5 +418,5 @@ function get_img_command(data_names, full_paths, fig_labels; fig_caption="")
 end
 
 function tbl_test_performance(grid::ExperimentGrid; include_adv::Bool=false, kwrgs...)
-    
+
 end
