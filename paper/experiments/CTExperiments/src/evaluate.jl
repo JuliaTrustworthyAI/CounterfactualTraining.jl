@@ -123,7 +123,10 @@ end
 Tests the performance of a trained model on the test set and returns the evaluation metrics. The `measure` parameter specifies which metric(s) to evaluate, and `n` can be used to limit the number of samples used for testing.
 """
 function test_performance(
-    exper::Experiment; measure=[accuracy, multiclass_f1score], n::Union{Nothing,Int}=nothing
+    exper::Experiment;
+    return_df::Bool=false,
+    measure=[accuracy, multiclass_f1score],
+    n::Union{Nothing,Int}=nothing,
 )
     _, _, M = load_results(exper)
 
@@ -134,7 +137,20 @@ function test_performance(
     # Evaluate the model:
     results = [measure(ytest, yhat) for measure in measure]
 
-    return results
+    if !return_df
+        return results
+    end
+
+    # Wrap in data frame
+    df = DataFrame(
+        "experiment_name" => exper.meta_params.experiment_name,
+        [
+            StatisticalMeasures.StatisticalMeasuresBase.human_name(m) => res for
+            (m, res) in zip(measure, results)
+        ]...,
+    )
+    
+    return df
 end
 
 """
@@ -142,12 +158,17 @@ end
 
 Tests the performance of a trained model on the test set for each experiment in an `ExperimentGrid` and returns the evaluation metrics. The `measure` parameter specifies which metric(s) to evaluate.
 """
-function test_performance(grid::ExperimentGrid; kwrgs...)
+function test_performance(grid::ExperimentGrid; return_df::Bool=false, kwrgs...)
+    
     exper_list = load_list(grid)
     results = Logging.with_logger(Logging.NullLogger()) do
-        test_performance.(exper_list; kwrgs...)
+        test_performance.(exper_list; return_df, kwrgs...)
+    end
+    if return_df
+        results = reduce(vcat, results)
     end
     return results
+
 end
 
 """

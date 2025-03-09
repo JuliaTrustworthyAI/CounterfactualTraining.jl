@@ -301,7 +301,7 @@ function aggregate_ce_evaluation(
             else
                 # Otherwise store average level of baseline:
                 df_agg.avg_baseline .= mean(df_agg[:, Symbol(vanilla_name)])
-                df_agg[:, Symbol(obj)] .+= df_agg.avg_baseline
+                df_agg[:, Symbol(obj)] .+= df_agg[:, Symbol(vanilla_name)]
             end
         end
         df_agg = DataFrames.stack(
@@ -372,4 +372,8 @@ end
 function get_img_command(data_names, full_paths, fig_labels; fig_caption="")
     fig_cap = fig_caption == "" ? fig_caption : "$fig_caption "
     return ["![$(fig_cap)Data: $(CTExperiments.get_data_name(nm)).](/$pth){#$(lbl)}" for (nm, pth, lbl) in zip(data_names,full_paths,fig_labels)]
+end
+
+function tbl_test_performance(grid::ExperimentGrid; include_adv::Bool=false, kwrgs...)
+    
 end
