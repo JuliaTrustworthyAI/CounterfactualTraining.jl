@@ -228,7 +228,7 @@ function plot_measure_ce(
         xtitle = L"\textbf{Generator} \\ ($\leftarrow$ column facet variable: %$(_colvar) $\rightarrow$)"
     end
 
-    plt = data(df_agg) * mapping(:generator_type => xtitle, :mean => ytitle) * vis
+    plt = data(df_agg) * mapping(Symbol(x) => xtitle, :mean => ytitle) * vis
     if !isnothing(colorvar)
         plt =
             plt *
