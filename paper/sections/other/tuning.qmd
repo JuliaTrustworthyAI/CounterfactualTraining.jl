@@ -1,0 +1,22 @@
+## Hyperparameter Tuning {#sec-app-tune}
+
+```{julia}
+projectdir = splitpath(pwd()) |>
+    ss -> joinpath(ss[1:findall([s == "CounterfactualTraining.jl" for s in ss])[1]]...) 
+cd(projectdir)
+
+using CTExperiments
+using CTExperiments.CSV
+using CTExperiments.DataFrames
+using CTExperiments.StatsBase
+
+using DotEnv
+DotEnv.load!()
+```
+
+```{julia}
+res_dir = ENV["FINAL_GRID_RESULTS"]
+```
+
+Based on the findings from our initial large grid searches (@sec-app-grid), we tune selected hyperparameters for all datasets.
+
