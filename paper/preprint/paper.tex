@@ -185,12 +185,12 @@
 \usepackage{amsthm}
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}
 \newtheorem{example}{Example}[section]
 \theoremstyle{plain}
 \newtheorem{corollary}{Research Question}[section]
-\theoremstyle{plain}
-\newtheorem{proposition}{Proposition}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -629,8 +629,8 @@ that induces discriminative performance (e.g.~cross-entropy). The two
 additional components in Equation~\ref{eq-obj} are explained in more
 detail below. For now, they can be sufficiently described as inducing
 explainability directly and indirectly by penalizing: 1) the contrastive
-divergence, \(\text{div}(\cdot)\), between counterfactuals
-\(\mathbf{x}_T^\prime\) and observed samples \(x\) and, 2) the
+divergence, \(\text{div}(\cdot)\), between mature counterfactuals
+\(\mathbf{x}_T^\prime\) and observed samples \(\mathbf{x}\) and, 2) the
 adversarial loss, \(\text{advloss}(.)\), with respect to nascent
 counterfactuals \(\mathbf{x}_{t\leq T}^\prime\). The tradeoff between
 the different components can be governed by adjusting the strengths of
@@ -673,14 +673,16 @@ Specifically, we have
 
 where \(\mathcal{E}_\theta(\cdot)\) denotes the energy function. In
 particular, we set
-\(\mathcal{E}_\theta(\mathbf{x},\mathbf{y})=-\mathbf{M}_\theta(\mathbf{x})[y^+]\)
-where \(y^+\) denotes the index of the target class. We generate samples
-\(\mathbf{x}_T^\prime\) by first randomly sampling the target class
-\(y^+ \sim p(y)\) and then generating a counterfactual explanation for
-that target over \(T\) iterations using a gradient-based counterfactual
-generator. This is similar to how conditional sampling is used to draw
-from \(p_\theta(\mathbf{x})\) in Grathwohl et al.
-(\citeproc{ref-grathwohl2020your}{2020}).
+\(\mathcal{E}_\theta(\mathbf{x},\mathbf{y})=-\mathbf{M}_\theta(\mathbf{x^+})[y^+]\)
+where \(y^+\) denotes the index of the randomly drawn target class,
+\(y^+ \sim p(y)\), and \(\mathbf{x^+}\) denotes an observed data point
+sampled from target domain: \(\mathbf{X}^+=\{\mathbf{x}:y=y^+\}\).
+Conditional on the target class \(y^+\), \(\mathbf{x}_T^\prime\) denotes
+a mature counterfactual for a randomly sampled factual from a non-target
+class generated through a gradient-based counterfactual generator for at
+most \(T\) iterations. We define mature counterfactuals as those that
+have either exhausted \(T\) or reached convergence in terms of the
+pre-determined decision threshold earlier.
 
 Intuitively, the gradient of Equation~\ref{eq-div} decreases the energy
 of observed training samples (positive samples) while at same time
@@ -906,6 +908,40 @@ Equation~\ref{eq-obj}?
 
 \subsection{Experimental Setup}\label{experimental-setup}
 
+\subsubsection{Evaluation}\label{evaluation}
+
+Our key outcome of interest is how well models perform with respect to
+explainability (Definition~\ref{def-explainability}): to this end, we
+focus primarily on the plausibility and cost of faithfully generated
+counterfactuals at test time. To measure the cost of counterfactuals, we
+follow the standard convention of using distances (\(\ell_1\)-norm)
+between factuals and counterfactuals as a proxy. For plausibility, we
+assess how similar counterfactuals are to observed samples in the target
+domain. We rely on the distance-based metric used by Altmeyer et al.
+(\citeproc{ref-altmeyer2024faithful}{2024}),
+
+\begin{equation}\phantomsection\label{eq-impl-dist}{
+\text{implaus}_{\text{dist}}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
+}\end{equation}
+
+and introduce a novel divergence metric,
+
+\begin{equation}\phantomsection\label{eq-impl-div}{
+\text{implaus}_{\text{div}}(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
+}\end{equation}
+
+where \(\mathbf{X}^\prime\) denotes a set of multiple counterfactuals
+and \(\text{MMD}(\cdot)\) is an unbiased estimate of the squared
+population maximum mean discrepancy
+(\citeproc{ref-gretton2012kernel}{Gretton et al. 2012}). The metric in
+Equation~\ref{eq-impl-div} is equal to zero iff
+\(\mathbf{X}^\prime=\mathbf{X}^+\).
+
+In addition to cost and plausibility, we also compute other standard
+metrics to evaluate counterfactuals at test time including validity and
+redundancy. Finally, we also assess the predictive performance of models
+using standard metrics.
+
 \subsection{Experimental Results}\label{experimental-results}
 
 \section{Discussion}\label{sec-discussion}
@@ -1035,6 +1071,11 @@ Grathwohl, Will, Kuan-Chieh Wang, Joern-Henrik Jacobsen, David Duvenaud,
 Mohammad Norouzi, and Kevin Swersky. 2020. {``Your Classifier Is
 Secretly an Energy Based Model and You Should Treat It Like One.''} In
 \emph{International Conference on Learning Representations}.
+
+\bibitem[\citeproctext]{ref-gretton2012kernel}
+Gretton, Arthur, Karsten M Borgwardt, Malte J Rasch, Bernhard Schölkopf,
+and Alexander Smola. 2012. {``A Kernel Two-Sample Test.''} \emph{The
+Journal of Machine Learning Research} 13 (1): 723--73.
 
 \bibitem[\citeproctext]{ref-guidotti2022counterfactual}
 Guidotti, Riccardo. 2022. {``Counterfactual Explanations and How to Find
@@ -1195,6 +1236,14 @@ Linguistics. \url{https://doi.org/10.18653/v1/2021.acl-long.523}.
 \item
   \(\Theta\): Matrix of parameters.
 \end{itemize}
+
+\subsection{Other Technical Details}\label{other-technical-details}
+
+\begin{equation}\phantomsection\label{eq-mmd}{
+\begin{aligned}
+MMD({X}^\prime,\tilde{X}^\prime) &= \frac{1}{m(m-1)}\sum_{i=1}^m\sum_{j\neq i}^m k(x_i,x_j) \\ &+ \frac{1}{n(n-1)}\sum_{i=1}^n\sum_{j\neq i}^n k(\tilde{x}_i,\tilde{x}_j) \\ &- \frac{2}{mn}\sum_{i=1}^m\sum_{j=1}^n k(x_i,\tilde{x}_j)
+\end{aligned}
+}\end{equation}
 
 \section{Technical Details of Our
 Approach}\label{technical-details-of-our-approach}
@@ -1406,7 +1455,7 @@ counterfactual training.
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, toptitle=1mm, breakable, toprule=.15mm, leftrule=.75mm, opacitybacktitle=0.6, coltitle=black, bottomtitle=1mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, opacityback=0, bottomrule=.15mm, arc=.35mm, title={Note}, rightrule=.15mm, titlerule=0mm]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, opacitybacktitle=0.6, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, breakable, bottomtitle=1mm, toptitle=1mm, colback=white, titlerule=0mm, title={Note}, opacityback=0, arc=.35mm, left=2mm, coltitle=black]
 
 Figure~\ref{fig-mnist} shows much more plausible (faithful)
 counterfactuals for a model with CT than the model with conventional
@@ -1472,18 +1521,26 @@ We have grouped these grid searches into multiple categories:
 We begin by summarizing the high-level findings in
 Section~\ref{sec-app-grid-hl}. For each of the categories,
 Section~\ref{sec-app-grid-gen} to Section~\ref{sec-app-grid-train} then
-present all details including the parameter grids, average performance
-outcomes and key evaluation metrics for the generated counterfactuals.
+present all details including the exact parameter grids, average
+predictive performance outcomes and key evaluation metrics for the
+generated counterfactuals.
 
-\subsubsection{High-Level Findings}\label{sec-app-grid-hl}
+\subsubsection{Evaluation Details}\label{evaluation-details}
 
-Overall, we find that Counterfactual Training (CT) achieves it key
-objectives consistently across all hyperparameter settings and also
-broadly across datasets. We do observe strong sensitivity to certain
-hyperparameters, but clear and manageable patterns emerge in those
-cases. With respect to the underlying training data distribution, we
-find that outcomes for CT seem to depend to some degree on class
-separability.
+To measure predictive performance, we compute the accuracy and F1-score
+for all models on test data (Table~\ref{tbl-acc-gen},
+Table~\ref{tbl-acc-pen}, Table~\ref{tbl-acc-train}). With respect to
+explanatory performance, we report here our findings for the
+(im)plausibility and cost of counterfactuals at test time. Since the
+computation of our proposed divergence metric
+(Equation~\ref{eq-impl-div}) is memory-intensive, we rely on the
+distance-based metric for the grid searches. For the counterfactual
+evaluation, we draw factual samples from the training data for the grid
+searches to avoid data leakage with respect to our final results
+reported in the body of the paper. Specifically, we want to avoid
+choosing our default hyperparameters based on results on the test data.
+Since we are optimizing for explainability, not predictive performance,
+we still present test accuracy and F1-scores.
 
 \paragraph{Predictive Performance}\label{predictive-performance}
 
@@ -1495,8 +1552,76 @@ Table~\ref{tbl-acc-train}). Variation across hyperparameters is
 negligible as indicated by small standard deviations for these metrics
 across the board.
 
-\paragraph{Key Counterfactual
-Outcomes}\label{key-counterfactual-outcomes}
+\paragraph{Counterfactual Outcomes}\label{sec-app-grid-hl}
+
+Overall, we find that Counterfactual Training (CT) achieves it key
+objectives consistently across all hyperparameter settings and also
+broadly across datasets: plausibility is improved by up to
+\textasciitilde60 percentage points (ppts) for the \emph{Circles} data
+(e.g. Figure~\ref{fig-grid-gen_params-plaus-circles}),
+\textasciitilde25-30ppts for the \emph{Moons} data (e.g.
+Figure~\ref{fig-grid-gen_params-plaus-moons}) and
+\textasciitilde10-20ppts for the \emph{Linearly Separable} data (e.g.
+Figure~\ref{fig-grid-gen_params-plaus-lin_sep}). At the same time, the
+average costs of faithful counterfactuals are reduced in many cases by
+around \textasciitilde20-25ppts for \emph{Circles} (e.g.
+Figure~\ref{fig-grid-gen_params-cost-circles}) and up to
+\textasciitilde50ppts for \emph{Moons} (e.g.
+Figure~\ref{fig-grid-gen_params-cost-moons}). For the \emph{Linearly
+Separable} data, costs are generally increased although typically by
+less than 10ppts (e.g. Figure~\ref{fig-grid-gen_params-cost-lin_sep}),
+which reflects a common tradeoff between costs and plausibility
+(\citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024}).
+
+We do observe strong sensitivity to certain hyperparameters, with clear
+an manageable patterns. Concerning generator parameters, we firstly find
+that using \emph{REVISE} to generate counterfactuals during training
+typically yields the worst outcomes out of all generators, often leading
+to a substantial decrease in plausibility. This finding can be
+attributed to the fact that \emph{REVISE} effectively assigns the task
+of learning plausible explanations from the model itself to a surrogate
+VAE. In other words, counterfactuals generated by \emph{REVISE} are less
+faithful to the model that \emph{ECCo} and \emph{Generic}, and hence we
+would expect them to be a less effective and, in fact, potentially
+detrimental role in our training regime. Secondly, we observe that
+allowing for a higher number of maximum steps \(T\) for the
+counterfactual search generally yields better outcomes. This is
+intuitive, because it allows more counterfactuals to reach maturity in
+any given iteration. Looking in particular at the results for
+\emph{Linearly Separable}, it seems that higher values for \(T\) in
+combination with higher decision thresholds (\(\tau\)) yields the best
+results when using \emph{ECCo}. But depending on the degree of class
+separability of the underlying data, a high decision-threshold can also
+affect results adversely, as evident from the results for the
+\emph{Overlapping} data (Figure~\ref{fig-grid-gen_params-plaus-over}):
+here we find that CT generally fails to achieve its objective because
+only a tiny proportion of counterfactuals ever reaches maturity.
+
+Regarding penalty strengths, we find that the strength of the energy
+regularization, \(\lambda_{\text{reg}}\) is a key hyperparameter, while
+sensitivity with respect to \(\lambda_{\text{div}}\) and
+\(\lambda_{\text{adv}}\) is much less evident. In particular, we observe
+that not regularizing energy enough or at all typically leads to poor
+performance in terms of decreased plausibility and increased costs, in
+particular for \emph{Circles} (Figure~\ref{fig-grid-pen-plaus-circles}),
+\emph{Linearly Separable} (Figure~\ref{fig-grid-pen-plaus-lin_sep}) and
+\emph{Overlapping} (Figure~\ref{fig-grid-pen-plaus-over}). High values
+of \(\lambda_{\text{reg}}\) can increase the variability in outcomes, in
+particular when combined with high values for \(\lambda_{\text{div}}\)
+and \(\lambda_{\text{adv}}\), but this effect is less pronounced.
+
+Finally, concerning other hyperparameters we observe that the
+effectiveness and stability of CT is positively associated with the
+number of counterfactuals generated during each training epoch, in
+particular for \emph{Circles}
+(Figure~\ref{fig-grid-train-plaus-circles}) and \emph{Moons}
+(Figure~\ref{fig-grid-train-plaus-moons}). We further find that a higher
+number of training epochs is beneficial as expected, where we tested
+training models for 50 and 100 epochs. Interestingly, we find that it is
+not necessary to employ CT during the entire training phase to achieve
+the desired improvements in explainability: specifically, we have tested
+training models conventionally during the first half of training before
+switching to CT after this initial burn-in period.
 
 \subsubsection{Generator Parameters}\label{sec-app-grid-gen}
 
@@ -1505,7 +1630,7 @@ training is shown in Note~\ref{nte-gen-params-final-run-train}. The
 corresponding evaluation grid used for these experiments is shown in
 Note~\ref{nte-gen-params-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, toptitle=1mm, breakable, toprule=.15mm, leftrule=.75mm, opacitybacktitle=0.6, coltitle=black, bottomtitle=1mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, opacityback=0, bottomrule=.15mm, arc=.35mm, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, rightrule=.15mm, titlerule=0mm]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, opacitybacktitle=0.6, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, breakable, bottomtitle=1mm, toptitle=1mm, colback=white, titlerule=0mm, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, opacityback=0, arc=.35mm, left=2mm, coltitle=black]
 
 \quartocalloutnte{nte-gen-params-final-run-train} 
 
@@ -1539,7 +1664,7 @@ Note~\ref{nte-gen-params-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, toptitle=1mm, breakable, toprule=.15mm, leftrule=.75mm, opacitybacktitle=0.6, coltitle=black, bottomtitle=1mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, opacityback=0, bottomrule=.15mm, arc=.35mm, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, rightrule=.15mm, titlerule=0mm]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, opacitybacktitle=0.6, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, breakable, bottomtitle=1mm, toptitle=1mm, colback=white, titlerule=0mm, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, opacityback=0, arc=.35mm, left=2mm, coltitle=black]
 
 \quartocalloutnte{nte-gen-params-final-run-eval} 
 
@@ -1722,7 +1847,7 @@ is shown in Note~\ref{nte-pen-final-run-train}. The corresponding
 evaluation grid used for these experiments is shown in
 Note~\ref{nte-pen-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, toptitle=1mm, breakable, toprule=.15mm, leftrule=.75mm, opacitybacktitle=0.6, coltitle=black, bottomtitle=1mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, opacityback=0, bottomrule=.15mm, arc=.35mm, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, rightrule=.15mm, titlerule=0mm]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, opacitybacktitle=0.6, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, breakable, bottomtitle=1mm, toptitle=1mm, colback=white, titlerule=0mm, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, opacityback=0, arc=.35mm, left=2mm, coltitle=black]
 
 \quartocalloutnte{nte-pen-final-run-train} 
 
@@ -1750,7 +1875,7 @@ Note~\ref{nte-pen-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, toptitle=1mm, breakable, toprule=.15mm, leftrule=.75mm, opacitybacktitle=0.6, coltitle=black, bottomtitle=1mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, opacityback=0, bottomrule=.15mm, arc=.35mm, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, rightrule=.15mm, titlerule=0mm]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, opacitybacktitle=0.6, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, breakable, bottomtitle=1mm, toptitle=1mm, colback=white, titlerule=0mm, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, opacityback=0, arc=.35mm, left=2mm, coltitle=black]
 
 \quartocalloutnte{nte-pen-final-run-eval} 
 
@@ -1932,7 +2057,7 @@ in Note~\ref{nte-train-final-run-train}. The corresponding evaluation
 grid used for these experiments is shown in
 Note~\ref{nte-train-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, toptitle=1mm, breakable, toprule=.15mm, leftrule=.75mm, opacitybacktitle=0.6, coltitle=black, bottomtitle=1mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, opacityback=0, bottomrule=.15mm, arc=.35mm, title={Note \ref*{nte-train-final-run-train}: Training Phase}, rightrule=.15mm, titlerule=0mm]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, opacitybacktitle=0.6, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, breakable, bottomtitle=1mm, toptitle=1mm, colback=white, titlerule=0mm, title={Note \ref*{nte-train-final-run-train}: Training Phase}, opacityback=0, arc=.35mm, left=2mm, coltitle=black]
 
 \quartocalloutnte{nte-train-final-run-train} 
 
@@ -1960,7 +2085,7 @@ Note~\ref{nte-train-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, toptitle=1mm, breakable, toprule=.15mm, leftrule=.75mm, opacitybacktitle=0.6, coltitle=black, bottomtitle=1mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, opacityback=0, bottomrule=.15mm, arc=.35mm, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, rightrule=.15mm, titlerule=0mm]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, opacitybacktitle=0.6, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, breakable, bottomtitle=1mm, toptitle=1mm, colback=white, titlerule=0mm, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, opacityback=0, arc=.35mm, left=2mm, coltitle=black]
 
 \quartocalloutnte{nte-train-final-run-eval} 
 
