@@ -32,7 +32,7 @@ Overall, we find that Counterfactual Training (CT) achieves it key objectives co
 
 #### Predictive Performance
 
-We find that CT is associated with little to no decrease in average predictive performance for our synthetic datasets: test accuracy and F1-scores decrease by at most ~1 percentage point, but generally much less (@tbl-acc-gen, @tbl-acc-pen, @tbl-acc-train). 
+We find that CT is associated with little to no decrease in average predictive performance for our synthetic datasets: test accuracy and F1-scores decrease by at most ~1 percentage point, but generally much less (@tbl-acc-gen, @tbl-acc-pen, @tbl-acc-train). Variation across hyperparameters is negligible as indicated by small standard deviations for these metrics across the board. 
 
 #### Key Counterfactual Outcomes
 
