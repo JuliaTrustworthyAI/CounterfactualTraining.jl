@@ -98,6 +98,21 @@ function plot_errorbar_logs(
         use_line_plot = all(isnan.(df_agg.std))
     end
 
+    # Axis titles:
+    if isnothing(rowvar)
+        ytitle = "Value"
+    else
+        _rowvar = CTExperiments.format_header(rowvar; replacements=LatexMakieReplacements)
+        ytitle = L"($\leftarrow$ row facet variable: %$(_rowvar) $\rightarrow$) \\ \textbf{Value}"
+    end
+
+    if isnothing(rowvar)
+        xtitle = "Epoch"
+    else
+        _colvar = CTExperiments.format_header(colvar; replacements=LatexMakieReplacements)
+        xtitle = L"\textbf{Epoch} \\ ($\leftarrow$ column facet variable: %$(_colvar) $\rightarrow$)"
+    end
+
     # Plotting:
     plt = data(df_agg)
     if use_line_plot
@@ -110,7 +125,7 @@ function plot_errorbar_logs(
         else
             layers = visual(Lines)
         end
-        plt = plt * layers * mapping(:epoch => "Epoch", :mean => "Value")
+        plt = plt * layers * mapping(:epoch => xtitle, :mean => ytitle)
     else
         plt = plt * mapping(:epoch => "Epoch", :mean => "Value", :std) * visual(Errorbars)
     end
@@ -183,6 +198,7 @@ function plot_measure_ce(
     vis=visual(BoxPlot),
     lnstyvar=nothing,
 )
+
     # Plotting:
     ylab = "Value"
     if rebase
@@ -197,7 +213,22 @@ function plot_measure_ce(
         end
     end
 
-    plt = data(df_agg) * mapping(:generator_type => "Generator", :mean => ylab) * vis
+    # Axis titles:
+    if isnothing(rowvar)
+        ytitle = ylab
+    else
+        _rowvar = CTExperiments.format_header(rowvar; replacements=LatexMakieReplacements)
+        ytitle = L"($\leftarrow$ row facet variable: %$(_rowvar) $\rightarrow$) \\ \textbf{%$(ylab)}"
+    end
+
+    if isnothing(rowvar)
+        xtitle = "Generator"
+    else
+        _colvar = CTExperiments.format_header(colvar; replacements=LatexMakieReplacements)
+        xtitle = L"\textbf{Generator} \\ ($\leftarrow$ column facet variable: %$(_colvar) $\rightarrow$)"
+    end
+
+    plt = data(df_agg) * mapping(:generator_type => xtitle, :mean => ytitle) * vis
     if !isnothing(colorvar)
         plt =
             plt *
