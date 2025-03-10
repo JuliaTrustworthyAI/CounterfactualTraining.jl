@@ -221,7 +221,7 @@ function plot_measure_ce(
         ytitle = L"($\leftarrow$ row facet variable: %$(_rowvar) $\rightarrow$) \\ \textbf{%$(ylab)}"
     end
 
-    xlab = CTExperiments.format_header(xvar; replacements=LatexMakieReplacements)
+    xlab = CTExperiments.format_header(x; replacements=LatexMakieReplacements)
     if isnothing(colvar)
         xtitle = xlab
     else
