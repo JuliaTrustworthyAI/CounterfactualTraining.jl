@@ -1,49 +1,22 @@
 {
   "cells": [
     {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
-        "projectdir = splitpath(pwd()) |>\n",
-        "    ss -> joinpath(ss[1:findall([s == \"CounterfactualTraining.jl\" for s in ss])[1]]...) \n",
-        "cd(projectdir)"
-      ],
-      "id": "f8842ede",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
-        "using CTExperiments\n",
-        "using CTExperiments.CSV\n",
-        "using CTExperiments.DataFrames\n",
-        "using CTExperiments.StatsBase\n",
-        "\n",
-        "using DotEnv\n",
-        "DotEnv.load!()"
-      ],
-      "id": "32c4c789",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
       "cell_type": "markdown",
       "metadata": {},
       "source": [
         "\\FloatBarrier\n",
         "\n",
-        "\\setcounter{section}{0}\n",
+        "<!-- \\setcounter{section}{0} -->\n",
         "\\renewcommand{\\thesection}{\\Alph{section}}\n",
         "\n",
-        "\\setcounter{table}{0}\n",
+        "<!-- \\setcounter{table}{0} -->\n",
         "\\renewcommand{\\thetable}{A\\arabic{table}}\n",
         "\n",
-        "\\setcounter{figure}{0}\n",
+        "<!-- \\setcounter{figure}{0} -->\n",
         "\\renewcommand{\\thefigure}{A\\arabic{figure}}\n",
         "\n",
         "<!-- # Supplementary Material {.appendix} -->\n",
+        "\n",
         "\n",
         "# Notation {.appendix}\n",
         "\n",
@@ -52,6 +25,8 @@
         "- $\\mathbf{y}^+$: The one-hot encoded output vector for the target class. \n",
         "- $\\theta$: Model parameters (unspecified).\n",
         "- $\\Theta$: Matrix of parameters. \n",
+        "\n",
+        "\n",
         "\n",
         "# Technical Details of Our Approach {.appendix} \n",
         "\n",
@@ -62,13 +37,25 @@
         "\n",
         "### Background {#sec-app-ce-background}\n",
         "\n",
+        "Gradient-based counterfactual search was originally proposed by @wachter2017counterfactual. It generally solves the following unconstrained objective,\n",
+        "\n",
+        "$$\n",
+        "\\begin{aligned}\n",
+        "\\min_{\\mathbf{z}^\\prime \\in \\mathcal{Z}^L} \\left\\{  {\\text{yloss}(\\mathbf{M}_{\\theta}(g(\\mathbf{z}^\\prime)),\\mathbf{y}^+)}+ \\lambda {\\text{cost}(g(\\mathbf{z}^\\prime)) }  \\right\\} \n",
+        "\\end{aligned} \n",
+        "$$\n",
+        "\n",
+        "where $g: \\mathcal{Z} \\mapsto \\mathcal{X}$ is an invertible function that maps from the $L$-dimensional counterfactual state space to the feature space and $\\text{cost}(\\cdot)$ denotes one or more penalties that are used to induce certain properties of the counterfactual outcome. As above, $\\mathbf{y}^+$ denotes the target output and $\\mathbf{M}_{\\theta}(\\mathbf{x})$ returns the logit predictions of the underlying classifier for $\\mathbf{x}=g(\\mathbf{z})$.\n",
+        "\n",
+        "For all generators used in this work we use standard logit crossentropy loss for $\\text{yloss}(\\cdot)$. All generators also penalize the distance ($\\ell_1$-norm) of counterfactuals from their original factual state. For *Generic* and *ECCo*, we have $\\mathcal{Z}:=\\mathcal{X}$ and $g(\\mathbf{z})=g(\\mathbf{z})^{-1}=\\mathbf{z}$, that is counterfactual are searched directly in the feature space. Conversely, *REVISE* traverses the latent space of a variational autoencoder (VAE) fitted to the training data, where $g(\\cdot)$ corresponds to the decoder [@joshi2019realistic]. In addition to the distance penalty, *ECCo* uses an additional penalty component that regularizes the energy associated with the counterfactual, $\\mathbf{x}^\\prime$ [@altmeyer2024faithful]. \n",
+        "\n",
         "### Convergence {#sec-app-conv}\n",
         "\n",
         "An important consideration when generating counterfactual explanations using gradient-based methods is how to define convergence. Two common choices are to 1) perform gradient descent over a fixed number of iterations $T$, or 2) conclude the search as soon as the predicted probability for the target class has reached a pre-determined threshold, $\\tau$: $\\mathcal{S}(\\mathbf{M}_\\theta(\\mathbf{x}^\\prime))[y^+] \\geq \\tau$. We prefer the latter for our purposes, because it explicitly defines convergence in terms of the black-box model, $\\mathbf{M}(\\mathbf{x})$.\n",
         "\n",
         "Defining convergence in this way allows for a more intuitive interpretation of the resulting counterfactual outcomes than with fixed $T$. Specifically, it allows us to think of counterfactuals as explaining 'high-confidence' predictions by the model for the target class $y^+$. Depending on the context and application, different choices of $\\tau$ can be considered as representing 'high-confidence' predictions.\n"
       ],
-      "id": "a3cba833"
+      "id": "04f553fe"
     },
     {
       "cell_type": "code",
@@ -88,7 +75,7 @@
         "using CTExperiments.TaijaPlotting\n",
         "using Plots.PlotMeasures"
       ],
-      "id": "1396bafd",
+      "id": "df411883",
       "execution_count": null,
       "outputs": []
     },
@@ -142,15 +129,9 @@
         "\n",
         "Thus, our proposed approach of protecting feature $d_{\\text{immtbl}}$ has the net affect of decreasing the classifier's sensitivity to the immutable feature relative to the mutable feature (i.e. no change in sensitivity for $d_{\\text{immtbl}}$ relative to increased sensitivity for $d_{\\text{mtbl}}$).\n",
         "\n",
-        ":::\n",
-        "\n",
-        "::: {.callout-warning}\n",
-        "\n",
-        "\\@Cynthia, \\@Arie, I have tentatively phrased the above in terms of a theorem and proof. This is something I've so far shied away from because I feel a bit out of my depth when it comes to mathematical proofs. The above makes intuitive sense to me, but I don't know for sure if it's correct. \n",
-        "\n",
         ":::"
       ],
-      "id": "6dd83834"
+      "id": "bf321133"
     },
     {
       "cell_type": "code",
@@ -228,7 +209,7 @@
         "    (\"(d)\", FullObjective(lambda=[1.0,0.5,0.01,0.1]), [\"both\", \"none\"]),\n",
         "]"
       ],
-      "id": "22a28a21",
+      "id": "160ee1eb",
       "execution_count": null,
       "outputs": []
     },
@@ -291,7 +272,7 @@
         "    push!(plts, current())\n",
         "end"
       ],
-      "id": "9f61496d",
+      "id": "ce8085c0",
       "execution_count": null,
       "outputs": []
     },
@@ -313,7 +294,7 @@
         "display(plt)\n",
         "Plots.savefig(plt, \"paper/figures/poc.svg\")"
       ],
-      "id": "9ae812b5",
+      "id": "2612154d",
       "execution_count": null,
       "outputs": []
     },
@@ -341,7 +322,7 @@
         "plt = Plots.plot(plts..., layout=(1,2), size=(600,300))\n",
         "Plots.savefig(plt, \"paper/figures/app_mtblty.svg\")"
       ],
-      "id": "b8d17052",
+      "id": "c88ef65d",
       "execution_count": null,
       "outputs": []
     },
@@ -374,17 +355,11 @@
         "\n",
         "# Detailed Results {.appendix}\n",
         "\n",
-        "::: {.callout-warning}\n",
-        "\n",
-        "\\@Cynthia, \\@Arie, I'm including some preliminary results here but will rerun experiments in the coming days. You'll notice some odd outlier results (huge values) for the initial grid search (@sec-app-initial). My belief is that this is once again due to *ECCo* overshooting for some hyperparameter choices, that we have discussed before. A simple solution to this story is to actually impose domain constraints. Let's see what the final results show us (I also still plan to make slight changes to the implementation), but in any case I think it might even be worth to report results for the initial grid search in the final appendix (they do include good results for CT for certain hyperparameter ranges and highlight limitations inherited from energy-based modelling).\n",
-        "\n",
-        ":::\n",
-        "\n",
         "## Qualitative Findings for Image Data\n",
         "\n",
         "::: {.callout-note}\n",
         "\n",
-        "\\@Cynthia, \\@Arie, @fig-mnist shows much more plausible (faithful) counterfactuals for a model with CT than the model with conventional training (@fig-mnist-vanilla). In fact, this is not even using *ECCo+* and still showing better results than the best results we achieved in our AAAI paper for JEM ensembles.\n",
+        "@fig-mnist shows much more plausible (faithful) counterfactuals for a model with CT than the model with conventional training (@fig-mnist-vanilla). In fact, this is not even using *ECCo+* and still showing better results than the best results we achieved in our AAAI paper for JEM ensembles.\n",
         "\n",
         ":::\n",
         "\n",
@@ -392,18 +367,38 @@
         "\n",
         "![Counterfactual images for *MLP* with conventional training. The underlying generator, *ECCo*, aims to generate counterfactuals that are faithful to the model [@altmeyer2024faithful].](/paper/figures/mnist_mlp_vanilla.png){#fig-mnist-vanilla}\n",
         "\n",
-        "## Initial Grid Search {#sec-app-initial}\n"
+        "\n",
+        "## Grid Searches {#sec-app-grid}"
       ],
-      "id": "e06c45f6"
+      "id": "7295e9fe"
     },
     {
       "cell_type": "code",
       "metadata": {},
       "source": [
-        "results_dir = ENV[\"INITIAL_RUN_RESULTS\"]\n",
-        "config_dir = ENV[\"INITIAL_RUN_CONFIG\"]"
+        "projectdir = splitpath(pwd()) |>\n",
+        "    ss -> joinpath(ss[1:findall([s == \"CounterfactualTraining.jl\" for s in ss])[1]]...) \n",
+        "cd(projectdir)\n",
+        "\n",
+        "using CTExperiments\n",
+        "using CTExperiments.CSV\n",
+        "using CTExperiments.DataFrames\n",
+        "using CTExperiments.StatsBase\n",
+        "\n",
+        "using DotEnv\n",
+        "DotEnv.load!()"
       ],
-      "id": "6c29dd8d",
+      "id": "7b1d7271",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "res_dir = ENV[\"FINAL_GRID_RESULTS\"]"
+      ],
+      "id": "0d98f05a",
       "execution_count": null,
       "outputs": []
     },
@@ -411,27 +406,71 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
-        "For the initial round of experiments we employed a different training objective and procedure that led to promising results for some hyperparameter choices, but suffered from training instabilities.\n",
+        "To assess the hyperparameter sensitivity of our proposed training regime we ran multiple large grid searches for all of our synthetic datasets. We have grouped these grid searches into multiple categories: \n",
         "\n",
-        "### Generator Parameters\n",
+        "1. **Generator Parameters** (@sec-app-grid-gen): Investigates the effect of changing hyperparameters that affect the counterfactual outcomes during the training phase.\n",
+        "2. **Penalty Strengths** (@sec-app-grid-pen): Investigates the effect of changing the penalty strengths in out proposed objective (@eq-obj).\n",
+        "3. **Other Parameters** (@sec-app-grid-train): Investigates the effect of changing other training parameters, including the total number of generated counterfactuals in each epoch.\n",
         "\n",
-        "The hyperparameter grids for the first investigation of the effect of generator parameters are shown in @exr-gen-params-first-run-train and @exr-gen-params-first-run-eval.\n",
+        "We begin by summarizing the high-level findings in @sec-app-grid-hl. For each of the categories, @sec-app-grid-gen to @sec-app-grid-train then present all details including the exact parameter grids, average predictive performance outcomes and key evaluation metrics for the generated counterfactuals. \n",
         "\n",
-        "::: {#exr-gen-params-first-run-train}\n",
+        "### Evaluation Details\n",
         "\n",
-        "## Training Phase\n"
+        "To measure predictive performance, we compute the accuracy and F1-score for all models on test data (@tbl-acc-gen, @tbl-acc-pen, @tbl-acc-train). \n",
+        "\n",
+        "We evaluated \n",
+        "\n",
+        "### High-Level Findings {#sec-app-grid-hl}\n",
+        "\n",
+        "Overall, we find that Counterfactual Training (CT) achieves it key objectives consistently across all hyperparameter settings and also broadly across datasets: plausibility is improved  We do observe strong sensitivity to certain hyperparameters, but clear and manageable patterns emerge in those cases. With respect to the underlying training data distribution, we find that outcomes for CT seem to depend to some degree on class separability.\n",
+        "\n",
+        "#### Predictive Performance\n",
+        "\n",
+        "We find that CT is associated with little to no decrease in average predictive performance for our synthetic datasets: test accuracy and F1-scores decrease by at most ~1 percentage point, but generally much less (@tbl-acc-gen, @tbl-acc-pen, @tbl-acc-train). Variation across hyperparameters is negligible as indicated by small standard deviations for these metrics across the board. \n",
+        "\n",
+        "#### Key Counterfactual Outcomes\n",
+        "\n",
+        "\n",
+        "\n",
+        "### Generator Parameters {#sec-app-grid-gen}"
       ],
-      "id": "96654b30"
+      "id": "194e194b"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "grid_dir = joinpath(res_dir, \"gen_params/mlp\")\n",
+        "data_dirs = readdir(grid_dir) |> x -> joinpath.(grid_dir, x) |> x -> x[isdir.(x)]\n",
+        "eval_grids = (p -> EvaluationGrid(joinpath(p,\"grid_config.toml\"))).(data_dirs)\n",
+        "data_names = basename.(data_dirs)\n",
+        "suffix = \"evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/\""
+      ],
+      "id": "d3a47085",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The hyperparameter grid with varying generator parameters during training is shown in @nte-gen-params-final-run-train. The corresponding evaluation grid used for these experiments is shown in @nte-gen-params-final-run-eval.\n",
+        "\n",
+        "::: {#nte-gen-params-final-run-train .callout-note}\n",
+        "\n",
+        "## Training Phase"
+      ],
+      "id": "8637040e"
     },
     {
       "cell_type": "code",
       "metadata": {},
       "source": [
         "#| output: asis\n",
-        "dict = CTExperiments.from_toml(joinpath(config_dir,\"gen_params.toml\")) \n",
+        "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/grid_config.toml\")) \n",
         "println(CTExperiments.dict_to_quarto_markdown(dict))"
       ],
-      "id": "6c135fd9",
+      "id": "6c515bbc",
       "execution_count": null,
       "outputs": []
     },
@@ -441,22 +480,21 @@
       "source": [
         ":::\n",
         "\n",
+        "::: {#nte-gen-params-final-run-eval .callout-note}\n",
         "\n",
-        "::: {#exr-gen-params-first-run-eval}\n",
-        "\n",
-        "## Evaluation Phase\n"
+        "## Evaluation Phase"
       ],
-      "id": "031b45fd"
+      "id": "7341e5a0"
     },
     {
       "cell_type": "code",
       "metadata": {},
       "source": [
         "#| output: asis\n",
-        "dict = CTExperiments.from_toml(joinpath(results_dir, \"gen_params/mlp/lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
+        "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
         "println(CTExperiments.dict_to_quarto_markdown(dict))"
       ],
-      "id": "cbd38d99",
+      "id": "46a99dab",
       "execution_count": null,
       "outputs": []
     },
@@ -464,66 +502,26 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
-        ":::\n"
-      ],
-      "id": "d7964a8d"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
-        "gen_params_dir = joinpath(results_dir, \"gen_params/mlp\")"
-      ],
-      "id": "0314a17e",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
-        "#### Linearly Separable \n",
+        ":::\n",
         "\n",
-        "- **Energy Penalty** (@tbl-lin_sep-lambda_energy_exper): *ECCo* generally does yield better results than *Vanilla* for higher choices of the energy penalty (10,15) during training. *Generic* performs poorly accross the board. *Omni* seems to have an anchoring effect, in that it never performs terribly but also never as good as the best *ECCo* results. *REVISE* performs poorly across the board.\n",
-        "- **Cost** (@tbl-lin_sep-lambda_cost_exper): Results for all generators (except *Omni*) are quite bad, which can likely be attributed to extremely bad results for some choices of the **Energy Penalty** (results here are averaged). For *ECCo* and *Generic*, higher cost values generally lead to worse results.\n",
-        "- **Maximum Iterations**: No clear patterns recognizable, so it seems that smaller choices are ok. \n",
-        "- **Validity**: *ECCo* almost always valid except for very low values during training and high values at evaluation time. *Generic* often has poor validity.\n",
-        "- **Accuracy**: Seems largely unaffected.\n"
-      ],
-      "id": "4003a254"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
-        "df = CSV.read(\"$(gen_params_dir)/lin_sep/evaluation/results/ce/objective---lambda_energy_exper---lambda_energy_eval/plausibility_distance_from_target.csv\", DataFrame)\n",
-        "df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> \n",
-        "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
-        "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type])"
-      ],
-      "id": "e61cbb63",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
-        "::: {#tbl-lin_sep-lambda_energy_exper}\n",
+        "#### Accuracy\n",
         "\n",
-        "::: {.content-hidden unless-format=\"pdf\"}\n"
+        "::: {#tbl-acc-gen}\n",
+        "\n",
+        "::: {.content-hidden unless-format=\"pdf\"}"
       ],
-      "id": "bf8baf23"
+      "id": "45195557"
     },
     {
       "cell_type": "code",
       "metadata": {},
       "source": [
         "#| output: asis\n",
-        "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
+        "df = CTExperiments.aggregate_performance(eval_grids; byvars=[\"objective\"]) \n",
+        "get_table_inputs(df, \"mean\";backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs; wrap_table=false)"
       ],
-      "id": "820fcb6a",
+      "id": "21b962e8",
       "execution_count": null,
       "outputs": []
     },
@@ -533,46 +531,180 @@
       "source": [
         ":::\n",
         "\n",
-        "Results for Linearly Separable data by energy penalty.\n",
+        "Predictive performance measures by dataset and objective averaged across training-phase parameters (@nte-gen-params-final-run-train) and evaluation-phase parameters (@nte-gen-params-final-run-eval).\n",
         "\n",
         ":::\n",
         "\n",
-        "<!-- Cost -->\n"
+        "#### Plausibility"
       ],
-      "id": "354841ec"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
-        "df = CSV.read(\"$(gen_params_dir)/lin_sep/evaluation/results/ce/objective---lambda_cost_exper---lambda_energy_eval/plausibility_distance_from_target.csv\", DataFrame)\n",
-        "df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> \n",
-        "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
-        "  df -> sort(df, [:lambda_cost_exper, :objective, :generator_type])"
-      ],
-      "id": "3d57f59c",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
-        "::: {#tbl-lin_sep-lambda_cost_exper}\n",
-        "\n",
-        "::: {.content-hidden unless-format=\"pdf\"}\n"
-      ],
-      "id": "6b8665d4"
+      "id": "6d26dd7b"
     },
     {
       "cell_type": "code",
       "metadata": {},
       "source": [
         "#| output: asis\n",
-        "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_cost_exper\", backend=Val(:latex)) |>\n",
+        "\n",
+        "fig_label_prefix = \"grid-gen_params-plaus\"\n",
+        "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
+        "_str = \"The results with respect to the plausibility measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
+        "println(_str)"
+      ],
+      "id": "0261ea6c",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        " \n",
+        "imgfname = \"plausibility_distance_from_target.png\"\n",
+        "fig_caption = \"Average outcomes for the plausibility measure across hyperparameters.\"\n",
+        "full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))\n",
+        "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption) \n",
+        "_str = join(include_img_commands, \"\\n\\n\")\n",
+        "println(_str)"
+      ],
+      "id": "991bfd7a",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "#### Cost"
+      ],
+      "id": "673a78b2"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "\n",
+        "fig_label_prefix = \"grid-gen_params-cost\"\n",
+        "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
+        "_str = \"The results with respect to the cost measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
+        "println(_str)"
+      ],
+      "id": "a92cdc51",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        " \n",
+        "imgfname = \"distance.png\"\n",
+        "fig_caption = \"Average outcomes for the cost measure across hyperparameters.\"\n",
+        "full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))\n",
+        "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption)\n",
+        "_str = join(include_img_commands, \"\\n\\n\")\n",
+        "println(_str)"
+      ],
+      "id": "7331b8d5",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Penalty Strengths {#sec-app-grid-pen}"
+      ],
+      "id": "c1a84f89"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "grid_dir = joinpath(res_dir, \"penalties/mlp\")\n",
+        "data_dirs = readdir(grid_dir) |> x -> joinpath.(grid_dir, x) |> x -> x[isdir.(x)]\n",
+        "eval_grids = (p -> EvaluationGrid(joinpath(p,\"grid_config.toml\"))).(data_dirs)\n",
+        "data_names = basename.(data_dirs)\n",
+        "suffix = \"evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/\""
+      ],
+      "id": "b4bfd740",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The hyperparameter grid with varying penalty strengths during training is shown in @nte-pen-final-run-train. The corresponding evaluation grid used for these experiments is shown in @nte-pen-final-run-eval.\n",
+        "\n",
+        "::: {#nte-pen-final-run-train .callout-note}\n",
+        "\n",
+        "## Training Phase"
+      ],
+      "id": "58206660"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/grid_config.toml\")) \n",
+        "println(CTExperiments.dict_to_quarto_markdown(dict))"
+      ],
+      "id": "3651e514",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        ":::\n",
+        "\n",
+        "::: {#nte-pen-final-run-eval .callout-note}\n",
+        "\n",
+        "## Evaluation Phase"
+      ],
+      "id": "97433e3d"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
+        "println(CTExperiments.dict_to_quarto_markdown(dict))"
+      ],
+      "id": "152598b4",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        ":::\n",
+        "\n",
+        "#### Accuracy\n",
+        "\n",
+        "::: {#tbl-acc-pen}\n",
+        "\n",
+        "::: {.content-hidden unless-format=\"pdf\"}"
+      ],
+      "id": "32862788"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "df = CTExperiments.aggregate_performance(eval_grids; byvars=[\"objective\"]) \n",
+        "get_table_inputs(df, \"mean\";backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs; wrap_table=false)"
       ],
-      "id": "dc0705a9",
+      "id": "aa5a2540",
       "execution_count": null,
       "outputs": []
     },
@@ -582,108 +714,129 @@
       "source": [
         ":::\n",
         "\n",
-        "Results for Linearly Separable data by cost penalty.\n",
+        "Predictive performance measures by dataset and objective averaged across training-phase parameters (@nte-pen-final-run-train) and evaluation-phase parameters (@nte-pen-final-run-eval).\n",
         "\n",
         ":::\n",
         "\n",
-        "\n",
-        "#### Moons\n",
-        "\n",
-        "- **Energy Penalty** (@tbl-moons-lambda_energy_exper): *ECCo* consistently yields better results than *Vanilla*, except for very low choices of the energy penalty during training for which it performs abismal. *Generic* performs quite badly across the board for high enough choices of the energy penalty at evaluation time. *Omni* has small positive effect. *REVISE* performs poorly across the board.\n",
-        "- **Cost (distance penalty)**: *Generic* generally does better for higher values, while *ECCo* does better for lower values.\n",
-        "- **Maximum Iterations**: No clear patterns recognizable, so it seems that smaller choices are ok. \n",
-        "- **Validity**: *ECCo* generally achieves full validity except for very low choices the energy penalty during training and high choices at evaluation time. *Generic* performs poorly for high choices of the energy penalty during evaluation.\n",
-        "- **Accuracy**: Largely unaffected although *ECCo* suffers a bit for very low choices the energy penalty during training. *REVISE* suffers a lot in general (around 10 percentage points).\n"
+        "#### Plausibility"
       ],
-      "id": "e3bd4731"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
-        "df = CSV.read(\"$(gen_params_dir)/moons/evaluation/results/ce/objective---lambda_energy_exper---lambda_energy_eval/plausibility_distance_from_target.csv\", DataFrame)\n",
-        "df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> \n",
-        "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
-        "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) "
-      ],
-      "id": "eb651b5c",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
-        "::: {#tbl-moons-lambda_energy_exper}\n",
-        "\n",
-        "::: {.content-hidden unless-format=\"pdf\"}\n"
-      ],
-      "id": "4d385a00"
+      "id": "a9a5bedc"
     },
     {
       "cell_type": "code",
       "metadata": {},
       "source": [
         "#| output: asis\n",
-        "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
-        "    inputs -> tabulate_results(inputs)"
+        "\n",
+        "fig_label_prefix = \"grid-pen-plaus\"\n",
+        "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
+        "_str = \"The results with respect to the plausibility measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
+        "println(_str)"
       ],
-      "id": "3886ae9b",
+      "id": "856ea2f6",
       "execution_count": null,
       "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
-        ":::\n",
-        "\n",
-        "Results for Moons data by energy penalty.\n",
-        "\n",
-        ":::\n",
-        "\n",
-        "#### Circles\n",
-        "\n",
-        "- **Energy Penalty** (@tbl-circles-lambda_energy_exper): *ECCo* consistently yields better results than *Vanilla*, though primarily for low to medium choices of the energy penalty (<=5) during training. The same goes for *Generic*, which sometimes outperforms *ECCo* (for small energy penalty at evaluation time). *Omni* does alright for lower energy penalty at evaluation time, but loses out for higher choices. *REVISE* performs poorly across the board (except very low choices at evaluation time).\n",
-        "- **Cost (distance penalty)**: *ECCo* and *Generic* generally achieve the best results when no cost penalty is used during training. Both *Omni* and *REVISE* are largely unaffected.\n",
-        "- **Maximum Iterations**: *ECCo* consistently yields better results for higher numbers of iterations. *Generic* generally does best for a medium number (50). *Omni* is sometimes invalid (**???**).\n",
-        "- **Validity**: *ECCo* tends to outperform its *Vanilla* counterpart, though primarily for low to medium choices of the energy penalty (<=5) during training and evaluation. *Vanilla* typically worse across the board.\n",
-        "- **Accuracy**: Mostly unaffected, but *REVISE* again consistently some deterioration and *ECCo* deteriorates for high choices of energy penalty during training, reflecting other outcomes above.\n"
-      ],
-      "id": "74f7a90e"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
-        "df = CSV.read(\"$(gen_params_dir)/circles/evaluation/results/ce/objective---lambda_energy_exper---lambda_energy_eval/plausibility_distance_from_target.csv\", DataFrame)\n",
-        "df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> \n",
-        "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
-        "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) "
-      ],
-      "id": "03b965d1",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
-        "::: {#tbl-circles-lambda_energy_exper}\n",
-        "\n",
-        "::: {.content-hidden unless-format=\"pdf\"}\n"
-      ],
-      "id": "8f6b8002"
     },
     {
       "cell_type": "code",
       "metadata": {},
       "source": [
         "#| output: asis\n",
-        "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
-        "    inputs -> tabulate_results(inputs)"
+        " \n",
+        "imgfname = \"plausibility_distance_from_target.png\"\n",
+        "fig_caption = \"Average outcomes for the plausibility measure across hyperparameters.\"\n",
+        "full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))\n",
+        "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption) \n",
+        "_str = join(include_img_commands, \"\\n\\n\")\n",
+        "println(_str)"
       ],
-      "id": "9af1849f",
+      "id": "4ecf57a5",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "#### Cost"
+      ],
+      "id": "bde7d0a6"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "\n",
+        "fig_label_prefix = \"grid-pen-cost\"\n",
+        "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
+        "_str = \"The results with respect to the cost measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
+        "println(_str)"
+      ],
+      "id": "f5b31562",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        " \n",
+        "imgfname = \"distance.png\"\n",
+        "fig_caption = \"Average outcomes for the cost measure across hyperparameters.\"\n",
+        "full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))\n",
+        "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption)\n",
+        "_str = join(include_img_commands, \"\\n\\n\")\n",
+        "println(_str)"
+      ],
+      "id": "d68f96fb",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Other Parameters {#sec-app-grid-train}"
+      ],
+      "id": "b7a25655"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "grid_dir = joinpath(res_dir, \"training_params/mlp\")\n",
+        "data_dirs = readdir(grid_dir) |> x -> joinpath.(grid_dir, x) |> x -> x[isdir.(x)]\n",
+        "eval_grids = (p -> EvaluationGrid(joinpath(p,\"grid_config.toml\"))).(data_dirs)\n",
+        "data_names = basename.(data_dirs)\n",
+        "suffix = \"evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/\""
+      ],
+      "id": "61ba16f7",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The hyperparameter grid with other varying training parameters is shown in @nte-train-final-run-train. The corresponding evaluation grid used for these experiments is shown in @nte-train-final-run-eval.\n",
+        "\n",
+        "::: {#nte-train-final-run-train .callout-note}\n",
+        "\n",
+        "## Training Phase"
+      ],
+      "id": "36e89980"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/grid_config.toml\")) \n",
+        "println(CTExperiments.dict_to_quarto_markdown(dict))"
+      ],
+      "id": "fc92a8e9",
       "execution_count": null,
       "outputs": []
     },
@@ -693,20 +846,156 @@
       "source": [
         ":::\n",
         "\n",
-        "Results for Circles data by energy penalty.\n",
+        "::: {#nte-train-final-run-eval .callout-note}\n",
+        "\n",
+        "## Evaluation Phase"
+      ],
+      "id": "6cbb8ba7"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
+        "println(CTExperiments.dict_to_quarto_markdown(dict))"
+      ],
+      "id": "f739f296",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        ":::\n",
+        "\n",
+        "#### Accuracy\n",
+        "\n",
+        "::: {#tbl-acc-train}\n",
+        "\n",
+        "::: {.content-hidden unless-format=\"pdf\"}"
+      ],
+      "id": "3e79480f"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "df = CTExperiments.aggregate_performance(eval_grids; byvars=[\"objective\"]) \n",
+        "get_table_inputs(df, \"mean\";backend=Val(:latex)) |>\n",
+        "    inputs -> tabulate_results(inputs; wrap_table=false)"
+      ],
+      "id": "81437d7c",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        ":::\n",
+        "\n",
+        "Predictive performance measures by dataset and objective averaged across training-phase parameters (@nte-train-final-run-train) and evaluation-phase parameters (@nte-train-final-run-eval).\n",
         "\n",
         ":::\n",
+        "\n",
+        "#### Plausibility"
+      ],
+      "id": "99eadc8c"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "\n",
+        "fig_label_prefix = \"grid-train-plaus\"\n",
+        "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
+        "_str = \"The results with respect to the plausibility measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
+        "println(_str)"
+      ],
+      "id": "2d0b70ba",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        " \n",
+        "imgfname = \"plausibility_distance_from_target.png\"\n",
+        "fig_caption = \"Average outcomes for the plausibility measure across hyperparameters.\"\n",
+        "full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))\n",
+        "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption) \n",
+        "_str = join(include_img_commands, \"\\n\\n\")\n",
+        "println(_str)"
+      ],
+      "id": "2d9d5385",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "#### Cost"
+      ],
+      "id": "8129e0fd"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "\n",
+        "fig_label_prefix = \"grid-train-cost\"\n",
+        "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
+        "_str = \"The results with respect to the cost measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
+        "println(_str)"
+      ],
+      "id": "8b4ddde1",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        " \n",
+        "imgfname = \"distance.png\"\n",
+        "fig_caption = \"Average outcomes for the cost measure across hyperparameters.\"\n",
+        "full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))\n",
+        "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption)\n",
+        "_str = join(include_img_commands, \"\\n\\n\")\n",
+        "println(_str)"
+      ],
+      "id": "8ccfa01c",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "<!-- {{< include /paper/sections/other/initial_grids.qmd >}} -->\n",
+        "\n",
         "\n",
         "# Computation Details {.appendix}\n",
         "\n",
         "<!-- [@DHPC2022] -->\n",
         "## Hardware\n",
         "\n",
-        "We performed our experiments on a high-performance cluster. Details about the cluster will be disclosed upon publication to avoid revealing information that might interfere with the double-blind review process. Since our experiments have largely involved highly parallel tasks and small models, we have made extensive use of multi-processing.\n",
+        "We performed our experiments on a high-performance cluster. Details about the cluster will be disclosed upon publication to avoid revealing information that might interfere with the double-blind review process. Since our experiments involve highly parallel tasks and rather small models by today's standard, we have relied on distributed computing across multiple central processing units (CPU). Graphical processing units (GPU) were not required. Model training for the largest grid searches with 270 unique parameter combinations was parallelized across 34 CPUs with 2GB memory each. The time to completion varied by dataset for reasons discussed in @sec-discussion: 0h49m (*Moons*), 1h4m (*Linearly Separable*), 1h49m (*Circles*), 3h52m (*Overlapping*). Model evaluations for large grid searches were parallelized across 20 CPUs with 3GB memory each. Evaluations for all data sets took less than one hour (<1h) to complete. \n",
         "\n",
-        "## Software\n"
+        "## Software\n",
+        "\n",
+        "All computations were performed in the Julia Programming Language [@bezanson2017julia]. We have developed a package for counterfactual training that leverages and extends the functionality provided by several existing packages, most notably [CounterfactualExplanations.jl](https://github.com/JuliaTrustworthyAI/CounterfactualExplanations.jl) [@altmeyer2023explaining] and the [Flux.jl](https://fluxml.ai/Flux.jl/v0.16/) library for deep learning [@innes2018fashionable;@innes2018flux]. For data-wrangling and presentation-ready tables we relied on [DataFrames.jl](https://dataframes.juliadata.org/v1.7/) [@milan2023dataframes] and [PrettyTables.jl](https://ronisbr.github.io/PrettyTables.jl/v2.4/) [@chagas2024pretty], respectively. For plots and visualizations we used both [Plots.jl](https://docs.juliaplots.org/v1.40/) [@PlotsJL] and [Makie.jl](https://docs.makie.org/v0.22/) [@danisch2021makie], in particular [AlgebraOfGraphics.jl](https://aog.makie.org/v0.9.3/). To distribute computational tasks across multiple processors, we have relied on [MPI.jl](https://juliaparallel.org/MPI.jl/v0.20/) [@byrne2021mpi].\n"
       ],
-      "id": "9b1c6687"
+      "id": "9fc793a0"
     }
   ],
   "metadata": {

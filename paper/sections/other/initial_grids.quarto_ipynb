@@ -1,0 +1,352 @@
+{
+  "cells": [
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "projectdir = splitpath(pwd()) |>\n",
+        "    ss -> joinpath(ss[1:findall([s == \"CounterfactualTraining.jl\" for s in ss])[1]]...) \n",
+        "cd(projectdir)"
+      ],
+      "id": "c206cd4d",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "using CTExperiments\n",
+        "using CTExperiments.CSV\n",
+        "using CTExperiments.DataFrames\n",
+        "using CTExperiments.StatsBase\n",
+        "\n",
+        "using DotEnv\n",
+        "DotEnv.load!()"
+      ],
+      "id": "4dd27aa0",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Initial Grid Search {#sec-app-initial}\n"
+      ],
+      "id": "2459a374"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "res_dir = ENV[\"INITIAL_RUN_RESULTS\"]"
+      ],
+      "id": "9e4b665f",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "For the initial round of experiments we employed a different training objective and procedure that led to promising results for some hyperparameter choices, but suffered from training instabilities.\n",
+        "\n",
+        "### Generator Parameters\n",
+        "\n",
+        "The hyperparameter grids for the first investigation of the effect of generator parameters are shown in @exr-gen-params-first-run-train and @exr-gen-params-first-run-eval.\n",
+        "\n",
+        "::: {#exr-gen-params-first-run-train}\n",
+        "\n",
+        "## Training Phase\n"
+      ],
+      "id": "4670bee3"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "dict = CTExperiments.from_toml(joinpath(res_dir,\"gen_params/mlp/lin_sep/grid_config.toml\")) \n",
+        "println(CTExperiments.dict_to_quarto_markdown(dict))"
+      ],
+      "id": "f264ccf3",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        ":::\n",
+        "\n",
+        "\n",
+        "::: {#exr-gen-params-first-run-eval}\n",
+        "\n",
+        "## Evaluation Phase\n"
+      ],
+      "id": "64ae9463"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "dict = CTExperiments.from_toml(joinpath(res_dir, \"gen_params/mlp/lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
+        "println(CTExperiments.dict_to_quarto_markdown(dict))"
+      ],
+      "id": "14789953",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        ":::\n"
+      ],
+      "id": "cf2d68c7"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "gen_params_dir = joinpath(res_dir, \"gen_params/mlp\")"
+      ],
+      "id": "ccb29809",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "#### Linearly Separable \n",
+        "\n",
+        "- **Energy Penalty** (@tbl-lin_sep-lambda_energy_exper): *ECCo* generally does yield better results than *Vanilla* for higher choices of the energy penalty (10,15) during training. *Generic* performs poorly accross the board. *Omni* seems to have an anchoring effect, in that it never performs terribly but also never as good as the best *ECCo* results. *REVISE* performs poorly across the board.\n",
+        "- **Cost** (@tbl-lin_sep-lambda_cost_exper): Results for all generators (except *Omni*) are quite bad, which can likely be attributed to extremely bad results for some choices of the **Energy Penalty** (results here are averaged). For *ECCo* and *Generic*, higher cost values generally lead to worse results.\n",
+        "- **Maximum Iterations**: No clear patterns recognizable, so it seems that smaller choices are ok. \n",
+        "- **Validity**: *ECCo* almost always valid except for very low values during training and high values at evaluation time. *Generic* often has poor validity.\n",
+        "- **Accuracy**: Seems largely unaffected.\n"
+      ],
+      "id": "0f825ab6"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "df = CSV.read(\"$(gen_params_dir)/lin_sep/evaluation/results/ce/objective---lambda_energy_exper---lambda_energy_eval/plausibility_distance_from_target.csv\", DataFrame)\n",
+        "df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> \n",
+        "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
+        "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type])"
+      ],
+      "id": "c200a69d",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "::: {#tbl-lin_sep-lambda_energy_exper}\n",
+        "\n",
+        "::: {.content-hidden unless-format=\"pdf\"}\n"
+      ],
+      "id": "971160f3"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
+        "    inputs -> tabulate_results(inputs; wrap_table=false)"
+      ],
+      "id": "e0581d5a",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        ":::\n",
+        "\n",
+        "Results for Linearly Separable data by energy penalty.\n",
+        "\n",
+        ":::\n",
+        "\n",
+        "<!-- Cost -->\n"
+      ],
+      "id": "5d49a1bb"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "df = CSV.read(\"$(gen_params_dir)/lin_sep/evaluation/results/ce/objective---lambda_cost_exper---lambda_energy_eval/plausibility_distance_from_target.csv\", DataFrame)\n",
+        "df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> \n",
+        "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
+        "  df -> sort(df, [:lambda_cost_exper, :objective, :generator_type])"
+      ],
+      "id": "cf822dcb",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "::: {#tbl-lin_sep-lambda_cost_exper}\n",
+        "\n",
+        "::: {.content-hidden unless-format=\"pdf\"}\n"
+      ],
+      "id": "70c851a9"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_cost_exper\", backend=Val(:latex)) |>\n",
+        "    inputs -> tabulate_results(inputs; wrap_table=false)"
+      ],
+      "id": "23092a96",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        ":::\n",
+        "\n",
+        "Results for Linearly Separable data by cost penalty.\n",
+        "\n",
+        ":::\n",
+        "\n",
+        "\n",
+        "#### Moons\n",
+        "\n",
+        "- **Energy Penalty** (@tbl-moons-lambda_energy_exper): *ECCo* consistently yields better results than *Vanilla*, except for very low choices of the energy penalty during training for which it performs abismal. *Generic* performs quite badly across the board for high enough choices of the energy penalty at evaluation time. *Omni* has small positive effect. *REVISE* performs poorly across the board.\n",
+        "- **Cost (distance penalty)**: *Generic* generally does better for higher values, while *ECCo* does better for lower values.\n",
+        "- **Maximum Iterations**: No clear patterns recognizable, so it seems that smaller choices are ok. \n",
+        "- **Validity**: *ECCo* generally achieves full validity except for very low choices the energy penalty during training and high choices at evaluation time. *Generic* performs poorly for high choices of the energy penalty during evaluation.\n",
+        "- **Accuracy**: Largely unaffected although *ECCo* suffers a bit for very low choices the energy penalty during training. *REVISE* suffers a lot in general (around 10 percentage points).\n"
+      ],
+      "id": "b50ecc43"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "df = CSV.read(\"$(gen_params_dir)/moons/evaluation/results/ce/objective---lambda_energy_exper---lambda_energy_eval/plausibility_distance_from_target.csv\", DataFrame)\n",
+        "df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> \n",
+        "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
+        "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) "
+      ],
+      "id": "eff0c01b",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "::: {#tbl-moons-lambda_energy_exper}\n",
+        "\n",
+        "::: {.content-hidden unless-format=\"pdf\"}\n"
+      ],
+      "id": "a8b2da69"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
+        "    inputs -> tabulate_results(inputs)"
+      ],
+      "id": "b297cf3c",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        ":::\n",
+        "\n",
+        "Results for Moons data by energy penalty.\n",
+        "\n",
+        ":::\n",
+        "\n",
+        "#### Circles\n",
+        "\n",
+        "- **Energy Penalty** (@tbl-circles-lambda_energy_exper): *ECCo* consistently yields better results than *Vanilla*, though primarily for low to medium choices of the energy penalty (<=5) during training. The same goes for *Generic*, which sometimes outperforms *ECCo* (for small energy penalty at evaluation time). *Omni* does alright for lower energy penalty at evaluation time, but loses out for higher choices. *REVISE* performs poorly across the board (except very low choices at evaluation time).\n",
+        "- **Cost (distance penalty)**: *ECCo* and *Generic* generally achieve the best results when no cost penalty is used during training. Both *Omni* and *REVISE* are largely unaffected.\n",
+        "- **Maximum Iterations**: *ECCo* consistently yields better results for higher numbers of iterations. *Generic* generally does best for a medium number (50). *Omni* is sometimes invalid (**???**).\n",
+        "- **Validity**: *ECCo* tends to outperform its *Vanilla* counterpart, though primarily for low to medium choices of the energy penalty (<=5) during training and evaluation. *Vanilla* typically worse across the board.\n",
+        "- **Accuracy**: Mostly unaffected, but *REVISE* again consistently some deterioration and *ECCo* deteriorates for high choices of energy penalty during training, reflecting other outcomes above.\n"
+      ],
+      "id": "16096b23"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "df = CSV.read(\"$(gen_params_dir)/circles/evaluation/results/ce/objective---lambda_energy_exper---lambda_energy_eval/plausibility_distance_from_target.csv\", DataFrame)\n",
+        "df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> \n",
+        "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
+        "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) "
+      ],
+      "id": "b3077f92",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "::: {#tbl-circles-lambda_energy_exper}\n",
+        "\n",
+        "::: {.content-hidden unless-format=\"pdf\"}\n"
+      ],
+      "id": "407662c2"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
+        "    inputs -> tabulate_results(inputs)"
+      ],
+      "id": "2a672083",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        ":::\n",
+        "\n",
+        "Results for Circles data by energy penalty.\n",
+        "\n",
+        ":::"
+      ],
+      "id": "87c0d29d"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "julia-1.11",
+      "language": "julia",
+      "display_name": "Julia 1.11.1",
+      "path": "/Users/paltmeyer/Library/Jupyter/kernels/julia-1.11"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

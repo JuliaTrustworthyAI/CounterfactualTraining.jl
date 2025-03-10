@@ -24,17 +24,25 @@ To assess the hyperparameter sensitivity of our proposed training regime we ran 
 2. **Penalty Strengths** (@sec-app-grid-pen): Investigates the effect of changing the penalty strengths in out proposed objective (@eq-obj).
 3. **Other Parameters** (@sec-app-grid-train): Investigates the effect of changing other training parameters, including the total number of generated counterfactuals in each epoch.
 
-We begin by summarizing the high-level findings in @sec-app-grid-hl. For each of the categories, @sec-app-grid-gen to @sec-app-grid-train then present all details including the parameter grids, average performance outcomes and key evaluation metrics for the generated counterfactuals. 
+We begin by summarizing the high-level findings in @sec-app-grid-hl. For each of the categories, @sec-app-grid-gen to @sec-app-grid-train then present all details including the exact parameter grids, average predictive performance outcomes and key evaluation metrics for the generated counterfactuals. 
+
+### Evaluation Details
+
+To measure predictive performance, we compute the accuracy and F1-score for all models on test data (@tbl-acc-gen, @tbl-acc-pen, @tbl-acc-train). 
+
+We evaluated 
 
 ### High-Level Findings {#sec-app-grid-hl}
 
-Overall, we find that Counterfactual Training (CT) achieves it key objectives consistently across all hyperparameter settings and also broadly across datasets. We do observe strong sensitivity to certain hyperparameters, but clear and manageable patterns emerge in those cases. With respect to the underlying training data distribution, we find that outcomes for CT seem to depend to some degree on class separability.
+Overall, we find that Counterfactual Training (CT) achieves it key objectives consistently across all hyperparameter settings and also broadly across datasets: plausibility is improved  We do observe strong sensitivity to certain hyperparameters, but clear and manageable patterns emerge in those cases. With respect to the underlying training data distribution, we find that outcomes for CT seem to depend to some degree on class separability.
 
 #### Predictive Performance
 
 We find that CT is associated with little to no decrease in average predictive performance for our synthetic datasets: test accuracy and F1-scores decrease by at most ~1 percentage point, but generally much less (@tbl-acc-gen, @tbl-acc-pen, @tbl-acc-train). Variation across hyperparameters is negligible as indicated by small standard deviations for these metrics across the board. 
 
 #### Key Counterfactual Outcomes
+
+
 
 ### Generator Parameters {#sec-app-grid-gen}
 
