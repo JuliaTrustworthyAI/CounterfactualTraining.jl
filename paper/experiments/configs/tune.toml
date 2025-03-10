@@ -1,6 +1,6 @@
-name = "ablation"
+name = "tune"
 dim_reduction = []
-generator_type = ["ecco", "generic", "revise"]
+generator_type = ["ecco"]
 data = ""
 model_type = ""
 save_dir = ""
@@ -24,13 +24,14 @@ nhidden = []
 opt = []
 lambda_cost = []
 lr = []
+decision_threshold = [0.5, 0.75, 0.90]
 maxiter = []
 lambda_energy = []
 type = []
 
 [training_params]
 opt = []
-nce = [3000]
+nce = []
 lr = []
 threaded = []
 class_loss = []
@@ -39,7 +40,7 @@ lambda_class_loss = []
 lambda_energy_diff = []
 burnin = []
 nepochs = []
-lambda_energy_reg = []
+lambda_energy_reg = [0.1, 0.25, 0.5]
 verbose = []
 lambda_adversarial = []
 parallelizer = []
