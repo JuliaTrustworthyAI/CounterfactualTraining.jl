@@ -167,14 +167,14 @@
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
-\theoremstyle{plain}
-\newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}
 \newtheorem{example}{Example}[section]
 \theoremstyle{plain}
-\newtheorem{corollary}{Research Question}[section]
+\newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
+\theoremstyle{plain}
+\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -622,9 +622,9 @@ that induces discriminative performance (e.g., cross-entropy). The two
 additional components in Equation~\ref{eq-obj} are explained in more
 detail below. For now, they can be sufficiently described as inducing
 explainability directly and indirectly by penalizing: (1) the
-contrastive divergence, \(\text{div}(\cdot)\), between counterfactuals
-\(\mathbf{x}_T^\prime\) and observed samples \(x\) and, (2) the
-adversarial loss, \(\text{advloss}(.)\), with respect to nascent
+contrastive divergence, \(\text{div}(\cdot)\), between mature
+counterfactuals \(\mathbf{x}_T^\prime\) and observed samples \(x\) and,
+(2) the adversarial loss, \(\text{advloss}(.)\), with respect to nascent
 counterfactuals \(\mathbf{x}_{t\leq T}^\prime\). The tradeoff between
 the different components can be governed by adjusting the strengths of
 the penalties \(\lambda_{\text{div}}\) and \(\lambda_{\text{adv}}\).
@@ -666,14 +666,16 @@ counterfactuals of observed training samples. Specifically, we have:
 
 where \(\mathcal{E}_\theta(\cdot)\) denotes the energy function. In
 particular, we set
-\(\mathcal{E}_\theta(\mathbf{x},\mathbf{y})=-\mathbf{M}_\theta(\mathbf{x})[y^+]\)
-where \(y^+\) denotes the index of the target class. We generate samples
-\(\mathbf{x}_T^\prime\) by first randomly sampling the target class
-\(y^+ \sim p(y)\) and then generating a counterfactual explanation for
-that target over \(T\) iterations using a gradient-based counterfactual
-generator. This is similar to how conditional sampling is used to draw
-from \(p_\theta(\mathbf{x})\) in Grathwohl et al.
-(\citeproc{ref-grathwohl2020your}{2020}).
+\(\mathcal{E}_\theta(\mathbf{x},\mathbf{y})=-\mathbf{M}_\theta(\mathbf{x^+})[y^+]\)
+where \(y^+\) denotes the index of the randomly drawn target class,
+\(y^+ \sim p(y)\), and \(\mathbf{x^+}\) denotes an observed data point
+sampled from target domain: \(\mathbf{X}^+=\{\mathbf{x}:y=y^+\}\).
+Conditional on the target class \(y^+\), \(\mathbf{x}_T^\prime\) denotes
+a mature counterfactual for a randomly sampled factual from a non-target
+class generated through a gradient-based counterfactual generator for at
+most \(T\) iterations. We define mature counterfactuals as those that
+have either exhausted \(T\) or reached convergence in terms of the
+pre-determined decision threshold earlier.
 
 Intuitively, the gradient of Equation~\ref{eq-div} decreases the energy
 of observed training samples (positive samples) while at same time
@@ -900,6 +902,40 @@ Equation~\ref{eq-obj}?
 
 \subsection{Experimental Setup}\label{experimental-setup}
 
+\subsubsection{Evaluation}\label{evaluation}
+
+Our key outcome of interest is how well models perform with respect to
+explainability (Definition~\ref{def-explainability}): to this end, we
+focus primarily on the plausibility and cost of faithfully generated
+counterfactuals at test time. To measure the cost of counterfactuals, we
+follow the standard convention of using distances (\(\ell_1\)-norm)
+between factuals and counterfactuals as a proxy. For plausibility, we
+assess how similar counterfactuals are to observed samples in the target
+domain. We rely on the distance-based metric used by Altmeyer et al.
+(\citeproc{ref-altmeyer2024faithful}{2024}),
+
+\begin{equation}\phantomsection\label{eq-impl-dist}{
+\text{implaus}_{\text{dist}}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
+}\end{equation}
+
+and introduce a novel divergence metric,
+
+\begin{equation}\phantomsection\label{eq-impl-div}{
+\text{implaus}_{\text{div}}(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
+}\end{equation}
+
+where \(\mathbf{X}^\prime\) denotes a set of multiple counterfactuals
+and \(\text{MMD}(\cdot)\) is an unbiased estimate of the squared
+population maximum mean discrepancy
+(\citeproc{ref-gretton2012kernel}{Gretton et al. 2012}). The metric in
+Equation~\ref{eq-impl-div} is equal to zero iff
+\(\mathbf{X}^\prime=\mathbf{X}^+\).
+
+In addition to cost and plausibility, we also compute other standard
+metrics to evaluate counterfactuals at test time including validity and
+redundancy. Finally, we also assess the predictive performance of models
+using standard metrics.
+
 \subsection{Experimental Results}\label{experimental-results}
 
 \section{Discussion}\label{sec-discussion}
@@ -1001,6 +1037,11 @@ Grathwohl, Will, Kuan-Chieh Wang, Joern-Henrik Jacobsen, David Duvenaud,
 Mohammad Norouzi, and Kevin Swersky. 2020. {``Your Classifier Is
 Secretly an Energy Based Model and You Should Treat It Like One.''} In
 \emph{International Conference on Learning Representations}.
+
+\bibitem[\citeproctext]{ref-gretton2012kernel}
+Gretton, Arthur, Karsten M Borgwardt, Malte J Rasch, Bernhard Schölkopf,
+and Alexander Smola. 2012. {``A Kernel Two-Sample Test.''} \emph{The
+Journal of Machine Learning Research} 13 (1): 723--73.
 
 \bibitem[\citeproctext]{ref-guidotti2022counterfactual}
 Guidotti, Riccardo. 2022. {``Counterfactual Explanations and How to Find

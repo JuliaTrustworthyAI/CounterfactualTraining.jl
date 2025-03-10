@@ -31,4 +31,22 @@ What are the effects of different hyperparameter choices with respect to @eq-obj
 
 ## Experimental Setup
 
+### Evaluation 
+
+Our key outcome of interest is how well models perform with respect to explainability (@def-explainability): to this end, we focus primarily on the plausibility and cost of faithfully generated counterfactuals at test time. To measure the cost of counterfactuals, we follow the standard convention of using distances ($\ell_1$-norm) between factuals and counterfactuals as a proxy. For plausibility, we assess how similar counterfactuals are to observed samples in the target domain. We rely on the distance-based metric used by @altmeyer2024faithful,
+
+$$
+\text{implaus}_{\text{dist}}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
+$$ {#eq-impl-dist}
+
+and introduce a novel divergence metric,
+
+$$
+\text{implaus}_{\text{div}}(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
+$$ {#eq-impl-div}
+
+where $\mathbf{X}^\prime$ denotes a set of multiple counterfactuals and $\text{MMD}(\cdot)$ is an unbiased estimate of the squared population maximum mean discrepancy [@gretton2012kernel]. The metric in @eq-impl-div is equal to zero iff $\mathbf{X}^\prime=\mathbf{X}^+$.
+
+In addition to cost and plausibility, we also compute other standard metrics to evaluate counterfactuals at test time including validity and redundancy. Finally, we also assess the predictive performance of models using standard metrics.
+
 ## Experimental Results

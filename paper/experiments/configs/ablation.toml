@@ -1,4 +1,4 @@
-name = "mutability"
+name = "ablation"
 dim_reduction = []
 generator_type = ["ecco", "generic", "revise"]
 data = ""
@@ -7,7 +7,7 @@ save_dir = ""
 
 [data_params]
 datadir = []
-mutability = [["both", "both"], ["none", "both"], ["both", "none"]]
+mutability = []
 domain = []
 n_validation = []
 train_test_ratio = []
@@ -16,9 +16,9 @@ n_train = []
 batchsize = []
 
 [model_params]
-nlayers = [3]
-activation = ["swish"]
-nhidden = [16]
+nlayers = []
+activation = []
+nhidden = []
 
 [generator_params]
 opt = []
@@ -30,11 +30,11 @@ type = []
 
 [training_params]
 opt = []
-nce = [300]
+nce = []
 lr = []
 threaded = []
 class_loss = []
-objective = ["energy"]
+objective = ["full", "energy", "adversarial", "vanilla"]
 lambda_class_loss = []
 lambda_energy_diff = []
 burnin = []
