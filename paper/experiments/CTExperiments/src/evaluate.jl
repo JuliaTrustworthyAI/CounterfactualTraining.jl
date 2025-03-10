@@ -115,6 +115,34 @@ function to_toml(eval_config::EvaluationConfig)
     return to_toml(eval_config, default_eval_config_name(eval_config))
 end
 
+function adjust_name(name::String)
+    s = replace(name, "multi-class ``F_β`` score" => "f1-score") |>
+        s -> uppercasefirst(s) 
+    return s
+end
+
+function compute_performance_measures(
+    exper, ytest, yhat; measure=[accuracy, multiclass_f1score], return_df::Bool=false
+)
+    # Evaluate the model:
+    results = [measure(ytest, yhat) for measure in measure]
+
+    if !return_df
+        return results
+    end
+
+    # Wrap in data frame
+    df = DataFrame(
+        "id" => exper.meta_params.experiment_name,
+        [
+            StatisticalMeasures.StatisticalMeasuresBase.human_name(m) |> adjust_name => res
+            for (m, res) in zip(measure, results)
+        ]...,
+    )
+    df = stack(df, 2:size(df, 2))
+    return df
+end
+
 """
     test_performance(
         exper::Experiment; measure=[accuracy, multiclass_f1score], n::Union{Nothing,Int}=nothing
@@ -123,19 +151,35 @@ end
 Tests the performance of a trained model on the test set and returns the evaluation metrics. The `measure` parameter specifies which metric(s) to evaluate, and `n` can be used to limit the number of samples used for testing.
 """
 function test_performance(
-    exper::Experiment; measure=[accuracy, multiclass_f1score], n::Union{Nothing,Int}=nothing
+    exper::Experiment;
+    adversarial::Bool=false,
+    return_df::Bool=false,
+    measure=[accuracy, multiclass_f1score],
+    n::Union{Nothing,Int}=nothing,
+    eps::Real=0.3,
 )
-    _, _, M = load_results(exper)
+    model, _, M = load_results(exper)
 
     # Get test data:
     Xtest, ytest = get_data(exper.data; n=n, test_set=true)
+
+    if adversarial
+        # Generate adversarial examples:
+        Xtest = generate_ae(model, nothing, Xtest, ytest; eps)
+    end
+
     yhat = predict_label(M, CounterfactualData(Xtest, ytest), Xtest)
 
-    # Evaluate the model:
-    results = [measure(ytest, yhat) for measure in measure]
+    return compute_performance_measures(exper, ytest, yhat; measure, return_df)
 
-    return results
 end
+
+function generate_ae(model, loss, x, y; eps::Real=0.3, p=Inf)
+    delta = randn(size(x)...)
+    return x + eps * delta
+end
+
+adv_performance(exper::Experiment; kwrgs...) = test_performance(exper; adversarial=true, kwrgs...)
 
 """
     test_performance(grid::ExperimentGrid; kwrgs...)
@@ -143,31 +187,20 @@ end
 Tests the performance of a trained model on the test set for each experiment in an `ExperimentGrid` and returns the evaluation metrics. The `measure` parameter specifies which metric(s) to evaluate.
 """
 function test_performance(grid::ExperimentGrid; kwrgs...)
+    
     exper_list = load_list(grid)
     results = Logging.with_logger(Logging.NullLogger()) do
         test_performance.(exper_list; kwrgs...)
     end
+    if eltype(results) == DataFrame
+        results = reduce(vcat, results)
+    end
     return results
+
 end
 
-"""
-    adv_performance(exper::Experiment; measure=[accuracy, multiclass_f1score])
-
-Tests the performance of a trained model on adversarial examples and returns the evaluation metrics. The `measure` parameter specifies which metric(s) to evaluate.
-"""
-function adv_performance(exper::Experiment; measure=[accuracy, multiclass_f1score])
-    model, logs, M = load_results(exper)
-
-    # Get test data:
-    Xtest, ytest = get_data(exper.data; test_set=true)
-
-    # Generate adversarial examples:
-
-    # Evaluate the model:
-    yhat = predict_label(M, CounterfactualData(Xtest, ytest), Xtest)
-    results = [measure(ytest, yhat) for measure in measure]
-
-    return results
+function adv_performance(grid::ExperimentGrid; kwrgs...)
+    return test_performance(grid; adversarial=true, kwrgs...)
 end
 
 """

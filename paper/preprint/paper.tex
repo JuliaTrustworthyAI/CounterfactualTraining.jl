@@ -183,14 +183,14 @@
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
-\theoremstyle{plain}
-\newtheorem{corollary}{Research Question}[section]
-\theoremstyle{plain}
-\newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
 \theoremstyle{definition}
 \newtheorem{example}{Example}[section]
+\theoremstyle{plain}
+\newtheorem{corollary}{Research Question}[section]
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -1172,13 +1172,10 @@ Linguistics. \url{https://doi.org/10.18653/v1/2021.acl-long.523}.
 
 \FloatBarrier
 
-\setcounter{section}{0}
 \renewcommand{\thesection}{\Alph{section}}
 
-\setcounter{table}{0}
 \renewcommand{\thetable}{A\arabic{table}}
 
-\setcounter{figure}{0}
 \renewcommand{\thefigure}{A\arabic{figure}}
 
 \section{Notation}\label{notation}
@@ -1409,7 +1406,7 @@ counterfactual training.
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, coltitle=black, rightrule=.15mm, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacitybacktitle=0.6, title={Note}, opacityback=0, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, toptitle=1mm, breakable, toprule=.15mm, leftrule=.75mm, opacitybacktitle=0.6, coltitle=black, bottomtitle=1mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, opacityback=0, bottomrule=.15mm, arc=.35mm, title={Note}, rightrule=.15mm, titlerule=0mm]
 
 Figure~\ref{fig-mnist} shows much more plausible (faithful)
 counterfactuals for a model with CT than the model with conventional
@@ -1451,14 +1448,64 @@ to generate counterfactuals that are faithful to the model
 
 \subsection{Grid Searches}\label{sec-app-grid}
 
-\subsubsection{Generator Parameters}\label{generator-parameters}
+To assess the hyperparameter sensitivity of our proposed training regime
+we ran multiple large grid searches for all of our synthetic datasets.
+We have grouped these grid searches into multiple categories:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Generator Parameters} (Section~\ref{sec-app-grid-gen}):
+  Investigates the effect of changing hyperparameters that affect the
+  counterfactual outcomes during the training phase.
+\item
+  \textbf{Penalty Strengths} (Section~\ref{sec-app-grid-pen}):
+  Investigates the effect of changing the penalty strengths in out
+  proposed objective (Equation~\ref{eq-obj}).
+\item
+  \textbf{Other Parameters} (Section~\ref{sec-app-grid-train}):
+  Investigates the effect of changing other training parameters,
+  including the total number of generated counterfactuals in each epoch.
+\end{enumerate}
+
+We begin by summarizing the high-level findings in
+Section~\ref{sec-app-grid-hl}. For each of the categories,
+Section~\ref{sec-app-grid-gen} to Section~\ref{sec-app-grid-train} then
+present all details including the parameter grids, average performance
+outcomes and key evaluation metrics for the generated counterfactuals.
+
+\subsubsection{High-Level Findings}\label{sec-app-grid-hl}
+
+Overall, we find that Counterfactual Training (CT) achieves it key
+objectives consistently across all hyperparameter settings and also
+broadly across datasets. We do observe strong sensitivity to certain
+hyperparameters, but clear and manageable patterns emerge in those
+cases. With respect to the underlying training data distribution, we
+find that outcomes for CT seem to depend to some degree on class
+separability.
+
+\paragraph{Predictive Performance}\label{predictive-performance}
+
+We find that CT is associated with little to no decrease in average
+predictive performance for our synthetic datasets: test accuracy and
+F1-scores decrease by at most \textasciitilde1 percentage point, but
+generally much less (Table~\ref{tbl-acc-gen}, Table~\ref{tbl-acc-pen},
+Table~\ref{tbl-acc-train}). Variation across hyperparameters is
+negligible as indicated by small standard deviations for these metrics
+across the board.
+
+\paragraph{Key Counterfactual
+Outcomes}\label{key-counterfactual-outcomes}
+
+\subsubsection{Generator Parameters}\label{sec-app-grid-gen}
 
 The hyperparameter grid with varying generator parameters during
 training is shown in Note~\ref{nte-gen-params-final-run-train}. The
 corresponding evaluation grid used for these experiments is shown in
 Note~\ref{nte-gen-params-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, coltitle=black, rightrule=.15mm, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacitybacktitle=0.6, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, opacityback=0, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, toptitle=1mm, breakable, toprule=.15mm, leftrule=.75mm, opacitybacktitle=0.6, coltitle=black, bottomtitle=1mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, opacityback=0, bottomrule=.15mm, arc=.35mm, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, rightrule=.15mm, titlerule=0mm]
 
 \quartocalloutnte{nte-gen-params-final-run-train} 
 
@@ -1492,7 +1539,7 @@ Note~\ref{nte-gen-params-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, coltitle=black, rightrule=.15mm, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacitybacktitle=0.6, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, opacityback=0, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, toptitle=1mm, breakable, toprule=.15mm, leftrule=.75mm, opacitybacktitle=0.6, coltitle=black, bottomtitle=1mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, opacityback=0, bottomrule=.15mm, arc=.35mm, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, rightrule=.15mm, titlerule=0mm]
 
 \quartocalloutnte{nte-gen-params-final-run-eval} 
 
@@ -1509,6 +1556,47 @@ Note~\ref{nte-gen-params-final-run-eval}.
 \end{itemize}
 
 \end{tcolorbox}
+
+\paragraph{Accuracy}\label{accuracy}
+
+\begin{longtable}{ccccc}
+
+\caption{\label{tbl-acc-gen}Predictive performance measures by dataset
+and objective averaged across training-phase parameters
+(Note~\ref{nte-gen-params-final-run-train}) and evaluation-phase
+parameters (Note~\ref{nte-gen-params-final-run-eval}).}
+
+\tabularnewline
+
+  \toprule
+  \textbf{Dataset} & \textbf{Variable} & \textbf{Objective} & \textbf{Mean} & \textbf{Std} \\\midrule
+  \endfirsthead
+  \toprule
+  \textbf{Dataset} & \textbf{Variable} & \textbf{Objective} & \textbf{Mean} & \textbf{Std} \\\midrule
+  \endhead
+  \bottomrule
+  \multicolumn{5}{r}{Continuing table below.}\\
+  \bottomrule
+  \endfoot
+  \endlastfoot
+  Circles & Accuracy & Full & 0.997 & 0.00309 \\
+  Circles & Accuracy & Vanilla & 0.998 & 0.000557 \\
+  Circles & F1-score & Full & 0.997 & 0.00309 \\
+  Circles & F1-score & Vanilla & 0.998 & 0.000558 \\
+  Lin Sep & Accuracy & Full & 0.999 & 0.00201 \\
+  Lin Sep & Accuracy & Vanilla & 1 & 0 \\
+  Lin Sep & F1-score & Full & 0.999 & 0.00201 \\
+  Lin Sep & F1-score & Vanilla & 1 & 0 \\
+  Moons & Accuracy & Full & 0.999 & 0.000696 \\
+  Moons & Accuracy & Vanilla & 1 & 0.00111 \\
+  Moons & F1-score & Full & 0.999 & 0.000696 \\
+  Moons & F1-score & Vanilla & 1 & 0.00111 \\
+  Over & Accuracy & Full & 0.915 & 0.00477 \\
+  Over & Accuracy & Vanilla & 0.917 & 0.00123 \\
+  Over & F1-score & Full & 0.915 & 0.00478 \\
+  Over & F1-score & Vanilla & 0.917 & 0.00124 \\\bottomrule
+
+\end{longtable}
 
 \paragraph{Plausibility}\label{plausibility-1}
 
@@ -1627,14 +1715,14 @@ cost measure across hyperparameters. Data: Overlapping.}
 
 \end{figure}%
 
-\subsubsection{Penalty Strengths}\label{penalty-strengths}
+\subsubsection{Penalty Strengths}\label{sec-app-grid-pen}
 
 The hyperparameter grid with varying penalty strengths during training
 is shown in Note~\ref{nte-pen-final-run-train}. The corresponding
 evaluation grid used for these experiments is shown in
 Note~\ref{nte-pen-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, coltitle=black, rightrule=.15mm, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacitybacktitle=0.6, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, opacityback=0, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, toptitle=1mm, breakable, toprule=.15mm, leftrule=.75mm, opacitybacktitle=0.6, coltitle=black, bottomtitle=1mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, opacityback=0, bottomrule=.15mm, arc=.35mm, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, rightrule=.15mm, titlerule=0mm]
 
 \quartocalloutnte{nte-pen-final-run-train} 
 
@@ -1654,7 +1742,7 @@ Note~\ref{nte-pen-final-run-eval}.
   \item
     \(\lambda_{\text{div}}\): \texttt{0.01,\ 0.1,\ 1.0}
   \item
-    \(\lambda_{\text{reg}}\): \texttt{0.0,\ 0.01,\ 0.1}
+    \(\lambda_{\text{reg}}\): \texttt{0.0,\ 0.01,\ 0.1,\ 0.25,\ 0.5}
   \item
     Objective: \texttt{full,\ vanilla}
   \end{itemize}
@@ -1662,7 +1750,7 @@ Note~\ref{nte-pen-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, coltitle=black, rightrule=.15mm, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacitybacktitle=0.6, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, opacityback=0, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, toptitle=1mm, breakable, toprule=.15mm, leftrule=.75mm, opacitybacktitle=0.6, coltitle=black, bottomtitle=1mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, opacityback=0, bottomrule=.15mm, arc=.35mm, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, rightrule=.15mm, titlerule=0mm]
 
 \quartocalloutnte{nte-pen-final-run-eval} 
 
@@ -1679,6 +1767,47 @@ Note~\ref{nte-pen-final-run-eval}.
 \end{itemize}
 
 \end{tcolorbox}
+
+\paragraph{Accuracy}\label{accuracy-1}
+
+\begin{longtable}{ccccc}
+
+\caption{\label{tbl-acc-pen}Predictive performance measures by dataset
+and objective averaged across training-phase parameters
+(Note~\ref{nte-pen-final-run-train}) and evaluation-phase parameters
+(Note~\ref{nte-pen-final-run-eval}).}
+
+\tabularnewline
+
+  \toprule
+  \textbf{Dataset} & \textbf{Variable} & \textbf{Objective} & \textbf{Mean} & \textbf{Std} \\\midrule
+  \endfirsthead
+  \toprule
+  \textbf{Dataset} & \textbf{Variable} & \textbf{Objective} & \textbf{Mean} & \textbf{Std} \\\midrule
+  \endhead
+  \bottomrule
+  \multicolumn{5}{r}{Continuing table below.}\\
+  \bottomrule
+  \endfoot
+  \endlastfoot
+  Circles & Accuracy & Full & 0.994 & 0.0144 \\
+  Circles & Accuracy & Vanilla & 0.998 & 0.000875 \\
+  Circles & F1-score & Full & 0.994 & 0.0145 \\
+  Circles & F1-score & Vanilla & 0.998 & 0.000875 \\
+  Lin Sep & Accuracy & Full & 0.998 & 0.00772 \\
+  Lin Sep & Accuracy & Vanilla & 1 & 0 \\
+  Lin Sep & F1-score & Full & 0.998 & 0.00773 \\
+  Lin Sep & F1-score & Vanilla & 1 & 0 \\
+  Moons & Accuracy & Full & 0.987 & 0.0351 \\
+  Moons & Accuracy & Vanilla & 0.998 & 0.0101 \\
+  Moons & F1-score & Full & 0.987 & 0.0352 \\
+  Moons & F1-score & Vanilla & 0.998 & 0.0102 \\
+  Over & Accuracy & Full & 0.911 & 0.0217 \\
+  Over & Accuracy & Vanilla & 0.916 & 0.00236 \\
+  Over & F1-score & Full & 0.911 & 0.0219 \\
+  Over & F1-score & Vanilla & 0.916 & 0.00236 \\\bottomrule
+
+\end{longtable}
 
 \paragraph{Plausibility}\label{plausibility-2}
 
@@ -1796,14 +1925,14 @@ measure across hyperparameters. Data: Overlapping.}
 
 \end{figure}%
 
-\subsubsection{Training Parameters}\label{training-parameters}
+\subsubsection{Other Parameters}\label{sec-app-grid-train}
 
 The hyperparameter grid with other varying training parameters is shown
 in Note~\ref{nte-train-final-run-train}. The corresponding evaluation
 grid used for these experiments is shown in
 Note~\ref{nte-train-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, coltitle=black, rightrule=.15mm, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacitybacktitle=0.6, title={Note \ref*{nte-train-final-run-train}: Training Phase}, opacityback=0, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, toptitle=1mm, breakable, toprule=.15mm, leftrule=.75mm, opacitybacktitle=0.6, coltitle=black, bottomtitle=1mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, opacityback=0, bottomrule=.15mm, arc=.35mm, title={Note \ref*{nte-train-final-run-train}: Training Phase}, rightrule=.15mm, titlerule=0mm]
 
 \quartocalloutnte{nte-train-final-run-train} 
 
@@ -1831,7 +1960,7 @@ Note~\ref{nte-train-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colbacktitle=quarto-callout-note-color!10!white, colback=white, breakable, left=2mm, coltitle=black, rightrule=.15mm, bottomtitle=1mm, toprule=.15mm, toptitle=1mm, titlerule=0mm, arc=.35mm, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacitybacktitle=0.6, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, opacityback=0, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, colframe=quarto-callout-note-color-frame, toptitle=1mm, breakable, toprule=.15mm, leftrule=.75mm, opacitybacktitle=0.6, coltitle=black, bottomtitle=1mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, opacityback=0, bottomrule=.15mm, arc=.35mm, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, rightrule=.15mm, titlerule=0mm]
 
 \quartocalloutnte{nte-train-final-run-eval} 
 
@@ -1848,6 +1977,47 @@ Note~\ref{nte-train-final-run-eval}.
 \end{itemize}
 
 \end{tcolorbox}
+
+\paragraph{Accuracy}\label{accuracy-2}
+
+\begin{longtable}{ccccc}
+
+\caption{\label{tbl-acc-train}Predictive performance measures by dataset
+and objective averaged across training-phase parameters
+(Note~\ref{nte-train-final-run-train}) and evaluation-phase parameters
+(Note~\ref{nte-train-final-run-eval}).}
+
+\tabularnewline
+
+  \toprule
+  \textbf{Dataset} & \textbf{Variable} & \textbf{Objective} & \textbf{Mean} & \textbf{Std} \\\midrule
+  \endfirsthead
+  \toprule
+  \textbf{Dataset} & \textbf{Variable} & \textbf{Objective} & \textbf{Mean} & \textbf{Std} \\\midrule
+  \endhead
+  \bottomrule
+  \multicolumn{5}{r}{Continuing table below.}\\
+  \bottomrule
+  \endfoot
+  \endlastfoot
+  Circles & Accuracy & Full & 0.995 & 0.00431 \\
+  Circles & Accuracy & Vanilla & 0.998 & 0.000566 \\
+  Circles & F1-score & Full & 0.995 & 0.00432 \\
+  Circles & F1-score & Vanilla & 0.998 & 0.000566 \\
+  Lin Sep & Accuracy & Full & 0.999 & 0.00231 \\
+  Lin Sep & Accuracy & Vanilla & 1 & 0 \\
+  Lin Sep & F1-score & Full & 0.999 & 0.00231 \\
+  Lin Sep & F1-score & Vanilla & 1 & 0 \\
+  Moons & Accuracy & Full & 0.996 & 0.0136 \\
+  Moons & Accuracy & Vanilla & 0.988 & 0.022 \\
+  Moons & F1-score & Full & 0.996 & 0.0136 \\
+  Moons & F1-score & Vanilla & 0.988 & 0.022 \\
+  Over & Accuracy & Full & 0.914 & 0.00563 \\
+  Over & Accuracy & Vanilla & 0.918 & 0.00116 \\
+  Over & F1-score & Full & 0.914 & 0.0057 \\
+  Over & F1-score & Vanilla & 0.918 & 0.00116 \\\bottomrule
+
+\end{longtable}
 
 \paragraph{Plausibility}\label{plausibility-3}
 
@@ -1975,8 +2145,15 @@ information that might interfere with the double-blind review process.
 Since our experiments involve highly parallel tasks and rather small
 models by today's standard, we have relied on distributed computing
 across multiple central processing units (CPU). Graphical processing
-units (GPU) were not required. For larger grid searches we used up to
-but typically less than 100 CPUs.
+units (GPU) were not required. Model training for the largest grid
+searches with 270 unique parameter combinations was parallelized across
+34 CPUs with 2GB memory each. The time to completion varied by dataset
+for reasons discussed in Section~\ref{sec-discussion}: 0h49m
+(\emph{Moons}), 1h4m (\emph{Linearly Separable}), 1h49m
+(\emph{Circles}), 3h52m (\emph{Overlapping}). Model evaluations for
+large grid searches were parallelized across 20 CPUs with 3GB memory
+each. Evaluations for all data sets took less than one hour
+(\textless1h) to complete.
 
 \subsection{Software}\label{software}
 
