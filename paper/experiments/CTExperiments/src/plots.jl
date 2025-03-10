@@ -106,7 +106,7 @@ function plot_errorbar_logs(
         ytitle = L"($\leftarrow$ row facet variable: %$(_rowvar) $\rightarrow$) \\ \textbf{Value}"
     end
 
-    if isnothing(rowvar)
+    if isnothing(colvar)
         xtitle = "Epoch"
     else
         _colvar = CTExperiments.format_header(colvar; replacements=LatexMakieReplacements)
@@ -221,14 +221,15 @@ function plot_measure_ce(
         ytitle = L"($\leftarrow$ row facet variable: %$(_rowvar) $\rightarrow$) \\ \textbf{%$(ylab)}"
     end
 
-    if isnothing(rowvar)
-        xtitle = "Generator"
+    xlab = CTExperiments.format_header(xvar; replacements=LatexMakieReplacements)
+    if isnothing(colvar)
+        xtitle = xlab
     else
         _colvar = CTExperiments.format_header(colvar; replacements=LatexMakieReplacements)
-        xtitle = L"\textbf{Generator} \\ ($\leftarrow$ column facet variable: %$(_colvar) $\rightarrow$)"
+        xtitle = L"\textbf{%$(xlab)} \\ ($\leftarrow$ column facet variable: %$(_colvar) $\rightarrow$)"
     end
 
-    plt = data(df_agg) * mapping(Symbol(x) => xtitle, :mean => ytitle) * vis
+    plt = data(df_agg) * mapping(Symbol(x) => nonnumeric => xtitle, :mean => ytitle) * vis
     if !isnothing(colorvar)
         plt =
             plt *
