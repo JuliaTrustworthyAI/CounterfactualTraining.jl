@@ -1,6 +1,6 @@
 name = "architecture"
 dim_reduction = []
-generator_type = ["ecco", "generic", "revise"]
+generator_type = []
 data = ""
 model_type = "mlp"
 save_dir = ""
@@ -18,7 +18,7 @@ batchsize = []
 [model_params]
 nlayers = [1, 2, 3]
 activation = ["relu", "swish"]
-nhidden = [16, 32, 64]
+nhidden = [16, 32, 64, 128]
 
 [generator_params]
 opt = []
@@ -34,7 +34,7 @@ nce = []
 lr = []
 threaded = []
 class_loss = []
-objective = ["full", "vanilla"]
+objective = ["vanilla"]
 lambda_class_loss = []
 lambda_energy_diff = []
 burnin = []

@@ -29,8 +29,8 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
     n_individuals::Int = get_global_param("n_individuals", 100)
     n_runs::Int = get_global_param("n_runs", 5)
     conv::AbstractString = "threshold"
-    decision_threshold::AbstractFloat = 0.75
-    maxiter::Int = 100
+    decision_threshold::AbstractFloat = 0.95
+    maxiter::Int = 50
     vertical_splits::Int = get_global_param("vertical_splits", 100)
     store_ce::Bool = false
     parallelizer::AbstractString = "mpi"
@@ -87,7 +87,9 @@ function get_parallelizer(cfg::CounterfactualParams)
     return get_parallelizer(cfg.parallelizer; threaded=cfg.threaded)
 end
 
-get_convergence(cfg::CounterfactualParams) = get_convergence(cfg.conv, cfg.maxiter, cfg.decision_threshold)
+function get_convergence(cfg::CounterfactualParams)
+    return get_convergence(cfg.conv, cfg.maxiter, cfg.decision_threshold)
+end
 
 """
     evaluate_counterfactuals(
@@ -228,7 +230,7 @@ function load_data_models_generators(cfg::AbstractEvaluationConfig)
 
     # Counterfactual generators (same for each exper):
     gen_params = cfg.counterfactual_params.generator_params
-    _gen_name = get_generator_name(gen_params)
+    _gen_name = get_name(gen_params)
     _generator = get_generator(gen_params)
     generators = Dict(_gen_name => _generator)
 
@@ -382,7 +384,7 @@ function generate_factual_target_pairs(
     cfg::AbstractEvaluationConfig;
     fname::Union{Nothing,String}=nothing,
     overwrite::Bool=false,
-    nce::Int=1
+    nce::Int=1,
 )
     fname = if isnothing(fname)
         default_factual_target_pairs_name(cfg)
@@ -423,7 +425,7 @@ function generate_factual_target_pairs(
     data::CounterfactualData,
     models::AbstractDict,
     generators::AbstractDict;
-    nce::Int=1
+    nce::Int=1,
 )
 
     # Targets and factuals:

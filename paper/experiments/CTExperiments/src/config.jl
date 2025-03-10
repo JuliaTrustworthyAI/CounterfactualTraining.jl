@@ -146,7 +146,7 @@ function is_empty_value(v::Any)
     if v isa String
         return isempty(v)
     elseif v isa Vector
-        return isempty(v)
+        return isempty(v) || length(v) == 1
     elseif v isa Dict
         # A dictionary is empty if it's empty itself or if all its filtered values would be empty
         filtered = filter_dict(v)
@@ -157,45 +157,66 @@ function is_empty_value(v::Any)
 end
 
 # Function to filter dictionary
-function filter_dict(dict::Dict)
+function filter_dict(dict::Dict; drop_fields=["name", "data", "data_params"])
+
+    # Take care of nested dicts:
+    for (k, v) in dict
+        if v isa Dict
+            dict[k] = filter_dict(v; drop_fields)
+        end
+    end
+
     # Filter out empty values and specified fields
-    drop_fields = ["name"]
-    return filter(dict) do (k, v)
+    dict = filter(dict) do (k, v)
         !is_empty_value(v) && !(k in drop_fields)
     end
+
+    return dict
 end
 
 global LatexReplacements = Dict(
-    "lambda_energy" => "\$\\lambda_{\\text{div}}\$",
+    "lambda_energy" => "\$\\lambda_{\\text{energy}}\$",
     "lambda_cost" => "\$\\lambda_{\\text{cost}}\$",
+    "lambda_adversarial" => "\$\\lambda_{\\text{adv}}\$",
+    "lambda_energy_diff" => "\$\\lambda_{\\text{div}}\$",
+    "lambda_energy_reg" => "\$\\lambda_{\\text{reg}}\$",
+    "lambda_class_loss" => "\$\\lambda_{\\text{yloss}}\$",
 )
 
 function format_header(s::String; replacements::Dict=LatexReplacements)
     s =
-        replace(s, "_type" => "") |>
+        replace(s, "nce" => "ncounterfactuals") |>
         s ->
-            replace(s, "_params" => "_parameters") |>
+        replace(s, "_exper" => "") |>
+        s ->
+            replace(s, "_eval" => "") |>
             s ->
-                replace(s, "lr" => "learning_rate") |>
+                replace(s, "_type" => "") |>
                 s ->
-                    replace(s, "maxiter" => "maximum_iterations") |>
+                    replace(s, "_params" => "_parameters") |>
                     s ->
-                        replace(s, "opt" => "optimizer") |>
+                        replace(s, "lr" => "learning_rate") |>
                         s ->
-                            replace(s, "conv" => "convergence") |>
+                            replace(s, "maxiter" => "maximum_iterations") |>
                             s ->
                                 replace(s, "opt" => "optimizer") |>
                                 s ->
-                                    replace(s, "n_" => "no._") |>
-                                    s -> if s in keys(replacements)
-                                        replacements[s]
-                                    else
-                                        s |>
+                                    replace(s, "conv" => "convergence") |>
+                                    s ->
+                                        replace(s, r"\bopt\b" => "optimizer") |>
                                         s ->
-                                            split(s, "_") |>
-                                            ss ->
-                                                [uppercasefirst(s) for s in ss] |> ss -> join(ss, " ")
-                                    end
+                                            replace(s, r"^n" => "no._") |>
+                                                s ->
+                                                    replace(s, "__" => "_") |>
+                                            s -> if s in keys(replacements)
+                                                replacements[s]
+                                            else
+                                                s |>
+                                                s ->
+                                                    split(s, "_") |>
+                                                    ss ->
+                                                        [uppercasefirst(s) for s in ss] |> ss -> join(ss, " ")
+                                            end
     return s
 end
 

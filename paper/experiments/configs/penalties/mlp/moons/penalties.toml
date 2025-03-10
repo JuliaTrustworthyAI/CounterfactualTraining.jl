@@ -1,0 +1,48 @@
+name = "penalties"
+dim_reduction = []
+generator_type = ["ecco", "generic", "revise"]
+data = "moons"
+model_type = "mlp"
+save_dir = "paper/experiments/output/final_run/penalties/mlp/moons"
+
+[data_params]
+datadir = []
+mutability = []
+domain = []
+n_validation = []
+train_test_ratio = []
+train_test_seed = []
+n_train = []
+batchsize = []
+
+[model_params]
+nlayers = []
+activation = []
+nhidden = []
+
+[generator_params]
+opt = []
+lambda_cost = []
+lr = []
+maxiter = []
+lambda_energy = []
+type = []
+
+[training_params]
+opt = []
+lr = []
+objective = ["full", "vanilla"]
+lambda_class_loss = []
+lambda_energy_diff = [0.01, 0.1, 1.0]
+burnin = []
+nepochs = []
+lambda_adversarial = [0.1, 0.25, 1.0]
+parallelizer = []
+nce = []
+threaded = []
+class_loss = []
+lambda_energy_reg = [0.0, 0.01, 0.1, 0.25, 0.5]
+verbose = []
+generator_params = []
+conv = []
+nneighbours = []

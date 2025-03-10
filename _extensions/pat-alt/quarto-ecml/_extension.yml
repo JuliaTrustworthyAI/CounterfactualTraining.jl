@@ -1,0 +1,42 @@
+title: Quarto-ecml
+author: pat-alt
+version: 0.0.1
+quarto-required: ">=1.6.0"
+contributes:
+  project:
+    project:
+      type: default
+    post-render: 
+      - remove_caption.lua
+    format: quarto-ecml-pdf
+  formats:
+    common:
+      toc: false
+      number-sections: true
+      number-depth: 2
+      linkcolor: black
+      crossref:
+        fig-title: Fig.
+        fig-prefix: Fig.
+    pdf:
+      include-in-header: header.tex
+      format-resources:
+        - llncs.cls
+        - splncs04.bst
+        - remove_caption.lua
+      template-partials:
+        - partials/before-title.tex
+        - partials/title.tex
+        - partials/doc-class.tex
+        - partials/before-body.tex
+        - partials/biblio.tex
+      filters:
+        - cite.lua
+      indent: true
+      block-headings: false
+      nolinks: true
+      microtypeoptions:
+        - activate=false
+    html:
+      css: styles.css
+

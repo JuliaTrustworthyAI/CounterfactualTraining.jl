@@ -1,3 +1,4 @@
+using CounterfactualExplanations.Evaluation: validity_strict
 using JSON
 
 function get_ce_measures(;
@@ -7,6 +8,7 @@ function get_ce_measures(;
 )
     measures = [
         validity,
+        validity_strict,
         plausibility_distance_from_target,
         plausibility_energy_differential,
         distance,

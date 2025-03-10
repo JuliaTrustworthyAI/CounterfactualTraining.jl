@@ -39,7 +39,7 @@ params = PlotParams(;
 )
 final_save_dir = save_dir(params, output_dir; prefix)
 for y in valid_y
-    plt, tbl = boxplot_ce(all_data...; y=y, params()...)
+    plt, tbl = plot_measure_ce(all_data...; y=y, params()...)
     display(plt)
     CairoMakie.save(joinpath(final_save_dir, "$y.png"), plt; px_per_unit=3)
 end

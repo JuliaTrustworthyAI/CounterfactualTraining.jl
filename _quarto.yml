@@ -20,3 +20,4 @@ execute:
   echo: false
   output: false
   daemon: 60
+callout-icon: false

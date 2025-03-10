@@ -42,8 +42,8 @@ function get_table_inputs(
     hls = value_highlighter(df, value_var; backend=backend, kwrgs...)
     if "generator_type" in names(df)
         # Filter out "omni":
-        df = df[df.generator_type .!= "omni",:]
-        df.generator_type = format_generator.(df.generator_type)
+        df = df[df.generator_type .!= "omni", :]
+        # df.generator_type = format_generator.(df.generator_type)
         gen_hl = generator_highlighter(df; backend=backend)
         hls = (hls..., gen_hl)
     end
@@ -52,13 +52,16 @@ function get_table_inputs(
     return df, (; highlighters=hls, backend=backend, header=header)
 end
 
-format_generator(s::AbstractString) = get_generator_name(generator_types[s](); pretty=true)
+format_generator(s::AbstractString) = get_name(generator_types[s](); pretty=true)
 
-global LatexHeaderReplacements = Dict(
-    "lambda_energy_exper" => LatexCell("\$\\lambda_{\\text{div}} (\\text{train})\$"),
-    "lambda_energy_eval" => LatexCell("\$\\lambda_{\\text{div}} (\\text{eval})\$"),
-    "lambda_cost_exper" => LatexCell("\$\\lambda_{\\text{cost}} (\\text{train})\$"),
-    "lambda_cost_eval" => LatexCell("\$\\lambda_{\\text{cost}} (\\text{eval})\$"),
+global LatexHeaderReplacements = merge(
+    Dict(
+        "lambda_energy_exper" => LatexCell("\$\\lambda_{\\text{div}} (\\text{train})\$"),
+        "lambda_energy_eval" => LatexCell("\$\\lambda_{\\text{div}} (\\text{eval})\$"),
+        "lambda_cost_exper" => LatexCell("\$\\lambda_{\\text{cost}} (\\text{train})\$"),
+        "lambda_cost_eval" => LatexCell("\$\\lambda_{\\text{cost}} (\\text{eval})\$"),
+    ),
+    Dict(k => LatexCell(v) for (k, v) in CTExperiments.LatexReplacements),
 )
 
 function value_highlighter(
@@ -78,13 +81,15 @@ function value_highlighter(
     if !isnothing(byvars)
         byvars = isa(byvars, String) ? [byvars] : byvars
         df.row .= 1:nrow(df)
-        max_idx = combine(groupby(df, byvars...)) do sdf
+        max_idx = combine(groupby(df, byvars)) do sdf
             (max_idx=sdf.row[argmax(sdf[:, value_var])],)
         end
         max_idx = max_idx.max_idx
         select!(df, Not(:row))
         hl = bolden_max_hl(max_idx, col_idx, backend)
         push!(hls, hl)
+        hl_bad = bolden_max_hl_bad(max_idx, col_idx, backend)
+        push!(hls, hl_bad)
     end
 
     # Color scale:
@@ -136,7 +141,11 @@ function color_scale_hl(
 end
 
 function bolden_max_hl(max_idx::Vector{Int}, col_idx::Vector{Int}, backend::Val{:latex})
-    return hl = LatexHighlighter((df, i, j) -> i in max_idx, ["color{blue}", "textbf"])
+    return hl = LatexHighlighter((df, i, j) -> (i in max_idx) && df[i,:value]>0, ["color{Green}", "textbf"])
+end
+
+function bolden_max_hl_bad(max_idx::Vector{Int}, col_idx::Vector{Int}, backend::Val{:latex})
+    return hl = LatexHighlighter((df, i, j) -> (i in max_idx) && df[i,:value]<0, ["color{Red}", "textbf"])
 end
 
 function generator_highlighter(df::DataFrame; backend::Val=Val(:text))

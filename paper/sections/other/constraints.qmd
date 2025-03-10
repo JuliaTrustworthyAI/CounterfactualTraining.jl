@@ -62,12 +62,6 @@ Thus, our proposed approach of protecting feature $d_{\text{immtbl}}$ has the ne
 
 :::
 
-::: {.callout-warning}
-
-\@Cynthia, \@Arie, I have tentatively phrased the above in terms of a theorem and proof. This is something I've so far shied away from because I feel a bit out of my depth when it comes to mathematical proofs. The above makes intuitive sense to me, but I don't know for sure if it's correct. 
-
-:::
-
 ```{julia}
 #| eval: false
 

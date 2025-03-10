@@ -8,6 +8,7 @@ using TaijaParallel
 using Flux
 
 const Opt = Flux.Optimise.AbstractOptimiser
+const default_ce_search_lr = 0.25
 
 "Type for the ECCoGenerator."
 struct ECCo <: AbstractGeneratorType end
@@ -21,10 +22,10 @@ struct Generic <: AbstractGeneratorType end
 "Type for the GravitationalGenerator."
 struct Gravitational <: AbstractGeneratorType end
 
-get_generator_name(gen::ECCo; pretty::Bool=false) = pretty ? "ECCo" : "ecco"
-get_generator_name(gen::Generic; pretty::Bool=false) = pretty ? "Generic" : "generic"
-get_generator_name(gen::REVISE; pretty::Bool=false) = pretty ? "REVISE" : "revise"
-function get_generator_name(gen::Gravitational; pretty::Bool=false)
+get_name(gen::ECCo; pretty::Bool=false) = pretty ? "ECCo" : "ecco"
+get_name(gen::Generic; pretty::Bool=false) = pretty ? "Generic" : "generic"
+get_name(gen::REVISE; pretty::Bool=false) = pretty ? "REVISE" : "revise"
+function get_name(gen::Gravitational; pretty::Bool=false)
     return pretty ? "Gravitational" : "gravi"
 end
 
@@ -34,10 +35,10 @@ end
 Catalogue of available generator types.
 """
 const generator_types = Dict(
-    get_generator_name(ECCo()) => ECCo,
-    get_generator_name(Generic()) => Generic,
-    get_generator_name(REVISE()) => REVISE,
-    get_generator_name(Gravitational()) => Gravitational,
+    get_name(ECCo()) => ECCo,
+    get_name(Generic()) => Generic,
+    get_name(REVISE()) => REVISE,
+    get_name(Gravitational()) => Gravitational,
 )
 
 """
@@ -75,7 +76,7 @@ Mutable struct holding keyword arguments relevant to counterfactual generator.
 """
 Base.@kwdef struct GeneratorParams <: AbstractGeneratorParams
     type::AbstractGeneratorType = ECCo()
-    lr::AbstractFloat = 1.0
+    lr::AbstractFloat = default_ce_search_lr
     opt::AbstractString = "sgd"
     maxiter::Int = 30
     decision_threshold::AbstractFloat = 0.75
@@ -83,7 +84,7 @@ Base.@kwdef struct GeneratorParams <: AbstractGeneratorParams
     lambda_energy::AbstractFloat = 5.0
 end
 
-get_generator_name(params::GeneratorParams) = get_generator_name(params.type)
+get_name(params::GeneratorParams) = get_name(params.type)
 
 """
     get_generator(params::GeneratorParams)
@@ -287,7 +288,7 @@ const conv_catalogue = Dict(
 function get_convergence(s::String, max_iter::Int, decision_threshold::AbstractFloat)
     s = lowercase(s)
     @assert s in keys(conv_catalogue) "Unknown convergence type: $s. Available types are $(keys(conv_catalogue))"
-    if s=="threshold"
+    if s == "threshold"
         conv = conv_catalogue[s](; max_iter, decision_threshold)
     else
         conv = conv_catalogue[s](; max_iter)
@@ -296,5 +297,9 @@ function get_convergence(s::String, max_iter::Int, decision_threshold::AbstractF
 end
 
 function get_convergence(params::TrainingParams)
-    return get_convergence(params.conv, params.generator_params.maxiter, params.generator_params.decision_threshold)
+    return get_convergence(
+        params.conv,
+        params.generator_params.maxiter,
+        params.generator_params.decision_threshold,
+    )
 end

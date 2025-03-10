@@ -6,12 +6,33 @@ const default_ce = (; width=400, height=400)
 
 const default_facet = (; linkyaxes=:minimal, linkxaxes=:minimal)
 
+function format_for_makie_latex(str::String)
+    # Remove surrounding $ signs if they exist
+    content = startswith(str, '$') && endswith(str, '$') ? str[2:(end - 1)] : str
+
+    # Replace double backslashes with single backslashes
+    # This handles cases where the input string has already been escaped for other contexts
+    content = replace(content, "\\\\" => "\\")
+
+    # Create the LaTeX string properly escaped
+    # Note: We escape the dollar signs to avoid string interpolation
+    return """L"\$$(content)\$" """
+end
+
+global LatexMakieReplacements = Dict(
+    k => CTExperiments.format_for_makie_latex(v) |> x -> eval(Meta.parse(x)) for
+    (k, v) in CTExperiments.LatexReplacements
+)
+
 Base.@kwdef struct PlotParams
     x::Union{Nothing,String} = nothing
     byvars::Union{Nothing,String,Vector{String}} = nothing
     colorvar::Union{Nothing,String} = get_global_param("colorvar", nothing)
     rowvar::Union{Nothing,String} = get_global_param("rowvar", nothing)
     colvar::Union{Nothing,String} = get_global_param("colvar", nothing)
+    lnstyvar::Union{Nothing,String} = get_global_param("lnstyvar", nothing)
+    sidevar::Union{Nothing,String} = get_global_param("sidevar", nothing)
+    dodgevar::Union{Nothing,String} = get_global_param("dodgevar", nothing)
 end
 
 function (params::PlotParams)()
@@ -21,6 +42,9 @@ function (params::PlotParams)()
         colorvar=params.colorvar,
         rowvar=params.rowvar,
         colvar=params.colvar,
+        lnstyvar=params.lnstyvar,
+        sidevar=params.sidevar,
+        dodgevar=params.dodgevar,
     )
 end
 
@@ -53,30 +77,52 @@ A Makie plot object displaying error bars for aggregated logs.
 """
 function plot_errorbar_logs(
     cfg::EvalConfigOrGrid;
-    x::Nothing=nothing,
     y::String="acc_val",
     byvars::Union{Nothing,String,Vector{String}}=nothing,
     colorvar::Union{Nothing,String}=nothing,
     rowvar::Union{Nothing,String}=nothing,
     colvar::Union{Nothing,String}="generator_type",
+    lnstyvar::Union{Nothing,String}=nothing,
     facet=default_facet,
     axis=default_axis,
+    use_line_plot::Bool=true,
+    x=nothing,
+    sidevar=nothing,
+    dodgevar=nothing,
 )
-    byvars = gather_byvars(byvars, colorvar, rowvar, colvar)
+    byvars = gather_byvars(byvars, colorvar, rowvar, colvar, lnstyvar)
 
     # Aggregate logs:
-    df_agg = aggregate_logs(cfg; y=y, byvars=byvars)
-    use_line_plot = all(isnan.(df_agg.std))
+    df_agg = aggregate_logs(cfg; y=y, byvars=byvars) |> format_plot_data
+    if isnothing(use_line_plot)
+        use_line_plot = all(isnan.(df_agg.std))
+    end
 
     # Plotting:
     plt = data(df_agg)
     if use_line_plot
-        plt = plt * mapping(:epoch => "Epoch", :mean => "Value") * visual(Lines)
+        if !isnothing(lnstyvar)
+            layers =
+                visual(Lines) * mapping(;
+                    linestyle=lnstyvar =>
+                        nonnumeric => CTExperiments.format_header(lnstyvar; replacements=LatexMakieReplacements),
+                )
+        else
+            layers = visual(Lines)
+        end
+        plt = plt * layers * mapping(:epoch => "Epoch", :mean => "Value")
     else
         plt = plt * mapping(:epoch => "Epoch", :mean => "Value", :std) * visual(Errorbars)
     end
     if !isnothing(colorvar)
-        plt = plt * mapping(; color=colorvar => nonnumeric)
+        plt =
+            plt *
+            mapping(;
+                color=colorvar =>
+                    nonnumeric => CTExperiments.format_header(
+                        colorvar; replacements=LatexMakieReplacements
+                    ),
+            )
     end
     if !isnothing(rowvar)
         plt = plt * mapping(; row=rowvar => nonnumeric)
@@ -89,7 +135,7 @@ function plot_errorbar_logs(
     return plt, df_agg
 end
 
-function boxplot_ce(
+function plot_measure_ce(
     df::DataFrame,
     df_meta::DataFrame,
     df_eval::DataFrame;
@@ -99,34 +145,68 @@ function boxplot_ce(
     colorvar::Union{Nothing,String}=nothing,
     rowvar::Union{Nothing,String}=nothing,
     colvar::Union{Nothing,String}="generator_type",
+    sidevar::Union{Nothing,String}=nothing,
+    dodgevar::Union{Nothing,String}=nothing,
+    rebase::Bool=true,
+    lnstyvar=nothing,
     kwrgs...,
 )
     x = isnothing(x) ? "generator_type" : x
 
-    byvars = gather_byvars(byvars, colorvar, rowvar, colvar, x)
+    byvars = gather_byvars(byvars, colorvar, rowvar, colvar, sidevar, dodgevar, x)
 
     # Aggregate:
-    df_agg = aggregate_ce_evaluation(df, df_meta, df_eval; y=y, byvars=byvars)
+    df_agg =
+        aggregate_ce_evaluation(
+            df, df_meta, df_eval; y=y, byvars=byvars, agg_runs=false, rebase
+        ) |> format_plot_data
 
     # Plotting:
-    plt = boxplot_ce(df_agg, x; colorvar, rowvar, colvar, kwrgs...)
+    plt = plot_measure_ce(
+        df_agg, x; colorvar, rowvar, colvar, sidevar, dodgevar, rebase, kwrgs...
+    )
 
     return plt, df_agg
 end
 
-function boxplot_ce(
+function plot_measure_ce(
     df_agg::DataFrame,
     x::Union{Nothing,String}="generator_type";
     colorvar::Union{Nothing,String}=nothing,
     rowvar::Union{Nothing,String}=nothing,
     colvar::Union{Nothing,String}=nothing,
+    sidevar::Union{Nothing,String}=nothing,
+    rebase::Bool=true,
+    dodgevar::Union{Nothing,String}=nothing,
     facet=default_facet,
     axis=default_axis,
+    vis=visual(BoxPlot),
+    lnstyvar=nothing,
 )
     # Plotting:
-    plt = data(df_agg) * mapping(Symbol(x), :mean => "Value") * visual(BoxPlot)
+    ylab = "Value"
+    if rebase
+        if unique(df_agg.is_pct)[1]
+            ylab = "Change from baseline (%)"
+            plt_hline = mapping([0]) * visual(HLines)
+        else
+            hl = unique(df_agg.avg_baseline)
+            plt_hline =
+                mapping(hl) *
+                visual(HLines; label="Baseline Average", linestyle=:dot, color=:red)
+        end
+    end
+
+    plt = data(df_agg) * mapping(:generator_type => "Generator", :mean => ylab) * vis
     if !isnothing(colorvar)
-        plt = plt * mapping(; color=colorvar => nonnumeric)
+        plt =
+            plt *
+            mapping(;
+                color=colorvar =>
+                    nonnumeric => CTExperiments.format_header(
+                        colorvar; replacements=LatexMakieReplacements
+                    ),
+            )
     end
     if !isnothing(rowvar)
         plt = plt * mapping(; row=rowvar => nonnumeric)
@@ -134,8 +214,19 @@ function boxplot_ce(
     if !isnothing(colvar)
         plt = plt * mapping(; col=colvar => nonnumeric)
     end
+    if !isnothing(sidevar)
+        plt = plt * mapping(; side=sidevar => nonnumeric)
+    end
+    if !isnothing(dodgevar)
+        plt = plt * mapping(; dodge=dodgevar => nonnumeric)
+    end
 
-    plt = draw(plt; facet=facet, axis=axis)
+    # Horizontal line
+    if rebase
+        plt = plt + plt_hline
+    end
+
+    plt = draw(plt; facet=facet, axis=axis, legend=(position=:top, titleposition=:left))
 
     return plt
 end
@@ -143,7 +234,9 @@ end
 function plot_ce(
     cfg::EvalConfigOrGrid; save_dir=nothing, overwrite::Bool=false, nce::Int=1, kwrgs...
 )
-    return plot_ce(CTExperiments.get_data_set(cfg)(), cfg; save_dir=save_dir, overwrite, nce, kwrgs...)
+    return plot_ce(
+        CTExperiments.get_data_set(cfg)(), cfg; save_dir=save_dir, overwrite, nce, kwrgs...
+    )
 end
 
 function plot_ce(
@@ -165,7 +258,9 @@ function plot_ce(
         else
             local_save_dir = nothing
         end
-        plt = plot_ce(dataset, eval_config; save_dir=local_save_dir, overwrite, nce, kwrgs...)
+        plt = plot_ce(
+            dataset, eval_config; save_dir=local_save_dir, overwrite, nce, kwrgs...
+        )
         push!(plt_list, plt)
     end
     return plt_list
@@ -313,8 +408,8 @@ function plot_ce(data::Dataset, df::DataFrame, factual::Int, target::Int; axis=d
             title = ""
             Plots.scatter!(
                 plt,
-                x[1,:],
-                x[2,:];
+                x[1, :],
+                x[2, :];
                 label="Factual",
                 size=values(axis),
                 title=title,
@@ -325,8 +420,8 @@ function plot_ce(data::Dataset, df::DataFrame, factual::Int, target::Int; axis=d
             title = "$factual→$target"
             Plots.scatter!(
                 plt,
-                x[1,:],
-                x[2,:];
+                x[1, :],
+                x[2, :];
                 label="Counterfactual",
                 size=values(axis),
                 title=title,
@@ -452,4 +547,16 @@ function plot_ce(
     w, h = (_cols * 2default_axis.width, _rows * 2default_axis.height)
 
     return Plots.plot(plts...; layout=layout, size=(w, h))
+end
+
+format_objective(str::String) = uppercasefirst(str)
+
+function format_plot_data(df)
+    if "generator_type" in names(df)
+        df.generator_type = CTExperiments.format_generator.(df.generator_type)
+    end
+    if "objective" in names(df)
+        df.objective = format_objective.(df.objective)
+    end
+    return df
 end

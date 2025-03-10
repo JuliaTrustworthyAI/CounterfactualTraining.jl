@@ -1,19 +1,3 @@
-```{julia}
-projectdir = splitpath(pwd()) |>
-    ss -> joinpath(ss[1:findall([s == "CounterfactualTraining.jl" for s in ss])[1]]...) 
-cd(projectdir)
-```
-
-```{julia}
-using CTExperiments
-using CTExperiments.CSV
-using CTExperiments.DataFrames
-using CTExperiments.StatsBase
-
-using DotEnv
-DotEnv.load!()
-```
-
 \FloatBarrier
 
 \setcounter{section}{0}
@@ -27,13 +11,7 @@ DotEnv.load!()
 
 <!-- # Supplementary Material {.appendix} -->
 
-# Notation {.appendix}
-
-- $y^+$: The target class and also the index of the target class.
-- $y^-$: The non-target class and also the index of non-the target class.
-- $\mathbf{y}^+$: The one-hot encoded output vector for the target class. 
-- $\theta$: Model parameters (unspecified).
-- $\Theta$: Matrix of parameters. 
+{{< include /paper/sections/other/notation.qmd >}}
 
 # Technical Details of Our Approach {.appendix} 
 
@@ -45,17 +23,11 @@ DotEnv.load!()
 
 # Detailed Results {.appendix}
 
-::: {.callout-warning}
-
-\@Cynthia, \@Arie, I'm including some preliminary results here but will rerun experiments in the coming days. You'll notice some odd outlier results (huge values) for the initial grid search (@sec-app-initial). My belief is that this is once again due to *ECCo* overshooting for some hyperparameter choices, that we have discussed before. A simple solution to this story is to actually impose domain constraints. Let's see what the final results show us (I also still plan to make slight changes to the implementation), but in any case I think it might even be worth to report results for the initial grid search in the final appendix (they do include good results for CT for certain hyperparameter ranges and highlight limitations inherited from energy-based modelling).
-
-:::
-
 ## Qualitative Findings for Image Data
 
 ::: {.callout-note}
 
-\@Cynthia, \@Arie, @fig-mnist shows much more plausible (faithful) counterfactuals for a model with CT than the model with conventional training (@fig-mnist-vanilla). In fact, this is not even using *ECCo+* and still showing better results than the best results we achieved in our AAAI paper for JEM ensembles.
+@fig-mnist shows much more plausible (faithful) counterfactuals for a model with CT than the model with conventional training (@fig-mnist-vanilla). In fact, this is not even using *ECCo+* and still showing better results than the best results we achieved in our AAAI paper for JEM ensembles.
 
 :::
 
@@ -63,175 +35,9 @@ DotEnv.load!()
 
 ![Counterfactual images for *MLP* with conventional training. The underlying generator, *ECCo*, aims to generate counterfactuals that are faithful to the model [@altmeyer2024faithful].](/paper/figures/mnist_mlp_vanilla.png){#fig-mnist-vanilla}
 
-## Initial Grid Search {#sec-app-initial}
+{{< include /paper/sections/other/grids.qmd >}}
 
-```{julia}
-results_dir = ENV["INITIAL_RUN_RESULTS"]
-config_dir = ENV["INITIAL_RUN_CONFIG"]
-```
+<!-- {{< include /paper/sections/other/initial_grids.qmd >}} -->
 
-For the initial round of experiments we employed a different training objective and procedure that led to promising results for some hyperparameter choices, but suffered from training instabilities.
-
-### Generator Parameters
-
-The hyperparameter grids for the first investigation of the effect of generator parameters are shown in @exr-gen-params-first-run-train and @exr-gen-params-first-run-eval.
-
-::: {#exr-gen-params-first-run-train}
-
-## Training Phase
-
-```{julia}
-#| output: asis
-dict = CTExperiments.from_toml(joinpath(config_dir,"gen_params.toml")) 
-println(CTExperiments.dict_to_quarto_markdown(dict))
-```
-
-:::
-
-
-::: {#exr-gen-params-first-run-eval}
-
-## Evaluation Phase
-
-```{julia}
-#| output: asis
-dict = CTExperiments.from_toml(joinpath(results_dir, "gen_params/mlp/lin_sep/evaluation/evaluation_grid_config.toml"))
-println(CTExperiments.dict_to_quarto_markdown(dict))
-```
-
-:::
-
-```{julia}
-gen_params_dir = joinpath(results_dir, "gen_params/mlp")
-```
-
-#### Linearly Separable 
-
-- **Energy Penalty** (@tbl-lin_sep-lambda_energy_exper): *ECCo* generally does yield better results than *Vanilla* for higher choices of the energy penalty (10,15) during training. *Generic* performs poorly accross the board. *Omni* seems to have an anchoring effect, in that it never performs terribly but also never as good as the best *ECCo* results. *REVISE* performs poorly across the board.
-- **Cost** (@tbl-lin_sep-lambda_cost_exper): Results for all generators (except *Omni*) are quite bad, which can likely be attributed to extremely bad results for some choices of the **Energy Penalty** (results here are averaged). For *ECCo* and *Generic*, higher cost values generally lead to worse results.
-- **Maximum Iterations**: No clear patterns recognizable, so it seems that smaller choices are ok. 
-- **Validity**: *ECCo* almost always valid except for very low values during training and high values at evaluation time. *Generic* often has poor validity.
-- **Accuracy**: Seems largely unaffected.
-
-```{julia}
-df = CSV.read("$(gen_params_dir)/lin_sep/evaluation/results/ce/objective---lambda_energy_exper---lambda_energy_eval/plausibility_distance_from_target.csv", DataFrame)
-df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> 
-  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>
-  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type])
-```
-
-::: {#tbl-lin_sep-lambda_energy_exper}
-
-::: {.content-hidden unless-format="pdf"}
-
-```{julia}
-#| output: asis
-get_table_inputs(df, "value"; alpha=0.9, byvars="lambda_energy_exper", backend=Val(:latex)) |>
-    inputs -> tabulate_results(inputs; wrap_table=false)
-```
-
-:::
-
-Results for Linearly Separable data by energy penalty.
-
-:::
-
-<!-- Cost -->
-
-```{julia}
-df = CSV.read("$(gen_params_dir)/lin_sep/evaluation/results/ce/objective---lambda_cost_exper---lambda_energy_eval/plausibility_distance_from_target.csv", DataFrame)
-df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> 
-  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>
-  df -> sort(df, [:lambda_cost_exper, :objective, :generator_type])
-```
-
-::: {#tbl-lin_sep-lambda_cost_exper}
-
-::: {.content-hidden unless-format="pdf"}
-
-```{julia}
-#| output: asis
-get_table_inputs(df, "value"; alpha=0.9, byvars="lambda_cost_exper", backend=Val(:latex)) |>
-    inputs -> tabulate_results(inputs; wrap_table=false)
-```
-
-:::
-
-Results for Linearly Separable data by cost penalty.
-
-:::
-
-
-#### Moons
-
-- **Energy Penalty** (@tbl-moons-lambda_energy_exper): *ECCo* consistently yields better results than *Vanilla*, except for very low choices of the energy penalty during training for which it performs abismal. *Generic* performs quite badly across the board for high enough choices of the energy penalty at evaluation time. *Omni* has small positive effect. *REVISE* performs poorly across the board.
-- **Cost (distance penalty)**: *Generic* generally does better for higher values, while *ECCo* does better for lower values.
-- **Maximum Iterations**: No clear patterns recognizable, so it seems that smaller choices are ok. 
-- **Validity**: *ECCo* generally achieves full validity except for very low choices the energy penalty during training and high choices at evaluation time. *Generic* performs poorly for high choices of the energy penalty during evaluation.
-- **Accuracy**: Largely unaffected although *ECCo* suffers a bit for very low choices the energy penalty during training. *REVISE* suffers a lot in general (around 10 percentage points).
-
-```{julia}
-df = CSV.read("$(gen_params_dir)/moons/evaluation/results/ce/objective---lambda_energy_exper---lambda_energy_eval/plausibility_distance_from_target.csv", DataFrame)
-df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> 
-  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>
-  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) 
-```
-
-::: {#tbl-moons-lambda_energy_exper}
-
-::: {.content-hidden unless-format="pdf"}
-
-```{julia}
-#| output: asis
-get_table_inputs(df, "value"; alpha=0.9, byvars="lambda_energy_exper", backend=Val(:latex)) |>
-    inputs -> tabulate_results(inputs)
-```
-
-:::
-
-Results for Moons data by energy penalty.
-
-:::
-
-#### Circles
-
-- **Energy Penalty** (@tbl-circles-lambda_energy_exper): *ECCo* consistently yields better results than *Vanilla*, though primarily for low to medium choices of the energy penalty (<=5) during training. The same goes for *Generic*, which sometimes outperforms *ECCo* (for small energy penalty at evaluation time). *Omni* does alright for lower energy penalty at evaluation time, but loses out for higher choices. *REVISE* performs poorly across the board (except very low choices at evaluation time).
-- **Cost (distance penalty)**: *ECCo* and *Generic* generally achieve the best results when no cost penalty is used during training. Both *Omni* and *REVISE* are largely unaffected.
-- **Maximum Iterations**: *ECCo* consistently yields better results for higher numbers of iterations. *Generic* generally does best for a medium number (50). *Omni* is sometimes invalid (**???**).
-- **Validity**: *ECCo* tends to outperform its *Vanilla* counterpart, though primarily for low to medium choices of the energy penalty (<=5) during training and evaluation. *Vanilla* typically worse across the board.
-- **Accuracy**: Mostly unaffected, but *REVISE* again consistently some deterioration and *ECCo* deteriorates for high choices of energy penalty during training, reflecting other outcomes above.
-
-```{julia}
-df = CSV.read("$(gen_params_dir)/circles/evaluation/results/ce/objective---lambda_energy_exper---lambda_energy_eval/plausibility_distance_from_target.csv", DataFrame)
-df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> 
-  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>
-  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) 
-```
-
-::: {#tbl-circles-lambda_energy_exper}
-
-::: {.content-hidden unless-format="pdf"}
-
-```{julia}
-#| output: asis
-get_table_inputs(df, "value"; alpha=0.9, byvars="lambda_energy_exper", backend=Val(:latex)) |>
-    inputs -> tabulate_results(inputs)
-```
-
-:::
-
-Results for Circles data by energy penalty.
-
-:::
-
-# Computation Details {.appendix}
-
-<!-- [@DHPC2022] -->
-## Hardware
-
-We performed our experiments on a high-performance cluster. Details about the cluster will be disclosed upon publication to avoid revealing information that might interfere with the double-blind review process. Since our experiments have largely involved highly parallel tasks and small models, we have made extensive use of multi-processing.
-
-## Software
-
-All computations were performed in the Julia Programming Language [@bezanson2017julia]. We have developed a package for counterfactual training that leverages and extends the functionality provided by several existing packages, most notably [CounterfactualExplanations.jl](https://github.com/JuliaTrustworthyAI/CounterfactualExplanations.jl) [@altmeyer2023explaining] and the [Flux.jl](https://fluxml.ai/Flux.jl/v0.16/) library for deep learning [@innes2018fashionable;@innes2018flux]. For data-wrangling and presentation-ready tables we relied on [DataFrames.jl](https://dataframes.juliadata.org/v1.7/) [@milan2023dataframes] and [PrettyTables.jl](https://ronisbr.github.io/PrettyTables.jl/v2.4/) [@chagas2024pretty], respectively. For plots and visualizations we used both [Plots.jl](https://docs.juliaplots.org/v1.40/) [@PlotsJL] and [Makie.jl](https://docs.makie.org/v0.22/) [@danisch2021makie], in particular [AlgebraOfGraphics.jl](https://aog.makie.org/v0.9.3/). 
+{{< include /paper/sections/other/compute.qmd >}}
 

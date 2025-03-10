@@ -13,6 +13,22 @@ global _rowvar = nothing
 global _rowvar_ce = nothing
 global _colvar_ce = nothing
 global _byvars_ce = nothing
+global _lnstyvar = nothing
+global _dodgevar = nothing
+global _sidevar = nothing
+
+function adjust_plot_var(x::Union{Nothing,String}, cfg::CTExperiments.EvalConfigOrGrid)
+    if isnothing(x)
+        return x
+    else
+        if typeof(cfg) == EvaluationConfig
+            x = replace(x, "_exper" => "")
+            return x
+        else
+            return x
+        end
+    end
+end
 
 include("plots.jl")
 include("tables.jl")
@@ -227,6 +243,8 @@ function aggregate_ce_evaluation(
     df_eval::DataFrame;
     y::String="plausibility_distance_from_target",
     byvars::Union{Nothing,String,Vector{String}}=nothing,
+    agg_runs::Bool=false,
+    rebase::Bool=true,
 )
     # Assertions:
     valid_y = valid_y_ce(df)
@@ -242,10 +260,62 @@ function aggregate_ce_evaluation(
 
     # Aggregate:
     if "run" in names(df)
-        return aggregate_data(df, y, byvars; byvars_must_include=["run"])
+        byvars_must_include = ["run", "lambda_energy_eval", "objective"]
+        byvars_must_include = byvars_must_include[[
+            x in names(df) for x in byvars_must_include
+        ]]
+        df_agg = aggregate_data(df, y, byvars; byvars_must_include=byvars_must_include)
+        if agg_runs
+            # Compute mean of means and std of means:
+            df_agg =
+                groupby(df_agg, byvars) |>
+                df -> combine(df, :mean => (y -> (mean=mean(y), std=std(y))) => AsTable)
+        end
+        df_agg
     else
-        return aggregate_data(df, y, byvars)
+        df_agg = aggregate_data(df, y, byvars)
     end
+
+    # Subtract from Vanilla:
+    if rebase
+        @assert "objective" in names(df_agg) "Cannot rebase with respect to 'vanilla' objective is the 'objective' column is not present."
+        objectives = unique(df_agg.objective)
+        df_agg = DataFrames.unstack(df_agg[:, Not(:std)], :objective, :mean)
+        vanilla_name = objectives[lowercase.(objectives) .== "vanilla"][1]
+        other_names = objectives[lowercase.(objectives) .!= "vanilla"]
+        for obj in other_names
+
+            # Compute differences:
+            df_agg[:, Symbol(obj)] .= (
+                df_agg[:, Symbol(obj)] .- df_agg[:, Symbol(vanilla_name)]
+            )
+            df_agg.is_pct .= false
+            df_agg = filter(row -> !ismissing(row[Symbol(vanilla_name)]) && isfinite(row[Symbol(vanilla_name)]), df_agg)
+            # Further adjustment
+            if !any(df_agg[:, Symbol(vanilla_name)] .== 0) .&&
+                !(y in ["validity_strict", "validity", "redundancy"])
+                # Compute percentage if only non-zero:
+                df_agg[:, Symbol(obj)] .=
+                    100 .* df_agg[:, Symbol(obj)] ./ abs.(df_agg[:, Symbol(vanilla_name)])
+                df_agg.is_pct .= true
+            else
+                # Otherwise store average level of baseline:
+                df_agg.avg_baseline .= mean(df_agg[:, Symbol(vanilla_name)])
+                df_agg[:, Symbol(obj)] .+= df_agg.avg_baseline
+            end
+        end
+        df_agg = DataFrames.stack(
+            df_agg[:, Not(Symbol(vanilla_name))],
+            Symbol.(other_names);
+            value_name=:mean,
+            variable_name=:objective,
+        )
+    end
+
+    # Filter out rows with missing, Inf, or NaN values in the mean column 
+    filtered_df = filter(row -> !ismissing(row.mean) && isfinite(row.mean), df_agg)
+    
+    return filtered_df
 end
 
 function valid_y_ce(df::DataFrame)
@@ -261,7 +331,9 @@ function aggregate_counterfactuals(eval_grid::EvaluationGrid; kwrgs...)
     return aggregate_counterfactuals.(eval_list)
 end
 
-function aggregate_counterfactuals(eval_config::EvaluationConfig; overwrite::Bool=false, nce::Int=1, kwrgs...)
+function aggregate_counterfactuals(
+    eval_config::EvaluationConfig; overwrite::Bool=false, nce::Int=1, kwrgs...
+)
     bmk = generate_factual_target_pairs(eval_config; overwrite, nce)
     df = innerjoin(bmk.evaluation, bmk.counterfactuals; on=:sample)
     rename!(df, :model => :id)
@@ -292,5 +364,12 @@ function aggregate_counterfactuals(
     end
 
     # Aggregate:
-    return aggregate_data(df, "ce", byvars; byvars_must_include=byvars_must_include, agg_fun=:identity)
+    return aggregate_data(
+        df, "ce", byvars; byvars_must_include=byvars_must_include, agg_fun=:identity
+    )
+end
+
+function get_img_command(data_names, full_paths, fig_labels; fig_caption="")
+    fig_cap = fig_caption == "" ? fig_caption : "$fig_caption "
+    return ["![$(fig_cap)Data: $(CTExperiments.get_data_name(nm)).](/$pth){#$(lbl)}" for (nm, pth, lbl) in zip(data_names,full_paths,fig_labels)]
 end

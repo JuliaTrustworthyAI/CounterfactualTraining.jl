@@ -1,0 +1,1375 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[runningheads]{llncs}
+
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else  
+    % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[activate=false]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage{xcolor}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\setcounter{secnumdepth}{2}
+
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[misc]{ifsym}
+\newcommand{\corr}{(\Letter)}
+\usepackage{placeins}
+\makeatletter
+\@ifpackageloaded{tcolorbox}{}{\usepackage[skins,breakable]{tcolorbox}}
+\@ifpackageloaded{fontawesome5}{}{\usepackage{fontawesome5}}
+\definecolor{quarto-callout-color}{HTML}{909090}
+\definecolor{quarto-callout-note-color}{HTML}{0758E5}
+\definecolor{quarto-callout-important-color}{HTML}{CC1914}
+\definecolor{quarto-callout-warning-color}{HTML}{EB9113}
+\definecolor{quarto-callout-tip-color}{HTML}{00A047}
+\definecolor{quarto-callout-caution-color}{HTML}{FC5300}
+\definecolor{quarto-callout-color-frame}{HTML}{acacac}
+\definecolor{quarto-callout-note-color-frame}{HTML}{4582ec}
+\definecolor{quarto-callout-important-color-frame}{HTML}{d9534f}
+\definecolor{quarto-callout-warning-color-frame}{HTML}{f0ad4e}
+\definecolor{quarto-callout-tip-color-frame}{HTML}{02b875}
+\definecolor{quarto-callout-caution-color-frame}{HTML}{fd7e14}
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Fig.}
+\else
+  \newcommand\figurename{Fig.}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+% \usepackage{amsthm}
+% \theoremstyle{definition}
+% \newtheorem{example}{Example}[section]
+% \theoremstyle{plain}
+% \newtheorem{proposition}{Proposition}[section]
+% \theoremstyle{plain}
+% \newtheorem{corollary}{Research Question}[section]
+% \theoremstyle{definition}
+% \newtheorem{definition}{Definition}[section]
+% \theoremstyle{remark}
+% \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
+% \newtheorem*{remark}{Remark}
+% \newtheorem*{solution}{Solution}
+% \newtheorem{refremark}{Remark}[section]
+% \newtheorem{refsolution}{Solution}[section]
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+\newcounter{quartocalloutnteno}
+\newcommand{\quartocalloutnte}[1]{\refstepcounter{quartocalloutnteno}\label{#1}}
+
+\usepackage{bookmark}
+
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={Counterfactual Training: Teaching Models Plausible and Actionable Explanations},
+  pdfauthor={Patrick Altmeyer; Aleksander Buszydlik; Arie van Deursen; Cynthia C. S. Liem},
+  pdfkeywords={Counterfactual Explanations, Algorithmic
+Recourse, Explainable AI, Adversarial Robustness, Representation
+Learning},
+  colorlinks=true,
+  linkcolor={black},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+\hypersetup{nolinks=true}
+
+\title{Counterfactual Training: Teaching Models Plausible and Actionable
+Explanations}
+
+\titlerunning{Counterfactual Training}
+
+\author{Author information scrubbed for double-blind reviewing}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We propose a novel model objective that leverages counterfactual
+explanations to increase the explanatory capacity of trained models.
+Counterfactual explanations have emerged as a popular tool to explain
+predictions made by opaque machine learning models: they inform how
+factual inputs would need to change in order for a model to produce some
+desired output. Much existing research has focused on generating
+counterfactuals that are not only valid but also deemed acceptable with
+respect to the stakeholder requirements and plausible with respect to
+the underlying data. Recent work has shown that under this premise, the
+task of learning plausible explanations---ones that respect the
+conditional distribution of the target class---is effectively reassigned
+from the model itself to the post-hoc counterfactual explainer. Building
+on that work, we propose a novel objective function that employs
+counterfactuals (ad-hoc) during the training phase to minimize the
+divergence between the learned representations and the explanations.
+Through extensive experiments, we demonstrate that our proposed method
+facilitates training models that deliver inherently plausible
+explanations while maintaining high predictive performance.
+
+\keywords{Counterfactual Explanations \and Algorithmic
+Recourse \and Explainable AI \and Adversarial
+Robustness \and Representation Learning}
+
+\end{abstract}
+
+
+
+\section{Introduction}\label{introduction}
+
+Today's prominence of artificial intelligence (AI) has largely been
+driven by advances in \textbf{representation learning}: instead of
+relying on features and rules that are carefully hand-crafted by humans,
+modern machine learning (ML) models are tasked with learning these
+representations from scratch, guided by narrow objectives such as
+predictive accuracy \cite{goodfellow2016deep}. Modern advances in
+computing have made it possible to provide such models with ever greater
+degrees of freedom to achieve that task, which has often led them to
+outperform traditionally more parsimonious models. Unfortunately, in
+doing so they also learn increasingly complex and highly sensitive
+representations that we can no longer easily interpret.
+
+This trend towards complexity for the sake of performance has come under
+serious scrutiny in recent years. At the very cusp of the deep learning
+revolution, \cite{szegedy2013intriguing} showed that artificial neural
+networks (ANN) are sensitive to adversarial examples: counterfactuals of
+model inputs that yield vastly different model predictions despite being
+``imperceptible'' in that they are semantically indifferent from their
+factual counterparts. Despite partially effective mitigation strategies
+such as \textbf{adversarial training} \cite{goodfellow2014explaining},
+truly robust deep learning (DL) remains unattainable even for models
+that are considered shallow by today's standards
+\cite{kolter2023keynote}.
+
+Part of the problem is that high degrees of freedom provide room for
+many solutions that are locally optimal with respect to narrow
+objectives \cite{wilson2020case}\footnote{For clarity: we follow
+  standard ML convention in using ``degrees of freedom'' to refer to the
+  number of parameters estimated from data.}. Based purely on predictive
+performance, these solutions may seem to provide compelling explanations
+for the data, when in fact they are based on purely associative,
+semantically meaningless patterns. This poses two related challenges:
+firstly, it makes these models inherently opaque, since humans cannot
+simply interpret what type of explanation the complex learned
+representations correspond to; secondly, even if we could resolve the
+first challenge, it is not obvious how to mitigate models from learning
+representations that correspond to meaningless and implausible
+explanations.
+
+The first challenge has attracted an abundance of research on
+\textbf{explainable AI} (XAI) which aims to develop tools to derive
+explanations from complex model representations. This can mitigate a
+scenario in which we deploy opaque models and blindly rely on their
+predictions. On countless occasions, this scenario has already occurred
+in practice and caused real harm to people who were affected adversely
+and often unfairly by automated decision-making systems (ADMS) involving
+opaque models \cite{oneil2016weapons}. Effective XAI tools can aide us
+in monitoring models and providing recourse to individuals to turn
+adverse outcomes (e.g.~``loan application rejected'') into positive ones
+(``application accepted''). \cite{wachter2017counterfactual} propose
+\textbf{counterfactual explanations} as an effective approach to achieve
+this: they explain how factual inputs need to change in order for some
+fitted model to produce some desired output, typically involving minimal
+perturbations.
+
+To our surprise, the second challenge has not yet attracted any
+consolidated research effort. Specifically, there has been no concerted
+effort towards improving model \textbf{explainability}, which we define
+here as the degree to which learned representations correspond to
+explanations that are interpretable and deemed \textbf{plausible} by
+humans (see Definition~\ref{def-explainability}). Instead, the choice
+has typically been to improve the capacity of XAI tools to identify the
+subset explanations that are both plausible and valid for any given
+model, independent of whether the learned representations are also
+compatible with implausible explanations \cite{altmeyer2024faithful}.
+Fortunately, recent findings indicate that explainability can arise as
+byproduct of regularization techniques aimed at other objectives such as
+robustness, generalization and generative capacity
+\cite{schut2021generating}.
+
+Building on these findings, we introduce \textbf{counterfactual
+training}: a novel regularization technique geared explicitly towards
+aligning model representations with plausible explanations. Our
+contributions are as follows:
+
+\begin{itemize}
+\tightlist
+\item
+  We discuss existing related work on improving models and consolidate
+  it through the lens of counterfactual explanations
+  (Section~\ref{sec-lit}).
+\item
+  We present our proposed methodological framework that leverages
+  faithful counterfactual explanations during the training phase of
+  models to achieve the explainability objective
+  (Section~\ref{sec-method}).
+\item
+  Through extensive experiments we demonstrate the counterfactual
+  training improve model explainability while maintaining high
+  predictive performance. We run ablation studies and grid searches to
+  understand how the underlying model components and hyperparameters
+  affect outcomes. (Section~\ref{sec-experiments}).
+\end{itemize}
+
+Despite limitations of our approach discussed in
+Section~\ref{sec-discussion}, we conclude that counterfactual training
+provides a practical framework for researchers and practitioners
+interested in making opaque models more trustworthy
+Section~\ref{sec-conclusion}. We also believe that this work serves as
+an opportunity for XAI researchers to reevaluate the premise of
+improving XAI tools without improving models.
+
+\section{Related Literature}\label{sec-lit}
+
+To the best of our knowledge, our proposed framework for counterfactual
+training represents the first attempt to use counterfactual explanations
+during training to improve model explainability. In high-level terms, we
+define model explainability as the extent to which valid explanations
+derived for an opaque model are also deemed plausible with respect to
+the underlying data and stakeholder requirements. To make this more
+concrete, we follow \cite{augustin2020adversarial} in tieing the concept
+of explainability to the quality of counterfactual explanations that we
+can generate for a given model. The authors show that counterfactual
+explanations---understood here as minimal input perturbations that yield
+some desired model prediction---are generally more meaningful if the
+underlying model is more robust to adversarial examples. We can make
+intuitive sense of this finding when looking at adversarial training
+(AT) through the lens of representation learning with high degrees of
+freedom: by inducing models to ``unlearn'' representations that are
+susceptible to worst-case counterfactuals (i.e.~adversarial examples),
+AT effectively removes some implausible explanations from the solution
+space.
+
+\subsection{Adversarial Examples are Counterfactual
+Explanations}\label{adversarial-examples-are-counterfactual-explanations}
+
+This interpretation of the link between explainability through
+counterfactuals on one side, and robustness to adversarial examples on
+the other, is backed by empirical evidence.
+\cite{sauer2021counterfactual} demonstrate that using counterfactual
+images during classifier training improves model robustness. Similarly,
+\cite{abbasnejad2020counterfactual} argue that counterfactuals represent
+potentially useful training data in machine learning, especially in
+supervised settings where inputs may be reasonably mapped to multiple
+outputs. They, too, demonstrate the augmenting the training data of
+image classifiers can improve generalization. \cite{teney2020learning}
+propose an approach using counterfactuals in training that does not rely
+on data augmentation: they argue that counterfactual pairs typically
+already exist in training datasets. Specifically, their approach relies
+on, firstly, identifying similar input samples with different
+annotations and, secondly, ensuring that the gradient of the classifier
+aligns with the vector between pairs of counterfactual inputs using the
+cosine distance as a loss function.
+
+In the natural language processing (NLP) domain, counterfactuals have
+similarly been used to improve models through data augmentation:
+\cite{wu2021polyjuice}, propose \emph{Polyjuice}, a general-purpose
+counterfactual generator for language models. They demonstrate
+empirically that augmenting training data through \emph{Polyjuice}
+counterfactuals improves robustness in a number of NLP tasks.
+\cite{balashankar2023improving} also use \emph{Polyjuice} to augment NLP
+datasets through diverse counterfactuals and show that classifier
+robustness improves up to 20\%. Finally, \cite{luu2023counterfactual}
+introduce Counterfactual Adversarial Training (CAT), which also aims at
+improving generalization and robustness of language models.
+Specifically, they propose to proceed as follows: firstly, they identify
+training samples that are subject to high predictive uncertainty;
+secondly, they generate counterfactual explanations for those samples;
+and, finally, they fine-tune the given language model on the augmented
+dataset that includes the generated counterfactuals.
+
+There have also been several attempts at formalizing the relationship
+between counterfactual explanations (CE) and adversarial examples (AE).
+Pointing to clear similarities in how CE and AE are generated,
+\cite{freiesleben2022intriguing} makes the case for jointly studying the
+opaqueness and robustness problem in representation learning. Formally,
+AE can be seen as the subset of CE, for which misclassification is
+achieved \cite{freiesleben2022intriguing}. Similarly,
+\cite{pawelczyk2022exploring} show that CE and AE are equivalent under
+certain conditions and derive theoretical upper bounds on the distances
+between them.
+
+Two recent works are closely related to ours in that they use
+counterfactuals during training with the explicit goal of affecting
+certain properties of post-hoc counterfactual explanations. Firstly,
+\cite{ross2021learning} propose a way to train models that are
+guaranteed to provide recourse for individuals to move from an adverse
+outcome to some positive target class with high probability. The
+approach proposed by \cite{ross2021learning} builds on adversarial
+training, where in this context susceptibility to targeted adversarial
+examples for the positive class is explicitly induced. The proposed
+method allows for imposing a set of actionability constraints ex-ante:
+for example, users can specify that certain features (e.g.~\emph{age},
+\emph{gender}, \ldots) are immutable. Secondly, \cite{guo2023counternet}
+are the first to propose an end-to-end training pipeline that includes
+counterfactual explanations as part of the training procedure. In
+particular, they propose a specific network architecture that includes a
+predictor and CE generator network, where the parameters of the CE
+generator network are learnable. Counterfactuals are generated during
+each training iteration and fed back to the predictor network. In
+contrast to \cite{guo2023counternet}, we impose no restrictions on the
+neural network architecture at all.
+
+\subsection{Beyond Robustness}\label{beyond-robustness}
+
+Improving the adversarial robustness of models is not the only path
+towards aligning representations with plausible explanations. In a work
+closely related to this one, \cite{altmeyer2024faithful} show that
+explainability can be improved through model averaging and refined model
+objectives. The authors propose a way to generate counterfactuals that
+are maximally \textbf{faithful} to the model in that they are consistent
+with what the model has learned about the underlying data. Formally,
+they rely on tools from energy-based modelling to minimize the
+divergence between the distribution of counterfactuals and the
+conditional posterior over inputs learned by the model. Their proposed
+counterfactual explainer, \emph{ECCCo}, yields plausible explanations if
+and only if the underlying model has learned representations that align
+with them. They find that both deep ensembles
+\cite{lakshminarayanan2016simple} and joint energy-based models (JEMs)
+\cite{grathwohl2020your} tend to do well in this regard.
+
+Once again it helps to look at these findings through the lens of
+representation learning with high degrees of freedom. Deep ensembles are
+approximate Bayesian model averages, which are most called for when
+models are underspecified by the available data \cite{wilson2020case}.
+Averaging across solutions mitigates the aforementioned risk of relying
+on a single locally optimal representations that corresponds to
+semantically meaningless explanations for the data. Previous work by
+\cite{schut2021generating} similarly found that generating plausible
+(``interpretable'') counterfactual explanations is almost trivial for
+deep ensembles that have also undergone adversarial training. The case
+for JEMs is even clearer: they involve a hybrid objective that induces
+both high predictive performance and generative capacity
+\cite{grathwohl2020your}. This is closely related to the idea of
+aligning models with plausible explanations and has inspired our
+proposed counterfactual training objective, as we explain in
+Section~\ref{sec-method}.
+
+\section{Counterfactual Training}\label{sec-method}
+
+Counterfactual training combines ideas from adversarial training,
+energy-based modelling and counterfactuals explanations with the
+explicit objective of aligning representations with plausible
+explanations that comply with user requirements. In the context of CE,
+plausibility has broadly been defined as the degree to which
+counterfactuals comply with the underlying data generating process
+\cite{poyiadzi2020face,guidotti2022counterfactual,altmeyer2024faithful}.
+Plausibility is a necessary but insufficient condition for using CE to
+provide algorithmic recourse (AR) to individuals affected by opaque
+models in practice. This is because for recourse recommendations to be
+\textbf{actionable}, they need to not only result in plausible
+counterfactuals but also be attainable. A plausible CE for a rejected
+20-year-old loan applicant, for example, might reveal that their
+application would have been accepted, if only they were 20 years older.
+Ignoring all other features, this complies with the definition of
+plausibility if 40-year-old individuals are in fact more credit-worthy
+on average than young adults. But of course this CE does not qualify for
+providing actionable recourse to the applicant since \emph{age} is not a
+mutable feature. For our intents and purposes, counterfactual training
+aims at improving model explainability by aligning models with
+counterfactuals that meet both desiderata, plausibility and
+actionability. Formally, we define explainability as follows:
+
+\begin{definition}[Model
+Explainability]\protect\hypertarget{def-explainability}{}\label{def-explainability}
+
+Let \(\mathbf{M}_\theta: \mathcal{X} \mapsto \mathcal{Y}\) denote a
+supervised classification model that maps from the \(D\)-dimensional
+input space \(\mathcal{X}\) to representations
+\(\phi(\mathbf{x};\theta)\) and finally to the \(K\)-dimensional output
+space \(\mathcal{Y}\). Assume that for any given input-output pair
+\(\{\mathbf{x},\mathbf{y}\}_i\) there exists a counterfactual
+\(\mathbf{x}^{\prime} = \mathbf{x} + \Delta: \mathbf{M}_\theta(\mathbf{x}^{\prime}) = \mathbf{y}^{+} \neq \mathbf{y} = \mathbf{M}_\theta(\mathbf{x})\)
+where \(\arg\max_y{\mathbf{y}^{+}}=y^+\) and \(y^+\) denotes the index
+of the target class.
+
+We say that \(\mathbf{M}_\theta\) is \textbf{explainable} to the extent
+that faithfully generated counterfactuals are plausible (i.e.~consistent
+with the data) and actionable. Formally, we define these properties as
+follows:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  (Plausibility)
+  \(\int^{A} p(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1\)
+  where \(A\) is some small region around \(\mathbf{x}^{\prime}\).
+\item
+  (Actionability) Permutations \(\Delta\) are subject to actionability
+  constraints.
+\end{enumerate}
+
+We consider counterfactuals as faithful to the extent that they are
+consistent with what the model has learned about the input data. Let
+\(p_\theta(\mathbf{x}|\mathbf{y}^{+})\) denote the conditional posterior
+over inputs, then formally:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  (Faithfulness)
+  \(\int^{A} p_\theta(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1\)
+  where \(A\) is defined as above.
+\end{enumerate}
+
+\end{definition}
+
+The definitions of faithfulness and plausibility in
+Definition~\ref{def-explainability} are the same as in
+\cite{altmeyer2024faithful}, with adapted notation. Actionability
+constraints in Definition~\ref{def-explainability} vary and depend on
+the context in which \(\mathbf{M}_\theta\) is deployed. In this work, we
+focus on domain and mutability constraints for individual features
+\(x_d\) for \(d=1,...,D\). We limit ourselves to classification tasks
+for reasons discussed in Section~\ref{sec-discussion}.
+
+\subsection{Our Proposed Objective}\label{our-proposed-objective}
+
+Let \(\mathbf{x}_t^\prime\) for \(t=0,...,T\) denote a counterfactual
+explanation generated through gradient descent over \(T\) iterations as
+initially proposed by \cite{wachter2017counterfactual}. For our
+purposes, we let \(T\) vary and consider the counterfactual search as
+converged as soon as the predicted probability for the target class has
+reached a pre-determined threshold, \(\tau\):
+\(\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}^\prime))[y^+] \geq \tau\)\footnote{For
+  detailed background information on gradient-based counterfactual
+  search and convergence see Section~\ref{sec-app-ce}.}.
+
+To train models with high explainability as defined in
+Definition~\ref{def-explainability}, we propose to leverage
+counterfactuals in the following objective,
+
+\begin{equation}\phantomsection\label{eq-obj}{
+\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y})
+}\end{equation}
+
+where \(\text{yloss}(\cdot)\) is any conventional classification loss
+that induces discriminative performance (e.g.~cross-entropy). The two
+additional components in Equation~\ref{eq-obj} are explained in more
+detail below. For now, they can be sufficiently described as inducing
+explainability directly and indirectly by penalizing: 1) the contrastive
+divergence, \(\text{div}(\cdot)\), between counterfactuals
+\(\mathbf{x}_T^\prime\) and observed samples \(x\) and, 2) the
+adversarial loss, \(\text{advloss}(.)\), with respect to nascent
+counterfactuals \(\mathbf{x}_{t\leq T}^\prime\). The tradeoff between
+the different components can be governed by adjusting the strengths of
+the penalties \(\lambda_{\text{div}}\) and \(\lambda_{\text{adv}}\).
+
+\subsubsection{Directly Inducing Explainability through Contrastive
+Divergence}\label{directly-inducing-explainability-through-contrastive-divergence}
+
+\cite{grathwohl2020your} observe that any classifier can be
+re-interpreted as a joint energy-based model (JEM) that learns to
+discriminate output classes conditional on inputs and generate inputs.
+They show that JEMs can be trained to perform well at both tasks by
+directly maximizing the joint log-likelihood factorized as
+\(\log p_\theta(\mathbf{x},\mathbf{y})=\log p_\theta(\mathbf{y}|\mathbf{x}) + \log p_\theta(\mathbf{x})\).
+The first factor can be optimized using conventional cross-entropy as in
+Equation~\ref{eq-obj}. To optimize \(\log p_\theta(\mathbf{x})\)
+\cite{grathwohl2020your} minimize the contrastive divergence between
+samples drawn from \(p_\theta(\mathbf{x})\) and training observations,
+i.e.~samples from \(p(\mathbf{x})\).
+
+A key empirical finding in \cite{altmeyer2024faithful} was that JEMs
+tend to do well with respect to the plausibility objective in
+Definition~\ref{def-explainability}. If we consider samples drawn from
+\(p_\theta(\mathbf{x})\) as counterfactuals, this is an expected
+finding, because the JEM objective effectively minimizes the divergence
+between the conditional posterior and \(p(\mathbf{x}|\mathbf{y}^{+})\).
+To generate samples, \cite{grathwohl2020your} rely on Stochastic
+Gradient Langevin Dynamics (SGLD) using an uninformative prior for
+initialization. This is where we depart from their methodology: instead
+of generating samples through SGLD, we propose using counterfactual
+explainers to generate counterfactuals for observed training samples.
+Specifically, we have
+
+\begin{equation}\phantomsection\label{eq-div}{
+\text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) = \mathcal{E}_\theta(\mathbf{x},y) - \mathcal{E}_\theta(\mathbf{x}_T^\prime,y)
+}\end{equation}
+
+where \(\mathcal{E}_\theta(\cdot)\) denotes the energy function. In
+particular, we set
+\(\mathcal{E}_\theta(\mathbf{x},\mathbf{y})=-\mathbf{M}_\theta(\mathbf{x})[y^+]\)
+where \(y^+\) denotes the index of the target class. We generate samples
+\(\mathbf{x}_T^\prime\) by first randomly sampling the target class
+\(y^+ \sim p(y)\) and then generating a counterfactual explanation for
+that target over \(T\) iterations using a gradient-based counterfactual
+generator. This is similar to how conditional sampling is used to draw
+from \(p_\theta(\mathbf{x})\) in \cite{grathwohl2020your}.
+
+Intuitively, the gradient of Equation~\ref{eq-div} decreases the energy
+of observed training samples (positive samples) while at same time
+increasing the energy of counterfactuals (negative samples)
+\cite{du2019implicit}. As the generated counterfactuals get more
+plausible (Definition~\ref{def-explainability}) over the cause of
+training, these two opposing effects gradually balance each out
+\cite{lippe2024uvadlc}.
+
+The departure from SGLD allows us to tap into the vast repertoire of
+explainers that have been proposed in the literature to meet different
+desiderata. Typically, these methods facilitate the imposition of domain
+and mutability constraints, for example. In principle, any existing
+approach for generating counterfactual explanations is viable, so long
+as it does not violate the faithfulness condition. Like JEMs
+\cite{murphy2022probabilistic}, counterfactual training can be
+considered as a form of contrastive representation learning.
+
+\subsubsection{Indirectly Inducing Explainability through Adversarial
+Robustness}\label{indirectly-inducing-explainability-through-adversarial-robustness}
+
+Based on our analysis in Section~\ref{sec-lit}, counterfactuals
+\(\mathbf{x}^\prime\) can be repurposed as additional training samples
+\cite{luu2023counterfactual,balashankar2023improving} or adversarial
+examples \cite{freiesleben2022intriguing,pawelczyk2022exploring}. This
+leaves some flexibility with respect to the exact choice for
+\(\text{advloss}(\cdot)\) in Equation~\ref{eq-obj}. An intuitive
+functional form to use, though likely not the only reasonable choice, is
+inspired by adversarial training:
+
+\begin{equation}\phantomsection\label{eq-adv}{
+\begin{aligned}
+\text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y};\varepsilon)&=\text{yloss}(\mathbf{M}_\theta(\mathbf{x}_{t_\varepsilon}^\prime),\mathbf{y}) \\
+t_\varepsilon &= \max_t \{t: ||\Delta_t||_\infty < \varepsilon\}
+\end{aligned}
+}\end{equation}
+
+Under this choice, we consider nascent counterfactuals
+\(\mathbf{x}_{t\leq T}^\prime\) as adversarial examples as long as the
+magnitude of the perturbation to any individual feature is at most
+\(\varepsilon\). This is closely aligned with
+\cite{szegedy2013intriguing}, who define an adversarial attack as an
+``imperceptible non-random perturbation''. Thus, we choose to work with
+a different distinction between CE and AE than
+\cite{freiesleben2022intriguing}, who considers misclassification as the
+key distinguishing feature of AE. One of the key observations in this
+work is that we can leverage counterfactual explanations during training
+and get adversarial examples, essentially for free.
+
+\subsection{Encoding Actionability Constraints}\label{sec-constraints}
+
+Many existing counterfactual explainers support domain and mutability
+constraints out-of-the-box. In fact, both types of constraints can be
+implemented for any counterfactual explainer that relies on gradient
+descent in the feature space for optimization
+\cite{altmeyer2023explaining}. In this context, domain constraints can
+be imposed by simply projecting counterfactuals back to the specified
+domain, if the previous gradient step resulted in updated feature values
+that were out-of-domain. Mutability constraints can similarly be
+enforced by setting partial derivatives to zero to ensure that features
+are only mutated in the allowed direction, if at all.
+
+Since actionability constraints are binding at test time, we should also
+impose them when generating \(\mathbf{x}^\prime\) during each training
+iteration to align model representations with user requirements. Through
+their effect on \(\mathbf{x}^\prime\), both types of constraints
+influence model outcomes through Equation~\ref{eq-div}. Here it is
+crucial that we avoid penalizing implausibility that arises due to
+mutability constraints. For any mutability-constrained feature \(d\)
+this can be achieved by enforcing
+\(\mathbf{x}[d] - \mathbf{x}^\prime[d]:=0\) whenever perturbing
+\(\mathbf{x}^\prime[d]\) in the direction of \(\mathbf{x}[d]\) would
+violate mutability constraints. Specifically, we set
+\(\mathbf{x}[d] := \mathbf{x}^\prime[d]\) if
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Feature \(d\) is strictly immutable in practice.
+\item
+  We have \(\mathbf{x}[d]>\mathbf{x}^\prime[d]\) but feature \(d\) can
+  only be decreased in practice.
+\item
+  We have \(\mathbf{x}[d]<\mathbf{x}^\prime[d]\) but feature \(d\) can
+  only be increased in practice.
+\end{enumerate}
+
+From a Bayesian perspective, setting
+\(\mathbf{x}[d] := \mathbf{x}^\prime[d]\) can be understood as assuming
+a point mass prior for \(p(\mathbf{x})\) with respect to feature \(d\).
+Intuitively, we think of this simply in terms ignoring implausibility
+costs with respect to immutable features, which effectively forces the
+model to instead seek plausibility with respect to the remaining
+features. This in turn results in lower overall sensitivity to immutable
+features, which we demonstrate empirically for different classifiers in
+Section~\ref{sec-experiments}. Under certain conditions, this results
+holds theoretically{[}For the proof, see the supplementary appendix.{]}:
+
+\begin{proposition}[Protecting Immutable
+Features]\protect\hypertarget{prp-mtblty}{}\label{prp-mtblty}
+
+Let
+\(f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})\)
+denote a linear classifier with softmax activation \(\mathcal{S}\)
+(i.e.~\emph{multinomial logistic regression}) where
+\(y\in\{1,...,K\}=\mathcal{K}\) and \(\mathbf{x} \in \mathbb{R}^D\). If
+we assume multivariate Gaussian class densities with common diagonal
+covariance matrix \(\Sigma_k=\Sigma\) for all \(k \in \mathcal{K}\),
+then protecting an immutable feature from the contrastive divergence
+penalty (Equation~\ref{eq-div}) will result in lower classifier
+sensitivity to that feature relative to the remaining features, provided
+that at least one of those is mutable and discriminative.
+
+\end{proposition}
+
+It is worth highlighting that Proposition~\ref{prp-mtblty} assumes
+independence of features. This raises a valid concern about the effect
+of protecting immutable features in the presence of proxy features that
+remain unprotected. We discuss this limitation in
+Section~\ref{sec-discussion}.
+
+\subsection{Illustration}\label{illustration}
+
+To better convey the intuition underlying our proposed method, we
+illustrate different model outcomes in Example~\ref{exm-grad}.
+
+\begin{example}[Prediction of Consumer Credit
+Default]\protect\hypertarget{exm-grad}{}\label{exm-grad}
+
+Suppose we are interested in predicting the likelihood that loan
+applicants default on their credit. We have access to historical data on
+previous loan takers comprised of a binary outcome variable
+(\(y\in\{1=\text{default},2=\text{no default}\}\)) two input features:
+1) the subjects' \emph{age}, which we define as immutable, and 2) the
+subjects' existing level of \emph{debt}, which we define as mutable.
+
+We have simulated this scenario using synthetic data with independent
+features and Gaussian class-conditional densities in
+Figure~\ref{fig-poc}. The four panels in Figure~\ref{fig-poc} show the
+outcomes for different training procedures using the same model
+architecture each time (a linear classifier). In each case, we show the
+linear decision boundary (green) and the training data colored according
+to their ground-truth label: orange points belong to the target class,
+\(y^+=2\), blue points belong to the non-target class, \(y^-=1\). Stars
+indicate counterfactuals in the target class generated at test time
+using generic gradient descent until convergence.
+
+In panel (a), we have trained our model conventionally, and we do not
+impose mutability constraints at test time. The generated
+counterfactuals are all valid, but not plausible: they are clearly
+distinguishable from the ground-truth data. In panel (b), we have
+trained our model with counterfactual training, once again not imposing
+mutability constraints at test time. We observe that the counterfactuals
+are clearly plausible, therefore meeting the first objective of
+Definition~\ref{def-explainability}.
+
+In panel (c), we have used conventional training again, this time
+imposing the mutability constraint on \emph{age} at test time.
+Counterfactuals are valid but involve some substantial reductions in
+\emph{debt} for some individuals, in particular very young applicants.
+By comparison, counterfactual paths are shorter on average in panel (d),
+where we have used counterfactual training and protected immutable
+features as described in Section~\ref{sec-constraints}. In particular,
+we observe that due to the classifier's lower sensitivity to \emph{age},
+recourse recommendations with respect to \emph{debt} are much more
+homogenous, in that they do not disproportionately punish younger
+individuals. The counterfactuals are also plausible with respect to the
+mutable feature. Thus, we consider the model in panel (d) as the most
+explainable according to Definition~\ref{def-explainability}.
+
+\end{example}
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{paper_files/mediabag/../../paper/figures/poc.pdf}}
+
+}
+
+\caption{\label{fig-poc}Visual illustration of how counterfactual
+training improves explainability. See Example~\ref{exm-grad} for
+details.}
+
+\end{figure}%
+
+\section{Experiments}\label{sec-experiments}
+
+In this section, we present experiments that we have conducted in order
+to answer the following research questions:
+
+\begin{corollary}[Plausibility]\protect\hypertarget{cor-plaus}{}\label{cor-plaus}
+
+Does our proposed counterfactual training objective
+(Equation~\ref{eq-obj}) induce models to learn plausible explanations?
+
+\end{corollary}
+
+\begin{corollary}[Actionability]\protect\hypertarget{cor-action}{}\label{cor-action}
+
+Does our proposed counterfactual training objective
+(Equation~\ref{eq-obj}) yield more favorable algorithmic recourse
+outcomes in the presence of actionability constraints?
+
+\end{corollary}
+
+Beyond this, we are also interested in understanding how robust our
+answers to RQ~\ref{cor-plaus} and RQ~\ref{cor-action} are:
+
+\begin{corollary}[Hyperparameters]\protect\hypertarget{cor-hyper}{}\label{cor-hyper}
+
+What are the effects of different hyperparameter choices with respect to
+Equation~\ref{eq-obj}?
+
+\end{corollary}
+
+\subsection{Experimental Setup}\label{experimental-setup}
+
+\subsection{Experimental Results}\label{experimental-results}
+
+\section{Discussion}\label{sec-discussion}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Limited to classification models.
+\item
+  Proxy attributes of immutable features.
+\item
+  Increased training time.
+\item
+  Training instabilities
+\item
+  Fairness and caveats (aware it's not a classical approach in this
+  context, but there is a clear link).
+\end{enumerate}
+
+\section{Conclusion}\label{sec-conclusion}
+
+\subsection*{References}\label{references}
+\addcontentsline{toc}{subsection}{References}
+
+\newpage{}
+
+\FloatBarrier
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\Alph{section}}
+
+\setcounter{table}{0}
+\renewcommand{\thetable}{A\arabic{table}}
+
+\setcounter{figure}{0}
+\renewcommand{\thefigure}{A\arabic{figure}}
+
+\section{Notation}\label{notation}
+
+\begin{itemize}
+\tightlist
+\item
+  \(y^+\): The target class and also the index of the target class.
+\item
+  \(y^-\): The non-target class and also the index of non-the target
+  class.
+\item
+  \(\mathbf{y}^+\): The one-hot encoded output vector for the target
+  class.
+\item
+  \(\theta\): Model parameters (unspecified).
+\item
+  \(\Theta\): Matrix of parameters.
+\end{itemize}
+
+\section{Technical Details of Our
+Approach}\label{technical-details-of-our-approach}
+
+\subsection{Generating Counterfactuals through Gradient
+Descent}\label{sec-app-ce}
+
+In this section, we provide some background on gradient-based
+counterfactual generators (Section~\ref{sec-app-ce-background}) and
+discuss how we define convergence in this context
+(Section~\ref{sec-app-conv}).
+
+\subsubsection{Background}\label{sec-app-ce-background}
+
+Gradient-based counterfactual search was originally proposed by
+\cite{wachter2017counterfactual}. It generally solves the following
+unconstrained objective,
+
+\[
+\begin{aligned}
+\min_{\mathbf{z}^\prime \in \mathcal{Z}^L} \left\{  {\text{yloss}(\mathbf{M}_{\theta}(g(\mathbf{z}^\prime)),\mathbf{y}^+)}+ \lambda {\text{cost}(g(\mathbf{z}^\prime)) }  \right\} 
+\end{aligned} 
+\]
+
+where \(g: \mathcal{Z} \mapsto \mathcal{X}\) is an invertible function
+that maps from the \(L\)-dimensional counterfactual state space to the
+feature space and \(\text{cost}(\cdot)\) denotes one or more penalties
+that are used to induce certain properties of the counterfactual
+outcome. As above, \(\mathbf{y}^+\) denotes the target output and
+\(\mathbf{M}_{\theta}(\mathbf{x})\) returns the logit predictions of the
+underlying classifier for \(\mathbf{x}=g(\mathbf{z})\).
+
+For all generators used in this work we use standard logit crossentropy
+loss for \(\text{yloss}(\cdot)\). All generators also penalize the
+distance (\(\ell_1\)-norm) of counterfactuals from their original
+factual state. For \emph{Generic} and \emph{ECCo}, we have
+\(\mathcal{Z}:=\mathcal{X}\) and
+\(g(\mathbf{z})=g(\mathbf{z})^{-1}=\mathbf{z}\), that is counterfactual
+are searched directly in the feature space. Conversely, \emph{REVISE}
+traverses the latent space of a variational autoencoder (VAE) fitted to
+the training data, where \(g(\cdot)\) corresponds to the decoder
+\cite{joshi2019realistic}. In addition to the distance penalty,
+\emph{ECCo} uses an additional penalty component that regularizes the
+energy associated with the counterfactual, \(\mathbf{x}^\prime\)
+\cite{altmeyer2024faithful}.
+
+\subsubsection{Convergence}\label{sec-app-conv}
+
+An important consideration when generating counterfactual explanations
+using gradient-based methods is how to define convergence. Two common
+choices are to 1) perform gradient descent over a fixed number of
+iterations \(T\), or 2) conclude the search as soon as the predicted
+probability for the target class has reached a pre-determined threshold,
+\(\tau\):
+\(\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}^\prime))[y^+] \geq \tau\). We
+prefer the latter for our purposes, because it explicitly defines
+convergence in terms of the black-box model, \(\mathbf{M}(\mathbf{x})\).
+
+Defining convergence in this way allows for a more intuitive
+interpretation of the resulting counterfactual outcomes than with fixed
+\(T\). Specifically, it allows us to think of counterfactuals as
+explaining `high-confidence' predictions by the model for the target
+class \(y^+\). Depending on the context and application, different
+choices of \(\tau\) can be considered as representing `high-confidence'
+predictions.
+
+\subsection{Protecting Mutability Constraints with Linear
+Classifiers}\label{sec-app-constraints}
+
+In Section~\ref{sec-constraints} we explain that to avoid penalizing
+implausibility that arises due to mutability constraints, we impose a
+point mass prior on \(p(\mathbf{x})\) for the corresponding feature. We
+argue in Section~\ref{sec-constraints} that this approach induces models
+to be less sensitive to immutable features and demonstrate this
+empirically in Section~\ref{sec-experiments}. Below we derive the
+analytical results in Proposition~\ref{prp-mtblty}.
+
+\begin{proof}
+Let \(d_{\text{mtbl}}\) and \(d_{\text{immtbl}}\) denote some mutable
+and immutable feature, respectively. Suppose that
+\(\mu_{y^-,d_{\text{immtbl}}} < \mu_{y^+,d_{\text{immtbl}}}\) and
+\(\mu_{y^-,d_{\text{mtbl}}} > \mu_{y^+,d_{\text{mtbl}}}\), where
+\(\mu_{k,d}\) denotes the conditional sample mean of feature \(d\) in
+class \(k\). In words, we assume that the immutable feature tends to
+take lower values for samples in the non-target class \(y^-\) than in
+the target class \(y^+\). We assume the opposite to hold for the mutable
+feature.
+
+Assuming multivariate Gaussian class densities with common diagonal
+covariance matrix \(\Sigma_k=\Sigma\) for all \(k \in \mathcal{K}\), we
+have for the log likelihood ratio between any two classes
+\(k,m \in \mathcal{K}\) \cite{hastie2009elements}:
+
+\begin{equation}\phantomsection\label{eq-loglike}{
+\log \frac{p(k|\mathbf{x})}{p(m|\mathbf{x})}=\mathbf{x}^\intercal \Sigma^{-1}(\mu_{k}-\mu_{m})  + \text{const}
+}\end{equation}
+
+By independence of \(x_1,...,x_D\), the full log-likelihood ratio
+decomposes into:
+
+\begin{equation}\phantomsection\label{eq-loglike-decomp}{
+\log \frac{p(k|\mathbf{x})}{p(m|\mathbf{x})} = \sum_{d=1}^D \frac{\mu_{k,d}-\mu_{m,d}}{\sigma_{d}^2} x_{d} + \text{const}
+}\end{equation}
+
+By the properties of our classifier (\emph{multinomial logistic
+regression}), we have:
+
+\begin{equation}\phantomsection\label{eq-multi}{
+\log \frac{p(k|\mathbf{x})}{p(m|\mathbf{x})} = \sum_{d=1}^D \left( \theta_{k,d} - \theta_{m,d} \right)x_d + \text{const}
+}\end{equation}
+
+where \(\theta_{k,d}=\Theta[k,d]\) denotes the coefficient on feature
+\(d\) for class \(k\).
+
+Based on Equation~\ref{eq-loglike-decomp} and Equation~\ref{eq-multi} we
+can identify that
+\((\mu_{k,d}-\mu_{m,d}) \propto (\theta_{k,d} - \theta_{m,d})\) under
+the assumptions we made above. Hence, we have that
+\((\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}}) < 0\)
+and
+\((\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}}) > 0\)
+
+Let \(\mathbf{x}^\prime\) denote some randomly chosen individual from
+class \(y^-\) and let \(y^+ \sim p(y)\) denote the randomly chosen
+target class. Then the partial derivative of the contrastive divergence
+penalty Equation~\ref{eq-div} with respect to coefficient
+\(\theta_{y^+,d}\) is equal to
+
+\begin{equation}\phantomsection\label{eq-grad}{
+\frac{\partial}{\partial\theta_{y^+,d}} \left(\text{div}(\mathbf{x},\mathbf{x^\prime},\mathbf{y};\theta)\right) = \frac{\partial}{\partial\theta_{y^+,d}} \left( \left(-\mathbf{M}_\theta(\mathbf{x})[y^+]\right) - \left(-\mathbf{M}_\theta(\mathbf{x}^\prime)[y^+]\right) \right) = x_{d}^\prime - x_{d}
+}\end{equation}
+
+and equal to zero everywhere else.
+
+Since \((\mu_{y^-,d_{\text{immtbl}}} < \mu_{y^+,d_{\text{immtbl}}})\) we
+are more likely to have
+\((x_{d_{\text{immtbl}}}^\prime - x_{d_{\text{immtbl}}}) < 0\) than vice
+versa at initialization. Similarly, we are more likely to have
+\((x_{d_{\text{mtbl}}}^\prime - x_{d_{\text{mtbl}}}) > 0\) since
+\((\mu_{y^-,d_{\text{mtbl}}} > \mu_{y^+,d_{\text{mtbl}}})\).
+
+This implies that if we do not protect feature \(d_{\text{immtbl}}\),
+the contrastive divergence penalty will decrease
+\(\theta_{y^-,d_{\text{immtbl}}}\) thereby exacerbating the existing
+effect
+\((\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}}) < 0\).
+In words, not protecting the immutable feature would have the
+undesirable effect of making the classifier more sensitive to this
+feature, in that it would be more likely to predict class \(y^-\) as
+opposed to \(y^+\) for lower values of \(d_{\text{immtbl}}\).
+
+By the same rationale, the contrastive divergence penalty can generally
+be expected to increase \(\theta_{y^-,d_{\text{mtbl}}}\) exacerbating
+\((\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}}) > 0\).
+In words, this has the effect of making the classifier more sensitive to
+the mutable feature, in that it would be more likely to predict class
+\(y^-\) as opposed to \(y^+\) for higher values of \(d_{\text{mtbl}}\).
+
+Thus, our proposed approach of protecting feature \(d_{\text{immtbl}}\)
+has the net affect of decreasing the classifier's sensitivity to the
+immutable feature relative to the mutable feature (i.e.~no change in
+sensitivity for \(d_{\text{immtbl}}\) relative to increased sensitivity
+for \(d_{\text{mtbl}}\)).
+\end{proof}
+
+\subsection{Domain Constraints}\label{domain-constraints}
+
+We apply domain constraints on counterfactuals during training and
+evaluation. There are at least two good reasons for doing so. Firstly,
+within the context of explainability and algorithmic recourse,
+real-world attributes are often domain constrained: the \emph{age}
+feature, for example, is lower bounded by zero and upper bounded by the
+maximum human lifespan. Secondly, domain constraints help mitigate
+training instabilities commonly associated with energy-based modelling
+\cite{grathwohl2020your,altmeyer2024faithful}.
+
+For our image datasets, features are pixel values and hence the domain
+is constrained by the lower and upper bound of values that pixels can
+take depending on how they are scaled (in our case \([-1,1]\)). For all
+other features \(d\) in our synthetic and tabular datasets, we
+automatically infer domain constraints
+\([x_d^{\text{LB}},x_d^{\text{UB}}]\) as follows,
+
+\begin{equation}\phantomsection\label{eq-domain}{
+\begin{aligned}
+x_d^{\text{LB}} &= \arg\min_{x_d} \{\mu_d - n_{\sigma_d}\sigma_d, \arg \min_{x_d} x_d\} \\
+x_d^{\text{UB}} &= \arg\max_{x_d} \{\mu_d + n_{\sigma_d}\sigma_d, \arg \max_{x_d} x_d\} 
+\end{aligned}
+}\end{equation}
+
+where \(\mu_d\) and \(\sigma_d\) denote the sample mean and standard
+deviation of feature \(d\). We set \(n_{\sigma_d}=3\) across the board
+but higher values and hence wider bounds may be appropriate depending on
+the application.
+
+\subsection{Training Details}\label{sec-app-training}
+
+In this section, we describe the training procedure in detail. While the
+details laid out here are not crucial for understanding our proposed
+approach, they are of importance to anyone looking to implement
+counterfactual training.
+
+\section{Detailed Results}\label{detailed-results}
+
+\subsection{Qualitative Findings for Image
+Data}\label{qualitative-findings-for-image-data}
+
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, coltitle=black, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, leftrule=.75mm, arc=.35mm, titlerule=0mm, opacitybacktitle=0.6, toptitle=1mm, colback=white, title={Note}, bottomtitle=1mm, bottomrule=.15mm, toprule=.15mm, opacityback=0, colframe=quarto-callout-note-color-frame, breakable]
+
+Figure~\ref{fig-mnist} shows much more plausible (faithful)
+counterfactuals for a model with CT than the model with conventional
+training (Figure~\ref{fig-mnist-vanilla}). In fact, this is not even
+using \emph{ECCo+} and still showing better results than the best
+results we achieved in our AAAI paper for JEM ensembles.
+
+\end{tcolorbox}
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/figures/mnist_mlp.png}}
+
+}
+
+\caption{\label{fig-mnist}Counterfactual images for \emph{MLP} with
+counterfactual training. The underlying generator, \emph{ECCo}, aims to
+generate counterfactuals that are faithful to the model
+\cite{altmeyer2024faithful}.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/figures/mnist_mlp_vanilla.png}}
+
+}
+
+\caption{\label{fig-mnist-vanilla}Counterfactual images for \emph{MLP}
+with conventional training. The underlying generator, \emph{ECCo}, aims
+to generate counterfactuals that are faithful to the model
+\cite{altmeyer2024faithful}.}
+
+\end{figure}%
+
+\subsection{Grid Searches}\label{sec-app-grid}
+
+\subsubsection{Generator Parameters}\label{generator-parameters}
+
+The hyperparameter grid with varying generator parameters during
+training is shown in Note~\ref{nte-gen-params-final-run-train}. The
+corresponding evaluation grid used for these experiments is shown in
+Note~\ref{nte-gen-params-final-run-eval}.
+
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, coltitle=black, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, leftrule=.75mm, arc=.35mm, titlerule=0mm, opacitybacktitle=0.6, toptitle=1mm, colback=white, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, bottomtitle=1mm, bottomrule=.15mm, toprule=.15mm, opacityback=0, colframe=quarto-callout-note-color-frame, breakable]
+
+\quartocalloutnte{nte-gen-params-final-run-train} 
+
+\begin{itemize}
+\tightlist
+\item
+  Generator Parameters:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Decision Threshold: \texttt{0.75,\ 0.9,\ 0.95}
+  \item
+    \(\lambda_{\text{energy}}\): \texttt{0.1,\ 0.5,\ 5.0,\ 10.0,\ 20.0}
+  \item
+    Maximum Iterations: \texttt{5,\ 25,\ 50}
+  \end{itemize}
+\item
+  Generator: \texttt{ecco,\ generic,\ revise}
+\item
+  Model: \texttt{mlp}
+\item
+  Training Parameters:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Objective: \texttt{full,\ vanilla}
+  \end{itemize}
+\end{itemize}
+
+\end{tcolorbox}
+
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, coltitle=black, colbacktitle=quarto-callout-note-color!10!white, rightrule=.15mm, leftrule=.75mm, arc=.35mm, titlerule=0mm, opacitybacktitle=0.6, toptitle=1mm, colback=white, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, bottomtitle=1mm, bottomrule=.15mm, toprule=.15mm, opacityback=0, colframe=quarto-callout-note-color-frame, breakable]
+
+\quartocalloutnte{nte-gen-params-final-run-eval} 
+
+\begin{itemize}
+\tightlist
+\item
+  Generator Parameters:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \(\lambda_{\text{energy}}\): \texttt{0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0}
+  \end{itemize}
+\end{itemize}
+
+\end{tcolorbox}
+
+\subsubsection{High-Level Findings}\label{high-level-findings}
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/moons/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/plausibility_distance_from_target.png}}
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/moons/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/distance.png}}
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/moons/evaluation/results/logs/objective---lambda_energy---generator_type---maxiter/percent_valid.png}}
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/moons/evaluation/results/logs/objective---lambda_energy---generator_type---maxiter/acc_val.png}}
+
+\subsubsection{Detailed Findings}\label{detailed-findings}
+
+\paragraph{Linearly Separable}\label{linearly-separable}
+
+\begin{longtable}{cccccc}
+
+\caption{\label{tbl-lin_sep-lambda_energy_exper}Results for Linearly
+Separable data by energy penalty.}
+
+\tabularnewline
+
+  \toprule
+  \textbf{Decision Threshold} & \textbf{$\lambda_{\text{energy}}$} & \textbf{Maximum Iterations} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endfirsthead
+  \toprule
+  \textbf{Decision Threshold} & \textbf{$\lambda_{\text{energy}}$} & \textbf{Maximum Iterations} & \textbf{Generator} & \textbf{Value} & \textbf{Std} \\\midrule
+  \endhead
+  \bottomrule
+  \multicolumn{6}{r}{Continuing table below.}\\
+  \bottomrule
+  \endfoot
+  \endlastfoot
+  0.75 & 0.1 & 5 & \textit{ECCo} & -15.9 & 16.7 \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{41.9}} & \color{Green}{\textbf{8.13}} \\
+  0.75 & 0.1 & 5 & \textit{REVISE} & -64.4 & 3.58 \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{28.9}} & \color{Green}{\textbf{2.28}} \\
+  0.75 & 0.1 & 25 & \textit{Generic} & -11.3 & 11.5 \\
+  0.75 & 0.1 & 25 & \textit{REVISE} & -55.3 & 4.18 \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{10.9}} & \color{Green}{\textbf{7.47}} \\
+  0.75 & 0.1 & 50 & \textit{Generic} & -32.3 & 16.6 \\
+  0.75 & 0.1 & 50 & \textit{REVISE} & -44.1 & 4.24 \\
+  0.9 & 0.1 & 5 & \textit{ECCo} & -13.7 & 13.7 \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{22.3}} & \color{Green}{\textbf{4.87}} \\
+  0.9 & 0.1 & 5 & \textit{REVISE} & -27.8 & 6.26 \\
+  0.9 & 0.1 & 25 & \textit{ECCo} & 8.84 & 7.13 \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{30.7}} & \color{Green}{\textbf{5.77}} \\
+  0.9 & 0.1 & 25 & \textit{REVISE} & -72.7 & 34.9 \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{17.1}} & \color{Green}{\textbf{7.98}} \\
+  0.9 & 0.1 & 50 & \textit{Generic} & 3.82 & 8.86 \\
+  0.9 & 0.1 & 50 & \textit{REVISE} & -45.8 & 2.79 \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{35.7}} & \color{Green}{\textbf{7.56}} \\
+  0.95 & 0.1 & 5 & \textit{Generic} & -13.3 & 5.73 \\
+  0.95 & 0.1 & 5 & \textit{REVISE} & -54.9 & 5.43 \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{37}} & \color{Green}{\textbf{5.31}} \\
+  0.95 & 0.1 & 25 & \textit{Generic} & 29 & 8.6 \\
+  0.95 & 0.1 & 25 & \textit{REVISE} & -40.5 & 41 \\
+  0.95 & 0.1 & 50 & \textit{ECCo} & 13.2 & 4.89 \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{0.1}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{35.5}} & \color{Green}{\textbf{4.27}} \\
+  0.95 & 0.1 & 50 & \textit{REVISE} & -60.4 & 45.8 \\
+  \color{Red}{\textbf{0.75}} & \color{Red}{\textbf{0.5}} & \color{Red}{\textbf{5}} & \color{Red}{\textbf{ECCo}} & \color{Red}{\textbf{-0.94}} & \color{Red}{\textbf{17.6}} \\
+  0.75 & 0.5 & 5 & \textit{Generic} & -11.7 & 17.4 \\
+  0.75 & 0.5 & 5 & \textit{REVISE} & -37.7 & 3.92 \\
+  0.75 & 0.5 & 25 & \textit{ECCo} & 14.7 & 6.32 \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{0.5}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{32.3}} & \color{Green}{\textbf{3.49}} \\
+  0.75 & 0.5 & 25 & \textit{REVISE} & -39.9 & 7.21 \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{0.5}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{28.3}} & \color{Green}{\textbf{5.05}} \\
+  0.75 & 0.5 & 50 & \textit{Generic} & -9.72 & 9.19 \\
+  0.75 & 0.5 & 50 & \textit{REVISE} & -30 & 5.22 \\
+  0.9 & 0.5 & 5 & \textit{ECCo} & -7.38 & 13.6 \\
+  \color{Red}{\textbf{0.9}} & \color{Red}{\textbf{0.5}} & \color{Red}{\textbf{5}} & \color{Red}{\textbf{Generic}} & \color{Red}{\textbf{-0.0952}} & \color{Red}{\textbf{17.1}} \\
+  0.9 & 0.5 & 5 & \textit{REVISE} & -50.6 & 4.77 \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{0.5}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{39.1}} & \color{Green}{\textbf{8.3}} \\
+  0.9 & 0.5 & 25 & \textit{Generic} & 38.6 & 6.03 \\
+  0.9 & 0.5 & 25 & \textit{REVISE} & -56.9 & 4.28 \\
+  0.9 & 0.5 & 50 & \textit{ECCo} & -6.53 & 10.9 \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{0.5}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{13.6}} & \color{Green}{\textbf{12.8}} \\
+  0.9 & 0.5 & 50 & \textit{REVISE} & -24.1 & 12.5 \\
+  0.95 & 0.5 & 5 & \textit{ECCo} & 0.596 & 1.11 \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{0.5}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{4.57}} & \color{Green}{\textbf{5.88}} \\
+  0.95 & 0.5 & 5 & \textit{REVISE} & -34.3 & 6.09 \\
+  0.95 & 0.5 & 25 & \textit{ECCo} & 16.5 & 3.53 \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{0.5}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{19.1}} & \color{Green}{\textbf{4.43}} \\
+  0.95 & 0.5 & 25 & \textit{REVISE} & -37.2 & 39.2 \\
+  0.95 & 0.5 & 50 & \textit{ECCo} & -31 & 14.2 \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{0.5}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{24.8}} & \color{Green}{\textbf{4.78}} \\
+  0.95 & 0.5 & 50 & \textit{REVISE} & -1.28 & 2.7 \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{37}} & \color{Green}{\textbf{9.21}} \\
+  0.75 & 5 & 5 & \textit{Generic} & 0.977 & 21.1 \\
+  0.75 & 5 & 5 & \textit{REVISE} & -55.2 & 4.75 \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{21.8}} & \color{Green}{\textbf{5.97}} \\
+  0.75 & 5 & 25 & \textit{Generic} & 17.8 & 5.33 \\
+  0.75 & 5 & 25 & \textit{REVISE} & -68.1 & 8.69 \\
+  0.75 & 5 & 50 & \textit{ECCo} & 0.864 & 9.51 \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{8.56}} & \color{Green}{\textbf{13.6}} \\
+  0.75 & 5 & 50 & \textit{REVISE} & -71.8 & 3.18 \\
+  0.9 & 5 & 5 & \textit{ECCo} & -3.59 & 20.3 \\
+  \color{Red}{\textbf{0.9}} & \color{Red}{\textbf{5}} & \color{Red}{\textbf{5}} & \color{Red}{\textbf{Generic}} & \color{Red}{\textbf{-1.18}} & \color{Red}{\textbf{16.7}} \\
+  0.9 & 5 & 5 & \textit{REVISE} & -58.6 & 3.55 \\
+  0.9 & 5 & 25 & \textit{ECCo} & -1.73 & 9.07 \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{21.9}} & \color{Green}{\textbf{7.48}} \\
+  0.9 & 5 & 25 & \textit{REVISE} & -44.4 & 4.23 \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{30.8}} & \color{Green}{\textbf{10.7}} \\
+  0.9 & 5 & 50 & \textit{Generic} & 16.3 & 11.1 \\
+  0.9 & 5 & 50 & \textit{REVISE} & -53.3 & 6.73 \\
+  \color{Red}{\textbf{0.95}} & \color{Red}{\textbf{5}} & \color{Red}{\textbf{5}} & \color{Red}{\textbf{ECCo}} & \color{Red}{\textbf{-5.29}} & \color{Red}{\textbf{24.5}} \\
+  0.95 & 5 & 5 & \textit{Generic} & -5.71 & 17.4 \\
+  0.95 & 5 & 5 & \textit{REVISE} & -36.5 & 4.01 \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{26.9}} & \color{Green}{\textbf{4.08}} \\
+  0.95 & 5 & 25 & \textit{Generic} & 19.5 & 5.49 \\
+  0.95 & 5 & 25 & \textit{REVISE} & -25 & 5 \\
+  0.95 & 5 & 50 & \textit{ECCo} & 4.6 & 7.46 \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{16.6}} & \color{Green}{\textbf{4.3}} \\
+  0.95 & 5 & 50 & \textit{REVISE} & -50.4 & 46.4 \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{2.47}} & \color{Green}{\textbf{8.57}} \\
+  0.75 & 10 & 5 & \textit{Generic} & -7.23 & 9.13 \\
+  0.75 & 10 & 5 & \textit{REVISE} & -67.2 & 5.75 \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{29.9}} & \color{Green}{\textbf{15.8}} \\
+  0.75 & 10 & 25 & \textit{Generic} & 4.47 & 8.22 \\
+  0.75 & 10 & 25 & \textit{REVISE} & -52 & 5.51 \\
+  0.75 & 10 & 50 & \textit{ECCo} & 6.23 & 6.11 \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{15.2}} & \color{Green}{\textbf{10.2}} \\
+  0.75 & 10 & 50 & \textit{REVISE} & -17 & 5.46 \\
+  0.9 & 10 & 5 & \textit{ECCo} & -6.93 & 14.7 \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{6.88}} & \color{Green}{\textbf{5.11}} \\
+  0.9 & 10 & 5 & \textit{REVISE} & -45.6 & 47.8 \\
+  0.9 & 10 & 25 & \textit{ECCo} & 6.2 & 6.75 \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{34.7}} & \color{Green}{\textbf{9.74}} \\
+  0.9 & 10 & 25 & \textit{REVISE} & -55.7 & 6.04 \\
+  0.9 & 10 & 50 & \textit{ECCo} & 30.1 & 14.2 \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{35}} & \color{Green}{\textbf{7.11}} \\
+  0.9 & 10 & 50 & \textit{REVISE} & -48.8 & 3.3 \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{35.7}} & \color{Green}{\textbf{3.83}} \\
+  0.95 & 10 & 5 & \textit{Generic} & 2.85 & 7.9 \\
+  0.95 & 10 & 5 & \textit{REVISE} & -34.9 & 4.56 \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{33}} & \color{Green}{\textbf{6.45}} \\
+  0.95 & 10 & 25 & \textit{Generic} & 24.8 & 4.59 \\
+  0.95 & 10 & 25 & \textit{REVISE} & -55.7 & 44 \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{10}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{8.07}} & \color{Green}{\textbf{7.68}} \\
+  0.95 & 10 & 50 & \textit{Generic} & -7.11 & 9.2 \\
+  0.95 & 10 & 50 & \textit{REVISE} & -26.1 & 18.6 \\
+  0.75 & 20 & 5 & \textit{ECCo} & -10.8 & 20.8 \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{12.6}} & \color{Green}{\textbf{17.6}} \\
+  0.75 & 20 & 5 & \textit{REVISE} & -21.6 & 3.34 \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{17.2}} & \color{Green}{\textbf{4.25}} \\
+  0.75 & 20 & 25 & \textit{Generic} & -10.3 & 9.59 \\
+  0.75 & 20 & 25 & \textit{REVISE} & -59 & 3.66 \\
+  \color{Green}{\textbf{0.75}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{15.6}} & \color{Green}{\textbf{8.38}} \\
+  0.75 & 20 & 50 & \textit{Generic} & 3.92 & 6.2 \\
+  0.75 & 20 & 50 & \textit{REVISE} & -70.9 & 5.16 \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{26.3}} & \color{Green}{\textbf{6.62}} \\
+  0.9 & 20 & 5 & \textit{Generic} & 2.35 & 7.04 \\
+  0.9 & 20 & 5 & \textit{REVISE} & -64.8 & 4.31 \\
+  0.9 & 20 & 25 & \textit{ECCo} & 21.1 & 11.6 \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{39}} & \color{Green}{\textbf{5.98}} \\
+  0.9 & 20 & 25 & \textit{REVISE} & -50.7 & 13.8 \\
+  \color{Green}{\textbf{0.9}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{15.1}} & \color{Green}{\textbf{7.46}} \\
+  0.9 & 20 & 50 & \textit{Generic} & 8.53 & 6.95 \\
+  0.9 & 20 & 50 & \textit{REVISE} & -36 & 6.14 \\
+  0.95 & 20 & 5 & \textit{ECCo} & -23.8 & 17.8 \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{5}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{7.23}} & \color{Green}{\textbf{4.74}} \\
+  0.95 & 20 & 5 & \textit{REVISE} & -34 & 4.11 \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{25}} & \color{Green}{\textbf{ECCo}} & \color{Green}{\textbf{19.3}} & \color{Green}{\textbf{14.6}} \\
+  0.95 & 20 & 25 & \textit{Generic} & -1.35 & 7.71 \\
+  0.95 & 20 & 25 & \textit{REVISE} & -52.8 & 5.11 \\
+  0.95 & 20 & 50 & \textit{ECCo} & 18.7 & 3.84 \\
+  \color{Green}{\textbf{0.95}} & \color{Green}{\textbf{20}} & \color{Green}{\textbf{50}} & \color{Green}{\textbf{Generic}} & \color{Green}{\textbf{37.3}} & \color{Green}{\textbf{7.78}} \\
+  0.95 & 20 & 50 & \textit{REVISE} & -28.3 & 15 \\\bottomrule
+
+\end{longtable}
+
+\section{Computation Details}\label{computation-details}
+
+\subsection{Hardware}\label{hardware}
+
+We performed our experiments on a high-performance cluster. Details
+about the cluster will be disclosed upon publication to avoid revealing
+information that might interfere with the double-blind review process.
+Since our experiments involve highly parallel tasks and rather small
+models by today's standard, we have relied on distributed computing
+across multiple central processing units (CPU). Graphical processing
+units (GPU) were not required. For larger grid searches we used up to
+but typically less than 100 CPUs.
+
+\subsection{Software}\label{software}
+
+All computations were performed in the Julia Programming Language
+\cite{bezanson2017julia}. We have developed a package for counterfactual
+training that leverages and extends the functionality provided by
+several existing packages, most notably
+\href{https://github.com/JuliaTrustworthyAI/CounterfactualExplanations.jl}{CounterfactualExplanations.jl}
+\cite{altmeyer2023explaining} and the
+\href{https://fluxml.ai/Flux.jl/v0.16/}{Flux.jl} library for deep
+learning \cite{innes2018fashionable,innes2018flux}. For data-wrangling
+and presentation-ready tables we relied on
+\href{https://dataframes.juliadata.org/v1.7/}{DataFrames.jl}
+\cite{milan2023dataframes} and
+\href{https://ronisbr.github.io/PrettyTables.jl/v2.4/}{PrettyTables.jl}
+\cite{chagas2024pretty}, respectively. For plots and visualizations we
+used both \href{https://docs.juliaplots.org/v1.40/}{Plots.jl}
+\cite{PlotsJL} and \href{https://docs.makie.org/v0.22/}{Makie.jl}
+\cite{danisch2021makie}, in particular
+\href{https://aog.makie.org/v0.9.3/}{AlgebraOfGraphics.jl}. To
+distribute computational tasks across multiple processors, we have
+relied on \href{https://juliaparallel.org/MPI.jl/v0.20/}{MPI.jl}
+\cite{byrne2021mpi}.
+
+
+\bibliographystyle{splncs04}
+\bibliography{bibliography}
+
+\end{document}

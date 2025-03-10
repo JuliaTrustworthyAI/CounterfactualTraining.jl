@@ -79,10 +79,9 @@ function counterfactual_training(
         reg_losses = Float32[]
         validity_losses = Float32[]
         start = time()
-        
+
         # Generate counterfactuals:
         if epoch > burnin && needs_counterfactuals(loss)
-
             counterfactual_dl, percent_valid, ces = generate!(
                 model,
                 train_set,

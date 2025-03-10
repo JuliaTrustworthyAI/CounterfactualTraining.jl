@@ -3,7 +3,7 @@ dim_reduction = []
 generator_type = ["ecco", "generic", "revise"]
 data = "lin_sep"
 model_type = "mlp"
-save_dir = "paper/experiments/output/single/mlp/lin_sep"
+save_dir = "paper/experiments/output/test_run/single/mlp/lin_sep"
 
 [data_params]
 datadir = []
@@ -23,7 +23,7 @@ nhidden = []
 [generator_params]
 opt = []
 lambda_cost = []
-lr = []
+lr = [0.1]
 maxiter = []
 lambda_energy = []
 decision_threshold = []
