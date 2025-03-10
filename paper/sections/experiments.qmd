@@ -33,7 +33,7 @@ What are the effects of different hyperparameter choices with respect to @eq-obj
 
 ### Evaluation 
 
-Our key outcome of interest is how well models perform with respect to explainability (@def-explainability): to this end, we focus primarily on the plausibility and cost of faithfully generated counterfactuals at test time. To measure the cost of counterfactuals, we follow the standard convention of using distances ($\ell_1$-norm) between factuals and counterfactuals as a proxy. For plausibility, we assess how similar counterfactuals are to observed samples in the target domain. We rely on previously used distance-based metrics [@giudot]
+Our key outcome of interest is how well models perform with respect to explainability (@def-explainability): to this end, we focus primarily on the plausibility and cost of faithfully generated counterfactuals at test time. To measure the cost of counterfactuals, we follow the standard convention of using distances ($\ell_1$-norm) between factuals and counterfactuals as a proxy. For plausibility, we assess how similar counterfactuals are to observed samples in the target domain. We rely on previously used distance-based metrics, in particular the one used by @altmeyer2024faithful, and introduce a novel divergence metric. 
 
 
 We also assess their predictive performance using conventional performance metrics including accuracy and the F1-score. 
