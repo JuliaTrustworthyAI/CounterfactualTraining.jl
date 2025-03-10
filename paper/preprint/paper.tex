@@ -168,13 +168,13 @@
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
 \theoremstyle{plain}
-\newtheorem{corollary}{Research Question}[section]
+\newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}
 \newtheorem{example}{Example}[section]
+\theoremstyle{plain}
+\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
-\theoremstyle{plain}
-\newtheorem{proposition}{Proposition}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -634,16 +634,17 @@ Divergence}\label{directly-inducing-explainability-through-contrastive-divergenc
 
 Grathwohl et al. (\citeproc{ref-grathwohl2020your}{2020}) observe that
 any classifier can be re-interpreted as a joint energy-based model (JEM)
-that learns to discriminate output classes conditional on inputs and
-generate inputs. They show that JEMs can be trained to perform well at
-both tasks by directly maximizing the joint log-likelihood factorized as
+that learns to discriminate output classes conditional on the observed
+(training) samples from \(p(\mathbf{x})\) and the generated samples from
+\(p_\theta(\mathbf{x})\). They show that JEMs can be trained to perform
+well at both tasks by directly maximizing the joint log-likelihood
+factorized as
 \(\log p_\theta(\mathbf{x},\mathbf{y})=\log p_\theta(\mathbf{y}|\mathbf{x}) + \log p_\theta(\mathbf{x})\).
 The first factor can be optimized using conventional cross-entropy as in
-Equation~\ref{eq-obj}. To optimize \(\log p_\theta(\mathbf{x})\)
+Equation~\ref{eq-obj}. Then, to optimize \(\log p_\theta(\mathbf{x})\)
 Grathwohl et al. (\citeproc{ref-grathwohl2020your}{2020}) minimize the
-contrastive divergence between samples drawn from
-\(p_\theta(\mathbf{x})\) and training observations, i.e., samples from
-\(p(\mathbf{x})\).
+contrastive divergence between these observed samples from
+\(p(\mathbf{x})\) and generated samples from \(p_\theta(\mathbf{x})\).
 
 A key empirical finding in Altmeyer et al.
 (\citeproc{ref-altmeyer2024faithful}{2024}) was that JEMs tend to do
@@ -656,9 +657,8 @@ To generate samples, Grathwohl et al.
 (\citeproc{ref-grathwohl2020your}{2020}) rely on Stochastic Gradient
 Langevin Dynamics (SGLD) using an uninformative prior for
 initialization. This is where we depart from their methodology: instead
-of generating samples through SGLD, we propose using counterfactual
-explainers to generate counterfactuals for observed training samples.
-Specifically, we have
+of SGLD, we propose to use counterfactual explainers to generate
+counterfactuals of observed training samples. Specifically, we have:
 
 \begin{equation}\phantomsection\label{eq-div}{
 \text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) = \mathcal{E}_\theta(\mathbf{x},y) - \mathcal{E}_\theta(\mathbf{x}_T^\prime,y)
@@ -793,7 +793,7 @@ covariance matrix \(\Sigma_k=\Sigma\) for all \(k \in \mathcal{K}\),
 then protecting an immutable feature from the contrastive divergence
 penalty (Equation~\ref{eq-div}) will result in lower classifier
 sensitivity to that feature relative to the remaining features, provided
-that at least one of those is mutable and discriminative.
+that at least one of those is discriminative and mutable.
 
 \end{proposition}
 
