@@ -49,4 +49,19 @@ where $\mathbf{X}^\prime$ denotes a set of multiple counterfactuals and $\text{M
 
 In addition to cost and plausibility, we also compute other standard metrics to evaluate counterfactuals at test time including validity and redundancy. Finally, we also assess the predictive performance of models using standard metrics.
 
+We run the experiments with three CE generators: *Generic* of @wachter2017counterfactual as a simple baseline approach, *REVISE* [@joshi2019realistic] that aims to generate plausible counterfactuals using a surrogate Variational Autoencoder (VAE), and *ECCo*---the generator of @altmeyer2023faithful but without the conformal prediction component---as a method that directly targets both faithfulness and plausibility of the CEs.
+
 ## Experimental Results
+
+### Plausibility
+
+### Actionability
+
+### Impact of hyperparameter settings
+We extensively test the impact of three types of hyperparameters on the proposed training regime. Our complete results are available in the technical appendix; this section focuses on the main findings. 
+
+***Hyperparameters of the CE generators.*** First, we observe that CT is highly sensitive to hyperparameter settings but (a) there are manageable patterns and (b) we can typically identify settings that improve either plausibility or cost, and commonly both of them at the same time. Second, we note that the choice of a CE generator has a major impact on the results. For example, *REVISE* tends to perform the worst, most likely because it attempts to explain the decisions of a VAE that is an imperfect surrogate of the original model. Third, increasing $T$, the maximum number of steps, generally yields better outcomes because more CEs can mature in any iteration. Fourth, the impact of $\tau$, the required decision threshold is more difficult to predict. On "harder" datasets it may be difficult to satisfy high $\tau$ for any given sample (i.e., also factuals) and so increasing this threshold does not seem to correlate with better outcomes.
+
+***Hyperparameters for penalties*** We find that the strength of the energy regularization, $\lambda_{\text{reg}}$ is highly impactful; energy must be sufficiently regularized to avoid poor performance in terms of decreased plausibility and increased costs. The sensitivity with respect to $\lambda_{\text{div}}$ and $\lambda_{\text{adv}}$ is much less evident. While high values of $\lambda_{\text{reg}}$ may increase the variability in outcomes when combined with high values for @eq-obj penalties, this effect is not very pronounced.
+
+***Other hyperparameters.*** We observe that the effectiveness and stability of CT is positively associated with the number of counterfactuals generated during each training epoch. We also confirm that a higher number of training epochs is beneficial. Interestingly, we find that it is not necessary to employ CT during the entire training phase to achieve the desired improvements in explainability. We have tested training models conventionally during the first half of training before switching to CT after this initial "burn-in" period and observed positive results. Put differently, CT may be a way to improve the explainability of trained models in a fine-tuning manner. 

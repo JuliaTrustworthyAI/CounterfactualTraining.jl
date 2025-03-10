@@ -936,7 +936,64 @@ metrics to evaluate counterfactuals at test time including validity and
 redundancy. Finally, we also assess the predictive performance of models
 using standard metrics.
 
+We run the experiments with three CE generators: \emph{Generic} of
+Wachter, Mittelstadt, and Russell
+(\citeproc{ref-wachter2017counterfactual}{2017}) as a simple baseline
+approach, \emph{REVISE} (\citeproc{ref-joshi2019realistic}{Joshi et al.
+2019}) that aims to generate plausible counterfactuals using a surrogate
+Variational Autoencoder (VAE), and \emph{ECCo}---the generator of
+Altmeyer et al. (\citeproc{ref-altmeyer2023faithful}{2023}) but without
+the conformal prediction component---as a method that directly targets
+both faithfulness and plausibility of the CEs.
+
 \subsection{Experimental Results}\label{experimental-results}
+
+\subsubsection{Plausibility}\label{plausibility-1}
+
+\subsubsection{Actionability}\label{actionability-1}
+
+\subsubsection{Impact of hyperparameter
+settings}\label{impact-of-hyperparameter-settings}
+
+We extensively test the impact of three types of hyperparameters on the
+proposed training regime. Our complete results are available in the
+technical appendix; this section focuses on the main findings.
+
+\textbf{\emph{Hyperparameters of the CE generators.}} First, we observe
+that CT is highly sensitive to hyperparameter settings but (a) there are
+manageable patterns and (b) we can typically identify settings that
+improve either plausibility or cost, and commonly both of them at the
+same time. Second, we note that the choice of a CE generator has a major
+impact on the results. For example, \emph{REVISE} tends to perform the
+worst, most likely because it attempts to explain the decisions of a VAE
+that is an imperfect surrogate of the original model. Third, increasing
+\(T\), the maximum number of steps, generally yields better outcomes
+because more CEs can mature in any iteration. Fourth, the impact of
+\(\tau\), the required decision threshold is more difficult to predict.
+On ``harder'' datasets it may be difficult to satisfy high \(\tau\) for
+any given sample (i.e., also factuals) and so increasing this threshold
+does not seem to correlate with better outcomes.
+
+\textbf{\emph{Hyperparameters for penalties}} We find that the strength
+of the energy regularization, \(\lambda_{\text{reg}}\) is highly
+impactful; energy must be sufficiently regularized to avoid poor
+performance in terms of decreased plausibility and increased costs. The
+sensitivity with respect to \(\lambda_{\text{div}}\) and
+\(\lambda_{\text{adv}}\) is much less evident. While high values of
+\(\lambda_{\text{reg}}\) may increase the variability in outcomes when
+combined with high values for Equation~\ref{eq-obj} penalties, this
+effect is not very pronounced.
+
+\textbf{\emph{Other hyperparameters.}} We observe that the effectiveness
+and stability of CT is positively associated with the number of
+counterfactuals generated during each training epoch. We also confirm
+that a higher number of training epochs is beneficial. Interestingly, we
+find that it is not necessary to employ CT during the entire training
+phase to achieve the desired improvements in explainability. We have
+tested training models conventionally during the first half of training
+before switching to CT after this initial ``burn-in'' period and
+observed positive results. Put differently, CT may be a way to improve
+the explainability of trained models in a fine-tuning manner.
 
 \section{Discussion}\label{sec-discussion}
 
@@ -982,6 +1039,11 @@ den Hengel. 2020. {``Counterfactual Vision and Language Learning.''} In
 \emph{2020 IEEE/CVF Conference on Computer Vision and Pattern
 Recognition (CVPR)}, 10041--51.
 \url{https://doi.org/10.1109/CVPR42600.2020.01006}.
+
+\bibitem[\citeproctext]{ref-altmeyer2023faithful}
+Altmeyer, Patrick, Mojtaba Farmanbar, Arie van Deursen, and Cynthia C.
+S. Liem. 2023. {``Faithful Model Explanations Through Energy-Constrained
+Conformal Counterfactuals.''} \url{https://arxiv.org/abs/2312.10648}.
 
 \bibitem[\citeproctext]{ref-altmeyer2024faithful}
 Altmeyer, Patrick, Mojtaba Farmanbar, Arie van Deursen, and Cynthia CS
@@ -1055,6 +1117,12 @@ In \emph{Proceedings of the 29th ACM SIGKDD Conference on Knowledge
 Discovery and Data Mining}, 577--89. KDD '23. New York, NY, USA:
 Association for Computing Machinery.
 \url{https://doi.org/10.1145/3580305.3599290}.
+
+\bibitem[\citeproctext]{ref-joshi2019realistic}
+Joshi, Shalmali, Oluwasanmi Koyejo, Warut Vijitbenjaronk, Been Kim, and
+Joydeep Ghosh. 2019. {``Towards Realistic Individual Recourse and
+Actionable Explanations in Black-Box Decision Making Systems.''}
+\url{https://arxiv.org/abs/1907.09615}.
 
 \bibitem[\citeproctext]{ref-kolter2023keynote}
 Kolter, Zico. 2023.{``{Keynote Addresses: SaTML 2023 }.''} In \emph{2023
