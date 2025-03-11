@@ -1,9 +1,9 @@
 name = "tune_lr"
 dim_reduction = []
 generator_type = ["ecco"]
-data = ""
-model_type = ""
-save_dir = ""
+data = "gmsc"
+model_type = "mlp"
+save_dir = "paper/experiments/output/final_run/tune_lr/mlp/gmsc"
 
 [data_params]
 datadir = []
@@ -24,26 +24,26 @@ nhidden = []
 opt = []
 lambda_cost = []
 lr = [0.25, 0.5, 1.0]
-decision_threshold = []
 maxiter = []
 lambda_energy = []
+decision_threshold = []
 type = []
 
 [training_params]
 opt = []
-nce = []
 lr = []
-threaded = []
-class_loss = []
 objective = ["full", "vanilla"]
 lambda_class_loss = []
 lambda_energy_diff = []
 burnin = []
 nepochs = []
-lambda_energy_reg = [0.1, 0.25, 0.5]
-verbose = []
 lambda_adversarial = []
 parallelizer = []
+nce = []
+threaded = []
+class_loss = []
+lambda_energy_reg = [0.1, 0.25, 0.5]
+verbose = []
 generator_params = []
 conv = []
 nneighbours = []
