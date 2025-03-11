@@ -72,3 +72,29 @@ dname(d::Adult) = "adult"
 nmax(d::Adult) = 32561
 
 load_data(d::Adult, n::Int) = load_uci_adult(n)
+
+get_cats(d::Adult) = load_uci_adult(; return_cats=true)[2]
+
+"""
+    Credit Default
+
+Keyword container for the `Credit Default` data set.
+"""
+Base.@kwdef mutable struct Credit <: Dataset
+    n_train::Int = 9617
+    batchsize::Int = 1000
+    n_validation::Int = 1000
+    train_test_ratio::Float32 = 0.8
+    train_test_seed::Int = get_global_seed()
+    mutability::Union{String,Vector{String}} = "none"
+    domain::Union{String,Vector{<:Any}} = "none"
+    datadir::String = get_global_dev_dir()
+end
+
+dname(d::Credit) = "credit"
+
+nmax(d::Credit) = 13272
+
+load_data(d::Credit, n::Int) = load_credit_default(n)
+
+get_cats(d::Credit) = load_credit_default(; return_cats=true)[2]

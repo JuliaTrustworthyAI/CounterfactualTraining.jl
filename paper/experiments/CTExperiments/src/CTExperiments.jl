@@ -47,7 +47,7 @@ export set_work_dir, get_work_dir, results_dir
 export save_dir
 export get_config_from_args
 export mpi_should_finalize, set_mpi_finalize
-export GMSC, MNIST, Moons, LinearlySeparable, Overlapping, Circles, CaliHousing, Adult
+export GMSC, MNIST, Moons, LinearlySeparable, Overlapping, Circles, CaliHousing, Adult, Credit
 export get_data, get_ce_data, ntotal
 export get_domain, get_mutability
 export default_save_dir
