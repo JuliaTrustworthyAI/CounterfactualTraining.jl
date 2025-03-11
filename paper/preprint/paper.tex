@@ -168,13 +168,13 @@
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
 \theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\theoremstyle{definition}
 \newtheorem{example}{Example}[section]
 \theoremstyle{plain}
-\newtheorem{proposition}{Proposition}[section]
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
-\theoremstyle{plain}
 \newtheorem{corollary}{Research Question}[section]
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -953,7 +953,7 @@ both faithfulness and plausibility of the CEs.
 \subsubsection{Actionability}\label{actionability-1}
 
 \subsubsection{Impact of hyperparameter
-settings}\label{impact-of-hyperparameter-settings}
+settings}\label{sec-hyperparameters}
 
 We extensively test the impact of three types of hyperparameters on the
 proposed training regime. Our complete results are available in the
@@ -997,34 +997,61 @@ the explainability of trained models in a fine-tuning manner.
 
 \section{Discussion}\label{sec-discussion}
 
-\subsection{Approach/Future Directions}\label{approachfuture-directions}
+We begin the discussion by addressing the direct extensions of the
+counterfactual training approach in Section~\ref{sec-approach}. Then, we
+look at its broader limitations and challenges in
+Section~\ref{sec-limitations}.
 
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  Limited to classification models.
-\item
-  Training instabilities.
-\item
-  Hyperparameter sensitivity -\textgreater{} can we do better than grid
-  search? (Bayes opt, \ldots)
-\end{enumerate}
+\subsection{Future research}\label{sec-approach}
 
-\subsection{Limitations}\label{limitations}
+\textbf{\emph{CT is defined only for classification settings.}} Our
+formulation relies on the distinction between non-target class(es)
+\(y^{-}\) and target class(es) \(y^{+}\) to generate counterfactuals
+through Equation~\ref{eq-obj}. While \(y^{-}\) and \(y^{+}\) can be
+arbitrarily defined by the user, CT requires the output space
+\(\mathcal{Y}\) to be discrete. Thus, it applies to binary and
+multi-class classification but it is not well-defined for other ML tasks
+where the change in outcome with respect to a decision threshold
+\(\tau\) cannot be readily quantified. In fact, this is a common
+restriction in research on CEs and AR that predominantly focuses on
+classification models. Although other settings have attracted some
+interest (e.g., regression in
+\citeproc{ref-spooner2021counterfactual}{Spooner et al. 2021};
+\citeproc{ref-zhao2023counterfactual}{Zhao, Broelemann, and Kasneci
+2023}), there is still no consensus on what constitutes a counterfactual
+in such settings.
 
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\setcounter{enumi}{2}
-\tightlist
-\item
-  Proxy attributes of immutable features.
-\item
-  Increased training time.
-\item
-  Fairness and caveats (aware it's not a classical approach in this
-  context, but there is a clear link).
-\end{enumerate}
+\textbf{\emph{CT is subject to training instabilities.}} Joint
+energy-based models are susceptible to instabilities during training
+(\citeproc{ref-grathwohl2020your}{Grathwohl et al. 2020}) and even
+though we depart from the SGLD-based sampling, we still encounter major
+variability in the outcomes. CT is exposed to two potential sources of
+instabilities: (1) the energy-based contrastive divergence term in
+Equation~\ref{eq-div}, and (2) the underlying counterfactual explainers.
+For example, Altmeyer et al. (\citeproc{ref-altmeyer2023faithful}{2023})
+recognize this to be a challenge for \emph{ECCCo} and so it may have
+downstream impacts on our proposed method. Still, we find that training
+instabilities can be largely counteracted with strong regularization, in
+particular through \(\lambda_{\text{reg}}\) penalty on the energy.
+
+\textbf{\emph{CT is sensitive to hyperparameter selection.}} As
+discussed in Section~\ref{sec-hyperparameters}, our method requires
+careful selection of the hyperparameters. All experiments relied on
+grid-search tuning but we recognize that other algorithms may be more
+efficient. Notably, counterfactual training is iterative which makes a
+variety of methods applicable, including Bayesian (e.g.,
+\citeproc{ref-snoek2012practical}{Snoek, Larochelle, and Adams 2012}) or
+gradient-based (e.g., \citeproc{ref-franceschi2017forward}{Franceschi et
+al. 2017}) optimization.
+
+\subsection{Limitations and challenges}\label{sec-limitations}
+
+\textbf{\emph{CT increases the training time of models.}}
+
+\textbf{\emph{Immutable features may have proxies.}}
+
+\textbf{\emph{Interventions on features may have downstream impacts on
+fairness.}}
 
 \section{Conclusion}\label{sec-conclusion}
 
@@ -1073,6 +1100,14 @@ Linguistics: EMNLP 2023}, 127--39.
 Du, Yilun, and Igor Mordatch. 2020. {``Implicit Generation and
 Generalization in Energy-Based Models.''}
 \url{https://arxiv.org/abs/1903.08689}.
+
+\bibitem[\citeproctext]{ref-franceschi2017forward}
+Franceschi, Luca, Michele Donini, Paolo Frasconi, and Massimiliano
+Pontil. 2017. {``{Forward and Reverse Gradient-Based Hyperparameter
+Optimization}.''} In \emph{Proceedings of the 34th International
+Conference on Machine Learning}, edited by Doina Precup and Yee Whye
+Teh, 70:1165--73. Proceedings of Machine Learning Research. PMLR.
+\url{https://proceedings.mlr.press/v70/franceschi17a.html}.
 
 \bibitem[\citeproctext]{ref-frankle2018lottery}
 Frankle, Jonathan, and Michael Carbin. 2019. {``The Lottery Ticket
@@ -1199,6 +1234,20 @@ Counterfactual Explanations By Implicit Minimisation} of {Epistemic} and
 {Aleatoric Uncertainties}.''} In \emph{International {Conference} on
 {Artificial Intelligence} and {Statistics}}, 1756--64. {PMLR}.
 
+\bibitem[\citeproctext]{ref-snoek2012practical}
+Snoek, Jasper, Hugo Larochelle, and Ryan P. Adams. 2012. {``{Practical
+Bayesian Optimization of Machine Learning Algorithms}.''} In
+\emph{Advances in Neural Information Processing Systems}, edited by F.
+Pereira, C. J. Burges, L. Bottou, and K. Q. Weinberger. Vol. 25. Curran
+Associates, Inc.
+\url{https://proceedings.neurips.cc/paper_files/paper/2012/file/05311655a15b75fab86956663e1819cd-Paper.pdf}.
+
+\bibitem[\citeproctext]{ref-spooner2021counterfactual}
+Spooner, Thomas, Danial Dervovic, Jason Long, Jon Shepard, Jiahao Chen,
+and Daniele Magazzeni. 2021. {``{Counterfactual Explanations for
+Arbitrary Regression Models}.''} \emph{CoRR} abs/2106.15212.
+\url{https://arxiv.org/abs/2106.15212}.
+
 \bibitem[\citeproctext]{ref-szegedy2013intriguing}
 Szegedy, Christian, Wojciech Zaremba, Ilya Sutskever, Joan Bruna,
 Dumitru Erhan, Ian Goodfellow, and Rob Fergus. 2013. {``Intriguing
@@ -1236,6 +1285,13 @@ Zhang, Chiyuan, Samy Bengio, Moritz Hardt, Benjamin Recht, and Oriol
 Vinyals. 2021. {``Understanding Deep Learning (Still) Requires
 Rethinking Generalization.''} \emph{Commun. ACM} 64 (3): 107--15.
 \url{https://doi.org/10.1145/3446776}.
+
+\bibitem[\citeproctext]{ref-zhao2023counterfactual}
+Zhao, Xuan, Klaus Broelemann, and Gjergji Kasneci. 2023.
+{``{Counterfactual Explanation for Regression via Disentanglement in
+Latent Space}.''} In \emph{2023 IEEE International Conference on Data
+Mining Workshops (ICDMW)}, 976--84. Los Alamitos, CA, USA: IEEE Computer
+Society. \url{https://doi.org/10.1109/ICDMW60847.2023.00130}.
 
 \end{CSLReferences}
 

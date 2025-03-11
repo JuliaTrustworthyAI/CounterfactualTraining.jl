@@ -57,7 +57,7 @@ We run the experiments with three CE generators: *Generic* of @wachter2017counte
 
 ### Actionability
 
-### Impact of hyperparameter settings
+### Impact of hyperparameter settings {#sec-hyperparameters}
 We extensively test the impact of three types of hyperparameters on the proposed training regime. Our complete results are available in the technical appendix; this section focuses on the main findings. 
 
 ***Hyperparameters of the CE generators.*** First, we observe that CT is highly sensitive to hyperparameter settings but (a) there are manageable patterns and (b) we can typically identify settings that improve either plausibility or cost, and commonly both of them at the same time. Second, we note that the choice of a CE generator has a major impact on the results. For example, *REVISE* tends to perform the worst, most likely because it attempts to explain the decisions of a VAE that is an imperfect surrogate of the original model. Third, increasing $T$, the maximum number of steps, generally yields better outcomes because more CEs can mature in any iteration. Fourth, the impact of $\tau$, the required decision threshold is more difficult to predict. On "harder" datasets it may be difficult to satisfy high $\tau$ for any given sample (i.e., also factuals) and so increasing this threshold does not seem to correlate with better outcomes.
