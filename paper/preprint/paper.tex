@@ -167,14 +167,14 @@
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
 \theoremstyle{definition}
 \newtheorem{example}{Example}[section]
 \theoremstyle{plain}
 \newtheorem{corollary}{Research Question}[section]
-\theoremstyle{plain}
-\newtheorem{proposition}{Proposition}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -1046,12 +1046,50 @@ al. 2017}) optimization.
 
 \subsection{Limitations and challenges}\label{sec-limitations}
 
-\textbf{\emph{CT increases the training time of models.}}
+\textbf{\emph{CT increases the training time of models.}} Counterfactual
+training promotes explainability through CEs and robustness through AEs
+at the cost of longer training times compared to conventional training
+regimes. While higher numbers of iterations and counterfactuals per
+iteration positively impact the quality of found solutions, they also
+increase the required amount of computations. We find that relatively
+small grids with 270 settings can take almost four hours for more
+demanding datasets on a high-performance computing cluster with 34 2GB
+CPUs (see details in \textbf{?@sec-hardware}). However, there are three
+factors that attenuate the impact of this limitation. First, CT provides
+counterfactual explanations for the training samples essentially for
+free, which may be beneficial in many ADM systems. Second, we find that
+CT can retain its value when used as a ``fine-tuning'' training regime
+for conventionally-trained models. Third, in principle, CT yields itself
+to multi-threaded execution.
 
-\textbf{\emph{Immutable features may have proxies.}}
+\textbf{\emph{Immutable features may have proxies.}} In
+Proposition~\ref{prp-mtblty} we define an approach to protect immutable
+features and thus increase the actionability of the generated
+counterfactuals. However, this approach requires that model owners
+define the mutability constraints for (all) features considered by the
+model. Even with sufficient domain knowledge to protect all immutable
+features---ones that cannot be changed at all and ones that cannot be
+reasonably expected to change---there may exist proxies that are
+theoretically mutable (and hence should not be protected) but preserve
+enough information about the principals to counteract the protections.
+As one example, consider the Adult dataset used in our experiments where
+the mutable education status is a proxy for the immutable age, in that
+the attainment of degrees is correlated with age. Delineating
+actionability is a major undecided challenge in the AR literature (see,
+e.g.,
+\citeproc{ref-venkatasubramanian2020philosophical}{Venkatasubramanian
+and Alfano 2020}) impacting the capacity of CT to increase the
+explainability of the model.
 
 \textbf{\emph{Interventions on features may have downstream impacts on
-fairness.}}
+fairness.}}\\
+- \href{https://arxiv.org/abs/2401.16088}{Equality of opportunity}?\\
+- \href{https://proceedings.mlr.press/v202/gao23d/gao23d.pdf}{Social
+segregation}?\\
+- Supporting AR within one context/system may still unfairly target
+recourse-affected individuals within other contexts/systems? In Example
+3.1 younger individuals gain access to a loan but their age could still
+lead to, e.g., enforcing stronger supervisory mechanisms?
 
 \section{Conclusion}\label{sec-conclusion}
 
@@ -1259,6 +1297,13 @@ Teney, Damien, Ehsan Abbasnedjad, and Anton van den Hengel. 2020.
 Gradient Supervision.''} In \emph{Computer Vision--ECCV 2020: 16th
 European Conference, Glasgow, UK, August 23--28, 2020, Proceedings, Part
 x 16}, 580--99. Springer.
+
+\bibitem[\citeproctext]{ref-venkatasubramanian2020philosophical}
+Venkatasubramanian, Suresh, and Mark Alfano. 2020. {``The Philosophical
+Basis of Algorithmic Recourse.''} In \emph{Proceedings of the 2020
+Conference on Fairness, Accountability, and Transparency}, 284--93. FAT*
+'20. New York, NY, USA: Association for Computing Machinery.
+\url{https://doi.org/10.1145/3351095.3372876}.
 
 \bibitem[\citeproctext]{ref-wachter2017counterfactual}
 Wachter, Sandra, Brent Mittelstadt, and Chris Russell. 2017.
