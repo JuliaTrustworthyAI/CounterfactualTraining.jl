@@ -167,12 +167,12 @@
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
-\theoremstyle{plain}
-\newtheorem{proposition}{Proposition}[section]
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
 \theoremstyle{definition}
 \newtheorem{example}{Example}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}[section]
 \theoremstyle{plain}
 \newtheorem{corollary}{Research Question}[section]
 \theoremstyle{remark}
@@ -736,13 +736,13 @@ Many existing counterfactual explainers support domain and mutability
 constraints out-of-the-box. In fact, both types of constraints can be
 implemented for any counterfactual explainer that relies on gradient
 descent in the feature space for optimization
-(\citeproc{ref-altmeyer2023explaining}{Altmeyer, van Deursen, and Liem
-2023}). In this context, domain constraints can be imposed by simply
-projecting counterfactuals back to the specified domain, if the previous
-gradient step resulted in updated feature values that were
-out-of-domain. Mutability constraints can similarly be enforced by
-setting partial derivatives to zero to ensure that features are only
-mutated in the allowed direction, if at all.
+(\citeproc{ref-altmeyer2023explaining}{Altmeyer, Deursen, et al. 2023}).
+In this context, domain constraints can be imposed by simply projecting
+counterfactuals back to the specified domain, if the previous gradient
+step resulted in updated feature values that were out-of-domain.
+Mutability constraints can similarly be enforced by setting partial
+derivatives to zero to ensure that features are only mutated in the
+allowed direction, if at all.
 
 Since actionability constraints are binding at test time, we should also
 impose them when generating \(\mathbf{x}^\prime\) during each training
@@ -1105,6 +1105,11 @@ den Hengel. 2020. {``Counterfactual Vision and Language Learning.''} In
 Recognition (CVPR)}, 10041--51.
 \url{https://doi.org/10.1109/CVPR42600.2020.01006}.
 
+\bibitem[\citeproctext]{ref-altmeyer2023explaining}
+Altmeyer, Patrick, Arie van Deursen, et al. 2023. {``Explaining
+Black-Box Models Through Counterfactuals.''} In \emph{Proceedings of the
+JuliaCon Conferences}, 1:130. 1.
+
 \bibitem[\citeproctext]{ref-altmeyer2023faithful}
 Altmeyer, Patrick, Mojtaba Farmanbar, Arie van Deursen, and Cynthia C.
 S. Liem. 2023. {``Faithful Model Explanations Through Energy-Constrained
@@ -1115,11 +1120,6 @@ Altmeyer, Patrick, Mojtaba Farmanbar, Arie van Deursen, and Cynthia CS
 Liem. 2024. {``Faithful Model Explanations Through Energy-Constrained
 Conformal Counterfactuals.''} In \emph{Proceedings of the AAAI
 Conference on Artificial Intelligence}, 38:10829--37. 10.
-
-\bibitem[\citeproctext]{ref-altmeyer2023explaining}
-Altmeyer, Patrick, Arie van Deursen, and Cynthia C. S. Liem. 2023.
-{``Explaining Black-Box Models Through Counterfactuals.''} In
-\emph{Proceedings of the JuliaCon Conferences}, 1:130. 1.
 
 \bibitem[\citeproctext]{ref-augustin2020adversarial}
 Augustin, Maximilian, Alexander Meinke, and Matthias Hein. 2020.
