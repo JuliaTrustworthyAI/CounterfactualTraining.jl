@@ -98,21 +98,7 @@
 \@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
-\usepackage{amsthm}
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
-\theoremstyle{definition}
-\newtheorem{example}{Example}[section]
-\theoremstyle{plain}
-\newtheorem{proposition}{Proposition}[section]
-\theoremstyle{plain}
-\newtheorem{corollary}{Research Question}[section]
-\theoremstyle{remark}
-\AtBeginDocument{\renewcommand*{\proofname}{Proof}}
-\newtheorem*{remark}{Remark}
-\newtheorem*{solution}{Solution}
-\newtheorem{refremark}{Remark}[section]
-\newtheorem{refsolution}{Solution}[section]
+
 \makeatother
 \makeatletter
 \makeatother
@@ -418,28 +404,27 @@ Section~\ref{sec-method}.
 
 \section{Counterfactual Training}\label{sec-method}
 
-Counterfactual training combines ideas from adversarial training,
+Counterfactual training (CT) combines ideas from adversarial training,
 energy-based modelling and counterfactuals explanations with the
-explicit objective of aligning representations with plausible
-explanations that comply with user requirements. In the context of CEs,
-plausibility has broadly been defined as the degree to which
-counterfactuals comply with the underlying data generating process
+explicit goal of aligning representations with plausible explanations
+that comply with user requirements. In the context of CEs, plausibility
+has broadly been defined as the degree to which counterfactuals comply
+with the underlying data-generating process
 \cite{poyiadzi2020face,guidotti2022counterfactual,altmeyer2024faithful}.
 Plausibility is a necessary but insufficient condition for using CEs to
-provide algorithmic recourse (AR) to individuals affected by opaque
-models in practice. This is because for recourse recommendations to be
-\textbf{actionable}, they need to not only result in plausible
-counterfactuals but also be attainable. A plausible CE for a rejected
-20-year-old loan applicant, for example, might reveal that their
-application would have been accepted, if only they were 20 years older.
-Ignoring all other features, this would comply with the definition of
-plausibility if 40-year-old individuals were in fact more credit-worthy
-on average than young adults. But of course this CE does not qualify for
-providing actionable recourse to the applicant since \emph{age} is not a
-(directly) mutable feature. For our intents and purposes, counterfactual
-training aims to improve model explainability by aligning models with
-counterfactuals that meet both desiderata, plausibility and
-actionability. Formally, we define explainability as follows:
+provide algorithmic recourse (AR) to individuals (negatively) affected
+by opaque models. For AR recommendations to be actionable, they need to
+not only result in plausible counterfactuals but also be attainable. A
+plausible CE for a rejected 20-year-old loan applicant, for example,
+might reveal that their application would have been accepted, if only
+they were 20 years older. Ignoring all other features, this would comply
+with the definition of plausibility if 40-year-old individuals were in
+fact more credit-worthy on average than young adults. But of course this
+CE does not qualify for providing actionable recourse to the applicant
+since \emph{age} is not a (directly) mutable feature. CT aims to improve
+model explainability by aligning models with counterfactuals that meet
+both desiderata: plausibility and actionability. Formally, we define
+explainability as follows:
 
 \begin{definition}[Model
 Explainability]\protect\hypertarget{def-explainability}{}\label{def-explainability}
@@ -455,9 +440,9 @@ where \(\arg\max_y{\mathbf{y}^{+}}=y^+\) and \(y^+\) denotes the index
 of the target class.
 
 We say that \(\mathbf{M}_\theta\) is \textbf{explainable} to the extent
-that faithfully generated counterfactuals are plausible (i.e.~consistent
-with the data) and actionable. Formally, we define these properties as
-follows:
+that faithfully generated counterfactuals are plausible (i.e.,
+consistent with the data) and actionable. Formally, we define these
+properties as follows:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -488,8 +473,8 @@ over inputs, then formally:
 
 \end{definition}
 
-The definitions of faithfulness and plausibility in
-Definition~\ref{def-explainability} are the same as in
+The characterization of faithfulness and plausibility in
+Definition~\ref{def-explainability} is the same as in
 \cite{altmeyer2024faithful}, with adapted notation. Actionability
 constraints in Definition~\ref{def-explainability} vary and depend on
 the context in which \(\mathbf{M}_\theta\) is deployed. In this work, we
@@ -502,9 +487,9 @@ for reasons discussed in Section~\ref{sec-discussion}.
 Let \(\mathbf{x}_t^\prime\) for \(t=0,...,T\) denote a counterfactual
 explanation generated through gradient descent over \(T\) iterations as
 initially proposed by \cite{wachter2017counterfactual}. For our
-purposes, we let \(T\) vary and consider the counterfactual search as
+purposes, we let \(T\) vary and consider the counterfactual search to be
 converged as soon as the predicted probability for the target class has
-reached a pre-determined threshold, \(\tau\):
+reached a pre-determined threshold \(\tau\):
 \(\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}^\prime))[y^+] \geq \tau\),
 where \(\mathcal{S}\) is the softmax function.\footnote{For detailed
   background information on gradient-based counterfactual search and
@@ -515,37 +500,39 @@ Definition~\ref{def-explainability}, we propose to leverage
 counterfactuals in the following objective:
 
 \begin{equation}\phantomsection\label{eq-obj}{
-\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y}) + \lambda_{\text{reg}}\text{ridge}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta)
+\begin{split}
+\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) &+ \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y}) \\ &+ \lambda_{\text{reg}}\text{ridge}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta)
+\end{split}
 }\end{equation}
 
-where \(\text{yloss}(\cdot)\) is any conventional classification loss
-that induces discriminative performance (e.g., cross-entropy). The
-second and third terms in Equation~\ref{eq-obj} are explained in more
-detail below. For now, they can be sufficiently described as inducing
-explainability directly and indirectly by penalizing: (1) the
-contrastive divergence, \(\text{div}(\cdot)\), between mature
-counterfactuals \(\mathbf{x}_T^\prime\) and observed samples \(x\) and,
-(2) the adversarial loss, \(\text{advloss}(.)\), with respect to nascent
+where \(\text{yloss}(\cdot)\) is a classification loss that induces
+discriminative performance (e.g., cross-entropy). The second and third
+terms in Equation~\ref{eq-obj} are explained in detail below. For now,
+they can be sufficiently described as inducing explainability directly
+and indirectly by penalizing: (1) the contrastive divergence,
+\(\text{div}(\cdot)\), between mature counterfactuals
+\(\mathbf{x}_T^\prime\) and observed samples \(x\) and, (2) the
+adversarial loss, \(\text{advloss}(.)\), with respect to nascent
 counterfactuals \(\mathbf{x}_{t\leq T}^\prime\). Finally,
 \(\text{ridge}(\cdot)\) denotes a Ridge penalty (\(\ell_2\)-norm) that
-regularises the magnitude of the energy terms involved in
-\(\text{div}(\cdot)\) \cite{du2019implicit}. The tradeoff between the
-different components can be governed by adjusting the strengths of the
-penalties \(\lambda_{\text{div}}\), \(\lambda_{\text{adv}}\) and
+regularizes the magnitude of the energy terms involved in
+\(\text{div}(\cdot)\) \cite{du2019implicit}. The trade-off between the
+components can be governed by adjusting the strengths of the penalties
+\(\lambda_{\text{div}}\), \(\lambda_{\text{adv}}\) and
 \(\lambda_{\text{reg}}\).
 
-\subsubsection{Directly Inducing Explainability through Contrastive
-Divergence}\label{directly-inducing-explainability-through-contrastive-divergence}
+\subsection{Directly Inducing Explainability with Contrastive
+Divergence}\label{directly-inducing-explainability-with-contrastive-divergence}
 
 \cite{grathwohl2020your} observe that any classifier can be
 re-interpreted as a joint energy-based model (JEM) that learns to
 discriminate output classes conditional on the observed (training)
 samples from \(p(\mathbf{x})\) and the generated samples from
-\(p_\theta(\mathbf{x})\). They show that JEMs can be trained to perform
-well at both tasks by directly maximizing the joint log-likelihood
-factorized as
+\(p_\theta(\mathbf{x})\). The authors show that JEMs can be trained to
+perform well at both tasks by directly maximizing the joint
+log-likelihood factorized as
 \(\log p_\theta(\mathbf{x},\mathbf{y})=\log p_\theta(\mathbf{y}|\mathbf{x}) + \log p_\theta(\mathbf{x})\).
-The first factor can be optimized using conventional cross-entropy as in
+The first term can be optimized using conventional cross-entropy as in
 Equation~\ref{eq-obj}. Then, to optimize \(\log p_\theta(\mathbf{x})\)
 \cite{grathwohl2020your} minimize the contrastive divergence between
 these observed samples from \(p(\mathbf{x})\) and generated samples from
@@ -553,61 +540,58 @@ these observed samples from \(p(\mathbf{x})\) and generated samples from
 
 A key empirical finding in \cite{altmeyer2024faithful} was that JEMs
 tend to do well with respect to the plausibility objective in
-Definition~\ref{def-explainability}. If we consider samples drawn from
-\(p_\theta(\mathbf{x})\) as counterfactuals, this is an expected
-finding, because the JEM objective effectively minimizes the divergence
-between the conditional posterior and \(p(\mathbf{x}|\mathbf{y}^{+})\).
-To generate samples, \cite{grathwohl2020your} rely on Stochastic
-Gradient Langevin Dynamics (SGLD) using an uninformative prior for
-initialization. This is where we depart from their methodology: instead
-of SGLD, we propose to use counterfactual explainers to generate
-counterfactuals of observed training samples. Specifically, we have:
+Definition~\ref{def-explainability}. This follows directly if we
+consider samples drawn from \(p_\theta(\mathbf{x})\) as counterfactuals
+because the JEM objective effectively minimizes the divergence between
+the conditional posterior and \(p(\mathbf{x}|\mathbf{y}^{+})\). To
+generate samples, \cite{grathwohl2020your} rely on Stochastic Gradient
+Langevin Dynamics (SGLD) using an uninformative prior for initialization
+but we depart from their methodology. Instead of SGLD, we propose to use
+counterfactual explainers to generate counterfactuals of observed
+training samples. Specifically, we have:
 
 \begin{equation}\phantomsection\label{eq-div}{
 \text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) = \mathcal{E}_\theta(\mathbf{x},y) - \mathcal{E}_\theta(\mathbf{x}_T^\prime,y)
 }\end{equation}
 
-where \(\mathcal{E}_\theta(\cdot)\) denotes the energy function. In
-particular, we set
+where \(\mathcal{E}_\theta(\cdot)\) denotes the energy function. We set
 \(\mathcal{E}_\theta(\mathbf{x},\mathbf{y})=-\mathbf{M}_\theta(\mathbf{x^+})[y^+]\)
 where \(y^+\) denotes the index of the randomly drawn target class,
-\(y^+ \sim p(y)\), and \(\mathbf{x^+}\) denotes an observed data point
-sampled from target domain: \(\mathbf{X}^+=\{\mathbf{x}:y=y^+\}\).
-Conditional on the target class \(y^+\), \(\mathbf{x}_T^\prime\) denotes
-a mature counterfactual for a randomly sampled factual from a non-target
-class generated through a gradient-based counterfactual generator for at
-most \(T\) iterations. We define mature counterfactuals as those that
-have either exhausted \(T\) or reached convergence in terms of the
-pre-determined decision threshold earlier.
+\(y^+ \sim p(y)\), and \(\mathbf{x^+}\) denotes an observed sample from
+target domain: \(\mathbf{X}^+=\{\mathbf{x}:y=y^+\}\). Conditional on the
+target class \(y^+\), \(\mathbf{x}_T^\prime\) denotes a mature
+counterfactual for a randomly sampled factual from a non-target class
+generated with a gradient-based CE generator for up to \(T\) iterations.
+Mature counterfactuals are ones that have either reached convergence
+wrt. the decision threshold \(\tau\) or exhausted \(T\).
 
 Intuitively, the gradient of Equation~\ref{eq-div} decreases the energy
-of observed training samples (positive samples) while at same time
-increasing the energy of counterfactuals (negative samples)
-\cite{du2019implicit}. As the generated counterfactuals get more
-plausible (Definition~\ref{def-explainability}) over the course of
-training, these two opposing effects gradually balance each out
-\cite{lippe2024uvadlc}.
+of observed training samples (positive samples) while increasing the
+energy of counterfactuals (negative samples) \cite{du2019implicit}. As
+the counterfactuals get more plausible
+(Definition~\ref{def-explainability}) during training, these opposing
+effects gradually balance each other out \cite{lippe2024uvadlc}.
 
 The departure from SGLD allows us to tap into the vast repertoire of
 explainers that have been proposed in the literature to meet different
-desiderata. Typically, these methods facilitate the imposition of domain
-and mutability constraints, for example. In principle, any existing
-approach for generating counterfactual explanations is viable, so long
-as it does not violate the faithfulness condition. Like JEMs
-\cite{murphy2022probabilistic}, counterfactual training can be
-considered as a form of contrastive representation learning.
+desiderata. For example, many methods facilitate the imposition of
+domain and mutability constraints. In principle, any existing approach
+for generating counterfactual explanations is viable, so long as it does
+not violate the faithfulness condition. Like JEMs
+\cite{murphy2022probabilistic}, CT can be considered a form of
+contrastive representation learning.
 
-\subsubsection{Indirectly Inducing Explainability through Adversarial
-Robustness}\label{indirectly-inducing-explainability-through-adversarial-robustness}
+\subsection{Indirectly Inducing Explainability with Adversarial
+Robustness}\label{indirectly-inducing-explainability-with-adversarial-robustness}
 
 Based on our analysis in Section~\ref{sec-lit}, counterfactuals
 \(\mathbf{x}^\prime\) can be repurposed as additional training samples
-\cite{luu2023counterfactual,balashankar2023improving} or adversarial
-examples \cite{freiesleben2022intriguing,pawelczyk2022exploring}. This
-leaves some flexibility with respect to the exact choice for
+\cite{luu2023counterfactual,balashankar2023improving} or AEs
+\cite{freiesleben2022intriguing,pawelczyk2022exploring}. This leaves
+some flexibility with respect to the choice for
 \(\text{advloss}(\cdot)\) in Equation~\ref{eq-obj}. An intuitive
-functional form to use, though likely not the only reasonable choice, is
-inspired by adversarial training:
+functional form, but likely not the only sensible choice, is inspired by
+adversarial training:
 
 \begin{equation}\phantomsection\label{eq-adv}{
 \begin{aligned}
@@ -617,16 +601,15 @@ t_\varepsilon &= \max_t \{t: ||\Delta_t||_\infty < \varepsilon\}
 }\end{equation}
 
 Under this choice, we consider nascent counterfactuals
-\(\mathbf{x}_{t\leq T}^\prime\) as adversarial examples as long as the
-magnitude of the perturbation to any individual feature is at most
-\(\varepsilon\). This is closely aligned with
-\cite{szegedy2013intriguing}, who define an adversarial attack as an
-``imperceptible non-random perturbation''. Thus, we choose to work with
-a different distinction between CE and AE than
-\cite{freiesleben2022intriguing}, who considers misclassification as the
-key distinguishing feature of AE. One of the key observations in this
-work is that we can leverage counterfactual explanations during training
-and get adversarial examples, essentially for free.
+\(\mathbf{x}_{t\leq T}^\prime\) as AEs as long as the magnitude of the
+perturbation to any single feature is at most \(\varepsilon\). This is
+closely aligned with \cite{szegedy2013intriguing} who define an
+adversarial attack as an ``imperceptible non-random perturbation''.
+Thus, we choose to work with a different distinction between CE and AE
+than \cite{freiesleben2022intriguing} who consider misclassification as
+the key distinguishing feature of AE. One of the key observations in
+this work is that we can leverage CEs during training and get
+adversarial examples essentially for free.
 
 \subsection{Encoding Actionability Constraints}\label{sec-constraints}
 
@@ -878,19 +861,19 @@ performance in terms of decreased plausibility and increased costs. The
 sensitivity with respect to \(\lambda_{\text{div}}\) and
 \(\lambda_{\text{adv}}\) is much less evident. While high values of
 \(\lambda_{\text{reg}}\) may increase the variability in outcomes when
-combined with high values for any of the other penalties in
-Equation~\ref{eq-obj}, this effect is not very pronounced.
+combined with high values of \(\lambda_{\text{div}}\) or
+\(\lambda_{\text{adv}}\), this effect is not very pronounced.
 
 \textbf{\emph{Other hyperparameters.}} We observe that the effectiveness
 and stability of CT is positively associated with the number of
 counterfactuals generated during each training epoch. We also confirm
 that a higher number of training epochs is beneficial. Interestingly, we
 find that it is not necessary to employ CT during the entire training
-phase to achieve the desired improvements in explainability. We have
-tested training models conventionally during the first half of training
-before switching to CT after this initial ``burn-in'' period and
-observed positive results. Put differently, CT may be a way to improve
-the explainability of trained models in a fine-tuning manner.
+phase to achieve the desired improvements in explainability. When
+training models conventionally during the first 50\% of epochs before
+switching to CT for the next 50\% of epochs, we observed positive
+results. Put differently, CT may be a way to improve the explainability
+of models in a fine-tuning manner.
 
 \section{Discussion}\label{sec-discussion}
 
@@ -936,10 +919,9 @@ discussed in Section~\ref{sec-hyperparameters}, our method benefits from
 tuning certain key hyperparameters. In this work, we have relied
 exclusively on grid search for this task. Future work on CT could
 benefit from investigating more sophisticated approaches towards
-hyperparameter tuning. Notably, counterfactual training is iterative
-which makes a variety of methods applicable, including Bayesian
-\cite{snoek2012practical} or gradient-based \cite{franceschi2017forward}
-optimization.
+hyperparameter tuning. Notably, CT is iterative which makes a variety of
+methods applicable, including Bayesian \cite{snoek2012practical} or
+gradient-based \cite{franceschi2017forward} optimization.
 
 \subsection{Limitations and challenges}\label{sec-limitations}
 
@@ -992,8 +974,8 @@ assigned burden of recourse \cite{sharma2020certifai}, threatening the
 equality of opportunity in the system \cite{bell2024fairness} and
 potentially reinforcing social segregation \cite{gao2023impact}. Still,
 as the referenced publications indicate, such phenomena are not specific
-to CT; regrettably, all types of ADM solutions without strong external
-protections have been recognized to promote harmful power dynamics
+to CT; all types of ADM solutions without strong external protections
+have been recognized to promote harmful power dynamics
 \cite{maas2023machine}.
 
 \section{Conclusion}\label{sec-conclusion}
