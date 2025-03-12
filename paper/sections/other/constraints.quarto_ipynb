@@ -18,7 +18,7 @@
         "using CTExperiments.TaijaPlotting\n",
         "using Plots.PlotMeasures"
       ],
-      "id": "63f8ee0b",
+      "id": "43293917",
       "execution_count": null,
       "outputs": []
     },
@@ -74,7 +74,7 @@
         "\n",
         ":::\n"
       ],
-      "id": "fcc3fecf"
+      "id": "002c7566"
     },
     {
       "cell_type": "code",
@@ -152,7 +152,7 @@
         "    (\"(d)\", FullObjective(lambda=[1.0,0.5,0.01,0.1]), [\"both\", \"none\"]),\n",
         "]"
       ],
-      "id": "68ce4a1e",
+      "id": "45cdd8f5",
       "execution_count": null,
       "outputs": []
     },
@@ -215,7 +215,7 @@
         "    push!(plts, current())\n",
         "end"
       ],
-      "id": "8aabf142",
+      "id": "9e3d759c",
       "execution_count": null,
       "outputs": []
     },
@@ -237,7 +237,7 @@
         "display(plt)\n",
         "Plots.savefig(plt, \"paper/figures/poc.svg\")"
       ],
-      "id": "70ae0248",
+      "id": "329cb378",
       "execution_count": null,
       "outputs": []
     },
@@ -265,7 +265,7 @@
         "plt = Plots.plot(plts..., layout=(1,2), size=(600,300))\n",
         "Plots.savefig(plt, \"paper/figures/app_mtblty.svg\")"
       ],
-      "id": "0c2e91d5",
+      "id": "9dc05bf5",
       "execution_count": null,
       "outputs": []
     },
@@ -288,7 +288,7 @@
         "\n",
         "where $\\mu_d$ and $\\sigma_d$ denote the sample mean and standard deviation of feature $d$. We set $n_{\\sigma_d}=3$ across the board but higher values and hence wider bounds may be appropriate depending on the application."
       ],
-      "id": "fab362f4"
+      "id": "c3fdb02f"
     }
   ],
   "metadata": {
