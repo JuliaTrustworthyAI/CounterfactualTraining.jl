@@ -24,6 +24,8 @@ end
 
 dname(d::MNIST) = "mnist"
 
+get_name(d::MNIST; pretty::Bool=false) = pretty ? "MNIST" : dname(d)
+
 """
     get_data(data::MNIST, test_set::Bool=false)
 
