@@ -1,7 +1,7 @@
 # Computation Details {.appendix}
 
 <!-- [@DHPC2022] -->
-## Hardware
+## Hardware {#sec-app-hardware}
 
 We performed our experiments on a high-performance cluster. Details about the cluster will be disclosed upon publication to avoid revealing information that might interfere with the double-blind review process. Since our experiments involve highly parallel tasks and rather small models by today's standard, we have relied on distributed computing across multiple central processing units (CPU). Graphical processing units (GPU) were not required. 
 

@@ -63,7 +63,11 @@
         "\n",
         "Defining convergence in this way allows for a more intuitive interpretation of the resulting counterfactual outcomes than with fixed $T$. Specifically, it allows us to think of counterfactuals as explaining 'high-confidence' predictions by the model for the target class $y^+$. Depending on the context and application, different choices of $\\tau$ can be considered as representing 'high-confidence' predictions.\n"
       ],
+<<<<<<< HEAD
       "id": "4b5aa1f2"
+=======
+      "id": "491391fe"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -83,7 +87,11 @@
         "using CTExperiments.TaijaPlotting\n",
         "using Plots.PlotMeasures"
       ],
+<<<<<<< HEAD
       "id": "d5d882f2",
+=======
+      "id": "2e209b3a",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -139,7 +147,11 @@
         "\n",
         ":::"
       ],
+<<<<<<< HEAD
       "id": "b7efbe67"
+=======
+      "id": "f127ef0a"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -217,7 +229,11 @@
         "    (\"(d)\", FullObjective(lambda=[1.0,0.5,0.01,0.1]), [\"both\", \"none\"]),\n",
         "]"
       ],
+<<<<<<< HEAD
       "id": "b0df9568",
+=======
+      "id": "451d504a",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -280,7 +296,11 @@
         "    push!(plts, current())\n",
         "end"
       ],
+<<<<<<< HEAD
       "id": "338ef53f",
+=======
+      "id": "8c99d160",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -302,7 +322,11 @@
         "display(plt)\n",
         "Plots.savefig(plt, \"paper/figures/poc.svg\")"
       ],
+<<<<<<< HEAD
       "id": "0e9e5a96",
+=======
+      "id": "996265a8",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -330,7 +354,11 @@
         "plt = Plots.plot(plts..., layout=(1,2), size=(600,300))\n",
         "Plots.savefig(plt, \"paper/figures/app_mtblty.svg\")"
       ],
+<<<<<<< HEAD
       "id": "95f4c09b",
+=======
+      "id": "43455310",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -378,7 +406,11 @@
         "\n",
         "## Grid Searches {#sec-app-grid}"
       ],
+<<<<<<< HEAD
       "id": "2389e415"
+=======
+      "id": "51706d35"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -396,7 +428,11 @@
         "using DotEnv\n",
         "DotEnv.load!()"
       ],
+<<<<<<< HEAD
       "id": "fcc63d5a",
+=======
+      "id": "3006e124",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -406,7 +442,11 @@
       "source": [
         "res_dir = ENV[\"FINAL_GRID_RESULTS\"]"
       ],
+<<<<<<< HEAD
       "id": "5437a519",
+=======
+      "id": "b137b497",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -442,7 +482,11 @@
         "\n",
         "### Generator Parameters {#sec-app-grid-gen}"
       ],
+<<<<<<< HEAD
       "id": "834cc70b"
+=======
+      "id": "52541f73"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -454,7 +498,11 @@
         "data_names = basename.(data_dirs)\n",
         "suffix = \"evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/\""
       ],
+<<<<<<< HEAD
       "id": "e12c6170",
+=======
+      "id": "0c881c57",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -468,7 +516,11 @@
         "\n",
         "## Training Phase"
       ],
+<<<<<<< HEAD
       "id": "9a354257"
+=======
+      "id": "f3f86162"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -478,7 +530,11 @@
         "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/grid_config.toml\")) \n",
         "println(CTExperiments.dict_to_quarto_markdown(dict))"
       ],
+<<<<<<< HEAD
       "id": "0eae3d7d",
+=======
+      "id": "4aacc084",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -492,7 +548,11 @@
         "\n",
         "## Evaluation Phase"
       ],
+<<<<<<< HEAD
       "id": "fa8c083a"
+=======
+      "id": "e8018342"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -502,7 +562,11 @@
         "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
         "println(CTExperiments.dict_to_quarto_markdown(dict))"
       ],
+<<<<<<< HEAD
       "id": "b9e32e25",
+=======
+      "id": "4e176a99",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -518,7 +582,11 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}"
       ],
+<<<<<<< HEAD
       "id": "14a5106e"
+=======
+      "id": "3b5fd65b"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -529,7 +597,11 @@
         "get_table_inputs(df, \"mean\";backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs; wrap_table=false)"
       ],
+<<<<<<< HEAD
       "id": "e2583420",
+=======
+      "id": "2b8450e2",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -545,7 +617,11 @@
         "\n",
         "#### Plausibility"
       ],
+<<<<<<< HEAD
       "id": "b690a1b2"
+=======
+      "id": "e1ec6081"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -558,7 +634,11 @@
         "_str = \"The results with respect to the plausibility measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
         "println(_str)"
       ],
+<<<<<<< HEAD
       "id": "373b2e0e",
+=======
+      "id": "09a8a68c",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -575,7 +655,11 @@
         "_str = join(include_img_commands, \"\\n\\n\")\n",
         "println(_str)"
       ],
+<<<<<<< HEAD
       "id": "b1ee1c6d",
+=======
+      "id": "d26f3fb1",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -585,7 +669,11 @@
       "source": [
         "#### Cost"
       ],
+<<<<<<< HEAD
       "id": "b87c8ffc"
+=======
+      "id": "290f3c6d"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -598,7 +686,11 @@
         "_str = \"The results with respect to the cost measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
         "println(_str)"
       ],
+<<<<<<< HEAD
       "id": "0311188c",
+=======
+      "id": "b25ecc7c",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -615,7 +707,11 @@
         "_str = join(include_img_commands, \"\\n\\n\")\n",
         "println(_str)"
       ],
+<<<<<<< HEAD
       "id": "8d8fac15",
+=======
+      "id": "671eb850",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -625,7 +721,11 @@
       "source": [
         "### Penalty Strengths {#sec-app-grid-pen}"
       ],
+<<<<<<< HEAD
       "id": "ea27c984"
+=======
+      "id": "351ae84d"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -637,7 +737,11 @@
         "data_names = basename.(data_dirs)\n",
         "suffix = \"evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/\""
       ],
+<<<<<<< HEAD
       "id": "444d447f",
+=======
+      "id": "2f70c1a4",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -651,7 +755,11 @@
         "\n",
         "## Training Phase"
       ],
+<<<<<<< HEAD
       "id": "1f809d63"
+=======
+      "id": "69faca79"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -661,7 +769,11 @@
         "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/grid_config.toml\")) \n",
         "println(CTExperiments.dict_to_quarto_markdown(dict))"
       ],
+<<<<<<< HEAD
       "id": "c597e0b3",
+=======
+      "id": "c00243ca",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -675,7 +787,11 @@
         "\n",
         "## Evaluation Phase"
       ],
+<<<<<<< HEAD
       "id": "fc0f951c"
+=======
+      "id": "47a96785"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -685,7 +801,11 @@
         "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
         "println(CTExperiments.dict_to_quarto_markdown(dict))"
       ],
+<<<<<<< HEAD
       "id": "9d7d43ba",
+=======
+      "id": "c84c20b6",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -701,7 +821,11 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}"
       ],
+<<<<<<< HEAD
       "id": "2bae1624"
+=======
+      "id": "c53ce94c"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -712,7 +836,11 @@
         "get_table_inputs(df, \"mean\";backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs; wrap_table=false)"
       ],
+<<<<<<< HEAD
       "id": "6d8324c0",
+=======
+      "id": "bf738714",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -728,7 +856,11 @@
         "\n",
         "#### Plausibility"
       ],
+<<<<<<< HEAD
       "id": "94741e0f"
+=======
+      "id": "1e4fded5"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -741,7 +873,11 @@
         "_str = \"The results with respect to the plausibility measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
         "println(_str)"
       ],
+<<<<<<< HEAD
       "id": "88872a28",
+=======
+      "id": "638a039e",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -758,7 +894,11 @@
         "_str = join(include_img_commands, \"\\n\\n\")\n",
         "println(_str)"
       ],
+<<<<<<< HEAD
       "id": "242a72f9",
+=======
+      "id": "6dd28241",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -768,7 +908,11 @@
       "source": [
         "#### Cost"
       ],
+<<<<<<< HEAD
       "id": "5c51f9f9"
+=======
+      "id": "bae5dbf1"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -781,7 +925,11 @@
         "_str = \"The results with respect to the cost measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
         "println(_str)"
       ],
+<<<<<<< HEAD
       "id": "ecdd64ef",
+=======
+      "id": "c21b0bf8",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -798,7 +946,11 @@
         "_str = join(include_img_commands, \"\\n\\n\")\n",
         "println(_str)"
       ],
+<<<<<<< HEAD
       "id": "f942894f",
+=======
+      "id": "a3631345",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -808,7 +960,11 @@
       "source": [
         "### Other Parameters {#sec-app-grid-train}"
       ],
+<<<<<<< HEAD
       "id": "ad5b7578"
+=======
+      "id": "4dfb183d"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -820,7 +976,11 @@
         "data_names = basename.(data_dirs)\n",
         "suffix = \"evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/\""
       ],
+<<<<<<< HEAD
       "id": "a85425ca",
+=======
+      "id": "3dd9a329",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -834,7 +994,11 @@
         "\n",
         "## Training Phase"
       ],
+<<<<<<< HEAD
       "id": "51ea5390"
+=======
+      "id": "f9129b12"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -844,7 +1008,11 @@
         "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/grid_config.toml\")) \n",
         "println(CTExperiments.dict_to_quarto_markdown(dict))"
       ],
+<<<<<<< HEAD
       "id": "8088c1a3",
+=======
+      "id": "2b830d45",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -858,7 +1026,11 @@
         "\n",
         "## Evaluation Phase"
       ],
+<<<<<<< HEAD
       "id": "62ff09b5"
+=======
+      "id": "ef906573"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -868,7 +1040,11 @@
         "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
         "println(CTExperiments.dict_to_quarto_markdown(dict))"
       ],
+<<<<<<< HEAD
       "id": "fc18ba23",
+=======
+      "id": "e93aed30",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -884,7 +1060,11 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}"
       ],
+<<<<<<< HEAD
       "id": "58311e97"
+=======
+      "id": "dcf146a1"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -895,7 +1075,11 @@
         "get_table_inputs(df, \"mean\";backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs; wrap_table=false)"
       ],
+<<<<<<< HEAD
       "id": "b973f24c",
+=======
+      "id": "3e82500a",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -911,7 +1095,11 @@
         "\n",
         "#### Plausibility"
       ],
+<<<<<<< HEAD
       "id": "9c3ec13e"
+=======
+      "id": "77b6d7f1"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -924,7 +1112,11 @@
         "_str = \"The results with respect to the plausibility measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
         "println(_str)"
       ],
+<<<<<<< HEAD
       "id": "201386ea",
+=======
+      "id": "72dded9c",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -941,7 +1133,11 @@
         "_str = join(include_img_commands, \"\\n\\n\")\n",
         "println(_str)"
       ],
+<<<<<<< HEAD
       "id": "a80b9eb7",
+=======
+      "id": "7072e7ff",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -951,7 +1147,11 @@
       "source": [
         "#### Cost"
       ],
+<<<<<<< HEAD
       "id": "17223d2f"
+=======
+      "id": "39eb927a"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -964,7 +1164,11 @@
         "_str = \"The results with respect to the cost measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
         "println(_str)"
       ],
+<<<<<<< HEAD
       "id": "2644fe7f",
+=======
+      "id": "69950f1b",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -981,7 +1185,11 @@
         "_str = join(include_img_commands, \"\\n\\n\")\n",
         "println(_str)"
       ],
+<<<<<<< HEAD
       "id": "f7f8d427",
+=======
+      "id": "eba676ae",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -1193,7 +1401,7 @@
         "# Computation Details {.appendix}\n",
         "\n",
         "<!-- [@DHPC2022] -->\n",
-        "## Hardware\n",
+        "## Hardware {#sec-hardware}\n",
         "\n",
         "We performed our experiments on a high-performance cluster. Details about the cluster will be disclosed upon publication to avoid revealing information that might interfere with the double-blind review process. Since our experiments involve highly parallel tasks and rather small models by today's standard, we have relied on distributed computing across multiple central processing units (CPU). Graphical processing units (GPU) were not required. \n",
         "\n",
@@ -1209,7 +1417,11 @@
         "\n",
         "All computations were performed in the Julia Programming Language [@bezanson2017julia]. We have developed a package for counterfactual training that leverages and extends the functionality provided by several existing packages, most notably [CounterfactualExplanations.jl](https://github.com/JuliaTrustworthyAI/CounterfactualExplanations.jl) [@altmeyer2023explaining] and the [Flux.jl](https://fluxml.ai/Flux.jl/v0.16/) library for deep learning [@innes2018fashionable;@innes2018flux]. For data-wrangling and presentation-ready tables we relied on [DataFrames.jl](https://dataframes.juliadata.org/v1.7/) [@milan2023dataframes] and [PrettyTables.jl](https://ronisbr.github.io/PrettyTables.jl/v2.4/) [@chagas2024pretty], respectively. For plots and visualizations we used both [Plots.jl](https://docs.juliaplots.org/v1.40/) [@PlotsJL] and [Makie.jl](https://docs.makie.org/v0.22/) [@danisch2021makie], in particular [AlgebraOfGraphics.jl](https://aog.makie.org/v0.9.3/). To distribute computational tasks across multiple processors, we have relied on [MPI.jl](https://juliaparallel.org/MPI.jl/v0.20/) [@byrne2021mpi].\n"
       ],
+<<<<<<< HEAD
       "id": "139347a7"
+=======
+      "id": "0444d9c0"
+>>>>>>> 16-final-things-ecml
     }
   ],
   "metadata": {
