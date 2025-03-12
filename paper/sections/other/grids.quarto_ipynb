@@ -4,10 +4,14 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
-        "## Grid Searches {#sec-app-grid}\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        "## Grid Searches {#sec-app-grid}\n"
+      ],
+      "id": "f259a825"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "projectdir = splitpath(pwd()) |>\n",
         "    ss -> joinpath(ss[1:findall([s == \"CounterfactualTraining.jl\" for s in ss])[1]]...) \n",
         "cd(projectdir)\n",
@@ -18,14 +22,26 @@
         "using CTExperiments.StatsBase\n",
         "\n",
         "using DotEnv\n",
-        "DotEnv.load!()\n",
-        "```\n",
-        "\n",
-        "```{julia}\n",
-        "res_dir = ENV[\"FINAL_GRID_RESULTS\"]\n",
-        "```\n",
-        "\n",
-        "\n",
+        "DotEnv.load!()"
+      ],
+      "id": "38def576",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "res_dir = ENV[\"FINAL_GRID_RESULTS\"]"
+      ],
+      "id": "811ecc02",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
         "To assess the hyperparameter sensitivity of our proposed training regime we ran multiple large grid searches for all of our synthetic datasets. We have grouped these grid searches into multiple categories: \n",
         "\n",
         "1. **Generator Parameters** (@sec-app-grid-gen): Investigates the effect of changing hyperparameters that affect the counterfactual outcomes during the training phase.\n",
@@ -52,82 +68,132 @@
         "\n",
         "Finally, concerning other hyperparameters we observe that the effectiveness and stability of CT is positively associated with the number of counterfactuals generated during each training epoch, in particular for *Circles* (@fig-grid-train-plaus-circles) and *Moons* (@fig-grid-train-plaus-moons). We further find that a higher number of training epochs is beneficial as expected, where we tested training models for 50 and 100 epochs. Interestingly, we find that it is not necessary to employ CT during the entire training phase to achieve the desired improvements in explainability: specifically, we have tested training models conventionally during the first half of training before switching to CT after this initial burn-in period. \n",
         "\n",
-        "### Generator Parameters {#sec-app-grid-gen}\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        "### Generator Parameters {#sec-app-grid-gen}\n"
+      ],
+      "id": "2a346cb0"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "grid_dir = joinpath(res_dir, \"gen_params/mlp\")\n",
         "data_dirs = readdir(grid_dir) |> x -> joinpath.(grid_dir, x) |> x -> x[isdir.(x)]\n",
         "eval_grids = (p -> EvaluationGrid(joinpath(p,\"grid_config.toml\"))).(data_dirs)\n",
         "data_names = basename.(data_dirs)\n",
-        "suffix = \"evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/\"\n",
-        "```\n",
-        "\n",
-        "\n",
+        "suffix = \"evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/\""
+      ],
+      "id": "2783fa8a",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
         "The hyperparameter grid with varying generator parameters during training is shown in @nte-gen-params-final-run-train. The corresponding evaluation grid used for these experiments is shown in @nte-gen-params-final-run-eval.\n",
         "\n",
         "::: {#nte-gen-params-final-run-train .callout-note}\n",
         "\n",
-        "## Training Phase\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        "## Training Phase\n"
+      ],
+      "id": "3070d586"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/grid_config.toml\")) \n",
-        "println(CTExperiments.dict_to_quarto_markdown(dict))\n",
-        "```\n",
-        "\n",
-        "\n",
+        "println(CTExperiments.dict_to_quarto_markdown(dict))"
+      ],
+      "id": "dacd82b8",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
         ":::\n",
         "\n",
         "::: {#nte-gen-params-final-run-eval .callout-note}\n",
         "\n",
-        "## Evaluation Phase\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        "## Evaluation Phase\n"
+      ],
+      "id": "df5f18ab"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
-        "println(CTExperiments.dict_to_quarto_markdown(dict))\n",
-        "```\n",
-        "\n",
-        "\n",
+        "println(CTExperiments.dict_to_quarto_markdown(dict))"
+      ],
+      "id": "86d81e1f",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
         ":::\n",
         "\n",
         "#### Accuracy\n",
         "\n",
         "::: {#tbl-acc-gen}\n",
         "\n",
-        "::: {.content-hidden unless-format=\"pdf\"}\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        "::: {.content-hidden unless-format=\"pdf\"}\n"
+      ],
+      "id": "cbf898c9"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         "df = CTExperiments.aggregate_performance(eval_grids; byvars=[\"objective\"]) \n",
         "get_table_inputs(df, \"mean\";backend=Val(:latex)) |>\n",
-        "    inputs -> tabulate_results(inputs; wrap_table=false)\n",
-        "```\n",
-        "\n",
-        "\n",
+        "    inputs -> tabulate_results(inputs; wrap_table=false)"
+      ],
+      "id": "09287dd4",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
         ":::\n",
         "\n",
         "Predictive performance measures by dataset and objective averaged across training-phase parameters (@nte-gen-params-final-run-train) and evaluation-phase parameters (@nte-gen-params-final-run-eval).\n",
         "\n",
         ":::\n",
         "\n",
-        "#### Plausibility\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        "#### Plausibility\n"
+      ],
+      "id": "42fc6882"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         "\n",
         "fig_label_prefix = \"grid-gen_params-plaus\"\n",
         "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
         "_str = \"The results with respect to the plausibility measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
-        "println(_str)\n",
-        "```\n",
-        "\n",
-        "```{julia}\n",
+        "println(_str)"
+      ],
+      "id": "021454e5",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         " \n",
         "imgfname = \"plausibility_distance_from_target.png\"\n",
@@ -135,23 +201,39 @@
         "full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))\n",
         "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption) \n",
         "_str = join(include_img_commands, \"\\n\\n\")\n",
-        "println(_str)\n",
-        "```\n",
-        "\n",
-        "\n",
-        "#### Cost\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        "println(_str)"
+      ],
+      "id": "e58b0d8a",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "#### Cost\n"
+      ],
+      "id": "203be58a"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         "\n",
         "fig_label_prefix = \"grid-gen_params-cost\"\n",
         "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
         "_str = \"The results with respect to the cost measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
-        "println(_str)\n",
-        "```\n",
-        "\n",
-        "```{julia}\n",
+        "println(_str)"
+      ],
+      "id": "8bd2af36",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         " \n",
         "imgfname = \"distance.png\"\n",
@@ -159,86 +241,142 @@
         "full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))\n",
         "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption)\n",
         "_str = join(include_img_commands, \"\\n\\n\")\n",
-        "println(_str)\n",
-        "```\n",
-        "\n",
-        "\n",
-        "### Penalty Strengths {#sec-app-grid-pen}\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        "println(_str)"
+      ],
+      "id": "2cfdccf2",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Penalty Strengths {#sec-app-grid-pen}\n"
+      ],
+      "id": "3acdd85b"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "grid_dir = joinpath(res_dir, \"penalties/mlp\")\n",
         "data_dirs = readdir(grid_dir) |> x -> joinpath.(grid_dir, x) |> x -> x[isdir.(x)]\n",
         "eval_grids = (p -> EvaluationGrid(joinpath(p,\"grid_config.toml\"))).(data_dirs)\n",
         "data_names = basename.(data_dirs)\n",
-        "suffix = \"evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/\"\n",
-        "```\n",
-        "\n",
-        "\n",
+        "suffix = \"evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/\""
+      ],
+      "id": "5c452846",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
         "The hyperparameter grid with varying penalty strengths during training is shown in @nte-pen-final-run-train. The corresponding evaluation grid used for these experiments is shown in @nte-pen-final-run-eval.\n",
         "\n",
         "::: {#nte-pen-final-run-train .callout-note}\n",
         "\n",
-        "## Training Phase\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        "## Training Phase\n"
+      ],
+      "id": "0e4baeed"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/grid_config.toml\")) \n",
-        "println(CTExperiments.dict_to_quarto_markdown(dict))\n",
-        "```\n",
-        "\n",
-        "\n",
+        "println(CTExperiments.dict_to_quarto_markdown(dict))"
+      ],
+      "id": "fc40e331",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
         ":::\n",
         "\n",
         "::: {#nte-pen-final-run-eval .callout-note}\n",
         "\n",
-        "## Evaluation Phase\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        "## Evaluation Phase\n"
+      ],
+      "id": "339ddc5a"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
-        "println(CTExperiments.dict_to_quarto_markdown(dict))\n",
-        "```\n",
-        "\n",
-        "\n",
+        "println(CTExperiments.dict_to_quarto_markdown(dict))"
+      ],
+      "id": "7783e4af",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
         ":::\n",
         "\n",
         "#### Accuracy\n",
         "\n",
         "::: {#tbl-acc-pen}\n",
         "\n",
-        "::: {.content-hidden unless-format=\"pdf\"}\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        "::: {.content-hidden unless-format=\"pdf\"}\n"
+      ],
+      "id": "3301d4b1"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         "df = CTExperiments.aggregate_performance(eval_grids; byvars=[\"objective\"]) \n",
         "get_table_inputs(df, \"mean\";backend=Val(:latex)) |>\n",
-        "    inputs -> tabulate_results(inputs; wrap_table=false)\n",
-        "```\n",
-        "\n",
-        "\n",
+        "    inputs -> tabulate_results(inputs; wrap_table=false)"
+      ],
+      "id": "d853dde0",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
         ":::\n",
         "\n",
         "Predictive performance measures by dataset and objective averaged across training-phase parameters (@nte-pen-final-run-train) and evaluation-phase parameters (@nte-pen-final-run-eval).\n",
         "\n",
         ":::\n",
         "\n",
-        "#### Plausibility\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        "#### Plausibility\n"
+      ],
+      "id": "6bd3744c"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         "\n",
         "fig_label_prefix = \"grid-pen-plaus\"\n",
         "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
         "_str = \"The results with respect to the plausibility measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
-        "println(_str)\n",
-        "```\n",
-        "\n",
-        "```{julia}\n",
+        "println(_str)"
+      ],
+      "id": "7b933717",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         " \n",
         "imgfname = \"plausibility_distance_from_target.png\"\n",
@@ -246,23 +384,39 @@
         "full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))\n",
         "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption) \n",
         "_str = join(include_img_commands, \"\\n\\n\")\n",
-        "println(_str)\n",
-        "```\n",
-        "\n",
-        "\n",
-        "#### Cost\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        "println(_str)"
+      ],
+      "id": "a80f39e4",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "#### Cost\n"
+      ],
+      "id": "5ac99ad7"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         "\n",
         "fig_label_prefix = \"grid-pen-cost\"\n",
         "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
         "_str = \"The results with respect to the cost measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
-        "println(_str)\n",
-        "```\n",
-        "\n",
-        "```{julia}\n",
+        "println(_str)"
+      ],
+      "id": "e180aea9",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         " \n",
         "imgfname = \"distance.png\"\n",
@@ -270,86 +424,142 @@
         "full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))\n",
         "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption)\n",
         "_str = join(include_img_commands, \"\\n\\n\")\n",
-        "println(_str)\n",
-        "```\n",
-        "\n",
-        "\n",
-        "### Other Parameters {#sec-app-grid-train}\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        "println(_str)"
+      ],
+      "id": "df0a0df6",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Other Parameters {#sec-app-grid-train}\n"
+      ],
+      "id": "3e6ffc86"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "grid_dir = joinpath(res_dir, \"training_params/mlp\")\n",
         "data_dirs = readdir(grid_dir) |> x -> joinpath.(grid_dir, x) |> x -> x[isdir.(x)]\n",
         "eval_grids = (p -> EvaluationGrid(joinpath(p,\"grid_config.toml\"))).(data_dirs)\n",
         "data_names = basename.(data_dirs)\n",
-        "suffix = \"evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/\"\n",
-        "```\n",
-        "\n",
-        "\n",
+        "suffix = \"evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/\""
+      ],
+      "id": "ab47afbb",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
         "The hyperparameter grid with other varying training parameters is shown in @nte-train-final-run-train. The corresponding evaluation grid used for these experiments is shown in @nte-train-final-run-eval.\n",
         "\n",
         "::: {#nte-train-final-run-train .callout-note}\n",
         "\n",
-        "## Training Phase\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        "## Training Phase\n"
+      ],
+      "id": "eb3f04fd"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/grid_config.toml\")) \n",
-        "println(CTExperiments.dict_to_quarto_markdown(dict))\n",
-        "```\n",
-        "\n",
-        "\n",
+        "println(CTExperiments.dict_to_quarto_markdown(dict))"
+      ],
+      "id": "60a00859",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
         ":::\n",
         "\n",
         "::: {#nte-train-final-run-eval .callout-note}\n",
         "\n",
-        "## Evaluation Phase\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        "## Evaluation Phase\n"
+      ],
+      "id": "a8c4313c"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
-        "println(CTExperiments.dict_to_quarto_markdown(dict))\n",
-        "```\n",
-        "\n",
-        "\n",
+        "println(CTExperiments.dict_to_quarto_markdown(dict))"
+      ],
+      "id": "ce791296",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
         ":::\n",
         "\n",
         "#### Accuracy\n",
         "\n",
         "::: {#tbl-acc-train}\n",
         "\n",
-        "::: {.content-hidden unless-format=\"pdf\"}\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        "::: {.content-hidden unless-format=\"pdf\"}\n"
+      ],
+      "id": "b4e21310"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         "df = CTExperiments.aggregate_performance(eval_grids; byvars=[\"objective\"]) \n",
         "get_table_inputs(df, \"mean\";backend=Val(:latex)) |>\n",
-        "    inputs -> tabulate_results(inputs; wrap_table=false)\n",
-        "```\n",
-        "\n",
-        "\n",
+        "    inputs -> tabulate_results(inputs; wrap_table=false)"
+      ],
+      "id": "1f57501f",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
         ":::\n",
         "\n",
         "Predictive performance measures by dataset and objective averaged across training-phase parameters (@nte-train-final-run-train) and evaluation-phase parameters (@nte-train-final-run-eval).\n",
         "\n",
         ":::\n",
         "\n",
-        "#### Plausibility\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        "#### Plausibility\n"
+      ],
+      "id": "aa3f21d7"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         "\n",
         "fig_label_prefix = \"grid-train-plaus\"\n",
         "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
         "_str = \"The results with respect to the plausibility measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
-        "println(_str)\n",
-        "```\n",
-        "\n",
-        "```{julia}\n",
+        "println(_str)"
+      ],
+      "id": "0b508ee8",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         " \n",
         "imgfname = \"plausibility_distance_from_target.png\"\n",
@@ -357,23 +567,39 @@
         "full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))\n",
         "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption) \n",
         "_str = join(include_img_commands, \"\\n\\n\")\n",
-        "println(_str)\n",
-        "```\n",
-        "\n",
-        "\n",
-        "#### Cost\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        "println(_str)"
+      ],
+      "id": "162970d5",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "#### Cost\n"
+      ],
+      "id": "9ab7efdc"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         "\n",
         "fig_label_prefix = \"grid-train-cost\"\n",
         "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
         "_str = \"The results with respect to the cost measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
-        "println(_str)\n",
-        "```\n",
-        "\n",
-        "```{julia}\n",
+        "println(_str)"
+      ],
+      "id": "e8c36497",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         " \n",
         "imgfname = \"distance.png\"\n",
@@ -381,18 +607,19 @@
         "full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))\n",
         "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption)\n",
         "_str = join(include_img_commands, \"\\n\\n\")\n",
-        "println(_str)\n",
-        "```"
+        "println(_str)"
       ],
-      "id": "d4066dee"
+      "id": "f6460134",
+      "execution_count": null,
+      "outputs": []
     }
   ],
   "metadata": {
     "kernelspec": {
-      "name": "comp_vis",
-      "language": "python",
-      "display_name": "comp_vis",
-      "path": "C:\\Users\\Olek\\AppData\\Roaming\\jupyter\\kernels\\comp_vis"
+      "name": "julia-1.11",
+      "language": "julia",
+      "display_name": "Julia 1.11.1",
+      "path": "/Users/paltmeyer/Library/Jupyter/kernels/julia-1.11"
     }
   },
   "nbformat": 4,

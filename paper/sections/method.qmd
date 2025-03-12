@@ -28,10 +28,10 @@ Let $\mathbf{x}_t^\prime$ for $t=0,...,T$ denote a counterfactual explanation ge
 To train models with high explainability as defined in @def-explainability, we propose to leverage counterfactuals in the following objective:
 
 $$
-\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y})
+\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y}) + \lambda_{\text{reg}}\text{ridge}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta)
 $$ {#eq-obj}
 
-where $\text{yloss}(\cdot)$ is any conventional classification loss that induces discriminative performance (e.g., cross-entropy). The two additional components in @eq-obj are explained in more detail below. For now, they can be sufficiently described as inducing explainability directly and indirectly by penalizing: (1) the contrastive divergence, $\text{div}(\cdot)$, between mature counterfactuals $\mathbf{x}_T^\prime$ and observed samples $x$ and, (2) the adversarial loss, $\text{advloss}(.)$, with respect to nascent counterfactuals $\mathbf{x}_{t\leq T}^\prime$. The tradeoff between the different components can be governed by adjusting the strengths of the penalties $\lambda_{\text{div}}$ and $\lambda_{\text{adv}}$.
+where $\text{yloss}(\cdot)$ is any conventional classification loss that induces discriminative performance (e.g., cross-entropy). The second and third terms in @eq-obj are explained in more detail below. For now, they can be sufficiently described as inducing explainability directly and indirectly by penalizing: (1) the contrastive divergence, $\text{div}(\cdot)$, between mature counterfactuals $\mathbf{x}_T^\prime$ and observed samples $x$ and, (2) the adversarial loss, $\text{advloss}(.)$, with respect to nascent counterfactuals $\mathbf{x}_{t\leq T}^\prime$. Finally, $\text{ridge}(\cdot)$ denotes a Ridge penalty ($\ell_2$-norm) that regularises the magnitude of the energy terms involved in $\text{div}(\cdot)$ [@du2019implicit]. The tradeoff between the different components can be governed by adjusting the strengths of the penalties $\lambda_{\text{div}}$, $\lambda_{\text{adv}}$ and $\lambda_{\text{reg}}$.
 
 ### Directly Inducing Explainability through Contrastive Divergence
 

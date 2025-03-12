@@ -167,14 +167,14 @@
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
-\theoremstyle{definition}
-\newtheorem{example}{Example}[section]
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
-\theoremstyle{plain}
-\newtheorem{proposition}{Proposition}[section]
 \theoremstyle{plain}
 \newtheorem{corollary}{Research Question}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\theoremstyle{definition}
+\newtheorem{example}{Example}[section]
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -614,20 +614,24 @@ Definition~\ref{def-explainability}, we propose to leverage
 counterfactuals in the following objective:
 
 \begin{equation}\phantomsection\label{eq-obj}{
-\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y})
+\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y}) + \lambda_{\text{reg}}\text{ridge}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta)
 }\end{equation}
 
 where \(\text{yloss}(\cdot)\) is any conventional classification loss
-that induces discriminative performance (e.g., cross-entropy). The two
-additional components in Equation~\ref{eq-obj} are explained in more
+that induces discriminative performance (e.g., cross-entropy). The
+second and third terms in Equation~\ref{eq-obj} are explained in more
 detail below. For now, they can be sufficiently described as inducing
 explainability directly and indirectly by penalizing: (1) the
 contrastive divergence, \(\text{div}(\cdot)\), between mature
 counterfactuals \(\mathbf{x}_T^\prime\) and observed samples \(x\) and,
 (2) the adversarial loss, \(\text{advloss}(.)\), with respect to nascent
-counterfactuals \(\mathbf{x}_{t\leq T}^\prime\). The tradeoff between
-the different components can be governed by adjusting the strengths of
-the penalties \(\lambda_{\text{div}}\) and \(\lambda_{\text{adv}}\).
+counterfactuals \(\mathbf{x}_{t\leq T}^\prime\). Finally,
+\(\text{ridge}(\cdot)\) denotes a Ridge penalty (\(\ell_2\)-norm) that
+regularises the magnitude of the energy terms involved in
+\(\text{div}(\cdot)\) (\citeproc{ref-du2019implicit}{Du and Mordatch
+2020}). The tradeoff between the different components can be governed by
+adjusting the strengths of the penalties \(\lambda_{\text{div}}\),
+\(\lambda_{\text{adv}}\) and \(\lambda_{\text{reg}}\).
 
 \subsubsection{Directly Inducing Explainability through Contrastive
 Divergence}\label{directly-inducing-explainability-through-contrastive-divergence}
@@ -965,24 +969,28 @@ manageable patterns and (b) we can typically identify settings that
 improve either plausibility or cost, and commonly both of them at the
 same time. Second, we note that the choice of a CE generator has a major
 impact on the results. For example, \emph{REVISE} tends to perform the
-worst, most likely because it attempts to explain the decisions of a VAE
-that is an imperfect surrogate of the original model. Third, increasing
-\(T\), the maximum number of steps, generally yields better outcomes
-because more CEs can mature in any iteration. Fourth, the impact of
-\(\tau\), the required decision threshold is more difficult to predict.
-On ``harder'' datasets it may be difficult to satisfy high \(\tau\) for
-any given sample (i.e., also factuals) and so increasing this threshold
-does not seem to correlate with better outcomes.
+worst, most likely because it uses a surrogate VAE to generate
+counterfactuals which impedes faithfulness
+(\citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024}). Third,
+increasing \(T\), the maximum number of steps, generally yields better
+outcomes because more CEs can mature in each training epoch. Fourth, the
+impact of \(\tau\), the required decision threshold is more difficult to
+predict. On ``harder'' datasets it may be difficult to satisfy high
+\(\tau\) for any given sample (i.e., also factuals) and so increasing
+this threshold does not seem to correlate with better outcomes. In fact,
+we have generally found that a choice of \(\tau=0.5\) leads to optimal
+results because it is associated with high proportions of mature
+counterfactuals.
 
-\textbf{\emph{Hyperparameters for penalties}} We find that the strength
+\textbf{\emph{Hyperparameters for penalties.}} We find that the strength
 of the energy regularization, \(\lambda_{\text{reg}}\) is highly
 impactful; energy must be sufficiently regularized to avoid poor
 performance in terms of decreased plausibility and increased costs. The
 sensitivity with respect to \(\lambda_{\text{div}}\) and
 \(\lambda_{\text{adv}}\) is much less evident. While high values of
 \(\lambda_{\text{reg}}\) may increase the variability in outcomes when
-combined with high values for Equation~\ref{eq-obj} penalties, this
-effect is not very pronounced.
+combined with high values for any of the other penalties in
+Equation~\ref{eq-obj}, this effect is not very pronounced.
 
 \textbf{\emph{Other hyperparameters.}} We observe that the effectiveness
 and stability of CT is positively associated with the number of
@@ -1031,15 +1039,18 @@ Equation~\ref{eq-div}, and (2) the underlying counterfactual explainers.
 For example, Altmeyer et al. (\citeproc{ref-altmeyer2023faithful}{2023})
 recognize this to be a challenge for \emph{ECCCo} and so it may have
 downstream impacts on our proposed method. Still, we find that training
-instabilities can be largely counteracted with strong regularization, in
-particular through \(\lambda_{\text{reg}}\) penalty on the energy.
+instabilities can be successfully mitigated by regularizing energy
+(\(\lambda_{\text{reg}}\)), generating a sufficiently large number of
+counterfactuals during each training epoch and including only mature
+counterfactuals for contrastive divergence.
 
 \textbf{\emph{CT is sensitive to hyperparameter selection.}} As
-discussed in Section~\ref{sec-hyperparameters}, our method requires
-careful selection of the hyperparameters. All experiments relied on
-grid-search tuning but we recognize that other algorithms may be more
-efficient. Notably, counterfactual training is iterative which makes a
-variety of methods applicable, including Bayesian (e.g.,
+discussed in Section~\ref{sec-hyperparameters}, our method benefits from
+tuning certain key hyperparameters. In this work, we have relied
+exclusively on grid search for this task. Future work on CT could
+benefit from investigating more sophisticated approaches towards
+hyperparameter tuning. Notably, counterfactual training is iterative
+which makes a variety of methods applicable, including Bayesian (e.g.,
 \citeproc{ref-snoek2012practical}{Snoek, Larochelle, and Adams 2012}) or
 gradient-based (e.g., \citeproc{ref-franceschi2017forward}{Franceschi et
 al. 2017}) optimization.
@@ -1060,7 +1071,7 @@ counterfactual explanations for the training samples essentially for
 free, which may be beneficial in many ADM systems. Second, we find that
 CT can retain its value when used as a ``fine-tuning'' training regime
 for conventionally-trained models. Third, in principle, CT yields itself
-to multi-threaded execution.
+to parallel execution, which we have leveraged for our own experiments.
 
 \textbf{\emph{Immutable features may have proxies.}} In
 Proposition~\ref{prp-mtblty} we define an approach to protect immutable
