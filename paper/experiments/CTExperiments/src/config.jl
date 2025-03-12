@@ -181,6 +181,7 @@ global LatexReplacements = Dict(
     "lambda_energy_diff" => "\$\\lambda_{\\text{div}}\$",
     "lambda_energy_reg" => "\$\\lambda_{\\text{reg}}\$",
     "lambda_class_loss" => "\$\\lambda_{\\text{yloss}}\$",
+    "mmd" => "MMD"
 )
 
 function format_header(s::String; replacements::Dict=LatexReplacements)

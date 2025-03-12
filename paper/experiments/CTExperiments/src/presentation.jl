@@ -464,7 +464,7 @@ function tbl_test_performance(grid::ExperimentGrid; include_adv::Bool=false, kwr
 
 end
 
-function aggregate_ce_evaluation(res_dir::String; byvars=nothing, kwrgs...)
+function aggregate_ce_evaluation(res_dir::String; byvars=nothing, y="mmd", kwrgs...)
     byvars = gather_byvars(byvars, "data")
     eval_grids, _ = final_results(res_dir)
     df = DataFrame()
@@ -475,6 +475,7 @@ function aggregate_ce_evaluation(res_dir::String; byvars=nothing, kwrgs...)
     rename!(df, :data => :dataset)
     df.dataset .= CTExperiments.format_header.(df.dataset)
     df.objective .= CTExperiments.format_header.(df.objective)
+    df.variable .= CTExperiments.format_header.(y)
     return df
 end
 
