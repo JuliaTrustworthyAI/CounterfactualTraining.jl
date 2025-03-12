@@ -311,10 +311,10 @@ Aggregate the results from a single counterfactual evaluation.
 function aggregate_ce_evaluation(
     df::DataFrame,
     df_meta::DataFrame,
-    df_eval::DataFrame;
+    df_eval::DataFrame=DataFrame();
     y::String="plausibility_distance_from_target",
     byvars::Union{Nothing,String,Vector{String}}=nothing,
-    agg_runs::Bool=false,
+    agg_further_vars::Union{Nothing,Vector{String}}=nothing,
     rebase::Bool=true,
 )
     # Assertions:
@@ -323,7 +323,7 @@ function aggregate_ce_evaluation(
     if isa(byvars, String)
         byvars = [byvars]
     end
-    @assert byvars isa Nothing || all(col -> col in names(df_meta), byvars) "Columns specified in `byvars` must be one of the following: $(names(df_meta))."
+    @assert isnothing(byvars) || all(col -> col in names(df_meta), byvars) "Columns specified in `byvars` must be one of the following: $(names(df_meta))."
 
     df = df[df.variable .== y, :]
     rename!(df, :value => y)
@@ -336,8 +336,12 @@ function aggregate_ce_evaluation(
             x in names(df) for x in byvars_must_include
         ]]
         df_agg = aggregate_data(df, y, byvars; byvars_must_include=byvars_must_include)
-        if agg_runs
+
+        if !isnothing(agg_further_vars)
             # Compute mean of means and std of means:
+            byvars =
+                isnothing(byvars) ? byvars_must_include : union(byvars_must_include, byvars)
+            filter!(x -> x ∉ agg_further_vars, byvars)
             df_agg =
                 groupby(df_agg, byvars) |>
                 df -> combine(df, :mean => (y -> (mean=mean(y), std=std(y))) => AsTable)
@@ -446,5 +450,32 @@ function get_img_command(data_names, full_paths, fig_labels; fig_caption="")
 end
 
 function tbl_test_performance(grid::ExperimentGrid; include_adv::Bool=false, kwrgs...)
+
+end
+
+function aggregate_ce_evaluation(res_dir::String; byvars=nothing, kwrgs...)
+    byvars = gather_byvars(byvars, "data")
+    eval_grids, exper_grids = final_results(res_dir)
+    df_agg = DataFrame()
+    for (i,cfg) in enumerate(eval_grids)
+        df_agg_i = aggregate_ce_evaluation(cfg; byvars=byvars, kwrgs...)
+        df_agg = vcat(df_agg, df_agg_i)
+    end
+    return df_agg
+end
+
+function final_results(res_dir::String)
+
+    # Get model and data directories:
+    model_dirs = joinpath.(res_dir, readdir(res_dir)) |> x -> x[isdir.(x)]
+    data_dirs = [joinpath.(d, readdir(d)) |> x -> x[isdir.(x)] for d in model_dirs] |> x -> reduce(vcat, x)
+
+    # Filter out directories with missing results:
+    data_dirs = filter(x -> isfile(joinpath(x,"evaluation/evaluation_grid_config.toml")), data_dirs)
+    eval_grids = EvaluationGrid.(joinpath.(data_dirs, "evaluation/evaluation_grid_config.toml"))
+    data_dirs = filter(x -> isfile(joinpath(x, "grid_config.toml")), data_dirs)
+    exper_grids = ExperimentGrid.(joinpath.(data_dirs, "grid_config.toml"))
+
+    return eval_grids, exper_grids
 
 end
