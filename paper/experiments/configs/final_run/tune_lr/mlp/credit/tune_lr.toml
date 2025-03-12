@@ -1,9 +1,9 @@
 name = "tune_lr"
 dim_reduction = []
 generator_type = ["ecco"]
-data = "gmsc"
+data = "credit"
 model_type = "mlp"
-save_dir = "paper/experiments/output/final_run/tune_lr/mlp/gmsc"
+save_dir = "paper/experiments/output/final_run/tune_lr/mlp/credit"
 
 [data_params]
 datadir = []

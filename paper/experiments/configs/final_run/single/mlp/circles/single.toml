@@ -1,9 +1,9 @@
-name = "tune_lr"
+name = "single"
 dim_reduction = []
 generator_type = ["ecco"]
-data = "gmsc"
+data = "circles"
 model_type = "mlp"
-save_dir = "paper/experiments/output/final_run/tune_lr/mlp/gmsc"
+save_dir = "paper/experiments/output/final_run/single/mlp/circles"
 
 [data_params]
 datadir = []
@@ -23,10 +23,10 @@ nhidden = []
 [generator_params]
 opt = []
 lambda_cost = []
-lr = [0.1, 0.5, 1.0]
+lr = []
 maxiter = []
 lambda_energy = []
-decision_threshold = [0.5]
+decision_threshold = []
 type = []
 
 [training_params]
@@ -42,7 +42,7 @@ parallelizer = []
 nce = []
 threaded = []
 class_loss = []
-lambda_energy_reg = [0.01, 0.1, 0.5]
+lambda_energy_reg = []
 verbose = []
 generator_params = []
 conv = []
