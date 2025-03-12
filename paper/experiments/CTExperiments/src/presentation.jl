@@ -292,7 +292,9 @@ Aggregate the results from a single counterfactual evaluation.
 function aggregate_ce_evaluation(cfg::EvalConfigOrGrid; kwrgs...)
 
     # Load data:
-    all_data = merge_with_meta(cfg, CTExperiments.load_ce_evaluation(cfg))
+    all_data = Logging.with_logger(Logging.NullLogger()) do
+        merge_with_meta(cfg, CTExperiments.load_ce_evaluation(cfg))
+    end
 
     return aggregate_ce_evaluation(all_data...; kwrgs...)
 end
@@ -316,6 +318,7 @@ function aggregate_ce_evaluation(
     byvars::Union{Nothing,String,Vector{String}}=nothing,
     agg_further_vars::Union{Nothing,Vector{String}}=nothing,
     rebase::Bool=true,
+    lambda_eval::Union{Nothing,Vector{<:Real}}=nothing,
 )
     # Assertions:
     valid_y = valid_y_ce(df)
@@ -328,6 +331,12 @@ function aggregate_ce_evaluation(
     df = df[df.variable .== y, :]
     rename!(df, :value => y)
     select!(df, Not(:variable))
+
+    # Filter:
+    if !isnothing(lambda_eval)
+        @assert "lambda_energy_eval" in names(df) "Variables `lambda_energy_eval` not included."
+        df = filter(df -> df.lambda_energy_eval in lambda_eval, df)
+    end
 
     # Aggregate:
     if "run" in names(df)
@@ -402,7 +411,9 @@ function valid_y_ce(cfg::AbstractEvaluationConfig)
 end
 
 function aggregate_counterfactuals(eval_grid::EvaluationGrid; kwrgs...)
-    eval_list = load_list(eval_grid)
+    eval_list = Logging.with_logger(Logging.NullLogger()) do 
+        load_list(eval_grid)
+    end
     return aggregate_counterfactuals.(eval_list)
 end
 
@@ -455,13 +466,21 @@ end
 
 function aggregate_ce_evaluation(res_dir::String; byvars=nothing, kwrgs...)
     byvars = gather_byvars(byvars, "data")
-    eval_grids, exper_grids = final_results(res_dir)
-    df_agg = DataFrame()
+    eval_grids, _ = final_results(res_dir)
+    df = DataFrame()
     for (i,cfg) in enumerate(eval_grids)
-        df_agg_i = aggregate_ce_evaluation(cfg; byvars=byvars, kwrgs...)
-        df_agg = vcat(df_agg, df_agg_i)
+        df_i = aggregate_ce_evaluation(cfg; byvars=byvars, kwrgs...)
+        df = vcat(df, df_i)
     end
-    return df_agg
+    rename!(df, :data => :dataset)
+    df.dataset .= CTExperiments.format_header.(df.dataset)
+    df.objective .= CTExperiments.format_header.(df.objective)
+    return df
+end
+
+function aggregate_performance(res_dir::String)
+    eval_grids, _ = final_results(res_dir)
+    return aggregate_performance(eval_grids)
 end
 
 function final_results(res_dir::String)
@@ -478,4 +497,7 @@ function final_results(res_dir::String)
 
     return eval_grids, exper_grids
 
+end
+
+function final_table(res_dir::String)
 end
