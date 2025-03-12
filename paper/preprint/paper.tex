@@ -183,14 +183,14 @@
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
-\theoremstyle{plain}
-\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{definition}
 \newtheorem{example}{Example}[section]
 \theoremstyle{plain}
-\newtheorem{proposition}{Proposition}[section]
+\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -1455,7 +1455,7 @@ counterfactual training.
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, titlerule=0mm, breakable, toptitle=1mm, rightrule=.15mm, leftrule=.75mm, colback=white, coltitle=black, left=2mm, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, toprule=.15mm, opacitybacktitle=0.6, arc=.35mm, title={Note}, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
 
 Figure~\ref{fig-mnist} shows much more plausible (faithful)
 counterfactuals for a model with CT than the model with conventional
@@ -1630,7 +1630,7 @@ training is shown in Note~\ref{nte-gen-params-final-run-train}. The
 corresponding evaluation grid used for these experiments is shown in
 Note~\ref{nte-gen-params-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, titlerule=0mm, breakable, toptitle=1mm, rightrule=.15mm, leftrule=.75mm, colback=white, coltitle=black, left=2mm, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, toprule=.15mm, opacitybacktitle=0.6, arc=.35mm, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
 
 \quartocalloutnte{nte-gen-params-final-run-train} 
 
@@ -1664,7 +1664,7 @@ Note~\ref{nte-gen-params-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, titlerule=0mm, breakable, toptitle=1mm, rightrule=.15mm, leftrule=.75mm, colback=white, coltitle=black, left=2mm, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, toprule=.15mm, opacitybacktitle=0.6, arc=.35mm, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
 
 \quartocalloutnte{nte-gen-params-final-run-eval} 
 
@@ -1847,7 +1847,7 @@ is shown in Note~\ref{nte-pen-final-run-train}. The corresponding
 evaluation grid used for these experiments is shown in
 Note~\ref{nte-pen-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, titlerule=0mm, breakable, toptitle=1mm, rightrule=.15mm, leftrule=.75mm, colback=white, coltitle=black, left=2mm, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, toprule=.15mm, opacitybacktitle=0.6, arc=.35mm, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
 
 \quartocalloutnte{nte-pen-final-run-train} 
 
@@ -1875,7 +1875,7 @@ Note~\ref{nte-pen-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, titlerule=0mm, breakable, toptitle=1mm, rightrule=.15mm, leftrule=.75mm, colback=white, coltitle=black, left=2mm, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, toprule=.15mm, opacitybacktitle=0.6, arc=.35mm, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
 
 \quartocalloutnte{nte-pen-final-run-eval} 
 
@@ -2057,7 +2057,7 @@ in Note~\ref{nte-train-final-run-train}. The corresponding evaluation
 grid used for these experiments is shown in
 Note~\ref{nte-train-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, titlerule=0mm, breakable, toptitle=1mm, rightrule=.15mm, leftrule=.75mm, colback=white, coltitle=black, left=2mm, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, toprule=.15mm, opacitybacktitle=0.6, arc=.35mm, title={Note \ref*{nte-train-final-run-train}: Training Phase}, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-train-final-run-train}: Training Phase}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
 
 \quartocalloutnte{nte-train-final-run-train} 
 
@@ -2085,7 +2085,7 @@ Note~\ref{nte-train-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, titlerule=0mm, breakable, toptitle=1mm, rightrule=.15mm, leftrule=.75mm, colback=white, coltitle=black, left=2mm, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, toprule=.15mm, opacitybacktitle=0.6, arc=.35mm, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
 
 \quartocalloutnte{nte-train-final-run-eval} 
 
@@ -2284,12 +2284,28 @@ Concerning the regularization strength, we find somewhat high variation
 across datasets. Most notably, we find that relatively low levels of
 regularization are optimal for MNIST. We hypothesize that this finding
 may be attributed to the uniform scaling of all input features (digits).
+
 Finally, to increase the proportion of mature counterfactuals for some
 datasets, we have also investigated the effect on the learning rate
-\(\eta\) for the counterfactual search, but found little effect on the
-results.
+\(\eta\) for the counterfactual search and even smaller regularization
+strengths for a fixed decision threshold of 0.5
+(Figure~\ref{fig-tune_lr-plaus-adult} to
+Figure~\ref{fig-tune_lr-plaus-over}). For the given low decision
+threshold, we find that the learning rate has no discernable impact on
+the proportion of mature counterfactuals
+(Figure~\ref{fig-tune_lr-mat-adult} to
+Figure~\ref{fig-tune_lr-mat-over}). We do notice, however, that the
+results for MNIST are much improved when using a low value
+\(\lambda_{\text{reg}}\), the strength for the engery regularization:
+plausibility is increased by up to \textasciitilde10ppt
+(Figure~\ref{fig-tune_lr-plaus-mnist}) and the proportion of mature
+counterfactuals reaches 100\%.
 
-\begin{tcolorbox}[enhanced jigsaw, titlerule=0mm, breakable, toptitle=1mm, rightrule=.15mm, leftrule=.75mm, colback=white, coltitle=black, left=2mm, bottomtitle=1mm, colbacktitle=quarto-callout-warning-color!10!white, toprule=.15mm, opacitybacktitle=0.6, arc=.35mm, title={Package Version (Reproducibility)}, colframe=quarto-callout-warning-color-frame, bottomrule=.15mm, opacityback=0]
+One consideration worth exploring is to combine high decision thresholds
+with high learning rates and low energy regularization strengths, which
+we have not investigated here.
+
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Package Version (Reproducibility)}, colbacktitle=quarto-callout-warning-color!10!white, colback=white, colframe=quarto-callout-warning-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
 
 Tuning was run using \texttt{v1.1.3} of \texttt{TaijaData}. The
 follow-up version \texttt{v1.1.4} introduced an option to split
@@ -2304,13 +2320,13 @@ please use \texttt{v1.1.3}.
 
 \end{tcolorbox}
 
-\subsubsection{Key Parameters}\label{sec-app-tune}
+\subsubsection{Key Parameters}\label{sec-app-tune-key}
 
 The hyperparameter grid for tuning key parameters is shown in
 Note~\ref{nte-tune-train}. The corresponding evaluation grid used for
 these experiments is shown in Note~\ref{nte-tune-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, titlerule=0mm, breakable, toptitle=1mm, rightrule=.15mm, leftrule=.75mm, colback=white, coltitle=black, left=2mm, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, toprule=.15mm, opacitybacktitle=0.6, arc=.35mm, title={Note \ref*{nte-tune-train}: Training Phase}, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-tune-train}: Training Phase}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
 
 \quartocalloutnte{nte-tune-train} 
 
@@ -2340,7 +2356,7 @@ these experiments is shown in Note~\ref{nte-tune-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, titlerule=0mm, breakable, toptitle=1mm, rightrule=.15mm, leftrule=.75mm, colback=white, coltitle=black, left=2mm, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, toprule=.15mm, opacitybacktitle=0.6, arc=.35mm, title={Note \ref*{nte-tune-eval}: Evaluation Phase}, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-tune-eval}: Evaluation Phase}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
 
 \quartocalloutnte{nte-tune-eval} 
 
@@ -2602,6 +2618,202 @@ in each epoch. Data: Moons.}
 
 \caption{\label{fig-tune-mat-over}Proportion of mature counterfactuals
 in each epoch. Data: Overlapping.}
+
+\end{figure}%
+
+\subsubsection{Learning Rate}\label{sec-app-tune-lr}
+
+The hyperparameter grid for tuning the learning rate is shown in
+Note~\ref{nte-tune_lr-train}. The corresponding evaluation grid used for
+these experiments is shown in Note~\ref{nte-tune_lr-eval}.
+
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-tune_lr-train}: Training Phase}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
+
+\quartocalloutnte{nte-tune_lr-train} 
+
+\begin{itemize}
+\tightlist
+\item
+  Generator Parameters:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Learning Rate: \texttt{0.1,\ 0.5,\ 1.0}
+  \end{itemize}
+\item
+  Model: \texttt{mlp}
+\item
+  Training Parameters:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \(\lambda_{\text{reg}}\): \texttt{0.01,\ 0.1,\ 0.5}
+  \item
+    Objective: \texttt{full,\ vanilla}
+  \end{itemize}
+\end{itemize}
+
+\end{tcolorbox}
+
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-tune_lr-eval}: Evaluation Phase}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
+
+\quartocalloutnte{nte-tune_lr-eval} 
+
+\begin{itemize}
+\tightlist
+\item
+  Generator Parameters:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \(\lambda_{\text{energy}}\): \texttt{0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0}
+  \end{itemize}
+\end{itemize}
+
+\end{tcolorbox}
+
+\paragraph{Plausibility}\label{plausibility-5}
+
+The results with respect to the plausibility measure are shown in
+Figure~\ref{fig-tune_lr-plaus-adult} to
+Figure~\ref{fig-tune_lr-plaus-over}.
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/adult/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}}
+
+}
+
+\caption{\label{fig-tune_lr-plaus-adult}Average outcomes for the
+plausibility measure across key hyperparameters. Data: Adult.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/credit/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}}
+
+}
+
+\caption{\label{fig-tune_lr-plaus-credit}Average outcomes for the
+plausibility measure across key hyperparameters. Data: Credit.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/gmsc/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}}
+
+}
+
+\caption{\label{fig-tune_lr-plaus-gmsc}Average outcomes for the
+plausibility measure across key hyperparameters. Data: GMSC.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/mnist/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}}
+
+}
+
+\caption{\label{fig-tune_lr-plaus-mnist}Average outcomes for the
+plausibility measure across key hyperparameters. Data: MNIST.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/over/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}}
+
+}
+
+\caption{\label{fig-tune_lr-plaus-over}Average outcomes for the
+plausibility measure across key hyperparameters. Data: Overlapping.}
+
+\end{figure}%
+
+\paragraph{Proportion of Mature CE}\label{proportion-of-mature-ce-1}
+
+The results with respect to the proportion of mature counterfactuals in
+each epoch are shown in Figure~\ref{fig-tune_lr-mat-adult} to
+Figure~\ref{fig-tune_lr-mat-over}.
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/adult/evaluation/results/logs/objective---lr---lambda_energy_reg/percent_valid.png}}
+
+}
+
+\caption{\label{fig-tune_lr-mat-adult}Proportion of mature
+counterfactuals in each epoch. Data: Adult.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/credit/evaluation/results/logs/objective---lr---lambda_energy_reg/percent_valid.png}}
+
+}
+
+\caption{\label{fig-tune_lr-mat-credit}Proportion of mature
+counterfactuals in each epoch. Data: Credit.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/gmsc/evaluation/results/logs/objective---lr---lambda_energy_reg/percent_valid.png}}
+
+}
+
+\caption{\label{fig-tune_lr-mat-gmsc}Proportion of mature
+counterfactuals in each epoch. Data: GMSC.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/mnist/evaluation/results/logs/objective---lr---lambda_energy_reg/percent_valid.png}}
+
+}
+
+\caption{\label{fig-tune_lr-mat-mnist}Proportion of mature
+counterfactuals in each epoch. Data: MNIST.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/over/evaluation/results/logs/objective---lr---lambda_energy_reg/percent_valid.png}}
+
+}
+
+\caption{\label{fig-tune_lr-mat-over}Proportion of mature
+counterfactuals in each epoch. Data: Overlapping.}
 
 \end{figure}%
 
