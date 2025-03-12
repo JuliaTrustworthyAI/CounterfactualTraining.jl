@@ -167,12 +167,12 @@
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
-\theoremstyle{definition}
-\newtheorem{example}{Example}[section]
 \theoremstyle{plain}
 \newtheorem{corollary}{Research Question}[section]
+\theoremstyle{definition}
+\newtheorem{example}{Example}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
 \theoremstyle{plain}
 \newtheorem{proposition}{Proposition}[section]
 \theoremstyle{remark}
@@ -1093,14 +1093,27 @@ and Alfano 2020}) impacting the capacity of CT to increase the
 explainability of the model.
 
 \textbf{\emph{Interventions on features may have downstream impacts on
-fairness.}}\\
-- \href{https://arxiv.org/abs/2401.16088}{Equality of opportunity}?\\
-- \href{https://proceedings.mlr.press/v202/gao23d/gao23d.pdf}{Social
-segregation}?\\
-- Supporting AR within one context/system may still unfairly target
-recourse-affected individuals within other contexts/systems? In Example
-3.1 younger individuals gain access to a loan but their age could still
-lead to, e.g., enforcing stronger supervisory mechanisms?
+fairness.}} Related to the point above, we provide a tool that allows
+practitioners to modify the sensitivity of a model with respect to
+certain features, which may have implication for the fair and equitable
+treatment of individuals subject to automated decisions. As protecting a
+set of features leads the model to assign higher relative importance to
+unprotected features, model owners could misuse our solution by
+enforcing explanations based on features that are more difficult to
+modify by some (group of) individuals. For example, consider again the
+Adult dataset where features such as workclass or education may be more
+difficult to change for underpriviledged groups. When applied
+irresponsibly, counterfactual training could result in an unfairly
+assigned burden of recourse (e.g.,
+\citeproc{ref-sharma2020certifai}{Sharma, Henderson, and Ghosh 2020}),
+threatening the equality of opportunity in the system
+(\citeproc{ref-bell2024fairness}{Bell et al. 2024}) and potentially
+reinforcing social segregation (\citeproc{ref-gao2023impact}{Gao and
+Lakkaraju 2023}). Still, as the referenced publications indicate, such
+phenomena are not specific to CT; regrettably, all types of ADM
+solutions without strong external protections have been recognized to
+promote harmful power dynamics (\citeproc{ref-maas2023machine}{Maas
+2023}).
 
 \section{Conclusion}\label{sec-conclusion}
 
@@ -1145,6 +1158,12 @@ Robustness Through Active Generative Counterfactual Data
 Augmentation.''} In \emph{Findings of the Association for Computational
 Linguistics: EMNLP 2023}, 127--39.
 
+\bibitem[\citeproctext]{ref-bell2024fairness}
+Bell, Andrew, Joao Fonseca, Carlo Abrate, Francesco Bonchi, and Julia
+Stoyanovich. 2024. {``Fairness in Algorithmic Recourse Through the Lens
+of Substantive Equality of Opportunity.''}
+\url{https://arxiv.org/abs/2401.16088}.
+
 \bibitem[\citeproctext]{ref-du2019implicit}
 Du, Yilun, and Igor Mordatch. 2020. {``Implicit Generation and
 Generalization in Energy-Based Models.''}
@@ -1168,6 +1187,12 @@ Hypothesis: Finding Sparse, Trainable Neural Networks.''} In
 Freiesleben, Timo. 2022. {``The Intriguing Relation Between
 Counterfactual Explanations and Adversarial Examples.''} \emph{Minds and
 Machines} 32 (1): 77--109.
+
+\bibitem[\citeproctext]{ref-gao2023impact}
+Gao, Ruijiang, and Himabindu Lakkaraju. 2023. {``On the Impact of
+Algorithmic Recourse on Social Segregation.''} In \emph{Proceedings of
+the 40th International Conference on Machine Learning}. ICML'23.
+Honolulu, Hawaii, USA: JMLR.org.
 
 \bibitem[\citeproctext]{ref-goodfellow2014explaining}
 Goodfellow, Ian J, Jonathon Shlens, and Christian Szegedy. 2014.
@@ -1230,6 +1255,10 @@ Training for Improving Robustness of Pre-Trained Language Models.''} In
 \emph{Proceedings of the 37th Pacific Asia Conference on Language,
 Information and Computation}, 881--88.
 
+\bibitem[\citeproctext]{ref-maas2023machine}
+Maas, Jonne. 2023. {``Machine Learning and Power Relations.''} \emph{AI
+\& SOCIETY} 38 (4): 1493--1500.
+
 \bibitem[\citeproctext]{ref-mcgregor2021preventing}
 McGregor, Sean. 2021. {``{Preventing repeated real world AI failures by
 cataloging incidents: The AI incident database}.''} In \emph{Proceedings
@@ -1282,6 +1311,14 @@ Sacaleanu, Yarin Gal, et al. 2021. {``Generating {Interpretable
 Counterfactual Explanations By Implicit Minimisation} of {Epistemic} and
 {Aleatoric Uncertainties}.''} In \emph{International {Conference} on
 {Artificial Intelligence} and {Statistics}}, 1756--64. {PMLR}.
+
+\bibitem[\citeproctext]{ref-sharma2020certifai}
+Sharma, Shubham, Jette Henderson, and Joydeep Ghosh. 2020. {``CERTIFAI:
+A Common Framework to Provide Explanations and Analyse the Fairness and
+Robustness of Black-Box Models.''} In \emph{Proceedings of the AAAI/ACM
+Conference on AI, Ethics, and Society}, 166--72. AIES '20. New York, NY,
+USA: Association for Computing Machinery.
+\url{https://doi.org/10.1145/3375627.3375812}.
 
 \bibitem[\citeproctext]{ref-snoek2012practical}
 Snoek, Jasper, Hugo Larochelle, and Ryan P. Adams. 2012. {``{Practical

@@ -1,55 +1,34 @@
 {
   "cells": [
     {
-      "cell_type": "code",
+      "cell_type": "markdown",
       "metadata": {},
       "source": [
+        "```{julia}\n",
         "projectdir = splitpath(pwd()) |>\n",
         "    ss -> joinpath(ss[1:findall([s == \"CounterfactualTraining.jl\" for s in ss])[1]]...) \n",
-        "cd(projectdir)"
-      ],
-      "id": "25497838",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "cd(projectdir)\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
         "using CTExperiments\n",
         "using CTExperiments.CSV\n",
         "using CTExperiments.DataFrames\n",
         "using CTExperiments.StatsBase\n",
         "\n",
         "using DotEnv\n",
-        "DotEnv.load!()"
-      ],
-      "id": "1760269c",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
-        "## Initial Grid Search {#sec-app-initial}\n"
-      ],
-      "id": "f47854b0"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
-        "res_dir = ENV[\"INITIAL_RUN_RESULTS\"]"
-      ],
-      "id": "cf8e27e7",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "DotEnv.load!()\n",
+        "```\n",
+        "\n",
+        "\n",
+        "## Initial Grid Search {#sec-app-initial}\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
+        "res_dir = ENV[\"INITIAL_RUN_RESULTS\"]\n",
+        "```\n",
+        "\n",
+        "\n",
         "For the initial round of experiments we employed a different training objective and procedure that led to promising results for some hyperparameter choices, but suffered from training instabilities.\n",
         "\n",
         "### Generator Parameters\n",
@@ -58,167 +37,97 @@
         "\n",
         "::: {#exr-gen-params-first-run-train}\n",
         "\n",
-        "## Training Phase\n"
-      ],
-      "id": "04f99ef1"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "## Training Phase\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "#| output: asis\n",
         "dict = CTExperiments.from_toml(joinpath(res_dir,\"gen_params/mlp/lin_sep/grid_config.toml\")) \n",
-        "println(CTExperiments.dict_to_quarto_markdown(dict))"
-      ],
-      "id": "9fab3ecc",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "println(CTExperiments.dict_to_quarto_markdown(dict))\n",
+        "```\n",
+        "\n",
+        "\n",
         ":::\n",
         "\n",
         "\n",
         "::: {#exr-gen-params-first-run-eval}\n",
         "\n",
-        "## Evaluation Phase\n"
-      ],
-      "id": "fbd444ce"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "## Evaluation Phase\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "#| output: asis\n",
         "dict = CTExperiments.from_toml(joinpath(res_dir, \"gen_params/mlp/lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
-        "println(CTExperiments.dict_to_quarto_markdown(dict))"
-      ],
-      "id": "6767a507",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
-        ":::\n"
-      ],
-      "id": "3a9b1f4d"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
-        "gen_params_dir = joinpath(res_dir, \"gen_params/mlp\")"
-      ],
-      "id": "00326e53",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "println(CTExperiments.dict_to_quarto_markdown(dict))\n",
+        "```\n",
+        "\n",
+        "\n",
+        ":::\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
+        "gen_params_dir = joinpath(res_dir, \"gen_params/mlp\")\n",
+        "```\n",
+        "\n",
+        "\n",
         "#### Linearly Separable \n",
         "\n",
         "- **Energy Penalty** (@tbl-lin_sep-lambda_energy_exper): *ECCo* generally does yield better results than *Vanilla* for higher choices of the energy penalty (10,15) during training. *Generic* performs poorly accross the board. *Omni* seems to have an anchoring effect, in that it never performs terribly but also never as good as the best *ECCo* results. *REVISE* performs poorly across the board.\n",
         "- **Cost** (@tbl-lin_sep-lambda_cost_exper): Results for all generators (except *Omni*) are quite bad, which can likely be attributed to extremely bad results for some choices of the **Energy Penalty** (results here are averaged). For *ECCo* and *Generic*, higher cost values generally lead to worse results.\n",
         "- **Maximum Iterations**: No clear patterns recognizable, so it seems that smaller choices are ok. \n",
         "- **Validity**: *ECCo* almost always valid except for very low values during training and high values at evaluation time. *Generic* often has poor validity.\n",
-        "- **Accuracy**: Seems largely unaffected.\n"
-      ],
-      "id": "8f007318"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "- **Accuracy**: Seems largely unaffected.\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "df = CSV.read(\"$(gen_params_dir)/lin_sep/evaluation/results/ce/objective---lambda_energy_exper---lambda_energy_eval/plausibility_distance_from_target.csv\", DataFrame)\n",
         "df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> \n",
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
-        "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type])"
-      ],
-      "id": "d9c0edd2",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type])\n",
+        "```\n",
+        "\n",
+        "\n",
         "::: {#tbl-lin_sep-lambda_energy_exper}\n",
         "\n",
-        "::: {.content-hidden unless-format=\"pdf\"}\n"
-      ],
-      "id": "df848df1"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "::: {.content-hidden unless-format=\"pdf\"}\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "#| output: asis\n",
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
-        "    inputs -> tabulate_results(inputs; wrap_table=false)"
-      ],
-      "id": "20f5d605",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "    inputs -> tabulate_results(inputs; wrap_table=false)\n",
+        "```\n",
+        "\n",
+        "\n",
         ":::\n",
         "\n",
         "Results for Linearly Separable data by energy penalty.\n",
         "\n",
         ":::\n",
         "\n",
-        "<!-- Cost -->\n"
-      ],
-      "id": "088585e7"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "<!-- Cost -->\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "df = CSV.read(\"$(gen_params_dir)/lin_sep/evaluation/results/ce/objective---lambda_cost_exper---lambda_energy_eval/plausibility_distance_from_target.csv\", DataFrame)\n",
         "df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> \n",
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
-        "  df -> sort(df, [:lambda_cost_exper, :objective, :generator_type])"
-      ],
-      "id": "248c12aa",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "  df -> sort(df, [:lambda_cost_exper, :objective, :generator_type])\n",
+        "```\n",
+        "\n",
+        "\n",
         "::: {#tbl-lin_sep-lambda_cost_exper}\n",
         "\n",
-        "::: {.content-hidden unless-format=\"pdf\"}\n"
-      ],
-      "id": "6c4fbfb6"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "::: {.content-hidden unless-format=\"pdf\"}\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "#| output: asis\n",
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_cost_exper\", backend=Val(:latex)) |>\n",
-        "    inputs -> tabulate_results(inputs; wrap_table=false)"
-      ],
-      "id": "2f58cb90",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "    inputs -> tabulate_results(inputs; wrap_table=false)\n",
+        "```\n",
+        "\n",
+        "\n",
         ":::\n",
         "\n",
         "Results for Linearly Separable data by cost penalty.\n",
@@ -232,49 +141,29 @@
         "- **Cost (distance penalty)**: *Generic* generally does better for higher values, while *ECCo* does better for lower values.\n",
         "- **Maximum Iterations**: No clear patterns recognizable, so it seems that smaller choices are ok. \n",
         "- **Validity**: *ECCo* generally achieves full validity except for very low choices the energy penalty during training and high choices at evaluation time. *Generic* performs poorly for high choices of the energy penalty during evaluation.\n",
-        "- **Accuracy**: Largely unaffected although *ECCo* suffers a bit for very low choices the energy penalty during training. *REVISE* suffers a lot in general (around 10 percentage points).\n"
-      ],
-      "id": "e05bf47c"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "- **Accuracy**: Largely unaffected although *ECCo* suffers a bit for very low choices the energy penalty during training. *REVISE* suffers a lot in general (around 10 percentage points).\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "df = CSV.read(\"$(gen_params_dir)/moons/evaluation/results/ce/objective---lambda_energy_exper---lambda_energy_eval/plausibility_distance_from_target.csv\", DataFrame)\n",
         "df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> \n",
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
-        "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) "
-      ],
-      "id": "6773d6d6",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) \n",
+        "```\n",
+        "\n",
+        "\n",
         "::: {#tbl-moons-lambda_energy_exper}\n",
         "\n",
-        "::: {.content-hidden unless-format=\"pdf\"}\n"
-      ],
-      "id": "1d4d9799"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "::: {.content-hidden unless-format=\"pdf\"}\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "#| output: asis\n",
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
-        "    inputs -> tabulate_results(inputs)"
-      ],
-      "id": "eafb823a",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "    inputs -> tabulate_results(inputs)\n",
+        "```\n",
+        "\n",
+        "\n",
         ":::\n",
         "\n",
         "Results for Moons data by energy penalty.\n",
@@ -287,64 +176,44 @@
         "- **Cost (distance penalty)**: *ECCo* and *Generic* generally achieve the best results when no cost penalty is used during training. Both *Omni* and *REVISE* are largely unaffected.\n",
         "- **Maximum Iterations**: *ECCo* consistently yields better results for higher numbers of iterations. *Generic* generally does best for a medium number (50). *Omni* is sometimes invalid (**???**).\n",
         "- **Validity**: *ECCo* tends to outperform its *Vanilla* counterpart, though primarily for low to medium choices of the energy penalty (<=5) during training and evaluation. *Vanilla* typically worse across the board.\n",
-        "- **Accuracy**: Mostly unaffected, but *REVISE* again consistently some deterioration and *ECCo* deteriorates for high choices of energy penalty during training, reflecting other outcomes above.\n"
-      ],
-      "id": "74ab915b"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "- **Accuracy**: Mostly unaffected, but *REVISE* again consistently some deterioration and *ECCo* deteriorates for high choices of energy penalty during training, reflecting other outcomes above.\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "df = CSV.read(\"$(gen_params_dir)/circles/evaluation/results/ce/objective---lambda_energy_exper---lambda_energy_eval/plausibility_distance_from_target.csv\", DataFrame)\n",
         "df = groupby(df, Not(:run, :std, :mean, :lambda_energy_eval)) |> \n",
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
-        "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) "
-      ],
-      "id": "dd856642",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) \n",
+        "```\n",
+        "\n",
+        "\n",
         "::: {#tbl-circles-lambda_energy_exper}\n",
         "\n",
-        "::: {.content-hidden unless-format=\"pdf\"}\n"
-      ],
-      "id": "cf00e6f0"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "::: {.content-hidden unless-format=\"pdf\"}\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "#| output: asis\n",
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
-        "    inputs -> tabulate_results(inputs)"
-      ],
-      "id": "6740f1bb",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "    inputs -> tabulate_results(inputs)\n",
+        "```\n",
+        "\n",
+        "\n",
         ":::\n",
         "\n",
         "Results for Circles data by energy penalty.\n",
         "\n",
         ":::"
       ],
-      "id": "66632a25"
+      "id": "e6a34d52"
     }
   ],
   "metadata": {
     "kernelspec": {
-      "name": "julia-1.11",
-      "language": "julia",
-      "display_name": "Julia 1.11.1",
-      "path": "/Users/paltmeyer/Library/Jupyter/kernels/julia-1.11"
+      "name": "comp_vis",
+      "language": "python",
+      "display_name": "comp_vis",
+      "path": "C:\\Users\\Olek\\AppData\\Roaming\\jupyter\\kernels\\comp_vis"
     }
   },
   "nbformat": 4,
