@@ -167,12 +167,12 @@
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
-\theoremstyle{plain}
-\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
 \theoremstyle{definition}
 \newtheorem{example}{Example}[section]
+\theoremstyle{plain}
+\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{plain}
 \newtheorem{proposition}{Proposition}[section]
 \theoremstyle{remark}
@@ -260,13 +260,13 @@ Representation Learning
 Today's prominence of artificial intelligence (AI) has largely been
 driven by advances in \textbf{representation learning}: instead of
 relying on features and rules that are carefully hand-crafted by humans,
-modern machine learning (ML) models are tasked with learning the
+modern machine learning (ML) models are tasked with learning
 representations directly from data, guided by narrow objectives such as
 predictive accuracy (\citeproc{ref-goodfellow2016deep}{I. Goodfellow,
 Bengio, and Courville 2016}). Modern advances in computing have made it
-possible to provide such models with ever growing degrees of freedom to
+possible to provide such models with ever-growing degrees of freedom to
 achieve that task, which has often led them to outperform traditionally
-more parsimonious models. Unfortunately, in doing so, the models learn
+more parsimonious models. Unfortunately, in doing so, models learn
 increasingly complex and highly sensitive representations that we can no
 longer easily interpret.
 
@@ -289,12 +289,12 @@ many solutions that are locally optimal with respect to narrow
 objectives (\citeproc{ref-wilson2020case}{Wilson 2020}).\footnote{We
   follow the standard ML convention, where ``degrees of freedom'' refer
   to the number of parameters estimated from data.} Indeed, recent work
-on the so called ``lottery tickets'' suggests that modern neural
-networks can be pruned by up to 90\% while preserving their predictive
-performance (\citeproc{ref-frankle2018lottery}{Frankle and Carbin 2019})
-and generalizability (\citeproc{ref-morcos2019success}{Morcos et al.
-2019}). Similarly, Zhang et al.
-(\citeproc{ref-zhang2021understanding}{2021}) showed that
+on the so called ``lottery ticket hypothesis'' suggests that modern
+neural networks can be pruned by up to 90\% while preserving their
+predictive performance (\citeproc{ref-frankle2018lottery}{Frankle and
+Carbin 2019}) and generalizability
+(\citeproc{ref-morcos2019success}{Morcos et al. 2019}). Similarly, Zhang
+et al. (\citeproc{ref-zhang2021understanding}{2021}) showed that
 state-of-the-art neural networks are so expressive that they can fit
 randomly labeled data. Thus, looking at the predictive performance, the
 solutions may seem to provide compelling explanations for the data, when
