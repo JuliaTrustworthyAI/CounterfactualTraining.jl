@@ -37,7 +37,7 @@
 
 {{< include /paper/sections/other/grids.qmd >}}
 
-<!-- {{< include /paper/sections/other/initial_grids.qmd >}} -->
+{{< include /paper/sections/other/tuning.qmd >}}
 
 {{< include /paper/sections/other/compute.qmd >}}
 
