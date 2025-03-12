@@ -177,11 +177,11 @@ end
 
 Aggregate performance variable `y` from an experiment grid by columns specified in `byvars`.
 """
-function aggregate_performance(cfg::EvalConfigOrGrid; kwrgs...)
+function aggregate_performance(cfg::EvalConfigOrGrid; measure=[accuracy, multiclass_f1score], kwrgs...)
 
     # Load data:
     exper_grid = ExperimentGrid(cfg.grid_file)
-    df, df_meta, df_perf = merge_with_meta(cfg, CTExperiments.test_performance(exper_grid; return_df=true))
+    df, df_meta, df_perf = merge_with_meta(cfg, CTExperiments.test_performance(exper_grid; measure, return_df=true))
 
     return aggregate_performance(df, df_meta, df_perf; kwrgs...)
 end
@@ -329,6 +329,10 @@ function aggregate_ce_evaluation(
     @assert isnothing(byvars) || all(col -> col in names(df_meta), byvars) "Columns specified in `byvars` must be one of the following: $(names(df_meta))."
 
     df = df[df.variable .== y, :]
+    if y == "mmd"
+        # To align with plausibility metric (negative distance), we need to invert the MMD metric. We also first clamp values to 0 (sometimes MMD is slightly negative for numeric reasons).
+        df.value .= .-clamp.(df.value, 0, Inf) 
+    end
     rename!(df, :value => y)
     select!(df, Not(:variable))
 
@@ -355,7 +359,6 @@ function aggregate_ce_evaluation(
                 groupby(df_agg, byvars) |>
                 df -> combine(df, :mean => (y -> (mean=mean(y), std=std(y))) => AsTable)
         end
-        df_agg
     else
         df_agg = aggregate_data(df, y, byvars)
     end
@@ -464,24 +467,41 @@ function tbl_test_performance(grid::ExperimentGrid; include_adv::Bool=false, kwr
 
 end
 
-function aggregate_ce_evaluation(res_dir::String; byvars=nothing, y="mmd", kwrgs...)
+function aggregate_ce_evaluation(res_dir::String; y="mmd", byvars=nothing, rebase=true, kwrgs...)
     byvars = gather_byvars(byvars, "data")
     eval_grids, _ = final_results(res_dir)
     df = DataFrame()
     for (i,cfg) in enumerate(eval_grids)
-        df_i = aggregate_ce_evaluation(cfg; byvars=byvars, kwrgs...)
+        df_i = aggregate_ce_evaluation(cfg; y, byvars, rebase, kwrgs...)
         df = vcat(df, df_i)
     end
     rename!(df, :data => :dataset)
     df.dataset .= CTExperiments.format_header.(df.dataset)
     df.objective .= CTExperiments.format_header.(df.objective)
     df.variable .= CTExperiments.format_header.(y)
+    select!(df, Not([:is_pct]))
+    if rebase
+        df.objective .= "Reduction (%)"
+    end
     return df
 end
 
-function aggregate_performance(res_dir::String)
+global allowed_perf_measures = Dict(
+    "acc" => accuracy,
+    "f1" => multiclass_f1score,
+)
+
+function aggregate_performance(res_dir::String; measure::Vector=["acc"])
+
+    # Get measures:
+    if eltype(measure) == String
+        measure = [allowed_perf_measures[m] for m in measure]
+    end
+
     eval_grids, _ = final_results(res_dir)
-    return aggregate_performance(eval_grids)
+    df = aggregate_performance(eval_grids; measure)
+    select!(df, Not([:std]))
+    return df
 end
 
 function final_results(res_dir::String)
@@ -500,5 +520,21 @@ function final_results(res_dir::String)
 
 end
 
-function final_table(res_dir::String)
+function final_table(
+    res_dir::String;
+    ce_var=["plausibility_distance_from_target", "mmd"],
+    perf_var=["acc"],
+    rebase::Bool=true,
+    agg_further_vars=["run", "lambda_energy_eval"],
+)
+    # CE:
+    df_ce = DataFrame()
+    for y in ce_var
+        df = aggregate_ce_evaluation(res_dir; y, agg_further_vars, rebase=true)
+        df_ce = vcat(df_ce, df)
+    end
+
+    # Performance:
+    df_perf = aggregate_performance(res_dir; measure=perf_var)
+    return vcat(df_ce,df_perf)|> df -> DataFrames.unstack(df, :dataset, :mean)
 end
