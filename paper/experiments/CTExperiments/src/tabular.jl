@@ -31,6 +31,7 @@ function get_data(data::TabularData; n::Union{Nothing,Int}=nothing, test_set::Bo
         X, y = Xtest, ytest
     end
     X = Float32.(X)
+    y = Int.(y)
 
     # Subset:
     if !isnothing(n)
