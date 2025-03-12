@@ -8,7 +8,11 @@
         "    ss -> joinpath(ss[1:findall([s == \"CounterfactualTraining.jl\" for s in ss])[1]]...) \n",
         "cd(projectdir)"
       ],
+<<<<<<< HEAD
       "id": "5a9d599b",
+=======
+      "id": "25497838",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -24,7 +28,11 @@
         "using DotEnv\n",
         "DotEnv.load!()"
       ],
+<<<<<<< HEAD
       "id": "e9cf5d96",
+=======
+      "id": "1760269c",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -34,7 +42,11 @@
       "source": [
         "## Initial Grid Search {#sec-app-initial}\n"
       ],
+<<<<<<< HEAD
       "id": "4fff3473"
+=======
+      "id": "f47854b0"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -42,7 +54,11 @@
       "source": [
         "res_dir = ENV[\"INITIAL_RUN_RESULTS\"]"
       ],
+<<<<<<< HEAD
       "id": "9e8c4947",
+=======
+      "id": "cf8e27e7",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -60,7 +76,11 @@
         "\n",
         "## Training Phase\n"
       ],
+<<<<<<< HEAD
       "id": "4017c5ea"
+=======
+      "id": "04f99ef1"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -70,7 +90,11 @@
         "dict = CTExperiments.from_toml(joinpath(res_dir,\"gen_params/mlp/lin_sep/grid_config.toml\")) \n",
         "println(CTExperiments.dict_to_quarto_markdown(dict))"
       ],
+<<<<<<< HEAD
       "id": "5dbed8ca",
+=======
+      "id": "9fab3ecc",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -85,7 +109,11 @@
         "\n",
         "## Evaluation Phase\n"
       ],
+<<<<<<< HEAD
       "id": "2d8e22f8"
+=======
+      "id": "fbd444ce"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -95,7 +123,11 @@
         "dict = CTExperiments.from_toml(joinpath(res_dir, \"gen_params/mlp/lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
         "println(CTExperiments.dict_to_quarto_markdown(dict))"
       ],
+<<<<<<< HEAD
       "id": "d3854077",
+=======
+      "id": "6767a507",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -105,7 +137,11 @@
       "source": [
         ":::\n"
       ],
+<<<<<<< HEAD
       "id": "2df17e50"
+=======
+      "id": "3a9b1f4d"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -113,7 +149,11 @@
       "source": [
         "gen_params_dir = joinpath(res_dir, \"gen_params/mlp\")"
       ],
+<<<<<<< HEAD
       "id": "f145a7bd",
+=======
+      "id": "00326e53",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -129,7 +169,11 @@
         "- **Validity**: *ECCo* almost always valid except for very low values during training and high values at evaluation time. *Generic* often has poor validity.\n",
         "- **Accuracy**: Seems largely unaffected.\n"
       ],
+<<<<<<< HEAD
       "id": "26acc707"
+=======
+      "id": "8f007318"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -140,7 +184,11 @@
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
         "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type])"
       ],
+<<<<<<< HEAD
       "id": "3324d7e7",
+=======
+      "id": "d9c0edd2",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -152,7 +200,11 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}\n"
       ],
+<<<<<<< HEAD
       "id": "1dd301ca"
+=======
+      "id": "df848df1"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -162,7 +214,11 @@
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs; wrap_table=false)"
       ],
+<<<<<<< HEAD
       "id": "9e6a935d",
+=======
+      "id": "20f5d605",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -178,7 +234,11 @@
         "\n",
         "<!-- Cost -->\n"
       ],
+<<<<<<< HEAD
       "id": "6ea3fc13"
+=======
+      "id": "088585e7"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -189,7 +249,11 @@
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
         "  df -> sort(df, [:lambda_cost_exper, :objective, :generator_type])"
       ],
+<<<<<<< HEAD
       "id": "d99c0867",
+=======
+      "id": "248c12aa",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -201,7 +265,11 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}\n"
       ],
+<<<<<<< HEAD
       "id": "68318776"
+=======
+      "id": "6c4fbfb6"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -211,7 +279,11 @@
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_cost_exper\", backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs; wrap_table=false)"
       ],
+<<<<<<< HEAD
       "id": "80e966c4",
+=======
+      "id": "2f58cb90",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -234,7 +306,11 @@
         "- **Validity**: *ECCo* generally achieves full validity except for very low choices the energy penalty during training and high choices at evaluation time. *Generic* performs poorly for high choices of the energy penalty during evaluation.\n",
         "- **Accuracy**: Largely unaffected although *ECCo* suffers a bit for very low choices the energy penalty during training. *REVISE* suffers a lot in general (around 10 percentage points).\n"
       ],
+<<<<<<< HEAD
       "id": "8926f1a1"
+=======
+      "id": "e05bf47c"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -245,7 +321,11 @@
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
         "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) "
       ],
+<<<<<<< HEAD
       "id": "250cb620",
+=======
+      "id": "6773d6d6",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -257,7 +337,11 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}\n"
       ],
+<<<<<<< HEAD
       "id": "3951d930"
+=======
+      "id": "1d4d9799"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -267,7 +351,11 @@
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs)"
       ],
+<<<<<<< HEAD
       "id": "aeb3ee5c",
+=======
+      "id": "eafb823a",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -289,7 +377,11 @@
         "- **Validity**: *ECCo* tends to outperform its *Vanilla* counterpart, though primarily for low to medium choices of the energy penalty (<=5) during training and evaluation. *Vanilla* typically worse across the board.\n",
         "- **Accuracy**: Mostly unaffected, but *REVISE* again consistently some deterioration and *ECCo* deteriorates for high choices of energy penalty during training, reflecting other outcomes above.\n"
       ],
+<<<<<<< HEAD
       "id": "5c72caab"
+=======
+      "id": "74ab915b"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -300,7 +392,11 @@
         "  gdf -> combine(gdf, :mean => (x -> [(mean(x),std(x))]) => [:value,:std]) |>\n",
         "  df -> sort(df, [:lambda_energy_exper, :objective, :generator_type]) "
       ],
+<<<<<<< HEAD
       "id": "9c7458d0",
+=======
+      "id": "dd856642",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -312,7 +408,11 @@
         "\n",
         "::: {.content-hidden unless-format=\"pdf\"}\n"
       ],
+<<<<<<< HEAD
       "id": "f1c86664"
+=======
+      "id": "cf00e6f0"
+>>>>>>> 16-final-things-ecml
     },
     {
       "cell_type": "code",
@@ -322,7 +422,11 @@
         "get_table_inputs(df, \"value\"; alpha=0.9, byvars=\"lambda_energy_exper\", backend=Val(:latex)) |>\n",
         "    inputs -> tabulate_results(inputs)"
       ],
+<<<<<<< HEAD
       "id": "e1b26338",
+=======
+      "id": "6740f1bb",
+>>>>>>> 16-final-things-ecml
       "execution_count": null,
       "outputs": []
     },
@@ -336,7 +440,11 @@
         "\n",
         ":::"
       ],
+<<<<<<< HEAD
       "id": "176767b9"
+=======
+      "id": "66632a25"
+>>>>>>> 16-final-things-ecml
     }
   ],
   "metadata": {

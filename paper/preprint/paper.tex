@@ -185,12 +185,12 @@
 \usepackage{amsthm}
 \theoremstyle{plain}
 \newtheorem{proposition}{Proposition}[section]
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
-\theoremstyle{definition}
-\newtheorem{example}{Example}[section]
 \theoremstyle{plain}
 \newtheorem{corollary}{Research Question}[section]
+\theoremstyle{definition}
+\newtheorem{example}{Example}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -278,82 +278,93 @@ Representation Learning
 Today's prominence of artificial intelligence (AI) has largely been
 driven by advances in \textbf{representation learning}: instead of
 relying on features and rules that are carefully hand-crafted by humans,
-modern machine learning (ML) models are tasked with learning these
-representations from scratch, guided by narrow objectives such as
+modern machine learning (ML) models are tasked with learning
+representations directly from data, guided by narrow objectives such as
 predictive accuracy (\citeproc{ref-goodfellow2016deep}{I. Goodfellow,
 Bengio, and Courville 2016}). Modern advances in computing have made it
-possible to provide such models with ever greater degrees of freedom to
+possible to provide such models with ever-growing degrees of freedom to
 achieve that task, which has often led them to outperform traditionally
-more parsimonious models. Unfortunately, in doing so they also learn
+more parsimonious models. Unfortunately, in doing so, models learn
 increasingly complex and highly sensitive representations that we can no
 longer easily interpret.
 
-This trend towards complexity for the sake of performance has come under
+The trend towards complexity for the sake of performance has come under
 serious scrutiny in recent years. At the very cusp of the deep learning
 revolution, Szegedy et al. (\citeproc{ref-szegedy2013intriguing}{2013})
 showed that artificial neural networks (ANN) are sensitive to
 adversarial examples: counterfactuals of model inputs that yield vastly
 different model predictions despite being ``imperceptible'' in that they
-are semantically indifferent from their factual counterparts. Despite
-partially effective mitigation strategies such as \textbf{adversarial
-training} (\citeproc{ref-goodfellow2014explaining}{I. J. Goodfellow,
-Shlens, and Szegedy 2014}), truly robust deep learning (DL) remains
-unattainable even for models that are considered shallow by today's
-standards (\citeproc{ref-kolter2023keynote}{Kolter 2023}).
+are semantically indifferent from their factual counterparts. Although
+some partially effective mitigation strategies have been proposed, for
+example \textbf{adversarial training}
+(\citeproc{ref-goodfellow2014explaining}{I. J. Goodfellow, Shlens, and
+Szegedy 2014}), truly robust deep learning (DL) remains unattainable
+even for models that are considered shallow by today's standards
+(\citeproc{ref-kolter2023keynote}{Kolter 2023}).
 
-Part of the problem is that high degrees of freedom provide room for
+Part of the problem is that the high degrees of freedom provide room for
 many solutions that are locally optimal with respect to narrow
-objectives (\citeproc{ref-wilson2020case}{Wilson 2020})\footnote{For
-  clarity: we follow standard ML convention in using ``degrees of
-  freedom'' to refer to the number of parameters estimated from data.}.
-Based purely on predictive performance, these solutions may seem to
-provide compelling explanations for the data, when in fact they are
-based on purely associative, semantically meaningless patterns. This
-poses two related challenges: firstly, it makes these models inherently
-opaque, since humans cannot simply interpret what type of explanation
-the complex learned representations correspond to; secondly, even if we
-could resolve the first challenge, it is not obvious how to mitigate
-models from learning representations that correspond to meaningless and
-implausible explanations.
+objectives (\citeproc{ref-wilson2020case}{Wilson 2020}).\footnote{We
+  follow the standard ML convention, where ``degrees of freedom'' refer
+  to the number of parameters estimated from data.} Indeed, recent work
+on the so called ``lottery ticket hypothesis'' suggests that modern
+neural networks can be pruned by up to 90\% while preserving their
+predictive performance (\citeproc{ref-frankle2018lottery}{Frankle and
+Carbin 2019}) and generalizability
+(\citeproc{ref-morcos2019success}{Morcos et al. 2019}). Similarly, Zhang
+et al. (\citeproc{ref-zhang2021understanding}{2021}) showed that
+state-of-the-art neural networks are so expressive that they can fit
+randomly labeled data. Thus, looking at the predictive performance, the
+solutions may seem to provide compelling explanations for the data, when
+in fact they are based on purely associative, semantically meaningless
+patterns. This poses two related challenges. Firstly, there is no
+dependable way to verify if such complex representations correspond to
+meaningful and plausible explanations. Secondly, even if we could
+resolve the first challenge, it remains undecided how to ensure that
+models can \emph{only} learn valuable explanations.
 
 The first challenge has attracted an abundance of research on
 \textbf{explainable AI} (XAI) which aims to develop tools to derive
 explanations from complex model representations. This can mitigate a
 scenario in which we deploy opaque models and blindly rely on their
-predictions. On countless occasions, this scenario has already occurred
-in practice and caused real harm to people who were affected adversely
-and often unfairly by automated decision-making systems (ADMS) involving
-opaque models (\citeproc{ref-oneil2016weapons}{O'Neil 2016}). Effective
-XAI tools can aide us in monitoring models and providing recourse to
-individuals to turn adverse outcomes (e.g.~``loan application
-rejected'') into positive ones (``application accepted''). Wachter,
-Mittelstadt, and Russell
+predictions. On countless occasions, this scenario has occurred in
+practice and caused real harm to people who were affected adversely and
+often unfairly by automated decision-making (ADM) systems involving
+opaque models (\citeproc{ref-oneil2016weapons}{O'Neil 2016};
+\citeproc{ref-mcgregor2021preventing}{McGregor 2021}). Effective XAI
+tools can aid us in monitoring models and providing recourse to
+individuals to turn adverse outcomes (e.g., ``loan application
+rejected'') into positive ones (e.g., ``application accepted'').
+Wachter, Mittelstadt, and Russell
 (\citeproc{ref-wachter2017counterfactual}{2017}) propose
-\textbf{counterfactual explanations} as an effective approach to achieve
-this: they explain how factual inputs need to change in order for some
-fitted model to produce some desired output, typically involving minimal
-perturbations.
+\textbf{counterfactual explanations} (CE) as an effective approach to
+achieve this goal: CEs explain how factual inputs need to change in
+order for some fitted model to produce some desired output, typically
+involving minimal perturbations.
 
-To our surprise, the second challenge has not yet attracted any
+To our surprise, the second challenge has not yet attracted any major
 consolidated research effort. Specifically, there has been no concerted
-effort towards improving model \textbf{explainability}, which we define
-here as the degree to which learned representations correspond to
-explanations that are interpretable and deemed \textbf{plausible} by
-humans (see Definition~\ref{def-explainability}). Instead, the choice
-has typically been to improve the capacity of XAI tools to identify the
-subset explanations that are both plausible and valid for any given
-model, independent of whether the learned representations are also
-compatible with implausible explanations
+effort towards improving improving models' explanatory capacity, which
+we will henceforth simply call ``explainability'', defined as the degree
+to which learned representations correspond to explanations that are
+interpretable and deemed \textbf{plausible} by humans (see
+Definition~\ref{def-explainability}). Instead, the choice has typically
+been to improve the ability of XAI tools to identify the subset
+explanations that are both plausible and valid for any given model,
+independent of whether the learned representations are also compatible
+with implausible explanations
 (\citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024}).
 Fortunately, recent findings indicate that explainability can arise as
 byproduct of regularization techniques aimed at other objectives such as
-robustness, generalization and generative capacity Altmeyer et al.
-(\citeproc{ref-altmeyer2024faithful}{2024}).
+robustness, generalization, and generative capacity
+(\citeproc{ref-schut2021generating}{Schut et al. 2021};
+\citeproc{ref-augustin2020adversarial}{Augustin, Meinke, and Hein 2020};
+\citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024}).
 
 Building on these findings, we introduce \textbf{counterfactual
-training}: a novel regularization technique geared explicitly towards
-aligning model representations with plausible explanations. Our
-contributions are as follows:
+training}: a novel training regime explicitly geared towards aligning
+model representations with plausible explanations. Our contributions are
+as follows:
 
 \begin{itemize}
 \tightlist
@@ -374,24 +385,24 @@ contributions are as follows:
   affect outcomes. (Section~\ref{sec-experiments}).
 \end{itemize}
 
-Despite limitations of our approach discussed in
-Section~\ref{sec-discussion}, we conclude that counterfactual training
-provides a practical framework for researchers and practitioners
-interested in making opaque models more trustworthy
-Section~\ref{sec-conclusion}. We also believe that this work serves as
-an opportunity for XAI researchers to reevaluate the premise of
-improving XAI tools without improving models.
+Despite some limitations of our approach discussed in
+Section~\ref{sec-discussion}, we conclude in
+Section~\ref{sec-conclusion} that counterfactual training provides a
+practical framework for researchers and practitioners interested in
+making opaque models more trustworthy. We also believe that this work
+serves as an opportunity for XAI researchers to re-evaluate the trend of
+improving XAI tools without improving the underlying models.
 
 \section{Related Literature}\label{sec-lit}
 
-To the best of our knowledge, our proposed framework for counterfactual
+To the best of our knowledge, our proposed framework of counterfactual
 training represents the first attempt to use counterfactual explanations
 during training to improve model explainability. In high-level terms, we
 define model explainability as the extent to which valid explanations
 derived for an opaque model are also deemed plausible with respect to
 the underlying data and stakeholder requirements. To make this more
 concrete, we follow Augustin, Meinke, and Hein
-(\citeproc{ref-augustin2020adversarial}{2020}) in tieing the concept of
+(\citeproc{ref-augustin2020adversarial}{2020}) in tying the concept of
 explainability to the quality of counterfactual explanations that we can
 generate for a given model. The authors show that counterfactual
 explanations---understood here as minimal input perturbations that yield
@@ -400,7 +411,7 @@ underlying model is more robust to adversarial examples. We can make
 intuitive sense of this finding when looking at adversarial training
 (AT) through the lens of representation learning with high degrees of
 freedom: by inducing models to ``unlearn'' representations that are
-susceptible to worst-case counterfactuals (i.e.~adversarial examples),
+susceptible to worst-case counterfactuals (i.e., adversarial examples),
 AT effectively removes some implausible explanations from the solution
 space.
 
@@ -422,10 +433,10 @@ generalization. Teney, Abbasnedjad, and Hengel
 (\citeproc{ref-teney2020learning}{2020}) propose an approach using
 counterfactuals in training that does not rely on data augmentation:
 they argue that counterfactual pairs typically already exist in training
-datasets. Specifically, their approach relies on, firstly, identifying
-similar input samples with different annotations and, secondly, ensuring
-that the gradient of the classifier aligns with the vector between pairs
-of counterfactual inputs using the cosine distance as a loss function.
+datasets. Specifically, their approach relies on identifying similar
+input samples with different annotations and ensuring that the gradient
+of the classifier aligns with the vector between such pairs of
+counterfactual inputs using the cosine distance as the loss function.
 
 In the natural language processing (NLP) domain, counterfactuals have
 similarly been used to improve models through data augmentation: Wu et
@@ -447,11 +458,11 @@ fine-tune the given language model on the augmented dataset that
 includes the generated counterfactuals.
 
 There have also been several attempts at formalizing the relationship
-between counterfactual explanations (CE) and adversarial examples (AE).
+between counterfactual explanations and adversarial examples (AE).
 Pointing to clear similarities in how CE and AE are generated,
 Freiesleben (\citeproc{ref-freiesleben2022intriguing}{2022}) makes the
 case for jointly studying the opaqueness and robustness problem in
-representation learning. Formally, AE can be seen as the subset of CE,
+representation learning. Formally, AE can be seen as the subset of CE
 for which misclassification is achieved
 (\citeproc{ref-freiesleben2022intriguing}{Freiesleben 2022}). Similarly,
 Pawelczyk et al. (\citeproc{ref-pawelczyk2022exploring}{2022}) show that
@@ -464,22 +475,21 @@ certain properties of post-hoc counterfactual explanations. Firstly,
 Ross, Lakkaraju, and Bastani (\citeproc{ref-ross2021learning}{2024})
 propose a way to train models that are guaranteed to provide recourse
 for individuals to move from an adverse outcome to some positive target
-class with high probability. The approach proposed by Ross, Lakkaraju,
-and Bastani (\citeproc{ref-ross2021learning}{2024}) builds on
-adversarial training, where in this context susceptibility to targeted
-adversarial examples for the positive class is explicitly induced. The
-proposed method allows for imposing a set of actionability constraints
-ex-ante: for example, users can specify that certain features
-(e.g.~\emph{age}, \emph{gender}, \ldots) are immutable. Secondly, Guo,
-Nguyen, and Yadav (\citeproc{ref-guo2023counternet}{2023}) are the first
-to propose an end-to-end training pipeline that includes counterfactual
-explanations as part of the training procedure. In particular, they
-propose a specific network architecture that includes a predictor and CE
-generator network, where the parameters of the CE generator network are
-learnable. Counterfactuals are generated during each training iteration
-and fed back to the predictor network. In contrast to Guo, Nguyen, and
-Yadav (\citeproc{ref-guo2023counternet}{2023}), we impose no
-restrictions on the neural network architecture at all.
+class with high probability. Their approach builds on adversarial
+training, where in this context susceptibility to targeted adversarial
+examples for the positive class is explicitly induced. The proposed
+method allows for imposing a set of actionability constraints ex-ante:
+for example, users can specify that certain features (e.g., \emph{age},
+\emph{gender}, \ldots) are immutable. Secondly, Guo, Nguyen, and Yadav
+(\citeproc{ref-guo2023counternet}{2023}) are the first to propose an
+end-to-end training pipeline that includes counterfactual explanations
+as part of the training procedure. In particular, they propose a
+specific network architecture that includes a predictor and CE generator
+network, where the parameters of the CE generator network are learnable.
+Counterfactuals are generated during each training iteration and fed
+back to the predictor network. In contrast to Guo, Nguyen, and Yadav
+(\citeproc{ref-guo2023counternet}{2023}), we impose no restrictions on
+the neural network architecture at all.
 
 \subsection{Beyond Robustness}\label{beyond-robustness}
 
@@ -525,25 +535,25 @@ objective, as we explain in Section~\ref{sec-method}.
 Counterfactual training combines ideas from adversarial training,
 energy-based modelling and counterfactuals explanations with the
 explicit objective of aligning representations with plausible
-explanations that comply with user requirements. In the context of CE,
+explanations that comply with user requirements. In the context of CEs,
 plausibility has broadly been defined as the degree to which
 counterfactuals comply with the underlying data generating process
 (\citeproc{ref-poyiadzi2020face}{Poyiadzi et al. 2020};
 \citeproc{ref-guidotti2022counterfactual}{Guidotti 2022};
 \citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024}). Plausibility
-is a necessary but insufficient condition for using CE to provide
+is a necessary but insufficient condition for using CEs to provide
 algorithmic recourse (AR) to individuals affected by opaque models in
 practice. This is because for recourse recommendations to be
 \textbf{actionable}, they need to not only result in plausible
 counterfactuals but also be attainable. A plausible CE for a rejected
 20-year-old loan applicant, for example, might reveal that their
 application would have been accepted, if only they were 20 years older.
-Ignoring all other features, this complies with the definition of
-plausibility if 40-year-old individuals are in fact more credit-worthy
+Ignoring all other features, this would comply with the definition of
+plausibility if 40-year-old individuals were in fact more credit-worthy
 on average than young adults. But of course this CE does not qualify for
 providing actionable recourse to the applicant since \emph{age} is not a
-mutable feature. For our intents and purposes, counterfactual training
-aims at improving model explainability by aligning models with
+(directly) mutable feature. For our intents and purposes, counterfactual
+training aims to improve model explainability by aligning models with
 counterfactuals that meet both desiderata, plausibility and
 actionability. Formally, we define explainability as follows:
 
@@ -573,8 +583,8 @@ follows:
   \(\int^{A} p(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1\)
   where \(A\) is some small region around \(\mathbf{x}^{\prime}\).
 \item
-  (Actionability) Permutations \(\Delta\) are subject to actionability
-  constraints.
+  (Actionability) Permutations \(\Delta\) are subject to some
+  actionability constraints.
 \end{enumerate}
 
 We consider counterfactuals as faithful to the extent that they are
@@ -612,45 +622,51 @@ initially proposed by Wachter, Mittelstadt, and Russell
 let \(T\) vary and consider the counterfactual search as converged as
 soon as the predicted probability for the target class has reached a
 pre-determined threshold, \(\tau\):
-\(\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}^\prime))[y^+] \geq \tau\)\footnote{For
-  detailed background information on gradient-based counterfactual
-  search and convergence see Section~\ref{sec-app-ce}.}.
+\(\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}^\prime))[y^+] \geq \tau\),
+where \(\mathcal{S}\) is the softmax function.\footnote{For detailed
+  background information on gradient-based counterfactual search and
+  convergence see supplementary appendix.}
 
 To train models with high explainability as defined in
 Definition~\ref{def-explainability}, we propose to leverage
-counterfactuals in the following objective,
+counterfactuals in the following objective:
 
 \begin{equation}\phantomsection\label{eq-obj}{
-\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y})
+\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) + \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y}) + \lambda_{\text{reg}}\text{ridge}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta)
 }\end{equation}
 
 where \(\text{yloss}(\cdot)\) is any conventional classification loss
-that induces discriminative performance (e.g.~cross-entropy). The two
-additional components in Equation~\ref{eq-obj} are explained in more
+that induces discriminative performance (e.g., cross-entropy). The
+second and third terms in Equation~\ref{eq-obj} are explained in more
 detail below. For now, they can be sufficiently described as inducing
-explainability directly and indirectly by penalizing: 1) the contrastive
-divergence, \(\text{div}(\cdot)\), between mature counterfactuals
-\(\mathbf{x}_T^\prime\) and observed samples \(\mathbf{x}\) and, 2) the
-adversarial loss, \(\text{advloss}(.)\), with respect to nascent
-counterfactuals \(\mathbf{x}_{t\leq T}^\prime\). The tradeoff between
-the different components can be governed by adjusting the strengths of
-the penalties \(\lambda_{\text{div}}\) and \(\lambda_{\text{adv}}\).
+explainability directly and indirectly by penalizing: (1) the
+contrastive divergence, \(\text{div}(\cdot)\), between mature
+counterfactuals \(\mathbf{x}_T^\prime\) and observed samples \(x\) and,
+(2) the adversarial loss, \(\text{advloss}(.)\), with respect to nascent
+counterfactuals \(\mathbf{x}_{t\leq T}^\prime\). Finally,
+\(\text{ridge}(\cdot)\) denotes a Ridge penalty (\(\ell_2\)-norm) that
+regularises the magnitude of the energy terms involved in
+\(\text{div}(\cdot)\) (\citeproc{ref-du2019implicit}{Du and Mordatch
+2020}). The tradeoff between the different components can be governed by
+adjusting the strengths of the penalties \(\lambda_{\text{div}}\),
+\(\lambda_{\text{adv}}\) and \(\lambda_{\text{reg}}\).
 
 \subsubsection{Directly Inducing Explainability through Contrastive
 Divergence}\label{directly-inducing-explainability-through-contrastive-divergence}
 
 Grathwohl et al. (\citeproc{ref-grathwohl2020your}{2020}) observe that
 any classifier can be re-interpreted as a joint energy-based model (JEM)
-that learns to discriminate output classes conditional on inputs and
-generate inputs. They show that JEMs can be trained to perform well at
-both tasks by directly maximizing the joint log-likelihood factorized as
+that learns to discriminate output classes conditional on the observed
+(training) samples from \(p(\mathbf{x})\) and the generated samples from
+\(p_\theta(\mathbf{x})\). They show that JEMs can be trained to perform
+well at both tasks by directly maximizing the joint log-likelihood
+factorized as
 \(\log p_\theta(\mathbf{x},\mathbf{y})=\log p_\theta(\mathbf{y}|\mathbf{x}) + \log p_\theta(\mathbf{x})\).
 The first factor can be optimized using conventional cross-entropy as in
-Equation~\ref{eq-obj}. To optimize \(\log p_\theta(\mathbf{x})\)
+Equation~\ref{eq-obj}. Then, to optimize \(\log p_\theta(\mathbf{x})\)
 Grathwohl et al. (\citeproc{ref-grathwohl2020your}{2020}) minimize the
-contrastive divergence between samples drawn from
-\(p_\theta(\mathbf{x})\) and training observations, i.e.~samples from
-\(p(\mathbf{x})\).
+contrastive divergence between these observed samples from
+\(p(\mathbf{x})\) and generated samples from \(p_\theta(\mathbf{x})\).
 
 A key empirical finding in Altmeyer et al.
 (\citeproc{ref-altmeyer2024faithful}{2024}) was that JEMs tend to do
@@ -663,9 +679,8 @@ To generate samples, Grathwohl et al.
 (\citeproc{ref-grathwohl2020your}{2020}) rely on Stochastic Gradient
 Langevin Dynamics (SGLD) using an uninformative prior for
 initialization. This is where we depart from their methodology: instead
-of generating samples through SGLD, we propose using counterfactual
-explainers to generate counterfactuals for observed training samples.
-Specifically, we have
+of SGLD, we propose to use counterfactual explainers to generate
+counterfactuals of observed training samples. Specifically, we have:
 
 \begin{equation}\phantomsection\label{eq-div}{
 \text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) = \mathcal{E}_\theta(\mathbf{x},y) - \mathcal{E}_\theta(\mathbf{x}_T^\prime,y)
@@ -689,8 +704,8 @@ of observed training samples (positive samples) while at same time
 increasing the energy of counterfactuals (negative samples)
 (\citeproc{ref-du2019implicit}{Du and Mordatch 2020}). As the generated
 counterfactuals get more plausible (Definition~\ref{def-explainability})
-over the cause of training, these two opposing effects gradually balance
-each out (\citeproc{ref-lippe2024uvadlc}{Lippe 2024}).
+over the course of training, these two opposing effects gradually
+balance each out (\citeproc{ref-lippe2024uvadlc}{Lippe 2024}).
 
 The departure from SGLD allows us to tap into the vast repertoire of
 explainers that have been proposed in the literature to meet different
@@ -762,7 +777,7 @@ this can be achieved by enforcing
 \(\mathbf{x}[d] - \mathbf{x}^\prime[d]:=0\) whenever perturbing
 \(\mathbf{x}^\prime[d]\) in the direction of \(\mathbf{x}[d]\) would
 violate mutability constraints. Specifically, we set
-\(\mathbf{x}[d] := \mathbf{x}^\prime[d]\) if
+\(\mathbf{x}[d] := \mathbf{x}^\prime[d]\) if:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -786,7 +801,8 @@ model to instead seek plausibility with respect to the remaining
 features. This in turn results in lower overall sensitivity to immutable
 features, which we demonstrate empirically for different classifiers in
 Section~\ref{sec-experiments}. Under certain conditions, this results
-holds theoretically{[}For the proof, see the supplementary appendix.{]}:
+holds theoretically:\footnote{For the proof, see the supplementary
+  appendix.}
 
 \begin{proposition}[Protecting Immutable
 Features]\protect\hypertarget{prp-mtblty}{}\label{prp-mtblty}
@@ -794,14 +810,14 @@ Features]\protect\hypertarget{prp-mtblty}{}\label{prp-mtblty}
 Let
 \(f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})\)
 denote a linear classifier with softmax activation \(\mathcal{S}\)
-(i.e.~\emph{multinomial logistic regression}) where
+(i.e., \emph{multinomial logistic regression}) where
 \(y\in\{1,...,K\}=\mathcal{K}\) and \(\mathbf{x} \in \mathbb{R}^D\). If
 we assume multivariate Gaussian class densities with common diagonal
 covariance matrix \(\Sigma_k=\Sigma\) for all \(k \in \mathcal{K}\),
 then protecting an immutable feature from the contrastive divergence
 penalty (Equation~\ref{eq-div}) will result in lower classifier
 sensitivity to that feature relative to the remaining features, provided
-that at least one of those is mutable and discriminative.
+that at least one of those is discriminative and mutable.
 
 \end{proposition}
 
@@ -823,7 +839,7 @@ Suppose we are interested in predicting the likelihood that loan
 applicants default on their credit. We have access to historical data on
 previous loan takers comprised of a binary outcome variable
 (\(y\in\{1=\text{default},2=\text{no default}\}\)) two input features:
-1) the subjects' \emph{age}, which we define as immutable, and 2) the
+(1) the subjects' \emph{age}, which we define as immutable, and (2) the
 subjects' existing level of \emph{debt}, which we define as mutable.
 
 We have simulated this scenario using synthetic data with independent
@@ -849,16 +865,16 @@ Definition~\ref{def-explainability}.
 In panel (c), we have used conventional training again, this time
 imposing the mutability constraint on \emph{age} at test time.
 Counterfactuals are valid but involve some substantial reductions in
-\emph{debt} for some individuals, in particular very young applicants.
-By comparison, counterfactual paths are shorter on average in panel (d),
-where we have used counterfactual training and protected immutable
-features as described in Section~\ref{sec-constraints}. In particular,
-we observe that due to the classifier's lower sensitivity to \emph{age},
-recourse recommendations with respect to \emph{debt} are much more
-homogenous, in that they do not disproportionately punish younger
-individuals. The counterfactuals are also plausible with respect to the
-mutable feature. Thus, we consider the model in panel (d) as the most
-explainable according to Definition~\ref{def-explainability}.
+\emph{debt} for some individuals (very young applicants). By comparison,
+counterfactual paths are shorter on average in panel (d), where we have
+used counterfactual training and protected immutable features as
+described in Section~\ref{sec-constraints}. In particular, we observe
+that due to the classifier's lower sensitivity to \emph{age}, recourse
+recommendations with respect to \emph{debt} are much more homogenous, in
+that they do not disproportionately punish younger individuals. The
+counterfactuals are also plausible with respect to the mutable feature.
+Thus, we consider the model in panel (d) as the most explainable
+according to Definition~\ref{def-explainability}.
 
 \end{example}
 
@@ -942,38 +958,168 @@ metrics to evaluate counterfactuals at test time including validity and
 redundancy. Finally, we also assess the predictive performance of models
 using standard metrics.
 
+We run the experiments with three CE generators: \emph{Generic} of
+Wachter, Mittelstadt, and Russell
+(\citeproc{ref-wachter2017counterfactual}{2017}) as a simple baseline
+approach, \emph{REVISE} (\citeproc{ref-joshi2019realistic}{Joshi et al.
+2019}) that aims to generate plausible counterfactuals using a surrogate
+Variational Autoencoder (VAE), and \emph{ECCo}---the generator of
+Altmeyer et al. (\citeproc{ref-altmeyer2023faithful}{2023}) but without
+the conformal prediction component---as a method that directly targets
+both faithfulness and plausibility of the CEs.
+
 \subsection{Experimental Results}\label{experimental-results}
+
+\subsubsection{Plausibility}\label{plausibility-1}
+
+\subsubsection{Actionability}\label{actionability-1}
+
+\subsubsection{Impact of hyperparameter
+settings}\label{sec-hyperparameters}
+
+We extensively test the impact of three types of hyperparameters on the
+proposed training regime. Our complete results are available in the
+technical appendix; this section focuses on the main findings.
+
+\textbf{\emph{Hyperparameters of the CE generators.}} First, we observe
+that CT is highly sensitive to hyperparameter settings but (a) there are
+manageable patterns and (b) we can typically identify settings that
+improve either plausibility or cost, and commonly both of them at the
+same time. Second, we note that the choice of a CE generator has a major
+impact on the results. For example, \emph{REVISE} tends to perform the
+worst, most likely because it uses a surrogate VAE to generate
+counterfactuals which impedes faithfulness
+(\citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024}). Third,
+increasing \(T\), the maximum number of steps, generally yields better
+outcomes because more CEs can mature in each training epoch. Fourth, the
+impact of \(\tau\), the required decision threshold is more difficult to
+predict. On ``harder'' datasets it may be difficult to satisfy high
+\(\tau\) for any given sample (i.e., also factuals) and so increasing
+this threshold does not seem to correlate with better outcomes. In fact,
+we have generally found that a choice of \(\tau=0.5\) leads to optimal
+results because it is associated with high proportions of mature
+counterfactuals.
+
+\textbf{\emph{Hyperparameters for penalties.}} We find that the strength
+of the energy regularization, \(\lambda_{\text{reg}}\) is highly
+impactful; energy must be sufficiently regularized to avoid poor
+performance in terms of decreased plausibility and increased costs. The
+sensitivity with respect to \(\lambda_{\text{div}}\) and
+\(\lambda_{\text{adv}}\) is much less evident. While high values of
+\(\lambda_{\text{reg}}\) may increase the variability in outcomes when
+combined with high values for any of the other penalties in
+Equation~\ref{eq-obj}, this effect is not very pronounced.
+
+\textbf{\emph{Other hyperparameters.}} We observe that the effectiveness
+and stability of CT is positively associated with the number of
+counterfactuals generated during each training epoch. We also confirm
+that a higher number of training epochs is beneficial. Interestingly, we
+find that it is not necessary to employ CT during the entire training
+phase to achieve the desired improvements in explainability. We have
+tested training models conventionally during the first half of training
+before switching to CT after this initial ``burn-in'' period and
+observed positive results. Put differently, CT may be a way to improve
+the explainability of trained models in a fine-tuning manner.
 
 \section{Discussion}\label{sec-discussion}
 
-\subsection{Approach/Future Directions}\label{approachfuture-directions}
+We begin the discussion by addressing the direct extensions of the
+counterfactual training approach in Section~\ref{sec-approach}. Then, we
+look at its broader limitations and challenges in
+Section~\ref{sec-limitations}.
 
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  Limited to classification models.
-\item
-  Training instabilities.
-\item
-  Hyperparameter sensitivity -\textgreater{} can we do better than grid
-  search? (Bayes opt, \ldots)
-\end{enumerate}
+\subsection{Future research}\label{sec-approach}
 
-\subsection{Limitations}\label{limitations}
+\textbf{\emph{CT is defined only for classification settings.}} Our
+formulation relies on the distinction between non-target class(es)
+\(y^{-}\) and target class(es) \(y^{+}\) to generate counterfactuals
+through Equation~\ref{eq-obj}. While \(y^{-}\) and \(y^{+}\) can be
+arbitrarily defined by the user, CT requires the output space
+\(\mathcal{Y}\) to be discrete. Thus, it applies to binary and
+multi-class classification but it is not well-defined for other ML tasks
+where the change in outcome with respect to a decision threshold
+\(\tau\) cannot be readily quantified. In fact, this is a common
+restriction in research on CEs and AR that predominantly focuses on
+classification models. Although other settings have attracted some
+interest (e.g., regression in
+\citeproc{ref-spooner2021counterfactual}{Spooner et al. 2021};
+\citeproc{ref-zhao2023counterfactual}{Zhao, Broelemann, and Kasneci
+2023}), there is still no consensus on what constitutes a counterfactual
+in such settings.
 
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\setcounter{enumi}{2}
-\tightlist
-\item
-  Proxy attributes of immutable features.
-\item
-  Increased training time.
-\item
-  Fairness and caveats (aware it's not a classical approach in this
-  context, but there is a clear link).
-\end{enumerate}
+\textbf{\emph{CT is subject to training instabilities.}} Joint
+energy-based models are susceptible to instabilities during training
+(\citeproc{ref-grathwohl2020your}{Grathwohl et al. 2020}) and even
+though we depart from the SGLD-based sampling, we still encounter major
+variability in the outcomes. CT is exposed to two potential sources of
+instabilities: (1) the energy-based contrastive divergence term in
+Equation~\ref{eq-div}, and (2) the underlying counterfactual explainers.
+For example, Altmeyer et al. (\citeproc{ref-altmeyer2023faithful}{2023})
+recognize this to be a challenge for \emph{ECCCo} and so it may have
+downstream impacts on our proposed method. Still, we find that training
+instabilities can be successfully mitigated by regularizing energy
+(\(\lambda_{\text{reg}}\)), generating a sufficiently large number of
+counterfactuals during each training epoch and including only mature
+counterfactuals for contrastive divergence.
+
+\textbf{\emph{CT is sensitive to hyperparameter selection.}} As
+discussed in Section~\ref{sec-hyperparameters}, our method benefits from
+tuning certain key hyperparameters. In this work, we have relied
+exclusively on grid search for this task. Future work on CT could
+benefit from investigating more sophisticated approaches towards
+hyperparameter tuning. Notably, counterfactual training is iterative
+which makes a variety of methods applicable, including Bayesian (e.g.,
+\citeproc{ref-snoek2012practical}{Snoek, Larochelle, and Adams 2012}) or
+gradient-based (e.g., \citeproc{ref-franceschi2017forward}{Franceschi et
+al. 2017}) optimization.
+
+\subsection{Limitations and challenges}\label{sec-limitations}
+
+\textbf{\emph{CT increases the training time of models.}} Counterfactual
+training promotes explainability through CEs and robustness through AEs
+at the cost of longer training times compared to conventional training
+regimes. While higher numbers of iterations and counterfactuals per
+iteration positively impact the quality of found solutions, they also
+increase the required amount of computations. We find that relatively
+small grids with 270 settings can take almost four hours for more
+demanding datasets on a high-performance computing cluster with 34 2GB
+CPUs\footnote{See supplementary appendix for computational details.}.
+However, there are three factors that attenuate the impact of this
+limitation. First, CT provides counterfactual explanations for the
+training samples essentially for free, which may be beneficial in many
+ADM systems. Second, we find that CT can retain its value when used as a
+``fine-tuning'' training regime for conventionally-trained models.
+Third, in principle, CT yields itself to parallel execution, which we
+have leveraged for our own experiments.
+
+\textbf{\emph{Immutable features may have proxies.}} In
+Proposition~\ref{prp-mtblty} we define an approach to protect immutable
+features and thus increase the actionability of the generated
+counterfactuals. However, this approach requires that model owners
+define the mutability constraints for (all) features considered by the
+model. Even with sufficient domain knowledge to protect all immutable
+features---ones that cannot be changed at all and ones that cannot be
+reasonably expected to change---there may exist proxies that are
+theoretically mutable (and hence should not be protected) but preserve
+enough information about the principals to counteract the protections.
+As one example, consider the Adult dataset used in our experiments where
+the mutable education status is a proxy for the immutable age, in that
+the attainment of degrees is correlated with age. Delineating
+actionability is a major undecided challenge in the AR literature (see,
+e.g.,
+\citeproc{ref-venkatasubramanian2020philosophical}{Venkatasubramanian
+and Alfano 2020}) impacting the capacity of CT to increase the
+explainability of the model.
+
+\textbf{\emph{Interventions on features may have downstream impacts on
+fairness.}}\\
+- \href{https://arxiv.org/abs/2401.16088}{Equality of opportunity}?\\
+- \href{https://proceedings.mlr.press/v202/gao23d/gao23d.pdf}{Social
+segregation}?\\
+- Supporting AR within one context/system may still unfairly target
+recourse-affected individuals within other contexts/systems? In Example
+3.1 younger individuals gain access to a loan but their age could still
+lead to, e.g., enforcing stronger supervisory mechanisms?
 
 \section{Conclusion}\label{sec-conclusion}
 
@@ -993,6 +1139,11 @@ Recognition (CVPR)}, 10041--51.
 Altmeyer, Patrick, Arie van Deursen, et al. 2023. {``Explaining
 Black-Box Models Through Counterfactuals.''} In \emph{Proceedings of the
 JuliaCon Conferences}, 1:130. 1.
+
+\bibitem[\citeproctext]{ref-altmeyer2023faithful}
+Altmeyer, Patrick, Mojtaba Farmanbar, Arie van Deursen, and Cynthia C.
+S. Liem. 2023. {``Faithful Model Explanations Through Energy-Constrained
+Conformal Counterfactuals.''} \url{https://arxiv.org/abs/2312.10648}.
 
 \bibitem[\citeproctext]{ref-altmeyer2024faithful}
 Altmeyer, Patrick, Mojtaba Farmanbar, Arie van Deursen, and Cynthia CS
@@ -1051,6 +1202,20 @@ Open Source Software} 6 (65): 3349.
 Du, Yilun, and Igor Mordatch. 2020. {``Implicit Generation and
 Generalization in Energy-Based Models.''}
 \url{https://arxiv.org/abs/1903.08689}.
+
+\bibitem[\citeproctext]{ref-franceschi2017forward}
+Franceschi, Luca, Michele Donini, Paolo Frasconi, and Massimiliano
+Pontil. 2017. {``{Forward and Reverse Gradient-Based Hyperparameter
+Optimization}.''} In \emph{Proceedings of the 34th International
+Conference on Machine Learning}, edited by Doina Precup and Yee Whye
+Teh, 70:1165--73. Proceedings of Machine Learning Research. PMLR.
+\url{https://proceedings.mlr.press/v70/franceschi17a.html}.
+
+\bibitem[\citeproctext]{ref-frankle2018lottery}
+Frankle, Jonathan, and Michael Carbin. 2019. {``The Lottery Ticket
+Hypothesis: Finding Sparse, Trainable Neural Networks.''} In
+\emph{International Conference on Learning Representations}.
+\url{https://openreview.net/forum?id=rJl-b3RcF7}.
 
 \bibitem[\citeproctext]{ref-freiesleben2022intriguing}
 Freiesleben, Timo. 2022. {``The Intriguing Relation Between
@@ -1134,6 +1299,18 @@ Training for Improving Robustness of Pre-Trained Language Models.''} In
 \emph{Proceedings of the 37th Pacific Asia Conference on Language,
 Information and Computation}, 881--88.
 
+\bibitem[\citeproctext]{ref-mcgregor2021preventing}
+McGregor, Sean. 2021. {``{Preventing repeated real world AI failures by
+cataloging incidents: The AI incident database}.''} In \emph{Proceedings
+of the AAAI Conference on Artificial Intelligence}, 35:15458--63. 17.
+
+\bibitem[\citeproctext]{ref-morcos2019success}
+Morcos, Ari S., Haonan Yu, Michela Paganini, and Yuandong Tian. 2019.
+{``One Ticket to Win Them All: Generalizing Lottery Ticket
+Initializations Across Datasets and Optimizers.''} In \emph{Proceedings
+of the 33rd International Conference on Neural Information Processing
+Systems}. Red Hook, NY, USA: Curran Associates Inc.
+
 \bibitem[\citeproctext]{ref-murphy2022probabilistic}
 Murphy, Kevin P. 2022. \emph{Probabilistic {Machine Learning}: {An}
 Introduction}. {MIT Press}.
@@ -1175,6 +1352,20 @@ Counterfactual Explanations By Implicit Minimisation} of {Epistemic} and
 {Aleatoric Uncertainties}.''} In \emph{International {Conference} on
 {Artificial Intelligence} and {Statistics}}, 1756--64. {PMLR}.
 
+\bibitem[\citeproctext]{ref-snoek2012practical}
+Snoek, Jasper, Hugo Larochelle, and Ryan P. Adams. 2012. {``{Practical
+Bayesian Optimization of Machine Learning Algorithms}.''} In
+\emph{Advances in Neural Information Processing Systems}, edited by F.
+Pereira, C. J. Burges, L. Bottou, and K. Q. Weinberger. Vol. 25. Curran
+Associates, Inc.
+\url{https://proceedings.neurips.cc/paper_files/paper/2012/file/05311655a15b75fab86956663e1819cd-Paper.pdf}.
+
+\bibitem[\citeproctext]{ref-spooner2021counterfactual}
+Spooner, Thomas, Danial Dervovic, Jason Long, Jon Shepard, Jiahao Chen,
+and Daniele Magazzeni. 2021. {``{Counterfactual Explanations for
+Arbitrary Regression Models}.''} \emph{CoRR} abs/2106.15212.
+\url{https://arxiv.org/abs/2106.15212}.
+
 \bibitem[\citeproctext]{ref-szegedy2013intriguing}
 Szegedy, Christian, Wojciech Zaremba, Ilya Sutskever, Joan Bruna,
 Dumitru Erhan, Ian Goodfellow, and Rob Fergus. 2013. {``Intriguing
@@ -1186,6 +1377,13 @@ Teney, Damien, Ehsan Abbasnedjad, and Anton van den Hengel. 2020.
 Gradient Supervision.''} In \emph{Computer Vision--ECCV 2020: 16th
 European Conference, Glasgow, UK, August 23--28, 2020, Proceedings, Part
 x 16}, 580--99. Springer.
+
+\bibitem[\citeproctext]{ref-venkatasubramanian2020philosophical}
+Venkatasubramanian, Suresh, and Mark Alfano. 2020. {``The Philosophical
+Basis of Algorithmic Recourse.''} In \emph{Proceedings of the 2020
+Conference on Fairness, Accountability, and Transparency}, 284--93. FAT*
+'20. New York, NY, USA: Association for Computing Machinery.
+\url{https://doi.org/10.1145/3351095.3372876}.
 
 \bibitem[\citeproctext]{ref-wachter2017counterfactual}
 Wachter, Sandra, Brent Mittelstadt, and Chris Russell. 2017.
@@ -1206,6 +1404,19 @@ Annual Meeting of the Association for Computational Linguistics and the
 (Volume 1: Long Papers)}, edited by Chengqing Zong, Fei Xia, Wenjie Li,
 and Roberto Navigli, 6707--23. Online: Association for Computational
 Linguistics. \url{https://doi.org/10.18653/v1/2021.acl-long.523}.
+
+\bibitem[\citeproctext]{ref-zhang2021understanding}
+Zhang, Chiyuan, Samy Bengio, Moritz Hardt, Benjamin Recht, and Oriol
+Vinyals. 2021. {``Understanding Deep Learning (Still) Requires
+Rethinking Generalization.''} \emph{Commun. ACM} 64 (3): 107--15.
+\url{https://doi.org/10.1145/3446776}.
+
+\bibitem[\citeproctext]{ref-zhao2023counterfactual}
+Zhao, Xuan, Klaus Broelemann, and Gjergji Kasneci. 2023.
+{``{Counterfactual Explanation for Regression via Disentanglement in
+Latent Space}.''} In \emph{2023 IEEE International Conference on Data
+Mining Workshops (ICDMW)}, 976--84. Los Alamitos, CA, USA: IEEE Computer
+Society. \url{https://doi.org/10.1109/ICDMW60847.2023.00130}.
 
 \end{CSLReferences}
 
@@ -1455,7 +1666,7 @@ counterfactual training.
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
 
 Figure~\ref{fig-mnist} shows much more plausible (faithful)
 counterfactuals for a model with CT than the model with conventional
@@ -1630,7 +1841,7 @@ training is shown in Note~\ref{nte-gen-params-final-run-train}. The
 corresponding evaluation grid used for these experiments is shown in
 Note~\ref{nte-gen-params-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
 
 \quartocalloutnte{nte-gen-params-final-run-train} 
 
@@ -1664,7 +1875,7 @@ Note~\ref{nte-gen-params-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
 
 \quartocalloutnte{nte-gen-params-final-run-eval} 
 
@@ -1723,7 +1934,7 @@ parameters (Note~\ref{nte-gen-params-final-run-eval}).}
 
 \end{longtable}
 
-\paragraph{Plausibility}\label{plausibility-1}
+\paragraph{Plausibility}\label{plausibility-2}
 
 The results with respect to the plausibility measure are shown in
 Figure~\ref{fig-grid-gen_params-plaus-circles} to
@@ -1847,7 +2058,7 @@ is shown in Note~\ref{nte-pen-final-run-train}. The corresponding
 evaluation grid used for these experiments is shown in
 Note~\ref{nte-pen-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
 
 \quartocalloutnte{nte-pen-final-run-train} 
 
@@ -1875,7 +2086,7 @@ Note~\ref{nte-pen-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
 
 \quartocalloutnte{nte-pen-final-run-eval} 
 
@@ -1934,7 +2145,7 @@ and objective averaged across training-phase parameters
 
 \end{longtable}
 
-\paragraph{Plausibility}\label{plausibility-2}
+\paragraph{Plausibility}\label{plausibility-3}
 
 The results with respect to the plausibility measure are shown in
 Figure~\ref{fig-grid-pen-plaus-circles} to
@@ -2057,7 +2268,7 @@ in Note~\ref{nte-train-final-run-train}. The corresponding evaluation
 grid used for these experiments is shown in
 Note~\ref{nte-train-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-train-final-run-train}: Training Phase}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-train-final-run-train}: Training Phase}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
 
 \quartocalloutnte{nte-train-final-run-train} 
 
@@ -2085,7 +2296,7 @@ Note~\ref{nte-train-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
 
 \quartocalloutnte{nte-train-final-run-eval} 
 
@@ -2144,7 +2355,7 @@ and objective averaged across training-phase parameters
 
 \end{longtable}
 
-\paragraph{Plausibility}\label{plausibility-3}
+\paragraph{Plausibility}\label{plausibility-4}
 
 The results with respect to the plausibility measure are shown in
 Figure~\ref{fig-grid-train-plaus-circles} to
@@ -2302,10 +2513,9 @@ plausibility is increased by up to \textasciitilde10ppt
 counterfactuals reaches 100\%.
 
 One consideration worth exploring is to combine high decision thresholds
-with high learning rates and low energy regularization strengths, which
-we have not investigated here.
+with high learning rates, which we have not investigated here.
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Package Version (Reproducibility)}, colbacktitle=quarto-callout-warning-color!10!white, colback=white, colframe=quarto-callout-warning-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-warning-color-frame, title={Package Version (Reproducibility)}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-warning-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
 
 Tuning was run using \texttt{v1.1.3} of \texttt{TaijaData}. The
 follow-up version \texttt{v1.1.4} introduced an option to split
@@ -2326,7 +2536,7 @@ The hyperparameter grid for tuning key parameters is shown in
 Note~\ref{nte-tune-train}. The corresponding evaluation grid used for
 these experiments is shown in Note~\ref{nte-tune-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-tune-train}: Training Phase}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-tune-train}: Training Phase}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
 
 \quartocalloutnte{nte-tune-train} 
 
@@ -2356,7 +2566,7 @@ these experiments is shown in Note~\ref{nte-tune-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-tune-eval}: Evaluation Phase}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-tune-eval}: Evaluation Phase}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
 
 \quartocalloutnte{nte-tune-eval} 
 
@@ -2374,7 +2584,7 @@ these experiments is shown in Note~\ref{nte-tune-eval}.
 
 \end{tcolorbox}
 
-\paragraph{Plausibility}\label{plausibility-4}
+\paragraph{Plausibility}\label{plausibility-5}
 
 The results with respect to the plausibility measure are shown in
 Figure~\ref{fig-tune-plaus-adult} to Figure~\ref{fig-tune-plaus-over}.
@@ -2627,7 +2837,7 @@ The hyperparameter grid for tuning the learning rate is shown in
 Note~\ref{nte-tune_lr-train}. The corresponding evaluation grid used for
 these experiments is shown in Note~\ref{nte-tune_lr-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-tune_lr-train}: Training Phase}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-tune_lr-train}: Training Phase}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
 
 \quartocalloutnte{nte-tune_lr-train} 
 
@@ -2657,7 +2867,7 @@ these experiments is shown in Note~\ref{nte-tune_lr-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-tune_lr-eval}: Evaluation Phase}, colbacktitle=quarto-callout-note-color!10!white, colback=white, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, rightrule=.15mm, opacitybacktitle=0.6, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, breakable, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-tune_lr-eval}: Evaluation Phase}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
 
 \quartocalloutnte{nte-tune_lr-eval} 
 
@@ -2675,7 +2885,7 @@ these experiments is shown in Note~\ref{nte-tune_lr-eval}.
 
 \end{tcolorbox}
 
-\paragraph{Plausibility}\label{plausibility-5}
+\paragraph{Plausibility}\label{plausibility-6}
 
 The results with respect to the plausibility measure are shown in
 Figure~\ref{fig-tune_lr-plaus-adult} to
@@ -2819,7 +3029,7 @@ counterfactuals in each epoch. Data: Overlapping.}
 
 \section{Computation Details}\label{computation-details}
 
-\subsection{Hardware}\label{hardware}
+\subsection{Hardware}\label{sec-app-hardware}
 
 We performed our experiments on a high-performance cluster. Details
 about the cluster will be disclosed upon publication to avoid revealing
