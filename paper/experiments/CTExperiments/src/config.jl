@@ -181,11 +181,13 @@ global LatexReplacements = Dict(
     "lambda_energy_diff" => "\$\\lambda_{\\text{div}}\$",
     "lambda_energy_reg" => "\$\\lambda_{\\text{reg}}\$",
     "lambda_class_loss" => "\$\\lambda_{\\text{yloss}}\$",
+    "mmd" => "\$\\text{implaus}_{\\text{div}}\$",
+    "plausibility_distance_from_target" => "\$\\text{implaus}_{\\text{dist}}\$",
 )
 
 function format_header(s::String; replacements::Dict=LatexReplacements)
     s =
-        replace(s, "nce" => "ncounterfactuals") |>
+        replace(s, r"\bnce\b" => "ncounterfactuals") |>
         s ->
         replace(s, "_exper" => "") |>
         s ->

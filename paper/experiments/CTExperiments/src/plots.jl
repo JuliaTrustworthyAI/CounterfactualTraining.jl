@@ -173,7 +173,7 @@ function plot_measure_ce(
     # Aggregate:
     df_agg =
         aggregate_ce_evaluation(
-            df, df_meta, df_eval; y=y, byvars=byvars, agg_runs=false, rebase
+            df, df_meta, df_eval; y=y, byvars=byvars, rebase
         ) |> format_plot_data
 
     # Plotting:
