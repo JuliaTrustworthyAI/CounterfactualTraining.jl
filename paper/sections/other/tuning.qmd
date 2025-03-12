@@ -18,7 +18,11 @@ DotEnv.load!()
 res_dir = ENV["FINAL_GRID_RESULTS"]
 ```
 
-Based on the findings from our initial large grid searches (@sec-app-grid), we tune selected hyperparameters for all datasets: namely, the decision threshold $\tau$ and the strength of the energy regularization $\lambda_{\text{reg}}$. The final hyperparameter choices for each dataset are presented in **ADD TABLE**. Detailed results for each data set are shown in @fig-tune-plaus-adult to @fig-tune-mat-over. From **ADD TABLE**, we notice that the same decision threshold of $\tau=0.5$ is optimal for all but on dataset. We attribute this to the fact that a low decision threshold results in a higher share of mature counterfactuals and hence more opportunities for the model to learn from examples (@fig-tune-mat-adult to @fig-tune-mat-over). This has played a role in particular for our real-world tabular datasets and MNIST, which suffered from low levels of maturity for higher decision thresholds. In cases where maturity is not an issue, as for *Moons*, higher decision thresholds lead to better outcomes, which may have to do with the fact that the resulting counterfactuals are more faithful to the model. Concerning the regularization strength, we find somewhat high variation across datasets. Most notably, we find that relatively low levels of regularization are optimal for MNIST. We hypothesize that this finding may be attributed to the uniform scaling of all input features (digits). Finally, to increase the proportion of mature counterfactuals for some datasets, we have also investigated the effect on the learning rate $\eta$ for the counterfactual search, but found little effect on the results. 
+Based on the findings from our initial large grid searches (@sec-app-grid), we tune selected hyperparameters for all datasets: namely, the decision threshold $\tau$ and the strength of the energy regularization $\lambda_{\text{reg}}$. The final hyperparameter choices for each dataset are presented in **ADD TABLE**. Detailed results for each data set are shown in @fig-tune-plaus-adult to @fig-tune-mat-over. From **ADD TABLE**, we notice that the same decision threshold of $\tau=0.5$ is optimal for all but on dataset. We attribute this to the fact that a low decision threshold results in a higher share of mature counterfactuals and hence more opportunities for the model to learn from examples (@fig-tune-mat-adult to @fig-tune-mat-over). This has played a role in particular for our real-world tabular datasets and MNIST, which suffered from low levels of maturity for higher decision thresholds. In cases where maturity is not an issue, as for *Moons*, higher decision thresholds lead to better outcomes, which may have to do with the fact that the resulting counterfactuals are more faithful to the model. Concerning the regularization strength, we find somewhat high variation across datasets. Most notably, we find that relatively low levels of regularization are optimal for MNIST. We hypothesize that this finding may be attributed to the uniform scaling of all input features (digits). 
+
+Finally, to increase the proportion of mature counterfactuals for some datasets, we have also investigated the effect on the learning rate $\eta$ for the counterfactual search and even smaller regularization strengths for a fixed decision threshold of 0.5 (@fig-tune_lr-plaus-adult to @fig-tune_lr-plaus-over). For the given low decision threshold, we find that the learning rate has no discernable impact on the proportion of mature counterfactuals (@fig-tune_lr-mat-adult to @fig-tune_lr-mat-over). We do notice, however, that the results for MNIST are much improved when using a low value $\lambda_{\text{reg}}$, the strength for the engery regularization: plausibility is increased by up to ~10ppt (@fig-tune_lr-plaus-mnist) and the proportion of mature counterfactuals reaches 100%. 
+
+One consideration worth exploring is to combine high decision thresholds with high learning rates, which we have not investigated here. 
 
 ::: {.callout-warning}
 
@@ -93,6 +97,87 @@ println(_str)
 #| output: asis
 
 fig_label_prefix = "tune-mat"
+fig_labels = (nm -> "fig-$(fig_label_prefix)-$nm").(data_names)
+_str = "The results with respect to the proportion of mature counterfactuals in each epoch are shown in @$(fig_labels[1]) to @$(fig_labels[end])."
+println(_str)
+```
+
+```{julia}
+#| output: asis
+ 
+imgfname = "percent_valid.png"
+fig_caption = "Proportion of mature counterfactuals in each epoch."
+full_paths = joinpath.(data_dirs, joinpath(logs_suffix,imgfname))
+include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption) 
+_str = join(include_img_commands, "\n\n")
+println(_str)
+```
+
+### Learning Rate {#sec-app-tune-lr}
+
+```{julia}
+grid_dir = joinpath(res_dir, "tune_lr/mlp")
+data_dirs = readdir(grid_dir) |> x -> joinpath.(grid_dir, x) |> x -> x[isdir.(x)]
+eval_grids = (p -> EvaluationGrid(joinpath(p,"grid_config.toml"))).(data_dirs)
+data_names = basename.(data_dirs)
+ce_suffix = "evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/"
+logs_suffix = "evaluation/results/logs/objective---lr---lambda_energy_reg/"
+```
+
+The hyperparameter grid for tuning the learning rate is shown in @nte-tune_lr-train. The corresponding evaluation grid used for these experiments is shown in @nte-tune_lr-eval.
+
+::: {#nte-tune_lr-train .callout-note}
+
+## Training Phase
+
+```{julia}
+#| output: asis
+dict = CTExperiments.from_toml(joinpath(grid_dir, "over/grid_config.toml")) 
+println(CTExperiments.dict_to_quarto_markdown(dict))
+```
+
+:::
+
+::: {#nte-tune_lr-eval .callout-note}
+
+## Evaluation Phase
+
+```{julia}
+#| output: asis
+dict = CTExperiments.from_toml(joinpath(grid_dir, "over/evaluation/evaluation_grid_config.toml"))
+println(CTExperiments.dict_to_quarto_markdown(dict))
+```
+
+:::
+
+#### Plausibility
+
+```{julia}
+#| output: asis
+
+fig_label_prefix = "tune_lr-plaus"
+fig_labels = (nm -> "fig-$(fig_label_prefix)-$nm").(data_names)
+_str = "The results with respect to the plausibility measure are shown in @$(fig_labels[1]) to @$(fig_labels[end])."
+println(_str)
+```
+
+```{julia}
+#| output: asis
+ 
+imgfname = "plausibility_distance_from_target.png"
+fig_caption = "Average outcomes for the plausibility measure across key hyperparameters."
+full_paths = joinpath.(data_dirs, joinpath(ce_suffix,imgfname))
+include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption) 
+_str = join(include_img_commands, "\n\n")
+println(_str)
+```
+
+#### Proportion of Mature CE
+
+```{julia}
+#| output: asis
+
+fig_label_prefix = "tune_lr-mat"
 fig_labels = (nm -> "fig-$(fig_label_prefix)-$nm").(data_names)
 _str = "The results with respect to the proportion of mature counterfactuals in each epoch are shown in @$(fig_labels[1]) to @$(fig_labels[end])."
 println(_str)
