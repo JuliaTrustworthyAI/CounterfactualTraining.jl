@@ -739,7 +739,7 @@ We run the experiments with three gradient-based generators:
 \emph{Generic} of \cite{wachter2017counterfactual} as a simple baseline
 approach, \emph{REVISE} \cite{joshi2019realistic} that aims to generate
 plausible counterfactuals using a surrogate Variational Autoencoder
-(VAE), and \emph{ECCo}---the generator of \cite{altmeyer2023faithful}
+(VAE), and \emph{ECCo}---the generator of \cite{altmeyer2024faithful}
 but without the conformal prediction component---as a method that
 directly targets both faithfulness and plausibility of the CEs.
 
@@ -883,7 +883,7 @@ sampling, we still encounter major variability in the outcomes. CT is
 exposed to two potential sources of instabilities: (1) the energy-based
 contrastive divergence term in Equation~\ref{eq-div}, and (2) the
 underlying counterfactual explainers. For example,
-\cite{altmeyer2023faithful} recognize this to be a challenge for
+\cite{altmeyer2024faithful} recognize this to be a challenge for
 \emph{ECCCo} and so it may have downstream impacts on our proposed
 method. Still, we find that training instabilities can be successfully
 mitigated by regularizing energy (\(\lambda_{\text{reg}}\)), generating

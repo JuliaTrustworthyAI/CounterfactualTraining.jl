@@ -24,7 +24,7 @@ where $\mathbf{X}^\prime$ denotes a set of multiple counterfactuals and $\text{M
 
 In addition to cost and plausibility, we also compute other standard metrics to evaluate counterfactuals at test time including validity and redundancy. Finally, we also assess the predictive performance of models using standard metrics.
 
-We run the experiments with three gradient-based generators: *Generic* of @wachter2017counterfactual as a simple baseline approach, *REVISE* [@joshi2019realistic] that aims to generate plausible counterfactuals using a surrogate Variational Autoencoder (VAE), and *ECCo*---the generator of @altmeyer2023faithful but without the conformal prediction component---as a method that directly targets both faithfulness and plausibility of the CEs.
+We run the experiments with three gradient-based generators: *Generic* of @wachter2017counterfactual as a simple baseline approach, *REVISE* [@joshi2019realistic] that aims to generate plausible counterfactuals using a surrogate Variational Autoencoder (VAE), and *ECCo*---the generator of @altmeyer2024faithful but without the conformal prediction component---as a method that directly targets both faithfulness and plausibility of the CEs.
 
 ## Experimental Results
 
