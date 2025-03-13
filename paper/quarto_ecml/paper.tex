@@ -464,15 +464,13 @@ following objective:
 \begin{split}
 \min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta) &+ \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y}) \\ &+ \lambda_{\text{reg}}\text{ridge}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta)
 \end{split}
-}\end{equation}
-
-where \(\text{yloss}(\cdot)\) is a classification loss that induces
-discriminative performance (e.g., cross-entropy). The second and third
-terms in Equation~\ref{eq-obj} are explained in detail below. For now,
-they can be sufficiently described as inducing explainability directly
-and indirectly by penalizing: (1) the contrastive divergence,
-\(\text{div}(\cdot)\), between mature counterfactuals
-\(\mathbf{x}_T^\prime\) and observed samples
+}\end{equation} where \(\text{yloss}(\cdot)\) is a classification loss
+that induces discriminative performance (e.g., cross-entropy). The
+second and third terms in Equation~\ref{eq-obj} are explained in detail
+below. For now, they can be sufficiently described as inducing
+explainability directly and indirectly by penalizing: (1) the
+contrastive divergence, \(\text{div}(\cdot)\), between mature
+counterfactuals \(\mathbf{x}_T^\prime\) and observed samples
 \(\mathbf{x}^+\in\mathcal{X}^+=\{\mathbf{x}:y=y^+\}\) in the target
 class \(y^+\), and, (2) the adversarial loss, \(\text{advloss}(.)\),
 with respect to nascent counterfactuals \(\mathbf{x}_{t\leq T}^\prime\).
@@ -514,9 +512,8 @@ training samples. Specifically, we have:
 
 \begin{equation}\phantomsection\label{eq-div}{
 \text{div}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta) = \mathcal{E}_\theta(\mathbf{x}^+,y) - \mathcal{E}_\theta(\mathbf{x}_T^\prime,y)
-}\end{equation}
-
-where \(\mathcal{E}_\theta(\cdot)\) denotes the energy function. We set
+}\end{equation} where \(\mathcal{E}_\theta(\cdot)\) denotes the energy
+function. We set
 \(\mathcal{E}_\theta(\mathbf{x},y)=-\mathbf{M}_\theta(\mathbf{x})[y^+]\)
 where \(y^+\) denotes the index of the randomly drawn target class,
 \(y^+ \sim p(y)\). Conditional on the target class \(y^+\),
@@ -559,9 +556,7 @@ adversarial training:
 \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y};\varepsilon)&=\text{yloss}(\mathbf{M}_\theta(\mathbf{x}_{t_\varepsilon}^\prime),\mathbf{y}) \\
 t_\varepsilon &= \max_t \{t: ||\Delta_t||_\infty < \varepsilon\}
 \end{aligned}
-}\end{equation}
-
-Under this choice, we consider nascent counterfactuals
+}\end{equation} Under this choice, we consider nascent counterfactuals
 \(\mathbf{x}_{t\leq T}^\prime\) as AEs as long as the magnitude of the
 perturbation to any single feature is at most \(\varepsilon\). This is
 closely aligned with \cite{szegedy2013intriguing} who define an
@@ -725,19 +720,15 @@ domain. We rely on the distance-based metric used by
 
 \begin{equation}\phantomsection\label{eq-impl-dist}{
 \text{IP}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
-}\end{equation}
-
-and introduce a novel divergence metric,
+}\end{equation} and introduce a novel divergence metric,
 
 \begin{equation}\phantomsection\label{eq-impl-div}{
 \text{IP}^*(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
-}\end{equation}
-
-where \(\mathbf{X}^\prime\) denotes a set of multiple counterfactuals
-and \(\text{MMD}(\cdot)\) is an unbiased estimate of the squared
-population maximum mean discrepancy \cite{gretton2012kernel}. The metric
-in Equation~\ref{eq-impl-div} is equal to zero iff the two distributions
-are the same, \(\mathbf{X}^\prime=\mathbf{X}^+\).
+}\end{equation} where \(\mathbf{X}^\prime\) denotes a set of multiple
+counterfactuals and \(\text{MMD}(\cdot)\) is an unbiased estimate of the
+squared population maximum mean discrepancy \cite{gretton2012kernel}.
+The metric in Equation~\ref{eq-impl-div} is equal to zero iff the two
+distributions are the same, \(\mathbf{X}^\prime=\mathbf{X}^+\).
 
 In addition to cost and plausibility, we also compute other standard
 metrics to evaluate counterfactuals at test time including validity and
