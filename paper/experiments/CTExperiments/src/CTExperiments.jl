@@ -41,7 +41,7 @@ export test_performance, evaluate_counterfactuals
 export generate_factual_target_pairs
 export to_toml
 export aggregate_logs, aggregate_ce_evaluation, aggregate_performance
-export final_table
+export final_table, final_results, final_params
 export PlotParams, useful_byvars
 export plot_errorbar_logs, plot_measure_ce, plot_ce
 export set_work_dir, get_work_dir, results_dir

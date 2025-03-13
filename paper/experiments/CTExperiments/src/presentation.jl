@@ -479,9 +479,9 @@ function aggregate_ce_evaluation(res_dir::String; y="mmd", byvars=nothing, rebas
     df.dataset .= CTExperiments.format_header.(df.dataset)
     df.objective .= CTExperiments.format_header.(df.objective)
     df.variable .= CTExperiments.format_header.(y)
-    select!(df, Not([:is_pct]))
     if rebase
         df.objective .= "Reduction (%)"
+        select!(df, Not([:is_pct]))
     end
     return df
 end
@@ -537,4 +537,21 @@ function final_table(
     # Performance:
     df_perf = aggregate_performance(res_dir; measure=perf_var)
     return vcat(df_ce,df_perf)|> df -> DataFrames.unstack(df, :dataset, :mean)
+end
+
+function final_params(res_dir::String)
+    _, exper_grids = final_results(res_dir)
+    df = DataFrame()
+    for cfg in exper_grids
+        df_meta = CTExperiments.expand_grid_to_df(cfg)
+        df = vcat(df, df_meta)
+    end
+    df.n_test = Int.(round.((1 .- df.train_test_ratio) .* df.n_train))
+    df.n_train = df.n_train .+ df.n_validation
+    df = df[:, [!allequal(x) for x in eachcol(df)]]
+    df = select(df, Not([:id, :objective, :n_validation])) |> unique
+    dataparams = [:data, :n_train, :n_test, :batchsize]
+    select!(df, dataparams, Not(dataparams))
+    sort!(df, :data)
+    return df
 end
