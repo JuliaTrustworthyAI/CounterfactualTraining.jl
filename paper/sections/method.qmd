@@ -6,14 +6,13 @@ Counterfactual training combines ideas from adversarial training, energy-based m
 \label{def-explainability}
 Let $\mathbf{M}_\theta: \mathcal{X} \mapsto \mathcal{Y}$ denote a supervised classification model that maps from the $D$-dimensional input space $\mathcal{X}$ to representations $\phi(\mathbf{x};\theta)$ and finally to the $K$-dimensional output space $\mathcal{Y}$. Assume that for any given input-output pair $\{\mathbf{x},\mathbf{y}\}_i$ there exists a counterfactual $\mathbf{x}^{\prime} = \mathbf{x} + \Delta: \mathbf{M}_\theta(\mathbf{x}^{\prime}) = \mathbf{y}^{+} \neq \mathbf{y} = \mathbf{M}_\theta(\mathbf{x})$ where $\arg\max_y{\mathbf{y}^{+}}=y^+$ and $y^+$ denotes the index of the target class. 
 
-We say that $\mathbf{M}_\theta$ is \textbf{explainable} to the extent that faithfully generated counterfactuals are plausible and actionable. Formally, we define these properties as follows,
+We say that $\mathbf{M}_\theta$ is \textbf{explainable} to the extent that faithfully generated counterfactuals are plausible and actionable. We define these properties as follows:
 
 \begin{enumerate}
     \item (Plausibility) $\int^{A} p(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$ where $A$ is some small region around $\mathbf{x}^{\prime}$.
     \item (Actionability) Permutations $\Delta$ are subject to some actionability constraints.
     \item (Faithfulness) $\int^{A} p_\theta(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$ where $A$ is defined as above.
 \end{enumerate}
-
 where $p_\theta(\mathbf{x}|\mathbf{y}^{+})$ denotes the conditional posterior over inputs. 
 \end{definition}
 
@@ -32,7 +31,7 @@ $$
 \min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta) &+ \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y}) \\ &+ \lambda_{\text{reg}}\text{ridge}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta)
 \end{split}
 $$ {#eq-obj}
-where $\text{yloss}(\cdot)$ is a classification loss that induces discriminative performance (e.g., cross-entropy). The second and third terms in @eq-obj are explained in detail below. For now, they can be sufficiently described as inducing explainability directly and indirectly by penalizing: (1) the contrastive divergence, $\text{div}(\cdot)$, between mature counterfactuals $\mathbf{x}_T^\prime$ and observed samples $\mathbf{x}^+\in\mathcal{X}^+=\{\mathbf{x}:y=y^+\}$ in the target class $y^+$, and, (2) the adversarial loss, $\text{advloss}(.)$, with respect to nascent counterfactuals $\mathbf{x}_{t\leq T}^\prime$. Finally, $\text{ridge}(\cdot)$ denotes a Ridge penalty ($\ell_2$-norm) that regularizes the magnitude of the energy terms involved in $\text{div}(\cdot)$ [@du2019implicit]. The trade-off between the components can be governed by adjusting the strengths of the penalties $\lambda_{\text{div}}$, $\lambda_{\text{adv}}$ and $\lambda_{\text{reg}}$.
+where $\text{yloss}(\cdot)$ is a classification loss that induces discriminative performance (e.g., cross-entropy). The second and third terms are explained in detail below. For now, they can be summarized as inducing explainability directly and indirectly by penalizing: (1) the contrastive divergence, $\text{div}(\cdot)$, between mature counterfactuals $\mathbf{x}_T^\prime$ and observed samples $\mathbf{x}^+\in\mathcal{X}^+=\{\mathbf{x}:y=y^+\}$ in the target class $y^+$, and, (2) the adversarial loss, $\text{advloss}(.)$, with respect to nascent counterfactuals $\mathbf{x}_{t\leq T}^\prime$. Finally, $\text{ridge}(\cdot)$ denotes a Ridge penalty ($\ell_2$-norm) that regularizes the magnitude of the energy terms involved in $\text{div}(\cdot)$ [@du2019implicit]. The trade-off between the components can governed through penalties $\lambda_{\text{div}}$, $\lambda_{\text{adv}}$ and $\lambda_{\text{reg}}$.
 
 ## Directly Inducing Explainability with Contrastive Divergence
 
@@ -78,7 +77,7 @@ From a Bayesian perspective, setting $\mathbf{x}^+[d] := \mathbf{x}^\prime[d]$ c
 Let $f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})$ denote a linear classifier with softmax activation $\mathcal{S}$ where $y\in\{1,...,K\}=\mathcal{K}$ and $\mathbf{x} \in \mathbb{R}^D$. If we assume multivariate Gaussian class densities with common diagonal covariance matrix $\Sigma_k=\Sigma$ for all $k \in \mathcal{K}$, then protecting an immutable feature from the contrastive divergence penalty will result in lower classifier sensitivity to that feature relative to the remaining features, provided that at least one of those is discriminative and mutable.
 \end{proposition}
 
-It is worth highlighting that Prp.~\ref{prp-mtblty} assumes independence of features. This raises a valid concern about the effect of protecting immutable features in the presence of proxies that remain unprotected. We address this in @sec-discussion.
+It is worth highlighting that \mbox{Prp. \ref{prp-mtblty}} assumes independence of features. This raises a valid concern about the effect of protecting immutable features in the presence of proxies that remain unprotected. We address this in @sec-discussion.
 
 ## Example (Prediction of Consumer Credit Default)
 
