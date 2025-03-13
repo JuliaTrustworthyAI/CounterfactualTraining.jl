@@ -6,7 +6,7 @@ In this section, we present experiments that we have conducted in order to answe
 
 ## Plausibility
 
-Does our proposed counterfactual training objective (@eq-obj) induce models to learn plausible explanations?
+To what extent does our proposed counterfactual training objective (@eq-obj) induce models to learn plausible explanations?
 
 :::
 
@@ -14,7 +14,7 @@ Does our proposed counterfactual training objective (@eq-obj) induce models to l
 
 ## Actionability
 
-Does our proposed counterfactual training objective (@eq-obj) yield more favorable algorithmic recourse outcomes in the presence of actionability constraints?
+To what extent does our proposed counterfactual training objective (@eq-obj) yield more favorable algorithmic recourse outcomes in the presence of actionability constraints?
 
 :::
 
@@ -24,7 +24,7 @@ Beyond this, we are also interested in understanding how robust our answers to @
 
 ## Hyperparameters 
 
-What are the effects of different hyperparameter choices with respect to @eq-obj?
+What are the effects of hyperparameter selection with respect to @eq-obj?
 
 :::
 

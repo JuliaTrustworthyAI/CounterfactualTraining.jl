@@ -622,20 +622,19 @@ be imposed by simply projecting counterfactuals back to the specified
 domain, if the previous gradient step resulted in updated feature values
 that were out-of-domain. Mutability constraints can similarly be
 enforced by setting partial derivatives to zero to ensure that features
-are only mutated in the allowed direction, if at all.
+are only perturbed in the allowed direction, if at all.
 
-Since actionability constraints are binding at test time, we should also
-impose them when generating \(\mathbf{x}^\prime\) during each training
-iteration to align model representations with user requirements. Through
-their effect on \(\mathbf{x}^\prime\), both types of constraints
-influence model outcomes through Equation~\ref{eq-div}. Here it is
-crucial that we avoid penalizing implausibility that arises due to
-mutability constraints. For any mutability-constrained feature \(d\)
-this can be achieved by enforcing
-\(\mathbf{x}[d] - \mathbf{x}^\prime[d]:=0\) whenever perturbing
-\(\mathbf{x}^\prime[d]\) in the direction of \(\mathbf{x}[d]\) would
-violate mutability constraints. Specifically, we set
-\(\mathbf{x}[d] := \mathbf{x}^\prime[d]\) if:
+Since such actionability constraints are binding at test time, we should
+also impose them when generating \(\mathbf{x}^\prime\) during each
+training iteration to inform model representations. Through their effect
+on \(\mathbf{x}^\prime\), both types of constraints influence model
+outcomes via Equation~\ref{eq-div}. Here it is crucial that we avoid
+penalizing implausibility that arises due to mutability constraints. For
+any mutability-constrained feature \(d\) this can be achieved by
+enforcing \(\mathbf{x}[d] - \mathbf{x}^\prime[d]:=0\) whenever
+perturbing \(\mathbf{x}^\prime[d]\) in the direction of
+\(\mathbf{x}[d]\) would violate mutability constraints. Specifically, we
+set \(\mathbf{x}[d] := \mathbf{x}^\prime[d]\) if:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -643,10 +642,10 @@ violate mutability constraints. Specifically, we set
 \item
   Feature \(d\) is strictly immutable in practice.
 \item
-  We have \(\mathbf{x}[d]>\mathbf{x}^\prime[d]\) but feature \(d\) can
+  We have \(\mathbf{x}[d]>\mathbf{x}^\prime[d]\), but feature \(d\) can
   only be decreased in practice.
 \item
-  We have \(\mathbf{x}[d]<\mathbf{x}^\prime[d]\) but feature \(d\) can
+  We have \(\mathbf{x}[d]<\mathbf{x}^\prime[d]\), but feature \(d\) can
   only be increased in practice.
 \end{enumerate}
 
@@ -681,11 +680,11 @@ that at least one of those is discriminative and mutable.
 
 It is worth highlighting that Proposition~\ref{prp-mtblty} assumes
 independence of features. This raises a valid concern about the effect
-of protecting immutable features in the presence of proxy features that
-remain unprotected. We discuss this limitation in
-Section~\ref{sec-discussion}.
+of protecting immutable features in the presence of proxies that remain
+unprotected. We address this in Section~\ref{sec-discussion}.
 
-\subsection{Illustration}\label{illustration}
+\subsection{Example: influence of counterfactual training on
+explainability}\label{example-influence-of-counterfactual-training-on-explainability}
 
 To better convey the intuition underlying our proposed method, we
 illustrate different model outcomes in Example~\ref{exm-grad}.
@@ -696,28 +695,30 @@ Default]\protect\hypertarget{exm-grad}{}\label{exm-grad}
 Suppose we are interested in predicting the likelihood that loan
 applicants default on their credit. We have access to historical data on
 previous loan takers comprised of a binary outcome variable
-(\(y\in\{1=\text{default},2=\text{no default}\}\)) two input features:
-(1) the subjects' \emph{age}, which we define as immutable, and (2) the
-subjects' existing level of \emph{debt}, which we define as mutable.
+(\(y\in\{1=\text{default},2=\text{no default}\}\)) with two input
+features: (1) the subjects' \emph{age}, which we define as immutable,
+and (2) the subjects' existing level of \emph{debt}, which we define as
+mutable.
 
-We have simulated this scenario using synthetic data with independent
-features and Gaussian class-conditional densities in
+We have simulated this scenario using synthetic data with two
+independent features and Gaussian class-conditional densities in
 Figure~\ref{fig-poc}. The four panels in Figure~\ref{fig-poc} show the
 outcomes for different training procedures using the same model
 architecture each time (a linear classifier). In each case, we show the
-linear decision boundary (green) and the training data colored according
-to their ground-truth label: orange points belong to the target class,
+decision boundary (in green) and the training data colored according to
+their ground-truth label: orange points belong to the target class,
 \(y^+=2\), blue points belong to the non-target class, \(y^-=1\). Stars
 indicate counterfactuals in the target class generated at test time
 using generic gradient descent until convergence.
 
 In panel (a), we have trained our model conventionally, and we do not
 impose mutability constraints at test time. The generated
-counterfactuals are all valid, but not plausible: they are clearly
-distinguishable from the ground-truth data. In panel (b), we have
-trained our model with counterfactual training, once again not imposing
-mutability constraints at test time. We observe that the counterfactuals
-are clearly plausible, therefore meeting the first objective of
+counterfactuals are all valid, but not plausible: they do not comply
+with the distribution of the factual samples in the target class to the
+point where they are clearly distinguishable from the ground-truth data.
+In panel (b), we have trained our model with counterfactual training,
+once again without any mutability constraints. We observe that the
+counterfactuals are highly plausible, meeting the first objective of
 Definition~\ref{def-explainability}.
 
 In panel (c), we have used conventional training again, this time
@@ -725,14 +726,14 @@ imposing the mutability constraint on \emph{age} at test time.
 Counterfactuals are valid but involve some substantial reductions in
 \emph{debt} for some individuals (very young applicants). By comparison,
 counterfactual paths are shorter on average in panel (d), where we have
-used counterfactual training and protected immutable features as
-described in Section~\ref{sec-constraints}. In particular, we observe
-that due to the classifier's lower sensitivity to \emph{age}, recourse
-recommendations with respect to \emph{debt} are much more homogenous, in
-that they do not disproportionately punish younger individuals. The
-counterfactuals are also plausible with respect to the mutable feature.
-Thus, we consider the model in panel (d) as the most explainable
-according to Definition~\ref{def-explainability}.
+used counterfactual training and protected the immutable feature as
+described in Section~\ref{sec-constraints}. We observe that due to the
+classifier's lower sensitivity to \emph{age}, recourse recommendations
+with respect to \emph{debt} are much more homogenous and do not
+disproportionately punish younger individuals. The counterfactuals are
+also plausible with respect to the mutable feature. Thus, we consider
+the model in panel (d) as the most explainable according to
+Definition~\ref{def-explainability}.
 
 \end{example}
 
@@ -744,9 +745,8 @@ according to Definition~\ref{def-explainability}.
 
 }
 
-\caption{\label{fig-poc}Visual illustration of how counterfactual
-training improves explainability. See Example~\ref{exm-grad} for
-details.}
+\caption{\label{fig-poc}Illustration for Example~\ref{exm-grad} of how
+CT improves model explainability.}
 
 \end{figure}%
 
@@ -757,14 +757,14 @@ to answer the following research questions:
 
 \begin{corollary}[Plausibility]\protect\hypertarget{cor-plaus}{}\label{cor-plaus}
 
-Does our proposed counterfactual training objective
+To what extent does our proposed counterfactual training objective
 (Equation~\ref{eq-obj}) induce models to learn plausible explanations?
 
 \end{corollary}
 
 \begin{corollary}[Actionability]\protect\hypertarget{cor-action}{}\label{cor-action}
 
-Does our proposed counterfactual training objective
+To what extent does our proposed counterfactual training objective
 (Equation~\ref{eq-obj}) yield more favorable algorithmic recourse
 outcomes in the presence of actionability constraints?
 
@@ -775,7 +775,7 @@ answers to RQ~\ref{cor-plaus} and RQ~\ref{cor-action} are:
 
 \begin{corollary}[Hyperparameters]\protect\hypertarget{cor-hyper}{}\label{cor-hyper}
 
-What are the effects of different hyperparameter choices with respect to
+What are the effects of hyperparameter selection with respect to
 Equation~\ref{eq-obj}?
 
 \end{corollary}

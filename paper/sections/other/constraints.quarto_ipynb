@@ -255,7 +255,7 @@
         "\n",
         "where $\\mu_d$ and $\\sigma_d$ denote the sample mean and standard deviation of feature $d$. We set $n_{\\sigma_d}=3$ across the board but higher values and hence wider bounds may be appropriate depending on the application."
       ],
-      "id": "237f0320"
+      "id": "31b6542d"
     }
   ],
   "metadata": {
