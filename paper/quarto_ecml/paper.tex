@@ -974,6 +974,24 @@ have been recognized to promote harmful power dynamics
 
 \section{Conclusion}\label{sec-conclusion}
 
+State-of-the-art machine learning models are prone to learning complex
+representations that cannot be interpreted by humans. Although post-hoc
+explainability approaches have attracted major research interest, these
+cannot guarantee that the explanations agree with the opaque model's
+learned representation of data. As a step towards addressing this
+challenge, we introduced counterfactual training, a novel training
+regime that incentivizes highly-explainable models. Our approach leads
+to explanations that are both plausible---compliant with the underlying
+data-generating process---and actionable---compliant with user-specified
+mutability constraints---and thus meaningful to their recipients.
+Through extensive experiments we demonstrate that counterfactual
+training satisfies its objectives while preserving the predictive
+performance of the trained models. We also find that our approach can be
+used to fine-tune conventionally-trained models and achieve similar
+gains in explainability. Finally, this work showcases that it is
+practical to improve models \emph{and} their explanations at the same
+time.
+
 \newpage{}
 
 
