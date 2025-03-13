@@ -1,6 +1,6 @@
 # Discussion {#sec-discussion}
 
-We begin the discussion by addressing the direct extensions of the counterfactual training approach in @sec-approach. Then, we look at its broader limitations and challenges in @sec-limitations. 
+We first address the direct extensions of the counterfactual training approach in @sec-approach. Then, we look at its limitations and challenges in @sec-limitations. 
 
 ## Future research {#sec-approach}
 
