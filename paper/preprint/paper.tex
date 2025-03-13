@@ -127,6 +127,14 @@
 \newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
 \newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 
+\usepackage{amsthm}
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\theoremstyle{definition}
+\newtheorem{example}{Example}[section]
+\theoremstyle{plain}
 \usepackage{arxiv}
 \usepackage{orcidlink}
 \usepackage{amsmath}
@@ -183,14 +191,6 @@
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \usepackage{amsthm}
-\theoremstyle{plain}
-\newtheorem{proposition}{Proposition}[section]
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}[section]
-\theoremstyle{definition}
-\newtheorem{example}{Example}[section]
-\theoremstyle{plain}
-\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -348,8 +348,8 @@ research interest. Specifically, there has been no concerted effort
 towards improving the ``explanatory capacity'' of models, i.e., the
 degree to which learned representations correspond to explanations that
 are \textbf{interpretable} and deemed \textbf{plausible} by humans (see
-Definition~\ref{def-explainability}). Instead, the choice has generally
-been to improve the ability of XAI tools to identify the subset of
+Def. \ref{def-explainability}). Instead, the choice has generally been
+to improve the ability of XAI tools to identify the subset of
 explanations that are both plausible and valid for any given model,
 independent of whether the learned representations are also compatible
 with plausible explanations
@@ -561,61 +561,32 @@ explainability by aligning models with counterfactuals that meet both
 desiderata: plausibility and actionability. Formally, we define
 explainability as follows:
 
-\begin{definition}[Model
-Explainability]\protect\hypertarget{def-explainability}{}\label{def-explainability}
+\begin{definition}[Model Explainability]
+\label{def-explainability}
+Let $\mathbf{M}_\theta: \mathcal{X} \mapsto \mathcal{Y}$ denote a supervised classification model that maps from the $D$-dimensional input space $\mathcal{X}$ to representations $\phi(\mathbf{x};\theta)$ and finally to the $K$-dimensional output space $\mathcal{Y}$. Assume that for any given input-output pair $\{\mathbf{x},\mathbf{y}\}_i$ there exists a counterfactual $\mathbf{x}^{\prime} = \mathbf{x} + \Delta: \mathbf{M}_\theta(\mathbf{x}^{\prime}) = \mathbf{y}^{+} \neq \mathbf{y} = \mathbf{M}_\theta(\mathbf{x})$ where $\arg\max_y{\mathbf{y}^{+}}=y^+$ and $y^+$ denotes the index of the target class. 
 
-Let \(\mathbf{M}_\theta: \mathcal{X} \mapsto \mathcal{Y}\) denote a
-supervised classification model that maps from the \(D\)-dimensional
-input space \(\mathcal{X}\) to representations
-\(\phi(\mathbf{x};\theta)\) and finally to the \(K\)-dimensional output
-space \(\mathcal{Y}\). Assume that for any given input-output pair
-\(\{\mathbf{x},\mathbf{y}\}_i\) there exists a counterfactual
-\(\mathbf{x}^{\prime} = \mathbf{x} + \Delta: \mathbf{M}_\theta(\mathbf{x}^{\prime}) = \mathbf{y}^{+} \neq \mathbf{y} = \mathbf{M}_\theta(\mathbf{x})\)
-where \(\arg\max_y{\mathbf{y}^{+}}=y^+\) and \(y^+\) denotes the index
-of the target class.
-
-We say that \(\mathbf{M}_\theta\) is \textbf{explainable} to the extent
-that faithfully generated counterfactuals are plausible (i.e.,
-consistent with the data) and actionable. Formally, we define these
-properties as follows:
+We say that $\mathbf{M}_\theta$ is \textbf{explainable} to the extent that faithfully generated counterfactuals are plausible and actionable. Formally, we define these properties as follows,
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  (Plausibility)
-  \(\int^{A} p(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1\)
-  where \(A\) is some small region around \(\mathbf{x}^{\prime}\).
-\item
-  (Actionability) Permutations \(\Delta\) are subject to some
-  actionability constraints.
+    \item (Plausibility) $\int^{A} p(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$ where $A$ is some small region around $\mathbf{x}^{\prime}$.
+    \item (Actionability) Permutations $\Delta$ are subject to some actionability constraints.
+    \item (Faithfulness) $\int^{A} p_\theta(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$ where $A$ is defined as above.
 \end{enumerate}
 
-We consider counterfactuals as faithful to the extent that they are
-consistent with what the model has learned about the input data. Let
-\(p_\theta(\mathbf{x}|\mathbf{y}^{+})\) denote the conditional posterior
-over inputs, then formally:
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\setcounter{enumi}{2}
-\tightlist
-\item
-  (Faithfulness)
-  \(\int^{A} p_\theta(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1\)
-  where \(A\) is defined as above.
-\end{enumerate}
-
+where $p_\theta(\mathbf{x}|\mathbf{y}^{+})$ denotes the conditional posterior over inputs. 
 \end{definition}
 
-The characterization of faithfulness and plausibility in
-Definition~\ref{def-explainability} is the same as in Altmeyer et al.
+The characterization of faithfulness and plausibility in Def.
+\ref{def-explainability} is the same as in Altmeyer et al.
 (\citeproc{ref-altmeyer2024faithful}{2024}), with adapted notation.
-Actionability constraints in Definition~\ref{def-explainability} vary
-and depend on the context in which \(\mathbf{M}_\theta\) is deployed. In
-this work, we focus on domain and mutability constraints for individual
-features \(x_d\) for \(d=1,...,D\). We limit ourselves to classification
-tasks for reasons discussed in Section~\ref{sec-discussion}.
+Intuitively, plausible counterfactuals are consistent with the data and
+faithful counterfactuals are consistent with what the model has learned
+about input data. Actionability constraints in Def.
+\ref{def-explainability} vary and depend on the context in which
+\(\mathbf{M}_\theta\) is deployed. In this work, we focus on domain and
+mutability constraints for individual features \(x_d\) for
+\(d=1,...,D\). We limit ourselves to classification tasks for reasons
+discussed in Section~\ref{sec-discussion}.
 
 \subsection{Our Proposed Objective}\label{our-proposed-objective}
 
@@ -623,17 +594,17 @@ Let \(\mathbf{x}_t^\prime\) for \(t=0,...,T\) denote a counterfactual
 explanation generated through gradient descent over \(T\) iterations as
 initially proposed by Wachter, Mittelstadt, and Russell
 (\citeproc{ref-wachter2017counterfactual}{2017}). For our purposes, we
-let \(T\) vary and consider the counterfactual search to be converged as
+let \(T\) vary and consider the counterfactual search as converged as
 soon as the predicted probability for the target class has reached a
-pre-determined threshold \(\tau\):
+pre-determined threshold, \(\tau\):
 \(\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}^\prime))[y^+] \geq \tau\),
 where \(\mathcal{S}\) is the softmax function.\footnote{For detailed
   background information on gradient-based counterfactual search and
   convergence see supplementary appendix.}
 
-To train models with high explainability as defined in
-Definition~\ref{def-explainability}, we propose to leverage
-counterfactuals in the following objective:
+To train models with high explainability as defined in Def.
+\ref{def-explainability}, we propose to leverage counterfactuals in the
+following objective:
 
 \begin{equation}\phantomsection\label{eq-obj}{
 \begin{split}
@@ -676,17 +647,16 @@ contrastive divergence between these observed samples from
 
 A key empirical finding in Altmeyer et al.
 (\citeproc{ref-altmeyer2024faithful}{2024}) was that JEMs tend to do
-well with respect to the plausibility objective in
-Definition~\ref{def-explainability}. This follows directly if we
-consider samples drawn from \(p_\theta(\mathbf{x})\) as counterfactuals
-because the JEM objective effectively minimizes the divergence between
-the conditional posterior and \(p(\mathbf{x}|\mathbf{y}^{+})\). To
-generate samples, Grathwohl et al.
-(\citeproc{ref-grathwohl2020your}{2020}) rely on Stochastic Gradient
-Langevin Dynamics (SGLD) using an uninformative prior for initialization
-but we depart from their methodology. Instead of SGLD, we propose to use
-counterfactual explainers to generate counterfactuals of observed
-training samples. Specifically, we have:
+well with respect to the plausibility objective in Def.
+\ref{def-explainability}. This follows directly if we consider samples
+drawn from \(p_\theta(\mathbf{x})\) as counterfactuals because the JEM
+objective effectively minimizes the divergence between the conditional
+posterior and \(p(\mathbf{x}|\mathbf{y}^{+})\). To generate samples,
+Grathwohl et al. (\citeproc{ref-grathwohl2020your}{2020}) rely on
+Stochastic Gradient Langevin Dynamics (SGLD) using an uninformative
+prior for initialization but we depart from their methodology. Instead
+of SGLD, we propose to use counterfactual explainers to generate
+counterfactuals of observed training samples. Specifically, we have:
 
 \begin{equation}\phantomsection\label{eq-div}{
 \text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) = \mathcal{E}_\theta(\mathbf{x},y) - \mathcal{E}_\theta(\mathbf{x}_T^\prime,y)
@@ -707,7 +677,7 @@ Intuitively, the gradient of Equation~\ref{eq-div} decreases the energy
 of observed training samples (positive samples) while increasing the
 energy of counterfactuals (negative samples)
 (\citeproc{ref-du2019implicit}{Du and Mordatch 2020}). As the
-counterfactuals get more plausible (Definition~\ref{def-explainability})
+counterfactuals get more plausible (Def. \ref{def-explainability})
 during training, these opposing effects gradually balance each other out
 (\citeproc{ref-lippe2024uvadlc}{Lippe 2024}).
 
@@ -804,36 +774,18 @@ Section~\ref{sec-experiments}. Under certain conditions, this results
 holds theoretically:\footnote{For the proof, see the supplementary
   appendix.}
 
-\begin{proposition}[Protecting Immutable
-Features]\protect\hypertarget{prp-mtblty}{}\label{prp-mtblty}
-
-Let
-\(f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})\)
-denote a linear classifier with softmax activation \(\mathcal{S}\)
-(i.e., \emph{multinomial logistic regression}) where
-\(y\in\{1,...,K\}=\mathcal{K}\) and \(\mathbf{x} \in \mathbb{R}^D\). If
-we assume multivariate Gaussian class densities with common diagonal
-covariance matrix \(\Sigma_k=\Sigma\) for all \(k \in \mathcal{K}\),
-then protecting an immutable feature from the contrastive divergence
-penalty (Equation~\ref{eq-div}) will result in lower classifier
-sensitivity to that feature relative to the remaining features, provided
-that at least one of those is discriminative and mutable.
-
+\begin{proposition}[Protecting Immutable Features]
+\label{prp-mtblty}
+Let $f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})$ denote a linear classifier with softmax activation $\mathcal{S}$ where $y\in\{1,...,K\}=\mathcal{K}$ and $\mathbf{x} \in \mathbb{R}^D$. If we assume multivariate Gaussian class densities with common diagonal covariance matrix $\Sigma_k=\Sigma$ for all $k \in \mathcal{K}$, then protecting an immutable feature from the contrastive divergence penalty will result in lower classifier sensitivity to that feature relative to the remaining features, provided that at least one of those is discriminative and mutable.
 \end{proposition}
 
-It is worth highlighting that Proposition~\ref{prp-mtblty} assumes
-independence of features. This raises a valid concern about the effect
-of protecting immutable features in the presence of proxies that remain
-unprotected. We address this in Section~\ref{sec-discussion}.
+It is worth highlighting that Prp.\textasciitilde{}\ref{prp-mtblty}
+assumes independence of features. This raises a valid concern about the
+effect of protecting immutable features in the presence of proxies that
+remain unprotected. We address this in Section~\ref{sec-discussion}.
 
-\subsection{Example: influence of counterfactual training on
-explainability}\label{example-influence-of-counterfactual-training-on-explainability}
-
-To better convey the intuition underlying our proposed method, we
-illustrate different model outcomes in Example~\ref{exm-grad}.
-
-\begin{example}[Prediction of Consumer Credit
-Default]\protect\hypertarget{exm-grad}{}\label{exm-grad}
+\subsection{Example (Prediction of Consumer Credit
+Default)}\label{example-prediction-of-consumer-credit-default}
 
 Suppose we are interested in predicting the likelihood that loan
 applicants default on their credit. We have access to historical data on
@@ -862,7 +814,7 @@ point where they are clearly distinguishable from the ground-truth data.
 In panel (b), we have trained our model with counterfactual training,
 once again without any mutability constraints. We observe that the
 counterfactuals are highly plausible, meeting the first objective of
-Definition~\ref{def-explainability}.
+Def. \ref{def-explainability}.
 
 In panel (c), we have used conventional training again, this time
 imposing the mutability constraint on \emph{age} at test time.
@@ -875,10 +827,8 @@ classifier's lower sensitivity to \emph{age}, recourse recommendations
 with respect to \emph{debt} are much more homogenous and do not
 disproportionately punish younger individuals. The counterfactuals are
 also plausible with respect to the mutable feature. Thus, we consider
-the model in panel (d) as the most explainable according to
-Definition~\ref{def-explainability}.
-
-\end{example}
+the model in panel (d) as the most explainable according to Def.
+\ref{def-explainability}.
 
 \begin{figure}
 
@@ -888,8 +838,8 @@ Definition~\ref{def-explainability}.
 
 }
 
-\caption{\label{fig-poc}Illustration for Example~\ref{exm-grad} of how
-CT improves model explainability.}
+\caption{\label{fig-poc}Illustration of how CT improves model
+explainability.}
 
 \end{figure}%
 
@@ -898,38 +848,28 @@ CT improves model explainability.}
 In this section, we present experiments that we have conducted in order
 to answer the following research questions:
 
-\begin{corollary}[Plausibility]\protect\hypertarget{cor-plaus}{}\label{cor-plaus}
-
-To what extent does our proposed counterfactual training objective
-(Equation~\ref{eq-obj}) induce models to learn plausible explanations?
-
-\end{corollary}
-
-\begin{corollary}[Actionability]\protect\hypertarget{cor-action}{}\label{cor-action}
-
-To what extent does our proposed counterfactual training objective
-(Equation~\ref{eq-obj}) yield more favorable algorithmic recourse
-outcomes in the presence of actionability constraints?
-
-\end{corollary}
-
-Beyond this, we are also interested in understanding how robust our
-answers to RQ~\ref{cor-plaus} and RQ~\ref{cor-action} are:
-
-\begin{corollary}[Hyperparameters]\protect\hypertarget{cor-hyper}{}\label{cor-hyper}
-
-What are the effects of different hyperparameter choices wrt.
-Equation~\ref{eq-obj}?
-
-\end{corollary}
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  To what extent does our proposed counterfactual training objective
+  (Equation~\ref{eq-obj}) induce models to learn plausible explanations?
+\item
+  To what extent does our proposed counterfactual training objective
+  (Equation~\ref{eq-obj}) yield more favorable algorithmic recourse
+  outcomes in the presence of actionability constraints?
+\item
+  What are the effects of hyperparameter selection with respect to
+  Equation~\ref{eq-obj}?
+\end{enumerate}
 
 \subsection{Experimental Setup}\label{experimental-setup}
 
 \subsubsection{Evaluation}\label{evaluation}
 
-Our key outcome of interest is how well models perform with respect to
-explainability (Definition~\ref{def-explainability}): to this end, we
-focus primarily on the plausibility and cost of faithfully generated
+Our key outcome of interest is how well do models perform with respect
+to explainability (Def. \ref{def-explainability}). To this end, we focus
+primarily on the plausibility and cost of faithfully generated
 counterfactuals at test time. To measure the cost of counterfactuals, we
 follow the standard convention of using distances (\(\ell_1\)-norm)
 between factuals and counterfactuals as a proxy. For plausibility, we
@@ -938,29 +878,29 @@ domain. We rely on the distance-based metric used by Altmeyer et al.
 (\citeproc{ref-altmeyer2024faithful}{2024}),
 
 \begin{equation}\phantomsection\label{eq-impl-dist}{
-\text{implaus}_{\text{dist}}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
+\text{IP}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
 }\end{equation}
 
 and introduce a novel divergence metric,
 
 \begin{equation}\phantomsection\label{eq-impl-div}{
-\text{implaus}_{\text{div}}(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
+\text{IP}^*(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
 }\end{equation}
 
 where \(\mathbf{X}^\prime\) denotes a set of multiple counterfactuals
 and \(\text{MMD}(\cdot)\) is an unbiased estimate of the squared
 population maximum mean discrepancy
 (\citeproc{ref-gretton2012kernel}{Gretton et al. 2012}). The metric in
-Equation~\ref{eq-impl-div} is equal to zero iff
-\(\mathbf{X}^\prime=\mathbf{X}^+\).
+Equation~\ref{eq-impl-div} is equal to zero iff the two distributions
+are the same, \(\mathbf{X}^\prime=\mathbf{X}^+\).
 
 In addition to cost and plausibility, we also compute other standard
 metrics to evaluate counterfactuals at test time including validity and
 redundancy. Finally, we also assess the predictive performance of models
 using standard metrics.
 
-We run the experiments with three CE generators: \emph{Generic} of
-Wachter, Mittelstadt, and Russell
+We run the experiments with three gradient-based generators:
+\emph{Generic} of Wachter, Mittelstadt, and Russell
 (\citeproc{ref-wachter2017counterfactual}{2017}) as a simple baseline
 approach, \emph{REVISE} (\citeproc{ref-joshi2019realistic}{Joshi et al.
 2019}) that aims to generate plausible counterfactuals using a surrogate
@@ -971,9 +911,70 @@ both faithfulness and plausibility of the CEs.
 
 \subsection{Experimental Results}\label{experimental-results}
 
-\subsubsection{Plausibility}\label{plausibility-1}
+\subsubsection{Plausibility}\label{plausibility}
 
-\subsubsection{Actionability}\label{actionability-1}
+Table~\ref{tbl-main} presents our main empirical findings. The top five
+rows show the percentage reduction in implausibility according to
+Equation~\ref{eq-impl-dist} for varying degrees of the energy penalty
+used for \emph{ECCo} at test time. The following row shows the reduction
+in implausibility as measured by Equation~\ref{eq-impl-div} and
+aggregated across all test specifications of \emph{ECCo}. The final two
+rows show the test accuracies for the model trained with CT and
+conventionally trained models (``vanilla'').
+
+We observe that for all datasets except \emph{OL} and across all test
+settings, the average distance of counterfactuals from observed samples
+in the target class is reduced, indicating improved plausibility. The
+magnitude of improvements varies by dataset: for the simple synthetic
+datasets, distance reductions range from around 20-40\% (\emph{LS},
+\emph{Moon}) to almost 60\% (\emph{Circ}). For the real-world tabular
+datasets, improvements are generally smaller but still substantial in
+many cases with around 10-15\% for \emph{CH}, 11-28\% for \emph{GMSC},
+7-8\% for \emph{Cred} and around 3\% for \emph{Adult}. For our only
+vision dataset (\emph{MNIST}), distances are reduced by up to 9\%. The
+results for our proposed divergence metric are qualitatively similar,
+but generally even more pronounced: for the \emph{Circ} dataset,
+implausibility is reduced by almost 94\% to virtually zero as we
+verified by looking at the absolute outcome. Improvements for other
+datasets range from 28\% (\emph{Moon}) to 78\% (\emph{GMSC}). For
+\emph{OL} the reduction is negative, consistent with the distance-based
+metric. The only dataset, for which our proposed metric disagrees with
+the distance-based metric is \emph{MNIST}.
+
+These broad and substantial improvements in plausibility generally do
+not come at the cost of decreased predictive performance: test accuracy
+for CT is virtually identical to the baseline for \emph{Adult},
+\emph{Circ}, \emph{LS}, \emph{Moon} and \emph{OL}, and even slightly
+improved for \emph{Cred}. Exceptions to this general pattern are
+\emph{MNIST}, \emph{CH} and \emph{GMSC}, for which we observe reduction
+in test accuracy of 2, 5 and 15 percentage points, respectively. We note
+in this context, that we have not optimized our models for predictive
+performance at all and worked with very small networks. In summary, we
+find that CT can substantially improve the quality of explanations
+learned by models without generally sacrificing predictive accuracy.
+
+\begin{table}
+
+\caption{\label{tbl-main}Key plausibility and predictive performance
+metrics for all datasets. The top five rows show the percentage
+reduction in implausibility according to Equation~\ref{eq-impl-dist} for
+varying degrees of the energy penalty used for \emph{ECCo} at test time.
+The following row shows the reduction in implausibility as measured by
+Equation~\ref{eq-impl-div} and aggregated across all test specifications
+of \emph{ECCo}. The final two rows show the test accuracies for the
+model trained with CT and conventionally trained models (``vanilla'').}
+
+\centering{
+
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}} cccccc }
+\input{tables/main.tex}
+\end{tabular*}
+
+}
+
+\end{table}%
+
+\subsubsection{Actionability}\label{actionability}
 
 \subsubsection{Impact of hyperparameter
 settings}\label{sec-hyperparameters}
@@ -1024,10 +1025,9 @@ of models in a fine-tuning manner.
 
 \section{Discussion}\label{sec-discussion}
 
-We begin the discussion by addressing the direct extensions of the
-counterfactual training approach in Section~\ref{sec-approach}. Then, we
-look at its broader limitations and challenges in
-Section~\ref{sec-limitations}.
+We first address the direct extensions of the counterfactual training
+approach in Section~\ref{sec-approach}. Then, we look at its limitations
+and challenges in Section~\ref{sec-limitations}.
 
 \subsection{Future research}\label{sec-approach}
 
@@ -1035,18 +1035,15 @@ Section~\ref{sec-limitations}.
 formulation relies on the distinction between non-target class(es)
 \(y^{-}\) and target class(es) \(y^{+}\) to generate counterfactuals
 through Equation~\ref{eq-obj}. While \(y^{-}\) and \(y^{+}\) can be
-arbitrarily defined by the user, CT requires the output space
-\(\mathcal{Y}\) to be discrete. Thus, it applies to binary and
-multi-class classification but it is not well-defined for other ML tasks
-where the change in outcome with respect to a decision threshold
-\(\tau\) cannot be readily quantified. In fact, this is a common
-restriction in research on CEs and AR that predominantly focuses on
-classification models. Although other settings have attracted some
-interest (e.g., regression in
-\citeproc{ref-spooner2021counterfactual}{Spooner et al. 2021};
+arbitrarily defined, CT requires the output space \(\mathcal{Y}\) to be
+discrete. Thus, it does not apply to ML tasks where the change in
+outcome cannot be readily quantified. Focus on classification models is
+a common restriction in research on CEs and AR. Other settings have
+attracted some interest (e.g., regression in
+(\citeproc{ref-spooner2021counterfactual}{Spooner et al. 2021};
 \citeproc{ref-zhao2023counterfactual}{Zhao, Broelemann, and Kasneci
-2023}), there is still no consensus on what constitutes a counterfactual
-in such settings.
+2023})), but there is little consensus how to robustly extend the notion
+of counterfactuals.
 
 \textbf{\emph{CT is subject to training instabilities.}} Joint
 energy-based models are susceptible to instabilities during training
@@ -1060,12 +1057,12 @@ recognize this to be a challenge for \emph{ECCCo} and so it may have
 downstream impacts on our proposed method. Still, we find that training
 instabilities can be successfully mitigated by regularizing energy
 (\(\lambda_{\text{reg}}\)), generating a sufficiently large number of
-counterfactuals during each training epoch and including only mature
+counterfactuals during each training epoch, and including only mature
 counterfactuals for contrastive divergence.
 
-\textbf{\emph{CT is sensitive to hyperparameter selection.}} As
-discussed in Section~\ref{sec-hyperparameters}, our method benefits from
-tuning certain key hyperparameters. In this work, we have relied
+\textbf{\emph{CT is sensitive to hyperparameter selection.}} Our method
+benefits from tuning certain key hyperparameters (see
+Section~\ref{sec-hyperparameters}). In this work, we have relied
 exclusively on grid search for this task. Future work on CT could
 benefit from investigating more sophisticated approaches towards
 hyperparameter tuning. Notably, CT is iterative which makes a variety of
@@ -1093,27 +1090,24 @@ ADM systems. Second, we find that CT can retain its value when used as a
 Third, in principle, CT yields itself to parallel execution, which we
 have leveraged for our own experiments.
 
-\textbf{\emph{Immutable features may have proxies.}} In
-Proposition~\ref{prp-mtblty} we define an approach to protect immutable
-features and thus increase the actionability of the generated
-counterfactuals. However, this approach requires that model owners
-define the mutability constraints for (all) features considered by the
-model. Even with sufficient domain knowledge to protect all immutable
-features---ones that cannot be changed at all and ones that cannot be
-reasonably expected to change---there may exist proxies that are
-theoretically mutable (and hence should not be protected) but preserve
-enough information about the principals to counteract the protections.
-As one example, consider the Adult dataset used in our experiments where
-the mutable education status is a proxy for the immutable age, in that
-the attainment of degrees is correlated with age. Delineating
-actionability is a major undecided challenge in the AR literature (see,
-e.g.,
+\textbf{\emph{Immutable features may have proxies.}} We propose an
+approach to protect immutable features and thus increase the
+actionability of the generated CEs. However, it requires that model
+owners define the mutability constraints for (all) features considered
+by the model. Even with sufficient domain knowledge to protect all
+immutable features, there may exist proxies that are theoretically
+mutable (and hence should not be protected) but preserve enough
+information about the principals to hinder the protections. As an
+example, consider the Adult dataset used in our experiments where the
+mutable education status is a proxy for the immutable age, in that the
+attainment of degrees is correlated with age. Delineating actionability
+is a major undecided challenge in the AR literature (see, e.g.,
 \citeproc{ref-venkatasubramanian2020philosophical}{Venkatasubramanian
 and Alfano 2020}) impacting the capacity of CT to increase the
 explainability of the model.
 
-\textbf{\emph{Interventions on features may have downstream impacts on
-fairness.}} Related to the point above, we provide a tool that allows
+\textbf{\emph{Interventions on features may impact fairness
+downstream.}} Related to the point above, we provide a tool that allows
 practitioners to modify the sensitivity of a model with respect to
 certain features, which may have implication for the fair and equitable
 treatment of individuals subject to automated decisions. As protecting a
@@ -1135,6 +1129,24 @@ strong external protections have been recognized to promote harmful
 power dynamics (\citeproc{ref-maas2023machine}{Maas 2023}).
 
 \section{Conclusion}\label{sec-conclusion}
+
+State-of-the-art machine learning models are prone to learning complex
+representations that cannot be interpreted by humans. Although post-hoc
+explainability approaches have attracted major research interest, these
+cannot guarantee that the explanations agree with the opaque model's
+learned representation of data. As a step towards addressing this
+challenge, we introduced counterfactual training, a novel training
+regime that incentivizes highly-explainable models. Our approach leads
+to explanations that are both plausible---compliant with the underlying
+data-generating process---and actionable---compliant with user-specified
+mutability constraints---and thus meaningful to their recipients.
+Through extensive experiments we demonstrate that counterfactual
+training satisfies its objectives while preserving the predictive
+performance of the trained models. We also find that our approach can be
+used to fine-tune conventionally-trained models and achieve similar
+gains in explainability. Finally, this work showcases that it is
+practical to improve models \emph{and} their explanations at the same
+time.
 
 \section*{References}\label{references}
 \addcontentsline{toc}{section}{References}
@@ -1177,13 +1189,12 @@ Robustness Through Active Generative Counterfactual Data
 Augmentation.''} In \emph{Findings of the Association for Computational
 Linguistics: EMNLP 2023}, 127--39.
 
-<<<<<<< HEAD
 \bibitem[\citeproctext]{ref-bell2024fairness}
 Bell, Andrew, Joao Fonseca, Carlo Abrate, Francesco Bonchi, and Julia
 Stoyanovich. 2024. {``Fairness in Algorithmic Recourse Through the Lens
 of Substantive Equality of Opportunity.''}
 \url{https://arxiv.org/abs/2401.16088}.
-=======
+
 \bibitem[\citeproctext]{ref-bezanson2017julia}
 Bezanson, Jeff, Alan Edelman, Stefan Karpinski, and Viral B Shah. 2017.
 {``Julia: A Fresh Approach to Numerical Computing.''} \emph{SIAM Review}
@@ -1217,7 +1228,6 @@ Danisch, Simon, and Julius Krumbiegel. 2021. {``{Makie.jl}: Flexible
 High-Performance Data Visualization for {Julia}.''} \emph{Journal of
 Open Source Software} 6 (65): 3349.
 \url{https://doi.org/10.21105/joss.03349}.
->>>>>>> 16-final-things-ecml
 
 \bibitem[\citeproctext]{ref-du2019implicit}
 Du, Yilun, and Igor Mordatch. 2020. {``Implicit Generation and
@@ -1571,7 +1581,7 @@ point mass prior on \(p(\mathbf{x})\) for the corresponding feature. We
 argue in Section~\ref{sec-constraints} that this approach induces models
 to be less sensitive to immutable features and demonstrate this
 empirically in Section~\ref{sec-experiments}. Below we derive the
-analytical results in Proposition~\ref{prp-mtblty}.
+analytical results in Prp.\textasciitilde{}\ref{prp-mtblty}.
 
 \begin{proof}
 Let \(d_{\text{mtbl}}\) and \(d_{\text{immtbl}}\) denote some mutable
@@ -1711,39 +1721,35 @@ a small set of key hyperparameters (Section~\ref{sec-app-tune}). The
 final choices for the main results are presented for each data set in
 Table~\ref{tbl-final-params} along with training, test and batch sizes.
 
-\begin{longtable}{ccccccc}
+\begin{table}
 
 \caption{\label{tbl-final-params}Final hyperparameters used for the main
 results for the different datasets.}
 
-\tabularnewline
+\centering{
 
-  \toprule
-  \textbf{Data} & \textbf{No. Train} & \textbf{No. Test} & \textbf{Batchsize} & \textbf{Decision Threshold} & \textbf{No. Counterfactuals} & \textbf{$\lambda_{\text{reg}}$} \\\midrule
-  \endfirsthead
-  \toprule
-  \textbf{Data} & \textbf{No. Train} & \textbf{No. Test} & \textbf{Batchsize} & \textbf{Decision Threshold} & \textbf{No. Counterfactuals} & \textbf{$\lambda_{\text{reg}}$} \\\midrule
-  \endhead
-  \bottomrule
-  \multicolumn{7}{r}{Continuing table below.}\\
-  \bottomrule
-  \endfoot
-  \endlastfoot
-  Adult & $2.6 \cdot 10^{4}$ & $5.01 \cdot 10^{3}$ & $1 \cdot 10^{3}$ & 0.75 & $5 \cdot 10^{3}$ & 0.25 \\
-  California Housing & $1.65 \cdot 10^{4}$ & $3.1 \cdot 10^{3}$ & $1 \cdot 10^{3}$ & 0.5 & $5 \cdot 10^{3}$ & 0.25 \\
-  Circles & $3.6 \cdot 10^{3}$ & 600 & 30 & 0.5 & $1 \cdot 10^{3}$ & 0.5 \\
-  Credit & $1.06 \cdot 10^{4}$ & $1.92 \cdot 10^{3}$ & $1 \cdot 10^{3}$ & 0.5 & $5 \cdot 10^{3}$ & 0.25 \\
-  GMSC & $1.34 \cdot 10^{4}$ & $2.47 \cdot 10^{3}$ & $1 \cdot 10^{3}$ & 0.5 & $5 \cdot 10^{3}$ & 0.5 \\
-  Linearly Separable & $3.6 \cdot 10^{3}$ & 600 & 30 & 0.5 & $1 \cdot 10^{3}$ & 0.25 \\
-  Moons & $3.6 \cdot 10^{3}$ & 600 & 30 & 0.9 & $1 \cdot 10^{3}$ & 0.25 \\
-  Overlapping & $3.6 \cdot 10^{3}$ & 600 & 30 & 0.5 & $1 \cdot 10^{3}$ & 0.25 \\\bottomrule
+  \begin{tabular}{cccccccc}
+    \toprule
+    \textbf{Data} & \textbf{No. Train} & \textbf{No. Test} & \textbf{Batchsize} & \textbf{Domain} & \textbf{Decision Threshold} & \textbf{No. Counterfactuals} & \textbf{$\lambda_{\text{reg}}$} \\\midrule
+    Adult & $2.6 \cdot 10^{4}$ & $5.01 \cdot 10^{3}$ & $1 \cdot 10^{3}$ & none & 0.75 & $5 \cdot 10^{3}$ & 0.25 \\
+    CH & $1.65 \cdot 10^{4}$ & $3.1 \cdot 10^{3}$ & $1 \cdot 10^{3}$ & none & 0.5 & $5 \cdot 10^{3}$ & 0.25 \\
+    Circ & $3.6 \cdot 10^{3}$ & 600 & 30 & none & 0.5 & $1 \cdot 10^{3}$ & 0.5 \\
+    Cred & $1.06 \cdot 10^{4}$ & $1.92 \cdot 10^{3}$ & $1 \cdot 10^{3}$ & none & 0.5 & $5 \cdot 10^{3}$ & 0.25 \\
+    GMSC & $1.34 \cdot 10^{4}$ & $2.47 \cdot 10^{3}$ & $1 \cdot 10^{3}$ & none & 0.5 & $5 \cdot 10^{3}$ & 0.5 \\
+    LS & $3.6 \cdot 10^{3}$ & 600 & 30 & none & 0.5 & $1 \cdot 10^{3}$ & 0.01 \\
+    MNIST & $1.1 \cdot 10^{4}$ & $2 \cdot 10^{3}$ & $1 \cdot 10^{3}$ & (-1.0, 1.0) & 0.5 & $5 \cdot 10^{3}$ & 0.01 \\
+    Moon & $3.6 \cdot 10^{3}$ & 600 & 30 & none & 0.9 & $1 \cdot 10^{3}$ & 0.25 \\
+    OL & $3.6 \cdot 10^{3}$ & 600 & 30 & none & 0.5 & $1 \cdot 10^{3}$ & 0.25 \\\bottomrule
+  \end{tabular}
 
-\end{longtable}
+}
+
+\end{table}%
 
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, coltitle=black, breakable, rightrule=.15mm, opacityback=0, toptitle=1mm, left=2mm, bottomtitle=1mm, title={Note}, colframe=quarto-callout-note-color-frame, titlerule=0mm, arc=.35mm, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm]
 
 Figure~\ref{fig-mnist} shows much more plausible (faithful)
 counterfactuals for a model with CT than the model with conventional
@@ -1918,7 +1924,7 @@ training is shown in Note~\ref{nte-gen-params-final-run-train}. The
 corresponding evaluation grid used for these experiments is shown in
 Note~\ref{nte-gen-params-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, coltitle=black, breakable, rightrule=.15mm, opacityback=0, toptitle=1mm, left=2mm, bottomtitle=1mm, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, colframe=quarto-callout-note-color-frame, titlerule=0mm, arc=.35mm, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm]
 
 \quartocalloutnte{nte-gen-params-final-run-train} 
 
@@ -1932,7 +1938,7 @@ Note~\ref{nte-gen-params-final-run-eval}.
   \item
     Decision Threshold: \texttt{0.75,\ 0.9,\ 0.95}
   \item
-    \(\lambda_{\text{energy}}\): \texttt{0.1,\ 0.5,\ 5.0,\ 10.0,\ 20.0}
+    \(\lambda_{\text{egy}}\): \texttt{0.1,\ 0.5,\ 5.0,\ 10.0,\ 20.0}
   \item
     Maximum Iterations: \texttt{5,\ 25,\ 50}
   \end{itemize}
@@ -1952,7 +1958,7 @@ Note~\ref{nte-gen-params-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, coltitle=black, breakable, rightrule=.15mm, opacityback=0, toptitle=1mm, left=2mm, bottomtitle=1mm, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, colframe=quarto-callout-note-color-frame, titlerule=0mm, arc=.35mm, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm]
 
 \quartocalloutnte{nte-gen-params-final-run-eval} 
 
@@ -1964,7 +1970,7 @@ Note~\ref{nte-gen-params-final-run-eval}.
   \begin{itemize}
   \tightlist
   \item
-    \(\lambda_{\text{energy}}\): \texttt{0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0}
+    \(\lambda_{\text{egy}}\): \texttt{0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0}
   \end{itemize}
 \end{itemize}
 
@@ -1992,26 +1998,26 @@ parameters (Note~\ref{nte-gen-params-final-run-eval}).}
   \bottomrule
   \endfoot
   \endlastfoot
-  Circles & Accuracy & Full & 0.997 & 0.00309 \\
-  Circles & Accuracy & Vanilla & 0.998 & 0.000557 \\
-  Circles & F1-score & Full & 0.997 & 0.00309 \\
-  Circles & F1-score & Vanilla & 0.998 & 0.000558 \\
-  Linearly Separable & Accuracy & Full & 0.999 & 0.00201 \\
-  Linearly Separable & Accuracy & Vanilla & 1 & 0 \\
-  Linearly Separable & F1-score & Full & 0.999 & 0.00201 \\
-  Linearly Separable & F1-score & Vanilla & 1 & 0 \\
-  Moons & Accuracy & Full & 0.999 & 0.000696 \\
-  Moons & Accuracy & Vanilla & 1 & 0.00111 \\
-  Moons & F1-score & Full & 0.999 & 0.000696 \\
-  Moons & F1-score & Vanilla & 1 & 0.00111 \\
-  Overlapping & Accuracy & Full & 0.915 & 0.00477 \\
-  Overlapping & Accuracy & Vanilla & 0.917 & 0.00123 \\
-  Overlapping & F1-score & Full & 0.915 & 0.00478 \\
-  Overlapping & F1-score & Vanilla & 0.917 & 0.00124 \\\bottomrule
+  Circ & Accuracy & Full & 0.997 & 0.00309 \\
+  Circ & Accuracy & Vanilla & 0.998 & 0.000557 \\
+  Circ & F1-score & Full & 0.997 & 0.00309 \\
+  Circ & F1-score & Vanilla & 0.998 & 0.000558 \\
+  LS & Accuracy & Full & 0.999 & 0.00201 \\
+  LS & Accuracy & Vanilla & 1 & 0 \\
+  LS & F1-score & Full & 0.999 & 0.00201 \\
+  LS & F1-score & Vanilla & 1 & 0 \\
+  Moon & Accuracy & Full & 0.999 & 0.000696 \\
+  Moon & Accuracy & Vanilla & 1 & 0.00111 \\
+  Moon & F1-score & Full & 0.999 & 0.000696 \\
+  Moon & F1-score & Vanilla & 1 & 0.00111 \\
+  OL & Accuracy & Full & 0.915 & 0.00477 \\
+  OL & Accuracy & Vanilla & 0.917 & 0.00123 \\
+  OL & F1-score & Full & 0.915 & 0.00478 \\
+  OL & F1-score & Vanilla & 0.917 & 0.00124 \\\bottomrule
 
 \end{longtable}
 
-\subsubsection{Plausibility}\label{plausibility-2}
+\subsubsection{Plausibility}\label{plausibility-1}
 
 The results with respect to the plausibility measure are shown in
 Figure~\ref{fig-grid-gen_params-plaus-circles} to
@@ -2135,7 +2141,7 @@ is shown in Note~\ref{nte-pen-final-run-train}. The corresponding
 evaluation grid used for these experiments is shown in
 Note~\ref{nte-pen-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, coltitle=black, breakable, rightrule=.15mm, opacityback=0, toptitle=1mm, left=2mm, bottomtitle=1mm, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, colframe=quarto-callout-note-color-frame, titlerule=0mm, arc=.35mm, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm]
 
 \quartocalloutnte{nte-pen-final-run-train} 
 
@@ -2163,7 +2169,7 @@ Note~\ref{nte-pen-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, coltitle=black, breakable, rightrule=.15mm, opacityback=0, toptitle=1mm, left=2mm, bottomtitle=1mm, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, colframe=quarto-callout-note-color-frame, titlerule=0mm, arc=.35mm, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm]
 
 \quartocalloutnte{nte-pen-final-run-eval} 
 
@@ -2175,7 +2181,7 @@ Note~\ref{nte-pen-final-run-eval}.
   \begin{itemize}
   \tightlist
   \item
-    \(\lambda_{\text{energy}}\): \texttt{0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0}
+    \(\lambda_{\text{egy}}\): \texttt{0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0}
   \end{itemize}
 \end{itemize}
 
@@ -2203,26 +2209,26 @@ and objective averaged across training-phase parameters
   \bottomrule
   \endfoot
   \endlastfoot
-  Circles & Accuracy & Full & 0.994 & 0.0144 \\
-  Circles & Accuracy & Vanilla & 0.998 & 0.000875 \\
-  Circles & F1-score & Full & 0.994 & 0.0145 \\
-  Circles & F1-score & Vanilla & 0.998 & 0.000875 \\
-  Linearly Separable & Accuracy & Full & 0.998 & 0.00772 \\
-  Linearly Separable & Accuracy & Vanilla & 1 & 0 \\
-  Linearly Separable & F1-score & Full & 0.998 & 0.00773 \\
-  Linearly Separable & F1-score & Vanilla & 1 & 0 \\
-  Moons & Accuracy & Full & 0.987 & 0.0351 \\
-  Moons & Accuracy & Vanilla & 0.998 & 0.0101 \\
-  Moons & F1-score & Full & 0.987 & 0.0352 \\
-  Moons & F1-score & Vanilla & 0.998 & 0.0102 \\
-  Overlapping & Accuracy & Full & 0.911 & 0.0217 \\
-  Overlapping & Accuracy & Vanilla & 0.916 & 0.00236 \\
-  Overlapping & F1-score & Full & 0.911 & 0.0219 \\
-  Overlapping & F1-score & Vanilla & 0.916 & 0.00236 \\\bottomrule
+  Circ & Accuracy & Full & 0.994 & 0.0144 \\
+  Circ & Accuracy & Vanilla & 0.998 & 0.000875 \\
+  Circ & F1-score & Full & 0.994 & 0.0145 \\
+  Circ & F1-score & Vanilla & 0.998 & 0.000875 \\
+  LS & Accuracy & Full & 0.998 & 0.00772 \\
+  LS & Accuracy & Vanilla & 1 & 0 \\
+  LS & F1-score & Full & 0.998 & 0.00773 \\
+  LS & F1-score & Vanilla & 1 & 0 \\
+  Moon & Accuracy & Full & 0.987 & 0.0351 \\
+  Moon & Accuracy & Vanilla & 0.998 & 0.0101 \\
+  Moon & F1-score & Full & 0.987 & 0.0352 \\
+  Moon & F1-score & Vanilla & 0.998 & 0.0102 \\
+  OL & Accuracy & Full & 0.911 & 0.0217 \\
+  OL & Accuracy & Vanilla & 0.916 & 0.00236 \\
+  OL & F1-score & Full & 0.911 & 0.0219 \\
+  OL & F1-score & Vanilla & 0.916 & 0.00236 \\\bottomrule
 
 \end{longtable}
 
-\subsubsection{Plausibility}\label{plausibility-3}
+\subsubsection{Plausibility}\label{plausibility-2}
 
 The results with respect to the plausibility measure are shown in
 Figure~\ref{fig-grid-pen-plaus-circles} to
@@ -2345,7 +2351,7 @@ in Note~\ref{nte-train-final-run-train}. The corresponding evaluation
 grid used for these experiments is shown in
 Note~\ref{nte-train-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-train-final-run-train}: Training Phase}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, coltitle=black, breakable, rightrule=.15mm, opacityback=0, toptitle=1mm, left=2mm, bottomtitle=1mm, title={Note \ref*{nte-train-final-run-train}: Training Phase}, colframe=quarto-callout-note-color-frame, titlerule=0mm, arc=.35mm, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm]
 
 \quartocalloutnte{nte-train-final-run-train} 
 
@@ -2373,7 +2379,7 @@ Note~\ref{nte-train-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, coltitle=black, breakable, rightrule=.15mm, opacityback=0, toptitle=1mm, left=2mm, bottomtitle=1mm, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, colframe=quarto-callout-note-color-frame, titlerule=0mm, arc=.35mm, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm]
 
 \quartocalloutnte{nte-train-final-run-eval} 
 
@@ -2385,7 +2391,7 @@ Note~\ref{nte-train-final-run-eval}.
   \begin{itemize}
   \tightlist
   \item
-    \(\lambda_{\text{energy}}\): \texttt{0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0}
+    \(\lambda_{\text{egy}}\): \texttt{0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0}
   \end{itemize}
 \end{itemize}
 
@@ -2413,26 +2419,26 @@ and objective averaged across training-phase parameters
   \bottomrule
   \endfoot
   \endlastfoot
-  Circles & Accuracy & Full & 0.995 & 0.00431 \\
-  Circles & Accuracy & Vanilla & 0.998 & 0.000566 \\
-  Circles & F1-score & Full & 0.995 & 0.00432 \\
-  Circles & F1-score & Vanilla & 0.998 & 0.000566 \\
-  Linearly Separable & Accuracy & Full & 0.999 & 0.00231 \\
-  Linearly Separable & Accuracy & Vanilla & 1 & 0 \\
-  Linearly Separable & F1-score & Full & 0.999 & 0.00231 \\
-  Linearly Separable & F1-score & Vanilla & 1 & 0 \\
-  Moons & Accuracy & Full & 0.996 & 0.0136 \\
-  Moons & Accuracy & Vanilla & 0.988 & 0.022 \\
-  Moons & F1-score & Full & 0.996 & 0.0136 \\
-  Moons & F1-score & Vanilla & 0.988 & 0.022 \\
-  Overlapping & Accuracy & Full & 0.914 & 0.00563 \\
-  Overlapping & Accuracy & Vanilla & 0.918 & 0.00116 \\
-  Overlapping & F1-score & Full & 0.914 & 0.0057 \\
-  Overlapping & F1-score & Vanilla & 0.918 & 0.00116 \\\bottomrule
+  Circ & Accuracy & Full & 0.995 & 0.00431 \\
+  Circ & Accuracy & Vanilla & 0.998 & 0.000566 \\
+  Circ & F1-score & Full & 0.995 & 0.00432 \\
+  Circ & F1-score & Vanilla & 0.998 & 0.000566 \\
+  LS & Accuracy & Full & 0.999 & 0.00231 \\
+  LS & Accuracy & Vanilla & 1 & 0 \\
+  LS & F1-score & Full & 0.999 & 0.00231 \\
+  LS & F1-score & Vanilla & 1 & 0 \\
+  Moon & Accuracy & Full & 0.996 & 0.0136 \\
+  Moon & Accuracy & Vanilla & 0.988 & 0.022 \\
+  Moon & F1-score & Full & 0.996 & 0.0136 \\
+  Moon & F1-score & Vanilla & 0.988 & 0.022 \\
+  OL & Accuracy & Full & 0.914 & 0.00563 \\
+  OL & Accuracy & Vanilla & 0.918 & 0.00116 \\
+  OL & F1-score & Full & 0.914 & 0.0057 \\
+  OL & F1-score & Vanilla & 0.918 & 0.00116 \\\bottomrule
 
 \end{longtable}
 
-\subsubsection{Plausibility}\label{plausibility-4}
+\subsubsection{Plausibility}\label{plausibility-3}
 
 The results with respect to the plausibility measure are shown in
 Figure~\ref{fig-grid-train-plaus-circles} to
@@ -2592,7 +2598,7 @@ counterfactuals reaches 100\%.
 One consideration worth exploring is to combine high decision thresholds
 with high learning rates, which we have not investigated here.
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Package Version (Reproducibility)}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-warning-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-warning-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, coltitle=black, breakable, rightrule=.15mm, opacityback=0, toptitle=1mm, left=2mm, bottomtitle=1mm, title={Package Version (Reproducibility)}, colframe=quarto-callout-warning-color-frame, titlerule=0mm, arc=.35mm, toprule=.15mm, colbacktitle=quarto-callout-warning-color!10!white, leftrule=.75mm]
 
 Tuning was run using \texttt{v1.1.3} of \texttt{TaijaData}. The
 follow-up version \texttt{v1.1.4} introduced an option to split
@@ -2613,7 +2619,7 @@ The hyperparameter grid for tuning key parameters is shown in
 Note~\ref{nte-tune-train}. The corresponding evaluation grid used for
 these experiments is shown in Note~\ref{nte-tune-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-tune-train}: Training Phase}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, coltitle=black, breakable, rightrule=.15mm, opacityback=0, toptitle=1mm, left=2mm, bottomtitle=1mm, title={Note \ref*{nte-tune-train}: Training Phase}, colframe=quarto-callout-note-color-frame, titlerule=0mm, arc=.35mm, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm]
 
 \quartocalloutnte{nte-tune-train} 
 
@@ -2643,7 +2649,7 @@ these experiments is shown in Note~\ref{nte-tune-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-tune-eval}: Evaluation Phase}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, coltitle=black, breakable, rightrule=.15mm, opacityback=0, toptitle=1mm, left=2mm, bottomtitle=1mm, title={Note \ref*{nte-tune-eval}: Evaluation Phase}, colframe=quarto-callout-note-color-frame, titlerule=0mm, arc=.35mm, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm]
 
 \quartocalloutnte{nte-tune-eval} 
 
@@ -2655,13 +2661,13 @@ these experiments is shown in Note~\ref{nte-tune-eval}.
   \begin{itemize}
   \tightlist
   \item
-    \(\lambda_{\text{energy}}\): \texttt{0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0}
+    \(\lambda_{\text{egy}}\): \texttt{0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0}
   \end{itemize}
 \end{itemize}
 
 \end{tcolorbox}
 
-\subsubsection{Plausibility}\label{plausibility-5}
+\subsubsection{Plausibility}\label{plausibility-4}
 
 The results with respect to the plausibility measure are shown in
 Figure~\ref{fig-tune-plaus-adult} to Figure~\ref{fig-tune-plaus-over}.
@@ -2914,7 +2920,7 @@ The hyperparameter grid for tuning the learning rate is shown in
 Note~\ref{nte-tune_lr-train}. The corresponding evaluation grid used for
 these experiments is shown in Note~\ref{nte-tune_lr-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-tune_lr-train}: Training Phase}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, coltitle=black, breakable, rightrule=.15mm, opacityback=0, toptitle=1mm, left=2mm, bottomtitle=1mm, title={Note \ref*{nte-tune_lr-train}: Training Phase}, colframe=quarto-callout-note-color-frame, titlerule=0mm, arc=.35mm, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm]
 
 \quartocalloutnte{nte-tune_lr-train} 
 
@@ -2944,7 +2950,7 @@ these experiments is shown in Note~\ref{nte-tune_lr-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-tune_lr-eval}: Evaluation Phase}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, coltitle=black, breakable, rightrule=.15mm, opacityback=0, toptitle=1mm, left=2mm, bottomtitle=1mm, title={Note \ref*{nte-tune_lr-eval}: Evaluation Phase}, colframe=quarto-callout-note-color-frame, titlerule=0mm, arc=.35mm, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm]
 
 \quartocalloutnte{nte-tune_lr-eval} 
 
@@ -2956,13 +2962,13 @@ these experiments is shown in Note~\ref{nte-tune_lr-eval}.
   \begin{itemize}
   \tightlist
   \item
-    \(\lambda_{\text{energy}}\): \texttt{0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0}
+    \(\lambda_{\text{egy}}\): \texttt{0.1,\ 0.5,\ 1.0,\ 5.0,\ 10.0}
   \end{itemize}
 \end{itemize}
 
 \end{tcolorbox}
 
-\subsubsection{Plausibility}\label{plausibility-6}
+\subsubsection{Plausibility}\label{plausibility-5}
 
 The results with respect to the plausibility measure are shown in
 Figure~\ref{fig-tune_lr-plaus-adult} to
@@ -3004,6 +3010,20 @@ plausibility measure across key hyperparameters. Data: Credit.}
 
 \caption{\label{fig-tune_lr-plaus-gmsc}Average outcomes for the
 plausibility measure across key hyperparameters. Data: GMSC.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/lin_sep/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}}
+
+}
+
+\caption{\label{fig-tune_lr-plaus-lin_sep}Average outcomes for the
+plausibility measure across key hyperparameters. Data: Linearly
+Separable.}
 
 \end{figure}%
 
@@ -3075,6 +3095,19 @@ counterfactuals in each epoch. Data: Credit.}
 
 \caption{\label{fig-tune_lr-mat-gmsc}Proportion of mature
 counterfactuals in each epoch. Data: GMSC.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/lin_sep/evaluation/results/logs/objective---lr---lambda_energy_reg/percent_valid.png}}
+
+}
+
+\caption{\label{fig-tune_lr-mat-lin_sep}Proportion of mature
+counterfactuals in each epoch. Data: Linearly Separable.}
 
 \end{figure}%
 

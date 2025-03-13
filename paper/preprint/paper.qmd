@@ -9,6 +9,16 @@ format:
     doublespacing: false
     runninghead: "Counterfactual Training (A Preprint)"
     authorcols: true
+    include-in-header:
+      text: |
+        \usepackage{amsthm}
+        \theoremstyle{plain}
+        \newtheorem{proposition}{Proposition}[section]
+        \theoremstyle{definition}
+        \newtheorem{definition}{Definition}[section]
+        \theoremstyle{definition}
+        \newtheorem{example}{Example}[section]
+        \theoremstyle{plain}
 ---
 
 {{< include /paper/body.qmd >}}
