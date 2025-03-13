@@ -887,16 +887,13 @@ and challenges in Section~\ref{sec-limitations}.
 formulation relies on the distinction between non-target class(es)
 \(y^{-}\) and target class(es) \(y^{+}\) to generate counterfactuals
 through Equation~\ref{eq-obj}. While \(y^{-}\) and \(y^{+}\) can be
-arbitrarily defined by the user, CT requires the output space
-\(\mathcal{Y}\) to be discrete. Thus, it applies to binary and
-multi-class classification but it is not well-defined for other ML tasks
-where the change in outcome with respect to a decision threshold
-\(\tau\) cannot be readily quantified. In fact, this is a common
-restriction in research on CEs and AR that predominantly focuses on
-classification models. Although other settings have attracted some
-interest \cite{spooner2021counterfactual,zhao2023counterfactual}, there
-is still no consensus on what constitutes a counterfactual in such
-settings.
+arbitrarily defined, CT requires the output space \(\mathcal{Y}\) to be
+discrete. Thus, it does not apply to ML tasks where the change in
+outcome cannot be readily quantified. Focus on classification models is
+a common restriction in research on CEs and AR. Other settings have
+attracted some interest (e.g., regression in
+\cite{spooner2021counterfactual,zhao2023counterfactual}), but there is
+little consensus how to robustly extend the notion of counterfactuals.
 
 \textbf{\emph{CT is subject to training instabilities.}} Joint
 energy-based models are susceptible to instabilities during training
@@ -910,12 +907,12 @@ underlying counterfactual explainers. For example,
 method. Still, we find that training instabilities can be successfully
 mitigated by regularizing energy (\(\lambda_{\text{reg}}\)), generating
 a sufficiently large number of counterfactuals during each training
-epoch and including only mature counterfactuals for contrastive
+epoch, and including only mature counterfactuals for contrastive
 divergence.
 
-\textbf{\emph{CT is sensitive to hyperparameter selection.}} As
-discussed in Section~\ref{sec-hyperparameters}, our method benefits from
-tuning certain key hyperparameters. In this work, we have relied
+\textbf{\emph{CT is sensitive to hyperparameter selection.}} Our method
+benefits from tuning certain key hyperparameters (see
+Section~\ref{sec-hyperparameters}). In this work, we have relied
 exclusively on grid search for this task. Future work on CT could
 benefit from investigating more sophisticated approaches towards
 hyperparameter tuning. Notably, CT is iterative which makes a variety of
@@ -934,31 +931,29 @@ small grids with 270 settings can take almost four hours for more
 demanding datasets on a high-performance computing cluster with 34 2GB
 CPUs (see details in \textbf{?@sec-hardware}). However, there are three
 factors that attenuate the impact of this limitation. First, CT provides
-counterfactual explanations for the training samples essentially for
-free, which may be beneficial in many ADM systems. Second, we find that
-CT can retain its value when used as a ``fine-tuning'' training regime
-for conventionally-trained models. Third, in principle, CT yields itself
-to parallel execution, which we have leveraged for our own experiments.
+CEs for the training samples for free, which may be beneficial in many
+ADM systems. Second, we find that CT can retain its value when used as a
+``fine-tuning'' training regime for conventionally-trained models.
+Third, in principle, CT yields itself to parallel execution, which we
+have leveraged for our own experiments.
 
-\textbf{\emph{Immutable features may have proxies.}} In
-Proposition~\ref{prp-mtblty} we define an approach to protect immutable
-features and thus increase the actionability of the generated
-counterfactuals. However, this approach requires that model owners
-define the mutability constraints for (all) features considered by the
-model. Even with sufficient domain knowledge to protect all immutable
-features---ones that cannot be changed at all and ones that cannot be
-reasonably expected to change---there may exist proxies that are
-theoretically mutable (and hence should not be protected) but preserve
-enough information about the principals to counteract the protections.
-As one example, consider the Adult dataset used in our experiments where
-the mutable education status is a proxy for the immutable age, in that
-the attainment of degrees is correlated with age. Delineating
-actionability is a major undecided challenge in the AR literature
+\textbf{\emph{Immutable features may have proxies.}} We propose an
+approach to protect immutable features and thus increase the
+actionability of the generated CEs. However, it requires that model
+owners define the mutability constraints for (all) features considered
+by the model. Even with sufficient domain knowledge to protect all
+immutable features, there may exist proxies that are theoretically
+mutable (and hence should not be protected) but preserve enough
+information about the principals to hinder the protections. As an
+example, consider the Adult dataset used in our experiments where the
+mutable education status is a proxy for the immutable age, in that the
+attainment of degrees is correlated with age. Delineating actionability
+is a major undecided challenge in the AR literature
 \cite{venkatasubramanian2020philosophical} impacting the capacity of CT
 to increase the explainability of the model.
 
-\textbf{\emph{Interventions on features may have downstream impacts on
-fairness.}} Related to the point above, we provide a tool that allows
+\textbf{\emph{Interventions on features may impact fairness
+downstream.}} Related to the point above, we provide a tool that allows
 practitioners to modify the sensitivity of a model with respect to
 certain features, which may have implication for the fair and equitable
 treatment of individuals subject to automated decisions. As protecting a
@@ -978,9 +973,6 @@ have been recognized to promote harmful power dynamics
 \cite{maas2023machine}.
 
 \section{Conclusion}\label{sec-conclusion}
-
-\subsection*{References}\label{references}
-\addcontentsline{toc}{subsection}{References}
 
 \newpage{}
 
