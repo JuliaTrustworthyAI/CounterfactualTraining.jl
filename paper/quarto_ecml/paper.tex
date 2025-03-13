@@ -100,13 +100,13 @@
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 % \usepackage{amsthm}
 % \theoremstyle{plain}
-% \newtheorem{proposition}{Proposition}[section]
-% \theoremstyle{plain}
 % \newtheorem{corollary}{Research Question}[section]
 % \theoremstyle{definition}
-% \newtheorem{definition}{Definition}[section]
-% \theoremstyle{definition}
 % \newtheorem{example}{Example}[section]
+% \theoremstyle{definition}
+% \newtheorem{definition}{Definition}[section]
+% \theoremstyle{plain}
+% \newtheorem{proposition}{Proposition}[section]
 % \theoremstyle{remark}
 % \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 % \newtheorem*{remark}{Remark}
@@ -809,13 +809,13 @@ domain. We rely on the distance-based metric used by
 \cite{altmeyer2024faithful},
 
 \begin{equation}\phantomsection\label{eq-impl-dist}{
-\text{implaus}_{\text{dist}}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
+\text{IP}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
 }\end{equation}
 
 and introduce a novel divergence metric,
 
 \begin{equation}\phantomsection\label{eq-impl-div}{
-\text{implaus}_{\text{div}}(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
+\text{IP}^*(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
 }\end{equation}
 
 where \(\mathbf{X}^\prime\) denotes a set of multiple counterfactuals
@@ -840,6 +840,67 @@ both faithfulness and plausibility of the CEs.
 \subsection{Experimental Results}\label{experimental-results}
 
 \subsubsection{Plausibility}\label{plausibility-1}
+
+Table~\ref{tbl-main} presents our main empirical findings. The top five
+rows show the percentage reduction in implausibility according to
+Equation~\ref{eq-impl-dist} for varying degrees of the energy penalty
+used for \emph{ECCo} at test time. The following row shows the reduction
+in implausibility as measured by Equation~\ref{eq-impl-div} and
+aggregated across all test specifications of \emph{ECCo}. The final two
+rows show the test accuracies for the model trained with CT and
+conventionally trained models (``vanilla'').
+
+We observe that for all datasets except \emph{OL} and across all test
+settings, the average distance of counterfactuals from observed samples
+in the target class is reduced, indicating improved plausibility. The
+magnitude of improvements varies by dataset: for the simple synthetic
+datasets, distance reductions range from around 20-40\% (\emph{LS},
+\emph{Moon}) to almost 60\% (\emph{Circ}). For the real-world tabular
+datasets, improvements are generally smaller but still substantial in
+many cases with around 10-15\% for \emph{CH}, 11-28\% for \emph{GMSC},
+7-8\% for \emph{Cred} and around 3\% for \emph{Adult}. For our only
+vision dataset (\emph{MNIST}), distances are reduced by up to 9\%. The
+results for our proposed divergence metric are qualitatively similar,
+but generally even more pronounced: for the \emph{Circ} dataset,
+implausibility is reduced by almost 94\% to virtually zero as we
+verified by looking at the absolute outcome. Improvements for other
+datasets range from 28\% (\emph{Moon}) to 78\% (\emph{GMSC}). For
+\emph{OL} the reduction is negative, consistent with the distance-based
+metric. The only dataset, for which our proposed metric disagrees with
+the distance-based metric is \emph{MNIST}.
+
+These broad and substantial improvements in plausibility generally do
+not come at the cost of decreased predictive performance: test accuracy
+for CT is virtually identical to the baseline for \emph{Adult},
+\emph{Circ}, \emph{LS}, \emph{Moon} and \emph{OL}, and even slightly
+improved for \emph{Cred}. Exceptions to this general pattern are
+\emph{MNIST}, \emph{CH} and \emph{GMSC}, for which we observe reduction
+in test accuracy of 2, 5 and 15 percentage points, respectively. We note
+in this context, that we have not optimized our models for predictive
+performance at all and worked with very small networks. In summary, we
+find that CT can substantially improve the quality of explanations
+learned by models without generally sacrificing predictive accuracy.
+
+\begin{table}
+
+\caption{\label{tbl-main}Key plausibility and predictive performance
+metrics for all datasets. The top five rows show the percentage
+reduction in implausibility according to Equation~\ref{eq-impl-dist} for
+varying degrees of the energy penalty used for \emph{ECCo} at test time.
+The following row shows the reduction in implausibility as measured by
+Equation~\ref{eq-impl-div} and aggregated across all test specifications
+of \emph{ECCo}. The final two rows show the test accuracies for the
+model trained with CT and conventionally trained models (``vanilla'').}
+
+\centering{
+
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}} cccccc }
+\input{tables/main.tex}
+\end{tabular*}
+
+}
+
+\end{table}%
 
 \subsubsection{Actionability}\label{actionability-1}
 

@@ -51,17 +51,20 @@ function filter_dict(dict::Dict; drop_fields=["name", "data", "data_params"])
 end
 
 global LatexReplacements = Dict(
-    "lambda_energy" => "\$\\lambda_{\\text{energy}}\$",
-    "lambda_cost" => "\$\\lambda_{\\text{cost}}\$",
+    "lambda_energy" => "\$\\lambda_{\\text{egy}}\$",
+    "lambda_cost" => "\$\\lambda_{\\text{cst}}\$",
     "lambda_adversarial" => "\$\\lambda_{\\text{adv}}\$",
     "lambda_energy_diff" => "\$\\lambda_{\\text{div}}\$",
     "lambda_energy_reg" => "\$\\lambda_{\\text{reg}}\$",
-    "lambda_class_loss" => "\$\\lambda_{\\text{yloss}}\$",
+    "lambda_class_loss" => "\$\\lambda_{\\text{clf}}\$",
     "gmsc" => get_name(GMSC(); pretty=true),
-    "lin_sep" => get_name(LinearlySeparable(); pretty=true),
-    "over" => get_name(Overlapping(); pretty=true),
-    "cali" => get_name(CaliHousing(); pretty=true),
-    "mnist" => get_name(MNIST(); pretty=true)
+    "lin_sep" => "LS",
+    "over" => "OL",
+    "cali" => "CH",
+    "mnist" => get_name(MNIST(); pretty=true),
+    "circles" => "Circ",
+    "moons" => "Moon",
+    "credit" => "Cred"
 )
 
 function format_header(s::String; replacements::Dict=LatexReplacements)
@@ -613,8 +616,8 @@ function get_img_command(data_names, full_paths, fig_labels; fig_caption="")
 end
 
 global LatexMetricReplacements = Dict(
-    "mmd" => "\$\\text{implaus}_{\\text{div}}\$",
-    "plausibility_distance_from_target" => "\$\\text{implaus}_{\\text{dist}}\$",
+    "mmd" => "\$ \\text{IP}^* \$",
+    "plausibility_distance_from_target" => "\$ \\text{IP} \$",
 )
 
 function format_metric(m::String)
@@ -634,7 +637,7 @@ function aggregate_ce_evaluation(res_dir::String; y="mmd", byvars=nothing, rebas
     df.objective .= CTExperiments.format_header.(df.objective)
     df.variable .= CTExperiments.format_metric.(y)
     if rebase
-        df.variable .= (x -> LatexCell("$(x)(\\Delta\\%)")).(df.variable)
+        df.variable .= (x -> LatexCell("$(x) \$(-\\Delta %)\$")).(df.variable)
         select!(df, Not([:is_pct, :objective]))
     end
     return df
@@ -654,6 +657,9 @@ function aggregate_performance(res_dir::String; measure::Vector=["acc"])
 
     eval_grids, _ = final_results(res_dir)
     df = aggregate_performance(eval_grids; measure)
+    df.objective .= replace.(df.objective, "Full" => "CT")
+    df.objective .= replace.(df.objective, "Vanilla" => "vanilla")
+    df.variable .= replace.(df.variable, "Accuracy" => "Acc.")
     df.variable .= ["$v ($o)" for (v,o) in zip(df.variable,df.objective)]
     select!(df, Not([:std, :objective]))
     return df
@@ -677,7 +683,7 @@ end
 
 function final_table(
     res_dir::String;
-    ce_var=["mmd", "plausibility_distance_from_target"],
+    ce_var=["plausibility_distance_from_target", "mmd"],
     perf_var=["acc"],
     agg_further_vars=[["run"],["run", "lambda_energy_eval"]],
 )
@@ -690,9 +696,19 @@ function final_table(
         df_ce = vcat(df_ce, df; cols=:union)
     end
 
+    # Missing:
+    df_ce = coalesce.(df_ce, "(agg.)")
+
     # Performance:
     df_perf = aggregate_performance(res_dir; measure=perf_var)
-    return vcat(df_ce,df_perf; cols=:union) |> df -> DataFrames.unstack(df, :dataset, :mean)
+    df = vcat(df_ce,df_perf; cols=:union) |> df -> DataFrames.unstack(df, :dataset, :mean)
+
+    # Missing:
+    df = coalesce.(df, "")
+
+    rename!(df, :variable => :measure)
+    select!(df, :measure, Not([:measure]))
+    return df
 end
 
 function final_params(res_dir::String)

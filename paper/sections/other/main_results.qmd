@@ -45,8 +45,8 @@ Final hyperparameters used for the main results for the different datasets.
 #| eval: false
 
 df = final_table(res_dir)
-get_table_inputs(df, nothing; backend=Val(:latex)) |>
-    inputs -> tabulate_results(inputs; table_type=:tabular, save_name="paper/tables/main.tex")
+inputs = get_table_inputs(df, nothing; backend=Val(:latex))
+tabulate_results(inputs; table_type=:tabular, save_name="paper/quarto_ecml/tables/main.tex", wrap_table=false)
 ```
 
 ## Qualitative Findings for Image Data
