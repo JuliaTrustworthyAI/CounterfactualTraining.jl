@@ -64,43 +64,46 @@ global LatexReplacements = Dict(
     "mnist" => get_name(MNIST(); pretty=true),
     "circles" => "Circ",
     "moons" => "Moon",
-    "credit" => "Cred"
+    "credit" => "Cred",
 )
 
 function format_header(s::String; replacements::Dict=LatexReplacements)
     s =
         replace(s, r"\bnce\b" => "ncounterfactuals") |>
         s ->
-        replace(s, "_exper" => "") |>
-        s ->
-            replace(s, "_eval" => "") |>
+            replace(s, "_exper" => "") |>
             s ->
-                replace(s, "_type" => "") |>
+                replace(s, "_eval" => "") |>
                 s ->
-                    replace(s, "_params" => "_parameters") |>
+                    replace(s, "_type" => "") |>
                     s ->
-                        replace(s, "lr" => "learning_rate") |>
+                        replace(s, "_params" => "_parameters") |>
                         s ->
-                            replace(s, "maxiter" => "maximum_iterations") |>
+                            replace(s, "lr" => "learning_rate") |>
                             s ->
-                                replace(s, "opt" => "optimizer") |>
+                                replace(s, "maxiter" => "maximum_iterations") |>
                                 s ->
-                                    replace(s, "conv" => "convergence") |>
+                                    replace(s, "opt" => "optimizer") |>
                                     s ->
-                                        replace(s, r"\bopt\b" => "optimizer") |>
+                                        replace(s, "conv" => "convergence") |>
                                         s ->
-                                            replace(s, r"^n" => "no._") |>
+                                            replace(s, r"\bopt\b" => "optimizer") |>
+                                            s ->
+                                                replace(s, r"^n" => "no._") |>
                                                 s ->
                                                     replace(s, "__" => "_") |>
-                                            s -> if s in keys(replacements)
-                                                replacements[s]
-                                            else
-                                                s |>
-                                                s ->
-                                                    split(s, "_") |>
-                                                    ss ->
-                                                        [uppercasefirst(s) for s in ss] |> ss -> join(ss, " ")
-                                            end
+                                                    s -> if s in keys(replacements)
+                                                        replacements[s]
+                                                    else
+                                                        s |>
+                                                        s ->
+                                                            split(s, "_") |>
+                                                            ss ->
+                                                                [
+                                                                    uppercasefirst(s)
+                                                                    for s in ss
+                                                                ] |> ss -> join(ss, " ")
+                                                    end
     return s
 end
 
@@ -305,10 +308,10 @@ Aggregate performance measures across multiple experiments.
 """
 function aggregate_performance(
     eval_grids::Vector{<:EvalConfigOrGrid}; byvars=["objective"], kwrgs...
-)   
+)
     @assert "objective" in byvars "Need to specify 'objective' as a byvar to aggregate performance measures."
 
-    df = Logging.with_logger(Logging.NullLogger()) do 
+    df = Logging.with_logger(Logging.NullLogger()) do
         map(eval_grids) do cfg
             df = CTExperiments.aggregate_performance(cfg; byvars=byvars, kwrgs...)
             exper_grid = ExperimentGrid(cfg.grid_file)
@@ -318,8 +321,7 @@ function aggregate_performance(
             select!(df, keyvars, Not(keyvars))
             sort!(df, keyvars)
             return df
-        end |>
-            dfs -> reduce(vcat, dfs) 
+        end |> dfs -> reduce(vcat, dfs)
     end
     return df
 end
@@ -329,11 +331,15 @@ end
 
 Aggregate performance variable `y` from an experiment grid by columns specified in `byvars`.
 """
-function aggregate_performance(cfg::EvalConfigOrGrid; measure=[accuracy, multiclass_f1score], kwrgs...)
+function aggregate_performance(
+    cfg::EvalConfigOrGrid; measure=[accuracy, multiclass_f1score], kwrgs...
+)
 
     # Load data:
     exper_grid = ExperimentGrid(cfg.grid_file)
-    df, df_meta, df_perf = merge_with_meta(cfg, CTExperiments.test_performance(exper_grid; measure, return_df=true))
+    df, df_meta, df_perf = merge_with_meta(
+        cfg, CTExperiments.test_performance(exper_grid; measure, return_df=true)
+    )
 
     return aggregate_performance(df, df_meta, df_perf; kwrgs...)
 end
@@ -356,9 +362,9 @@ function aggregate_performance(
     if !isnothing(y)
         valid_y = valid_y_perf(df_perf)
         @assert y in valid_y "Variable `y` must be one of the following: $valid_y."
-        df = df[df.variable .== y,:]
-        return select!(df,Not(:variable))
-    else 
+        df = df[df.variable .== y, :]
+        return select!(df, Not(:variable))
+    else
         return df
     end
 end
@@ -483,7 +489,7 @@ function aggregate_ce_evaluation(
     df = df[df.variable .== y, :]
     if y == "mmd"
         # To align with plausibility metric (negative distance), we need to invert the MMD metric. We also first clamp values to 0 (sometimes MMD is slightly negative for numeric reasons).
-        df.value .= .-clamp.(df.value, 0, Inf) 
+        df.value .= .-clamp.(df.value, 0, Inf)
     end
     rename!(df, :value => y)
     select!(df, Not(:variable))
@@ -529,7 +535,12 @@ function aggregate_ce_evaluation(
                 df_agg[:, Symbol(obj)] .- df_agg[:, Symbol(vanilla_name)]
             )
             df_agg.is_pct .= false
-            df_agg = filter(row -> !ismissing(row[Symbol(vanilla_name)]) && isfinite(row[Symbol(vanilla_name)]), df_agg)
+            df_agg = filter(
+                row ->
+                    !ismissing(row[Symbol(vanilla_name)]) &&
+                        isfinite(row[Symbol(vanilla_name)]),
+                df_agg,
+            )
             # Further adjustment
             if !any(df_agg[:, Symbol(vanilla_name)] .== 0) .&&
                 !(y in ["validity_strict", "validity", "redundancy"])
@@ -553,7 +564,7 @@ function aggregate_ce_evaluation(
 
     # Filter out rows with missing, Inf, or NaN values in the mean column 
     filtered_df = filter(row -> !ismissing(row.mean) && isfinite(row.mean), df_agg)
-    
+
     return filtered_df
 end
 
@@ -566,7 +577,7 @@ function valid_y_ce(cfg::AbstractEvaluationConfig)
 end
 
 function aggregate_counterfactuals(eval_grid::EvaluationGrid; kwrgs...)
-    eval_list = Logging.with_logger(Logging.NullLogger()) do 
+    eval_list = Logging.with_logger(Logging.NullLogger()) do
         load_list(eval_grid)
     end
     return aggregate_counterfactuals.(eval_list)
@@ -612,23 +623,27 @@ end
 
 function get_img_command(data_names, full_paths, fig_labels; fig_caption="")
     fig_cap = fig_caption == "" ? fig_caption : "$fig_caption "
-    return ["![$(fig_cap)Data: $(CTExperiments.get_data_name(nm)).](/$pth){#$(lbl)}" for (nm, pth, lbl) in zip(data_names,full_paths,fig_labels)]
+    return [
+        "![$(fig_cap)Data: $(CTExperiments.get_data_name(nm)).](/$pth){#$(lbl)}" for
+        (nm, pth, lbl) in zip(data_names, full_paths, fig_labels)
+    ]
 end
 
 global LatexMetricReplacements = Dict(
-    "mmd" => "\$ \\text{IP}^* \$",
-    "plausibility_distance_from_target" => "\$ \\text{IP} \$",
+    "mmd" => "\$ \\text{IP}^* \$", "plausibility_distance_from_target" => "\$ \\text{IP} \$"
 )
 
 function format_metric(m::String)
     return LatexMetricReplacements[m]
 end
 
-function aggregate_ce_evaluation(res_dir::String; y="mmd", byvars=nothing, rebase=true, kwrgs...)
+function aggregate_ce_evaluation(
+    res_dir::String; y="mmd", byvars=nothing, rebase=true, kwrgs...
+)
     byvars = gather_byvars(byvars, "data")
     eval_grids, _ = final_results(res_dir)
     df = DataFrame()
-    for (i,cfg) in enumerate(eval_grids)
+    for (i, cfg) in enumerate(eval_grids)
         df_i = aggregate_ce_evaluation(cfg; y, byvars, rebase, kwrgs...)
         df = vcat(df, df_i)
     end
@@ -643,10 +658,7 @@ function aggregate_ce_evaluation(res_dir::String; y="mmd", byvars=nothing, rebas
     return df
 end
 
-global allowed_perf_measures = Dict(
-    "acc" => accuracy,
-    "f1" => multiclass_f1score,
-)
+global allowed_perf_measures = Dict("acc" => accuracy, "f1" => multiclass_f1score)
 
 function aggregate_performance(res_dir::String; measure::Vector=["acc"])
 
@@ -660,7 +672,7 @@ function aggregate_performance(res_dir::String; measure::Vector=["acc"])
     df.objective .= replace.(df.objective, "Full" => "CT")
     df.objective .= replace.(df.objective, "Vanilla" => "vanilla")
     df.variable .= replace.(df.variable, "Accuracy" => "Acc.")
-    df.variable .= ["$v ($o)" for (v,o) in zip(df.variable,df.objective)]
+    df.variable .= ["$v ($o)" for (v, o) in zip(df.variable, df.objective)]
     select!(df, Not([:std, :objective]))
     return df
 end
@@ -669,27 +681,30 @@ function final_results(res_dir::String)
 
     # Get model and data directories:
     model_dirs = joinpath.(res_dir, readdir(res_dir)) |> x -> x[isdir.(x)]
-    data_dirs = [joinpath.(d, readdir(d)) |> x -> x[isdir.(x)] for d in model_dirs] |> x -> reduce(vcat, x)
+    data_dirs =
+        [joinpath.(d, readdir(d)) |> x -> x[isdir.(x)] for d in model_dirs] |> x -> reduce(vcat, x)
 
     # Filter out directories with missing results:
-    data_dirs = filter(x -> isfile(joinpath(x,"evaluation/evaluation_grid_config.toml")), data_dirs)
-    eval_grids = EvaluationGrid.(joinpath.(data_dirs, "evaluation/evaluation_grid_config.toml"))
+    data_dirs = filter(
+        x -> isfile(joinpath(x, "evaluation/evaluation_grid_config.toml")), data_dirs
+    )
+    eval_grids =
+        EvaluationGrid.(joinpath.(data_dirs, "evaluation/evaluation_grid_config.toml"))
     data_dirs = filter(x -> isfile(joinpath(x, "grid_config.toml")), data_dirs)
     exper_grids = ExperimentGrid.(joinpath.(data_dirs, "grid_config.toml"))
 
     return eval_grids, exper_grids
-
 end
 
 function final_table(
     res_dir::String;
     ce_var=["plausibility_distance_from_target", "mmd"],
     perf_var=["acc"],
-    agg_further_vars=[["run"],["run", "lambda_energy_eval"]],
+    agg_further_vars=[["run"], ["run", "lambda_energy_eval"]],
 )
     # CE:
     df_ce = DataFrame()
-    for (i,y) in enumerate(ce_var)
+    for (i, y) in enumerate(ce_var)
         df = aggregate_ce_evaluation(
             res_dir; y, agg_further_vars=agg_further_vars[i], rebase=true
         )
@@ -701,7 +716,7 @@ function final_table(
 
     # Performance:
     df_perf = aggregate_performance(res_dir; measure=perf_var)
-    df = vcat(df_ce,df_perf; cols=:union) |> df -> DataFrames.unstack(df, :dataset, :mean)
+    df = vcat(df_ce, df_perf; cols=:union) |> df -> DataFrames.unstack(df, :dataset, :mean)
 
     # Missing:
     df = coalesce.(df, "")

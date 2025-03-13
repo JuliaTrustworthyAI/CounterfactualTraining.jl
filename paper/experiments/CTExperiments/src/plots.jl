@@ -120,7 +120,9 @@ function plot_errorbar_logs(
             layers =
                 visual(Lines) * mapping(;
                     linestyle=lnstyvar =>
-                        nonnumeric => CTExperiments.format_header(lnstyvar; replacements=LatexMakieReplacements),
+                        nonnumeric => CTExperiments.format_header(
+                            lnstyvar; replacements=LatexMakieReplacements
+                        ),
                 )
         else
             layers = visual(Lines)
@@ -131,8 +133,7 @@ function plot_errorbar_logs(
     end
     if !isnothing(colorvar)
         plt =
-            plt *
-            mapping(;
+            plt * mapping(;
                 color=colorvar =>
                     nonnumeric => CTExperiments.format_header(
                         colorvar; replacements=LatexMakieReplacements
@@ -172,9 +173,8 @@ function plot_measure_ce(
 
     # Aggregate:
     df_agg =
-        aggregate_ce_evaluation(
-            df, df_meta, df_eval; y=y, byvars=byvars, rebase
-        ) |> format_plot_data
+        aggregate_ce_evaluation(df, df_meta, df_eval; y=y, byvars=byvars, rebase) |>
+        format_plot_data
 
     # Plotting:
     plt = plot_measure_ce(
@@ -232,8 +232,7 @@ function plot_measure_ce(
     plt = data(df_agg) * mapping(Symbol(x) => nonnumeric => xtitle, :mean => ytitle) * vis
     if !isnothing(colorvar)
         plt =
-            plt *
-            mapping(;
+            plt * mapping(;
                 color=colorvar =>
                     nonnumeric => CTExperiments.format_header(
                         colorvar; replacements=LatexMakieReplacements

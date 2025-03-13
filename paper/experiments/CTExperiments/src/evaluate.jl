@@ -116,8 +116,7 @@ function to_toml(eval_config::EvaluationConfig)
 end
 
 function adjust_name(name::String)
-    s = replace(name, "multi-class ``F_β`` score" => "f1-score") |>
-        s -> uppercasefirst(s) 
+    s = replace(name, "multi-class ``F_β`` score" => "f1-score") |> s -> uppercasefirst(s)
     return s
 end
 
@@ -171,7 +170,6 @@ function test_performance(
     yhat = predict_label(M, CounterfactualData(Xtest, ytest), Xtest)
 
     return compute_performance_measures(exper, ytest, yhat; measure, return_df)
-
 end
 
 function generate_ae(model, loss, x, y; eps::Real=0.3, p=Inf)
@@ -179,7 +177,9 @@ function generate_ae(model, loss, x, y; eps::Real=0.3, p=Inf)
     return x + eps * delta
 end
 
-adv_performance(exper::Experiment; kwrgs...) = test_performance(exper; adversarial=true, kwrgs...)
+function adv_performance(exper::Experiment; kwrgs...)
+    return test_performance(exper; adversarial=true, kwrgs...)
+end
 
 """
     test_performance(grid::ExperimentGrid; kwrgs...)
@@ -187,7 +187,6 @@ adv_performance(exper::Experiment; kwrgs...) = test_performance(exper; adversari
 Tests the performance of a trained model on the test set for each experiment in an `ExperimentGrid` and returns the evaluation metrics. The `measure` parameter specifies which metric(s) to evaluate.
 """
 function test_performance(grid::ExperimentGrid; kwrgs...)
-    
     exper_list = load_list(grid)
     results = Logging.with_logger(Logging.NullLogger()) do
         test_performance.(exper_list; kwrgs...)
@@ -196,7 +195,6 @@ function test_performance(grid::ExperimentGrid; kwrgs...)
         results = reduce(vcat, results)
     end
     return results
-
 end
 
 function adv_performance(grid::ExperimentGrid; kwrgs...)

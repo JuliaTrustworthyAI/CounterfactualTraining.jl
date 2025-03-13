@@ -33,7 +33,8 @@ function tabulate_results(
         else
             open(save_name, "w") do io
                 pretty_table(
-                    io, df;
+                    io,
+                    df;
                     tf=tf,
                     formatters=formatters,
                     wrap_table=wrap_table,
@@ -58,7 +59,10 @@ function tabulate_results(
 end
 
 function get_table_inputs(
-    df::DataFrame, value_var::Union{Nothing,String}="mean"; backend::Val=Val(:text), kwrgs...
+    df::DataFrame,
+    value_var::Union{Nothing,String}="mean";
+    backend::Val=Val(:text),
+    kwrgs...,
 )
     df = deepcopy(df)
 
@@ -168,7 +172,9 @@ function color_scale_hl(
     return hl
 end
 
-function bolden_max_hl(max_idx::Vector{Int}, col_idx::Vector{Int}, backend::Val{:latex}, value_var)
+function bolden_max_hl(
+    max_idx::Vector{Int}, col_idx::Vector{Int}, backend::Val{:latex}, value_var
+)
     return hl = LatexHighlighter(
         (df, i, j) -> (i in max_idx) && df[i, value_var] > 0, ["color{Green}", "textbf"]
     )
