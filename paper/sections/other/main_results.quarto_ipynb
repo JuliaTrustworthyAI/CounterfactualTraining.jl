@@ -1,0 +1,119 @@
+{
+  "cells": [
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "projectdir = splitpath(pwd()) |>\n",
+        "    ss -> joinpath(ss[1:findall([s == \"CounterfactualTraining.jl\" for s in ss])[1]]...) \n",
+        "cd(projectdir)\n",
+        "\n",
+        "using CTExperiments\n",
+        "using CTExperiments.CSV\n",
+        "using CTExperiments.DataFrames\n",
+        "using CTExperiments.StatsBase\n",
+        "\n",
+        "using DotEnv\n",
+        "DotEnv.load!()"
+      ],
+      "id": "8e767f5b",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "res_dir = joinpath(ENV[\"FINAL_GRID_RESULTS\"],\"single\")"
+      ],
+      "id": "8db75c4b",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# Details on Main Experiments {.appendix}\n",
+        "\n",
+        "## Final Hyperparameters\n",
+        "\n",
+        "As discussed @sec-experiments, CT is sensitive to certain hyperparameter choices. We study the effect of many hyperparameters extensively in @sec-app-grid. For the main results, we tune a small set of key hyperparameters (@sec-app-tune). The final choices for the main results are presented for each data set in @tbl-final-params along with training, test and batch sizes.\n",
+        "\n",
+        "::: {#tbl-final-params}\n",
+        "\n",
+        "::: {.content-hidden unless-format=\"pdf\"}\n"
+      ],
+      "id": "3a1619ba"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "\n",
+        "df = final_params(res_dir)\n",
+        "get_table_inputs(df, nothing; backend=Val(:latex)) |>\n",
+        "    inputs -> tabulate_results(inputs; table_type=:tabular)"
+      ],
+      "id": "20a8435d",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        ":::\n",
+        "\n",
+        "Final hyperparameters used for the main results for the different datasets.\n",
+        "\n",
+        ":::\n"
+      ],
+      "id": "8ecbe11c"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| eval: false\n",
+        "\n",
+        "df = final_table(res_dir)\n",
+        "inputs = get_table_inputs(df, nothing; backend=Val(:latex))\n",
+        "tabulate_results(inputs; table_type=:tabular, save_name=\"paper/quarto_ecml/tables/main.tex\", wrap_table=false)\n",
+        "tabulate_results(inputs; table_type=:tabular, save_name=\"paper/preprint/tables/main.tex\", wrap_table=false)"
+      ],
+      "id": "a4f2d531",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Qualitative Findings for Image Data\n",
+        "\n",
+        "::: {.callout-note}\n",
+        "\n",
+        "@fig-mnist shows much more plausible (faithful) counterfactuals for a model with CT than the model with conventional training (@fig-mnist-vanilla). In fact, this is not even using *ECCo+* and still showing better results than the best results we achieved in our AAAI paper for JEM ensembles.\n",
+        "\n",
+        ":::\n",
+        "\n",
+        "![Counterfactual images for *MLP* with counterfactual training. The underlying generator, *ECCo*, aims to generate counterfactuals that are faithful to the model [@altmeyer2024faithful].](/paper/figures/mnist_mlp.png){#fig-mnist}\n",
+        "\n",
+        "![Counterfactual images for *MLP* with conventional training. The underlying generator, *ECCo*, aims to generate counterfactuals that are faithful to the model [@altmeyer2024faithful].](/paper/figures/mnist_mlp_vanilla.png){#fig-mnist-vanilla}"
+      ],
+      "id": "4bef2774"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "julia-1.11",
+      "language": "julia",
+      "display_name": "Julia 1.11.1",
+      "path": "/Users/paltmeyer/Library/Jupyter/kernels/julia-1.11"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

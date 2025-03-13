@@ -135,7 +135,7 @@ Explanations}
 \maketitle
 
 \begin{abstract}
-We propose a novel training regime termed Counterfactual Training that
+We propose a novel training regime termed counterfactual training that
 leverages counterfactual explanations to increase the explanatory
 capacity of models. Counterfactual explanations have emerged as a
 popular post-hoc explanation method for opaque machine learning models:
@@ -146,7 +146,7 @@ respect to the underlying data and actionable with respect to the
 stakeholder requirements. Much existing research has therefore focused
 on developing post-hoc methods to generate counterfactuals that meet
 these desiderata. In this work, we instead hold models directly
-accountable for the desired end goal: Counterfactual Training employs
+accountable for the desired end goal: counterfactual training employs
 counterfactuals ad-hoc during the training phase to minimize the
 divergence between learned representations and plausible, actionable
 explanations. We demonstrate empirically and theoretically that our
@@ -191,7 +191,7 @@ Part of the problem is that the high degrees of freedom provide room for
 many solutions that are locally optimal with respect to narrow
 objectives \cite{wilson2020case}.\footnote{We follow the standard ML
   convention, where ``degrees of freedom'' refer to the number of
-  parameters estimated from data.} Indeed, recent work on the so called
+  parameters estimated from data.} Indeed, recent work on the so-called
 ``lottery ticket hypothesis'' suggests that modern neural networks can
 be pruned by up to 90\% while preserving their predictive performance
 \cite{frankle2018lottery} and generalizability \cite{morcos2019success}.
@@ -240,37 +240,31 @@ objectives such as robustness, generalization, and generative capacity
 As further discussed in Section~\ref{sec-lit}, our work consolidates
 these findings within a single objective.
 
-\textbf{Specifically, we introduce counterfactual training}: a novel
-training regime explicitly meant to align learned representations with
-plausible explanations that comply with user requirements. Our
-contributions are as follows:
+\textbf{Specifically, we introduce counterfactual training (CT)}: a
+novel training regime explicitly meant to align learned representations
+with plausible explanations that comply with user requirements. The
+remainder of this paper is structured as follows. Section~\ref{sec-lit}
+presents related work, focusing in particular on the link between
+adversarial examples and counterfactual explanations. Then follow our
+main contributions:
 
-\begin{itemize}
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  We present a novel methodological framework that leverages adversarial
-  examples and faithful counterfactual explanations during the training
-  phase to improve the explanatory capacity and robustness of machine
-  learning models (Section~\ref{sec-method}).\\
+  In Section~\ref{sec-method}, we introduce our methodological framework
+  and show theoretically that it can be used to enforce global
+  actionability constraints.\\
 \item
-  We propose a method to enforce global actionability constraints by
-  preventing models from assigning importance to immutable features,
-  i.e., ones over which decision subjects have no control
-  (Section~\ref{sec-method}).\\
-\item
-  Through extensive experiments we demonstrate that counterfactual
-  training promotes explainability while preserving high predictive
-  performance. We run ablation studies and grid searches to understand
-  how the underlying model components and hyperparameters affect
-  outcomes. (Section~\ref{sec-experiments}).
-\end{itemize}
+  Through extensive experiments we demonstrate that CT substantially
+  improves explainability without sacrificing predictive performance
+  (Section~\ref{sec-experiments}).
+\end{enumerate}
 
-Despite some limitations discussed in Section~\ref{sec-discussion}, we
-conclude in Section~\ref{sec-conclusion} that counterfactual training
-provides a useful framework for researchers and practitioners interested
-in making opaque models more trustworthy. We also believe that this work
-serves as an opportunity for XAI researchers to re-evaluate the trend of
-improving XAI tools without improving the underlying models.
+We discuss future research and challenges in
+Section~\ref{sec-discussion} and conclude in
+Section~\ref{sec-conclusion} that CT is a promising new approach towards
+making opaque models more trustworthy.
 
 \section{Related Literature}\label{sec-lit}
 
@@ -397,12 +391,11 @@ for JEMs is even clearer: they involve a hybrid objective that induces
 both high predictive performance and generative capacity
 \cite{grathwohl2020your}. This is closely related to the idea of
 aligning models with plausible explanations and has inspired our
-proposed counterfactual training objective, as we explain in
-Section~\ref{sec-method}.
+proposed CT objective, as we explain in Section~\ref{sec-method}.
 
 \section{Counterfactual Training}\label{sec-method}
 
-Counterfactual training (CT) combines ideas from adversarial training,
+Counterfactual training combines ideas from adversarial training,
 energy-based modelling and counterfactuals explanations with the
 explicit goal of aligning representations with plausible explanations
 that comply with user requirements. In the context of CEs, plausibility
@@ -469,7 +462,7 @@ following objective:
 
 \begin{equation}\phantomsection\label{eq-obj}{
 \begin{split}
-\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) &+ \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y}) \\ &+ \lambda_{\text{reg}}\text{ridge}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta)
+\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta) &+ \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y}) \\ &+ \lambda_{\text{reg}}\text{ridge}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta)
 \end{split}
 }\end{equation}
 
@@ -479,14 +472,15 @@ terms in Equation~\ref{eq-obj} are explained in detail below. For now,
 they can be sufficiently described as inducing explainability directly
 and indirectly by penalizing: (1) the contrastive divergence,
 \(\text{div}(\cdot)\), between mature counterfactuals
-\(\mathbf{x}_T^\prime\) and observed samples \(x\) and, (2) the
-adversarial loss, \(\text{advloss}(.)\), with respect to nascent
-counterfactuals \(\mathbf{x}_{t\leq T}^\prime\). Finally,
-\(\text{ridge}(\cdot)\) denotes a Ridge penalty (\(\ell_2\)-norm) that
-regularizes the magnitude of the energy terms involved in
-\(\text{div}(\cdot)\) \cite{du2019implicit}. The trade-off between the
-components can be governed by adjusting the strengths of the penalties
-\(\lambda_{\text{div}}\), \(\lambda_{\text{adv}}\) and
+\(\mathbf{x}_T^\prime\) and observed samples
+\(\mathbf{x}^+\in\mathcal{X}^+=\{\mathbf{x}:y=y^+\}\) in the target
+class \(y^+\), and, (2) the adversarial loss, \(\text{advloss}(.)\),
+with respect to nascent counterfactuals \(\mathbf{x}_{t\leq T}^\prime\).
+Finally, \(\text{ridge}(\cdot)\) denotes a Ridge penalty
+(\(\ell_2\)-norm) that regularizes the magnitude of the energy terms
+involved in \(\text{div}(\cdot)\) \cite{du2019implicit}. The trade-off
+between the components can be governed by adjusting the strengths of the
+penalties \(\lambda_{\text{div}}\), \(\lambda_{\text{adv}}\) and
 \(\lambda_{\text{reg}}\).
 
 \subsection{Directly Inducing Explainability with Contrastive
@@ -519,19 +513,18 @@ counterfactual explainers to generate counterfactuals of observed
 training samples. Specifically, we have:
 
 \begin{equation}\phantomsection\label{eq-div}{
-\text{div}(\mathbf{x},\mathbf{x}_T^\prime,y;\theta) = \mathcal{E}_\theta(\mathbf{x},y) - \mathcal{E}_\theta(\mathbf{x}_T^\prime,y)
+\text{div}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta) = \mathcal{E}_\theta(\mathbf{x}^+,y) - \mathcal{E}_\theta(\mathbf{x}_T^\prime,y)
 }\end{equation}
 
 where \(\mathcal{E}_\theta(\cdot)\) denotes the energy function. We set
-\(\mathcal{E}_\theta(\mathbf{x},\mathbf{y})=-\mathbf{M}_\theta(\mathbf{x^+})[y^+]\)
+\(\mathcal{E}_\theta(\mathbf{x},y)=-\mathbf{M}_\theta(\mathbf{x})[y^+]\)
 where \(y^+\) denotes the index of the randomly drawn target class,
-\(y^+ \sim p(y)\), and \(\mathbf{x^+}\) denotes an observed sample from
-target domain: \(\mathbf{X}^+=\{\mathbf{x}:y=y^+\}\). Conditional on the
-target class \(y^+\), \(\mathbf{x}_T^\prime\) denotes a mature
-counterfactual for a randomly sampled factual from a non-target class
-generated with a gradient-based CE generator for up to \(T\) iterations.
-Mature counterfactuals are ones that have either reached convergence
-wrt. the decision threshold \(\tau\) or exhausted \(T\).
+\(y^+ \sim p(y)\). Conditional on the target class \(y^+\),
+\(\mathbf{x}_T^\prime\) denotes a mature counterfactual for a randomly
+sampled factual from a non-target class generated with a gradient-based
+CE generator for up to \(T\) iterations. Mature counterfactuals are ones
+that have either reached convergence wrt. the decision threshold
+\(\tau\) or exhausted \(T\).
 
 Intuitively, the gradient of Equation~\ref{eq-div} decreases the energy
 of observed training samples (positive samples) while increasing the
@@ -599,10 +592,10 @@ on \(\mathbf{x}^\prime\), both types of constraints influence model
 outcomes via Equation~\ref{eq-div}. Here it is crucial that we avoid
 penalizing implausibility that arises due to mutability constraints. For
 any mutability-constrained feature \(d\) this can be achieved by
-enforcing \(\mathbf{x}[d] - \mathbf{x}^\prime[d]:=0\) whenever
+enforcing \(\mathbf{x}^+[d] - \mathbf{x}^\prime[d]:=0\) whenever
 perturbing \(\mathbf{x}^\prime[d]\) in the direction of
-\(\mathbf{x}[d]\) would violate mutability constraints. Specifically, we
-set \(\mathbf{x}[d] := \mathbf{x}^\prime[d]\) if:
+\(\mathbf{x}^+[d]\) would violate mutability constraints. Specifically,
+we set \(\mathbf{x}^+[d] := \mathbf{x}^\prime[d]\) if:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -610,24 +603,24 @@ set \(\mathbf{x}[d] := \mathbf{x}^\prime[d]\) if:
 \item
   Feature \(d\) is strictly immutable in practice.
 \item
-  We have \(\mathbf{x}[d]>\mathbf{x}^\prime[d]\), but feature \(d\) can
-  only be decreased in practice.
+  We have \(\mathbf{x}^+[d]>\mathbf{x}^\prime[d]\), but feature \(d\)
+  can only be decreased in practice.
 \item
-  We have \(\mathbf{x}[d]<\mathbf{x}^\prime[d]\), but feature \(d\) can
-  only be increased in practice.
+  We have \(\mathbf{x}^+[d]<\mathbf{x}^\prime[d]\), but feature \(d\)
+  can only be increased in practice.
 \end{enumerate}
 
 From a Bayesian perspective, setting
-\(\mathbf{x}[d] := \mathbf{x}^\prime[d]\) can be understood as assuming
-a point mass prior for \(p(\mathbf{x})\) with respect to feature \(d\).
-Intuitively, we think of this simply in terms ignoring implausibility
-costs with respect to immutable features, which effectively forces the
-model to instead seek plausibility with respect to the remaining
-features. This in turn results in lower overall sensitivity to immutable
-features, which we demonstrate empirically for different classifiers in
-Section~\ref{sec-experiments}. Under certain conditions, this results
-holds theoretically:\footnote{For the proof, see the supplementary
-  appendix.}
+\(\mathbf{x}^+[d] := \mathbf{x}^\prime[d]\) can be understood as
+assuming a point mass prior for \(p(\mathbf{x}^+)\) with respect to
+feature \(d\). Intuitively, we think of this simply in terms ignoring
+implausibility costs with respect to immutable features, which
+effectively forces the model to instead seek plausibility with respect
+to the remaining features. This in turn results in lower overall
+sensitivity to immutable features, which we demonstrate empirically for
+different classifiers in Section~\ref{sec-experiments}. Under certain
+conditions, this results holds theoretically:\footnote{For the proof,
+  see the supplementary appendix.}
 
 \begin{proposition}[Protecting Immutable Features]
 \label{prp-mtblty}
@@ -666,24 +659,22 @@ impose mutability constraints at test time. The generated
 counterfactuals are all valid, but not plausible: they do not comply
 with the distribution of the factual samples in the target class to the
 point where they are clearly distinguishable from the ground-truth data.
-In panel (b), we have trained our model with counterfactual training,
-once again without any mutability constraints. We observe that the
-counterfactuals are highly plausible, meeting the first objective of
-Def. \ref{def-explainability}.
+In panel (b), we have trained our model with CT, once again without any
+mutability constraints. We observe that the counterfactuals are highly
+plausible, meeting the first objective of Def. \ref{def-explainability}.
 
 In panel (c), we have used conventional training again, this time
 imposing the mutability constraint on \emph{age} at test time.
 Counterfactuals are valid but involve some substantial reductions in
 \emph{debt} for some individuals (very young applicants). By comparison,
 counterfactual paths are shorter on average in panel (d), where we have
-used counterfactual training and protected the immutable feature as
-described in Section~\ref{sec-constraints}. We observe that due to the
-classifier's lower sensitivity to \emph{age}, recourse recommendations
-with respect to \emph{debt} are much more homogenous and do not
-disproportionately punish younger individuals. The counterfactuals are
-also plausible with respect to the mutable feature. Thus, we consider
-the model in panel (d) as the most explainable according to Def.
-\ref{def-explainability}.
+used CT and protected the immutable feature as described in
+Section~\ref{sec-constraints}. We observe that due to the classifier's
+lower sensitivity to \emph{age}, recourse recommendations with respect
+to \emph{debt} are much more homogenous and do not disproportionately
+punish younger individuals. The counterfactuals are also plausible with
+respect to the mutable feature. Thus, we consider the model in panel (d)
+as the most explainable according to Def. \ref{def-explainability}.
 
 \begin{figure}
 
@@ -876,11 +867,11 @@ of models in a fine-tuning manner.
 
 \section{Discussion}\label{sec-discussion}
 
-We first address the direct extensions of the counterfactual training
-approach in Section~\ref{sec-approach}. Then, we look at its limitations
-and challenges in Section~\ref{sec-limitations}.
+We first address the direct extensions of CT in
+Section~\ref{sec-approach}. Then, we look at its limitations and
+challenges in Section~\ref{sec-limitations}.
 
-\subsection{Future research}\label{sec-approach}
+\subsection{Future Research}\label{sec-approach}
 
 \textbf{\emph{CT is defined only for classification settings.}} Our
 formulation relies on the distinction between non-target class(es)
@@ -918,7 +909,7 @@ hyperparameter tuning. Notably, CT is iterative which makes a variety of
 methods applicable, including Bayesian \cite{snoek2012practical} or
 gradient-based \cite{franceschi2017forward} optimization.
 
-\subsection{Limitations and challenges}\label{sec-limitations}
+\subsection{Limitations and Challenges}\label{sec-limitations}
 
 \textbf{\emph{CT increases the training time of models.}} Counterfactual
 training promotes explainability through CEs and robustness through AEs
@@ -963,14 +954,13 @@ enforcing explanations based on features that are more difficult to
 modify by some (group of) individuals. For example, consider again the
 Adult dataset where features such as workclass or education may be more
 difficult to change for underpriviledged groups. When applied
-irresponsibly, counterfactual training could result in an unfairly
-assigned burden of recourse \cite{sharma2020certifai}, threatening the
-equality of opportunity in the system \cite{bell2024fairness} and
-potentially reinforcing social segregation \cite{gao2023impact}. Still,
-as the referenced publications indicate, such phenomena are not specific
-to CT; all types of ADM solutions without strong external protections
-have been recognized to promote harmful power dynamics
-\cite{maas2023machine}.
+irresponsibly, CT could result in an unfairly assigned burden of
+recourse \cite{sharma2020certifai}, threatening the equality of
+opportunity in the system \cite{bell2024fairness} and potentially
+reinforcing social segregation \cite{gao2023impact}. Still, as the
+referenced publications indicate, such phenomena are not specific to CT;
+all types of ADM solutions without strong external protections have been
+recognized to promote harmful power dynamics \cite{maas2023machine}.
 
 \section{Conclusion}\label{sec-conclusion}
 
@@ -984,13 +974,12 @@ regime that incentivizes highly-explainable models. Our approach leads
 to explanations that are both plausible---compliant with the underlying
 data-generating process---and actionable---compliant with user-specified
 mutability constraints---and thus meaningful to their recipients.
-Through extensive experiments we demonstrate that counterfactual
-training satisfies its objectives while preserving the predictive
-performance of the trained models. We also find that our approach can be
-used to fine-tune conventionally-trained models and achieve similar
-gains in explainability. Finally, this work showcases that it is
-practical to improve models \emph{and} their explanations at the same
-time.
+Through extensive experiments we demonstrate that CT satisfies its
+objectives while preserving the predictive performance of the trained
+models. We also find that our approach can be used to fine-tune
+conventionally-trained models and achieve similar gains in
+explainability. Finally, this work showcases that it is practical to
+improve models \emph{and} their explanations at the same time.
 
 
 \bibliographystyle{splncs04}

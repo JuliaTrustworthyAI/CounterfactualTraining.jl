@@ -1,6 +1,39 @@
 {
   "cells": [
     {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# Technical Details of Our Approach {.appendix} \n",
+        "\n",
+        "\n",
+        "## Generating Counterfactuals through Gradient Descent {#sec-app-ce}\n",
+        "\n",
+        "In this section, we provide some background on gradient-based counterfactual generators (@sec-app-ce-background) and discuss how we define convergence in this context (@sec-app-conv).\n",
+        "\n",
+        "### Background {#sec-app-ce-background}\n",
+        "\n",
+        "Gradient-based counterfactual search was originally proposed by @wachter2017counterfactual. It generally solves the following unconstrained objective,\n",
+        "\n",
+        "$$\n",
+        "\\begin{aligned}\n",
+        "\\min_{\\mathbf{z}^\\prime \\in \\mathcal{Z}^L} \\left\\{  {\\text{yloss}(\\mathbf{M}_{\\theta}(g(\\mathbf{z}^\\prime)),\\mathbf{y}^+)}+ \\lambda {\\text{cost}(g(\\mathbf{z}^\\prime)) }  \\right\\} \n",
+        "\\end{aligned} \n",
+        "$$\n",
+        "\n",
+        "where $g: \\mathcal{Z} \\mapsto \\mathcal{X}$ is an invertible function that maps from the $L$-dimensional counterfactual state space to the feature space and $\\text{cost}(\\cdot)$ denotes one or more penalties that are used to induce certain properties of the counterfactual outcome. As above, $\\mathbf{y}^+$ denotes the target output and $\\mathbf{M}_{\\theta}(\\mathbf{x})$ returns the logit predictions of the underlying classifier for $\\mathbf{x}=g(\\mathbf{z})$.\n",
+        "\n",
+        "For all generators used in this work we use standard logit crossentropy loss for $\\text{yloss}(\\cdot)$. All generators also penalize the distance ($\\ell_1$-norm) of counterfactuals from their original factual state. For *Generic* and *ECCo*, we have $\\mathcal{Z}:=\\mathcal{X}$ and $g(\\mathbf{z})=g(\\mathbf{z})^{-1}=\\mathbf{z}$, that is counterfactual are searched directly in the feature space. Conversely, *REVISE* traverses the latent space of a variational autoencoder (VAE) fitted to the training data, where $g(\\cdot)$ corresponds to the decoder [@joshi2019realistic]. In addition to the distance penalty, *ECCo* uses an additional penalty component that regularizes the energy associated with the counterfactual, $\\mathbf{x}^\\prime$ [@altmeyer2024faithful]. \n",
+        "\n",
+        "### Convergence {#sec-app-conv}\n",
+        "\n",
+        "An important consideration when generating counterfactual explanations using gradient-based methods is how to define convergence. Two common choices are to 1) perform gradient descent over a fixed number of iterations $T$, or 2) conclude the search as soon as the predicted probability for the target class has reached a pre-determined threshold, $\\tau$: $\\mathcal{S}(\\mathbf{M}_\\theta(\\mathbf{x}^\\prime))[y^+] \\geq \\tau$. We prefer the latter for our purposes, because it explicitly defines convergence in terms of the black-box model, $\\mathbf{M}(\\mathbf{x})$.\n",
+        "\n",
+        "Defining convergence in this way allows for a more intuitive interpretation of the resulting counterfactual outcomes than with fixed $T$. Specifically, it allows us to think of counterfactuals as explaining 'high-confidence' predictions by the model for the target class $y^+$. Depending on the context and application, different choices of $\\tau$ can be considered as representing 'high-confidence' predictions.\n"
+      ],
+      "id": "7fe403ff"
+    },
+    {
       "cell_type": "code",
       "metadata": {},
       "source": [
@@ -18,7 +51,7 @@
         "using CTExperiments.TaijaPlotting\n",
         "using Plots.PlotMeasures"
       ],
-      "id": "f1954cef",
+      "id": "47c99903",
       "execution_count": null,
       "outputs": []
     },
@@ -72,9 +105,9 @@
         "\n",
         "Thus, our proposed approach of protecting feature $d_{\\text{immtbl}}$ has the net affect of decreasing the classifier's sensitivity to the immutable feature relative to the mutable feature (i.e. no change in sensitivity for $d_{\\text{immtbl}}$ relative to increased sensitivity for $d_{\\text{mtbl}}$).\n",
         "\n",
-        ":::\n"
+        ":::"
       ],
-      "id": "accb91b4"
+      "id": "cf9eb9ac"
     },
     {
       "cell_type": "code",
@@ -152,7 +185,7 @@
         "    (\"(d)\", FullObjective(lambda=[1.0,0.5,0.01,0.1]), [\"both\", \"none\"]),\n",
         "]"
       ],
-      "id": "b2174de5",
+      "id": "ef945566",
       "execution_count": null,
       "outputs": []
     },
@@ -215,7 +248,7 @@
         "    push!(plts, current())\n",
         "end"
       ],
-      "id": "75d97383",
+      "id": "d6aadd0e",
       "execution_count": null,
       "outputs": []
     },
@@ -237,7 +270,7 @@
         "display(plt)\n",
         "Plots.savefig(plt, \"paper/figures/poc.svg\")"
       ],
-      "id": "7037b6b9",
+      "id": "b20c2185",
       "execution_count": null,
       "outputs": []
     },
@@ -265,7 +298,7 @@
         "plt = Plots.plot(plts..., layout=(1,2), size=(600,300))\n",
         "Plots.savefig(plt, \"paper/figures/app_mtblty.svg\")"
       ],
-      "id": "f4939a08",
+      "id": "0d4a6caf",
       "execution_count": null,
       "outputs": []
     },
@@ -286,9 +319,14 @@
         "\\end{aligned}\n",
         "$$ {#eq-domain}\n",
         "\n",
-        "where $\\mu_d$ and $\\sigma_d$ denote the sample mean and standard deviation of feature $d$. We set $n_{\\sigma_d}=3$ across the board but higher values and hence wider bounds may be appropriate depending on the application."
+        "where $\\mu_d$ and $\\sigma_d$ denote the sample mean and standard deviation of feature $d$. We set $n_{\\sigma_d}=3$ across the board but higher values and hence wider bounds may be appropriate depending on the application.\n",
+        "\n",
+        "\n",
+        "## Training Details {#sec-app-training}\n",
+        "\n",
+        "In this section, we describe the training procedure in detail. While the details laid out here are not crucial for understanding our proposed approach, they are of importance to anyone looking to implement counterfactual training. \n"
       ],
-      "id": "915a6aa9"
+      "id": "1ac23447"
     }
   ],
   "metadata": {

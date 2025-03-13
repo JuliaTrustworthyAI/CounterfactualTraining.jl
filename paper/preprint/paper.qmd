@@ -7,7 +7,7 @@ format:
     keep-tex: true  
     linenumbers: true
     doublespacing: false
-    runninghead: "Counterfactual Training (A Preprint)"
+    runninghead: "counterfactual training (A Preprint)"
     authorcols: true
     include-in-header:
       text: |

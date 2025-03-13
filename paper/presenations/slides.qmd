@@ -1,5 +1,5 @@
 ---
-title: Counterfactual Training
+title: counterfactual training
 subtitle: Update Meeting Dec 2024
 author: 
   - name: Patrick Altmeyer
@@ -68,7 +68,7 @@ classoption: "notheorems"
 
 ## High-Level Idea
 
-Counterfactual Training (CT) combines ideas from Energy-Based Models and Adversarial Training:
+counterfactual training (CT) combines ideas from Energy-Based Models and Adversarial Training:
 
 $$
 \ell_{\text{clf}}(f_\theta(x),y) + \lambda_{\text{gen}} \ell_{\text{gen}}({x^\prime}_t,x_t;\theta) + \lambda_{\text{adv}} \ell_{\text{clf}}(f_\theta({x^\prime}_t),y)

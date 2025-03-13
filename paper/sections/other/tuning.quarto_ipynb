@@ -4,9 +4,9 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
-        "## Hyperparameter Tuning {#sec-app-tune}\n"
+        "# Tuning Key Parameters {#sec-app-tune}\n"
       ],
-      "id": "f95b0d5c"
+      "id": "7567a3af"
     },
     {
       "cell_type": "code",
@@ -24,7 +24,7 @@
         "using DotEnv\n",
         "DotEnv.load!()"
       ],
-      "id": "4998bb13",
+      "id": "b9fa76b3",
       "execution_count": null,
       "outputs": []
     },
@@ -34,7 +34,7 @@
       "source": [
         "res_dir = ENV[\"FINAL_GRID_RESULTS\"]"
       ],
-      "id": "430624d3",
+      "id": "5dfa928b",
       "execution_count": null,
       "outputs": []
     },
@@ -42,7 +42,11 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
-        "Based on the findings from our initial large grid searches (@sec-app-grid), we tune selected hyperparameters for all datasets: namely, the decision threshold $\\tau$ and the strength of the energy regularization $\\lambda_{\\text{reg}}$. The final hyperparameter choices for each dataset are presented in **ADD TABLE**. Detailed results for each data set are shown in **ADD FIGURES**. From **ADD TABLE**, we notice that the same decision threshold of $\\tau=0.5$ is optimal for all but on dataset. We attribute this to the fact that a low decision threshold results in a higher share of mature counterfactuals and hence more opportunities for the model to learn from examples. This has played a role in particular for our real-world tabular datasets and MNIST, which suffered from low levels of maturity for higher decision thresholds. In cases where maturity is not an issue, as for *Moons*, higher decision thresholds lead to better outcomes, which may have to do with the fact that the resulting counterfactuals are more faithful to the model. Concerning the regularization strength, we find somewhat high variation across datasets. Most notably, we find that relatively low levels of regularization are optimal for MNIST. We hypothesize that this finding may be attributed to the uniform scaling of all input features (digits). Finally, to increase the proportion of mature counterfactuals for some datasets, we have also investigated the effect on the learning rate $\\eta$ for the counterfactual search, but found little effect on the results. \n",
+        "Based on the findings from our initial large grid searches (@sec-app-grid), we tune selected hyperparameters for all datasets: namely, the decision threshold $\\tau$ and the strength of the energy regularization $\\lambda_{\\text{reg}}$. The final hyperparameter choices for each dataset are presented in **ADD TABLE**. Detailed results for each data set are shown in @fig-tune-plaus-adult to @fig-tune-mat-over. From **ADD TABLE**, we notice that the same decision threshold of $\\tau=0.5$ is optimal for all but on dataset. We attribute this to the fact that a low decision threshold results in a higher share of mature counterfactuals and hence more opportunities for the model to learn from examples (@fig-tune-mat-adult to @fig-tune-mat-over). This has played a role in particular for our real-world tabular datasets and MNIST, which suffered from low levels of maturity for higher decision thresholds. In cases where maturity is not an issue, as for *Moons*, higher decision thresholds lead to better outcomes, which may have to do with the fact that the resulting counterfactuals are more faithful to the model. Concerning the regularization strength, we find somewhat high variation across datasets. Most notably, we find that relatively low levels of regularization are optimal for MNIST. We hypothesize that this finding may be attributed to the uniform scaling of all input features (digits). \n",
+        "\n",
+        "Finally, to increase the proportion of mature counterfactuals for some datasets, we have also investigated the effect on the learning rate $\\eta$ for the counterfactual search and even smaller regularization strengths for a fixed decision threshold of 0.5 (@fig-tune_lr-plaus-adult to @fig-tune_lr-plaus-over). For the given low decision threshold, we find that the learning rate has no discernable impact on the proportion of mature counterfactuals (@fig-tune_lr-mat-adult to @fig-tune_lr-mat-over). We do notice, however, that the results for MNIST are much improved when using a low value $\\lambda_{\\text{reg}}$, the strength for the engery regularization: plausibility is increased by up to ~10% (@fig-tune_lr-plaus-mnist) and the proportion of mature counterfactuals reaches 100%. \n",
+        "\n",
+        "One consideration worth exploring is to combine high decision thresholds with high learning rates, which we have not investigated here. \n",
         "\n",
         "::: {.callout-warning}\n",
         "\n",
@@ -52,9 +56,9 @@
         "\n",
         ":::\n",
         "\n",
-        "### Key Parameters {#sec-app-tune}\n"
+        "## Key Parameters {#sec-app-tune-key}\n"
       ],
-      "id": "1bfc8079"
+      "id": "b5584b91"
     },
     {
       "cell_type": "code",
@@ -67,7 +71,7 @@
         "ce_suffix = \"evaluation/results/ce/lambda_energy_reg---decision_threshold_exper---lambda_energy_eval---lambda_energy_reg---decision_threshold_exper/\"\n",
         "logs_suffix = \"evaluation/results/logs/objective---decision_threshold---lambda_energy_reg/\""
       ],
-      "id": "f91e062d",
+      "id": "42258399",
       "execution_count": null,
       "outputs": []
     },
@@ -81,7 +85,7 @@
         "\n",
         "## Training Phase\n"
       ],
-      "id": "167fab2d"
+      "id": "28b308b3"
     },
     {
       "cell_type": "code",
@@ -91,7 +95,7 @@
         "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/grid_config.toml\")) \n",
         "println(CTExperiments.dict_to_quarto_markdown(dict))"
       ],
-      "id": "00d1a247",
+      "id": "23053f10",
       "execution_count": null,
       "outputs": []
     },
@@ -105,7 +109,7 @@
         "\n",
         "## Evaluation Phase\n"
       ],
-      "id": "0726c67d"
+      "id": "3e8d6431"
     },
     {
       "cell_type": "code",
@@ -115,7 +119,7 @@
         "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
         "println(CTExperiments.dict_to_quarto_markdown(dict))"
       ],
-      "id": "9b66f715",
+      "id": "993bf1ed",
       "execution_count": null,
       "outputs": []
     },
@@ -125,9 +129,9 @@
       "source": [
         ":::\n",
         "\n",
-        "#### Plausibility\n"
+        "### Plausibility\n"
       ],
-      "id": "6f62a5d1"
+      "id": "2e4c105d"
     },
     {
       "cell_type": "code",
@@ -140,7 +144,7 @@
         "_str = \"The results with respect to the plausibility measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
         "println(_str)"
       ],
-      "id": "70c27339",
+      "id": "2625c8ba",
       "execution_count": null,
       "outputs": []
     },
@@ -157,7 +161,7 @@
         "_str = join(include_img_commands, \"\\n\\n\")\n",
         "println(_str)"
       ],
-      "id": "a7c3531c",
+      "id": "7e0a0357",
       "execution_count": null,
       "outputs": []
     },
@@ -165,9 +169,9 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
-        "#### Proportion of Mature CE\n"
+        "### Proportion of Mature CE\n"
       ],
-      "id": "02ddb8fc"
+      "id": "d71b1773"
     },
     {
       "cell_type": "code",
@@ -180,7 +184,7 @@
         "_str = \"The results with respect to the proportion of mature counterfactuals in each epoch are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
         "println(_str)"
       ],
-      "id": "435b8807",
+      "id": "57159a5c",
       "execution_count": null,
       "outputs": []
     },
@@ -197,7 +201,160 @@
         "_str = join(include_img_commands, \"\\n\\n\")\n",
         "println(_str)"
       ],
-      "id": "200e44a1",
+      "id": "4b7b92f2",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Learning Rate {#sec-app-tune-lr}\n"
+      ],
+      "id": "031d31a7"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "grid_dir = joinpath(res_dir, \"tune_lr/mlp\")\n",
+        "data_dirs = readdir(grid_dir) |> x -> joinpath.(grid_dir, x) |> x -> x[isdir.(x)]\n",
+        "eval_grids = (p -> EvaluationGrid(joinpath(p,\"grid_config.toml\"))).(data_dirs)\n",
+        "data_names = basename.(data_dirs)\n",
+        "ce_suffix = \"evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/\"\n",
+        "logs_suffix = \"evaluation/results/logs/objective---lr---lambda_energy_reg/\""
+      ],
+      "id": "1e1ffb2b",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The hyperparameter grid for tuning the learning rate is shown in @nte-tune_lr-train. The corresponding evaluation grid used for these experiments is shown in @nte-tune_lr-eval.\n",
+        "\n",
+        "::: {#nte-tune_lr-train .callout-note}\n",
+        "\n",
+        "## Training Phase\n"
+      ],
+      "id": "155b4687"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "dict = CTExperiments.from_toml(joinpath(grid_dir, \"over/grid_config.toml\")) \n",
+        "println(CTExperiments.dict_to_quarto_markdown(dict))"
+      ],
+      "id": "a9142636",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        ":::\n",
+        "\n",
+        "::: {#nte-tune_lr-eval .callout-note}\n",
+        "\n",
+        "## Evaluation Phase\n"
+      ],
+      "id": "b97ca8da"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "dict = CTExperiments.from_toml(joinpath(grid_dir, \"over/evaluation/evaluation_grid_config.toml\"))\n",
+        "println(CTExperiments.dict_to_quarto_markdown(dict))"
+      ],
+      "id": "7d93e3c7",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        ":::\n",
+        "\n",
+        "### Plausibility\n"
+      ],
+      "id": "5940fd86"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "\n",
+        "fig_label_prefix = \"tune_lr-plaus\"\n",
+        "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
+        "_str = \"The results with respect to the plausibility measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
+        "println(_str)"
+      ],
+      "id": "0e404b1e",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        " \n",
+        "imgfname = \"plausibility_distance_from_target.png\"\n",
+        "fig_caption = \"Average outcomes for the plausibility measure across key hyperparameters.\"\n",
+        "full_paths = joinpath.(data_dirs, joinpath(ce_suffix,imgfname))\n",
+        "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption) \n",
+        "_str = join(include_img_commands, \"\\n\\n\")\n",
+        "println(_str)"
+      ],
+      "id": "2110ec1f",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Proportion of Mature CE\n"
+      ],
+      "id": "0e6fa3b9"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        "\n",
+        "fig_label_prefix = \"tune_lr-mat\"\n",
+        "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
+        "_str = \"The results with respect to the proportion of mature counterfactuals in each epoch are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
+        "println(_str)"
+      ],
+      "id": "5ee7a5ad",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| output: asis\n",
+        " \n",
+        "imgfname = \"percent_valid.png\"\n",
+        "fig_caption = \"Proportion of mature counterfactuals in each epoch.\"\n",
+        "full_paths = joinpath.(data_dirs, joinpath(logs_suffix,imgfname))\n",
+        "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption) \n",
+        "_str = join(include_img_commands, \"\\n\\n\")\n",
+        "println(_str)"
+      ],
+      "id": "695a27cd",
       "execution_count": null,
       "outputs": []
     }
