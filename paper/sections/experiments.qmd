@@ -55,6 +55,16 @@ We run the experiments with three CE generators: *Generic* of @wachter2017counte
 
 ### Plausibility
 
+::: {#tbl-main}
+
+```{=latex}
+\input{/paper/tables/main.tex}
+```
+
+Main results.
+
+:::
+
 ### Actionability
 
 ### Impact of hyperparameter settings {#sec-hyperparameters}

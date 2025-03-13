@@ -185,12 +185,12 @@
 \usepackage{amsthm}
 \theoremstyle{plain}
 \newtheorem{proposition}{Proposition}[section]
-\theoremstyle{plain}
-\newtheorem{corollary}{Research Question}[section]
-\theoremstyle{definition}
-\newtheorem{example}{Example}[section]
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
+\theoremstyle{definition}
+\newtheorem{example}{Example}[section]
+\theoremstyle{plain}
+\newtheorem{corollary}{Research Question}[section]
 \theoremstyle{remark}
 \AtBeginDocument{\renewcommand*{\proofname}{Proof}}
 \newtheorem*{remark}{Remark}
@@ -1661,12 +1661,50 @@ details laid out here are not crucial for understanding our proposed
 approach, they are of importance to anyone looking to implement
 counterfactual training.
 
-\section{Detailed Results}\label{detailed-results}
+\section{Details on Main Experiments}\label{details-on-main-experiments}
+
+\subsection{Final Hyperparameters}\label{final-hyperparameters}
+
+As discussed Section~\ref{sec-experiments}, CT is sensitive to certain
+hyperparameter choices. We study the effect of many hyperparameters
+extensively in Section~\ref{sec-app-grid}. For the main results, we tune
+a small set of key hyperparameters (Section~\ref{sec-app-tune}). The
+final choices for the main results are presented for each data set in
+Table~\ref{tbl-final-params} along with training, test and batch sizes.
+
+\begin{longtable}{ccccccc}
+
+\caption{\label{tbl-final-params}Final hyperparameters used for the main
+results for the different datasets.}
+
+\tabularnewline
+
+  \toprule
+  \textbf{Data} & \textbf{No. Train} & \textbf{No. Test} & \textbf{Batchsize} & \textbf{Decision Threshold} & \textbf{No. Counterfactuals} & \textbf{$\lambda_{\text{reg}}$} \\\midrule
+  \endfirsthead
+  \toprule
+  \textbf{Data} & \textbf{No. Train} & \textbf{No. Test} & \textbf{Batchsize} & \textbf{Decision Threshold} & \textbf{No. Counterfactuals} & \textbf{$\lambda_{\text{reg}}$} \\\midrule
+  \endhead
+  \bottomrule
+  \multicolumn{7}{r}{Continuing table below.}\\
+  \bottomrule
+  \endfoot
+  \endlastfoot
+  Adult & $2.6 \cdot 10^{4}$ & $5.01 \cdot 10^{3}$ & $1 \cdot 10^{3}$ & 0.75 & $5 \cdot 10^{3}$ & 0.25 \\
+  California Housing & $1.65 \cdot 10^{4}$ & $3.1 \cdot 10^{3}$ & $1 \cdot 10^{3}$ & 0.5 & $5 \cdot 10^{3}$ & 0.25 \\
+  Circles & $3.6 \cdot 10^{3}$ & 600 & 30 & 0.5 & $1 \cdot 10^{3}$ & 0.5 \\
+  Credit & $1.06 \cdot 10^{4}$ & $1.92 \cdot 10^{3}$ & $1 \cdot 10^{3}$ & 0.5 & $5 \cdot 10^{3}$ & 0.25 \\
+  GMSC & $1.34 \cdot 10^{4}$ & $2.47 \cdot 10^{3}$ & $1 \cdot 10^{3}$ & 0.5 & $5 \cdot 10^{3}$ & 0.5 \\
+  Linearly Separable & $3.6 \cdot 10^{3}$ & 600 & 30 & 0.5 & $1 \cdot 10^{3}$ & 0.25 \\
+  Moons & $3.6 \cdot 10^{3}$ & 600 & 30 & 0.9 & $1 \cdot 10^{3}$ & 0.25 \\
+  Overlapping & $3.6 \cdot 10^{3}$ & 600 & 30 & 0.5 & $1 \cdot 10^{3}$ & 0.25 \\\bottomrule
+
+\end{longtable}
 
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
 
 Figure~\ref{fig-mnist} shows much more plausible (faithful)
 counterfactuals for a model with CT than the model with conventional
@@ -1706,7 +1744,7 @@ to generate counterfactuals that are faithful to the model
 
 \end{figure}%
 
-\subsection{Grid Searches}\label{sec-app-grid}
+\section{Grid Searches}\label{sec-app-grid}
 
 To assess the hyperparameter sensitivity of our proposed training regime
 we ran multiple large grid searches for all of our synthetic datasets.
@@ -1736,7 +1774,7 @@ present all details including the exact parameter grids, average
 predictive performance outcomes and key evaluation metrics for the
 generated counterfactuals.
 
-\subsubsection{Evaluation Details}\label{evaluation-details}
+\subsection{Evaluation Details}\label{evaluation-details}
 
 To measure predictive performance, we compute the accuracy and F1-score
 for all models on test data (Table~\ref{tbl-acc-gen},
@@ -1753,7 +1791,7 @@ choosing our default hyperparameters based on results on the test data.
 Since we are optimizing for explainability, not predictive performance,
 we still present test accuracy and F1-scores.
 
-\paragraph{Predictive Performance}\label{predictive-performance}
+\subsubsection{Predictive Performance}\label{predictive-performance}
 
 We find that CT is associated with little to no decrease in average
 predictive performance for our synthetic datasets: test accuracy and
@@ -1763,24 +1801,24 @@ Table~\ref{tbl-acc-train}). Variation across hyperparameters is
 negligible as indicated by small standard deviations for these metrics
 across the board.
 
-\paragraph{Counterfactual Outcomes}\label{sec-app-grid-hl}
+\subsubsection{Counterfactual Outcomes}\label{sec-app-grid-hl}
 
 Overall, we find that Counterfactual Training (CT) achieves it key
 objectives consistently across all hyperparameter settings and also
 broadly across datasets: plausibility is improved by up to
-\textasciitilde60 percentage points (ppts) for the \emph{Circles} data
-(e.g. Figure~\ref{fig-grid-gen_params-plaus-circles}),
-\textasciitilde25-30ppts for the \emph{Moons} data (e.g.
-Figure~\ref{fig-grid-gen_params-plaus-moons}) and
-\textasciitilde10-20ppts for the \emph{Linearly Separable} data (e.g.
+\textasciitilde60 percent (\%) for the \emph{Circles} data (e.g.
+Figure~\ref{fig-grid-gen_params-plaus-circles}), \textasciitilde25-30\%
+for the \emph{Moons} data (e.g.
+Figure~\ref{fig-grid-gen_params-plaus-moons}) and \textasciitilde10-20\%
+for the \emph{Linearly Separable} data (e.g.
 Figure~\ref{fig-grid-gen_params-plaus-lin_sep}). At the same time, the
 average costs of faithful counterfactuals are reduced in many cases by
-around \textasciitilde20-25ppts for \emph{Circles} (e.g.
+around \textasciitilde20-25\% for \emph{Circles} (e.g.
 Figure~\ref{fig-grid-gen_params-cost-circles}) and up to
-\textasciitilde50ppts for \emph{Moons} (e.g.
+\textasciitilde50\% for \emph{Moons} (e.g.
 Figure~\ref{fig-grid-gen_params-cost-moons}). For the \emph{Linearly
 Separable} data, costs are generally increased although typically by
-less than 10ppts (e.g. Figure~\ref{fig-grid-gen_params-cost-lin_sep}),
+less than 10\% (e.g. Figure~\ref{fig-grid-gen_params-cost-lin_sep}),
 which reflects a common tradeoff between costs and plausibility
 (\citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024}).
 
@@ -1834,14 +1872,14 @@ the desired improvements in explainability: specifically, we have tested
 training models conventionally during the first half of training before
 switching to CT after this initial burn-in period.
 
-\subsubsection{Generator Parameters}\label{sec-app-grid-gen}
+\subsection{Generator Parameters}\label{sec-app-grid-gen}
 
 The hyperparameter grid with varying generator parameters during
 training is shown in Note~\ref{nte-gen-params-final-run-train}. The
 corresponding evaluation grid used for these experiments is shown in
 Note~\ref{nte-gen-params-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
 
 \quartocalloutnte{nte-gen-params-final-run-train} 
 
@@ -1875,7 +1913,7 @@ Note~\ref{nte-gen-params-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
 
 \quartocalloutnte{nte-gen-params-final-run-eval} 
 
@@ -1893,7 +1931,7 @@ Note~\ref{nte-gen-params-final-run-eval}.
 
 \end{tcolorbox}
 
-\paragraph{Accuracy}\label{accuracy}
+\subsubsection{Accuracy}\label{accuracy}
 
 \begin{longtable}{ccccc}
 
@@ -1919,22 +1957,22 @@ parameters (Note~\ref{nte-gen-params-final-run-eval}).}
   Circles & Accuracy & Vanilla & 0.998 & 0.000557 \\
   Circles & F1-score & Full & 0.997 & 0.00309 \\
   Circles & F1-score & Vanilla & 0.998 & 0.000558 \\
-  Lin Sep & Accuracy & Full & 0.999 & 0.00201 \\
-  Lin Sep & Accuracy & Vanilla & 1 & 0 \\
-  Lin Sep & F1-score & Full & 0.999 & 0.00201 \\
-  Lin Sep & F1-score & Vanilla & 1 & 0 \\
+  Linearly Separable & Accuracy & Full & 0.999 & 0.00201 \\
+  Linearly Separable & Accuracy & Vanilla & 1 & 0 \\
+  Linearly Separable & F1-score & Full & 0.999 & 0.00201 \\
+  Linearly Separable & F1-score & Vanilla & 1 & 0 \\
   Moons & Accuracy & Full & 0.999 & 0.000696 \\
   Moons & Accuracy & Vanilla & 1 & 0.00111 \\
   Moons & F1-score & Full & 0.999 & 0.000696 \\
   Moons & F1-score & Vanilla & 1 & 0.00111 \\
-  Over & Accuracy & Full & 0.915 & 0.00477 \\
-  Over & Accuracy & Vanilla & 0.917 & 0.00123 \\
-  Over & F1-score & Full & 0.915 & 0.00478 \\
-  Over & F1-score & Vanilla & 0.917 & 0.00124 \\\bottomrule
+  Overlapping & Accuracy & Full & 0.915 & 0.00477 \\
+  Overlapping & Accuracy & Vanilla & 0.917 & 0.00123 \\
+  Overlapping & F1-score & Full & 0.915 & 0.00478 \\
+  Overlapping & F1-score & Vanilla & 0.917 & 0.00124 \\\bottomrule
 
 \end{longtable}
 
-\paragraph{Plausibility}\label{plausibility-2}
+\subsubsection{Plausibility}\label{plausibility-2}
 
 The results with respect to the plausibility measure are shown in
 Figure~\ref{fig-grid-gen_params-plaus-circles} to
@@ -1993,7 +2031,7 @@ plausibility measure across hyperparameters. Data: Overlapping.}
 
 \end{figure}%
 
-\paragraph{Cost}\label{cost}
+\subsubsection{Cost}\label{cost}
 
 The results with respect to the cost measure are shown in
 Figure~\ref{fig-grid-gen_params-cost-circles} to
@@ -2051,14 +2089,14 @@ cost measure across hyperparameters. Data: Overlapping.}
 
 \end{figure}%
 
-\subsubsection{Penalty Strengths}\label{sec-app-grid-pen}
+\subsection{Penalty Strengths}\label{sec-app-grid-pen}
 
 The hyperparameter grid with varying penalty strengths during training
 is shown in Note~\ref{nte-pen-final-run-train}. The corresponding
 evaluation grid used for these experiments is shown in
 Note~\ref{nte-pen-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
 
 \quartocalloutnte{nte-pen-final-run-train} 
 
@@ -2086,7 +2124,7 @@ Note~\ref{nte-pen-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
 
 \quartocalloutnte{nte-pen-final-run-eval} 
 
@@ -2104,7 +2142,7 @@ Note~\ref{nte-pen-final-run-eval}.
 
 \end{tcolorbox}
 
-\paragraph{Accuracy}\label{accuracy-1}
+\subsubsection{Accuracy}\label{accuracy-1}
 
 \begin{longtable}{ccccc}
 
@@ -2130,22 +2168,22 @@ and objective averaged across training-phase parameters
   Circles & Accuracy & Vanilla & 0.998 & 0.000875 \\
   Circles & F1-score & Full & 0.994 & 0.0145 \\
   Circles & F1-score & Vanilla & 0.998 & 0.000875 \\
-  Lin Sep & Accuracy & Full & 0.998 & 0.00772 \\
-  Lin Sep & Accuracy & Vanilla & 1 & 0 \\
-  Lin Sep & F1-score & Full & 0.998 & 0.00773 \\
-  Lin Sep & F1-score & Vanilla & 1 & 0 \\
+  Linearly Separable & Accuracy & Full & 0.998 & 0.00772 \\
+  Linearly Separable & Accuracy & Vanilla & 1 & 0 \\
+  Linearly Separable & F1-score & Full & 0.998 & 0.00773 \\
+  Linearly Separable & F1-score & Vanilla & 1 & 0 \\
   Moons & Accuracy & Full & 0.987 & 0.0351 \\
   Moons & Accuracy & Vanilla & 0.998 & 0.0101 \\
   Moons & F1-score & Full & 0.987 & 0.0352 \\
   Moons & F1-score & Vanilla & 0.998 & 0.0102 \\
-  Over & Accuracy & Full & 0.911 & 0.0217 \\
-  Over & Accuracy & Vanilla & 0.916 & 0.00236 \\
-  Over & F1-score & Full & 0.911 & 0.0219 \\
-  Over & F1-score & Vanilla & 0.916 & 0.00236 \\\bottomrule
+  Overlapping & Accuracy & Full & 0.911 & 0.0217 \\
+  Overlapping & Accuracy & Vanilla & 0.916 & 0.00236 \\
+  Overlapping & F1-score & Full & 0.911 & 0.0219 \\
+  Overlapping & F1-score & Vanilla & 0.916 & 0.00236 \\\bottomrule
 
 \end{longtable}
 
-\paragraph{Plausibility}\label{plausibility-3}
+\subsubsection{Plausibility}\label{plausibility-3}
 
 The results with respect to the plausibility measure are shown in
 Figure~\ref{fig-grid-pen-plaus-circles} to
@@ -2203,7 +2241,7 @@ plausibility measure across hyperparameters. Data: Overlapping.}
 
 \end{figure}%
 
-\paragraph{Cost}\label{cost-1}
+\subsubsection{Cost}\label{cost-1}
 
 The results with respect to the cost measure are shown in
 Figure~\ref{fig-grid-pen-cost-circles} to
@@ -2261,14 +2299,14 @@ measure across hyperparameters. Data: Overlapping.}
 
 \end{figure}%
 
-\subsubsection{Other Parameters}\label{sec-app-grid-train}
+\subsection{Other Parameters}\label{sec-app-grid-train}
 
 The hyperparameter grid with other varying training parameters is shown
 in Note~\ref{nte-train-final-run-train}. The corresponding evaluation
 grid used for these experiments is shown in
 Note~\ref{nte-train-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-train-final-run-train}: Training Phase}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-train-final-run-train}: Training Phase}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
 
 \quartocalloutnte{nte-train-final-run-train} 
 
@@ -2296,7 +2334,7 @@ Note~\ref{nte-train-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
 
 \quartocalloutnte{nte-train-final-run-eval} 
 
@@ -2314,7 +2352,7 @@ Note~\ref{nte-train-final-run-eval}.
 
 \end{tcolorbox}
 
-\paragraph{Accuracy}\label{accuracy-2}
+\subsubsection{Accuracy}\label{accuracy-2}
 
 \begin{longtable}{ccccc}
 
@@ -2340,22 +2378,22 @@ and objective averaged across training-phase parameters
   Circles & Accuracy & Vanilla & 0.998 & 0.000566 \\
   Circles & F1-score & Full & 0.995 & 0.00432 \\
   Circles & F1-score & Vanilla & 0.998 & 0.000566 \\
-  Lin Sep & Accuracy & Full & 0.999 & 0.00231 \\
-  Lin Sep & Accuracy & Vanilla & 1 & 0 \\
-  Lin Sep & F1-score & Full & 0.999 & 0.00231 \\
-  Lin Sep & F1-score & Vanilla & 1 & 0 \\
+  Linearly Separable & Accuracy & Full & 0.999 & 0.00231 \\
+  Linearly Separable & Accuracy & Vanilla & 1 & 0 \\
+  Linearly Separable & F1-score & Full & 0.999 & 0.00231 \\
+  Linearly Separable & F1-score & Vanilla & 1 & 0 \\
   Moons & Accuracy & Full & 0.996 & 0.0136 \\
   Moons & Accuracy & Vanilla & 0.988 & 0.022 \\
   Moons & F1-score & Full & 0.996 & 0.0136 \\
   Moons & F1-score & Vanilla & 0.988 & 0.022 \\
-  Over & Accuracy & Full & 0.914 & 0.00563 \\
-  Over & Accuracy & Vanilla & 0.918 & 0.00116 \\
-  Over & F1-score & Full & 0.914 & 0.0057 \\
-  Over & F1-score & Vanilla & 0.918 & 0.00116 \\\bottomrule
+  Overlapping & Accuracy & Full & 0.914 & 0.00563 \\
+  Overlapping & Accuracy & Vanilla & 0.918 & 0.00116 \\
+  Overlapping & F1-score & Full & 0.914 & 0.0057 \\
+  Overlapping & F1-score & Vanilla & 0.918 & 0.00116 \\\bottomrule
 
 \end{longtable}
 
-\paragraph{Plausibility}\label{plausibility-4}
+\subsubsection{Plausibility}\label{plausibility-4}
 
 The results with respect to the plausibility measure are shown in
 Figure~\ref{fig-grid-train-plaus-circles} to
@@ -2413,7 +2451,7 @@ plausibility measure across hyperparameters. Data: Overlapping.}
 
 \end{figure}%
 
-\paragraph{Cost}\label{cost-2}
+\subsubsection{Cost}\label{cost-2}
 
 The results with respect to the cost measure are shown in
 Figure~\ref{fig-grid-train-cost-circles} to
@@ -2471,7 +2509,7 @@ measure across hyperparameters. Data: Overlapping.}
 
 \end{figure}%
 
-\subsection{Hyperparameter Tuning}\label{sec-app-tune}
+\section{Tuning Key Parameters}\label{sec-app-tune}
 
 Based on the findings from our initial large grid searches
 (Section~\ref{sec-app-grid}), we tune selected hyperparameters for all
@@ -2508,14 +2546,14 @@ the proportion of mature counterfactuals
 Figure~\ref{fig-tune_lr-mat-over}). We do notice, however, that the
 results for MNIST are much improved when using a low value
 \(\lambda_{\text{reg}}\), the strength for the engery regularization:
-plausibility is increased by up to \textasciitilde10ppt
+plausibility is increased by up to \textasciitilde10\%
 (Figure~\ref{fig-tune_lr-plaus-mnist}) and the proportion of mature
 counterfactuals reaches 100\%.
 
 One consideration worth exploring is to combine high decision thresholds
 with high learning rates, which we have not investigated here.
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-warning-color-frame, title={Package Version (Reproducibility)}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-warning-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Package Version (Reproducibility)}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-warning-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-warning-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
 
 Tuning was run using \texttt{v1.1.3} of \texttt{TaijaData}. The
 follow-up version \texttt{v1.1.4} introduced an option to split
@@ -2530,13 +2568,13 @@ please use \texttt{v1.1.3}.
 
 \end{tcolorbox}
 
-\subsubsection{Key Parameters}\label{sec-app-tune-key}
+\subsection{Key Parameters}\label{sec-app-tune-key}
 
 The hyperparameter grid for tuning key parameters is shown in
 Note~\ref{nte-tune-train}. The corresponding evaluation grid used for
 these experiments is shown in Note~\ref{nte-tune-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-tune-train}: Training Phase}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-tune-train}: Training Phase}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
 
 \quartocalloutnte{nte-tune-train} 
 
@@ -2566,7 +2604,7 @@ these experiments is shown in Note~\ref{nte-tune-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-tune-eval}: Evaluation Phase}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-tune-eval}: Evaluation Phase}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
 
 \quartocalloutnte{nte-tune-eval} 
 
@@ -2584,7 +2622,7 @@ these experiments is shown in Note~\ref{nte-tune-eval}.
 
 \end{tcolorbox}
 
-\paragraph{Plausibility}\label{plausibility-5}
+\subsubsection{Plausibility}\label{plausibility-5}
 
 The results with respect to the plausibility measure are shown in
 Figure~\ref{fig-tune-plaus-adult} to Figure~\ref{fig-tune-plaus-over}.
@@ -2708,7 +2746,7 @@ plausibility measure across key hyperparameters. Data: Overlapping.}
 
 \end{figure}%
 
-\paragraph{Proportion of Mature CE}\label{proportion-of-mature-ce}
+\subsubsection{Proportion of Mature CE}\label{proportion-of-mature-ce}
 
 The results with respect to the proportion of mature counterfactuals in
 each epoch are shown in Figure~\ref{fig-tune-mat-adult} to
@@ -2831,13 +2869,13 @@ in each epoch. Data: Overlapping.}
 
 \end{figure}%
 
-\subsubsection{Learning Rate}\label{sec-app-tune-lr}
+\subsection{Learning Rate}\label{sec-app-tune-lr}
 
 The hyperparameter grid for tuning the learning rate is shown in
 Note~\ref{nte-tune_lr-train}. The corresponding evaluation grid used for
 these experiments is shown in Note~\ref{nte-tune_lr-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-tune_lr-train}: Training Phase}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-tune_lr-train}: Training Phase}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
 
 \quartocalloutnte{nte-tune_lr-train} 
 
@@ -2867,7 +2905,7 @@ these experiments is shown in Note~\ref{nte-tune_lr-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, colback=white, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, breakable, toptitle=1mm, coltitle=black, arc=.35mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-tune_lr-eval}: Evaluation Phase}, opacityback=0, titlerule=0mm, colbacktitle=quarto-callout-note-color!10!white, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, title={Note \ref*{nte-tune_lr-eval}: Evaluation Phase}, arc=.35mm, titlerule=0mm, bottomrule=.15mm, bottomtitle=1mm, breakable, left=2mm, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, colback=white, opacityback=0]
 
 \quartocalloutnte{nte-tune_lr-eval} 
 
@@ -2885,7 +2923,7 @@ these experiments is shown in Note~\ref{nte-tune_lr-eval}.
 
 \end{tcolorbox}
 
-\paragraph{Plausibility}\label{plausibility-6}
+\subsubsection{Plausibility}\label{plausibility-6}
 
 The results with respect to the plausibility measure are shown in
 Figure~\ref{fig-tune_lr-plaus-adult} to
@@ -2956,7 +2994,7 @@ plausibility measure across key hyperparameters. Data: Overlapping.}
 
 \end{figure}%
 
-\paragraph{Proportion of Mature CE}\label{proportion-of-mature-ce-1}
+\subsubsection{Proportion of Mature CE}\label{proportion-of-mature-ce-1}
 
 The results with respect to the proportion of mature counterfactuals in
 each epoch are shown in Figure~\ref{fig-tune_lr-mat-adult} to

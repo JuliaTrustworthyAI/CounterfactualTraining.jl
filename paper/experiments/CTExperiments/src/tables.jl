@@ -9,6 +9,7 @@ function tabulate_results(
     wrap_table=true,
     table_type=:longtable,
     longtable_footer="Continuing table below.",
+    save_name::Union{String,Nothing}=nothing,
     kwrgs...,
 )
     df = inputs[1]
@@ -16,36 +17,63 @@ function tabulate_results(
     if isa(other_inputs.backend, Val{:latex})
         formatters = PrettyTables.ft_latex_sn(3)
         tf = PrettyTables.tf_latex_booktabs
-        tab = pretty_table(
-            df;
-            tf=tf,
-            formatters=formatters,
-            wrap_table=wrap_table,
-            table_type=table_type,
-            longtable_footer=longtable_footer,
-            alignment=:c,
-            other_inputs...,
-            kwrgs...,
-        )
+        if isnothing(save_name)
+            tab = pretty_table(
+                df;
+                tf=tf,
+                formatters=formatters,
+                wrap_table=wrap_table,
+                table_type=table_type,
+                longtable_footer=longtable_footer,
+                alignment=:c,
+                other_inputs...,
+                kwrgs...,
+            )
+            return tab
+        else
+            open(save_name, "w") do io
+                pretty_table(
+                    io, df;
+                    tf=tf,
+                    formatters=formatters,
+                    wrap_table=wrap_table,
+                    table_type=table_type,
+                    longtable_footer=longtable_footer,
+                    alignment=:c,
+                    other_inputs...,
+                    kwrgs...,
+                )
+            end
+        end
     else
-        tab = pretty_table(df; alignment=:c, other_inputs..., kwrgs...)
+        if isnothing(save_name)
+            tab = pretty_table(df; alignment=:c, other_inputs..., kwrgs...)
+            return tab
+        else
+            open(save_name, "w") do io
+                pretty_table(io, df; alignment=:c, other_inputs..., kwrgs...)
+            end
+        end
     end
-    return tab
 end
 
 function get_table_inputs(
-    df::DataFrame, value_var::String="mean"; backend::Val=Val(:text), kwrgs...
+    df::DataFrame, value_var::Union{Nothing,String}="mean"; backend::Val=Val(:text), kwrgs...
 )
     df = deepcopy(df)
 
-    # Highlighters:
-    hls = value_highlighter(df, value_var; backend=backend, kwrgs...)
-    if "generator_type" in names(df)
-        # Filter out "omni":
-        df = df[df.generator_type .!= "omni", :]
-        # df.generator_type = format_generator.(df.generator_type)
-        gen_hl = generator_highlighter(df; backend=backend)
-        hls = (hls..., gen_hl)
+    if !isnothing(value_var)
+        # Highlighters:
+        hls = value_highlighter(df, value_var; backend=backend, kwrgs...)
+        if "generator_type" in names(df)
+            # Filter out "omni":
+            df = df[df.generator_type .!= "omni", :]
+            # df.generator_type = format_generator.(df.generator_type)
+            gen_hl = generator_highlighter(df; backend=backend)
+            hls = (hls..., gen_hl)
+        end
+    else
+        hls = ()
     end
 
     header = format_header.(names(df); replacements=LatexHeaderReplacements)
