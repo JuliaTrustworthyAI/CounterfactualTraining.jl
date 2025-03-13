@@ -45,6 +45,7 @@ const data_sets = Dict(
     dname(Adult()) => Adult,
     dname(Circles()) => Circles,
     dname(Overlapping()) => Overlapping,
+    dname(Credit()) => Credit,
 )
 
 """
@@ -124,6 +125,7 @@ function get_ce_data(data::Dataset, n=nothing; test_set::Bool=false, train_only:
         get_data(data; n=n, test_set=test_set)...;
         domain=get_domain(data),
         mutability=get_mutability(data),
+        features_categorical = get_cats(data),
     )
     if train_only
         _, _, ce_data = train_val_split(data, ce_data, data.n_validation / ntotal(data))
@@ -215,3 +217,10 @@ Loads pre-trained VAE from the dataset directory. The file name is constructed u
 function load_vae(d::Dataset)
     return Serialization.deserialize(joinpath(d.datadir, "vae", "$(dname(d)).jls"))
 end
+
+"""
+    get_cats(d::Dataset)
+
+Get the vector of indeces for categorical features. By default, this returns `nothing`, i.e. no categorical features are assumed to be present.
+"""
+get_cats(d::Dataset) = nothing

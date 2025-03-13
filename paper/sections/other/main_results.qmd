@@ -1,0 +1,62 @@
+
+```{julia}
+projectdir = splitpath(pwd()) |>
+    ss -> joinpath(ss[1:findall([s == "CounterfactualTraining.jl" for s in ss])[1]]...) 
+cd(projectdir)
+
+using CTExperiments
+using CTExperiments.CSV
+using CTExperiments.DataFrames
+using CTExperiments.StatsBase
+
+using DotEnv
+DotEnv.load!()
+```
+
+```{julia}
+res_dir = joinpath(ENV["FINAL_GRID_RESULTS"],"single")
+```
+
+# Details on Main Experiments {.appendix}
+
+## Final Hyperparameters
+
+As discussed @sec-experiments, CT is sensitive to certain hyperparameter choices. We study the effect of many hyperparameters extensively in @sec-app-grid. For the main results, we tune a small set of key hyperparameters (@sec-app-tune). The final choices for the main results are presented for each data set in @tbl-final-params along with training, test and batch sizes.
+
+::: {#tbl-final-params}
+
+::: {.content-hidden unless-format="pdf"}
+
+```{julia}
+#| output: asis
+
+df = final_params(res_dir)
+get_table_inputs(df, nothing; backend=Val(:latex)) |>
+    inputs -> tabulate_results(inputs; table_type=:tabular)
+```
+
+:::
+
+Final hyperparameters used for the main results for the different datasets.
+
+:::
+
+```{julia}
+#| eval: false
+
+df = final_table(res_dir)
+inputs = get_table_inputs(df, nothing; backend=Val(:latex))
+tabulate_results(inputs; table_type=:tabular, save_name="paper/quarto_ecml/tables/main.tex", wrap_table=false)
+```
+
+## Qualitative Findings for Image Data
+
+::: {.callout-note}
+
+@fig-mnist shows much more plausible (faithful) counterfactuals for a model with CT than the model with conventional training (@fig-mnist-vanilla). In fact, this is not even using *ECCo+* and still showing better results than the best results we achieved in our AAAI paper for JEM ensembles.
+
+:::
+
+![Counterfactual images for *MLP* with counterfactual training. The underlying generator, *ECCo*, aims to generate counterfactuals that are faithful to the model [@altmeyer2024faithful].](/paper/figures/mnist_mlp.png){#fig-mnist}
+
+![Counterfactual images for *MLP* with conventional training. The underlying generator, *ECCo*, aims to generate counterfactuals that are faithful to the model [@altmeyer2024faithful].](/paper/figures/mnist_mlp_vanilla.png){#fig-mnist-vanilla}

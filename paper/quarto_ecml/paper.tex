@@ -98,7 +98,6 @@
 \@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
 \floatname{codelisting}{Listing}
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
-
 \makeatother
 \makeatletter
 \makeatother
@@ -230,8 +229,8 @@ research interest. Specifically, there has been no concerted effort
 towards improving the ``explanatory capacity'' of models, i.e., the
 degree to which learned representations correspond to explanations that
 are \textbf{interpretable} and deemed \textbf{plausible} by humans (see
-Definition~\ref{def-explainability}). Instead, the choice has generally
-been to improve the ability of XAI tools to identify the subset of
+Def. \ref{def-explainability}). Instead, the choice has generally been
+to improve the ability of XAI tools to identify the subset of
 explanations that are both plausible and valid for any given model,
 independent of whether the learned representations are also compatible
 with plausible explanations \cite{altmeyer2024faithful}. Fortunately,
@@ -426,58 +425,28 @@ model explainability by aligning models with counterfactuals that meet
 both desiderata: plausibility and actionability. Formally, we define
 explainability as follows:
 
-\begin{definition}[Model
-Explainability]\protect\hypertarget{def-explainability}{}\label{def-explainability}
+\begin{definition}[Model Explainability]
+\label{def-explainability}
+Let $\mathbf{M}_\theta: \mathcal{X} \mapsto \mathcal{Y}$ denote a supervised classification model that maps from the $D$-dimensional input space $\mathcal{X}$ to representations $\phi(\mathbf{x};\theta)$ and finally to the $K$-dimensional output space $\mathcal{Y}$. Assume that for any given input-output pair $\{\mathbf{x},\mathbf{y}\}_i$ there exists a counterfactual $\mathbf{x}^{\prime} = \mathbf{x} + \Delta: \mathbf{M}_\theta(\mathbf{x}^{\prime}) = \mathbf{y}^{+} \neq \mathbf{y} = \mathbf{M}_\theta(\mathbf{x})$ where $\arg\max_y{\mathbf{y}^{+}}=y^+$ and $y^+$ denotes the index of the target class. 
 
-Let \(\mathbf{M}_\theta: \mathcal{X} \mapsto \mathcal{Y}\) denote a
-supervised classification model that maps from the \(D\)-dimensional
-input space \(\mathcal{X}\) to representations
-\(\phi(\mathbf{x};\theta)\) and finally to the \(K\)-dimensional output
-space \(\mathcal{Y}\). Assume that for any given input-output pair
-\(\{\mathbf{x},\mathbf{y}\}_i\) there exists a counterfactual
-\(\mathbf{x}^{\prime} = \mathbf{x} + \Delta: \mathbf{M}_\theta(\mathbf{x}^{\prime}) = \mathbf{y}^{+} \neq \mathbf{y} = \mathbf{M}_\theta(\mathbf{x})\)
-where \(\arg\max_y{\mathbf{y}^{+}}=y^+\) and \(y^+\) denotes the index
-of the target class.
-
-We say that \(\mathbf{M}_\theta\) is \textbf{explainable} to the extent
-that faithfully generated counterfactuals are plausible (i.e.,
-consistent with the data) and actionable. Formally, we define these
-properties as follows:
+We say that $\mathbf{M}_\theta$ is \textbf{explainable} to the extent that faithfully generated counterfactuals are plausible and actionable. Formally, we define these properties as follows,
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  (Plausibility)
-  \(\int^{A} p(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1\)
-  where \(A\) is some small region around \(\mathbf{x}^{\prime}\).
-\item
-  (Actionability) Permutations \(\Delta\) are subject to some
-  actionability constraints.
+    \item (Plausibility) $\int^{A} p(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$ where $A$ is some small region around $\mathbf{x}^{\prime}$.
+    \item (Actionability) Permutations $\Delta$ are subject to some actionability constraints.
+    \item (Faithfulness) $\int^{A} p_\theta(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$ where $A$ is defined as above.
 \end{enumerate}
 
-We consider counterfactuals as faithful to the extent that they are
-consistent with what the model has learned about the input data. Let
-\(p_\theta(\mathbf{x}|\mathbf{y}^{+})\) denote the conditional posterior
-over inputs, then formally:
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\setcounter{enumi}{2}
-\tightlist
-\item
-  (Faithfulness)
-  \(\int^{A} p_\theta(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1\)
-  where \(A\) is defined as above.
-\end{enumerate}
-
+where $p_\theta(\mathbf{x}|\mathbf{y}^{+})$ denotes the conditional posterior over inputs. 
 \end{definition}
 
-The characterization of faithfulness and plausibility in
-Definition~\ref{def-explainability} is the same as in
-\cite{altmeyer2024faithful}, with adapted notation. Actionability
-constraints in Definition~\ref{def-explainability} vary and depend on
-the context in which \(\mathbf{M}_\theta\) is deployed. In this work, we
+The characterization of faithfulness and plausibility in Def.
+\ref{def-explainability} is the same as in \cite{altmeyer2024faithful},
+with adapted notation. Intuitively, plausible counterfactuals are
+consistent with the data and faithful counterfactuals are consistent
+with what the model has learned about input data. Actionability
+constraints in Def. \ref{def-explainability} vary and depend on the
+context in which \(\mathbf{M}_\theta\) is deployed. In this work, we
 focus on domain and mutability constraints for individual features
 \(x_d\) for \(d=1,...,D\). We limit ourselves to classification tasks
 for reasons discussed in Section~\ref{sec-discussion}.
@@ -487,17 +456,17 @@ for reasons discussed in Section~\ref{sec-discussion}.
 Let \(\mathbf{x}_t^\prime\) for \(t=0,...,T\) denote a counterfactual
 explanation generated through gradient descent over \(T\) iterations as
 initially proposed by \cite{wachter2017counterfactual}. For our
-purposes, we let \(T\) vary and consider the counterfactual search to be
+purposes, we let \(T\) vary and consider the counterfactual search as
 converged as soon as the predicted probability for the target class has
-reached a pre-determined threshold \(\tau\):
+reached a pre-determined threshold, \(\tau\):
 \(\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}^\prime))[y^+] \geq \tau\),
 where \(\mathcal{S}\) is the softmax function.\footnote{For detailed
   background information on gradient-based counterfactual search and
-  convergence see \textbf{?@sec-app-ce}.}
+  convergence see supplementary appendix.}
 
-To train models with high explainability as defined in
-Definition~\ref{def-explainability}, we propose to leverage
-counterfactuals in the following objective:
+To train models with high explainability as defined in Def.
+\ref{def-explainability}, we propose to leverage counterfactuals in the
+following objective:
 
 \begin{equation}\phantomsection\label{eq-obj}{
 \begin{split}
@@ -539,14 +508,14 @@ these observed samples from \(p(\mathbf{x})\) and generated samples from
 \(p_\theta(\mathbf{x})\).
 
 A key empirical finding in \cite{altmeyer2024faithful} was that JEMs
-tend to do well with respect to the plausibility objective in
-Definition~\ref{def-explainability}. This follows directly if we
-consider samples drawn from \(p_\theta(\mathbf{x})\) as counterfactuals
-because the JEM objective effectively minimizes the divergence between
-the conditional posterior and \(p(\mathbf{x}|\mathbf{y}^{+})\). To
-generate samples, \cite{grathwohl2020your} rely on Stochastic Gradient
-Langevin Dynamics (SGLD) using an uninformative prior for initialization
-but we depart from their methodology. Instead of SGLD, we propose to use
+tend to do well with respect to the plausibility objective in Def.
+\ref{def-explainability}. This follows directly if we consider samples
+drawn from \(p_\theta(\mathbf{x})\) as counterfactuals because the JEM
+objective effectively minimizes the divergence between the conditional
+posterior and \(p(\mathbf{x}|\mathbf{y}^{+})\). To generate samples,
+\cite{grathwohl2020your} rely on Stochastic Gradient Langevin Dynamics
+(SGLD) using an uninformative prior for initialization but we depart
+from their methodology. Instead of SGLD, we propose to use
 counterfactual explainers to generate counterfactuals of observed
 training samples. Specifically, we have:
 
@@ -568,9 +537,9 @@ wrt. the decision threshold \(\tau\) or exhausted \(T\).
 Intuitively, the gradient of Equation~\ref{eq-div} decreases the energy
 of observed training samples (positive samples) while increasing the
 energy of counterfactuals (negative samples) \cite{du2019implicit}. As
-the counterfactuals get more plausible
-(Definition~\ref{def-explainability}) during training, these opposing
-effects gradually balance each other out \cite{lippe2024uvadlc}.
+the counterfactuals get more plausible (Def. \ref{def-explainability})
+during training, these opposing effects gradually balance each other out
+\cite{lippe2024uvadlc}.
 
 The departure from SGLD allows us to tap into the vast repertoire of
 explainers that have been proposed in the literature to meet different
@@ -661,36 +630,18 @@ Section~\ref{sec-experiments}. Under certain conditions, this results
 holds theoretically:\footnote{For the proof, see the supplementary
   appendix.}
 
-\begin{proposition}[Protecting Immutable
-Features]\protect\hypertarget{prp-mtblty}{}\label{prp-mtblty}
-
-Let
-\(f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})\)
-denote a linear classifier with softmax activation \(\mathcal{S}\)
-(i.e., \emph{multinomial logistic regression}) where
-\(y\in\{1,...,K\}=\mathcal{K}\) and \(\mathbf{x} \in \mathbb{R}^D\). If
-we assume multivariate Gaussian class densities with common diagonal
-covariance matrix \(\Sigma_k=\Sigma\) for all \(k \in \mathcal{K}\),
-then protecting an immutable feature from the contrastive divergence
-penalty (Equation~\ref{eq-div}) will result in lower classifier
-sensitivity to that feature relative to the remaining features, provided
-that at least one of those is discriminative and mutable.
-
+\begin{proposition}[Protecting Immutable Features]
+\label{prp-mtblty}
+Let $f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})$ denote a linear classifier with softmax activation $\mathcal{S}$ where $y\in\{1,...,K\}=\mathcal{K}$ and $\mathbf{x} \in \mathbb{R}^D$. If we assume multivariate Gaussian class densities with common diagonal covariance matrix $\Sigma_k=\Sigma$ for all $k \in \mathcal{K}$, then protecting an immutable feature from the contrastive divergence penalty will result in lower classifier sensitivity to that feature relative to the remaining features, provided that at least one of those is discriminative and mutable.
 \end{proposition}
 
-It is worth highlighting that Proposition~\ref{prp-mtblty} assumes
-independence of features. This raises a valid concern about the effect
-of protecting immutable features in the presence of proxies that remain
-unprotected. We address this in Section~\ref{sec-discussion}.
+It is worth highlighting that Prp.\textasciitilde{}\ref{prp-mtblty}
+assumes independence of features. This raises a valid concern about the
+effect of protecting immutable features in the presence of proxies that
+remain unprotected. We address this in Section~\ref{sec-discussion}.
 
-\subsection{Example: influence of counterfactual training on
-explainability}\label{example-influence-of-counterfactual-training-on-explainability}
-
-To better convey the intuition underlying our proposed method, we
-illustrate different model outcomes in Example~\ref{exm-grad}.
-
-\begin{example}[Prediction of Consumer Credit
-Default]\protect\hypertarget{exm-grad}{}\label{exm-grad}
+\subsection{Example (Prediction of Consumer Credit
+Default)}\label{example-prediction-of-consumer-credit-default}
 
 Suppose we are interested in predicting the likelihood that loan
 applicants default on their credit. We have access to historical data on
@@ -719,7 +670,7 @@ point where they are clearly distinguishable from the ground-truth data.
 In panel (b), we have trained our model with counterfactual training,
 once again without any mutability constraints. We observe that the
 counterfactuals are highly plausible, meeting the first objective of
-Definition~\ref{def-explainability}.
+Def. \ref{def-explainability}.
 
 In panel (c), we have used conventional training again, this time
 imposing the mutability constraint on \emph{age} at test time.
@@ -732,10 +683,8 @@ classifier's lower sensitivity to \emph{age}, recourse recommendations
 with respect to \emph{debt} are much more homogenous and do not
 disproportionately punish younger individuals. The counterfactuals are
 also plausible with respect to the mutable feature. Thus, we consider
-the model in panel (d) as the most explainable according to
-Definition~\ref{def-explainability}.
-
-\end{example}
+the model in panel (d) as the most explainable according to Def.
+\ref{def-explainability}.
 
 \begin{figure}
 
@@ -745,8 +694,8 @@ Definition~\ref{def-explainability}.
 
 }
 
-\caption{\label{fig-poc}Illustration for Example~\ref{exm-grad} of how
-CT improves model explainability.}
+\caption{\label{fig-poc}Illustration of how CT improves model
+explainability.}
 
 \end{figure}%
 
@@ -755,38 +704,28 @@ CT improves model explainability.}
 In this section, we present experiments that we have conducted in order
 to answer the following research questions:
 
-\begin{corollary}[Plausibility]\protect\hypertarget{cor-plaus}{}\label{cor-plaus}
-
-To what extent does our proposed counterfactual training objective
-(Equation~\ref{eq-obj}) induce models to learn plausible explanations?
-
-\end{corollary}
-
-\begin{corollary}[Actionability]\protect\hypertarget{cor-action}{}\label{cor-action}
-
-To what extent does our proposed counterfactual training objective
-(Equation~\ref{eq-obj}) yield more favorable algorithmic recourse
-outcomes in the presence of actionability constraints?
-
-\end{corollary}
-
-Beyond this, we are also interested in understanding how robust our
-answers to RQ~\ref{cor-plaus} and RQ~\ref{cor-action} are:
-
-\begin{corollary}[Hyperparameters]\protect\hypertarget{cor-hyper}{}\label{cor-hyper}
-
-What are the effects of hyperparameter selection with respect to
-Equation~\ref{eq-obj}?
-
-\end{corollary}
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  To what extent does our proposed counterfactual training objective
+  (Equation~\ref{eq-obj}) induce models to learn plausible explanations?
+\item
+  To what extent does our proposed counterfactual training objective
+  (Equation~\ref{eq-obj}) yield more favorable algorithmic recourse
+  outcomes in the presence of actionability constraints?
+\item
+  What are the effects of hyperparameter selection with respect to
+  Equation~\ref{eq-obj}?
+\end{enumerate}
 
 \subsection{Experimental Setup}\label{experimental-setup}
 
 \subsubsection{Evaluation}\label{evaluation}
 
 Our key outcome of interest is how well do models perform with respect
-to explainability (Definition~\ref{def-explainability}). To this end, we
-focus primarily on the plausibility and cost of faithfully generated
+to explainability (Def. \ref{def-explainability}). To this end, we focus
+primarily on the plausibility and cost of faithfully generated
 counterfactuals at test time. To measure the cost of counterfactuals, we
 follow the standard convention of using distances (\(\ell_1\)-norm)
 between factuals and counterfactuals as a proxy. For plausibility, we
@@ -795,13 +734,13 @@ domain. We rely on the distance-based metric used by
 \cite{altmeyer2024faithful},
 
 \begin{equation}\phantomsection\label{eq-impl-dist}{
-\text{implaus}_{\text{dist}}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
+\text{IP}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
 }\end{equation}
 
 and introduce a novel divergence metric,
 
 \begin{equation}\phantomsection\label{eq-impl-div}{
-\text{implaus}_{\text{div}}(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
+\text{IP}^*(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
 }\end{equation}
 
 where \(\mathbf{X}^\prime\) denotes a set of multiple counterfactuals
@@ -825,9 +764,70 @@ directly targets both faithfulness and plausibility of the CEs.
 
 \subsection{Experimental Results}\label{experimental-results}
 
-\subsubsection{Plausibility}\label{plausibility-1}
+\subsubsection{Plausibility}\label{plausibility}
 
-\subsubsection{Actionability}\label{actionability-1}
+Table~\ref{tbl-main} presents our main empirical findings. The top five
+rows show the percentage reduction in implausibility according to
+Equation~\ref{eq-impl-dist} for varying degrees of the energy penalty
+used for \emph{ECCo} at test time. The following row shows the reduction
+in implausibility as measured by Equation~\ref{eq-impl-div} and
+aggregated across all test specifications of \emph{ECCo}. The final two
+rows show the test accuracies for the model trained with CT and
+conventionally trained models (``vanilla'').
+
+We observe that for all datasets except \emph{OL} and across all test
+settings, the average distance of counterfactuals from observed samples
+in the target class is reduced, indicating improved plausibility. The
+magnitude of improvements varies by dataset: for the simple synthetic
+datasets, distance reductions range from around 20-40\% (\emph{LS},
+\emph{Moon}) to almost 60\% (\emph{Circ}). For the real-world tabular
+datasets, improvements are generally smaller but still substantial in
+many cases with around 10-15\% for \emph{CH}, 11-28\% for \emph{GMSC},
+7-8\% for \emph{Cred} and around 3\% for \emph{Adult}. For our only
+vision dataset (\emph{MNIST}), distances are reduced by up to 9\%. The
+results for our proposed divergence metric are qualitatively similar,
+but generally even more pronounced: for the \emph{Circ} dataset,
+implausibility is reduced by almost 94\% to virtually zero as we
+verified by looking at the absolute outcome. Improvements for other
+datasets range from 28\% (\emph{Moon}) to 78\% (\emph{GMSC}). For
+\emph{OL} the reduction is negative, consistent with the distance-based
+metric. The only dataset, for which our proposed metric disagrees with
+the distance-based metric is \emph{MNIST}.
+
+These broad and substantial improvements in plausibility generally do
+not come at the cost of decreased predictive performance: test accuracy
+for CT is virtually identical to the baseline for \emph{Adult},
+\emph{Circ}, \emph{LS}, \emph{Moon} and \emph{OL}, and even slightly
+improved for \emph{Cred}. Exceptions to this general pattern are
+\emph{MNIST}, \emph{CH} and \emph{GMSC}, for which we observe reduction
+in test accuracy of 2, 5 and 15 percentage points, respectively. We note
+in this context, that we have not optimized our models for predictive
+performance at all and worked with very small networks. In summary, we
+find that CT can substantially improve the quality of explanations
+learned by models without generally sacrificing predictive accuracy.
+
+\begin{table}
+
+\caption{\label{tbl-main}Key plausibility and predictive performance
+metrics for all datasets. The top five rows show the percentage
+reduction in implausibility according to Equation~\ref{eq-impl-dist} for
+varying degrees of the energy penalty used for \emph{ECCo} at test time.
+The following row shows the reduction in implausibility as measured by
+Equation~\ref{eq-impl-div} and aggregated across all test specifications
+of \emph{ECCo}. The final two rows show the test accuracies for the
+model trained with CT and conventionally trained models (``vanilla'').}
+
+\centering{
+
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}} cccccc }
+\input{tables/main.tex}
+\end{tabular*}
+
+}
+
+\end{table}%
+
+\subsubsection{Actionability}\label{actionability}
 
 \subsubsection{Impact of hyperparameter
 settings}\label{sec-hyperparameters}
@@ -929,9 +929,10 @@ iteration positively impact the quality of found solutions, they also
 increase the required amount of computations. We find that relatively
 small grids with 270 settings can take almost four hours for more
 demanding datasets on a high-performance computing cluster with 34 2GB
-CPUs (see details in \textbf{?@sec-hardware}). However, there are three
-factors that attenuate the impact of this limitation. First, CT provides
-CEs for the training samples for free, which may be beneficial in many
+CPUs\footnote{See supplementary appendix for computational details.}.
+However, there are three factors that attenuate the impact of this
+limitation. First, CT provides counterfactual explanations for the
+training samples essentially for free, which may be beneficial in many
 ADM systems. Second, we find that CT can retain its value when used as a
 ``fine-tuning'' training regime for conventionally-trained models.
 Third, in principle, CT yields itself to parallel execution, which we
@@ -991,8 +992,6 @@ used to fine-tune conventionally-trained models and achieve similar
 gains in explainability. Finally, this work showcases that it is
 practical to improve models \emph{and} their explanations at the same
 time.
-
-\newpage{}
 
 
 \bibliographystyle{splncs04}

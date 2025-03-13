@@ -13,31 +13,13 @@
 
 {{< include /paper/sections/other/notation.qmd >}}
 
-# Technical Details of Our Approach {.appendix} 
+{{< include /paper/sections/other/technical.qmd >}}
 
-{{< include /paper/sections/other/counterfactuals.qmd >}}
-
-{{< include /paper/sections/other/constraints.qmd >}}
-
-{{< include /paper/sections/other/training.qmd >}}
-
-# Detailed Results {.appendix}
-
-## Qualitative Findings for Image Data
-
-::: {.callout-note}
-
-@fig-mnist shows much more plausible (faithful) counterfactuals for a model with CT than the model with conventional training (@fig-mnist-vanilla). In fact, this is not even using *ECCo+* and still showing better results than the best results we achieved in our AAAI paper for JEM ensembles.
-
-:::
-
-![Counterfactual images for *MLP* with counterfactual training. The underlying generator, *ECCo*, aims to generate counterfactuals that are faithful to the model [@altmeyer2024faithful].](/paper/figures/mnist_mlp.png){#fig-mnist}
-
-![Counterfactual images for *MLP* with conventional training. The underlying generator, *ECCo*, aims to generate counterfactuals that are faithful to the model [@altmeyer2024faithful].](/paper/figures/mnist_mlp_vanilla.png){#fig-mnist-vanilla}
+{{< include /paper/sections/other/main_results.qmd >}}
 
 {{< include /paper/sections/other/grids.qmd >}}
 
-<!-- {{< include /paper/sections/other/initial_grids.qmd >}} -->
+{{< include /paper/sections/other/tuning.qmd >}}
 
 {{< include /paper/sections/other/compute.qmd >}}
 

@@ -9,9 +9,3 @@ blind-review: true
 ---
 
 {{< include /paper/body.qmd >}}
-
-<!-- ## References {-} -->
-
-{{< pagebreak >}}
-
-<!-- {{< include /paper/sections/appendix.qmd >}} -->

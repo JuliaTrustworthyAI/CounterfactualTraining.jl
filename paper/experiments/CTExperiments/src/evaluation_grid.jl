@@ -85,7 +85,7 @@ function EvaluationGrid(
     save_dir::Union{Nothing,String}=nothing,
     counterfactual_params::NamedTuple=(;),
     generator_params::NamedTuple=_default_generator_params_eval_grid,
-    test_time::Bool=false,
+    test_time::Bool=get_global_param("test_time", false),
     inherit::Bool=get_global_param("inherit", true),
 )
     save_dir = if isnothing(save_dir)

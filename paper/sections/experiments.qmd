@@ -2,47 +2,24 @@
 
 In this section, we present experiments that we have conducted in order to answer the following research questions:
 
-::: {#cor-plaus}
-
-## Plausibility
-
-To what extent does our proposed counterfactual training objective (@eq-obj) induce models to learn plausible explanations?
-
-:::
-
-::: {#cor-action}
-
-## Actionability
-
-To what extent does our proposed counterfactual training objective (@eq-obj) yield more favorable algorithmic recourse outcomes in the presence of actionability constraints?
-
-:::
-
-Beyond this, we are also interested in understanding how robust our answers to @cor-plaus and @cor-action are:
-
-::: {#cor-hyper}
-
-## Hyperparameters 
-
-What are the effects of hyperparameter selection with respect to @eq-obj?
-
-:::
-
+1. To what extent does our proposed counterfactual training objective (@eq-obj) induce models to learn plausible explanations?
+2. To what extent does our proposed counterfactual training objective (@eq-obj) yield more favorable algorithmic recourse outcomes in the presence of actionability constraints?
+3. What are the effects of hyperparameter selection with respect to @eq-obj?
 
 ## Experimental Setup
 
 ### Evaluation 
 
-Our key outcome of interest is how well do models perform with respect to explainability (@def-explainability). To this end, we focus primarily on the plausibility and cost of faithfully generated counterfactuals at test time. To measure the cost of counterfactuals, we follow the standard convention of using distances ($\ell_1$-norm) between factuals and counterfactuals as a proxy. For plausibility, we assess how similar counterfactuals are to observed samples in the target domain. We rely on the distance-based metric used by @altmeyer2024faithful,
+Our key outcome of interest is how well do models perform with respect to explainability (Def. \ref{def-explainability}). To this end, we focus primarily on the plausibility and cost of faithfully generated counterfactuals at test time. To measure the cost of counterfactuals, we follow the standard convention of using distances ($\ell_1$-norm) between factuals and counterfactuals as a proxy. For plausibility, we assess how similar counterfactuals are to observed samples in the target domain. We rely on the distance-based metric used by @altmeyer2024faithful,
 
 $$
-\text{implaus}_{\text{dist}}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
+\text{IP}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
 $$ {#eq-impl-dist}
 
 and introduce a novel divergence metric,
 
 $$
-\text{implaus}_{\text{div}}(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
+\text{IP}^*(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
 $$ {#eq-impl-div}
 
 where $\mathbf{X}^\prime$ denotes a set of multiple counterfactuals and $\text{MMD}(\cdot)$ is an unbiased estimate of the squared population maximum mean discrepancy [@gretton2012kernel]. The metric in @eq-impl-div is equal to zero iff the two distributions are the same, $\mathbf{X}^\prime=\mathbf{X}^+$.
@@ -54,6 +31,24 @@ We run the experiments with three gradient-based generators: *Generic* of @wacht
 ## Experimental Results
 
 ### Plausibility
+
+@tbl-main presents our main empirical findings. The top five rows show the percentage reduction in implausibility according to @eq-impl-dist for varying degrees of the energy penalty used for *ECCo* at test time. The following row shows the reduction in implausibility as measured by @eq-impl-div and aggregated across all test specifications of *ECCo*. The final two rows show the test accuracies for the model trained with CT and conventionally trained models ("vanilla"). 
+
+We observe that for all datasets except *OL* and across all test settings, the average distance of counterfactuals from observed samples in the target class is reduced, indicating improved plausibility. The magnitude of improvements varies by dataset: for the simple synthetic datasets, distance reductions range from around 20-40% (*LS*, *Moon*) to almost 60% (*Circ*). For the real-world tabular datasets, improvements are generally smaller but still substantial in many cases with around 10-15% for *CH*, 11-28% for *GMSC*, 7-8% for *Cred* and around 3% for *Adult*. For our only vision dataset (*MNIST*), distances are reduced by up to 9%. The results for our proposed divergence metric are qualitatively similar, but generally even more pronounced: for the *Circ* dataset, implausibility is reduced by almost 94% to virtually zero as we verified by looking at the absolute outcome. Improvements for other datasets range from 28% (*Moon*) to 78% (*GMSC*). For *OL* the reduction is negative, consistent with the distance-based metric. The only dataset, for which our proposed metric disagrees with the distance-based metric is *MNIST*.
+
+These broad and substantial improvements in plausibility generally do not come at the cost of decreased predictive performance: test accuracy for CT is virtually identical to the baseline for *Adult*, *Circ*, *LS*, *Moon* and *OL*, and even slightly improved for *Cred*. Exceptions to this general pattern are *MNIST*, *CH* and *GMSC*, for which we observe reduction in test accuracy of 2, 5 and 15 percentage points, respectively. We note in this context, that we have not optimized our models for predictive performance at all and worked with very small networks. In summary, we find that CT can substantially improve the quality of explanations learned by models without generally sacrificing predictive accuracy. 
+
+::: {#tbl-main}
+
+```{=latex}
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}} cccccc }
+\input{tables/main.tex}
+\end{tabular*}
+```
+
+Key plausibility and predictive performance metrics for all datasets. The top five rows show the percentage reduction in implausibility according to @eq-impl-dist for varying degrees of the energy penalty used for *ECCo* at test time. The following row shows the reduction in implausibility as measured by @eq-impl-div and aggregated across all test specifications of *ECCo*. The final two rows show the test accuracies for the model trained with CT and conventionally trained models ("vanilla").
+
+:::
 
 ### Actionability
 

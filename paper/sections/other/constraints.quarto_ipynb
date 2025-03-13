@@ -17,10 +17,27 @@
         "using CTExperiments.Flux\n",
         "using CTExperiments.Plots\n",
         "using CTExperiments.TaijaPlotting\n",
+<<<<<<< HEAD
         "using Plots.PlotMeasures\n",
         "```\n",
         "\n",
         "\n",
+=======
+        "using Plots.PlotMeasures"
+      ],
+<<<<<<< HEAD
+      "id": "43293917",
+=======
+      "id": "b4bf263d",
+>>>>>>> 16-final-things-ecml
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+>>>>>>> 16-final-things-ecml
         "## Protecting Mutability Constraints with Linear Classifiers {#sec-app-constraints}\n",
         "\n",
         "In @sec-constraints we explain that to avoid penalizing implausibility that arises due to mutability constraints, we impose a point mass prior on $p(\\mathbf{x})$ for the corresponding feature. We argue in @sec-constraints that this approach induces models to be less sensitive to immutable features and demonstrate this empirically in @sec-experiments. Below we derive the analytical results in @prp-mtblty.\n",
@@ -67,10 +84,25 @@
         "\n",
         "Thus, our proposed approach of protecting feature $d_{\\text{immtbl}}$ has the net affect of decreasing the classifier's sensitivity to the immutable feature relative to the mutable feature (i.e. no change in sensitivity for $d_{\\text{immtbl}}$ relative to increased sensitivity for $d_{\\text{mtbl}}$).\n",
         "\n",
+<<<<<<< HEAD
         ":::\n",
         "\n",
         "\n",
         "```{julia}\n",
+=======
+        ":::\n"
+      ],
+<<<<<<< HEAD
+      "id": "002c7566"
+=======
+      "id": "68e4d577"
+>>>>>>> 16-final-things-ecml
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+>>>>>>> 16-final-things-ecml
         "#| eval: false\n",
         "\n",
         "using CTExperiments: \n",
@@ -141,10 +173,27 @@
         "    # (\"(b)\", FullObjective(lambda=[1.0,0.5,0.01,0.1]), [\"both\", \"both\"]),\n",
         "    # (\"(c)\", VanillaObjective(needs_ce=true), [\"both\", \"none\"]),\n",
         "    (\"(d)\", FullObjective(lambda=[1.0,0.5,0.01,0.1]), [\"both\", \"none\"]),\n",
+<<<<<<< HEAD
         "]\n",
         "```\n",
         "\n",
         "```{julia}\n",
+=======
+        "]"
+      ],
+<<<<<<< HEAD
+      "id": "45cdd8f5",
+=======
+      "id": "4fdd0db2",
+>>>>>>> 16-final-things-ecml
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+>>>>>>> 16-final-things-ecml
         "#| eval: false\n",
         "\n",
         "using CounterfactualExplanations.Convergence\n",
@@ -198,10 +247,27 @@
         "\n",
         "    push!(models, model)\n",
         "    push!(plts, current())\n",
+<<<<<<< HEAD
         "end\n",
         "```\n",
         "\n",
         "```{julia}\n",
+=======
+        "end"
+      ],
+<<<<<<< HEAD
+      "id": "9e3d759c",
+=======
+      "id": "93117d10",
+>>>>>>> 16-final-things-ecml
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+>>>>>>> 16-final-things-ecml
         "#| eval: false\n",
         "\n",
         "plt = Plots.plot(\n",
@@ -214,10 +280,27 @@
         "    right_margin = 10mm,\n",
         ")\n",
         "display(plt)\n",
+<<<<<<< HEAD
         "Plots.savefig(plt, \"paper/figures/poc.svg\")\n",
         "```\n",
         "\n",
         "```{julia}\n",
+=======
+        "Plots.savefig(plt, \"paper/figures/poc.svg\")"
+      ],
+<<<<<<< HEAD
+      "id": "329cb378",
+=======
+      "id": "b36ed9e8",
+>>>>>>> 16-final-things-ecml
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+>>>>>>> 16-final-things-ecml
         "#| eval: false\n",
         "\n",
         "plts = []\n",
@@ -236,10 +319,27 @@
         "end\n",
         "\n",
         "plt = Plots.plot(plts..., layout=(1,2), size=(600,300))\n",
+<<<<<<< HEAD
         "Plots.savefig(plt, \"paper/figures/app_mtblty.svg\")\n",
         "```\n",
         "\n",
         "\n",
+=======
+        "Plots.savefig(plt, \"paper/figures/app_mtblty.svg\")"
+      ],
+<<<<<<< HEAD
+      "id": "9dc05bf5",
+=======
+      "id": "f19866ca",
+>>>>>>> 16-final-things-ecml
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+>>>>>>> 16-final-things-ecml
         "## Domain Constraints\n",
         "\n",
         "We apply domain constraints on counterfactuals during training and evaluation. There are at least two good reasons for doing so. Firstly, within the context of explainability and algorithmic recourse, real-world attributes are often domain constrained: the *age* feature, for example, is lower bounded by zero and upper bounded by the maximum human lifespan. Secondly, domain constraints help mitigate training instabilities commonly associated with energy-based modelling [@grathwohl2020your;@altmeyer2024faithful].\n",
@@ -255,7 +355,15 @@
         "\n",
         "where $\\mu_d$ and $\\sigma_d$ denote the sample mean and standard deviation of feature $d$. We set $n_{\\sigma_d}=3$ across the board but higher values and hence wider bounds may be appropriate depending on the application."
       ],
+<<<<<<< HEAD
       "id": "31b6542d"
+=======
+<<<<<<< HEAD
+      "id": "c3fdb02f"
+=======
+      "id": "92e38134"
+>>>>>>> 16-final-things-ecml
+>>>>>>> 16-final-things-ecml
     }
   ],
   "metadata": {

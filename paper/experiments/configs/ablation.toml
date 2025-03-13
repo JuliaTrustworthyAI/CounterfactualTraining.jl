@@ -1,6 +1,6 @@
 name = "ablation"
 dim_reduction = []
-generator_type = ["ecco", "generic", "revise"]
+generator_type = ["ecco"]
 data = ""
 model_type = ""
 save_dir = ""

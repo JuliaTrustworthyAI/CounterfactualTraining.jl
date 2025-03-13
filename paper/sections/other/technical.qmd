@@ -1,0 +1,7 @@
+# Technical Details of Our Approach {.appendix} 
+
+{{< include /paper/sections/other/counterfactuals.qmd >}}
+
+{{< include /paper/sections/other/constraints.qmd >}}
+
+{{< include /paper/sections/other/training.qmd >}}

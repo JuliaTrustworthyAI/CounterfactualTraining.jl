@@ -79,7 +79,7 @@ Base.@kwdef struct GeneratorParams <: AbstractGeneratorParams
     lr::AbstractFloat = default_ce_search_lr
     opt::AbstractString = "sgd"
     maxiter::Int = 30
-    decision_threshold::AbstractFloat = 0.75
+    decision_threshold::AbstractFloat = get_global_param("tau", 0.75)
     lambda_cost::AbstractFloat = 0.001
     lambda_energy::AbstractFloat = 5.0
 end
@@ -180,7 +180,7 @@ Base.@kwdef struct TrainingParams <: AbstractConfiguration
     objective::AbstractString = "full"
     lambda_class_loss::AbstractFloat = 1.0
     lambda_energy_diff::AbstractFloat = CounterfactualTraining.default_energy_lambda[1]
-    lambda_energy_reg::AbstractFloat = CounterfactualTraining.default_energy_lambda[2]
+    lambda_energy_reg::AbstractFloat = get_global_param("reg_strength", CounterfactualTraining.default_energy_lambda[2])
     lambda_adversarial::AbstractFloat = CounterfactualTraining.default_adversarial_lambda
     class_loss::AbstractString = "logitcrossentropy"
     burnin::AbstractFloat = get_global_param("burnin", 0.0f0)

@@ -200,7 +200,7 @@ function get_config_from_args(;
         cfg["save_dir"] = default_save_dir(
             new_save_dir, cfg["name"], cfg["data"], cfg["model_type"]
         )
-        rootdir, fonly = (dirname(fname), splitdir(fname)[end])
+        rootdir, fonly = (joinpath(dirname(fname), subdirname), basename(fname))
         fname = joinpath(
             default_save_dir(rootdir, cfg["name"], cfg["data"], cfg["model_type"]), fonly
         )

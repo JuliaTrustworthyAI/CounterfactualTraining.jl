@@ -17,6 +17,158 @@ global _lnstyvar = nothing
 global _dodgevar = nothing
 global _sidevar = nothing
 
+# Function to check if a value is effectively empty
+function is_empty_value(v::Any)
+    if v isa String
+        return isempty(v)
+    elseif v isa Vector
+        return isempty(v) || length(v) == 1
+    elseif v isa Dict
+        # A dictionary is empty if it's empty itself or if all its filtered values would be empty
+        filtered = filter_dict(v)
+        return isempty(filtered)
+    else
+        return false
+    end
+end
+
+# Function to filter dictionary
+function filter_dict(dict::Dict; drop_fields=["name", "data", "data_params"])
+
+    # Take care of nested dicts:
+    for (k, v) in dict
+        if v isa Dict
+            dict[k] = filter_dict(v; drop_fields)
+        end
+    end
+
+    # Filter out empty values and specified fields
+    dict = filter(dict) do (k, v)
+        !is_empty_value(v) && !(k in drop_fields)
+    end
+
+    return dict
+end
+
+global LatexReplacements = Dict(
+    "lambda_energy" => "\$\\lambda_{\\text{egy}}\$",
+    "lambda_cost" => "\$\\lambda_{\\text{cst}}\$",
+    "lambda_adversarial" => "\$\\lambda_{\\text{adv}}\$",
+    "lambda_energy_diff" => "\$\\lambda_{\\text{div}}\$",
+    "lambda_energy_reg" => "\$\\lambda_{\\text{reg}}\$",
+    "lambda_class_loss" => "\$\\lambda_{\\text{clf}}\$",
+    "gmsc" => get_name(GMSC(); pretty=true),
+    "lin_sep" => "LS",
+    "over" => "OL",
+    "cali" => "CH",
+    "mnist" => get_name(MNIST(); pretty=true),
+    "circles" => "Circ",
+    "moons" => "Moon",
+    "credit" => "Cred"
+)
+
+function format_header(s::String; replacements::Dict=LatexReplacements)
+    s =
+        replace(s, r"\bnce\b" => "ncounterfactuals") |>
+        s ->
+        replace(s, "_exper" => "") |>
+        s ->
+            replace(s, "_eval" => "") |>
+            s ->
+                replace(s, "_type" => "") |>
+                s ->
+                    replace(s, "_params" => "_parameters") |>
+                    s ->
+                        replace(s, "lr" => "learning_rate") |>
+                        s ->
+                            replace(s, "maxiter" => "maximum_iterations") |>
+                            s ->
+                                replace(s, "opt" => "optimizer") |>
+                                s ->
+                                    replace(s, "conv" => "convergence") |>
+                                    s ->
+                                        replace(s, r"\bopt\b" => "optimizer") |>
+                                        s ->
+                                            replace(s, r"^n" => "no._") |>
+                                                s ->
+                                                    replace(s, "__" => "_") |>
+                                            s -> if s in keys(replacements)
+                                                replacements[s]
+                                            else
+                                                s |>
+                                                s ->
+                                                    split(s, "_") |>
+                                                    ss ->
+                                                        [uppercasefirst(s) for s in ss] |> ss -> join(ss, " ")
+                                            end
+    return s
+end
+
+function to_mkd(dict::Dict, level::Int=0; header::Union{Nothing,String}=nothing)
+    drop_fields = [
+        "name",
+        "concatenate_output",
+        "parallelizer",
+        "store_ce",
+        "threaded",
+        "verbose",
+        "vertical_splits",
+        "grid_file",
+        "inherit",
+        "save_dir",
+        "test_time",
+        "ndiv",
+    ]
+    dict = filter(((k, v),) -> length(v) > 0 && !(k in drop_fields), dict)
+
+    # Create indent string based on level
+    indent = repeat("    ", level)
+
+    # Initialize array to store markdown lines
+    if isnothing(header)
+        lines = String[]
+    else
+        header = "\n*$header*\n"
+        lines = [header]
+    end
+
+    # Sort dictionary keys for consistent output
+    for key in sort(collect(keys(dict)))
+        value = dict[key]
+        key = format_header(key; replacements=LatexReplacements)
+
+        if value isa Dict
+            # Handle nested dictionary
+            push!(lines, "$(indent)- $(key):")
+            # Recursively process nested dictionary with increased indentation
+            nested_lines = to_mkd(value, level + 1)
+            push!(lines, nested_lines)
+        elseif value isa Vector
+            # Handle vector values by joining with commas
+            value_str = join(value, ", ")
+            push!(lines, "$(indent)- $(key): `$(value_str)`")
+        else
+            # Handle single values
+            push!(lines, "$(indent)- $(key): `$(value)`")
+        end
+    end
+
+    # Join all lines with newlines
+    return join(lines, "\n")
+end
+
+# Function to create final Markdown string
+function dict_to_markdown(dict::Dict; header::Union{Nothing,String}=nothing)
+    filtered_dict = filter_dict(dict)
+    return "md\"\"\"\n$(to_mkd(filtered_dict; header=header))\n\"\"\""
+end
+
+# New function specifically for Quarto output
+function dict_to_quarto_markdown(dict::Dict; header::Union{Nothing,String}=nothing)
+    filtered_dict = filter_dict(dict)
+    return "$(to_mkd(filtered_dict; header=header))\n"
+end
+
 function adjust_plot_var(x::Union{Nothing,String}, cfg::CTExperiments.EvalConfigOrGrid)
     if isnothing(x)
         return x
@@ -177,11 +329,11 @@ end
 
 Aggregate performance variable `y` from an experiment grid by columns specified in `byvars`.
 """
-function aggregate_performance(cfg::EvalConfigOrGrid; kwrgs...)
+function aggregate_performance(cfg::EvalConfigOrGrid; measure=[accuracy, multiclass_f1score], kwrgs...)
 
     # Load data:
     exper_grid = ExperimentGrid(cfg.grid_file)
-    df, df_meta, df_perf = merge_with_meta(cfg, CTExperiments.test_performance(exper_grid; return_df=true))
+    df, df_meta, df_perf = merge_with_meta(cfg, CTExperiments.test_performance(exper_grid; measure, return_df=true))
 
     return aggregate_performance(df, df_meta, df_perf; kwrgs...)
 end
@@ -292,7 +444,9 @@ Aggregate the results from a single counterfactual evaluation.
 function aggregate_ce_evaluation(cfg::EvalConfigOrGrid; kwrgs...)
 
     # Load data:
-    all_data = merge_with_meta(cfg, CTExperiments.load_ce_evaluation(cfg))
+    all_data = Logging.with_logger(Logging.NullLogger()) do
+        merge_with_meta(cfg, CTExperiments.load_ce_evaluation(cfg))
+    end
 
     return aggregate_ce_evaluation(all_data...; kwrgs...)
 end
@@ -311,11 +465,12 @@ Aggregate the results from a single counterfactual evaluation.
 function aggregate_ce_evaluation(
     df::DataFrame,
     df_meta::DataFrame,
-    df_eval::DataFrame;
+    df_eval::DataFrame=DataFrame();
     y::String="plausibility_distance_from_target",
     byvars::Union{Nothing,String,Vector{String}}=nothing,
-    agg_runs::Bool=false,
+    agg_further_vars::Union{Nothing,Vector{String}}=nothing,
     rebase::Bool=true,
+    lambda_eval::Union{Nothing,Vector{<:Real}}=nothing,
 )
     # Assertions:
     valid_y = valid_y_ce(df)
@@ -323,11 +478,21 @@ function aggregate_ce_evaluation(
     if isa(byvars, String)
         byvars = [byvars]
     end
-    @assert byvars isa Nothing || all(col -> col in names(df_meta), byvars) "Columns specified in `byvars` must be one of the following: $(names(df_meta))."
+    @assert isnothing(byvars) || all(col -> col in names(df_meta), byvars) "Columns specified in `byvars` must be one of the following: $(names(df_meta))."
 
     df = df[df.variable .== y, :]
+    if y == "mmd"
+        # To align with plausibility metric (negative distance), we need to invert the MMD metric. We also first clamp values to 0 (sometimes MMD is slightly negative for numeric reasons).
+        df.value .= .-clamp.(df.value, 0, Inf) 
+    end
     rename!(df, :value => y)
     select!(df, Not(:variable))
+
+    # Filter:
+    if !isnothing(lambda_eval)
+        @assert "lambda_energy_eval" in names(df) "Variables `lambda_energy_eval` not included."
+        df = filter(df -> df.lambda_energy_eval in lambda_eval, df)
+    end
 
     # Aggregate:
     if "run" in names(df)
@@ -336,13 +501,16 @@ function aggregate_ce_evaluation(
             x in names(df) for x in byvars_must_include
         ]]
         df_agg = aggregate_data(df, y, byvars; byvars_must_include=byvars_must_include)
-        if agg_runs
+
+        if !isnothing(agg_further_vars)
             # Compute mean of means and std of means:
+            byvars =
+                isnothing(byvars) ? byvars_must_include : union(byvars_must_include, byvars)
+            filter!(x -> x ∉ agg_further_vars, byvars)
             df_agg =
                 groupby(df_agg, byvars) |>
                 df -> combine(df, :mean => (y -> (mean=mean(y), std=std(y))) => AsTable)
         end
-        df_agg
     else
         df_agg = aggregate_data(df, y, byvars)
     end
@@ -398,7 +566,9 @@ function valid_y_ce(cfg::AbstractEvaluationConfig)
 end
 
 function aggregate_counterfactuals(eval_grid::EvaluationGrid; kwrgs...)
-    eval_list = load_list(eval_grid)
+    eval_list = Logging.with_logger(Logging.NullLogger()) do 
+        load_list(eval_grid)
+    end
     return aggregate_counterfactuals.(eval_list)
 end
 
@@ -445,6 +615,116 @@ function get_img_command(data_names, full_paths, fig_labels; fig_caption="")
     return ["![$(fig_cap)Data: $(CTExperiments.get_data_name(nm)).](/$pth){#$(lbl)}" for (nm, pth, lbl) in zip(data_names,full_paths,fig_labels)]
 end
 
-function tbl_test_performance(grid::ExperimentGrid; include_adv::Bool=false, kwrgs...)
+global LatexMetricReplacements = Dict(
+    "mmd" => "\$ \\text{IP}^* \$",
+    "plausibility_distance_from_target" => "\$ \\text{IP} \$",
+)
 
+function format_metric(m::String)
+    return LatexMetricReplacements[m]
+end
+
+function aggregate_ce_evaluation(res_dir::String; y="mmd", byvars=nothing, rebase=true, kwrgs...)
+    byvars = gather_byvars(byvars, "data")
+    eval_grids, _ = final_results(res_dir)
+    df = DataFrame()
+    for (i,cfg) in enumerate(eval_grids)
+        df_i = aggregate_ce_evaluation(cfg; y, byvars, rebase, kwrgs...)
+        df = vcat(df, df_i)
+    end
+    rename!(df, :data => :dataset)
+    df.dataset .= CTExperiments.format_header.(df.dataset)
+    df.objective .= CTExperiments.format_header.(df.objective)
+    df.variable .= CTExperiments.format_metric.(y)
+    if rebase
+        df.variable .= (x -> LatexCell("$(x) \$(-\\Delta %)\$")).(df.variable)
+        select!(df, Not([:is_pct, :objective]))
+    end
+    return df
+end
+
+global allowed_perf_measures = Dict(
+    "acc" => accuracy,
+    "f1" => multiclass_f1score,
+)
+
+function aggregate_performance(res_dir::String; measure::Vector=["acc"])
+
+    # Get measures:
+    if eltype(measure) == String
+        measure = [allowed_perf_measures[m] for m in measure]
+    end
+
+    eval_grids, _ = final_results(res_dir)
+    df = aggregate_performance(eval_grids; measure)
+    df.objective .= replace.(df.objective, "Full" => "CT")
+    df.objective .= replace.(df.objective, "Vanilla" => "vanilla")
+    df.variable .= replace.(df.variable, "Accuracy" => "Acc.")
+    df.variable .= ["$v ($o)" for (v,o) in zip(df.variable,df.objective)]
+    select!(df, Not([:std, :objective]))
+    return df
+end
+
+function final_results(res_dir::String)
+
+    # Get model and data directories:
+    model_dirs = joinpath.(res_dir, readdir(res_dir)) |> x -> x[isdir.(x)]
+    data_dirs = [joinpath.(d, readdir(d)) |> x -> x[isdir.(x)] for d in model_dirs] |> x -> reduce(vcat, x)
+
+    # Filter out directories with missing results:
+    data_dirs = filter(x -> isfile(joinpath(x,"evaluation/evaluation_grid_config.toml")), data_dirs)
+    eval_grids = EvaluationGrid.(joinpath.(data_dirs, "evaluation/evaluation_grid_config.toml"))
+    data_dirs = filter(x -> isfile(joinpath(x, "grid_config.toml")), data_dirs)
+    exper_grids = ExperimentGrid.(joinpath.(data_dirs, "grid_config.toml"))
+
+    return eval_grids, exper_grids
+
+end
+
+function final_table(
+    res_dir::String;
+    ce_var=["plausibility_distance_from_target", "mmd"],
+    perf_var=["acc"],
+    agg_further_vars=[["run"],["run", "lambda_energy_eval"]],
+)
+    # CE:
+    df_ce = DataFrame()
+    for (i,y) in enumerate(ce_var)
+        df = aggregate_ce_evaluation(
+            res_dir; y, agg_further_vars=agg_further_vars[i], rebase=true
+        )
+        df_ce = vcat(df_ce, df; cols=:union)
+    end
+
+    # Missing:
+    df_ce = coalesce.(df_ce, "(agg.)")
+
+    # Performance:
+    df_perf = aggregate_performance(res_dir; measure=perf_var)
+    df = vcat(df_ce,df_perf; cols=:union) |> df -> DataFrames.unstack(df, :dataset, :mean)
+
+    # Missing:
+    df = coalesce.(df, "")
+
+    rename!(df, :variable => :measure)
+    select!(df, :measure, Not([:measure]))
+    return df
+end
+
+function final_params(res_dir::String)
+    _, exper_grids = final_results(res_dir)
+    df = DataFrame()
+    for cfg in exper_grids
+        df_meta = CTExperiments.expand_grid_to_df(cfg)
+        df = vcat(df, df_meta)
+    end
+    df.n_test = Int.(round.((1 .- df.train_test_ratio) .* df.n_train))
+    df.n_train = df.n_train .+ df.n_validation
+    df = df[:, [!allequal(x) for x in eachcol(df)]]
+    df = select(df, Not([:id, :objective, :n_validation])) |> unique
+    dataparams = [:data, :n_train, :n_test, :batchsize]
+    select!(df, dataparams, Not(dataparams))
+    df.data .= CTExperiments.format_header.(df.data)
+    sort!(df, :data)
+    return df
 end
