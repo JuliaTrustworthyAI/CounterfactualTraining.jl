@@ -2,38 +2,15 @@
 
 In this section, we present experiments that we have conducted in order to answer the following research questions:
 
-::: {#cor-plaus}
-
-## Plausibility
-
-Does our proposed counterfactual training objective (@eq-obj) induce models to learn plausible explanations?
-
-:::
-
-::: {#cor-action}
-
-## Actionability
-
-Does our proposed counterfactual training objective (@eq-obj) yield more favorable algorithmic recourse outcomes in the presence of actionability constraints?
-
-:::
-
-Beyond this, we are also interested in understanding how robust our answers to @cor-plaus and @cor-action are:
-
-::: {#cor-hyper}
-
-## Hyperparameters 
-
-What are the effects of different hyperparameter choices with respect to @eq-obj?
-
-:::
-
+1. To what extent does our proposed counterfactual training objective (@eq-obj) induce models to learn plausible explanations?
+2. To what extent does our proposed counterfactual training objective (@eq-obj) yield more favorable algorithmic recourse outcomes in the presence of actionability constraints?
+3. What are the effects of hyperparameter selection with respect to @eq-obj?
 
 ## Experimental Setup
 
 ### Evaluation 
 
-Our key outcome of interest is how well models perform with respect to explainability (@def-explainability): to this end, we focus primarily on the plausibility and cost of faithfully generated counterfactuals at test time. To measure the cost of counterfactuals, we follow the standard convention of using distances ($\ell_1$-norm) between factuals and counterfactuals as a proxy. For plausibility, we assess how similar counterfactuals are to observed samples in the target domain. We rely on the distance-based metric used by @altmeyer2024faithful,
+Our key outcome of interest is how well do models perform with respect to explainability (Def. \ref{def-explainability}). To this end, we focus primarily on the plausibility and cost of faithfully generated counterfactuals at test time. To measure the cost of counterfactuals, we follow the standard convention of using distances ($\ell_1$-norm) between factuals and counterfactuals as a proxy. For plausibility, we assess how similar counterfactuals are to observed samples in the target domain. We rely on the distance-based metric used by @altmeyer2024faithful,
 
 $$
 \text{IP}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
@@ -45,11 +22,11 @@ $$
 \text{IP}^*(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
 $$ {#eq-impl-div}
 
-where $\mathbf{X}^\prime$ denotes a set of multiple counterfactuals and $\text{MMD}(\cdot)$ is an unbiased estimate of the squared population maximum mean discrepancy [@gretton2012kernel]. The metric in @eq-impl-div is equal to zero iff $\mathbf{X}^\prime=\mathbf{X}^+$.
+where $\mathbf{X}^\prime$ denotes a set of multiple counterfactuals and $\text{MMD}(\cdot)$ is an unbiased estimate of the squared population maximum mean discrepancy [@gretton2012kernel]. The metric in @eq-impl-div is equal to zero iff the two distributions are the same, $\mathbf{X}^\prime=\mathbf{X}^+$.
 
 In addition to cost and plausibility, we also compute other standard metrics to evaluate counterfactuals at test time including validity and redundancy. Finally, we also assess the predictive performance of models using standard metrics.
 
-We run the experiments with three CE generators: *Generic* of @wachter2017counterfactual as a simple baseline approach, *REVISE* [@joshi2019realistic] that aims to generate plausible counterfactuals using a surrogate Variational Autoencoder (VAE), and *ECCo*---the generator of @altmeyer2023faithful but without the conformal prediction component---as a method that directly targets both faithfulness and plausibility of the CEs.
+We run the experiments with three gradient-based generators: *Generic* of @wachter2017counterfactual as a simple baseline approach, *REVISE* [@joshi2019realistic] that aims to generate plausible counterfactuals using a surrogate Variational Autoencoder (VAE), and *ECCo*---the generator of @altmeyer2023faithful but without the conformal prediction component---as a method that directly targets both faithfulness and plausibility of the CEs.
 
 ## Experimental Results
 
@@ -80,6 +57,6 @@ We extensively test the impact of three types of hyperparameters on the proposed
 
 ***Hyperparameters of the CE generators.*** First, we observe that CT is highly sensitive to hyperparameter settings but (a) there are manageable patterns and (b) we can typically identify settings that improve either plausibility or cost, and commonly both of them at the same time. Second, we note that the choice of a CE generator has a major impact on the results. For example, *REVISE* tends to perform the worst, most likely because it uses a surrogate VAE to generate counterfactuals which impedes faithfulness [@altmeyer2024faithful]. Third, increasing $T$, the maximum number of steps, generally yields better outcomes because more CEs can mature in each training epoch. Fourth, the impact of $\tau$, the required decision threshold is more difficult to predict. On "harder" datasets it may be difficult to satisfy high $\tau$ for any given sample (i.e., also factuals) and so increasing this threshold does not seem to correlate with better outcomes. In fact, we have generally found that a choice of $\tau=0.5$ leads to optimal results because it is associated with high proportions of mature counterfactuals.
 
-***Hyperparameters for penalties.*** We find that the strength of the energy regularization, $\lambda_{\text{reg}}$ is highly impactful; energy must be sufficiently regularized to avoid poor performance in terms of decreased plausibility and increased costs. The sensitivity with respect to $\lambda_{\text{div}}$ and $\lambda_{\text{adv}}$ is much less evident. While high values of $\lambda_{\text{reg}}$ may increase the variability in outcomes when combined with high values for any of the other penalties in @eq-obj, this effect is not very pronounced.
+***Hyperparameters for penalties.*** We find that the strength of the energy regularization, $\lambda_{\text{reg}}$ is highly impactful; energy must be sufficiently regularized to avoid poor performance in terms of decreased plausibility and increased costs. The sensitivity with respect to $\lambda_{\text{div}}$ and $\lambda_{\text{adv}}$ is much less evident. While high values of $\lambda_{\text{reg}}$ may increase the variability in outcomes when combined with high values of $\lambda_{\text{div}}$ or $\lambda_{\text{adv}}$, this effect is not very pronounced.
 
-***Other hyperparameters.*** We observe that the effectiveness and stability of CT is positively associated with the number of counterfactuals generated during each training epoch. We also confirm that a higher number of training epochs is beneficial. Interestingly, we find that it is not necessary to employ CT during the entire training phase to achieve the desired improvements in explainability. We have tested training models conventionally during the first half of training before switching to CT after this initial "burn-in" period and observed positive results. Put differently, CT may be a way to improve the explainability of trained models in a fine-tuning manner. 
+***Other hyperparameters.*** We observe that the effectiveness and stability of CT is positively associated with the number of counterfactuals generated during each training epoch. We also confirm that a higher number of training epochs is beneficial. Interestingly, we find that it is not necessary to employ CT during the entire training phase to achieve the desired improvements in explainability. When training models conventionally during the first 50% of epochs before switching to CT for the next 50% of epochs, we observed positive results. Put differently, CT may be a way to improve the explainability of models in a fine-tuning manner. 

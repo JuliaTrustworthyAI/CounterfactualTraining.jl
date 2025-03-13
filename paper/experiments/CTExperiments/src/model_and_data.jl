@@ -125,7 +125,7 @@ function get_ce_data(data::Dataset, n=nothing; test_set::Bool=false, train_only:
         get_data(data; n=n, test_set=test_set)...;
         domain=get_domain(data),
         mutability=get_mutability(data),
-        features_categorical = get_cats(data),
+        features_categorical=get_cats(data),
     )
     if train_only
         _, _, ce_data = train_val_split(data, ce_data, data.n_validation / ntotal(data))

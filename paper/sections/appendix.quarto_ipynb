@@ -61,6 +61,12 @@
         "\n",
         "An important consideration when generating counterfactual explanations using gradient-based methods is how to define convergence. Two common choices are to 1) perform gradient descent over a fixed number of iterations $T$, or 2) conclude the search as soon as the predicted probability for the target class has reached a pre-determined threshold, $\\tau$: $\\mathcal{S}(\\mathbf{M}_\\theta(\\mathbf{x}^\\prime))[y^+] \\geq \\tau$. We prefer the latter for our purposes, because it explicitly defines convergence in terms of the black-box model, $\\mathbf{M}(\\mathbf{x})$.\n",
         "\n",
+<<<<<<< HEAD
+        "Defining convergence in this way allows for a more intuitive interpretation of the resulting counterfactual outcomes than with fixed $T$. Specifically, it allows us to think of counterfactuals as explaining 'high-confidence' predictions by the model for the target class $y^+$. Depending on the context and application, different choices of $\\tau$ can be considered as representing 'high-confidence' predictions.\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
+=======
         "Defining convergence in this way allows for a more intuitive interpretation of the resulting counterfactual outcomes than with fixed $T$. Specifically, it allows us to think of counterfactuals as explaining 'high-confidence' predictions by the model for the target class $y^+$. Depending on the context and application, different choices of $\\tau$ can be considered as representing 'high-confidence' predictions.\n"
       ],
 <<<<<<< HEAD
@@ -73,6 +79,7 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "#| eval: false\n",
         "\n",
         "projectdir = splitpath(pwd()) |>\n",
@@ -85,6 +92,11 @@
         "using CTExperiments.Flux\n",
         "using CTExperiments.Plots\n",
         "using CTExperiments.TaijaPlotting\n",
+<<<<<<< HEAD
+        "using Plots.PlotMeasures\n",
+        "```\n",
+        "\n",
+=======
         "using Plots.PlotMeasures"
       ],
 <<<<<<< HEAD
@@ -99,6 +111,7 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "## Protecting Mutability Constraints with Linear Classifiers {#sec-app-constraints}\n",
         "\n",
         "In @sec-constraints we explain that to avoid penalizing implausibility that arises due to mutability constraints, we impose a point mass prior on $p(\\mathbf{x})$ for the corresponding feature. We argue in @sec-constraints that this approach induces models to be less sensitive to immutable features and demonstrate this empirically in @sec-experiments. Below we derive the analytical results in @prp-mtblty.\n",
@@ -145,6 +158,11 @@
         "\n",
         "Thus, our proposed approach of protecting feature $d_{\\text{immtbl}}$ has the net affect of decreasing the classifier's sensitivity to the immutable feature relative to the mutable feature (i.e. no change in sensitivity for $d_{\\text{immtbl}}$ relative to increased sensitivity for $d_{\\text{mtbl}}$).\n",
         "\n",
+<<<<<<< HEAD
+        ":::\n",
+        "\n",
+        "```{julia}\n",
+=======
         ":::"
       ],
 <<<<<<< HEAD
@@ -157,6 +175,7 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "#| eval: false\n",
         "\n",
         "using CTExperiments: \n",
@@ -227,6 +246,12 @@
         "    # (\"(b)\", FullObjective(lambda=[1.0,0.5,0.01,0.1]), [\"both\", \"both\"]),\n",
         "    # (\"(c)\", VanillaObjective(needs_ce=true), [\"both\", \"none\"]),\n",
         "    (\"(d)\", FullObjective(lambda=[1.0,0.5,0.01,0.1]), [\"both\", \"none\"]),\n",
+<<<<<<< HEAD
+        "]\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
+=======
         "]"
       ],
 <<<<<<< HEAD
@@ -241,6 +266,7 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "#| eval: false\n",
         "\n",
         "using CounterfactualExplanations.Convergence\n",
@@ -294,6 +320,12 @@
         "\n",
         "    push!(models, model)\n",
         "    push!(plts, current())\n",
+<<<<<<< HEAD
+        "end\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
+=======
         "end"
       ],
 <<<<<<< HEAD
@@ -308,6 +340,7 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "#| eval: false\n",
         "\n",
         "plt = Plots.plot(\n",
@@ -320,6 +353,12 @@
         "    right_margin = 10mm,\n",
         ")\n",
         "display(plt)\n",
+<<<<<<< HEAD
+        "Plots.savefig(plt, \"paper/figures/poc.svg\")\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
+=======
         "Plots.savefig(plt, \"paper/figures/poc.svg\")"
       ],
 <<<<<<< HEAD
@@ -334,6 +373,7 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "#| eval: false\n",
         "\n",
         "plts = []\n",
@@ -352,6 +392,11 @@
         "end\n",
         "\n",
         "plt = Plots.plot(plts..., layout=(1,2), size=(600,300))\n",
+<<<<<<< HEAD
+        "Plots.savefig(plt, \"paper/figures/app_mtblty.svg\")\n",
+        "```\n",
+        "\n",
+=======
         "Plots.savefig(plt, \"paper/figures/app_mtblty.svg\")"
       ],
 <<<<<<< HEAD
@@ -366,6 +411,7 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "## Domain Constraints\n",
         "\n",
         "We apply domain constraints on counterfactuals during training and evaluation. There are at least two good reasons for doing so. Firstly, within the context of explainability and algorithmic recourse, real-world attributes are often domain constrained: the *age* feature, for example, is lower bounded by zero and upper bounded by the maximum human lifespan. Secondly, domain constraints help mitigate training instabilities commonly associated with energy-based modelling [@grathwohl2020your;@altmeyer2024faithful].\n",
@@ -404,6 +450,11 @@
         "![Counterfactual images for *MLP* with conventional training. The underlying generator, *ECCo*, aims to generate counterfactuals that are faithful to the model [@altmeyer2024faithful].](/paper/figures/mnist_mlp_vanilla.png){#fig-mnist-vanilla}\n",
         "\n",
         "\n",
+<<<<<<< HEAD
+        "## Grid Searches {#sec-app-grid}\n",
+        "\n",
+        "```{julia}\n",
+=======
         "## Grid Searches {#sec-app-grid}"
       ],
 <<<<<<< HEAD
@@ -416,6 +467,7 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "projectdir = splitpath(pwd()) |>\n",
         "    ss -> joinpath(ss[1:findall([s == \"CounterfactualTraining.jl\" for s in ss])[1]]...) \n",
         "cd(projectdir)\n",
@@ -426,6 +478,15 @@
         "using CTExperiments.StatsBase\n",
         "\n",
         "using DotEnv\n",
+<<<<<<< HEAD
+        "DotEnv.load!()\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
+        "res_dir = ENV[\"FINAL_GRID_RESULTS\"]\n",
+        "```\n",
+        "\n",
+=======
         "DotEnv.load!()"
       ],
 <<<<<<< HEAD
@@ -454,6 +515,7 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "To assess the hyperparameter sensitivity of our proposed training regime we ran multiple large grid searches for all of our synthetic datasets. We have grouped these grid searches into multiple categories: \n",
         "\n",
         "1. **Generator Parameters** (@sec-app-grid-gen): Investigates the effect of changing hyperparameters that affect the counterfactual outcomes during the training phase.\n",
@@ -480,6 +542,11 @@
         "\n",
         "Finally, concerning other hyperparameters we observe that the effectiveness and stability of CT is positively associated with the number of counterfactuals generated during each training epoch, in particular for *Circles* (@fig-grid-train-plaus-circles) and *Moons* (@fig-grid-train-plaus-moons). We further find that a higher number of training epochs is beneficial as expected, where we tested training models for 50 and 100 epochs. Interestingly, we find that it is not necessary to employ CT during the entire training phase to achieve the desired improvements in explainability: specifically, we have tested training models conventionally during the first half of training before switching to CT after this initial burn-in period. \n",
         "\n",
+<<<<<<< HEAD
+        "### Generator Parameters {#sec-app-grid-gen}\n",
+        "\n",
+        "```{julia}\n",
+=======
         "### Generator Parameters {#sec-app-grid-gen}"
       ],
 <<<<<<< HEAD
@@ -492,10 +559,16 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "grid_dir = joinpath(res_dir, \"gen_params/mlp\")\n",
         "data_dirs = readdir(grid_dir) |> x -> joinpath.(grid_dir, x) |> x -> x[isdir.(x)]\n",
         "eval_grids = (p -> EvaluationGrid(joinpath(p,\"grid_config.toml\"))).(data_dirs)\n",
         "data_names = basename.(data_dirs)\n",
+<<<<<<< HEAD
+        "suffix = \"evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/\"\n",
+        "```\n",
+        "\n",
+=======
         "suffix = \"evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/\""
       ],
 <<<<<<< HEAD
@@ -510,10 +583,21 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "The hyperparameter grid with varying generator parameters during training is shown in @nte-gen-params-final-run-train. The corresponding evaluation grid used for these experiments is shown in @nte-gen-params-final-run-eval.\n",
         "\n",
         "::: {#nte-gen-params-final-run-train .callout-note}\n",
         "\n",
+<<<<<<< HEAD
+        "## Training Phase\n",
+        "\n",
+        "```{julia}\n",
+        "#| output: asis\n",
+        "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/grid_config.toml\")) \n",
+        "println(CTExperiments.dict_to_quarto_markdown(dict))\n",
+        "```\n",
+        "\n",
+=======
         "## Training Phase"
       ],
 <<<<<<< HEAD
@@ -542,10 +626,21 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         ":::\n",
         "\n",
         "::: {#nte-gen-params-final-run-eval .callout-note}\n",
         "\n",
+<<<<<<< HEAD
+        "## Evaluation Phase\n",
+        "\n",
+        "```{julia}\n",
+        "#| output: asis\n",
+        "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
+        "println(CTExperiments.dict_to_quarto_markdown(dict))\n",
+        "```\n",
+        "\n",
+=======
         "## Evaluation Phase"
       ],
 <<<<<<< HEAD
@@ -574,12 +669,24 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         ":::\n",
         "\n",
         "#### Accuracy\n",
         "\n",
         "::: {#tbl-acc-gen}\n",
         "\n",
+<<<<<<< HEAD
+        "::: {.content-hidden unless-format=\"pdf\"}\n",
+        "\n",
+        "```{julia}\n",
+        "#| output: asis\n",
+        "df = CTExperiments.aggregate_performance(eval_grids; byvars=[\"objective\"]) \n",
+        "get_table_inputs(df, \"mean\";backend=Val(:latex)) |>\n",
+        "    inputs -> tabulate_results(inputs; wrap_table=false)\n",
+        "```\n",
+        "\n",
+=======
         "::: {.content-hidden unless-format=\"pdf\"}"
       ],
 <<<<<<< HEAD
@@ -609,12 +716,18 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         ":::\n",
         "\n",
         "Predictive performance measures by dataset and objective averaged across training-phase parameters (@nte-gen-params-final-run-train) and evaluation-phase parameters (@nte-gen-params-final-run-eval).\n",
         "\n",
         ":::\n",
         "\n",
+<<<<<<< HEAD
+        "#### Plausibility\n",
+        "\n",
+        "```{julia}\n",
+=======
         "#### Plausibility"
       ],
 <<<<<<< HEAD
@@ -627,11 +740,18 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "#| output: asis\n",
         "\n",
         "fig_label_prefix = \"grid-gen_params-plaus\"\n",
         "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
         "_str = \"The results with respect to the plausibility measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
+<<<<<<< HEAD
+        "println(_str)\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
+=======
         "println(_str)"
       ],
 <<<<<<< HEAD
@@ -646,6 +766,7 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "#| output: asis\n",
         " \n",
         "imgfname = \"plausibility_distance_from_target.png\"\n",
@@ -653,6 +774,14 @@
         "full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))\n",
         "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption) \n",
         "_str = join(include_img_commands, \"\\n\\n\")\n",
+<<<<<<< HEAD
+        "println(_str)\n",
+        "```\n",
+        "\n",
+        "#### Cost\n",
+        "\n",
+        "```{julia}\n",
+=======
         "println(_str)"
       ],
 <<<<<<< HEAD
@@ -679,11 +808,18 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "#| output: asis\n",
         "\n",
         "fig_label_prefix = \"grid-gen_params-cost\"\n",
         "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
         "_str = \"The results with respect to the cost measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
+<<<<<<< HEAD
+        "println(_str)\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
+=======
         "println(_str)"
       ],
 <<<<<<< HEAD
@@ -698,6 +834,7 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "#| output: asis\n",
         " \n",
         "imgfname = \"distance.png\"\n",
@@ -705,6 +842,14 @@
         "full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))\n",
         "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption)\n",
         "_str = join(include_img_commands, \"\\n\\n\")\n",
+<<<<<<< HEAD
+        "println(_str)\n",
+        "```\n",
+        "\n",
+        "### Penalty Strengths {#sec-app-grid-pen}\n",
+        "\n",
+        "```{julia}\n",
+=======
         "println(_str)"
       ],
 <<<<<<< HEAD
@@ -731,10 +876,16 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "grid_dir = joinpath(res_dir, \"penalties/mlp\")\n",
         "data_dirs = readdir(grid_dir) |> x -> joinpath.(grid_dir, x) |> x -> x[isdir.(x)]\n",
         "eval_grids = (p -> EvaluationGrid(joinpath(p,\"grid_config.toml\"))).(data_dirs)\n",
         "data_names = basename.(data_dirs)\n",
+<<<<<<< HEAD
+        "suffix = \"evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/\"\n",
+        "```\n",
+        "\n",
+=======
         "suffix = \"evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/\""
       ],
 <<<<<<< HEAD
@@ -749,10 +900,21 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "The hyperparameter grid with varying penalty strengths during training is shown in @nte-pen-final-run-train. The corresponding evaluation grid used for these experiments is shown in @nte-pen-final-run-eval.\n",
         "\n",
         "::: {#nte-pen-final-run-train .callout-note}\n",
         "\n",
+<<<<<<< HEAD
+        "## Training Phase\n",
+        "\n",
+        "```{julia}\n",
+        "#| output: asis\n",
+        "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/grid_config.toml\")) \n",
+        "println(CTExperiments.dict_to_quarto_markdown(dict))\n",
+        "```\n",
+        "\n",
+=======
         "## Training Phase"
       ],
 <<<<<<< HEAD
@@ -781,10 +943,21 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         ":::\n",
         "\n",
         "::: {#nte-pen-final-run-eval .callout-note}\n",
         "\n",
+<<<<<<< HEAD
+        "## Evaluation Phase\n",
+        "\n",
+        "```{julia}\n",
+        "#| output: asis\n",
+        "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
+        "println(CTExperiments.dict_to_quarto_markdown(dict))\n",
+        "```\n",
+        "\n",
+=======
         "## Evaluation Phase"
       ],
 <<<<<<< HEAD
@@ -813,12 +986,24 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         ":::\n",
         "\n",
         "#### Accuracy\n",
         "\n",
         "::: {#tbl-acc-pen}\n",
         "\n",
+<<<<<<< HEAD
+        "::: {.content-hidden unless-format=\"pdf\"}\n",
+        "\n",
+        "```{julia}\n",
+        "#| output: asis\n",
+        "df = CTExperiments.aggregate_performance(eval_grids; byvars=[\"objective\"]) \n",
+        "get_table_inputs(df, \"mean\";backend=Val(:latex)) |>\n",
+        "    inputs -> tabulate_results(inputs; wrap_table=false)\n",
+        "```\n",
+        "\n",
+=======
         "::: {.content-hidden unless-format=\"pdf\"}"
       ],
 <<<<<<< HEAD
@@ -848,12 +1033,18 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         ":::\n",
         "\n",
         "Predictive performance measures by dataset and objective averaged across training-phase parameters (@nte-pen-final-run-train) and evaluation-phase parameters (@nte-pen-final-run-eval).\n",
         "\n",
         ":::\n",
         "\n",
+<<<<<<< HEAD
+        "#### Plausibility\n",
+        "\n",
+        "```{julia}\n",
+=======
         "#### Plausibility"
       ],
 <<<<<<< HEAD
@@ -866,11 +1057,18 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "#| output: asis\n",
         "\n",
         "fig_label_prefix = \"grid-pen-plaus\"\n",
         "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
         "_str = \"The results with respect to the plausibility measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
+<<<<<<< HEAD
+        "println(_str)\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
+=======
         "println(_str)"
       ],
 <<<<<<< HEAD
@@ -885,6 +1083,7 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "#| output: asis\n",
         " \n",
         "imgfname = \"plausibility_distance_from_target.png\"\n",
@@ -892,6 +1091,14 @@
         "full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))\n",
         "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption) \n",
         "_str = join(include_img_commands, \"\\n\\n\")\n",
+<<<<<<< HEAD
+        "println(_str)\n",
+        "```\n",
+        "\n",
+        "#### Cost\n",
+        "\n",
+        "```{julia}\n",
+=======
         "println(_str)"
       ],
 <<<<<<< HEAD
@@ -918,11 +1125,18 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "#| output: asis\n",
         "\n",
         "fig_label_prefix = \"grid-pen-cost\"\n",
         "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
         "_str = \"The results with respect to the cost measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
+<<<<<<< HEAD
+        "println(_str)\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
+=======
         "println(_str)"
       ],
 <<<<<<< HEAD
@@ -937,6 +1151,7 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "#| output: asis\n",
         " \n",
         "imgfname = \"distance.png\"\n",
@@ -944,6 +1159,14 @@
         "full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))\n",
         "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption)\n",
         "_str = join(include_img_commands, \"\\n\\n\")\n",
+<<<<<<< HEAD
+        "println(_str)\n",
+        "```\n",
+        "\n",
+        "### Other Parameters {#sec-app-grid-train}\n",
+        "\n",
+        "```{julia}\n",
+=======
         "println(_str)"
       ],
 <<<<<<< HEAD
@@ -970,10 +1193,16 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "grid_dir = joinpath(res_dir, \"training_params/mlp\")\n",
         "data_dirs = readdir(grid_dir) |> x -> joinpath.(grid_dir, x) |> x -> x[isdir.(x)]\n",
         "eval_grids = (p -> EvaluationGrid(joinpath(p,\"grid_config.toml\"))).(data_dirs)\n",
         "data_names = basename.(data_dirs)\n",
+<<<<<<< HEAD
+        "suffix = \"evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/\"\n",
+        "```\n",
+        "\n",
+=======
         "suffix = \"evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/\""
       ],
 <<<<<<< HEAD
@@ -988,10 +1217,21 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "The hyperparameter grid with other varying training parameters is shown in @nte-train-final-run-train. The corresponding evaluation grid used for these experiments is shown in @nte-train-final-run-eval.\n",
         "\n",
         "::: {#nte-train-final-run-train .callout-note}\n",
         "\n",
+<<<<<<< HEAD
+        "## Training Phase\n",
+        "\n",
+        "```{julia}\n",
+        "#| output: asis\n",
+        "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/grid_config.toml\")) \n",
+        "println(CTExperiments.dict_to_quarto_markdown(dict))\n",
+        "```\n",
+        "\n",
+=======
         "## Training Phase"
       ],
 <<<<<<< HEAD
@@ -1020,10 +1260,21 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         ":::\n",
         "\n",
         "::: {#nte-train-final-run-eval .callout-note}\n",
         "\n",
+<<<<<<< HEAD
+        "## Evaluation Phase\n",
+        "\n",
+        "```{julia}\n",
+        "#| output: asis\n",
+        "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
+        "println(CTExperiments.dict_to_quarto_markdown(dict))\n",
+        "```\n",
+        "\n",
+=======
         "## Evaluation Phase"
       ],
 <<<<<<< HEAD
@@ -1052,12 +1303,24 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         ":::\n",
         "\n",
         "#### Accuracy\n",
         "\n",
         "::: {#tbl-acc-train}\n",
         "\n",
+<<<<<<< HEAD
+        "::: {.content-hidden unless-format=\"pdf\"}\n",
+        "\n",
+        "```{julia}\n",
+        "#| output: asis\n",
+        "df = CTExperiments.aggregate_performance(eval_grids; byvars=[\"objective\"]) \n",
+        "get_table_inputs(df, \"mean\";backend=Val(:latex)) |>\n",
+        "    inputs -> tabulate_results(inputs; wrap_table=false)\n",
+        "```\n",
+        "\n",
+=======
         "::: {.content-hidden unless-format=\"pdf\"}"
       ],
 <<<<<<< HEAD
@@ -1087,12 +1350,18 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         ":::\n",
         "\n",
         "Predictive performance measures by dataset and objective averaged across training-phase parameters (@nte-train-final-run-train) and evaluation-phase parameters (@nte-train-final-run-eval).\n",
         "\n",
         ":::\n",
         "\n",
+<<<<<<< HEAD
+        "#### Plausibility\n",
+        "\n",
+        "```{julia}\n",
+=======
         "#### Plausibility"
       ],
 <<<<<<< HEAD
@@ -1105,11 +1374,18 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "#| output: asis\n",
         "\n",
         "fig_label_prefix = \"grid-train-plaus\"\n",
         "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
         "_str = \"The results with respect to the plausibility measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
+<<<<<<< HEAD
+        "println(_str)\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
+=======
         "println(_str)"
       ],
 <<<<<<< HEAD
@@ -1124,6 +1400,7 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "#| output: asis\n",
         " \n",
         "imgfname = \"plausibility_distance_from_target.png\"\n",
@@ -1131,6 +1408,14 @@
         "full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))\n",
         "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption) \n",
         "_str = join(include_img_commands, \"\\n\\n\")\n",
+<<<<<<< HEAD
+        "println(_str)\n",
+        "```\n",
+        "\n",
+        "#### Cost\n",
+        "\n",
+        "```{julia}\n",
+=======
         "println(_str)"
       ],
 <<<<<<< HEAD
@@ -1157,11 +1442,18 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "#| output: asis\n",
         "\n",
         "fig_label_prefix = \"grid-train-cost\"\n",
         "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
         "_str = \"The results with respect to the cost measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
+<<<<<<< HEAD
+        "println(_str)\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
+=======
         "println(_str)"
       ],
 <<<<<<< HEAD
@@ -1176,6 +1468,7 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+>>>>>>> 16-final-things-ecml
         "#| output: asis\n",
         " \n",
         "imgfname = \"distance.png\"\n",
@@ -1183,6 +1476,14 @@
         "full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))\n",
         "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption)\n",
         "_str = join(include_img_commands, \"\\n\\n\")\n",
+<<<<<<< HEAD
+        "println(_str)\n",
+        "```\n",
+        "\n",
+        "\n",
+        "\n",
+        "<!-- {{< include /paper/sections/other/initial_grids.qmd >}} -->\n",
+=======
         "println(_str)"
       ],
 <<<<<<< HEAD
@@ -1208,6 +1509,7 @@
         "projectdir = splitpath(pwd()) |>\n",
         "    ss -> joinpath(ss[1:findall([s == \"CounterfactualTraining.jl\" for s in ss])[1]]...) \n",
         "cd(projectdir)\n",
+>>>>>>> 16-final-things-ecml
         "\n",
         "using CTExperiments\n",
         "using CTExperiments.CSV\n",
@@ -1418,18 +1720,22 @@
         "All computations were performed in the Julia Programming Language [@bezanson2017julia]. We have developed a package for counterfactual training that leverages and extends the functionality provided by several existing packages, most notably [CounterfactualExplanations.jl](https://github.com/JuliaTrustworthyAI/CounterfactualExplanations.jl) [@altmeyer2023explaining] and the [Flux.jl](https://fluxml.ai/Flux.jl/v0.16/) library for deep learning [@innes2018fashionable;@innes2018flux]. For data-wrangling and presentation-ready tables we relied on [DataFrames.jl](https://dataframes.juliadata.org/v1.7/) [@milan2023dataframes] and [PrettyTables.jl](https://ronisbr.github.io/PrettyTables.jl/v2.4/) [@chagas2024pretty], respectively. For plots and visualizations we used both [Plots.jl](https://docs.juliaplots.org/v1.40/) [@PlotsJL] and [Makie.jl](https://docs.makie.org/v0.22/) [@danisch2021makie], in particular [AlgebraOfGraphics.jl](https://aog.makie.org/v0.9.3/). To distribute computational tasks across multiple processors, we have relied on [MPI.jl](https://juliaparallel.org/MPI.jl/v0.20/) [@byrne2021mpi].\n"
       ],
 <<<<<<< HEAD
+      "id": "28960c51"
+=======
+<<<<<<< HEAD
       "id": "139347a7"
 =======
       "id": "0444d9c0"
+>>>>>>> 16-final-things-ecml
 >>>>>>> 16-final-things-ecml
     }
   ],
   "metadata": {
     "kernelspec": {
-      "name": "julia-1.11",
-      "language": "julia",
-      "display_name": "Julia 1.11.1",
-      "path": "/Users/paltmeyer/Library/Jupyter/kernels/julia-1.11"
+      "name": "comp_vis",
+      "language": "python",
+      "display_name": "comp_vis",
+      "path": "C:\\Users\\Olek\\AppData\\Roaming\\jupyter\\kernels\\comp_vis"
     }
   },
   "nbformat": 4,

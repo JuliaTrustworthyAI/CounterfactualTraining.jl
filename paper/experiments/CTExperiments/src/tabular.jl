@@ -15,7 +15,6 @@ abstract type TabularData <: Dataset end
 
 """
 function get_data(data::TabularData; n::Union{Nothing,Int}=nothing, test_set::Bool=false)
-
     if exceeds_max(data)
         @warn "Requesting more data than available (using oversampling)."
     end
@@ -157,16 +156,16 @@ get_name(d::Credit; pretty::Bool=false) = pretty ? "Credit" : dname(d)
 
 nmax(d::Credit) = 13272
 
-function load_data(d::Credit, n::Int) 
-    data = Logging.with_logger(Logging.NullLogger()) do 
+function load_data(d::Credit, n::Int)
+    data = Logging.with_logger(Logging.NullLogger()) do
         load_credit_default(n; train_test_split=d.train_test_ratio)
     end
     return data
 end
 
 function get_cats(d::Credit)
-    cats = Logging.with_logger(Logging.NullLogger()) do 
-        load_credit_default(; return_cats=true)[3] 
+    cats = Logging.with_logger(Logging.NullLogger()) do
+        load_credit_default(; return_cats=true)[3]
     end
     return cats
 end

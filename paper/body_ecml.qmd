@@ -1,8 +1,0 @@
----
-format:
-  latex:
-    template: templates/body.tex
-    filters: [cite.lua, abstract-section]
----
-
-{{< include body.qmd >}}

@@ -180,7 +180,9 @@ Base.@kwdef struct TrainingParams <: AbstractConfiguration
     objective::AbstractString = "full"
     lambda_class_loss::AbstractFloat = 1.0
     lambda_energy_diff::AbstractFloat = CounterfactualTraining.default_energy_lambda[1]
-    lambda_energy_reg::AbstractFloat = get_global_param("reg_strength", CounterfactualTraining.default_energy_lambda[2])
+    lambda_energy_reg::AbstractFloat = get_global_param(
+        "reg_strength", CounterfactualTraining.default_energy_lambda[2]
+    )
     lambda_adversarial::AbstractFloat = CounterfactualTraining.default_adversarial_lambda
     class_loss::AbstractString = "logitcrossentropy"
     burnin::AbstractFloat = get_global_param("burnin", 0.0f0)
