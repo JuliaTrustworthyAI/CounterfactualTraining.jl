@@ -242,26 +242,18 @@ these findings within a single objective.
 
 \textbf{Specifically, we propose counterfactual training (CT)}: a novel
 training regime that aligns learned representations with plausible
-explanations compliant with user requirements. The remainder of this
+explanations respecting actionability constraints. The remainder of this
 paper is structured as follows. Section~\ref{sec-lit} presents related
 work, focusing on the link between adversarial examples and
-counterfactual explanations. Then follow our main contributions:
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  In Section~\ref{sec-method}, we introduce our methodological framework
-  and show theoretically that it can be used to enforce global
-  actionability constraints.\\
-\item
-  In Section~\ref{sec-experiments}, through extensive experiments we
-  demonstrate that CT substantially improves explainability without
-  sacrificing predictive performance.
-\end{enumerate}
-
-We discuss the challenges in Section~\ref{sec-discussion} and conclude
-in Section~\ref{sec-conclusion} that CT is a promising approach towards
+counterfactual explanations. Then follow our two principal
+contributions. In Section~\ref{sec-method}, we introduce our
+methodological framework and show theoretically that it can be employed
+to enforce global actionability constraints. In
+Section~\ref{sec-experiments}, through extensive experiments, we
+demonstrate that CT substantially improves explainability without
+sacrificing predictive performance. We discuss the challenges in
+Section~\ref{sec-discussion} and conclude in
+Section~\ref{sec-conclusion} that CT is a promising approach towards
 making opaque models more trustworthy.
 
 \section{Related Literature}\label{sec-lit}
@@ -307,22 +299,20 @@ with different annotations and ensuring that the gradient of the
 classifier aligns with the vector between such pairs of counterfactual
 inputs using the cosine distance as the loss function.
 
-In the natural language processing (NLP) domain, counterfactuals have
-similarly been used to improve models through data augmentation.
-\cite{wu2021polyjuice} propose \emph{Polyjuice}, a general-purpose
-counterfactual generator for language models. They demonstrate
-empirically that the augmentation of training data through
-\emph{Polyjuice} counterfactuals improves robustness in a number of NLP
-tasks. \cite{balashankar2023improving} similarly use \emph{Polyjuice} to
-augment NLP datasets through diverse counterfactuals and show that
-classifier robustness improves by up to 20\%. Finally,
+In the natural language processing (NLP) domain, CEs have also been used
+to improve models through data augmentation. \cite{wu2021polyjuice}
+propose \emph{Polyjuice}, a general-purpose counterfactual generator for
+language models. The authors empirically demonstrate that the
+augmentation of training data with their method improves robustness in a
+number of NLP tasks. \cite{balashankar2023improving} similarly use
+\emph{Polyjuice} to augment NLP datasets through diverse counterfactuals
+and show that classifier robustness improves by up to 20\%. Finally,
 \cite{luu2023counterfactual} introduce Counterfactual Adversarial
 Training (CAT), which also aims at improving generalization and
-robustness of language models through a three-step procedure. First, the
+robustness of language models through a three-step procedure: the
 authors identify training samples that are subject to high predictive
-uncertainty. Second, they generate counterfactual explanations for those
-samples. Finally, they fine-tune the given language model on the
-augmented dataset that includes the generated counterfactuals.
+uncertainty, generate CEs for those samples, and then fine-tune the
+language model on a dataset augmented with the CEs.
 
 There have also been several attempts at formalizing the relationship
 between counterfactual explanations and adversarial examples. Pointing
@@ -344,15 +334,14 @@ Their approach builds on adversarial training by explicitly inducing
 susceptibility to targeted adversarial examples for the positive class.
 Additionally, the proposed method allows for imposing a set of
 actionability constraints ex-ante. For example, users can specify that
-certain features (e.g., \emph{age}, \emph{gender}) are immutable.
-Secondly, \cite{guo2023counternet} are the first to propose an
-end-to-end training pipeline that includes counterfactual explanations
+certain features are immutable. Secondly, \cite{guo2023counternet} are
+the first to propose an end-to-end training pipeline that includes CEs
 as part of the training procedure. In particular, they propose a
 specific network architecture that includes a predictor and CE generator
 network, where the parameters of the CE generator network are learnable.
 Counterfactuals are generated during each training iteration and fed
 back to the predictor network. In contrast to \cite{guo2023counternet},
-we impose no restrictions on the neural network architecture at all.
+we impose no restrictions on the ANN architecture at all.
 
 \subsection{Beyond Robustness}\label{beyond-robustness}
 
@@ -477,7 +466,7 @@ through penalties \(\lambda_{\text{div}}\), \(\lambda_{\text{adv}}\) and
 \subsection{Directly Inducing Explainability with Contrastive
 Divergence}\label{directly-inducing-explainability-with-contrastive-divergence}
 
-\cite{grathwohl2020your} observe that any classifier can be
+As observed by \cite{grathwohl2020your}, any classifier can be
 re-interpreted as a joint energy-based model (JEM) that learns to
 discriminate output classes conditional on the observed (training)
 samples from \(p(\mathbf{x})\) and the generated samples from
@@ -607,18 +596,18 @@ effectively forces the model to instead seek plausibility with respect
 to the remaining features. This in turn results in lower overall
 sensitivity to immutable features, which we demonstrate empirically for
 different classifiers in Section~\ref{sec-experiments}. Under certain
-conditions, this results holds theoretically:\footnote{For the proof,
-  see the supplementary appendix.}
+conditions, this result holds theoretically:\footnote{For the proof, see
+  the supplementary appendix.}
 
 \begin{proposition}[Protecting Immutable Features]
 \label{prp-mtblty}
 Let $f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})$ denote a linear classifier with softmax activation $\mathcal{S}$ where $y\in\{1,...,K\}=\mathcal{K}$ and $\mathbf{x} \in \mathbb{R}^D$. If we assume multivariate Gaussian class densities with common diagonal covariance matrix $\Sigma_k=\Sigma$ for all $k \in \mathcal{K}$, then protecting an immutable feature from the contrastive divergence penalty will result in lower classifier sensitivity to that feature relative to the remaining features, provided that at least one of those is discriminative and mutable.
 \end{proposition}
 
-It is worth highlighting that \mbox{Prp. \ref{prp-mtblty}} assumes
-independence of features. This raises a valid concern about the effect
-of protecting immutable features in the presence of proxies that remain
-unprotected. We address this in Section~\ref{sec-discussion}.
+It is worth highlighting that \mbox{Proposition \ref{prp-mtblty}}
+assumes independence of features. This raises a valid concern about the
+effect of protecting immutable features in the presence of proxies that
+remain unprotected. We address this in Section~\ref{sec-discussion}.
 
 \subsection{Example (Prediction of Consumer Credit
 Default)}\label{example-prediction-of-consumer-credit-default}
@@ -633,37 +622,31 @@ mutable.
 
 We have simulated this scenario using synthetic data with two
 independent features and Gaussian class-conditional densities in
-Figure~\ref{fig-poc}. The four panels in Figure~\ref{fig-poc} show the
-outcomes for different training procedures using the same model
-architecture each time (a linear classifier). In each case, we show the
-decision boundary (in green) and the training data colored according to
-their ground-truth label: orange points belong to the target class,
-\(y^+=2\), blue points belong to the non-target class, \(y^-=1\). Stars
-indicate counterfactuals in the target class generated at test time
-using generic gradient descent until convergence.
+Figure~\ref{fig-poc}. The four panels show the outcomes for different
+training procedures using the same model architectures (a linear
+classifier). In panels (a) and (c) we have trained the models
+conventionally, while in panels (b) and (d) we used CT. Only in panels
+(c) and (d) do we impose the mutability constraint on \emph{age} at test
+time. In each case, we show the decision boundary (in green) and the
+training data colored according to their ground-truth label: orange
+points belong to the target class, \(y^+=2\), blue points belong to the
+non-target class, \(y^-=1\). Stars indicate CEs in the target class
+generated at test time using generic gradient descent until convergence.
 
-In panel (a), we have trained our model conventionally, and we do not
-impose mutability constraints at test time. The generated
-counterfactuals are all valid, but not plausible: they do not comply
-with the distribution of the factual samples in the target class to the
-point where they are clearly distinguishable from the ground-truth data.
-In panel (b), we have trained our model with CT, once again without any
-mutability constraints. We observe that the counterfactuals are highly
+In all cases the counterfactuals are valid but their quality differs. In
+panel (a), they are not plausible: they do not comply with the
+distribution of the factuals in \(y^+\) to the point where they form a
+clearly distinguishable cluster. In panel (b), they are highly
 plausible, meeting the first objective of Def. \ref{def-explainability}.
-
-In panel (c), we have used conventional training again, this time
-imposing the mutability constraint on \emph{age} at test time.
-Counterfactuals are valid but involve some substantial reductions in
-\emph{debt} for some individuals (very young applicants). By comparison,
-counterfactual paths are shorter on average in panel (d), where we have
-used CT and protected the immutable feature as described in
-Section~\ref{sec-constraints}. We observe that due to the classifier's
-lower sensitivity to \emph{age}, recourse recommendations with respect
-to \emph{debt} are much more homogenous and do not disproportionately
-punish younger individuals. The counterfactuals are also plausible with
-respect to the mutable feature and shorter on average than in (c). Thus,
-we consider the model in panel (d) as the most explainable according to
-Def. \ref{def-explainability}.
+In panel (c), the CEs involve substantial reductions in \emph{debt} for
+younger applicants. By comparison, counterfactual paths are shorter on
+average in panel (d) where we have protected the immutable \emph{age} as
+described in Section~\ref{sec-constraints}. Due to the classifier's
+lower sensitivity to \emph{age}, recommendations with respect to
+\emph{debt} are much more homogenous and do not unfairly punish younger
+individuals. These counterfactuals are also plausible with respect to
+the mutable feature. Thus, we consider the model in panel (d) as the
+most explainable according to Def. \ref{def-explainability}.
 
 \begin{figure}
 
@@ -680,27 +663,26 @@ explainability.}
 
 \section{Experiments}\label{sec-experiments}
 
-In this section, we present experiments that we have conducted in order
-to answer the following research questions:
+Here we present the experiments conducted to answer our research
+questions:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  To what extent does our proposed counterfactual training objective in
-  Equation~\ref{eq-obj} induce models to learn plausible explanations?
+  To what extent does our counterfactual training objective as defined
+  in Equation~\ref{eq-obj} induce models to learn plausible
+  explanations?
 \item
-  To what extent does our proposed counterfactual training objective in
-  Equation~\ref{eq-obj} yield more favorable algorithmic recourse
-  outcomes in the presence of actionability constraints?
+  To what extent does the CT objective produce more favorable
+  algorithmic recourse outcomes in the presence of actionability
+  constraints?
 \item
-  What are the effects of hyperparameter selection with respect to
-  Equation~\ref{eq-obj}?
+  What are the effects of hyperparameter selection wrt. the CT
+  objective?
 \end{enumerate}
 
 \subsection{Experimental Setup}\label{experimental-setup}
-
-\subsubsection{Evaluation}\label{evaluation}
 
 Our key outcome of interest is how well do models perform with respect
 to explainability (Def. \ref{def-explainability}). To this end, we focus
@@ -739,32 +721,31 @@ directly targets both faithfulness and plausibility of the CEs.
 
 \subsection{Experimental Results}\label{experimental-results}
 
-\subsubsection{Plausibility}\label{sec-plaus}
+\subsubsection{Plausibility.}\label{sec-plaus}
 
 Table~\ref{tbl-main} presents our main empirical findings. The top five
 rows show the percentage reduction in implausibility according to
 Equation~\ref{eq-impl-dist} for varying degrees of the energy penalty
-used for \emph{ECCo} at test time. The following row shows the reduction
-in implausibility as measured by Equation~\ref{eq-impl-div} and
-aggregated across all test specifications of \emph{ECCo}. The following
-two rows show the test accuracies for the model trained with CT and
-conventionally trained models (``vanilla'').
+used for \emph{ECCo} at test time. Row 6 shows the reduction in
+implausibility as measured by Equation~\ref{eq-impl-div} and aggregated
+across all test specifications of \emph{ECCo}. Rows 7 and 8 show the
+test accuracies for the model trained with CT and conventionally trained
+models (``vanilla'').
 
-We observe that for all datasets except \emph{OL} and across all test
-settings, the average distance of counterfactuals from observed samples
-in the target class is reduced, indicating improved plausibility. The
-magnitude of improvements varies by dataset: for the simple synthetic
-datasets, distance reductions range from around 20-40\% (\emph{LS},
-\emph{Moon}) to almost 60\% (\emph{Circ}). For the real-world tabular
-datasets, improvements are generally smaller but still substantial in
-many cases with around 10-15\% for \emph{CH}, 11-28\% for \emph{GMSC},
-7-8\% for \emph{Cred} and around 3\% for \emph{Adult}. For our only
-vision dataset (\emph{MNIST}), distances are reduced by up to 9\%. The
-results for our proposed divergence metric are qualitatively similar,
-but generally even more pronounced: for the \emph{Circ} dataset,
-implausibility is reduced by almost 94\% to virtually zero as we
-verified by looking at the absolute outcome. Improvements for other
-datasets range from 28\% (\emph{Moon}) to 78\% (\emph{GMSC}). For
+For all datasets except \emph{OL} and across all test settings, the
+average distance of CEs from observed samples in the target class is
+reduced, indicating improved plausibility. The magnitude of improvements
+varies. For the simple synthetic datasets, distance reductions range
+from around 20-40\% (\emph{LS}, \emph{Moon}) to almost 60\%
+(\emph{Circ}). For the real-world tabular datasets, improvements tend to
+be smaller but still substantial, with around 10-15\% for \emph{CH},
+11-28\% for \emph{GMSC}, 7-8\% for \emph{Cred} and around 3\% for
+\emph{Adult}. For our only vision dataset (\emph{MNIST}), distances are
+reduced by up to 9\%. The results for our proposed divergence metric are
+qualitatively similar, but generally even more pronounced: for the
+\emph{Circ} dataset, implausibility is reduced by almost 94\% to
+virtually zero as we verified by the absolute outcome. Improvements for
+other datasets range from 28\% (\emph{Moon}) to 78\% (\emph{GMSC}). For
 \emph{OL} the reduction is negative, consistent with the distance-based
 metric. \emph{MNIST} is the only dataset for which the two metrics
 disagree.
@@ -804,7 +785,7 @@ average reduction in costs when imposing mutability constraints.}
 
 \end{table}%
 
-\subsubsection{Actionability}\label{sec-act}
+\subsubsection{Actionability.}\label{sec-act}
 
 In Section~\ref{sec-method}, we show that our proposed way for encoding
 mutability constraints leads to lower classifier sensitivity wrt.
@@ -821,11 +802,10 @@ substantially indicating that classifiers trained with CT are indeed
 more sensitive to mutable features.
 
 \subsubsection{Impact of hyperparameter
-settings}\label{sec-hyperparameters}
+settings.}\label{sec-hyperparameters}
 
-We test in-depth the impact of three types of hyperparameters; our
-complete results are in the appendix.
-
+We test the impact of three types of hyperparameters; our complete
+results are in the supplementary appendix.\\
 \textbf{\emph{Hyperparameters of the CE generators.}} First, we observe
 that CT is highly sensitive to hyperparameter settings but (a) there are
 manageable patterns and (b) we can typically identify settings that
@@ -842,8 +822,7 @@ satisfy high \(\tau\) for any given sample (i.e., also factuals) and so
 increasing this threshold does not seem to correlate with better
 outcomes. In fact, we have generally found that a choice of \(\tau=0.5\)
 leads to optimal results because it is associated with high proportions
-of mature counterfactuals.
-
+of mature counterfactuals.\\
 \textbf{\emph{Hyperparameters for penalties.}} We find that the strength
 of the energy regularization, \(\lambda_{\text{reg}}\) is highly
 impactful; energy must be sufficiently regularized to avoid poor
@@ -852,8 +831,7 @@ sensitivity with respect to \(\lambda_{\text{div}}\) and
 \(\lambda_{\text{adv}}\) is much less evident. While high values of
 \(\lambda_{\text{reg}}\) may increase the variability in outcomes when
 combined with high values of \(\lambda_{\text{div}}\) or
-\(\lambda_{\text{adv}}\), this effect is not very pronounced.
-
+\(\lambda_{\text{adv}}\), this effect is not very pronounced.\\
 \textbf{\emph{Other hyperparameters.}} We observe that the effectiveness
 and stability of CT is positively associated with the number of
 counterfactuals generated during each training epoch. We also confirm
@@ -865,47 +843,9 @@ improve the explainability of models in a fine-tuning manner.
 
 \section{Discussion}\label{sec-discussion}
 
-We first address the direct extensions of CT in
-Section~\ref{sec-approach}. Then, we look at its limitations and
-challenges in Section~\ref{sec-limitations}.
-
-\subsection{Future Research}\label{sec-approach}
-
-\textbf{\emph{CT is defined only for classification settings.}} Our
-formulation relies on the distinction between non-target class(es)
-\(y^{-}\) and target class(es) \(y^{+}\) to generate counterfactuals
-through Equation~\ref{eq-obj}. While \(y^{-}\) and \(y^{+}\) can be
-arbitrarily defined, CT requires the output space \(\mathcal{Y}\) to be
-discrete. Thus, it does not apply to ML tasks where the change in
-outcome cannot be readily quantified. Focus on classification models is
-a common restriction in research on CEs and AR. Other settings have
-attracted some interest (e.g., regression in
-\cite{spooner2021counterfactual,zhao2023counterfactual}), but there is
-little consensus how to robustly extend the notion of counterfactuals.
-
-\textbf{\emph{CT is subject to training instabilities.}} JEMs are
-susceptible to instabilities during training \cite{grathwohl2020your}
-and even though we depart from the SGLD-based sampling, we still
-encounter major variability in the outcomes. CT is exposed to two
-potential sources of instabilities: (1) the energy-based contrastive
-divergence term in Equation~\ref{eq-div}, and (2) the underlying
-counterfactual explainers. Still, we find that training instabilities
-can be successfully mitigated by regularizing energy
-(\(\lambda_{\text{reg}}\)), generating sufficiently many counterfactuals
-during each training epoch, and including only mature counterfactuals
-for contrastive divergence.
-
-\textbf{\emph{CT is sensitive to hyperparameter selection.}} Our method
-benefits from the tuning of certain key hyperparameters (see
-Section~\ref{sec-hyperparameters}). In this work, we have relied
-exclusively on grid search for this task. Future work on CT could
-benefit from investigating more sophisticated approaches towards
-hyperparameter tuning. Notably, CT is iterative which makes a variety of
-methods applicable, including Bayesian \cite{snoek2012practical} or
-gradient-based \cite{franceschi2017forward} optimization.
-
-\subsection{Current Limitations}\label{sec-limitations}
-
+As our results indicate, counterfactual training produces models that
+are more explainable. However, our approach is not without
+limitations.\\
 \textbf{\emph{CT increases the training time of models.}} CT can be more
 time-consuming than conventional training regimes. While higher numbers
 of CEs per iteration positively impact the quality of solutions, they
@@ -917,8 +857,7 @@ attenuate this effect. First, CT amortizes the cost of CEs for the
 training samples. Second, we find that it can retain its value when used
 as a ``fine-tuning'' technique for conventionally-trained models. Third,
 it yields itself to parallel execution, which we have leveraged for our
-own experiments.
-
+own experiments.\\
 \textbf{\emph{Immutable features may have proxies.}} We propose an
 approach to protect immutable features and thus increase the
 actionability of the generated CEs. However, it requires that model
@@ -928,8 +867,7 @@ exist proxies that are mutable (and hence should not be protected) but
 preserve enough information about the principals to hinder the
 protections. Delineating actionability is a major undecided challenge in
 the AR literature \cite{venkatasubramanian2020philosophical} impacting
-the capacity of CT to increase the explainability of the model.
-
+the capacity of CT to fulfill its intended goal.\\
 \textbf{\emph{Interventions on features may impact fairness.}} We
 provide a tool that allows practitioners to modify the sensitivity of a
 model with respect to certain features, which may have implication for
@@ -944,6 +882,38 @@ groups. When applied irresponsibly, CT could result in an unfairly
 assigned burden of recourse \cite{sharma2020certifai}, threatening the
 equality of opportunity in the system \cite{bell2024fairness}. Still,
 these phenomena are not specific to CT.
+
+We also highlight several interesting directions for future research.\\
+\textbf{\emph{Extending CT beyond classification settings.}} Our
+formulation relies on the distinction between non-target class(es)
+\(y^{-}\) and target class(es) \(y^{+}\) to generate counterfactuals
+through Equation~\ref{eq-obj}. While \(y^{-}\) and \(y^{+}\) can be
+arbitrarily defined, CT requires the output space \(\mathcal{Y}\) to be
+discrete. Thus, it does not apply to ML tasks where the change in
+outcome cannot be readily quantified. Focus on classification models is
+a common restriction in research on CEs and AR. Other settings have
+attracted some interest (e.g., regression in
+\cite{spooner2021counterfactual,zhao2023counterfactual}), but there is
+little consensus how to robustly extend the notion of CEs.\\
+\textbf{\emph{Addressing the training instabilities.}} JEMs are
+susceptible to instabilities during training \cite{grathwohl2020your}
+and even though we depart from the SGLD-based sampling, we still
+encounter major variability in the outcomes. CT is exposed to two
+potential sources of instabilities: (1) the energy-based contrastive
+divergence term in Equation~\ref{eq-div}, and (2) the underlying
+counterfactual explainers. Still, we find that training instabilities
+can be successfully mitigated by regularizing energy
+(\(\lambda_{\text{reg}}\)), generating sufficiently many counterfactuals
+during each training epoch, and including only mature counterfactuals
+for contrastive divergence.\\
+\textbf{\emph{Improving hyperparameter selection procedures.}} Our
+method benefits from the tuning of certain key hyperparameters (see
+Section~\ref{sec-hyperparameters}). In this work, we have relied
+exclusively on grid search for this task. Future work on CT could
+benefit from investigating more sophisticated approaches towards
+hyperparameter tuning. Notably, CT is iterative which makes a variety of
+methods applicable, including Bayesian \cite{snoek2012practical} or
+gradient-based \cite{franceschi2017forward} optimization.
 
 \section{Conclusion}\label{sec-conclusion}
 

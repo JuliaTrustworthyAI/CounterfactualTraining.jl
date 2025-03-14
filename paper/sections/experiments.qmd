@@ -1,14 +1,12 @@
 # Experiments {#sec-experiments}
 
-In this section, we present experiments that we have conducted in order to answer the following research questions:
+Here we present the experiments conducted to answer our research questions:
 
-1. To what extent does our proposed counterfactual training objective in @eq-obj induce models to learn plausible explanations?
-2. To what extent does our proposed counterfactual training objective in @eq-obj yield more favorable algorithmic recourse outcomes in the presence of actionability constraints?
-3. What are the effects of hyperparameter selection with respect to @eq-obj?
+1. To what extent does our counterfactual training objective as defined in @eq-obj induce models to learn plausible explanations?
+2. To what extent does the CT objective produce more favorable algorithmic recourse outcomes in the presence of actionability constraints?
+3. What are the effects of hyperparameter selection wrt. the CT objective?
 
 ## Experimental Setup
-
-### Evaluation 
 
 Our key outcome of interest is how well do models perform with respect to explainability (Def. \ref{def-explainability}). To this end, we focus primarily on the plausibility and cost of faithfully generated counterfactuals at test time. To measure the cost of counterfactuals, we follow the standard convention of using distances ($\ell_1$-norm) between factuals and counterfactuals as a proxy. For plausibility, we assess how similar counterfactuals are to observed samples in the target domain, $\mathbf{X}^+\subset\mathcal{X}^+$. We rely on the distance-based metric used by @altmeyer2024faithful,
 
@@ -28,11 +26,11 @@ We run the experiments with three gradient-based generators: *Generic* of @wacht
 
 ## Experimental Results
 
-### Plausibility {#sec-plaus}
+### Plausibility. {#sec-plaus}
 
-@tbl-main presents our main empirical findings. The top five rows show the percentage reduction in implausibility according to @eq-impl-dist for varying degrees of the energy penalty used for *ECCo* at test time. The following row shows the reduction in implausibility as measured by @eq-impl-div and aggregated across all test specifications of *ECCo*. The following two rows show the test accuracies for the model trained with CT and conventionally trained models ("vanilla"). 
+@tbl-main presents our main empirical findings. The top five rows show the percentage reduction in implausibility according to @eq-impl-dist for varying degrees of the energy penalty used for *ECCo* at test time. Row 6 shows the reduction in implausibility as measured by @eq-impl-div and aggregated across all test specifications of *ECCo*. Rows 7 and 8 show the test accuracies for the model trained with CT and conventionally trained models ("vanilla"). 
 
-We observe that for all datasets except *OL* and across all test settings, the average distance of counterfactuals from observed samples in the target class is reduced, indicating improved plausibility. The magnitude of improvements varies by dataset: for the simple synthetic datasets, distance reductions range from around 20-40% (*LS*, *Moon*) to almost 60% (*Circ*). For the real-world tabular datasets, improvements are generally smaller but still substantial in many cases with around 10-15% for *CH*, 11-28% for *GMSC*, 7-8% for *Cred* and around 3% for *Adult*. For our only vision dataset (*MNIST*), distances are reduced by up to 9%. The results for our proposed divergence metric are qualitatively similar, but generally even more pronounced: for the *Circ* dataset, implausibility is reduced by almost 94% to virtually zero as we verified by looking at the absolute outcome. Improvements for other datasets range from 28% (*Moon*) to 78% (*GMSC*). For *OL* the reduction is negative, consistent with the distance-based metric. *MNIST* is the only dataset for which the two metrics disagree.
+For all datasets except *OL* and across all test settings, the average distance of CEs from observed samples in the target class is reduced, indicating improved plausibility. The magnitude of improvements varies. For the simple synthetic datasets, distance reductions range from around 20-40% (*LS*, *Moon*) to almost 60% (*Circ*). For the real-world tabular datasets, improvements tend to be smaller but still substantial, with around 10-15% for *CH*, 11-28% for *GMSC*, 7-8% for *Cred* and around 3% for *Adult*. For our only vision dataset (*MNIST*), distances are reduced by up to 9%. The results for our proposed divergence metric are qualitatively similar, but generally even more pronounced: for the *Circ* dataset, implausibility is reduced by almost 94% to virtually zero as we verified by the absolute outcome. Improvements for other datasets range from 28% (*Moon*) to 78% (*GMSC*). For *OL* the reduction is negative, consistent with the distance-based metric. *MNIST* is the only dataset for which the two metrics disagree.
 
 These broad and substantial improvements in plausibility generally do not come at the cost of decreased predictive performance: test accuracy for CT is virtually identical to the baseline for *Adult*, *Circ*, *LS*, *Moon* and *OL*, and even slightly improved for *Cred*. Exceptions to this general pattern are *MNIST*, *CH* and *GMSC*, for which we observe reduction in test accuracy of 2, 5 and 15 percentage points, respectively. We note in this context, that we have not optimized our models for predictive performance at all and worked with very small networks. In summary, we find that CT can substantially improve the quality of explanations learned by models without sacrificing predictive accuracy. 
 
@@ -48,15 +46,12 @@ Key explainability and predictive performance metrics for all datasets. **Plausi
 
 :::
 
-### Actionability {#sec-act}
+### Actionability. {#sec-act}
 
 In @sec-method, we show that our proposed way for encoding mutability constraints leads to lower classifier sensitivity wrt. immutable features for linear models, tilting the decision boundary in favour of mutable features instead. For binding constraints at test time, this has the effect of shorter counterfactual paths and hence smaller average costs to individuals. To extend this to the non-linear case, we test the effect of imposing mutability constraints empirically for our synthetic data using the same evaluation scheme as above. The final row in @tbl-main reports the average reduction in costs for CT compared to the baseline, when imposing that either the first or the second feature is immutable. In all cases, costs are reduced substantially indicating that classifiers trained with CT are indeed more sensitive to mutable features. 
 
-### Impact of hyperparameter settings {#sec-hyperparameters}
-We test in-depth the impact of three types of hyperparameters; our complete results are in the appendix.
-
-***Hyperparameters of the CE generators.*** First, we observe that CT is highly sensitive to hyperparameter settings but (a) there are manageable patterns and (b) we can typically identify settings that improve either plausibility or cost, and commonly both of them at the same time. Second, we note that the choice of a CE generator has a major impact on the results. For example, *REVISE* tends to perform the worst, most likely because it uses a surrogate VAE to generate counterfactuals which impedes faithfulness [@altmeyer2024faithful]. Third, increasing $T$, the maximum number of steps, generally yields better outcomes because more CEs can mature in each training epoch. Fourth, the impact of $\tau$, the required decision threshold is more difficult to predict. On "harder" datasets it may be difficult to satisfy high $\tau$ for any given sample (i.e., also factuals) and so increasing this threshold does not seem to correlate with better outcomes. In fact, we have generally found that a choice of $\tau=0.5$ leads to optimal results because it is associated with high proportions of mature counterfactuals.
-
-***Hyperparameters for penalties.*** We find that the strength of the energy regularization, $\lambda_{\text{reg}}$ is highly impactful; energy must be sufficiently regularized to avoid poor performance in terms of decreased plausibility and increased costs. The sensitivity with respect to $\lambda_{\text{div}}$ and $\lambda_{\text{adv}}$ is much less evident. While high values of $\lambda_{\text{reg}}$ may increase the variability in outcomes when combined with high values of $\lambda_{\text{div}}$ or $\lambda_{\text{adv}}$, this effect is not very pronounced.
-
+### Impact of hyperparameter settings. {#sec-hyperparameters}
+We test the impact of three types of hyperparameters; our complete results are in the supplementary appendix.  
+***Hyperparameters of the CE generators.*** First, we observe that CT is highly sensitive to hyperparameter settings but (a) there are manageable patterns and (b) we can typically identify settings that improve either plausibility or cost, and commonly both of them at the same time. Second, we note that the choice of a CE generator has a major impact on the results. For example, *REVISE* tends to perform the worst, most likely because it uses a surrogate VAE to generate counterfactuals which impedes faithfulness [@altmeyer2024faithful]. Third, increasing $T$, the maximum number of steps, generally yields better outcomes because more CEs can mature in each training epoch. Fourth, the impact of $\tau$, the required decision threshold is more difficult to predict. On "harder" datasets it may be difficult to satisfy high $\tau$ for any given sample (i.e., also factuals) and so increasing this threshold does not seem to correlate with better outcomes. In fact, we have generally found that a choice of $\tau=0.5$ leads to optimal results because it is associated with high proportions of mature counterfactuals.  
+***Hyperparameters for penalties.*** We find that the strength of the energy regularization, $\lambda_{\text{reg}}$ is highly impactful; energy must be sufficiently regularized to avoid poor performance in terms of decreased plausibility and increased costs. The sensitivity with respect to $\lambda_{\text{div}}$ and $\lambda_{\text{adv}}$ is much less evident. While high values of $\lambda_{\text{reg}}$ may increase the variability in outcomes when combined with high values of $\lambda_{\text{div}}$ or $\lambda_{\text{adv}}$, this effect is not very pronounced.  
 ***Other hyperparameters.*** We observe that the effectiveness and stability of CT is positively associated with the number of counterfactuals generated during each training epoch. We also confirm that a higher number of training epochs is beneficial. Interestingly, we observed desired improvements in explainability when CT was combined with conventional training and applied only for the final 50% of epochs of the complete training process. Put differently, CT may be a way to improve the explainability of models in a fine-tuning manner. 
