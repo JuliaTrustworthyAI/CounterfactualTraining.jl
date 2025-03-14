@@ -717,7 +717,22 @@ approach, \emph{REVISE} \cite{joshi2019realistic} that aims to generate
 plausible counterfactuals using a surrogate Variational Autoencoder
 (VAE), and \emph{ECCo}---the generator of \cite{altmeyer2024faithful}
 but without the conformal prediction component---as a method that
-directly targets both faithfulness and plausibility of the CEs.
+directly targets both faithfulness and plausibility of the
+counterfactuals.
+
+We make use of nine classification datasets common in the CE/AR
+literature. Four of them are synthetic with two classes and different
+characteristics: linearly separable clusters (\emph{LS}), overlapping
+clusters (\emph{OL}), concentric circles (\emph{Circ}), and interlocking
+moons (\emph{Moon}). These datasets are generated using the library of
+\cite{altmeyer2023explaining} and we present them in the supplementary
+appendix. Next, we have four real-world binary tabular datasets from the
+domain of economics: \emph{Adult} (a.k.a. Census data) of
+\cite{becker1996adult2}, California housing (\emph{CH}) of
+\cite{pace1997sparse}, Default of Credit Card Clients (\emph{Cred}) of
+\cite{yeh2016default}, and Give Me Some Credit (\emph{GMSC}) of
+\cite{kaggle2011give2}. Finally, for the convenience of illustration, we
+use of the 10-class \emph{MNIST} vision dataset \cite{lecun1998mnist}.
 
 \subsection{Experimental Results}\label{experimental-results}
 

@@ -22,7 +22,9 @@ where $\mathbf{X}^\prime$ denotes a collection of counterfactuals and $\text{MMD
 
 In addition to cost and plausibility, we also compute other standard metrics to evaluate counterfactuals at test time including validity and redundancy. Finally, we also assess the predictive performance of models using standard metrics.
 
-We run the experiments with three gradient-based generators: *Generic* of @wachter2017counterfactual as a simple baseline approach, *REVISE* [@joshi2019realistic] that aims to generate plausible counterfactuals using a surrogate Variational Autoencoder (VAE), and *ECCo*---the generator of @altmeyer2024faithful but without the conformal prediction component---as a method that directly targets both faithfulness and plausibility of the CEs.
+We run the experiments with three gradient-based generators: *Generic* of @wachter2017counterfactual as a simple baseline approach, *REVISE* [@joshi2019realistic] that aims to generate plausible counterfactuals using a surrogate Variational Autoencoder (VAE), and *ECCo*---the generator of @altmeyer2024faithful but without the conformal prediction component---as a method that directly targets both faithfulness and plausibility of the counterfactuals.
+
+We make use of nine classification datasets common in the CE/AR literature. Four of them are synthetic with two classes and different characteristics: linearly separable clusters (*LS*), overlapping clusters (*OL*), concentric circles (*Circ*), and interlocking moons (*Moon*). These datasets are generated using the library of [@altmeyer2023explaining] and we present them in the supplementary appendix. Next, we have four real-world binary tabular datasets from the domain of economics: *Adult* (a.k.a. Census data) of [@becker1996adult2], California housing (*CH*) of [@pace1997sparse], Default of Credit Card Clients (*Cred*) of [@yeh2016default], and Give Me Some Credit (*GMSC*) of [@kaggle2011give2]. Finally, for the convenience of illustration, we use of the 10-class *MNIST* vision dataset [@lecun1998mnist].
 
 ## Experimental Results
 

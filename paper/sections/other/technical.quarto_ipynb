@@ -29,14 +29,10 @@
         "\n",
         "An important consideration when generating counterfactual explanations using gradient-based methods is how to define convergence. Two common choices are to 1) perform gradient descent over a fixed number of iterations $T$, or 2) conclude the search as soon as the predicted probability for the target class has reached a pre-determined threshold, $\\tau$: $\\mathcal{S}(\\mathbf{M}_\\theta(\\mathbf{x}^\\prime))[y^+] \\geq \\tau$. We prefer the latter for our purposes, because it explicitly defines convergence in terms of the black-box model, $\\mathbf{M}(\\mathbf{x})$.\n",
         "\n",
-        "Defining convergence in this way allows for a more intuitive interpretation of the resulting counterfactual outcomes than with fixed $T$. Specifically, it allows us to think of counterfactuals as explaining 'high-confidence' predictions by the model for the target class $y^+$. Depending on the context and application, different choices of $\\tau$ can be considered as representing 'high-confidence' predictions.\n"
-      ],
-      "id": "7fe403ff"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "Defining convergence in this way allows for a more intuitive interpretation of the resulting counterfactual outcomes than with fixed $T$. Specifically, it allows us to think of counterfactuals as explaining 'high-confidence' predictions by the model for the target class $y^+$. Depending on the context and application, different choices of $\\tau$ can be considered as representing 'high-confidence' predictions.\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "#| eval: false\n",
         "\n",
         "projectdir = splitpath(pwd()) |>\n",
@@ -49,16 +45,9 @@
         "using CTExperiments.Flux\n",
         "using CTExperiments.Plots\n",
         "using CTExperiments.TaijaPlotting\n",
-        "using Plots.PlotMeasures"
-      ],
-      "id": "47c99903",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "using Plots.PlotMeasures\n",
+        "```\n",
+        "\n",
         "## Protecting Mutability Constraints with Linear Classifiers {#sec-app-constraints}\n",
         "\n",
         "In @sec-constraints we explain that to avoid penalizing implausibility that arises due to mutability constraints, we impose a point mass prior on $p(\\mathbf{x})$ for the corresponding feature. We argue in @sec-constraints that this approach induces models to be less sensitive to immutable features and demonstrate this empirically in @sec-experiments. Below we derive the analytical results in Prp.~\\ref{prp-mtblty}.\n",
@@ -105,14 +94,9 @@
         "\n",
         "Thus, our proposed approach of protecting feature $d_{\\text{immtbl}}$ has the net affect of decreasing the classifier's sensitivity to the immutable feature relative to the mutable feature (i.e. no change in sensitivity for $d_{\\text{immtbl}}$ relative to increased sensitivity for $d_{\\text{mtbl}}$).\n",
         "\n",
-        ":::"
-      ],
-      "id": "cf9eb9ac"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        ":::\n",
+        "\n",
+        "```{julia}\n",
         "#| eval: false\n",
         "\n",
         "using CTExperiments: \n",
@@ -183,16 +167,10 @@
         "    # (\"(b)\", FullObjective(lambda=[1.0,0.5,0.01,0.1]), [\"both\", \"both\"]),\n",
         "    # (\"(c)\", VanillaObjective(needs_ce=true), [\"both\", \"none\"]),\n",
         "    (\"(d)\", FullObjective(lambda=[1.0,0.5,0.01,0.1]), [\"both\", \"none\"]),\n",
-        "]"
-      ],
-      "id": "ef945566",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "]\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
         "#| eval: false\n",
         "\n",
         "using CounterfactualExplanations.Convergence\n",
@@ -246,16 +224,10 @@
         "\n",
         "    push!(models, model)\n",
         "    push!(plts, current())\n",
-        "end"
-      ],
-      "id": "d6aadd0e",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "end\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
         "#| eval: false\n",
         "\n",
         "plt = Plots.plot(\n",
@@ -268,16 +240,10 @@
         "    right_margin = 10mm,\n",
         ")\n",
         "display(plt)\n",
-        "Plots.savefig(plt, \"paper/figures/poc.svg\")"
-      ],
-      "id": "b20c2185",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "Plots.savefig(plt, \"paper/figures/poc.svg\")\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
         "#| eval: false\n",
         "\n",
         "plts = []\n",
@@ -296,16 +262,9 @@
         "end\n",
         "\n",
         "plt = Plots.plot(plts..., layout=(1,2), size=(600,300))\n",
-        "Plots.savefig(plt, \"paper/figures/app_mtblty.svg\")"
-      ],
-      "id": "0d4a6caf",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "Plots.savefig(plt, \"paper/figures/app_mtblty.svg\")\n",
+        "```\n",
+        "\n",
         "## Domain Constraints\n",
         "\n",
         "We apply domain constraints on counterfactuals during training and evaluation. There are at least two good reasons for doing so. Firstly, within the context of explainability and algorithmic recourse, real-world attributes are often domain constrained: the *age* feature, for example, is lower bounded by zero and upper bounded by the maximum human lifespan. Secondly, domain constraints help mitigate training instabilities commonly associated with energy-based modelling [@grathwohl2020your;@altmeyer2024faithful].\n",
@@ -326,15 +285,15 @@
         "\n",
         "In this section, we describe the training procedure in detail. While the details laid out here are not crucial for understanding our proposed approach, they are of importance to anyone looking to implement counterfactual training. \n"
       ],
-      "id": "1ac23447"
+      "id": "e8cb4bc8"
     }
   ],
   "metadata": {
     "kernelspec": {
-      "name": "julia-1.11",
-      "language": "julia",
-      "display_name": "Julia 1.11.1",
-      "path": "/Users/paltmeyer/Library/Jupyter/kernels/julia-1.11"
+      "name": "comp_vis",
+      "language": "python",
+      "display_name": "comp_vis",
+      "path": "C:\\Users\\Olek\\AppData\\Roaming\\jupyter\\kernels\\comp_vis"
     }
   },
   "nbformat": 4,
