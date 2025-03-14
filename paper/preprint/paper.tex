@@ -127,6 +127,8 @@
 \newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
 \newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 
+\usepackage[title]{appendix}
+\usepackage{placeins}
 \usepackage{amsthm}
 \theoremstyle{plain}
 \newtheorem{proposition}{Proposition}[section]
@@ -228,7 +230,7 @@ Learning},
 \usepackage{lineno}
 \linenumbers
 \newcommand{\runninghead}{A Preprint }
-\renewcommand{\runninghead}{counterfactual training (A Preprint) }
+\renewcommand{\runninghead}{Counterfactual Training (A Preprint) }
 \title{Counterfactual Training: Teaching Models Plausible and Actionable
 Explanations}
 \def\asep{\\\\\\ } % default: all authors on same column
@@ -280,7 +282,7 @@ driven by \textbf{representation learning}: instead of relying on
 features and rules that are carefully hand-crafted by humans, modern
 machine learning (ML) models are tasked with learning representations
 directly from data, guided by narrow objectives such as predictive
-accuracy (\citeproc{ref-goodfellow2016deep}{I. Goodfellow, Bengio, and
+accuracy (\citeproc{ref-goodfellow2016deep}{Goodfellow, Bengio, and
 Courville 2016}). Modern advances in computing have made it possible to
 provide such models with ever-growing degrees of freedom to achieve that
 task, which frequently allows them to outperform traditionally more
@@ -291,16 +293,16 @@ can no longer easily interpret.
 The trend towards complexity for the sake of performance has come under
 serious scrutiny in recent years. At the very cusp of the deep learning
 (DL) revolution, Szegedy et al.
-(\citeproc{ref-szegedy2013intriguing}{2013}) showed that artificial
+(\citeproc{ref-szegedy2013intriguing}{2014}) showed that artificial
 neural networks (ANN) are sensitive to adversarial examples (AEs):
 perturbed versions of data instances that yield vastly different model
 predictions despite being ``imperceptible'' in that they are
 semantically indifferent from their factual counterparts. Even though
 some partially effective mitigation strategies have been proposed---most
 notably \textbf{adversarial training}
-(\citeproc{ref-goodfellow2014explaining}{I. J. Goodfellow, Shlens, and
-Szegedy 2014})---truly robust deep learning remains unattainable even
-for models that are considered ``shallow'' by today's standards
+(\citeproc{ref-goodfellow2014explaining}{Goodfellow, Shlens, and Szegedy
+2015})---truly robust deep learning remains unattainable even for models
+that are considered ``shallow'' by today's standards
 (\citeproc{ref-kolter2023keynote}{Kolter 2023}).
 
 Part of the problem is that the high degrees of freedom provide room for
@@ -697,7 +699,7 @@ t_\varepsilon &= \max_t \{t: ||\Delta_t||_\infty < \varepsilon\}
 \(\mathbf{x}_{t\leq T}^\prime\) as AEs as long as the magnitude of the
 perturbation to any single feature is at most \(\varepsilon\). This is
 closely aligned with Szegedy et al.
-(\citeproc{ref-szegedy2013intriguing}{2013}) who define an adversarial
+(\citeproc{ref-szegedy2013intriguing}{2014}) who define an adversarial
 attack as an ``imperceptible non-random perturbation''. Thus, we choose
 to work with a different distinction between CE and AE than Freiesleben
 (\citeproc{ref-freiesleben2022intriguing}{2022}) who consider
@@ -711,13 +713,13 @@ Many existing counterfactual explainers support domain and mutability
 constraints out-of-the-box. In fact, both types of constraints can be
 implemented for any counterfactual explainer that relies on gradient
 descent in the feature space for optimization
-(\citeproc{ref-altmeyer2023explaining}{Altmeyer, Deursen, et al. 2023}).
-In this context, domain constraints can be imposed by simply projecting
-counterfactuals back to the specified domain, if the previous gradient
-step resulted in updated feature values that were out-of-domain.
-Mutability constraints can similarly be enforced by setting partial
-derivatives to zero to ensure that features are only perturbed in the
-allowed direction, if at all.
+(\citeproc{ref-altmeyer2023explaining}{Altmeyer, Deursen, and Liem
+2023}). In this context, domain constraints can be imposed by simply
+projecting counterfactuals back to the specified domain, if the previous
+gradient step resulted in updated feature values that were
+out-of-domain. Mutability constraints can similarly be enforced by
+setting partial derivatives to zero to ensure that features are only
+perturbed in the allowed direction, if at all.
 
 Since such actionability constraints are binding at test time, we should
 also impose them when generating \(\mathbf{x}^\prime\) during each
@@ -807,8 +809,9 @@ Section~\ref{sec-constraints}. We observe that due to the classifier's
 lower sensitivity to \emph{age}, recourse recommendations with respect
 to \emph{debt} are much more homogenous and do not disproportionately
 punish younger individuals. The counterfactuals are also plausible with
-respect to the mutable feature. Thus, we consider the model in panel (d)
-as the most explainable according to Def. \ref{def-explainability}.
+respect to the mutable feature and shorter on average than in (c). Thus,
+we consider the model in panel (d) as the most explainable according to
+Def. \ref{def-explainability}.
 
 \begin{figure}
 
@@ -854,7 +857,8 @@ counterfactuals at test time. To measure the cost of counterfactuals, we
 follow the standard convention of using distances (\(\ell_1\)-norm)
 between factuals and counterfactuals as a proxy. For plausibility, we
 assess how similar counterfactuals are to observed samples in the target
-domain. We rely on the distance-based metric used by Altmeyer et al.
+domain, \(\mathbf{X}^+\subset\mathcal{X}^+\). We rely on the
+distance-based metric used by Altmeyer et al.
 (\citeproc{ref-altmeyer2024faithful}{2024}),
 
 \begin{equation}\phantomsection\label{eq-impl-dist}{
@@ -863,7 +867,7 @@ domain. We rely on the distance-based metric used by Altmeyer et al.
 
 \begin{equation}\phantomsection\label{eq-impl-div}{
 \text{IP}^*(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
-}\end{equation} where \(\mathbf{X}^\prime\) denotes a set of multiple
+}\end{equation} where \(\mathbf{X}^\prime\) denotes a collection of
 counterfactuals and \(\text{MMD}(\cdot)\) is an unbiased estimate of the
 squared population maximum mean discrepancy
 (\citeproc{ref-gretton2012kernel}{Gretton et al. 2012}). The metric in
@@ -887,15 +891,15 @@ both faithfulness and plausibility of the CEs.
 
 \subsection{Experimental Results}\label{experimental-results}
 
-\subsubsection{Plausibility}\label{plausibility}
+\subsubsection{Plausibility}\label{sec-plaus}
 
 Table~\ref{tbl-main} presents our main empirical findings. The top five
 rows show the percentage reduction in implausibility according to
 Equation~\ref{eq-impl-dist} for varying degrees of the energy penalty
 used for \emph{ECCo} at test time. The following row shows the reduction
 in implausibility as measured by Equation~\ref{eq-impl-div} and
-aggregated across all test specifications of \emph{ECCo}. The final two
-rows show the test accuracies for the model trained with CT and
+aggregated across all test specifications of \emph{ECCo}. The following
+two rows show the test accuracies for the model trained with CT and
 conventionally trained models (``vanilla'').
 
 We observe that for all datasets except \emph{OL} and across all test
@@ -931,14 +935,16 @@ learned by models without sacrificing predictive accuracy.
 
 \begin{table}
 
-\caption{\label{tbl-main}Key plausibility and predictive performance
-metrics for all datasets. The top five rows show the percentage
-reduction in implausibility according to Equation~\ref{eq-impl-dist} for
-varying degrees of the energy penalty used for \emph{ECCo} at test time.
-The following row shows the reduction in implausibility as measured by
-Equation~\ref{eq-impl-div} and aggregated across all test specifications
-of \emph{ECCo}. The final two rows show the test accuracies for the
-model trained with CT and conventionally trained models (``vanilla'').}
+\caption{\label{tbl-main}Key explainability and predictive performance
+metrics for all datasets. \textbf{Plausibility}: the top five rows show
+the percentage reduction in implausibility according to
+Equation~\ref{eq-impl-dist} for varying degrees of the energy penalty
+used for \emph{ECCo} at test time. The following row shows the reduction
+in implausibility as measured by Equation~\ref{eq-impl-div} and
+aggregated across all test specifications. \textbf{Accuracy}: The
+following two rows show the test accuracies for the models trained with
+CT and the baseline. \textbf{Actionability}: The final row present the
+average reduction in costs when imposing mutability constraints.}
 
 \centering{
 
@@ -950,7 +956,21 @@ model trained with CT and conventionally trained models (``vanilla'').}
 
 \end{table}%
 
-\subsubsection{Actionability}\label{actionability}
+\subsubsection{Actionability}\label{sec-act}
+
+In Section~\ref{sec-method}, we show that our proposed way for encoding
+mutability constraints leads to lower classifier sensitivity wrt.
+immutable features for linear models, tilting the decision boundary in
+favour of mutable features instead. For binding constraints at test
+time, this has the effect of shorter counterfactual paths and hence
+smaller average costs to individuals. To extend this to the non-linear
+case, we test the effect of imposing mutability constraints empirically
+for our synthetic data using the same evaluation scheme as above. The
+final row in Table~\ref{tbl-main} reports the average reduction in costs
+for CT compared to the baseline, when imposing that either the first or
+the second feature is immutable. In all cases, costs are reduced
+substantially indicating that classifiers trained with CT are indeed
+more sensitive to mutable features.
 
 \subsubsection{Impact of hyperparameter
 settings}\label{sec-hyperparameters}
@@ -1111,39 +1131,42 @@ improve models \emph{and} their explanations at the same time.
 \begin{CSLReferences}{1}{0}
 \bibitem[\citeproctext]{ref-abbasnejad2020counterfactual}
 Abbasnejad, Ehsan, Damien Teney, Amin Parvaneh, Javen Shi, and Anton van
-den Hengel. 2020. {``Counterfactual Vision and Language Learning.''} In
-\emph{2020 IEEE/CVF Conference on Computer Vision and Pattern
+den Hengel. 2020. {``{Counterfactual Vision and Language Learning}.''}
+In \emph{2020 IEEE/CVF Conference on Computer Vision and Pattern
 Recognition (CVPR)}, 10041--51.
 \url{https://doi.org/10.1109/CVPR42600.2020.01006}.
 
 \bibitem[\citeproctext]{ref-altmeyer2023explaining}
-Altmeyer, Patrick, Arie van Deursen, et al. 2023. {``Explaining
-Black-Box Models Through Counterfactuals.''} In \emph{Proceedings of the
-JuliaCon Conferences}, 1:130. 1.
+Altmeyer, Patrick, Arie van Deursen, and Cynthia C. S. Liem. 2023.
+{``{Explaining Black-Box Models through Counterfactuals}.''} In
+\emph{Proceedings of the JuliaCon Conferences}, 1:130. 1.
 
 \bibitem[\citeproctext]{ref-altmeyer2024faithful}
-Altmeyer, Patrick, Mojtaba Farmanbar, Arie van Deursen, and Cynthia CS
-Liem. 2024. {``Faithful Model Explanations Through Energy-Constrained
-Conformal Counterfactuals.''} In \emph{Proceedings of the AAAI
-Conference on Artificial Intelligence}, 38:10829--37. 10.
+Altmeyer, Patrick, Mojtaba Farmanbar, Arie van Deursen, and Cynthia C.
+S. Liem. 2024. {``{Faithful Model Explanations through
+Energy-Constrained Conformal Counterfactuals}.''} In \emph{Proceedings
+of the Thirty-Eighth AAAI Conference on Artificial Intelligence},
+38:10829--37. 10. \url{https://doi.org/10.1609/aaai.v38i10.28956}.
 
 \bibitem[\citeproctext]{ref-augustin2020adversarial}
 Augustin, Maximilian, Alexander Meinke, and Matthias Hein. 2020.
-{``Adversarial Robustness on in-and Out-Distribution Improves
-Explainability.''} In \emph{European Conference on Computer Vision},
-228--45. Springer.
+{``{Adversarial Robustness on In- and Out-Distribution Improves
+Explainability}.''} In \emph{Computer Vision -- ECCV 2020}, edited by
+Andrea Vedaldi, Horst Bischof, Thomas Brox, and Jan-Michael Frahm,
+228--45. Cham: Springer.
 
 \bibitem[\citeproctext]{ref-balashankar2023improving}
 Balashankar, Ananth, Xuezhi Wang, Yao Qin, Ben Packer, Nithum Thain, Ed
-Chi, Jilin Chen, and Alex Beutel. 2023. {``Improving Classifier
-Robustness Through Active Generative Counterfactual Data
-Augmentation.''} In \emph{Findings of the Association for Computational
-Linguistics: EMNLP 2023}, 127--39.
+Chi, Jilin Chen, and Alex Beutel. 2023. {``{Improving Classifier
+Robustness through Active Generative Counterfactual Data
+Augmentation}.''} In \emph{Findings of the Association for Computational
+Linguistics: EMNLP 2023}, 127--39. ACL.
+\url{https://doi.org/10.18653/v1/2023.findings-emnlp.10}.
 
 \bibitem[\citeproctext]{ref-bell2024fairness}
 Bell, Andrew, Joao Fonseca, Carlo Abrate, Francesco Bonchi, and Julia
-Stoyanovich. 2024. {``Fairness in Algorithmic Recourse Through the Lens
-of Substantive Equality of Opportunity.''}
+Stoyanovich. 2024. {``{Fairness in Algorithmic Recourse Through the Lens
+of Substantive Equality of Opportunity}.''}
 \url{https://arxiv.org/abs/2401.16088}.
 
 \bibitem[\citeproctext]{ref-bezanson2017julia}
@@ -1181,37 +1204,35 @@ Open Source Software} 6 (65): 3349.
 \url{https://doi.org/10.21105/joss.03349}.
 
 \bibitem[\citeproctext]{ref-du2019implicit}
-Du, Yilun, and Igor Mordatch. 2020. {``Implicit Generation and
-Generalization in Energy-Based Models.''}
+Du, Yilun, and Igor Mordatch. 2020. {``{Implicit Generation and
+Generalization in Energy-Based Models}.''}
 \url{https://arxiv.org/abs/1903.08689}.
 
 \bibitem[\citeproctext]{ref-franceschi2017forward}
 Franceschi, Luca, Michele Donini, Paolo Frasconi, and Massimiliano
 Pontil. 2017. {``{Forward and Reverse Gradient-Based Hyperparameter
 Optimization}.''} In \emph{Proceedings of the 34th International
-Conference on Machine Learning}, edited by Doina Precup and Yee Whye
-Teh, 70:1165--73. Proceedings of Machine Learning Research. PMLR.
-\url{https://proceedings.mlr.press/v70/franceschi17a.html}.
+Conference on Machine Learning}, 1165--73. ICML'17. Sydney, NSW,
+Australia: JMLR.org.
 
 \bibitem[\citeproctext]{ref-frankle2018lottery}
-Frankle, Jonathan, and Michael Carbin. 2019. {``The Lottery Ticket
-Hypothesis: Finding Sparse, Trainable Neural Networks.''} In
+Frankle, Jonathan, and Michael Carbin. 2019. {``{The Lottery Ticket
+Hypothesis: Finding Sparse, Trainable Neural Networks}.''} In
 \emph{International Conference on Learning Representations}.
-\url{https://openreview.net/forum?id=rJl-b3RcF7}.
 
 \bibitem[\citeproctext]{ref-freiesleben2022intriguing}
-Freiesleben, Timo. 2022. {``The Intriguing Relation Between
-Counterfactual Explanations and Adversarial Examples.''} \emph{Minds and
-Machines} 32 (1): 77--109.
-
-\bibitem[\citeproctext]{ref-goodfellow2014explaining}
-Goodfellow, Ian J, Jonathon Shlens, and Christian Szegedy. 2014.
-{``Explaining and Harnessing Adversarial Examples.''}
-\url{https://arxiv.org/abs/1412.6572}.
+Freiesleben, Timo. 2022. {``{The Intriguing Relation Between
+Counterfactual Explanations and Adversarial Examples}.''} \emph{Minds
+and Machines} 32 (1): 77--109.
 
 \bibitem[\citeproctext]{ref-goodfellow2016deep}
 Goodfellow, Ian, Yoshua Bengio, and Aaron Courville. 2016. \emph{Deep
 {Learning}}. {MIT Press}.
+
+\bibitem[\citeproctext]{ref-goodfellow2014explaining}
+Goodfellow, Ian, Jonathon Shlens, and Christian Szegedy. 2015.
+{``{Explaining and Harnessing Adversarial Examples}.''}
+\url{https://arxiv.org/abs/1412.6572}.
 
 \bibitem[\citeproctext]{ref-grathwohl2020your}
 Grathwohl, Will, Kuan-Chieh Wang, Joern-Henrik Jacobsen, David Duvenaud,
@@ -1225,15 +1246,16 @@ and Alexander Smola. 2012. {``A Kernel Two-Sample Test.''} \emph{The
 Journal of Machine Learning Research} 13 (1): 723--73.
 
 \bibitem[\citeproctext]{ref-guidotti2022counterfactual}
-Guidotti, Riccardo. 2022. {``Counterfactual Explanations and How to Find
-Them: Literature Review and Benchmarking.''} \emph{Data Mining and
-Knowledge Discovery}, 1--55.
+Guidotti, Riccardo. 2022. {``{Counterfactual Explanations and How to
+Find Them: Literature Review and Benchmarking}.''} \emph{Data Mining and
+Knowledge Discovery} 38 (5): 2770--2824.
+\url{https://doi.org/10.1007/s10618-022-00831-6}.
 
 \bibitem[\citeproctext]{ref-guo2023counternet}
-Guo, Hangzhi, Thanh H. Nguyen, and Amulya Yadav. 2023. {``CounterNet:
-End-to-End Training of Prediction Aware Counterfactual Explanations.''}
+Guo, Hangzhi, Thanh H. Nguyen, and Amulya Yadav. 2023. {``{CounterNet:
+End-to-End Training of Prediction Aware Counterfactual Explanations}.''}
 In \emph{Proceedings of the 29th ACM SIGKDD Conference on Knowledge
-Discovery and Data Mining}, 577--89. KDD '23. New York, NY, USA:
+Discovery and Data Mining}, 577-\/-589. KDD '23. New York, NY, USA:
 Association for Computing Machinery.
 \url{https://doi.org/10.1145/3580305.3599290}.
 
@@ -1255,31 +1277,33 @@ Innes, Mike. 2018. {``Flux: {Elegant} Machine Learning with {Julia}.''}
 
 \bibitem[\citeproctext]{ref-joshi2019realistic}
 Joshi, Shalmali, Oluwasanmi Koyejo, Warut Vijitbenjaronk, Been Kim, and
-Joydeep Ghosh. 2019. {``Towards Realistic Individual Recourse and
-Actionable Explanations in Black-Box Decision Making Systems.''}
+Joydeep Ghosh. 2019. {``{Towards Realistic Individual Recourse and
+Actionable Explanations in Black-Box Decision Making Systems}.''}
 \url{https://arxiv.org/abs/1907.09615}.
 
 \bibitem[\citeproctext]{ref-kolter2023keynote}
 Kolter, Zico. 2023.{``{Keynote Addresses: SaTML 2023 }.''} In \emph{2023
-IEEE Conference on Secure and Trustworthy Machine Learning (SaTML)},
-xvi--. Los Alamitos, CA, USA: IEEE Computer Society.
+IEEE Conference on Secure and Trustworthy Machine Learning (SaTML)}. Los
+Alamitos, CA, USA: IEEE Computer Society.
 \url{https://doi.org/10.1109/SaTML54575.2023.00009}.
 
 \bibitem[\citeproctext]{ref-lakshminarayanan2016simple}
 Lakshminarayanan, Balaji, Alexander Pritzel, and Charles Blundell. 2017.
 {``Simple and Scalable Predictive Uncertainty Estimation Using Deep
-Ensembles.''} \emph{Advances in Neural Information Processing Systems}
-30.
+Ensembles.''} In \emph{Proceedings of the 31st International Conference
+on Neural Information Processing Systems}, 6405--16. NIPS'17. Red Hook,
+NY, USA: Curran Associates Inc.
 
 \bibitem[\citeproctext]{ref-lippe2024uvadlc}
 Lippe, Phillip. 2024. {``{UvA Deep Learning Tutorials}.''}
 \url{https://uvadlc-notebooks.readthedocs.io/en/latest/}.
 
 \bibitem[\citeproctext]{ref-luu2023counterfactual}
-Luu, Hoai Linh, and Naoya Inoue. 2023. {``Counterfactual Adversarial
-Training for Improving Robustness of Pre-Trained Language Models.''} In
+Luu, Hoai Linh, and Naoya Inoue. 2023. {``{Counterfactual Adversarial
+Training for Improving Robustness of Pre-trained Language Models}.''} In
 \emph{Proceedings of the 37th Pacific Asia Conference on Language,
-Information and Computation}, 881--88.
+Information and Computation}, 881--88. ACL.
+\url{https://aclanthology.org/2023.paclic-1.88/}.
 
 \bibitem[\citeproctext]{ref-mcgregor2021preventing}
 McGregor, Sean. 2021. {``{Preventing repeated real world AI failures by
@@ -1311,26 +1335,26 @@ Explanations.''} In \emph{Proceedings of the {AAAI}/{ACM Conference} on
 {AI}, {Ethics}, and {Society}}, 344--50.
 
 \bibitem[\citeproctext]{ref-ross2021learning}
-Ross, Alexis, Himabindu Lakkaraju, and Osbert Bastani. 2024. {``Learning
-Models for Actionable Recourse.''} In \emph{Proceedings of the 35th
-International Conference on Neural Information Processing Systems}. NIPS
-'21. Red Hook, NY, USA: Curran Associates Inc.
+Ross, Alexis, Himabindu Lakkaraju, and Osbert Bastani. 2024.
+{``{Learning Models for Actionable Recourse}.''} In \emph{Proceedings of
+the 35th International Conference on Neural Information Processing
+Systems}. NIPS '21. Red Hook, NY, USA: Curran Associates Inc.
 
 \bibitem[\citeproctext]{ref-sauer2021counterfactual}
-Sauer, Axel, and Andreas Geiger. 2021. {``Counterfactual Generative
-Networks.''} \url{https://arxiv.org/abs/2101.06046}.
+Sauer, Axel, and Andreas Geiger. 2021. {``{Counterfactual Generative
+Networks}.''} \url{https://arxiv.org/abs/2101.06046}.
 
 \bibitem[\citeproctext]{ref-schut2021generating}
-Schut, Lisa, Oscar Key, Rory Mc Grath, Luca Costabello, Bogdan
-Sacaleanu, Yarin Gal, et al. 2021. {``Generating {Interpretable
-Counterfactual Explanations By Implicit Minimisation} of {Epistemic} and
-{Aleatoric Uncertainties}.''} In \emph{International {Conference} on
-{Artificial Intelligence} and {Statistics}}, 1756--64. {PMLR}.
+Schut, Lisa, Oscar Key, Rory McGrath, Luca Costabello, Bogdan Sacaleanu,
+Yarin Gal, et al. 2021. {``Generating {Interpretable Counterfactual
+Explanations By Implicit Minimisation} of {Epistemic} and {Aleatoric
+Uncertainties}.''} In \emph{International {Conference} on {Artificial
+Intelligence} and {Statistics}}, 1756--64. {PMLR}.
 
 \bibitem[\citeproctext]{ref-sharma2020certifai}
-Sharma, Shubham, Jette Henderson, and Joydeep Ghosh. 2020. {``CERTIFAI:
+Sharma, Shubham, Jette Henderson, and Joydeep Ghosh. 2020. {``{CERTIFAI:
 A Common Framework to Provide Explanations and Analyse the Fairness and
-Robustness of Black-Box Models.''} In \emph{Proceedings of the AAAI/ACM
+Robustness of Black-box Models}.''} In \emph{Proceedings of the AAAI/ACM
 Conference on AI, Ethics, and Society}, 166--72. AIES '20. New York, NY,
 USA: Association for Computing Machinery.
 \url{https://doi.org/10.1145/3375627.3375812}.
@@ -1338,28 +1362,27 @@ USA: Association for Computing Machinery.
 \bibitem[\citeproctext]{ref-snoek2012practical}
 Snoek, Jasper, Hugo Larochelle, and Ryan P. Adams. 2012. {``{Practical
 Bayesian Optimization of Machine Learning Algorithms}.''} In
-\emph{Advances in Neural Information Processing Systems}, edited by F.
-Pereira, C. J. Burges, L. Bottou, and K. Q. Weinberger. Vol. 25. Curran
+\emph{Proceedings of the 26th International Conference on Neural
+Information Processing Systems - Volume 2}, edited by F. Pereira, C. J.
+Burges, L. Bottou, and K. Q. Weinberger. Vol. 25. NIPS'12. Curran
 Associates, Inc.
-\url{https://proceedings.neurips.cc/paper_files/paper/2012/file/05311655a15b75fab86956663e1819cd-Paper.pdf}.
 
 \bibitem[\citeproctext]{ref-spooner2021counterfactual}
 Spooner, Thomas, Danial Dervovic, Jason Long, Jon Shepard, Jiahao Chen,
 and Daniele Magazzeni. 2021. {``{Counterfactual Explanations for
-Arbitrary Regression Models}.''} \emph{CoRR} abs/2106.15212.
-\url{https://arxiv.org/abs/2106.15212}.
+Arbitrary Regression Models}.''} \url{https://arxiv.org/abs/2106.15212}.
 
 \bibitem[\citeproctext]{ref-szegedy2013intriguing}
 Szegedy, Christian, Wojciech Zaremba, Ilya Sutskever, Joan Bruna,
-Dumitru Erhan, Ian Goodfellow, and Rob Fergus. 2013. {``Intriguing
+Dumitru Erhan, Ian Goodfellow, and Rob Fergus. 2014. {``Intriguing
 Properties of Neural Networks.''} \url{https://arxiv.org/abs/1312.6199}.
 
 \bibitem[\citeproctext]{ref-teney2020learning}
 Teney, Damien, Ehsan Abbasnedjad, and Anton van den Hengel. 2020.
 {``Learning What Makes a Difference from Counterfactual Examples and
-Gradient Supervision.''} In \emph{Computer Vision--ECCV 2020: 16th
-European Conference, Glasgow, UK, August 23--28, 2020, Proceedings, Part
-x 16}, 580--99. Springer.
+Gradient Supervision.''} In \emph{Computer Vision - ECCV 2020}, 580--99.
+Berlin, Heidelberg: Springer-Verlag.
+\url{https://doi.org/10.1007/978-3-030-58607-2_34}.
 
 \bibitem[\citeproctext]{ref-venkatasubramanian2020philosophical}
 Venkatasubramanian, Suresh, and Mark Alfano. 2020. {``The Philosophical
@@ -1375,8 +1398,8 @@ Wachter, Sandra, Brent Mittelstadt, and Chris Russell. 2017.
 841. \url{https://doi.org/10.2139/ssrn.3063289}.
 
 \bibitem[\citeproctext]{ref-wilson2020case}
-Wilson, Andrew Gordon. 2020. {``The Case for Bayesian Deep Learning.''}
-\url{https://arxiv.org/abs/2001.10995}.
+Wilson, Andrew Gordon. 2020. {``{The Case for Bayesian Deep
+Learning}.''} \url{https://arxiv.org/abs/2001.10995}.
 
 \bibitem[\citeproctext]{ref-wu2021polyjuice}
 Wu, Tongshuang, Marco Tulio Ribeiro, Jeffrey Heer, and Daniel Weld.
@@ -1385,8 +1408,8 @@ Evaluating, and Improving Models.''} In \emph{Proceedings of the 59th
 Annual Meeting of the Association for Computational Linguistics and the
 11th International Joint Conference on Natural Language Processing
 (Volume 1: Long Papers)}, edited by Chengqing Zong, Fei Xia, Wenjie Li,
-and Roberto Navigli, 6707--23. Online: Association for Computational
-Linguistics. \url{https://doi.org/10.18653/v1/2021.acl-long.523}.
+and Roberto Navigli, 6707--23. Online: ACL.
+\url{https://doi.org/10.18653/v1/2021.acl-long.523}.
 
 \bibitem[\citeproctext]{ref-zhang2021understanding}
 Zhang, Chiyuan, Samy Bengio, Moritz Hardt, Benjamin Recht, and Oriol
@@ -1405,13 +1428,9 @@ Society. \url{https://doi.org/10.1109/ICDMW60847.2023.00130}.
 
 \newpage{}
 
+\begin{appendices}
+
 \FloatBarrier
-
-\renewcommand{\thesection}{\Alph{section}}
-
-\renewcommand{\thetable}{A\arabic{table}}
-
-\renewcommand{\thefigure}{A\arabic{figure}}
 
 \section{Notation}\label{notation}
 
@@ -1438,6 +1457,9 @@ Society. \url{https://doi.org/10.1109/ICDMW60847.2023.00130}.
 MMD({X}^\prime,\tilde{X}^\prime) &= \frac{1}{m(m-1)}\sum_{i=1}^m\sum_{j\neq i}^m k(x_i,x_j) \\ &+ \frac{1}{n(n-1)}\sum_{i=1}^n\sum_{j\neq i}^n k(\tilde{x}_i,\tilde{x}_j) \\ &- \frac{2}{mn}\sum_{i=1}^m\sum_{j=1}^n k(x_i,\tilde{x}_j)
 \end{aligned}
 }\end{equation}
+
+In our implementation, Equation~\ref{eq-mmd} is by default applied to
+the entire subset of the training data for which \(y=y^+\).
 
 \section{Technical Details of Our
 Approach}\label{technical-details-of-our-approach}
@@ -1644,7 +1666,7 @@ details laid out here are not crucial for understanding our proposed
 approach, they are of importance to anyone looking to implement
 counterfactual training.
 
-\section{Details on Main Experiments}\label{details-on-main-experiments}
+\section{Details on Main Experiments}\label{sec-app-main}
 
 \subsection{Final Hyperparameters}\label{final-hyperparameters}
 
@@ -1683,17 +1705,15 @@ results for the different datasets.}
 \subsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, rightrule=.15mm, titlerule=0mm, title={Note}, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, colframe=quarto-callout-note-color-frame, breakable, opacityback=0, colback=white, bottomtitle=1mm, arc=.35mm, bottomrule=.15mm, leftrule=.75mm, left=2mm, opacitybacktitle=0.6]
-
 Figure~\ref{fig-mnist} shows much more plausible (faithful)
 counterfactuals for a model with CT than the model with conventional
-training (Figure~\ref{fig-mnist-vanilla}). In fact, this is not even
-using \emph{ECCo+} and still showing better results than the best
-results we achieved in our AAAI paper for JEM ensembles.
-
-\end{tcolorbox}
+training (Figure~\ref{fig-mnist-vanilla}).
 
 \begin{figure}
+
+\begin{minipage}{0.46\linewidth}
+
+\begin{figure}[H]
 
 \centering{
 
@@ -1702,13 +1722,22 @@ results we achieved in our AAAI paper for JEM ensembles.
 }
 
 \caption{\label{fig-mnist}Counterfactual images for \emph{MLP} with
-counterfactual training. The underlying generator, \emph{ECCo}, aims to
-generate counterfactuals that are faithful to the model
+counterfactual training. Factual images are shown on the diagonal, with
+the corresponding counterfactual for each target class (columns) in that
+same row. The underlying generator, \emph{ECCo}, aims to generate
+counterfactuals that are faithful to the model
 (\citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024}).}
 
 \end{figure}%
 
-\begin{figure}
+\end{minipage}%
+%
+\begin{minipage}{0.09\linewidth}
+~\end{minipage}%
+%
+\begin{minipage}{0.46\linewidth}
+
+\begin{figure}[H]
 
 \centering{
 
@@ -1716,12 +1745,17 @@ generate counterfactuals that are faithful to the model
 
 }
 
-\caption{\label{fig-mnist-vanilla}Counterfactual images for \emph{MLP}
-with conventional training. The underlying generator, \emph{ECCo}, aims
-to generate counterfactuals that are faithful to the model
-(\citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024}).}
+\caption{\label{fig-mnist-vanilla}The same setup, factuals, model
+architecture and generator as in Figure~\ref{fig-mnist}, but the model
+was trained with CT.}
 
 \end{figure}%
+
+\end{minipage}%
+
+\end{figure}%
+
+\FloatBarrier
 
 \section{Grid Searches}\label{sec-app-grid}
 
@@ -1858,7 +1892,7 @@ training is shown in Note~\ref{nte-gen-params-final-run-train}. The
 corresponding evaluation grid used for these experiments is shown in
 Note~\ref{nte-gen-params-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, rightrule=.15mm, titlerule=0mm, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, colframe=quarto-callout-note-color-frame, breakable, opacityback=0, colback=white, bottomtitle=1mm, arc=.35mm, bottomrule=.15mm, leftrule=.75mm, left=2mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, opacitybacktitle=0.6, toprule=.15mm, rightrule=.15mm, colback=white, arc=.35mm, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, coltitle=black, opacityback=0, titlerule=0mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, breakable]
 
 \quartocalloutnte{nte-gen-params-final-run-train} 
 
@@ -1892,7 +1926,7 @@ Note~\ref{nte-gen-params-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, rightrule=.15mm, titlerule=0mm, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, colframe=quarto-callout-note-color-frame, breakable, opacityback=0, colback=white, bottomtitle=1mm, arc=.35mm, bottomrule=.15mm, leftrule=.75mm, left=2mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, opacitybacktitle=0.6, toprule=.15mm, rightrule=.15mm, colback=white, arc=.35mm, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, coltitle=black, opacityback=0, titlerule=0mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, breakable]
 
 \quartocalloutnte{nte-gen-params-final-run-eval} 
 
@@ -1910,7 +1944,10 @@ Note~\ref{nte-gen-params-final-run-eval}.
 
 \end{tcolorbox}
 
-\subsubsection{Accuracy}\label{accuracy}
+\subsubsection{Predictive Performance}\label{predictive-performance-1}
+
+Predictive performance measures for this grid search are shown in
+Table~\ref{tbl-acc-gen}.
 
 \begin{longtable}{ccccc}
 
@@ -1951,7 +1988,7 @@ parameters (Note~\ref{nte-gen-params-final-run-eval}).}
 
 \end{longtable}
 
-\subsubsection{Plausibility}\label{plausibility-1}
+\subsubsection{Plausibility}\label{plausibility}
 
 The results with respect to the plausibility measure are shown in
 Figure~\ref{fig-grid-gen_params-plaus-circles} to
@@ -2075,7 +2112,7 @@ is shown in Note~\ref{nte-pen-final-run-train}. The corresponding
 evaluation grid used for these experiments is shown in
 Note~\ref{nte-pen-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, rightrule=.15mm, titlerule=0mm, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, colframe=quarto-callout-note-color-frame, breakable, opacityback=0, colback=white, bottomtitle=1mm, arc=.35mm, bottomrule=.15mm, leftrule=.75mm, left=2mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, opacitybacktitle=0.6, toprule=.15mm, rightrule=.15mm, colback=white, arc=.35mm, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, coltitle=black, opacityback=0, titlerule=0mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, breakable]
 
 \quartocalloutnte{nte-pen-final-run-train} 
 
@@ -2103,7 +2140,7 @@ Note~\ref{nte-pen-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, rightrule=.15mm, titlerule=0mm, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, colframe=quarto-callout-note-color-frame, breakable, opacityback=0, colback=white, bottomtitle=1mm, arc=.35mm, bottomrule=.15mm, leftrule=.75mm, left=2mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, opacitybacktitle=0.6, toprule=.15mm, rightrule=.15mm, colback=white, arc=.35mm, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, coltitle=black, opacityback=0, titlerule=0mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, breakable]
 
 \quartocalloutnte{nte-pen-final-run-eval} 
 
@@ -2121,7 +2158,10 @@ Note~\ref{nte-pen-final-run-eval}.
 
 \end{tcolorbox}
 
-\subsubsection{Accuracy}\label{accuracy-1}
+\subsubsection{Predictive Performance}\label{predictive-performance-2}
+
+Predictive performance measures for this grid search are shown in
+Table~\ref{tbl-acc-pen}.
 
 \begin{longtable}{ccccc}
 
@@ -2162,7 +2202,7 @@ and objective averaged across training-phase parameters
 
 \end{longtable}
 
-\subsubsection{Plausibility}\label{plausibility-2}
+\subsubsection{Plausibility}\label{plausibility-1}
 
 The results with respect to the plausibility measure are shown in
 Figure~\ref{fig-grid-pen-plaus-circles} to
@@ -2285,7 +2325,7 @@ in Note~\ref{nte-train-final-run-train}. The corresponding evaluation
 grid used for these experiments is shown in
 Note~\ref{nte-train-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, rightrule=.15mm, titlerule=0mm, title={Note \ref*{nte-train-final-run-train}: Training Phase}, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, colframe=quarto-callout-note-color-frame, breakable, opacityback=0, colback=white, bottomtitle=1mm, arc=.35mm, bottomrule=.15mm, leftrule=.75mm, left=2mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, opacitybacktitle=0.6, toprule=.15mm, rightrule=.15mm, colback=white, arc=.35mm, title={Note \ref*{nte-train-final-run-train}: Training Phase}, coltitle=black, opacityback=0, titlerule=0mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, breakable]
 
 \quartocalloutnte{nte-train-final-run-train} 
 
@@ -2313,7 +2353,7 @@ Note~\ref{nte-train-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, rightrule=.15mm, titlerule=0mm, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, colframe=quarto-callout-note-color-frame, breakable, opacityback=0, colback=white, bottomtitle=1mm, arc=.35mm, bottomrule=.15mm, leftrule=.75mm, left=2mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, opacitybacktitle=0.6, toprule=.15mm, rightrule=.15mm, colback=white, arc=.35mm, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, coltitle=black, opacityback=0, titlerule=0mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, breakable]
 
 \quartocalloutnte{nte-train-final-run-eval} 
 
@@ -2331,7 +2371,10 @@ Note~\ref{nte-train-final-run-eval}.
 
 \end{tcolorbox}
 
-\subsubsection{Accuracy}\label{accuracy-2}
+\subsubsection{Predictive Performance}\label{predictive-performance-3}
+
+Predictive performance measures for this grid search are shown in
+Table~\ref{tbl-acc-train}.
 
 \begin{longtable}{ccccc}
 
@@ -2372,7 +2415,7 @@ and objective averaged across training-phase parameters
 
 \end{longtable}
 
-\subsubsection{Plausibility}\label{plausibility-3}
+\subsubsection{Plausibility}\label{plausibility-2}
 
 The results with respect to the plausibility measure are shown in
 Figure~\ref{fig-grid-train-plaus-circles} to
@@ -2488,30 +2531,33 @@ measure across hyperparameters. Data: Overlapping.}
 
 \end{figure}%
 
+\FloatBarrier
+
 \section{Tuning Key Parameters}\label{sec-app-tune}
 
 Based on the findings from our initial large grid searches
 (Section~\ref{sec-app-grid}), we tune selected hyperparameters for all
 datasets: namely, the decision threshold \(\tau\) and the strength of
 the energy regularization \(\lambda_{\text{reg}}\). The final
-hyperparameter choices for each dataset are presented in \textbf{ADD
-TABLE}. Detailed results for each data set are shown in
-Figure~\ref{fig-tune-plaus-adult} to Figure~\ref{fig-tune-mat-over}.
-From \textbf{ADD TABLE}, we notice that the same decision threshold of
-\(\tau=0.5\) is optimal for all but on dataset. We attribute this to the
-fact that a low decision threshold results in a higher share of mature
-counterfactuals and hence more opportunities for the model to learn from
-examples (Figure~\ref{fig-tune-mat-adult} to
-Figure~\ref{fig-tune-mat-over}). This has played a role in particular
-for our real-world tabular datasets and MNIST, which suffered from low
-levels of maturity for higher decision thresholds. In cases where
-maturity is not an issue, as for \emph{Moons}, higher decision
-thresholds lead to better outcomes, which may have to do with the fact
-that the resulting counterfactuals are more faithful to the model.
-Concerning the regularization strength, we find somewhat high variation
-across datasets. Most notably, we find that relatively low levels of
-regularization are optimal for MNIST. We hypothesize that this finding
-may be attributed to the uniform scaling of all input features (digits).
+hyperparameter choices for each dataset are presented in
+Table~\ref{tbl-final-params} in Section~\ref{sec-app-main}. Detailed
+results for each data set are shown in Figure~\ref{fig-tune-plaus-adult}
+to Figure~\ref{fig-tune-mat-over}. From Table~\ref{tbl-final-params}, we
+notice that the same decision threshold of \(\tau=0.5\) is optimal for
+all but on dataset. We attribute this to the fact that a low decision
+threshold results in a higher share of mature counterfactuals and hence
+more opportunities for the model to learn from examples
+(Figure~\ref{fig-tune-mat-adult} to Figure~\ref{fig-tune-mat-over}).
+This has played a role in particular for our real-world tabular datasets
+and MNIST, which suffered from low levels of maturity for higher
+decision thresholds. In cases where maturity is not an issue, as for
+\emph{Moons}, higher decision thresholds lead to better outcomes, which
+may have to do with the fact that the resulting counterfactuals are more
+faithful to the model. Concerning the regularization strength, we find
+somewhat high variation across datasets. Most notably, we find that
+relatively low levels of regularization are optimal for MNIST. We
+hypothesize that this finding may be attributed to the uniform scaling
+of all input features (digits).
 
 Finally, to increase the proportion of mature counterfactuals for some
 datasets, we have also investigated the effect on the learning rate
@@ -2532,7 +2578,7 @@ counterfactuals reaches 100\%.
 One consideration worth exploring is to combine high decision thresholds
 with high learning rates, which we have not investigated here.
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, rightrule=.15mm, titlerule=0mm, title={Package Version (Reproducibility)}, toprule=.15mm, colbacktitle=quarto-callout-warning-color!10!white, coltitle=black, colframe=quarto-callout-warning-color-frame, breakable, opacityback=0, colback=white, bottomtitle=1mm, arc=.35mm, bottomrule=.15mm, leftrule=.75mm, left=2mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, opacitybacktitle=0.6, toprule=.15mm, rightrule=.15mm, colback=white, arc=.35mm, title={Package Version (Reproducibility)}, coltitle=black, opacityback=0, titlerule=0mm, bottomrule=.15mm, colframe=quarto-callout-warning-color-frame, colbacktitle=quarto-callout-warning-color!10!white, breakable]
 
 Tuning was run using \texttt{v1.1.3} of \texttt{TaijaData}. The
 follow-up version \texttt{v1.1.4} introduced an option to split
@@ -2553,7 +2599,7 @@ The hyperparameter grid for tuning key parameters is shown in
 Note~\ref{nte-tune-train}. The corresponding evaluation grid used for
 these experiments is shown in Note~\ref{nte-tune-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, rightrule=.15mm, titlerule=0mm, title={Note \ref*{nte-tune-train}: Training Phase}, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, colframe=quarto-callout-note-color-frame, breakable, opacityback=0, colback=white, bottomtitle=1mm, arc=.35mm, bottomrule=.15mm, leftrule=.75mm, left=2mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, opacitybacktitle=0.6, toprule=.15mm, rightrule=.15mm, colback=white, arc=.35mm, title={Note \ref*{nte-tune-train}: Training Phase}, coltitle=black, opacityback=0, titlerule=0mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, breakable]
 
 \quartocalloutnte{nte-tune-train} 
 
@@ -2583,7 +2629,7 @@ these experiments is shown in Note~\ref{nte-tune-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, rightrule=.15mm, titlerule=0mm, title={Note \ref*{nte-tune-eval}: Evaluation Phase}, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, colframe=quarto-callout-note-color-frame, breakable, opacityback=0, colback=white, bottomtitle=1mm, arc=.35mm, bottomrule=.15mm, leftrule=.75mm, left=2mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, opacitybacktitle=0.6, toprule=.15mm, rightrule=.15mm, colback=white, arc=.35mm, title={Note \ref*{nte-tune-eval}: Evaluation Phase}, coltitle=black, opacityback=0, titlerule=0mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, breakable]
 
 \quartocalloutnte{nte-tune-eval} 
 
@@ -2601,7 +2647,7 @@ these experiments is shown in Note~\ref{nte-tune-eval}.
 
 \end{tcolorbox}
 
-\subsubsection{Plausibility}\label{plausibility-4}
+\subsubsection{Plausibility}\label{plausibility-3}
 
 The results with respect to the plausibility measure are shown in
 Figure~\ref{fig-tune-plaus-adult} to Figure~\ref{fig-tune-plaus-over}.
@@ -2854,7 +2900,7 @@ The hyperparameter grid for tuning the learning rate is shown in
 Note~\ref{nte-tune_lr-train}. The corresponding evaluation grid used for
 these experiments is shown in Note~\ref{nte-tune_lr-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, rightrule=.15mm, titlerule=0mm, title={Note \ref*{nte-tune_lr-train}: Training Phase}, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, colframe=quarto-callout-note-color-frame, breakable, opacityback=0, colback=white, bottomtitle=1mm, arc=.35mm, bottomrule=.15mm, leftrule=.75mm, left=2mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, opacitybacktitle=0.6, toprule=.15mm, rightrule=.15mm, colback=white, arc=.35mm, title={Note \ref*{nte-tune_lr-train}: Training Phase}, coltitle=black, opacityback=0, titlerule=0mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, breakable]
 
 \quartocalloutnte{nte-tune_lr-train} 
 
@@ -2884,7 +2930,7 @@ these experiments is shown in Note~\ref{nte-tune_lr-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, rightrule=.15mm, titlerule=0mm, title={Note \ref*{nte-tune_lr-eval}: Evaluation Phase}, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, colframe=quarto-callout-note-color-frame, breakable, opacityback=0, colback=white, bottomtitle=1mm, arc=.35mm, bottomrule=.15mm, leftrule=.75mm, left=2mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, left=2mm, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, opacitybacktitle=0.6, toprule=.15mm, rightrule=.15mm, colback=white, arc=.35mm, title={Note \ref*{nte-tune_lr-eval}: Evaluation Phase}, coltitle=black, opacityback=0, titlerule=0mm, bottomrule=.15mm, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, breakable]
 
 \quartocalloutnte{nte-tune_lr-eval} 
 
@@ -2902,7 +2948,7 @@ these experiments is shown in Note~\ref{nte-tune_lr-eval}.
 
 \end{tcolorbox}
 
-\subsubsection{Plausibility}\label{plausibility-5}
+\subsubsection{Plausibility}\label{plausibility-4}
 
 The results with respect to the plausibility measure are shown in
 Figure~\ref{fig-tune_lr-plaus-adult} to
@@ -3071,6 +3117,8 @@ counterfactuals in each epoch. Data: Overlapping.}
 
 \end{figure}%
 
+\FloatBarrier
+
 \section{Computation Details}\label{computation-details}
 
 \subsection{Hardware}\label{sec-app-hardware}
@@ -3118,10 +3166,10 @@ developed a package for counterfactual training that leverages and
 extends the functionality provided by several existing packages, most
 notably
 \href{https://github.com/JuliaTrustworthyAI/CounterfactualExplanations.jl}{CounterfactualExplanations.jl}
-(\citeproc{ref-altmeyer2023explaining}{Altmeyer, Deursen, et al. 2023})
-and the \href{https://fluxml.ai/Flux.jl/v0.16/}{Flux.jl} library for
-deep learning (\citeproc{ref-innes2018fashionable}{Michael Innes et al.
-2018}; \citeproc{ref-innes2018flux}{Mike Innes 2018}). For
+(\citeproc{ref-altmeyer2023explaining}{Altmeyer, Deursen, and Liem
+2023}) and the \href{https://fluxml.ai/Flux.jl/v0.16/}{Flux.jl} library
+for deep learning (\citeproc{ref-innes2018fashionable}{Michael Innes et
+al. 2018}; \citeproc{ref-innes2018flux}{Mike Innes 2018}). For
 data-wrangling and presentation-ready tables we relied on
 \href{https://dataframes.juliadata.org/v1.7/}{DataFrames.jl}
 (\citeproc{ref-milan2023dataframes}{Bouchet-Valat and Kamiński 2023})
@@ -3137,6 +3185,8 @@ particular \href{https://aog.makie.org/v0.9.3/}{AlgebraOfGraphics.jl}.
 To distribute computational tasks across multiple processors, we have
 relied on \href{https://juliaparallel.org/MPI.jl/v0.20/}{MPI.jl}
 (\citeproc{ref-byrne2021mpi}{Byrne, Wilcox, and Churavy 2021}).
+
+\end{appendices}
 
 
 

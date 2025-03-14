@@ -7,10 +7,12 @@ format:
     keep-tex: true  
     linenumbers: true
     doublespacing: false
-    runninghead: "counterfactual training (A Preprint)"
+    runninghead: "Counterfactual Training (A Preprint)"
     authorcols: true
     include-in-header:
       text: |
+        \usepackage[title]{appendix}
+        \usepackage{placeins}
         \usepackage{amsthm}
         \theoremstyle{plain}
         \newtheorem{proposition}{Proposition}[section]
@@ -30,5 +32,12 @@ format:
 
 {{< pagebreak >}}
 
+```{=latex}
+\begin{appendices}
+```
+
 {{< include /paper/sections/appendix.qmd >}}
 
+```{=latex}
+\end{appendices}
+```

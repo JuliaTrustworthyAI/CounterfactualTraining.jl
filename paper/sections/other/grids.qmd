@@ -80,7 +80,9 @@ println(CTExperiments.dict_to_quarto_markdown(dict))
 
 :::
 
-### Accuracy
+### Predictive Performance
+
+Predictive performance measures for this grid search are shown in @tbl-acc-gen.
 
 ::: {#tbl-acc-gen}
 
@@ -180,7 +182,9 @@ println(CTExperiments.dict_to_quarto_markdown(dict))
 
 :::
 
-### Accuracy
+### Predictive Performance
+
+Predictive performance measures for this grid search are shown in @tbl-acc-pen.
 
 ::: {#tbl-acc-pen}
 
@@ -279,7 +283,9 @@ println(CTExperiments.dict_to_quarto_markdown(dict))
 
 :::
 
-### Accuracy
+### Predictive Performance
+
+Predictive performance measures for this grid search are shown in @tbl-acc-train.
 
 ::: {#tbl-acc-train}
 
