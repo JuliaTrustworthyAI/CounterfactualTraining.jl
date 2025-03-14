@@ -7,7 +7,9 @@ cd(projectdir)
 using CTExperiments
 using CTExperiments.CSV
 using CTExperiments.DataFrames
+using CTExperiments.Plots
 using CTExperiments.StatsBase
+using Random
 
 using DotEnv
 DotEnv.load!()
@@ -54,12 +56,33 @@ tabulate_results(inputs; table_type=:tabular, save_name="paper/preprint/tables/m
 
 ## Qualitative Findings for Image Data
 
-::: {.callout-note}
+```{julia}
+#| eval: false
 
-@fig-mnist shows much more plausible (faithful) counterfactuals for a model with CT than the model with conventional training (@fig-mnist-vanilla). In fact, this is not even using *ECCo+* and still showing better results than the best results we achieved in our AAAI paper for JEM ensembles.
+Random.seed!(42)    # change seed for different outcome
+overwrite = false   # set to `true` if you want to overwrite the file
+fname = joinpath(res_dir,"mlp/mnist/grid_config.toml")
+output_dir = mkpath("paper/experiments/output/extra/")
+gen = CTExperiments.GeneratorParams(lambda_energy=25.0)
+conv = "max_iter"
+cfg = EvaluationConfig(
+    grid_file=fname, 
+    counterfactual_params=(conv=conv, generator_params=gen), 
+    save_dir=output_dir,
+    test_time=true
+)
+generate_factual_target_pairs(cfg; overwrite, nce=10)
+plts = plot_ce(MNIST(), cfg; byvars="objective")
+savefig(plts["objective"]["full"]["ecco"], "paper/figures/mnist_mlp.png")
+savefig(plts["objective"]["vanilla"]["ecco"], "paper/figures/mnist_mlp_vanilla.png")
+```
 
+
+
+@fig-mnist shows much more plausible (faithful) counterfactuals for a model with CT than the model with conventional training (@fig-mnist-vanilla).
+
+::: {layout="[10,-2,10]" layout-valign="top"}
+![Counterfactual images for *MLP* with counterfactual training. Factual images are shown on the diagonal, with the corresponding counterfactual for each target class (columns) in that same row. The underlying generator, *ECCo*, aims to generate counterfactuals that are faithful to the model [@altmeyer2024faithful].](/paper/figures/mnist_mlp.png){#fig-mnist}
+
+![The same setup, factuals, model architecture and generator as in @fig-mnist, but the model was trained with CT.](/paper/figures/mnist_mlp_vanilla.png){#fig-mnist-vanilla}
 :::
-
-![Counterfactual images for *MLP* with counterfactual training. The underlying generator, *ECCo*, aims to generate counterfactuals that are faithful to the model [@altmeyer2024faithful].](/paper/figures/mnist_mlp.png){#fig-mnist}
-
-![Counterfactual images for *MLP* with conventional training. The underlying generator, *ECCo*, aims to generate counterfactuals that are faithful to the model [@altmeyer2024faithful].](/paper/figures/mnist_mlp_vanilla.png){#fig-mnist-vanilla}

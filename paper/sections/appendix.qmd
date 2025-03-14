@@ -1,15 +1,10 @@
 \FloatBarrier
 
-<!-- \setcounter{section}{0} -->
-\renewcommand{\thesection}{\Alph{section}}
+<!-- \renewcommand{\thesection}{\Alph{section}}
 
-<!-- \setcounter{table}{0} -->
 \renewcommand{\thetable}{A\arabic{table}}
 
-<!-- \setcounter{figure}{0} -->
-\renewcommand{\thefigure}{A\arabic{figure}}
-
-<!-- # Supplementary Material {.appendix} -->
+\renewcommand{\thefigure}{A\arabic{figure}} -->
 
 {{< include /paper/sections/other/notation.qmd >}}
 
@@ -17,9 +12,15 @@
 
 {{< include /paper/sections/other/main_results.qmd >}}
 
+\FloatBarrier
+
 {{< include /paper/sections/other/grids.qmd >}}
 
+\FloatBarrier
+
 {{< include /paper/sections/other/tuning.qmd >}}
+
+\FloatBarrier
 
 {{< include /paper/sections/other/compute.qmd >}}
 

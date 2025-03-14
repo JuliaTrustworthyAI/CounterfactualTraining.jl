@@ -238,12 +238,15 @@ function load_data_models_generators(cfg::AbstractEvaluationConfig)
     generators = Dict(_gen_name => _generator)
 
     # Get data:
-    unique_dataset = unique([exper.data for exper in exper_list])
+    datasets = [exper.data for exper in exper_list]
+    unique_dataset = unique(x -> CTExperiments.to_dict(x), datasets)
 
     out_list = Tuple[]
 
     for dataset in unique_dataset
-        exper_with_this_dataset = [exper for exper in exper_list if exper.data == dataset]
+        exper_with_this_dataset = [
+            exper for exper in exper_list if CTExperiments.to_dict(exper.data) == CTExperiments.to_dict(dataset)
+        ]
 
         # Data:
         data = get_ce_data(dataset; test_set=cfg.test_time)

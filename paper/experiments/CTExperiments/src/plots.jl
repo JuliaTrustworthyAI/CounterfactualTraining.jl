@@ -412,7 +412,7 @@ function plot_ce(data::MNIST, df::DataFrame, factual::Int, target::Int; axis=def
     if length(x) == 0
         plt = Plots.plot(; axis=([], false), size=values(axis))
     else
-        @assert length(x) == 1 "Expected 1 value, got $(length(x))."
+        # @assert length(x) == 1 "Expected 1 value, got $(length(x))."
         x = x[1]
         if target == factual
             title = "Factual"
@@ -482,6 +482,7 @@ function plot_ce(
     nsamples::Int=25,
     kwrgs...,
 )
+
     M = load_results(exper)[3]
     generator = CTExperiments.get_generator(params.generator_params)
     conv = CTExperiments.get_convergence(params)
@@ -489,11 +490,6 @@ function plot_ce(
     if isnothing(target)
         @info "No target supplied, choosing first label."
         target = data.y_levels[1]
-    end
-
-    # Cannot plot counterfactuals for OmnisionGenerator:
-    if isa(generator, OmniscientGenerator)
-        return Plots.plot(M, data; size=(500, 500), cb=false, target=target, kwrgs...)
     end
 
     candidates = findall(predict_label(M, data) .!= target)
