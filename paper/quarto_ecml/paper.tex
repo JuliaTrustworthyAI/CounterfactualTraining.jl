@@ -661,8 +661,9 @@ Section~\ref{sec-constraints}. We observe that due to the classifier's
 lower sensitivity to \emph{age}, recourse recommendations with respect
 to \emph{debt} are much more homogenous and do not disproportionately
 punish younger individuals. The counterfactuals are also plausible with
-respect to the mutable feature. Thus, we consider the model in panel (d)
-as the most explainable according to Def. \ref{def-explainability}.
+respect to the mutable feature and shorter on average than in (c). Thus,
+we consider the model in panel (d) as the most explainable according to
+Def. \ref{def-explainability}.
 
 \begin{figure}
 
@@ -738,15 +739,15 @@ directly targets both faithfulness and plausibility of the CEs.
 
 \subsection{Experimental Results}\label{experimental-results}
 
-\subsubsection{Plausibility}\label{plausibility}
+\subsubsection{Plausibility}\label{sec-plaus}
 
 Table~\ref{tbl-main} presents our main empirical findings. The top five
 rows show the percentage reduction in implausibility according to
 Equation~\ref{eq-impl-dist} for varying degrees of the energy penalty
 used for \emph{ECCo} at test time. The following row shows the reduction
 in implausibility as measured by Equation~\ref{eq-impl-div} and
-aggregated across all test specifications of \emph{ECCo}. The final two
-rows show the test accuracies for the model trained with CT and
+aggregated across all test specifications of \emph{ECCo}. The following
+two rows show the test accuracies for the model trained with CT and
 conventionally trained models (``vanilla'').
 
 We observe that for all datasets except \emph{OL} and across all test
@@ -788,8 +789,10 @@ reduction in implausibility according to Equation~\ref{eq-impl-dist} for
 varying degrees of the energy penalty used for \emph{ECCo} at test time.
 The following row shows the reduction in implausibility as measured by
 Equation~\ref{eq-impl-div} and aggregated across all test specifications
-of \emph{ECCo}. The final two rows show the test accuracies for the
-model trained with CT and conventionally trained models (``vanilla'').}
+of \emph{ECCo}. The following two rows show the test accuracies for the
+model trained with CT and conventionally trained models (``vanilla'').
+The final row present the average reduction in costs when imposing
+mutability constraints (Section~\ref{sec-act})}
 
 \centering{
 
@@ -801,7 +804,21 @@ model trained with CT and conventionally trained models (``vanilla'').}
 
 \end{table}%
 
-\subsubsection{Actionability}\label{actionability}
+\subsubsection{Actionability}\label{sec-act}
+
+In Section~\ref{sec-method}, we show that our proposed way for encoding
+mutability constraints leads to lower classifier sensitivity wrt.
+immutable features for linear models, tilting the decision boundary in
+favour of mutable features instead. For binding constraints at test
+time, this has the effect of shorter counterfactual paths and hence
+smaller average costs to individuals. To extend this to the non-linear
+case, we test the effect of imposing mutability constraints empirically
+for our synthetic data using the same evaluation scheme as above. The
+final row in Table~\ref{tbl-main} reports the average reduction in costs
+for CT compared to the baseline, when imposing that either the first or
+the second feature is immutable. In all cases, costs are reduced
+substantially indicating that classifiers trained with CT are indeed
+more sensitive to mutable features.
 
 \subsubsection{Impact of hyperparameter
 settings}\label{sec-hyperparameters}

@@ -28,9 +28,9 @@ We run the experiments with three gradient-based generators: *Generic* of @wacht
 
 ## Experimental Results
 
-### Plausibility
+### Plausibility {#sec-plaus}
 
-@tbl-main presents our main empirical findings. The top five rows show the percentage reduction in implausibility according to @eq-impl-dist for varying degrees of the energy penalty used for *ECCo* at test time. The following row shows the reduction in implausibility as measured by @eq-impl-div and aggregated across all test specifications of *ECCo*. The final two rows show the test accuracies for the model trained with CT and conventionally trained models ("vanilla"). 
+@tbl-main presents our main empirical findings. The top five rows show the percentage reduction in implausibility according to @eq-impl-dist for varying degrees of the energy penalty used for *ECCo* at test time. The following row shows the reduction in implausibility as measured by @eq-impl-div and aggregated across all test specifications of *ECCo*. The following two rows show the test accuracies for the model trained with CT and conventionally trained models ("vanilla"). 
 
 We observe that for all datasets except *OL* and across all test settings, the average distance of counterfactuals from observed samples in the target class is reduced, indicating improved plausibility. The magnitude of improvements varies by dataset: for the simple synthetic datasets, distance reductions range from around 20-40% (*LS*, *Moon*) to almost 60% (*Circ*). For the real-world tabular datasets, improvements are generally smaller but still substantial in many cases with around 10-15% for *CH*, 11-28% for *GMSC*, 7-8% for *Cred* and around 3% for *Adult*. For our only vision dataset (*MNIST*), distances are reduced by up to 9%. The results for our proposed divergence metric are qualitatively similar, but generally even more pronounced: for the *Circ* dataset, implausibility is reduced by almost 94% to virtually zero as we verified by looking at the absolute outcome. Improvements for other datasets range from 28% (*Moon*) to 78% (*GMSC*). For *OL* the reduction is negative, consistent with the distance-based metric. *MNIST* is the only dataset for which the two metrics disagree.
 
@@ -44,11 +44,13 @@ These broad and substantial improvements in plausibility generally do not come a
 \end{tabular*}
 ```
 
-Key plausibility and predictive performance metrics for all datasets. The top five rows show the percentage reduction in implausibility according to @eq-impl-dist for varying degrees of the energy penalty used for *ECCo* at test time. The following row shows the reduction in implausibility as measured by @eq-impl-div and aggregated across all test specifications of *ECCo*. The final two rows show the test accuracies for the model trained with CT and conventionally trained models ("vanilla").
+Key plausibility and predictive performance metrics for all datasets. The top five rows show the percentage reduction in implausibility according to @eq-impl-dist for varying degrees of the energy penalty used for *ECCo* at test time. The following row shows the reduction in implausibility as measured by @eq-impl-div and aggregated across all test specifications of *ECCo*. The following two rows show the test accuracies for the model trained with CT and conventionally trained models ("vanilla"). The final row present the average reduction in costs when imposing mutability constraints (@sec-act)
 
 :::
 
-### Actionability
+### Actionability {#sec-act}
+
+In @sec-method, we show that our proposed way for encoding mutability constraints leads to lower classifier sensitivity wrt. immutable features for linear models, tilting the decision boundary in favour of mutable features instead. For binding constraints at test time, this has the effect of shorter counterfactual paths and hence smaller average costs to individuals. To extend this to the non-linear case, we test the effect of imposing mutability constraints empirically for our synthetic data using the same evaluation scheme as above. The final row in @tbl-main reports the average reduction in costs for CT compared to the baseline, when imposing that either the first or the second feature is immutable. In all cases, costs are reduced substantially indicating that classifiers trained with CT are indeed more sensitive to mutable features. 
 
 ### Impact of hyperparameter settings {#sec-hyperparameters}
 We test in-depth the impact of three types of hyperparameters; our complete results are in the appendix.
