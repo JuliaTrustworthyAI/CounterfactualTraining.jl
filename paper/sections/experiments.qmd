@@ -1,14 +1,14 @@
 # Experiments {#sec-experiments}
 
-Here we present the experiments conducted to answer our research questions:
+In our experiments we seek to answer the following three research questions:
 
-1. To what extent does our counterfactual training objective as defined in @eq-obj induce models to learn plausible explanations?
+1. To what extent does the counterfactual training objective (as defined in @eq-obj) induce models to learn plausible explanations?
 2. To what extent does the CT objective produce more favorable algorithmic recourse outcomes in the presence of actionability constraints?
 3. What are the effects of hyperparameter selection wrt. the CT objective?
 
 ## Experimental Setup
 
-Our key outcome of interest is how well do models perform with respect to explainability (Def. \ref{def-explainability}). To this end, we focus primarily on the plausibility and cost of faithfully generated counterfactuals at test time. To measure the cost of counterfactuals, we follow the standard convention of using distances ($\ell_1$-norm) between factuals and counterfactuals as a proxy. For plausibility, we assess how similar counterfactuals are to observed samples in the target domain, $\mathbf{X}^+\subset\mathcal{X}^+$. We rely on the distance-based metric used by @altmeyer2024faithful,
+Our key outcome of interest is how well models perform with respect to explainability (Def. \ref{def-explainability}). To this end, we focus primarily on the plausibility and cost of faithfully generated counterfactuals at test time. To measure the cost of counterfactuals, we follow the standard convention of using distances ($\ell_1$-norm) between factuals and counterfactuals as a proxy. For plausibility, we assess how similar counterfactuals are to observed samples in the target domain, $\mathbf{X}^+\subset\mathcal{X}^+$. We rely on the distance-based metric used by @altmeyer2024faithful,
 
 $$
 \text{IP}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
@@ -50,7 +50,7 @@ Key explainability and predictive performance metrics for all datasets. **Plausi
 
 ### Actionability. {#sec-act}
 
-In @sec-method, we show that our proposed way for encoding mutability constraints leads to lower classifier sensitivity wrt. immutable features for linear models, tilting the decision boundary in favour of mutable features instead. For binding constraints at test time, this has the effect of shorter counterfactual paths and hence smaller average costs to individuals. To extend this to the non-linear case, we test the effect of imposing mutability constraints empirically for our synthetic data using the same evaluation scheme as above. The final row in @tbl-main reports the average reduction in costs for CT compared to the baseline, when imposing that either the first or the second feature is immutable. In all cases, costs are reduced substantially indicating that classifiers trained with CT are indeed more sensitive to mutable features. 
+In @sec-method, we show that our proposed way for encoding mutability constraints leads to lower classifier sensitivity wrt. immutable features for linear models, tilting the decision boundary in favour of mutable features instead. For binding constraints at test time, this has the effect of shorter counterfactual paths and hence smaller average costs ($\ell_1$-norm) to individuals. To extend this to the non-linear case, we test the effect of imposing mutability constraints empirically for our synthetic data using the same evaluation scheme as above. The final row in @tbl-main reports the average reduction in costs for CT compared to the baseline, when imposing that either the first or the second feature is immutable. In all cases, costs are reduced substantially, indicating that classifiers trained with CT are indeed more sensitive to mutable features. 
 
 ### Impact of hyperparameter settings. {#sec-hyperparameters}
 We test the impact of three types of hyperparameters; our complete results are in the supplementary appendix.  

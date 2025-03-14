@@ -284,7 +284,7 @@ Explanations}\label{adversarial-examples-are-counterfactual-explanations}
 This interpretation of the link between explainability through
 counterfactuals on one side and robustness to adversarial examples on
 the other is backed by empirical evidence.
-\cite{sauer2021counterfactual} demonstrate that using counterfactual
+\cite{sauer2021counterfactual} demonstrates that using counterfactual
 images during classifier training improves model robustness. Similarly,
 \cite{abbasnejad2020counterfactual} argue that counterfactuals represent
 potentially useful training data in machine learning, especially in
@@ -478,7 +478,7 @@ log-likelihood factorized as
 \(\log p_\theta(\mathbf{x},\mathbf{y})=\log p_\theta(\mathbf{y}|\mathbf{x}) + \log p_\theta(\mathbf{x})\).
 The first term can be optimized using conventional cross-entropy as in
 Equation~\ref{eq-obj}. Then, to optimize \(\log p_\theta(\mathbf{x})\)
-\cite{grathwohl2020your} minimize the contrastive divergence between
+\cite{grathwohl2020your} minimizes the contrastive divergence between
 these observed samples from \(p(\mathbf{x})\) and generated samples from
 \(p_\theta(\mathbf{x})\).
 
@@ -488,7 +488,7 @@ tend to do well with respect to the plausibility objective in Def.
 drawn from \(p_\theta(\mathbf{x})\) as counterfactuals because the JEM
 objective effectively minimizes the divergence between the conditional
 posterior and \(p(\mathbf{x}|\mathbf{y}^{+})\). To generate samples,
-\cite{grathwohl2020your} rely on Stochastic Gradient Langevin Dynamics
+\cite{grathwohl2020your} relies on Stochastic Gradient Langevin Dynamics
 (SGLD) using an uninformative prior for initialization but we depart
 from their methodology. Instead of SGLD, we propose to use
 counterfactual explainers to generate counterfactuals of observed
@@ -497,7 +497,7 @@ training samples. Specifically, we have:
 \begin{equation}\phantomsection\label{eq-div}{
 \text{div}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta) = \mathcal{E}_\theta(\mathbf{x}^+,y) - \mathcal{E}_\theta(\mathbf{x}_T^\prime,y)
 }\end{equation} where \(\mathcal{E}_\theta(\cdot)\) denotes the energy
-function. We set
+function defined as
 \(\mathcal{E}_\theta(\mathbf{x},y)=-\mathbf{M}_\theta(\mathbf{x})[y^+]\)
 where \(y^+\) denotes the index of the randomly drawn target class,
 \(y^+ \sim p(y)\). Conditional on the target class \(y^+\),
@@ -514,26 +514,25 @@ the counterfactuals get more plausible (Def. \ref{def-explainability})
 during training, these opposing effects gradually balance each other out
 \cite{lippe2024uvadlc}.
 
-The departure from SGLD allows us to tap into the vast repertoire of
-explainers that have been proposed in the literature to meet different
-desiderata. For example, many methods facilitate the imposition of
-domain and mutability constraints. In principle, any existing approach
-for generating counterfactual explanations is viable, so long as it does
-not violate the faithfulness condition. Like JEMs
-\cite{murphy2022probabilistic}, CT can be considered a form of
-contrastive representation learning.
+The departure from SGLD of \cite{grathwohl2020your} allows us to tap
+into the vast repertoire of explainers that have been proposed in the
+literature to meet different desiderata. For example, many methods
+facilitate the imposition of domain and mutability constraints. In
+principle, any existing approach for generating counterfactual
+explanations is viable, so long as it does not violate the faithfulness
+condition. Like JEMs \cite{murphy2022probabilistic}, CT can be
+considered a form of contrastive representation learning.
 
 \subsection{Indirectly Inducing Explainability with Adversarial
 Robustness}\label{indirectly-inducing-explainability-with-adversarial-robustness}
 
 Based on our analysis in Section~\ref{sec-lit}, counterfactuals
 \(\mathbf{x}^\prime\) can be repurposed as additional training samples
-\cite{luu2023counterfactual,balashankar2023improving} or AEs
-\cite{freiesleben2022intriguing,pawelczyk2022exploring}. This leaves
-some flexibility with respect to the choice for
-\(\text{advloss}(\cdot)\) in Equation~\ref{eq-obj}. An intuitive
-functional form, but likely not the only sensible choice, is inspired by
-adversarial training:
+\cite{luu2023counterfactual,balashankar2023improving} or adversarial
+examples \cite{freiesleben2022intriguing,pawelczyk2022exploring}. This
+leaves some flexibility wrt. the choice for \(\text{advloss}(\cdot)\) in
+Equation~\ref{eq-obj}. An intuitive functional form, but likely not the
+only sensible choice, is inspired by adversarial training:
 
 \begin{equation}\phantomsection\label{eq-adv}{
 \begin{aligned}
@@ -547,9 +546,10 @@ closely aligned with \cite{szegedy2013intriguing} who define an
 adversarial attack as an ``imperceptible non-random perturbation''.
 Thus, we choose to work with a different distinction between CE and AE
 than \cite{freiesleben2022intriguing} who consider misclassification as
-the key distinguishing feature of AE. One of the key observations in
+the key distinguishing feature of AE. One of the key observations of
 this work is that we can leverage CEs during training and get
-adversarial examples essentially for free.
+adversarial examples essentially for free, which can be used to reap the
+aforementioned benefits of adversarial training.
 
 \subsection{Encoding Actionability Constraints}\label{sec-constraints}
 
@@ -622,8 +622,8 @@ features: (1) the subjects' \emph{age}, which we define as immutable,
 and (2) the subjects' existing level of \emph{debt}, which we define as
 mutable.
 
-We have simulated this scenario using synthetic data with two
-independent features and Gaussian class-conditional densities in
+We have simulated this scenario using synthetic data with independent
+\emph{age} and \emph{debt}, and Gaussian class-conditional densities in
 Figure~\ref{fig-poc}. The four panels show the outcomes for different
 training procedures using the same model architectures (a linear
 classifier). In panels (a) and (c) we have trained the models
@@ -665,15 +665,15 @@ explainability.}
 
 \section{Experiments}\label{sec-experiments}
 
-Here we present the experiments conducted to answer our research
+In our experiments we seek to answer the following three research
 questions:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  To what extent does our counterfactual training objective as defined
-  in Equation~\ref{eq-obj} induce models to learn plausible
+  To what extent does the counterfactual training objective (as defined
+  in Equation~\ref{eq-obj}) induce models to learn plausible
   explanations?
 \item
   To what extent does the CT objective produce more favorable
@@ -686,8 +686,8 @@ questions:
 
 \subsection{Experimental Setup}\label{experimental-setup}
 
-Our key outcome of interest is how well do models perform with respect
-to explainability (Def. \ref{def-explainability}). To this end, we focus
+Our key outcome of interest is how well models perform with respect to
+explainability (Def. \ref{def-explainability}). To this end, we focus
 primarily on the plausibility and cost of faithfully generated
 counterfactuals at test time. To measure the cost of counterfactuals, we
 follow the standard convention of using distances (\(\ell_1\)-norm)
@@ -809,14 +809,14 @@ mutability constraints leads to lower classifier sensitivity wrt.
 immutable features for linear models, tilting the decision boundary in
 favour of mutable features instead. For binding constraints at test
 time, this has the effect of shorter counterfactual paths and hence
-smaller average costs to individuals. To extend this to the non-linear
-case, we test the effect of imposing mutability constraints empirically
-for our synthetic data using the same evaluation scheme as above. The
-final row in Table~\ref{tbl-main} reports the average reduction in costs
-for CT compared to the baseline, when imposing that either the first or
-the second feature is immutable. In all cases, costs are reduced
-substantially indicating that classifiers trained with CT are indeed
-more sensitive to mutable features.
+smaller average costs (\(\ell_1\)-norm) to individuals. To extend this
+to the non-linear case, we test the effect of imposing mutability
+constraints empirically for our synthetic data using the same evaluation
+scheme as above. The final row in Table~\ref{tbl-main} reports the
+average reduction in costs for CT compared to the baseline, when
+imposing that either the first or the second feature is immutable. In
+all cases, costs are reduced substantially, indicating that classifiers
+trained with CT are indeed more sensitive to mutable features.
 
 \subsubsection{Impact of hyperparameter
 settings.}\label{sec-hyperparameters}
