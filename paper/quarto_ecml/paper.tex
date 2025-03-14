@@ -806,7 +806,7 @@ settings.}\label{sec-hyperparameters}
 
 We test the impact of three types of hyperparameters; our complete
 results are in the supplementary appendix.\\
-\textbf{\emph{Hyperparameters of the CE generators.}} First, we observe
+\indent \emph{Hyperparameters of the CE generators.} First, we observe
 that CT is highly sensitive to hyperparameter settings but (a) there are
 manageable patterns and (b) we can typically identify settings that
 improve either plausibility or cost, and commonly both of them at the
@@ -823,16 +823,16 @@ increasing this threshold does not seem to correlate with better
 outcomes. In fact, we have generally found that a choice of \(\tau=0.5\)
 leads to optimal results because it is associated with high proportions
 of mature counterfactuals.\\
-\textbf{\emph{Hyperparameters for penalties.}} We find that the strength
+\indent \emph{Hyperparameters for penalties.} We find that the strength
 of the energy regularization, \(\lambda_{\text{reg}}\) is highly
 impactful; energy must be sufficiently regularized to avoid poor
 performance in terms of decreased plausibility and increased costs. The
 sensitivity with respect to \(\lambda_{\text{div}}\) and
 \(\lambda_{\text{adv}}\) is much less evident. While high values of
-\(\lambda_{\text{reg}}\) may increase the variability in outcomes when
-combined with high values of \(\lambda_{\text{div}}\) or
-\(\lambda_{\text{adv}}\), this effect is not very pronounced.\\
-\textbf{\emph{Other hyperparameters.}} We observe that the effectiveness
+\(\lambda_{\text{reg}}\) may increase the variability in outcomes
+(especially) when combined with high values of \(\lambda_{\text{div}}\)
+or \(\lambda_{\text{adv}}\), this effect is not very pronounced.\\
+\indent \emph{Other hyperparameters.} We observe that the effectiveness
 and stability of CT is positively associated with the number of
 counterfactuals generated during each training epoch. We also confirm
 that a higher number of training epochs is beneficial. Interestingly, we
@@ -844,9 +844,9 @@ improve the explainability of models in a fine-tuning manner.
 \section{Discussion}\label{sec-discussion}
 
 As our results indicate, counterfactual training produces models that
-are more explainable. However, our approach is not without
+are more explainable. Nonetheless, it brings about three important
 limitations.\\
-\textbf{\emph{CT increases the training time of models.}} CT can be more
+\indent \emph{CT increases the training time of models.} CT can be more
 time-consuming than conventional training regimes. While higher numbers
 of CEs per iteration positively impact the quality of solutions, they
 also increase the amount of computations. Relatively small grids with
@@ -858,7 +858,7 @@ training samples. Second, we find that it can retain its value when used
 as a ``fine-tuning'' technique for conventionally-trained models. Third,
 it yields itself to parallel execution, which we have leveraged for our
 own experiments.\\
-\textbf{\emph{Immutable features may have proxies.}} We propose an
+\indent \emph{Immutable features may have proxies.} We propose an
 approach to protect immutable features and thus increase the
 actionability of the generated CEs. However, it requires that model
 owners define the mutability constraints for (all) features considered
@@ -868,11 +868,11 @@ preserve enough information about the principals to hinder the
 protections. Delineating actionability is a major undecided challenge in
 the AR literature \cite{venkatasubramanian2020philosophical} impacting
 the capacity of CT to fulfill its intended goal.\\
-\textbf{\emph{Interventions on features may impact fairness.}} We
-provide a tool that allows practitioners to modify the sensitivity of a
-model with respect to certain features, which may have implication for
-the fair and equitable treatment of decision subjects. As protecting a
-set of features leads the model to assign higher relative importance to
+\indent \emph{Interventions on features may impact fairness.} We provide
+a tool that allows practitioners to modify the sensitivity of a model
+with respect to certain features, which may have implication for the
+fair and equitable treatment of decision subjects. As protecting a set
+of features leads the model to assign higher relative importance to
 unprotected features, model owners could misuse our solution by
 enforcing explanations based on features that are more difficult to
 modify by some (group of) individuals. For example, consider the Adult
@@ -883,37 +883,36 @@ assigned burden of recourse \cite{sharma2020certifai}, threatening the
 equality of opportunity in the system \cite{bell2024fairness}. Still,
 these phenomena are not specific to CT.
 
-We also highlight several interesting directions for future research.\\
-\textbf{\emph{Extending CT beyond classification settings.}} Our
-formulation relies on the distinction between non-target class(es)
-\(y^{-}\) and target class(es) \(y^{+}\) to generate counterfactuals
-through Equation~\ref{eq-obj}. While \(y^{-}\) and \(y^{+}\) can be
-arbitrarily defined, CT requires the output space \(\mathcal{Y}\) to be
-discrete. Thus, it does not apply to ML tasks where the change in
-outcome cannot be readily quantified. Focus on classification models is
-a common restriction in research on CEs and AR. Other settings have
-attracted some interest (e.g., regression in
+We also highlight several important directions for future research.
+Firstly, it is an interesting challenge to extend CT beyond
+classification settings. Our formulation relies on the distinction
+between non-target class(es) \(y^{-}\) and target class(es) \(y^{+}\) to
+generate counterfactuals through Equation~\ref{eq-obj}. While \(y^{-}\)
+and \(y^{+}\) can be arbitrarily defined, CT requires the output space
+\(\mathcal{Y}\) to be discrete. Thus, it does not apply to ML tasks
+where the change in outcome cannot be readily quantified. Focus on
+classification models is a common restriction in research on CEs and AR.
+Other settings have attracted some interest (e.g., regression in
 \cite{spooner2021counterfactual,zhao2023counterfactual}), but there is
 little consensus how to robustly extend the notion of CEs.\\
-\textbf{\emph{Addressing the training instabilities.}} JEMs are
-susceptible to instabilities during training \cite{grathwohl2020your}
-and even though we depart from the SGLD-based sampling, we still
-encounter major variability in the outcomes. CT is exposed to two
-potential sources of instabilities: (1) the energy-based contrastive
-divergence term in Equation~\ref{eq-div}, and (2) the underlying
-counterfactual explainers. Still, we find that training instabilities
-can be successfully mitigated by regularizing energy
-(\(\lambda_{\text{reg}}\)), generating sufficiently many counterfactuals
-during each training epoch, and including only mature counterfactuals
-for contrastive divergence.\\
-\textbf{\emph{Improving hyperparameter selection procedures.}} Our
-method benefits from the tuning of certain key hyperparameters (see
-Section~\ref{sec-hyperparameters}). In this work, we have relied
-exclusively on grid search for this task. Future work on CT could
-benefit from investigating more sophisticated approaches towards
-hyperparameter tuning. Notably, CT is iterative which makes a variety of
-methods applicable, including Bayesian \cite{snoek2012practical} or
-gradient-based \cite{franceschi2017forward} optimization.
+\indent Secondly, our approach is susceptible to training instabilities.
+This problem has been recognized for JEMs \cite{grathwohl2020your} and
+even though we depart from the SGLD-based sampling, we still encounter
+considerable variability in the outcomes. CT is exposed to two potential
+sources of instabilities: (1) the energy-based contrastive divergence
+term in Equation~\ref{eq-div}, and (2) the underlying counterfactual
+explainers. We find several promising ways to mitigate this problem:
+regularizing energy (\(\lambda_{\text{reg}}\)), generating sufficiently
+many counterfactuals during each epoch, and including only mature
+counterfactuals for contrastive divergence.\\
+\indent Finally, we believe that it is possible to substantially improve
+hyperparameter selection procedures. Our method benefits from the tuning
+of certain key hyperparameters (see Section~\ref{sec-hyperparameters}).
+In this work, we have relied exclusively on grid search for this task.
+Future work on CT could benefit from investigating more sophisticated
+approaches. Notably, CT is iterative which makes methods such as
+Bayesian (e.g., \cite{snoek2012practical}) or gradient-based (e.g.,
+\cite{franceschi2017forward}) optimization applicable.
 
 \section{Conclusion}\label{sec-conclusion}
 
