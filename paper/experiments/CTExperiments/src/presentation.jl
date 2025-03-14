@@ -636,7 +636,7 @@ global LatexMetricReplacements = Dict(
     "plausibility_distance_from_target" => "\$ \\text{IP} \$",
     "distance" => "Cost",
     "sens_outid:1" => "sens_1",
-    "sens_outid:2" => "sens_2"
+    "sens_outid:2" => "sens_2",
 )
 
 function format_metric(m::String)
@@ -743,18 +743,14 @@ end
 function final_mutability(
     res_dir::String;
     var=["distance", "sens_outid:1", "sens_outid:2"],
-    byvars=["objective","mutability"],
+    byvars=["objective", "mutability"],
     agg_cases::Bool=true,
 )
     # CE:
     df_ce = DataFrame()
     for (i, y) in enumerate(var)
         df = aggregate_ce_evaluation(
-            res_dir;
-            byvars=byvars,
-            y,
-            agg_further_vars=["run"],
-            rebase=true,
+            res_dir; byvars=byvars, y, agg_further_vars=["run"], rebase=true
         )
         df_ce = vcat(df_ce, df; cols=:union)
     end
@@ -762,7 +758,7 @@ function final_mutability(
     # For sensitivity, need to adjust values cause `aggregate_ce_evaluation` returns levels not changes of zeros are present:
     adjusted_sens = []
     if "avg_baseline" in names(df_ce)
-        for (i,val) in enumerate(df_ce.mean)
+        for (i, val) in enumerate(df_ce.mean)
             if ismissing(df_ce.avg_baseline[i]) || val == 0
                 push!(adjusted_sens, val)
             else
@@ -771,7 +767,7 @@ function final_mutability(
                 push!(adjusted_sens, val_pct)
             end
         end
-        select!(df_ce,Not([:avg_baseline, :baseline]))
+        select!(df_ce, Not([:avg_baseline, :baseline]))
         df_ce.mean = adjusted_sens
     end
 
@@ -781,7 +777,8 @@ function final_mutability(
     # Aggregate across cases of interest:
     if agg_cases
         filter!(df_ce -> !all(df_ce.mutability .== "both"), df_ce)
-        df_ce = groupby(df_ce, [:dataset, :variable]) |>
+        df_ce =
+            groupby(df_ce, [:dataset, :variable]) |>
             gdf -> combine(gdf, :mean => mean => :mean)
     end
 
