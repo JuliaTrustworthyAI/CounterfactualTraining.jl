@@ -217,8 +217,8 @@ automated decision-making (ADM) systems involving opaque models
 \cite{oneil2016weapons,mcgregor2021preventing}. Effective XAI tools can
 aid us in monitoring models and providing recourse to individuals to
 turn negative outcomes (e.g., ``loan application rejected'') into
-positive ones (e.g., ``application accepted''). Our work builds upon
-\textbf{counterfactual explanations} (CE) proposed by
+positive ones (e.g., ``application accepted''). In line with this, our
+work builds upon \textbf{counterfactual explanations} (CE) proposed by
 \cite{wachter2017counterfactual} as an effective approach to achieve
 this goal. CEs prescribe minimal changes for factual inputs that, if
 implemented, would prompt some fitted model to produce a desired output.
@@ -231,40 +231,40 @@ are \textbf{interpretable} and deemed \textbf{plausible} by humans (see
 Def. \ref{def-explainability}). Instead, the choice has generally been
 to improve the ability of XAI tools to identify the subset of
 explanations that are both plausible and valid for any given model,
-independent of whether the learned representations are also compatible
-with plausible explanations \cite{altmeyer2024faithful}. Fortunately,
-recent findings indicate that improved explanatory capacity can arise as
-a consequence of regularization techniques aimed at other training
-objectives such as robustness, generalization, and generative capacity
+independent of whether the learned representations are in fact
+compatible with plausible explanations \cite{altmeyer2024faithful}.
+Fortunately, recent findings indicate that improved explanatory capacity
+can arise as a consequence of regularization techniques aimed at other
+training objectives such as robustness, generalization, and generative
+capacity
 \cite{schut2021generating,augustin2020adversarial,altmeyer2024faithful}.
 As further discussed in Section~\ref{sec-lit}, our work consolidates
 these findings within a single objective.
 
-\textbf{Specifically, we propose counterfactual training (CT)}: a novel
-training regime that aligns learned representations with plausible
-explanations respecting actionability constraints. The remainder of this
-paper is structured as follows. Section~\ref{sec-lit} presents related
-work, focusing on the link between adversarial examples and
-counterfactual explanations. Then follow our two principal
-contributions. In Section~\ref{sec-method}, we introduce our
-methodological framework and show theoretically that it can be employed
-to enforce global actionability constraints. In
-Section~\ref{sec-experiments}, through extensive experiments, we
-demonstrate that CT substantially improves explainability without
-sacrificing predictive performance. We discuss the challenges in
-Section~\ref{sec-discussion} and conclude in
+\textbf{Specifically, we introduce Counterfactual Training (CT)}: a
+novel training regime explicitly geared towards improving the
+explainability of models. In high-level terms, we define this concept as
+as the extent to which valid explanations derived for an opaque model
+are also deemed plausible with respect to the underlying data and the
+global actionability constraints. To the best of our knowledge, our
+framework represents the first attempt to address this challenge by
+employing counterfactual explanations already in the training phase.
+
+The remainder of this manuscript is structured as follows.
+Section~\ref{sec-lit} presents related work, focusing on the link
+between AEs and CEs. Then follow our two principal contributions. In
+Section~\ref{sec-method}, we introduce our methodological framework and
+show theoretically that it can be employed to enforce global
+actionability constraints. In Section~\ref{sec-experiments}, through
+extensive experiments, we demonstrate that CT substantially improves
+explainability without sacrificing predictive performance. We discuss
+the challenges in Section~\ref{sec-discussion} and conclude in
 Section~\ref{sec-conclusion} that CT is a promising approach towards
 making opaque models more trustworthy.
 
 \section{Related Literature}\label{sec-lit}
 
-To the best of our knowledge, the proposed framework for counterfactual
-training represents the first attempt to use counterfactual explanations
-during training to improve model explainability. In high-level terms, we
-define model explainability as the extent to which valid explanations
-derived for an opaque model are also deemed plausible with respect to
-the underlying data and (global) actionability constraints. To make the
-desiderata for our framework more concrete, we follow
+To make the desiderata for our framework more concrete, we follow
 \cite{augustin2020adversarial} in tying the concept of explainability to
 the quality of CEs that can be generated for a given model. The authors
 show that CEs---understood as minimal input perturbations that yield
@@ -275,8 +275,8 @@ intuitive sense of this finding when looking at adversarial training
 freedom. As argued before, learned representations may be sensitive to
 producing implausible explanations and mispredicting for worst-case
 counterfactuals (i.e., AEs). Thus, by inducing models to ``unlearn''
-susceptiblity to such examples, AT can effectively remove implausible
-explanations from the solution space.
+susceptiblity to such examples, adversarial training can effectively
+remove implausible explanations from the solution space.
 
 \subsection{Adversarial Examples are Counterfactual
 Explanations}\label{adversarial-examples-are-counterfactual-explanations}
@@ -322,8 +322,7 @@ opaqueness and robustness problems in representation learning. Formally,
 AEs can be seen as the subset of CEs for which misclassification is
 achieved \cite{freiesleben2022intriguing}. Similarly,
 \cite{pawelczyk2022exploring} show that CEs and AEs are equivalent under
-certain conditions and derive theoretical upper bounds on distances
-between them.
+certain conditions.
 
 Two recent works are closely related to ours in that they use
 counterfactuals during training with the explicit goal of affecting
@@ -343,7 +342,8 @@ Counterfactuals are generated during each training iteration and fed
 back to the predictor network. In contrast to \cite{guo2023counternet},
 we impose no restrictions on the ANN architecture at all.
 
-\subsection{Beyond Robustness}\label{beyond-robustness}
+\subsection{Aligning Representations with Plausible
+Explanations}\label{aligning-representations-with-plausible-explanations}
 
 Improving the adversarial robustness of models is not the only path
 towards aligning representations with plausible explanations. In a work
@@ -352,14 +352,14 @@ explainability can be improved through model averaging and refined model
 objectives. The authors propose a way to generate counterfactuals that
 are maximally faithful to the model in that they are consistent with
 what the model has learned about the underlying data. Formally, they
-rely on tools from energy-based modelling to minimize the divergence
-between the distribution of counterfactuals and the conditional
-posterior over inputs learned by the model. Their proposed
-counterfactual explainer, \emph{ECCCo}, yields plausible explanations if
-and only if the underlying model has learned representations that align
-with them. The authors find that both deep ensembles
-\cite{lakshminarayanan2016simple} and joint energy-based models (JEMs)
-\cite{grathwohl2020your} tend to do well in this regard.
+rely on tools from energy-based modelling \cite{teh2003energy} to
+minimize the divergence between the distribution of counterfactuals and
+the conditional posterior over inputs learned by the model. Their
+proposed counterfactual explainer, \emph{ECCCo}, yields plausible
+explanations if and only if the underlying model has learned
+representations that align with them. The authors find that both deep
+ensembles \cite{lakshminarayanan2016simple} and joint energy-based
+models (JEMs) \cite{grathwohl2020your} tend to do well in this regard.
 
 Once again it helps to look at these findings through the lens of
 representation learning with high degrees of freedom. Deep ensembles are
@@ -369,37 +369,39 @@ Averaging across solutions mitigates the aforementioned risk of relying
 on a single locally optimal representations that corresponds to
 semantically meaningless explanations for the data. Previous work by
 \cite{schut2021generating} similarly found that generating plausible
-(``interpretable'') counterfactual explanations is almost trivial for
-deep ensembles that have also undergone adversarial training. The case
-for JEMs is even clearer: they involve a hybrid objective that induces
-both high predictive performance and generative capacity
-\cite{grathwohl2020your}. This is closely related to the idea of
-aligning models with plausible explanations and has inspired our
-proposed CT objective, as we explain in Section~\ref{sec-method}.
+(``interpretable'') CEs is almost trivial for deep ensembles that have
+also undergone adversarial training. The case for JEMs is even clearer:
+they involve a hybrid objective that induces both high predictive
+performance and generative capacity \cite{grathwohl2020your}. This is
+closely related to the idea of aligning models with plausible
+explanations and has inspired our CT objective.
 
 \section{Counterfactual Training}\label{sec-method}
 
-Counterfactual training combines ideas from adversarial training,
-energy-based modelling and counterfactuals explanations with the
-explicit goal of aligning representations with plausible explanations
-that comply with user requirements. In the context of CEs, plausibility
-has broadly been defined as the degree to which counterfactuals comply
-with the underlying data-generating process
+In this section we propose our novel counterfactual training objective.
+In CT, we combine ideas from adversarial training, counterfactual
+explanations, and energy-based modelling with the explicit goal of
+aligning representations with plausible explanations that comply with
+user-defined actionability constraints.
+
+In the context of counterfactual explanations, plausibility has broadly
+been defined as the degree to which counterfactuals comply with the
+underlying data-generating process
 \cite{poyiadzi2020face,guidotti2022counterfactual,altmeyer2024faithful}.
 Plausibility is a necessary but insufficient condition for using CEs to
 provide algorithmic recourse (AR) to individuals (negatively) affected
-by opaque models. For AR recommendations to be actionable, they need to
-not only result in plausible counterfactuals but also be attainable. A
-plausible CE for a rejected 20-year-old loan applicant, for example,
-might reveal that their application would have been accepted, if only
-they were 20 years older. Ignoring all other features, this would comply
-with the definition of plausibility if 40-year-old individuals were in
-fact more credit-worthy on average than young adults. But of course this
-CE does not qualify for providing actionable recourse to the applicant
-since \emph{age} is not a (directly) mutable feature. CT aims to improve
-model explainability by aligning models with counterfactuals that meet
-both desiderata: plausibility and actionability. Formally, we define
-explainability as follows:
+by opaque models. To be actionable, AR recommendations must also be
+attainable. A plausible CE for a rejected 20-year-old loan applicant,
+for example, might reveal that their application would have been
+accepted, if only they were 20 years older. Ignoring all other features,
+this would comply with the definition of plausibility if 40-year-old
+individuals were in fact more credit-worthy on average than young
+adults. But of course this CE does not qualify for providing actionable
+recourse to the applicant since \emph{age} is not a (directly) mutable
+feature. Counterfactual training aims to improve model explainability by
+aligning models with counterfactuals that meet both desiderata:
+plausibility and actionability. Formally, we define explainability as
+follows:
 
 \begin{definition}[Model Explainability]
 \label{def-explainability}
