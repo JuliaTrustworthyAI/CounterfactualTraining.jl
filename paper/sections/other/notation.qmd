@@ -13,3 +13,5 @@ $$
 MMD({X}^\prime,\tilde{X}^\prime) &= \frac{1}{m(m-1)}\sum_{i=1}^m\sum_{j\neq i}^m k(x_i,x_j) \\ &+ \frac{1}{n(n-1)}\sum_{i=1}^n\sum_{j\neq i}^n k(\tilde{x}_i,\tilde{x}_j) \\ &- \frac{2}{mn}\sum_{i=1}^m\sum_{j=1}^n k(x_i,\tilde{x}_j)
 \end{aligned}
 $$ {#eq-mmd}
+
+In our implementation, @eq-mmd is by default applied to the entire subset of the training data for which $y=y^+$.

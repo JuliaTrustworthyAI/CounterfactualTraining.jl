@@ -15,9 +15,10 @@ DotEnv.load!()
 
 ```{julia}
 res_dir = joinpath(ENV["FINAL_GRID_RESULTS"],"single")
+mtbl_dir = joinpath(ENV["FINAL_GRID_RESULTS"],"mutability")
 ```
 
-# Details on Main Experiments {.appendix}
+# Details on Main Experiments {#sec-app-main .appendix}
 
 ## Final Hyperparameters
 
@@ -44,7 +45,8 @@ Final hyperparameters used for the main results for the different datasets.
 ```{julia}
 #| eval: false
 
-df = final_table(res_dir)
+tbl_mtbl = final_mutability(mtbl_dir; var=["distance"])
+df = final_table(res_dir; tbl_mtbl)
 inputs = get_table_inputs(df, nothing; backend=Val(:latex))
 tabulate_results(inputs; table_type=:tabular, save_name="paper/quarto_ecml/tables/main.tex", wrap_table=false)
 tabulate_results(inputs; table_type=:tabular, save_name="paper/preprint/tables/main.tex", wrap_table=false)

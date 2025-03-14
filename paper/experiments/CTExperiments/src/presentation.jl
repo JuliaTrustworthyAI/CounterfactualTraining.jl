@@ -551,6 +551,8 @@ function aggregate_ce_evaluation(
             else
                 # Otherwise store average level of baseline:
                 df_agg.avg_baseline .= mean(df_agg[:, Symbol(vanilla_name)])
+                df_agg.baseline .= df_agg[:, Symbol(vanilla_name)]
+                # Let outcome be difference from baseline:
                 df_agg[:, Symbol(obj)] .+= df_agg[:, Symbol(vanilla_name)]
             end
         end
@@ -630,7 +632,11 @@ function get_img_command(data_names, full_paths, fig_labels; fig_caption="")
 end
 
 global LatexMetricReplacements = Dict(
-    "mmd" => "\$ \\text{IP}^* \$", "plausibility_distance_from_target" => "\$ \\text{IP} \$"
+    "mmd" => "\$ \\text{IP}^* \$",
+    "plausibility_distance_from_target" => "\$ \\text{IP} \$",
+    "distance" => "Cost",
+    "sens_outid:1" => "sens_1",
+    "sens_outid:2" => "sens_2",
 )
 
 function format_metric(m::String)
@@ -649,7 +655,9 @@ function aggregate_ce_evaluation(
     end
     rename!(df, :data => :dataset)
     df.dataset .= CTExperiments.format_header.(df.dataset)
-    df.objective .= CTExperiments.format_header.(df.objective)
+    if "objective" in names(df)
+        df.objective .= CTExperiments.format_header.(df.objective)
+    end
     df.variable .= CTExperiments.format_metric.(y)
     if rebase
         df.variable .= (x -> LatexCell("$(x) \$(-\\Delta %)\$")).(df.variable)
@@ -698,6 +706,7 @@ end
 
 function final_table(
     res_dir::String;
+    tbl_mtbl::Union{Nothing,DataFrame}=nothing,
     ce_var=["plausibility_distance_from_target", "mmd"],
     perf_var=["acc"],
     agg_further_vars=[["run"], ["run", "lambda_energy_eval"]],
@@ -718,11 +727,64 @@ function final_table(
     df_perf = aggregate_performance(res_dir; measure=perf_var)
     df = vcat(df_ce, df_perf; cols=:union) |> df -> DataFrames.unstack(df, :dataset, :mean)
 
+    # Mutability:
+    if !isnothing(tbl_mtbl)
+        df = vcat(df, tbl_mtbl; cols=:union)
+    end
+
     # Missing:
     df = coalesce.(df, "")
 
     rename!(df, :variable => :measure)
     select!(df, :measure, Not([:measure]))
+    return df
+end
+
+function final_mutability(
+    res_dir::String;
+    var=["distance", "sens_outid:1", "sens_outid:2"],
+    byvars=["objective", "mutability"],
+    agg_cases::Bool=true,
+)
+    # CE:
+    df_ce = DataFrame()
+    for (i, y) in enumerate(var)
+        df = aggregate_ce_evaluation(
+            res_dir; byvars=byvars, y, agg_further_vars=["run"], rebase=true
+        )
+        df_ce = vcat(df_ce, df; cols=:union)
+    end
+
+    # For sensitivity, need to adjust values cause `aggregate_ce_evaluation` returns levels not changes of zeros are present:
+    adjusted_sens = []
+    if "avg_baseline" in names(df_ce)
+        for (i, val) in enumerate(df_ce.mean)
+            if ismissing(df_ce.avg_baseline[i]) || val == 0
+                push!(adjusted_sens, val)
+            else
+                val_bl = df_ce.baseline[i]
+                val_pct = 100 .* (val - val_bl) ./ abs.(val_bl)
+                push!(adjusted_sens, val_pct)
+            end
+        end
+        select!(df_ce, Not([:avg_baseline, :baseline]))
+        df_ce.mean = adjusted_sens
+    end
+
+    # Multiply by -1 to turn into -Δ%:
+    df_ce.mean .*= -1
+
+    # Aggregate across cases of interest:
+    if agg_cases
+        filter!(df_ce -> !all(df_ce.mutability .== "both"), df_ce)
+        df_ce =
+            groupby(df_ce, [:dataset, :variable]) |>
+            gdf -> combine(gdf, :mean => mean => :mean)
+    end
+
+    df = df_ce
+    df = DataFrames.unstack(df, :dataset, :mean)
+
     return df
 end
 

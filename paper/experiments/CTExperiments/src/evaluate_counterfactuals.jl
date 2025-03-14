@@ -165,6 +165,9 @@ function evaluate_counterfactuals(
         )
     end
 
+    # In case `feature_sensitivity` was computed, store index of feature:
+    add_sensitivity!(bmk)
+
     rm(interim_storage_path; recursive=true)
 
     # Remove counterfactuals to save memory:
