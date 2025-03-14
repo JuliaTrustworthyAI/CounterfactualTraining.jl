@@ -44,7 +44,7 @@ These broad and substantial improvements in plausibility generally do not come a
 \end{tabular*}
 ```
 
-Key plausibility and predictive performance metrics for all datasets. The top five rows show the percentage reduction in implausibility according to @eq-impl-dist for varying degrees of the energy penalty used for *ECCo* at test time. The following row shows the reduction in implausibility as measured by @eq-impl-div and aggregated across all test specifications of *ECCo*. The following two rows show the test accuracies for the model trained with CT and conventionally trained models ("vanilla"). The final row present the average reduction in costs when imposing mutability constraints (@sec-act)
+Key explainability and predictive performance metrics for all datasets. **Plausibility**: the top five rows show the percentage reduction in implausibility according to @eq-impl-dist for varying degrees of the energy penalty used for *ECCo* at test time. The following row shows the reduction in implausibility as measured by @eq-impl-div and aggregated across all test specifications. **Accuracy**: The following two rows show the test accuracies for the models trained with CT and the baseline. **Actionability**: The final row present the average reduction in costs when imposing mutability constraints.
 
 :::
 
