@@ -141,17 +141,18 @@ capacity of models. Counterfactual explanations have emerged as a
 popular post-hoc explanation method for opaque machine learning models:
 they inform how factual inputs would need to change in order for a model
 to produce some desired output. To be useful in real-word
-decision-making systems, counterfactuals should be plausible with
-respect to the underlying data and actionable with respect to the
-stakeholder requirements. Much existing research has therefore focused
-on developing post-hoc methods to generate counterfactuals that meet
-these desiderata. In this work, we instead hold models directly
-accountable for the desired end goal: counterfactual training employs
-counterfactuals ad-hoc during the training phase to minimize the
-divergence between learned representations and plausible, actionable
-explanations. We demonstrate empirically and theoretically that our
-proposed method facilitates training models that deliver inherently
-desirable explanations while maintaining high predictive performance.
+decision-making systems, counterfactuals should be (1) plausible with
+respect to the underlying data and (2) actionable with respect to the
+user-defined mutability constraints. Much existing research has
+therefore focused on developing post-hoc methods to generate
+counterfactuals that meet these desiderata. In this work, we instead
+hold models directly accountable for the desired end goal:
+counterfactual training employs counterfactuals ad-hoc during the
+training phase to minimize the divergence between learned
+representations and plausible, actionable explanations. We demonstrate
+empirically and theoretically that our proposed method facilitates
+training models that deliver inherently desirable explanations while
+maintaining high predictive performance.
 
 \keywords{Counterfactual Training \and Counterfactual
 Explanations \and Algorithmic Recourse \and Explainable
@@ -214,7 +215,7 @@ which practitioners deploy opaque models and blindly rely on their
 predictions. On countless occasions, this has happened in practice and
 caused real harms to people who were adversely and unfairly affected by
 automated decision-making (ADM) systems involving opaque models
-\cite{oneil2016weapons,mcgregor2021preventing}. Effective XAI tools can
+\cite{mcgregor2021preventing,oneil2016weapons}. Effective XAI tools can
 aid us in monitoring models and providing recourse to individuals to
 turn negative outcomes (e.g., ``loan application rejected'') into
 positive ones (e.g., ``application accepted''). In line with this, our
@@ -235,9 +236,9 @@ independent of whether the learned representations are in fact
 compatible with plausible explanations \cite{altmeyer2024faithful}.
 Fortunately, recent findings indicate that improved explanatory capacity
 can arise as a consequence of regularization techniques aimed at other
-training objectives such as robustness, generalization, and generative
-capacity
-\cite{schut2021generating,augustin2020adversarial,altmeyer2024faithful}.
+training objectives such as generative capacity, generalization, or
+robustness
+\cite{altmeyer2024faithful,augustin2020adversarial,schut2021generating}.
 As further discussed in Section~\ref{sec-lit}, our work consolidates
 these findings within a single objective.
 
@@ -387,7 +388,7 @@ user-defined actionability constraints.
 In the context of counterfactual explanations, plausibility has broadly
 been defined as the degree to which counterfactuals comply with the
 underlying data-generating process
-\cite{poyiadzi2020face,guidotti2022counterfactual,altmeyer2024faithful}.
+\cite{altmeyer2024faithful,guidotti2022counterfactual,poyiadzi2020face}.
 Plausibility is a necessary but insufficient condition for using CEs to
 provide algorithmic recourse (AR) to individuals (negatively) affected
 by opaque models. To be actionable, AR recommendations must also be
@@ -477,7 +478,7 @@ perform well at both tasks by directly maximizing the joint
 log-likelihood factorized as
 \(\log p_\theta(\mathbf{x},\mathbf{y})=\log p_\theta(\mathbf{y}|\mathbf{x}) + \log p_\theta(\mathbf{x})\).
 The first term can be optimized using conventional cross-entropy as in
-Equation~\ref{eq-obj}. To optimize \(\log p_\theta(\mathbf{x})\)
+Equation~\ref{eq-obj}. To optimize \(\log p_\theta(\mathbf{x})\),
 \cite{grathwohl2020your} minimizes the contrastive divergence between
 the observed samples from \(p(\mathbf{x})\) and generated samples from
 \(p_\theta(\mathbf{x})\).
@@ -528,7 +529,7 @@ Robustness}\label{indirectly-inducing-explainability-with-adversarial-robustness
 
 Based on our analysis in Section~\ref{sec-lit}, counterfactuals
 \(\mathbf{x}^\prime\) can be repurposed as additional training samples
-\cite{luu2023counterfactual,balashankar2023improving} or adversarial
+\cite{balashankar2023improving,luu2023counterfactual} or adversarial
 examples \cite{freiesleben2022intriguing,pawelczyk2022exploring}. This
 leaves some flexibility wrt. the choice for \(\text{advloss}(\cdot)\) in
 Equation~\ref{eq-obj}. An intuitive functional form, but likely not the
@@ -892,8 +893,8 @@ dataset used in our experiments, where \emph{workclass} or
 \emph{education} may be more difficult to change for underpriviledged
 groups. When applied irresponsibly, CT could result in an unfairly
 assigned burden of recourse \cite{sharma2020certifai}, threatening the
-equality of opportunity in the system \cite{bell2024fairness}. Still,
-these phenomena are not specific to CT.
+equality of opportunity in the system \cite{bell2024fairness}.
+Nonetheless, these phenomena are not specific to CT.
 
 We also highlight several important directions for future research.
 Firstly, it is an interesting challenge to extend CT beyond
@@ -923,7 +924,7 @@ of certain key hyperparameters (see Section~\ref{sec-hyperparameters}).
 In this work, we have relied exclusively on grid search for this task.
 Future work on CT could benefit from investigating more sophisticated
 approaches. Notably, CT is iterative which makes methods such as
-Bayesian or gradient-based optimization applicable (see
+Bayesian or gradient-based optimization applicable (see, e.g.,
 \cite{bischl2023hyperparameter}).
 
 \section{Conclusion}\label{sec-conclusion}
