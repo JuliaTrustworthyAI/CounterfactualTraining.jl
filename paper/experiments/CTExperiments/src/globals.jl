@@ -1,10 +1,49 @@
-using CounterfactualExplanations.Evaluation: validity_strict
+using CounterfactualExplanations.Evaluation: validity_strict, feature_sensitivity, get_outid
 using JSON
+
+"""
+    add_sensitivity!(bmk::Benchmark)
+
+Adds a column indicating the index of feature `d` for which `feature_sensitivity` was computed.
+"""
+function add_sensitivity!(bmk::Benchmark)
+    sens = get_global_param("sensitivity", nothing)
+    if isnothing(sens)
+        return bmk
+    end
+    sens = parse_sens(sens)
+    feature_id = []
+    for varname in bmk.evaluation.variable
+        if !contains(varname, "sens")
+            push!(feature_id, missing)
+        else
+            push!(feature_id, sens[get_outid(varname)])
+        end
+    end
+    bmk.evaluation.feature_id .= feature_id
+    return bmk
+end
+
+"""
+    parse_sens(sensitivity)
+
+Parses the `--sensitivity` command line argument.
+"""
+function parse_sens(sensitivity)
+    return sensitivity = try
+        parse.(Int, split(sensitivity, ","))
+    catch
+        error(
+            "The `--sensitivity` argument should be either an integer (e.g. `--sensitivity=1`) or a comma-separated list of integers (e.g. `--sensitivity=1,2,5`)",
+        )
+    end
+end
 
 function get_ce_measures(;
     use_mmd=get_global_param("use_mmd", true),
     length_scale=get_global_param("length_scale", 5.0),
     compute_p=get_global_param("compute_p", nothing),
+    sensitivity=get_global_param("sensitivity", nothing),
 )
     measures = [
         validity,
@@ -23,6 +62,12 @@ function get_ce_measures(;
                 compute_p=compute_p,
             ),
         )
+    end
+
+    if !isnothing(sensitivity)
+        sensitivity = parse_sens(sensitivity)
+        sens(x; kwrgs...) = feature_sensitivity(x, sensitivity)
+        push!(measures, sens)
     end
 
     return measures
