@@ -300,7 +300,7 @@ classifier aligns with the vector between such pairs of counterfactual
 inputs using the cosine distance as the loss function.
 
 In the natural language processing (NLP) domain, CEs have also been used
-to improve models through data augmentation. \cite{wu2021polyjuice}
+to improve models through data augmentation. \cite{wu2021polyjuice2}
 propose \emph{Polyjuice}, a general-purpose counterfactual generator for
 language models. The authors empirically demonstrate that the
 augmentation of training data with their method improves robustness in a
@@ -417,7 +417,7 @@ We say that $\mathbf{M}_\theta$ is \textbf{explainable} to the extent that faith
 where $p_\theta(\mathbf{x}|\mathbf{y}^{+})$ denotes the conditional posterior over inputs. 
 \end{definition}
 
-The characterization of faithfulness and plausibility in Def.
+\noindent The characterization of faithfulness and plausibility in Def.
 \ref{def-explainability} is the same as in \cite{altmeyer2024faithful},
 with adapted notation. Intuitively, plausible counterfactuals are
 consistent with the data and faithful counterfactuals are consistent
@@ -477,9 +477,9 @@ perform well at both tasks by directly maximizing the joint
 log-likelihood factorized as
 \(\log p_\theta(\mathbf{x},\mathbf{y})=\log p_\theta(\mathbf{y}|\mathbf{x}) + \log p_\theta(\mathbf{x})\).
 The first term can be optimized using conventional cross-entropy as in
-Equation~\ref{eq-obj}. Then, to optimize \(\log p_\theta(\mathbf{x})\)
+Equation~\ref{eq-obj}. To optimize \(\log p_\theta(\mathbf{x})\)
 \cite{grathwohl2020your} minimizes the contrastive divergence between
-these observed samples from \(p(\mathbf{x})\) and generated samples from
+the observed samples from \(p(\mathbf{x})\) and generated samples from
 \(p_\theta(\mathbf{x})\).
 
 A key empirical finding in \cite{altmeyer2024faithful} was that JEMs
@@ -589,7 +589,7 @@ we set \(\mathbf{x}^+[d] := \mathbf{x}^\prime[d]\) if:
   can only be increased in practice.
 \end{enumerate}
 
-From a Bayesian perspective, setting
+\noindent From a Bayesian perspective, setting
 \(\mathbf{x}^+[d] := \mathbf{x}^\prime[d]\) can be understood as
 assuming a point mass prior for \(p(\mathbf{x}^+)\) with respect to
 feature \(d\). Intuitively, we think of this simply in terms ignoring
@@ -606,10 +606,11 @@ conditions, this result holds theoretically:\footnote{For the proof, see
 Let $f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})$ denote a linear classifier with softmax activation $\mathcal{S}$ where $y\in\{1,...,K\}=\mathcal{K}$ and $\mathbf{x} \in \mathbb{R}^D$. If we assume multivariate Gaussian class densities with common diagonal covariance matrix $\Sigma_k=\Sigma$ for all $k \in \mathcal{K}$, then protecting an immutable feature from the contrastive divergence penalty will result in lower classifier sensitivity to that feature relative to the remaining features, provided that at least one of those is discriminative and mutable.
 \end{proposition}
 
-It is worth highlighting that \mbox{Proposition \ref{prp-mtblty}}
-assumes independence of features. This raises a valid concern about the
-effect of protecting immutable features in the presence of proxies that
-remain unprotected. We address this in Section~\ref{sec-discussion}.
+\noindent It is worth highlighting that
+\mbox{Proposition \ref{prp-mtblty}} assumes independence of features.
+This raises a valid concern about the effect of protecting immutable
+features in the presence of proxies that remain unprotected. We address
+this in Section~\ref{sec-discussion}.
 
 \subsection{Example (Prediction of Consumer Credit
 Default)}\label{example-prediction-of-consumer-credit-default}
@@ -767,30 +768,27 @@ other datasets range from 28\% (\emph{Moon}) to 78\% (\emph{GMSC}). For
 metric. \emph{MNIST} is the only dataset for which the two metrics
 disagree.
 
-These broad and substantial improvements in plausibility generally do
-not come at the cost of decreased predictive performance: test accuracy
-for CT is virtually identical to the baseline for \emph{Adult},
+We find that CT can substantially improve the quality of explanations
+learned by models without sacrificing predictive performance. Test
+accuracy for CT is virtually identical to the baseline for \emph{Adult},
 \emph{Circ}, \emph{LS}, \emph{Moon} and \emph{OL}, and even slightly
 improved for \emph{Cred}. Exceptions to this general pattern are
 \emph{MNIST}, \emph{CH} and \emph{GMSC}, for which we observe reduction
-in test accuracy of 2, 5 and 15 percentage points, respectively. We note
-in this context, that we have not optimized our models for predictive
-performance at all and worked with very small networks. In summary, we
-find that CT can substantially improve the quality of explanations
-learned by models without sacrificing predictive accuracy.
+in test accuracy of 2, 5 and 15 percentage points, respectively. In this
+context, we also note that we have not optimized the models (very small
+networks) for predictive performance at all.
 
 \begin{table}
 
-\caption{\label{tbl-main}Key explainability and predictive performance
-metrics for all datasets. \textbf{Plausibility}: the top five rows show
-the percentage reduction in implausibility according to
-Equation~\ref{eq-impl-dist} for varying degrees of the energy penalty
-used for \emph{ECCo} at test time. The following row shows the reduction
-in implausibility as measured by Equation~\ref{eq-impl-div} and
-aggregated across all test specifications. \textbf{Accuracy}: The
-following two rows show the test accuracies for the models trained with
-CT and the baseline. \textbf{Actionability}: The final row present the
-average reduction in costs when imposing mutability constraints.}
+\caption{\label{tbl-main}Key performance metrics across all datasets.
+\textbf{Plausibility}: Rows 1-5 show the percentage reduction in
+implausibility via Equation~\ref{eq-impl-dist} for varying degrees of
+the energy penalty used for \emph{ECCo} at test time; row 6 shows the
+reduction in implausibility via Equation~\ref{eq-impl-div} and
+aggregated across all test specifications. \textbf{Accuracy} (rows 7-8):
+test accuracies for models trained with CT and the baseline.
+\textbf{Actionability} (row 9): average reduction in costs when imposing
+mutability constraints.}
 
 \centering{
 
@@ -808,12 +806,12 @@ In Section~\ref{sec-method}, we show that our proposed way for encoding
 mutability constraints leads to lower classifier sensitivity wrt.
 immutable features for linear models, tilting the decision boundary in
 favour of mutable features instead. For binding constraints at test
-time, this has the effect of shorter counterfactual paths and hence
-smaller average costs (\(\ell_1\)-norm) to individuals. To extend this
-to the non-linear case, we test the effect of imposing mutability
-constraints empirically for our synthetic data using the same evaluation
-scheme as above. The final row in Table~\ref{tbl-main} reports the
-average reduction in costs for CT compared to the baseline, when
+time, this leads to shorter counterfactual paths and hence smaller
+average costs (\(\ell_1\)-norm) to individuals. To extend this to the
+non-linear case, we test the effect of imposing mutability constraints
+empirically for our synthetic data using the same evaluation scheme as
+above. The final row in Table~\ref{tbl-main} reports the average
+reduction in costs for CT compared to the ``vanilla'' baseline, when
 imposing that either the first or the second feature is immutable. In
 all cases, costs are reduced substantially, indicating that classifiers
 trained with CT are indeed more sensitive to mutable features.
@@ -823,40 +821,37 @@ settings.}\label{sec-hyperparameters}
 
 We test the impact of three types of hyperparameters; our complete
 results are in the supplementary appendix.\\
-\indent \emph{Hyperparameters of the CE generators.} First, we observe
-that CT is highly sensitive to hyperparameter settings but (a) there are
-manageable patterns and (b) we can typically identify settings that
-improve either plausibility or cost, and commonly both of them at the
-same time. Second, we note that the choice of a CE generator has a major
-impact on the results. For example, \emph{REVISE} tends to perform the
-worst, most likely because it uses a surrogate VAE to generate
-counterfactuals which impedes faithfulness \cite{altmeyer2024faithful}.
-Third, increasing \(T\), the maximum number of steps, generally yields
-better outcomes because more CEs can mature in each training epoch.
-Fourth, the impact of \(\tau\), the required decision threshold is more
-difficult to predict. On ``harder'' datasets it may be difficult to
-satisfy high \(\tau\) for any given sample (i.e., also factuals) and so
-increasing this threshold does not seem to correlate with better
-outcomes. In fact, we have generally found that a choice of \(\tau=0.5\)
-leads to optimal results because it is associated with high proportions
-of mature counterfactuals.\\
-\indent \emph{Hyperparameters for penalties.} We find that the strength
-of the energy regularization, \(\lambda_{\text{reg}}\) is highly
-impactful; energy must be sufficiently regularized to avoid poor
-performance in terms of decreased plausibility and increased costs. The
-sensitivity with respect to \(\lambda_{\text{div}}\) and
-\(\lambda_{\text{adv}}\) is much less evident. While high values of
-\(\lambda_{\text{reg}}\) may increase the variability in outcomes
-(especially) when combined with high values of \(\lambda_{\text{div}}\)
-or \(\lambda_{\text{adv}}\), this effect is not very pronounced.\\
-\indent \emph{Other hyperparameters.} We observe that the effectiveness
-and stability of CT is positively associated with the number of
-counterfactuals generated during each training epoch. We also confirm
-that a higher number of training epochs is beneficial. Interestingly, we
-observed desired improvements in explainability when CT was combined
+\indent We note that CT is highly sensitive to the choice of a CE
+generator and its hyperparameters but (a) there are manageable patterns
+and (b) we can typically identify settings that improve either
+plausibility or cost, and commonly both of them at the same time. For
+example, \emph{REVISE} tends to perform the worst, most likely because
+it uses a surrogate VAE to generate counterfactuals which impedes
+faithfulness \cite{altmeyer2024faithful}. Increasing \(T\), the maximum
+number of steps, generally yields better outcomes because more CEs can
+mature in each training epoch. The impact of \(\tau\), the required
+decision threshold is more difficult to predict. On ``harder'' datasets
+it may be difficult to satisfy high \(\tau\) for any given sample (i.e.,
+also factuals) and so increasing this threshold does not seem to
+correlate with better outcomes. In fact, the choice of \(\tau=0.5\)
+generally leads to optimal results because it is associated with high
+proportions of mature counterfactuals.\\
+\indent The strength of the energy regularization,
+\(\lambda_{\text{reg}}\) is highly impactful and leads to poor
+performance in terms of decreased plausibility and increased costs if
+insufficiently high. The sensitivity with respect to
+\(\lambda_{\text{div}}\) and \(\lambda_{\text{adv}}\) is much less
+evident. While high values of \(\lambda_{\text{reg}}\) may increase the
+variability in outcomes when combined with high values of
+\(\lambda_{\text{div}}\) or \(\lambda_{\text{adv}}\), this effect is not
+very pronounced.\\
+\indent The effectiveness and stability of CT is positively associated
+with the number of counterfactuals generated during each training epoch.
+We also confirm that a higher number of training epochs is beneficial.
+Interestingly, we observed desired improvements when CT was combined
 with conventional training and applied only for the final 50\% of epochs
-of the complete training process. Put differently, CT may be a way to
-improve the explainability of models in a fine-tuning manner.
+of the complete training process. Put differently, CT can improve the
+explainability of models in a fine-tuning manner.
 
 \section{Discussion}\label{sec-discussion}
 
@@ -910,8 +905,8 @@ and \(y^{+}\) can be arbitrarily defined, CT requires the output space
 where the change in outcome cannot be readily quantified. Focus on
 classification models is a common restriction in research on CEs and AR.
 Other settings have attracted some interest (e.g., regression in
-\cite{spooner2021counterfactual,zhao2023counterfactual}), but there is
-little consensus how to robustly extend the notion of CEs.\\
+\cite{spooner2021counterfactual}), but there is little consensus how to
+robustly extend the notion of CEs.\\
 \indent Secondly, our approach is susceptible to training instabilities.
 This problem has been recognized for JEMs \cite{grathwohl2020your} and
 even though we depart from the SGLD-based sampling, we still encounter
@@ -928,8 +923,8 @@ of certain key hyperparameters (see Section~\ref{sec-hyperparameters}).
 In this work, we have relied exclusively on grid search for this task.
 Future work on CT could benefit from investigating more sophisticated
 approaches. Notably, CT is iterative which makes methods such as
-Bayesian (e.g., \cite{snoek2012practical}) or gradient-based (e.g.,
-\cite{franceschi2017forward}) optimization applicable.
+Bayesian or gradient-based optimization applicable (see
+\cite{bischl2023hyperparameter}).
 
 \section{Conclusion}\label{sec-conclusion}
 
