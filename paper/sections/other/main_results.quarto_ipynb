@@ -1,9 +1,10 @@
 {
   "cells": [
     {
-      "cell_type": "code",
+      "cell_type": "markdown",
       "metadata": {},
       "source": [
+        "```{julia}\n",
         "projectdir = splitpath(pwd()) |>\n",
         "    ss -> joinpath(ss[1:findall([s == \"CounterfactualTraining.jl\" for s in ss])[1]]...) \n",
         "cd(projectdir)\n",
@@ -11,30 +12,21 @@
         "using CTExperiments\n",
         "using CTExperiments.CSV\n",
         "using CTExperiments.DataFrames\n",
+        "using CTExperiments.Plots\n",
         "using CTExperiments.StatsBase\n",
+        "using Random\n",
         "\n",
         "using DotEnv\n",
-        "DotEnv.load!()"
-      ],
-      "id": "8e767f5b",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
-        "res_dir = joinpath(ENV[\"FINAL_GRID_RESULTS\"],\"single\")"
-      ],
-      "id": "8db75c4b",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
-        "# Details on Main Experiments {.appendix}\n",
+        "DotEnv.load!()\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
+        "res_dir = joinpath(ENV[\"FINAL_GRID_RESULTS\"],\"single\")\n",
+        "mtbl_dir = joinpath(ENV[\"FINAL_GRID_RESULTS\"],\"mutability\")\n",
+        "```\n",
+        "\n",
+        "\n",
+        "# Details on Main Experiments {#sec-app-main .appendix}\n",
         "\n",
         "## Final Hyperparameters\n",
         "\n",
@@ -42,76 +34,80 @@
         "\n",
         "::: {#tbl-final-params}\n",
         "\n",
-        "::: {.content-hidden unless-format=\"pdf\"}\n"
-      ],
-      "id": "3a1619ba"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "::: {.content-hidden unless-format=\"pdf\"}\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "#| output: asis\n",
         "\n",
         "df = final_params(res_dir)\n",
         "get_table_inputs(df, nothing; backend=Val(:latex)) |>\n",
-        "    inputs -> tabulate_results(inputs; table_type=:tabular)"
-      ],
-      "id": "20a8435d",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "    inputs -> tabulate_results(inputs; table_type=:tabular)\n",
+        "```\n",
+        "\n",
+        "\n",
         ":::\n",
         "\n",
         "Final hyperparameters used for the main results for the different datasets.\n",
         "\n",
-        ":::\n"
-      ],
-      "id": "8ecbe11c"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
-        "#| eval: false\n",
-        "\n",
-        "df = final_table(res_dir)\n",
-        "inputs = get_table_inputs(df, nothing; backend=Val(:latex))\n",
-        "tabulate_results(inputs; table_type=:tabular, save_name=\"paper/quarto_ecml/tables/main.tex\", wrap_table=false)\n",
-        "tabulate_results(inputs; table_type=:tabular, save_name=\"paper/preprint/tables/main.tex\", wrap_table=false)"
-      ],
-      "id": "a4f2d531",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
-        "## Qualitative Findings for Image Data\n",
-        "\n",
-        "::: {.callout-note}\n",
-        "\n",
-        "@fig-mnist shows much more plausible (faithful) counterfactuals for a model with CT than the model with conventional training (@fig-mnist-vanilla). In fact, this is not even using *ECCo+* and still showing better results than the best results we achieved in our AAAI paper for JEM ensembles.\n",
-        "\n",
         ":::\n",
         "\n",
-        "![Counterfactual images for *MLP* with counterfactual training. The underlying generator, *ECCo*, aims to generate counterfactuals that are faithful to the model [@altmeyer2024faithful].](/paper/figures/mnist_mlp.png){#fig-mnist}\n",
         "\n",
-        "![Counterfactual images for *MLP* with conventional training. The underlying generator, *ECCo*, aims to generate counterfactuals that are faithful to the model [@altmeyer2024faithful].](/paper/figures/mnist_mlp_vanilla.png){#fig-mnist-vanilla}"
+        "```{julia}\n",
+        "#| eval: false\n",
+        "\n",
+        "tbl_mtbl = final_mutability(mtbl_dir; var=[\"distance\"])\n",
+        "df = final_table(res_dir; tbl_mtbl)\n",
+        "inputs = get_table_inputs(df, nothing; backend=Val(:latex))\n",
+        "tabulate_results(inputs; table_type=:tabular, save_name=\"paper/quarto_ecml/tables/main.tex\", wrap_table=false)\n",
+        "tabulate_results(inputs; table_type=:tabular, save_name=\"paper/preprint/tables/main.tex\", wrap_table=false)\n",
+        "```\n",
+        "\n",
+        "\n",
+        "## Qualitative Findings for Image Data\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
+        "#| eval: false\n",
+        "\n",
+        "Random.seed!(42)    # change seed for different outcome\n",
+        "overwrite = false   # set to `true` if you want to overwrite the file\n",
+        "fname = joinpath(res_dir,\"mlp/mnist/grid_config.toml\")\n",
+        "output_dir = mkpath(\"paper/experiments/output/extra/\")\n",
+        "gen = CTExperiments.GeneratorParams(lambda_energy=25.0)\n",
+        "conv = \"max_iter\"\n",
+        "cfg = EvaluationConfig(\n",
+        "    grid_file=fname, \n",
+        "    counterfactual_params=(conv=conv, generator_params=gen), \n",
+        "    save_dir=output_dir,\n",
+        "    test_time=true\n",
+        ")\n",
+        "generate_factual_target_pairs(cfg; overwrite, nce=10)\n",
+        "plts = plot_ce(MNIST(), cfg; byvars=\"objective\")\n",
+        "savefig(plts[\"objective\"][\"full\"][\"ecco\"], \"paper/figures/mnist_mlp.png\")\n",
+        "savefig(plts[\"objective\"][\"vanilla\"][\"ecco\"], \"paper/figures/mnist_mlp_vanilla.png\")\n",
+        "```\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "@fig-mnist shows much more plausible (faithful) counterfactuals for a model with CT than the model with conventional training (@fig-mnist-vanilla).\n",
+        "\n",
+        "::: {layout=\"[10,-2,10]\" layout-valign=\"top\"}\n",
+        "![Counterfactual images for *MLP* with counterfactual training. Factual images are shown on the diagonal, with the corresponding counterfactual for each target class (columns) in that same row. The underlying generator, *ECCo*, aims to generate counterfactuals that are faithful to the model [@altmeyer2024faithful].](/paper/figures/mnist_mlp.png){#fig-mnist}\n",
+        "\n",
+        "![The same setup, factuals, model architecture and generator as in @fig-mnist, but the model was trained with CT.](/paper/figures/mnist_mlp_vanilla.png){#fig-mnist-vanilla}\n",
+        ":::"
       ],
-      "id": "4bef2774"
+      "id": "154b9441"
     }
   ],
   "metadata": {
     "kernelspec": {
-      "name": "julia-1.11",
-      "language": "julia",
-      "display_name": "Julia 1.11.1",
-      "path": "/Users/paltmeyer/Library/Jupyter/kernels/julia-1.11"
+      "name": "comp_vis",
+      "language": "python",
+      "display_name": "comp_vis",
+      "path": "C:\\Users\\Olek\\AppData\\Roaming\\jupyter\\kernels\\comp_vis"
     }
   },
   "nbformat": 4,

@@ -4,14 +4,10 @@
       "cell_type": "markdown",
       "metadata": {},
       "source": [
-        "# Tuning Key Parameters {#sec-app-tune}\n"
-      ],
-      "id": "7567a3af"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "# Tuning Key Parameters {#sec-app-tune}\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "projectdir = splitpath(pwd()) |>\n",
         "    ss -> joinpath(ss[1:findall([s == \"CounterfactualTraining.jl\" for s in ss])[1]]...) \n",
         "cd(projectdir)\n",
@@ -22,27 +18,15 @@
         "using CTExperiments.StatsBase\n",
         "\n",
         "using DotEnv\n",
-        "DotEnv.load!()"
-      ],
-      "id": "b9fa76b3",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
-        "res_dir = ENV[\"FINAL_GRID_RESULTS\"]"
-      ],
-      "id": "5dfa928b",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
-        "Based on the findings from our initial large grid searches (@sec-app-grid), we tune selected hyperparameters for all datasets: namely, the decision threshold $\\tau$ and the strength of the energy regularization $\\lambda_{\\text{reg}}$. The final hyperparameter choices for each dataset are presented in **ADD TABLE**. Detailed results for each data set are shown in @fig-tune-plaus-adult to @fig-tune-mat-over. From **ADD TABLE**, we notice that the same decision threshold of $\\tau=0.5$ is optimal for all but on dataset. We attribute this to the fact that a low decision threshold results in a higher share of mature counterfactuals and hence more opportunities for the model to learn from examples (@fig-tune-mat-adult to @fig-tune-mat-over). This has played a role in particular for our real-world tabular datasets and MNIST, which suffered from low levels of maturity for higher decision thresholds. In cases where maturity is not an issue, as for *Moons*, higher decision thresholds lead to better outcomes, which may have to do with the fact that the resulting counterfactuals are more faithful to the model. Concerning the regularization strength, we find somewhat high variation across datasets. Most notably, we find that relatively low levels of regularization are optimal for MNIST. We hypothesize that this finding may be attributed to the uniform scaling of all input features (digits). \n",
+        "DotEnv.load!()\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
+        "res_dir = ENV[\"FINAL_GRID_RESULTS\"]\n",
+        "```\n",
+        "\n",
+        "\n",
+        "Based on the findings from our initial large grid searches (@sec-app-grid), we tune selected hyperparameters for all datasets: namely, the decision threshold $\\tau$ and the strength of the energy regularization $\\lambda_{\\text{reg}}$. The final hyperparameter choices for each dataset are presented in @tbl-final-params in @sec-app-main. Detailed results for each data set are shown in @fig-tune-plaus-adult to @fig-tune-mat-over. From @tbl-final-params, we notice that the same decision threshold of $\\tau=0.5$ is optimal for all but on dataset. We attribute this to the fact that a low decision threshold results in a higher share of mature counterfactuals and hence more opportunities for the model to learn from examples (@fig-tune-mat-adult to @fig-tune-mat-over). This has played a role in particular for our real-world tabular datasets and MNIST, which suffered from low levels of maturity for higher decision thresholds. In cases where maturity is not an issue, as for *Moons*, higher decision thresholds lead to better outcomes, which may have to do with the fact that the resulting counterfactuals are more faithful to the model. Concerning the regularization strength, we find somewhat high variation across datasets. Most notably, we find that relatively low levels of regularization are optimal for MNIST. We hypothesize that this finding may be attributed to the uniform scaling of all input features (digits). \n",
         "\n",
         "Finally, to increase the proportion of mature counterfactuals for some datasets, we have also investigated the effect on the learning rate $\\eta$ for the counterfactual search and even smaller regularization strengths for a fixed decision threshold of 0.5 (@fig-tune_lr-plaus-adult to @fig-tune_lr-plaus-over). For the given low decision threshold, we find that the learning rate has no discernable impact on the proportion of mature counterfactuals (@fig-tune_lr-mat-adult to @fig-tune_lr-mat-over). We do notice, however, that the results for MNIST are much improved when using a low value $\\lambda_{\\text{reg}}$, the strength for the engery regularization: plausibility is increased by up to ~10% (@fig-tune_lr-plaus-mnist) and the proportion of mature counterfactuals reaches 100%. \n",
         "\n",
@@ -56,102 +40,62 @@
         "\n",
         ":::\n",
         "\n",
-        "## Key Parameters {#sec-app-tune-key}\n"
-      ],
-      "id": "b5584b91"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "## Key Parameters {#sec-app-tune-key}\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "grid_dir = joinpath(res_dir, \"tune/mlp\")\n",
         "data_dirs = readdir(grid_dir) |> x -> joinpath.(grid_dir, x) |> x -> x[isdir.(x)]\n",
         "eval_grids = (p -> EvaluationGrid(joinpath(p,\"grid_config.toml\"))).(data_dirs)\n",
         "data_names = basename.(data_dirs)\n",
         "ce_suffix = \"evaluation/results/ce/lambda_energy_reg---decision_threshold_exper---lambda_energy_eval---lambda_energy_reg---decision_threshold_exper/\"\n",
-        "logs_suffix = \"evaluation/results/logs/objective---decision_threshold---lambda_energy_reg/\""
-      ],
-      "id": "42258399",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "logs_suffix = \"evaluation/results/logs/objective---decision_threshold---lambda_energy_reg/\"\n",
+        "```\n",
+        "\n",
+        "\n",
         "The hyperparameter grid for tuning key parameters is shown in @nte-tune-train. The corresponding evaluation grid used for these experiments is shown in @nte-tune-eval.\n",
         "\n",
         "::: {#nte-tune-train .callout-note}\n",
         "\n",
-        "## Training Phase\n"
-      ],
-      "id": "28b308b3"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "## Training Phase\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "#| output: asis\n",
         "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/grid_config.toml\")) \n",
-        "println(CTExperiments.dict_to_quarto_markdown(dict))"
-      ],
-      "id": "23053f10",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "println(CTExperiments.dict_to_quarto_markdown(dict))\n",
+        "```\n",
+        "\n",
+        "\n",
         ":::\n",
         "\n",
         "::: {#nte-tune-eval .callout-note}\n",
         "\n",
-        "## Evaluation Phase\n"
-      ],
-      "id": "3e8d6431"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "## Evaluation Phase\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "#| output: asis\n",
         "dict = CTExperiments.from_toml(joinpath(grid_dir, \"lin_sep/evaluation/evaluation_grid_config.toml\"))\n",
-        "println(CTExperiments.dict_to_quarto_markdown(dict))"
-      ],
-      "id": "993bf1ed",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "println(CTExperiments.dict_to_quarto_markdown(dict))\n",
+        "```\n",
+        "\n",
+        "\n",
         ":::\n",
         "\n",
-        "### Plausibility\n"
-      ],
-      "id": "2e4c105d"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "### Plausibility\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "#| output: asis\n",
         "\n",
         "fig_label_prefix = \"tune-plaus\"\n",
         "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
         "_str = \"The results with respect to the plausibility measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
-        "println(_str)"
-      ],
-      "id": "2625c8ba",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "println(_str)\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
         "#| output: asis\n",
         " \n",
         "imgfname = \"plausibility_distance_from_target.png\"\n",
@@ -159,39 +103,23 @@
         "full_paths = joinpath.(data_dirs, joinpath(ce_suffix,imgfname))\n",
         "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption) \n",
         "_str = join(include_img_commands, \"\\n\\n\")\n",
-        "println(_str)"
-      ],
-      "id": "7e0a0357",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
-        "### Proportion of Mature CE\n"
-      ],
-      "id": "d71b1773"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "println(_str)\n",
+        "```\n",
+        "\n",
+        "\n",
+        "### Proportion of Mature CE\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "#| output: asis\n",
         "\n",
         "fig_label_prefix = \"tune-mat\"\n",
         "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
         "_str = \"The results with respect to the proportion of mature counterfactuals in each epoch are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
-        "println(_str)"
-      ],
-      "id": "57159a5c",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "println(_str)\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
         "#| output: asis\n",
         " \n",
         "imgfname = \"percent_valid.png\"\n",
@@ -199,112 +127,66 @@
         "full_paths = joinpath.(data_dirs, joinpath(logs_suffix,imgfname))\n",
         "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption) \n",
         "_str = join(include_img_commands, \"\\n\\n\")\n",
-        "println(_str)"
-      ],
-      "id": "4b7b92f2",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
-        "## Learning Rate {#sec-app-tune-lr}\n"
-      ],
-      "id": "031d31a7"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "println(_str)\n",
+        "```\n",
+        "\n",
+        "\n",
+        "## Learning Rate {#sec-app-tune-lr}\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "grid_dir = joinpath(res_dir, \"tune_lr/mlp\")\n",
         "data_dirs = readdir(grid_dir) |> x -> joinpath.(grid_dir, x) |> x -> x[isdir.(x)]\n",
         "eval_grids = (p -> EvaluationGrid(joinpath(p,\"grid_config.toml\"))).(data_dirs)\n",
         "data_names = basename.(data_dirs)\n",
         "ce_suffix = \"evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/\"\n",
-        "logs_suffix = \"evaluation/results/logs/objective---lr---lambda_energy_reg/\""
-      ],
-      "id": "1e1ffb2b",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "logs_suffix = \"evaluation/results/logs/objective---lr---lambda_energy_reg/\"\n",
+        "```\n",
+        "\n",
+        "\n",
         "The hyperparameter grid for tuning the learning rate is shown in @nte-tune_lr-train. The corresponding evaluation grid used for these experiments is shown in @nte-tune_lr-eval.\n",
         "\n",
         "::: {#nte-tune_lr-train .callout-note}\n",
         "\n",
-        "## Training Phase\n"
-      ],
-      "id": "155b4687"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "## Training Phase\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "#| output: asis\n",
         "dict = CTExperiments.from_toml(joinpath(grid_dir, \"over/grid_config.toml\")) \n",
-        "println(CTExperiments.dict_to_quarto_markdown(dict))"
-      ],
-      "id": "a9142636",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "println(CTExperiments.dict_to_quarto_markdown(dict))\n",
+        "```\n",
+        "\n",
+        "\n",
         ":::\n",
         "\n",
         "::: {#nte-tune_lr-eval .callout-note}\n",
         "\n",
-        "## Evaluation Phase\n"
-      ],
-      "id": "b97ca8da"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "## Evaluation Phase\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "#| output: asis\n",
         "dict = CTExperiments.from_toml(joinpath(grid_dir, \"over/evaluation/evaluation_grid_config.toml\"))\n",
-        "println(CTExperiments.dict_to_quarto_markdown(dict))"
-      ],
-      "id": "7d93e3c7",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "println(CTExperiments.dict_to_quarto_markdown(dict))\n",
+        "```\n",
+        "\n",
+        "\n",
         ":::\n",
         "\n",
-        "### Plausibility\n"
-      ],
-      "id": "5940fd86"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "### Plausibility\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "#| output: asis\n",
         "\n",
         "fig_label_prefix = \"tune_lr-plaus\"\n",
         "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
         "_str = \"The results with respect to the plausibility measure are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
-        "println(_str)"
-      ],
-      "id": "0e404b1e",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "println(_str)\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
         "#| output: asis\n",
         " \n",
         "imgfname = \"plausibility_distance_from_target.png\"\n",
@@ -312,39 +194,23 @@
         "full_paths = joinpath.(data_dirs, joinpath(ce_suffix,imgfname))\n",
         "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption) \n",
         "_str = join(include_img_commands, \"\\n\\n\")\n",
-        "println(_str)"
-      ],
-      "id": "2110ec1f",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
-        "### Proportion of Mature CE\n"
-      ],
-      "id": "0e6fa3b9"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "println(_str)\n",
+        "```\n",
+        "\n",
+        "\n",
+        "### Proportion of Mature CE\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "#| output: asis\n",
         "\n",
         "fig_label_prefix = \"tune_lr-mat\"\n",
         "fig_labels = (nm -> \"fig-$(fig_label_prefix)-$nm\").(data_names)\n",
         "_str = \"The results with respect to the proportion of mature counterfactuals in each epoch are shown in @$(fig_labels[1]) to @$(fig_labels[end]).\"\n",
-        "println(_str)"
-      ],
-      "id": "5ee7a5ad",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "println(_str)\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
         "#| output: asis\n",
         " \n",
         "imgfname = \"percent_valid.png\"\n",
@@ -352,19 +218,18 @@
         "full_paths = joinpath.(data_dirs, joinpath(logs_suffix,imgfname))\n",
         "include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption) \n",
         "_str = join(include_img_commands, \"\\n\\n\")\n",
-        "println(_str)"
+        "println(_str)\n",
+        "```"
       ],
-      "id": "695a27cd",
-      "execution_count": null,
-      "outputs": []
+      "id": "1535d9e9"
     }
   ],
   "metadata": {
     "kernelspec": {
-      "name": "julia-1.11",
-      "language": "julia",
-      "display_name": "Julia 1.11.1",
-      "path": "/Users/paltmeyer/Library/Jupyter/kernels/julia-1.11"
+      "name": "comp_vis",
+      "language": "python",
+      "display_name": "comp_vis",
+      "path": "C:\\Users\\Olek\\AppData\\Roaming\\jupyter\\kernels\\comp_vis"
     }
   },
   "nbformat": 4,

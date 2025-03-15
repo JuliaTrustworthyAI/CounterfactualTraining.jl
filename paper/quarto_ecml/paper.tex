@@ -141,17 +141,18 @@ capacity of models. Counterfactual explanations have emerged as a
 popular post-hoc explanation method for opaque machine learning models:
 they inform how factual inputs would need to change in order for a model
 to produce some desired output. To be useful in real-word
-decision-making systems, counterfactuals should be plausible with
-respect to the underlying data and actionable with respect to the
-stakeholder requirements. Much existing research has therefore focused
-on developing post-hoc methods to generate counterfactuals that meet
-these desiderata. In this work, we instead hold models directly
-accountable for the desired end goal: counterfactual training employs
-counterfactuals ad-hoc during the training phase to minimize the
-divergence between learned representations and plausible, actionable
-explanations. We demonstrate empirically and theoretically that our
-proposed method facilitates training models that deliver inherently
-desirable explanations while maintaining high predictive performance.
+decision-making systems, counterfactuals should be (1) plausible with
+respect to the underlying data and (2) actionable with respect to the
+user-defined mutability constraints. Much existing research has
+therefore focused on developing post-hoc methods to generate
+counterfactuals that meet these desiderata. In this work, we instead
+hold models directly accountable for the desired end goal:
+counterfactual training employs counterfactuals ad-hoc during the
+training phase to minimize the divergence between learned
+representations and plausible, actionable explanations. We demonstrate
+empirically and theoretically that our proposed method facilitates
+training models that deliver inherently desirable explanations while
+maintaining high predictive performance.
 
 \keywords{Counterfactual Training \and Counterfactual
 Explanations \and Algorithmic Recourse \and Explainable
@@ -214,11 +215,11 @@ which practitioners deploy opaque models and blindly rely on their
 predictions. On countless occasions, this has happened in practice and
 caused real harms to people who were adversely and unfairly affected by
 automated decision-making (ADM) systems involving opaque models
-\cite{oneil2016weapons,mcgregor2021preventing}. Effective XAI tools can
+\cite{mcgregor2021preventing,oneil2016weapons}. Effective XAI tools can
 aid us in monitoring models and providing recourse to individuals to
 turn negative outcomes (e.g., ``loan application rejected'') into
-positive ones (e.g., ``application accepted''). Our work builds upon
-\textbf{counterfactual explanations} (CE) proposed by
+positive ones (e.g., ``application accepted''). In line with this, our
+work builds upon \textbf{counterfactual explanations} (CE) proposed by
 \cite{wachter2017counterfactual} as an effective approach to achieve
 this goal. CEs prescribe minimal changes for factual inputs that, if
 implemented, would prompt some fitted model to produce a desired output.
@@ -231,40 +232,40 @@ are \textbf{interpretable} and deemed \textbf{plausible} by humans (see
 Def. \ref{def-explainability}). Instead, the choice has generally been
 to improve the ability of XAI tools to identify the subset of
 explanations that are both plausible and valid for any given model,
-independent of whether the learned representations are also compatible
-with plausible explanations \cite{altmeyer2024faithful}. Fortunately,
-recent findings indicate that improved explanatory capacity can arise as
-a consequence of regularization techniques aimed at other training
-objectives such as robustness, generalization, and generative capacity
-\cite{schut2021generating,augustin2020adversarial,altmeyer2024faithful}.
+independent of whether the learned representations are in fact
+compatible with plausible explanations \cite{altmeyer2024faithful}.
+Fortunately, recent findings indicate that improved explanatory capacity
+can arise as a consequence of regularization techniques aimed at other
+training objectives such as generative capacity, generalization, or
+robustness
+\cite{altmeyer2024faithful,augustin2020adversarial,schut2021generating}.
 As further discussed in Section~\ref{sec-lit}, our work consolidates
 these findings within a single objective.
 
-\textbf{Specifically, we propose counterfactual training (CT)}: a novel
-training regime that aligns learned representations with plausible
-explanations respecting actionability constraints. The remainder of this
-paper is structured as follows. Section~\ref{sec-lit} presents related
-work, focusing on the link between adversarial examples and
-counterfactual explanations. Then follow our two principal
-contributions. In Section~\ref{sec-method}, we introduce our
-methodological framework and show theoretically that it can be employed
-to enforce global actionability constraints. In
-Section~\ref{sec-experiments}, through extensive experiments, we
-demonstrate that CT substantially improves explainability without
-sacrificing predictive performance. We discuss the challenges in
-Section~\ref{sec-discussion} and conclude in
+\textbf{Specifically, we introduce Counterfactual Training (CT)}: a
+novel training regime explicitly geared towards improving the
+explainability of models. In high-level terms, we define this concept as
+as the extent to which valid explanations derived for an opaque model
+are also deemed plausible with respect to the underlying data and the
+global actionability constraints. To the best of our knowledge, our
+framework represents the first attempt to address this challenge by
+employing counterfactual explanations already in the training phase.
+
+The remainder of this manuscript is structured as follows.
+Section~\ref{sec-lit} presents related work, focusing on the link
+between AEs and CEs. Then follow our two principal contributions. In
+Section~\ref{sec-method}, we introduce our methodological framework and
+show theoretically that it can be employed to enforce global
+actionability constraints. In Section~\ref{sec-experiments}, through
+extensive experiments, we demonstrate that CT substantially improves
+explainability without sacrificing predictive performance. We discuss
+the challenges in Section~\ref{sec-discussion} and conclude in
 Section~\ref{sec-conclusion} that CT is a promising approach towards
 making opaque models more trustworthy.
 
 \section{Related Literature}\label{sec-lit}
 
-To the best of our knowledge, the proposed framework for counterfactual
-training represents the first attempt to use counterfactual explanations
-during training to improve model explainability. In high-level terms, we
-define model explainability as the extent to which valid explanations
-derived for an opaque model are also deemed plausible with respect to
-the underlying data and (global) actionability constraints. To make the
-desiderata for our framework more concrete, we follow
+To make the desiderata for our framework more concrete, we follow
 \cite{augustin2020adversarial} in tying the concept of explainability to
 the quality of CEs that can be generated for a given model. The authors
 show that CEs---understood as minimal input perturbations that yield
@@ -275,8 +276,8 @@ intuitive sense of this finding when looking at adversarial training
 freedom. As argued before, learned representations may be sensitive to
 producing implausible explanations and mispredicting for worst-case
 counterfactuals (i.e., AEs). Thus, by inducing models to ``unlearn''
-susceptiblity to such examples, AT can effectively remove implausible
-explanations from the solution space.
+susceptiblity to such examples, adversarial training can effectively
+remove implausible explanations from the solution space.
 
 \subsection{Adversarial Examples are Counterfactual
 Explanations}\label{adversarial-examples-are-counterfactual-explanations}
@@ -284,7 +285,7 @@ Explanations}\label{adversarial-examples-are-counterfactual-explanations}
 This interpretation of the link between explainability through
 counterfactuals on one side and robustness to adversarial examples on
 the other is backed by empirical evidence.
-\cite{sauer2021counterfactual} demonstrate that using counterfactual
+\cite{sauer2021counterfactual} demonstrates that using counterfactual
 images during classifier training improves model robustness. Similarly,
 \cite{abbasnejad2020counterfactual} argue that counterfactuals represent
 potentially useful training data in machine learning, especially in
@@ -300,19 +301,19 @@ classifier aligns with the vector between such pairs of counterfactual
 inputs using the cosine distance as the loss function.
 
 In the natural language processing (NLP) domain, CEs have also been used
-to improve models through data augmentation. \cite{wu2021polyjuice}
-propose \emph{Polyjuice}, a general-purpose counterfactual generator for
-language models. The authors empirically demonstrate that the
+to improve models through data augmentation. \cite{wu2021polyjuice2}
+proposes \emph{Polyjuice}, a general-purpose counterfactual generator
+for language models. The authors empirically demonstrate that the
 augmentation of training data with their method improves robustness in a
-number of NLP tasks. \cite{balashankar2023improving} similarly use
+number of NLP tasks. \cite{balashankar2023improving} similarly uses
 \emph{Polyjuice} to augment NLP datasets through diverse counterfactuals
 and show that classifier robustness improves by up to 20\%. Finally,
-\cite{luu2023counterfactual} introduce Counterfactual Adversarial
-Training (CAT), which also aims at improving generalization and
-robustness of language models through a three-step procedure: the
-authors identify training samples that are subject to high predictive
-uncertainty, generate CEs for those samples, and then fine-tune the
-language model on a dataset augmented with the CEs.
+\cite{luu2023counterfactual} introduces Counterfactual Adversarial
+Training (CAT) that also aims to improve generalization and robustness
+of language models through a three-step procedure: the authors identify
+training samples that are subject to high predictive uncertainty,
+generate CEs for them, and fine-tune the language model on a dataset
+augmented with the CEs.
 
 There have also been several attempts at formalizing the relationship
 between counterfactual explanations and adversarial examples. Pointing
@@ -321,20 +322,19 @@ to clear similarities in how CEs and AEs are generated,
 opaqueness and robustness problems in representation learning. Formally,
 AEs can be seen as the subset of CEs for which misclassification is
 achieved \cite{freiesleben2022intriguing}. Similarly,
-\cite{pawelczyk2022exploring} show that CEs and AEs are equivalent under
-certain conditions and derive theoretical upper bounds on distances
-between them.
+\cite{pawelczyk2022exploring} shows that CEs and AEs are equivalent
+under certain conditions.
 
 Two recent works are closely related to ours in that they use
 counterfactuals during training with the explicit goal of affecting
 certain properties of the post-hoc counterfactual explanations. Firstly,
-\cite{ross2021learning} propose a way to train models that guarantee
+\cite{ross2021learning} proposes a way to train models that guarantee
 individual recourse to some positive target class with high probability.
 Their approach builds on adversarial training by explicitly inducing
 susceptibility to targeted adversarial examples for the positive class.
 Additionally, the proposed method allows for imposing a set of
 actionability constraints ex-ante. For example, users can specify that
-certain features are immutable. Secondly, \cite{guo2023counternet} are
+certain features are immutable. Secondly, \cite{guo2023counternet} is
 the first to propose an end-to-end training pipeline that includes CEs
 as part of the training procedure. In particular, they propose a
 specific network architecture that includes a predictor and CE generator
@@ -343,23 +343,24 @@ Counterfactuals are generated during each training iteration and fed
 back to the predictor network. In contrast to \cite{guo2023counternet},
 we impose no restrictions on the ANN architecture at all.
 
-\subsection{Beyond Robustness}\label{beyond-robustness}
+\subsection{Aligning Representations with Plausible
+Explanations}\label{aligning-representations-with-plausible-explanations}
 
 Improving the adversarial robustness of models is not the only path
 towards aligning representations with plausible explanations. In a work
-closely related to this one, \cite{altmeyer2024faithful} show that
+closely related to this one, \cite{altmeyer2024faithful} shows that
 explainability can be improved through model averaging and refined model
 objectives. The authors propose a way to generate counterfactuals that
 are maximally faithful to the model in that they are consistent with
 what the model has learned about the underlying data. Formally, they
-rely on tools from energy-based modelling to minimize the divergence
-between the distribution of counterfactuals and the conditional
-posterior over inputs learned by the model. Their proposed
-counterfactual explainer, \emph{ECCCo}, yields plausible explanations if
-and only if the underlying model has learned representations that align
-with them. The authors find that both deep ensembles
-\cite{lakshminarayanan2016simple} and joint energy-based models (JEMs)
-\cite{grathwohl2020your} tend to do well in this regard.
+rely on tools from energy-based modelling \cite{teh2003energy} to
+minimize the divergence between the distribution of counterfactuals and
+the conditional posterior over inputs learned by the model. Their
+proposed counterfactual explainer, \emph{ECCCo}, yields plausible
+explanations if and only if the underlying model has learned
+representations that align with them. The authors find that both deep
+ensembles \cite{lakshminarayanan2016simple} and joint energy-based
+models (JEMs) \cite{grathwohl2020your} tend to do well in this regard.
 
 Once again it helps to look at these findings through the lens of
 representation learning with high degrees of freedom. Deep ensembles are
@@ -367,39 +368,41 @@ approximate Bayesian model averages, which are most called for when
 models are underspecified by the available data \cite{wilson2020case}.
 Averaging across solutions mitigates the aforementioned risk of relying
 on a single locally optimal representations that corresponds to
-semantically meaningless explanations for the data. Previous work by
+semantically meaningless explanations for the data. Previous work of
 \cite{schut2021generating} similarly found that generating plausible
-(``interpretable'') counterfactual explanations is almost trivial for
-deep ensembles that have also undergone adversarial training. The case
-for JEMs is even clearer: they involve a hybrid objective that induces
-both high predictive performance and generative capacity
-\cite{grathwohl2020your}. This is closely related to the idea of
-aligning models with plausible explanations and has inspired our
-proposed CT objective, as we explain in Section~\ref{sec-method}.
+(``interpretable'') CEs is almost trivial for deep ensembles that have
+also undergone adversarial training. The case for JEMs is even clearer:
+they involve a hybrid objective that induces both high predictive
+performance and generative capacity \cite{grathwohl2020your}. This is
+closely related to the idea of aligning models with plausible
+explanations and has inspired our CT objective.
 
 \section{Counterfactual Training}\label{sec-method}
 
-Counterfactual training combines ideas from adversarial training,
-energy-based modelling and counterfactuals explanations with the
-explicit goal of aligning representations with plausible explanations
-that comply with user requirements. In the context of CEs, plausibility
-has broadly been defined as the degree to which counterfactuals comply
-with the underlying data-generating process
-\cite{poyiadzi2020face,guidotti2022counterfactual,altmeyer2024faithful}.
+In this section we propose our novel counterfactual training objective.
+In CT, we combine ideas from adversarial training, counterfactual
+explanations, and energy-based modelling with the explicit goal of
+aligning representations with plausible explanations that comply with
+user-defined actionability constraints.
+
+In the context of counterfactual explanations, plausibility has broadly
+been defined as the degree to which counterfactuals comply with the
+underlying data-generating process
+\cite{altmeyer2024faithful,guidotti2022counterfactual,poyiadzi2020face}.
 Plausibility is a necessary but insufficient condition for using CEs to
 provide algorithmic recourse (AR) to individuals (negatively) affected
-by opaque models. For AR recommendations to be actionable, they need to
-not only result in plausible counterfactuals but also be attainable. A
-plausible CE for a rejected 20-year-old loan applicant, for example,
-might reveal that their application would have been accepted, if only
-they were 20 years older. Ignoring all other features, this would comply
-with the definition of plausibility if 40-year-old individuals were in
-fact more credit-worthy on average than young adults. But of course this
-CE does not qualify for providing actionable recourse to the applicant
-since \emph{age} is not a (directly) mutable feature. CT aims to improve
-model explainability by aligning models with counterfactuals that meet
-both desiderata: plausibility and actionability. Formally, we define
-explainability as follows:
+by opaque models. To be actionable, AR recommendations must also be
+attainable. A plausible CE for a rejected 20-year-old loan applicant,
+for example, might reveal that their application would have been
+accepted, if only they were 20 years older. Ignoring all other features,
+this would comply with the definition of plausibility if 40-year-old
+individuals were in fact more credit-worthy on average than young
+adults. But of course this CE does not qualify for providing actionable
+recourse to the applicant since \emph{age} is not a (directly) mutable
+feature. Counterfactual training aims to improve model explainability by
+aligning models with counterfactuals that meet both desiderata:
+plausibility and actionability. Formally, we define explainability as
+follows:
 
 \begin{definition}[Model Explainability]
 \label{def-explainability}
@@ -415,7 +418,7 @@ We say that $\mathbf{M}_\theta$ is \textbf{explainable} to the extent that faith
 where $p_\theta(\mathbf{x}|\mathbf{y}^{+})$ denotes the conditional posterior over inputs. 
 \end{definition}
 
-The characterization of faithfulness and plausibility in Def.
+\noindent The characterization of faithfulness and plausibility in Def.
 \ref{def-explainability} is the same as in \cite{altmeyer2024faithful},
 with adapted notation. Intuitively, plausible counterfactuals are
 consistent with the data and faithful counterfactuals are consistent
@@ -475,9 +478,9 @@ perform well at both tasks by directly maximizing the joint
 log-likelihood factorized as
 \(\log p_\theta(\mathbf{x},\mathbf{y})=\log p_\theta(\mathbf{y}|\mathbf{x}) + \log p_\theta(\mathbf{x})\).
 The first term can be optimized using conventional cross-entropy as in
-Equation~\ref{eq-obj}. Then, to optimize \(\log p_\theta(\mathbf{x})\)
-\cite{grathwohl2020your} minimize the contrastive divergence between
-these observed samples from \(p(\mathbf{x})\) and generated samples from
+Equation~\ref{eq-obj}. To optimize \(\log p_\theta(\mathbf{x})\),
+\cite{grathwohl2020your} minimizes the contrastive divergence between
+the observed samples from \(p(\mathbf{x})\) and generated samples from
 \(p_\theta(\mathbf{x})\).
 
 A key empirical finding in \cite{altmeyer2024faithful} was that JEMs
@@ -486,7 +489,7 @@ tend to do well with respect to the plausibility objective in Def.
 drawn from \(p_\theta(\mathbf{x})\) as counterfactuals because the JEM
 objective effectively minimizes the divergence between the conditional
 posterior and \(p(\mathbf{x}|\mathbf{y}^{+})\). To generate samples,
-\cite{grathwohl2020your} rely on Stochastic Gradient Langevin Dynamics
+\cite{grathwohl2020your} relies on Stochastic Gradient Langevin Dynamics
 (SGLD) using an uninformative prior for initialization but we depart
 from their methodology. Instead of SGLD, we propose to use
 counterfactual explainers to generate counterfactuals of observed
@@ -495,7 +498,7 @@ training samples. Specifically, we have:
 \begin{equation}\phantomsection\label{eq-div}{
 \text{div}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta) = \mathcal{E}_\theta(\mathbf{x}^+,y) - \mathcal{E}_\theta(\mathbf{x}_T^\prime,y)
 }\end{equation} where \(\mathcal{E}_\theta(\cdot)\) denotes the energy
-function. We set
+function defined as
 \(\mathcal{E}_\theta(\mathbf{x},y)=-\mathbf{M}_\theta(\mathbf{x})[y^+]\)
 where \(y^+\) denotes the index of the randomly drawn target class,
 \(y^+ \sim p(y)\). Conditional on the target class \(y^+\),
@@ -512,26 +515,25 @@ the counterfactuals get more plausible (Def. \ref{def-explainability})
 during training, these opposing effects gradually balance each other out
 \cite{lippe2024uvadlc}.
 
-The departure from SGLD allows us to tap into the vast repertoire of
-explainers that have been proposed in the literature to meet different
-desiderata. For example, many methods facilitate the imposition of
-domain and mutability constraints. In principle, any existing approach
-for generating counterfactual explanations is viable, so long as it does
-not violate the faithfulness condition. Like JEMs
-\cite{murphy2022probabilistic}, CT can be considered a form of
-contrastive representation learning.
+The departure from SGLD of \cite{grathwohl2020your} allows us to tap
+into the vast repertoire of explainers that have been proposed in the
+literature to meet different desiderata. For example, many methods
+facilitate the imposition of domain and mutability constraints. In
+principle, any existing approach for generating counterfactual
+explanations is viable, so long as it does not violate the faithfulness
+condition. Like JEMs \cite{murphy2022probabilistic}, CT can be
+considered a form of contrastive representation learning.
 
 \subsection{Indirectly Inducing Explainability with Adversarial
 Robustness}\label{indirectly-inducing-explainability-with-adversarial-robustness}
 
 Based on our analysis in Section~\ref{sec-lit}, counterfactuals
 \(\mathbf{x}^\prime\) can be repurposed as additional training samples
-\cite{luu2023counterfactual,balashankar2023improving} or AEs
-\cite{freiesleben2022intriguing,pawelczyk2022exploring}. This leaves
-some flexibility with respect to the choice for
-\(\text{advloss}(\cdot)\) in Equation~\ref{eq-obj}. An intuitive
-functional form, but likely not the only sensible choice, is inspired by
-adversarial training:
+\cite{balashankar2023improving,luu2023counterfactual} or adversarial
+examples \cite{freiesleben2022intriguing,pawelczyk2022exploring}. This
+leaves some flexibility wrt. the choice for \(\text{advloss}(\cdot)\) in
+Equation~\ref{eq-obj}. An intuitive functional form, but likely not the
+only sensible choice, is inspired by adversarial training:
 
 \begin{equation}\phantomsection\label{eq-adv}{
 \begin{aligned}
@@ -541,13 +543,14 @@ t_\varepsilon &= \max_t \{t: ||\Delta_t||_\infty < \varepsilon\}
 }\end{equation} Under this choice, we consider nascent counterfactuals
 \(\mathbf{x}_{t\leq T}^\prime\) as AEs as long as the magnitude of the
 perturbation to any single feature is at most \(\varepsilon\). This is
-closely aligned with \cite{szegedy2013intriguing} who define an
+closely aligned with \cite{szegedy2013intriguing} that defines an
 adversarial attack as an ``imperceptible non-random perturbation''.
 Thus, we choose to work with a different distinction between CE and AE
-than \cite{freiesleben2022intriguing} who consider misclassification as
-the key distinguishing feature of AE. One of the key observations in
+than \cite{freiesleben2022intriguing} that considers misclassification
+as the key distinguishing feature of AE. One of the key observations of
 this work is that we can leverage CEs during training and get
-adversarial examples essentially for free.
+adversarial examples essentially for free, which can be used to reap the
+aforementioned benefits of adversarial training.
 
 \subsection{Encoding Actionability Constraints}\label{sec-constraints}
 
@@ -587,7 +590,7 @@ we set \(\mathbf{x}^+[d] := \mathbf{x}^\prime[d]\) if:
   can only be increased in practice.
 \end{enumerate}
 
-From a Bayesian perspective, setting
+\noindent From a Bayesian perspective, setting
 \(\mathbf{x}^+[d] := \mathbf{x}^\prime[d]\) can be understood as
 assuming a point mass prior for \(p(\mathbf{x}^+)\) with respect to
 feature \(d\). Intuitively, we think of this simply in terms ignoring
@@ -604,10 +607,11 @@ conditions, this result holds theoretically:\footnote{For the proof, see
 Let $f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})$ denote a linear classifier with softmax activation $\mathcal{S}$ where $y\in\{1,...,K\}=\mathcal{K}$ and $\mathbf{x} \in \mathbb{R}^D$. If we assume multivariate Gaussian class densities with common diagonal covariance matrix $\Sigma_k=\Sigma$ for all $k \in \mathcal{K}$, then protecting an immutable feature from the contrastive divergence penalty will result in lower classifier sensitivity to that feature relative to the remaining features, provided that at least one of those is discriminative and mutable.
 \end{proposition}
 
-It is worth highlighting that \mbox{Proposition \ref{prp-mtblty}}
-assumes independence of features. This raises a valid concern about the
-effect of protecting immutable features in the presence of proxies that
-remain unprotected. We address this in Section~\ref{sec-discussion}.
+\noindent It is worth highlighting that
+\mbox{Proposition \ref{prp-mtblty}} assumes independence of features.
+This raises a valid concern about the effect of protecting immutable
+features in the presence of proxies that remain unprotected. We address
+this in Section~\ref{sec-discussion}.
 
 \subsection{Example (Prediction of Consumer Credit
 Default)}\label{example-prediction-of-consumer-credit-default}
@@ -620,8 +624,8 @@ features: (1) the subjects' \emph{age}, which we define as immutable,
 and (2) the subjects' existing level of \emph{debt}, which we define as
 mutable.
 
-We have simulated this scenario using synthetic data with two
-independent features and Gaussian class-conditional densities in
+We have simulated this scenario using synthetic data with independent
+\emph{age} and \emph{debt}, and Gaussian class-conditional densities in
 Figure~\ref{fig-poc}. The four panels show the outcomes for different
 training procedures using the same model architectures (a linear
 classifier). In panels (a) and (c) we have trained the models
@@ -633,10 +637,10 @@ points belong to the target class, \(y^+=2\), blue points belong to the
 non-target class, \(y^-=1\). Stars indicate CEs in the target class
 generated at test time using generic gradient descent until convergence.
 
-In all cases the counterfactuals are valid but their quality differs. In
-panel (a), they are not plausible: they do not comply with the
-distribution of the factuals in \(y^+\) to the point where they form a
-clearly distinguishable cluster. In panel (b), they are highly
+In all cases the counterfactuals are all valid but their quality
+differs. In panel (a), they are not plausible: they do not comply with
+the distribution of the factuals in \(y^+\) to the point where they form
+a clearly distinguishable cluster. In panel (b), they are highly
 plausible, meeting the first objective of Def. \ref{def-explainability}.
 In panel (c), the CEs involve substantial reductions in \emph{debt} for
 younger applicants. By comparison, counterfactual paths are shorter on
@@ -663,15 +667,15 @@ explainability.}
 
 \section{Experiments}\label{sec-experiments}
 
-Here we present the experiments conducted to answer our research
+In our experiments we seek to answer the following three research
 questions:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  To what extent does our counterfactual training objective as defined
-  in Equation~\ref{eq-obj} induce models to learn plausible
+  To what extent does the counterfactual training objective as it is
+  defined in Equation~\ref{eq-obj} induce models to learn plausible
   explanations?
 \item
   To what extent does the CT objective produce more favorable
@@ -684,15 +688,15 @@ questions:
 
 \subsection{Experimental Setup}\label{experimental-setup}
 
-Our key outcome of interest is how well do models perform with respect
-to explainability (Def. \ref{def-explainability}). To this end, we focus
+Our key outcome of interest is how well models perform with respect to
+explainability (Def. \ref{def-explainability}). To this end, we focus
 primarily on the plausibility and cost of faithfully generated
 counterfactuals at test time. To measure the cost of counterfactuals, we
 follow the standard convention of using distances (\(\ell_1\)-norm)
 between factuals and counterfactuals as a proxy. For plausibility, we
 assess how similar counterfactuals are to observed samples in the target
 domain, \(\mathbf{X}^+\subset\mathcal{X}^+\). We rely on the
-distance-based metric used by \cite{altmeyer2024faithful},
+distance-based metric used in \cite{altmeyer2024faithful},
 
 \begin{equation}\phantomsection\label{eq-impl-dist}{
 \text{IP}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
@@ -717,7 +721,22 @@ approach, \emph{REVISE} \cite{joshi2019realistic} that aims to generate
 plausible counterfactuals using a surrogate Variational Autoencoder
 (VAE), and \emph{ECCo}---the generator of \cite{altmeyer2024faithful}
 but without the conformal prediction component---as a method that
-directly targets both faithfulness and plausibility of the CEs.
+directly targets both faithfulness and plausibility of the
+counterfactuals.
+
+We make use of nine classification datasets common in the CE/AR
+literature. Four of them are synthetic with two classes and different
+characteristics: linearly separable clusters (\emph{LS}), overlapping
+clusters (\emph{OL}), concentric circles (\emph{Circ}), and interlocking
+moons (\emph{Moon}). These datasets are generated using the library of
+\cite{altmeyer2023explaining} and we present them in the supplementary
+appendix. Next, we have four real-world binary tabular datasets from the
+domain of economics: \emph{Adult} (a.k.a. Census data) of
+\cite{becker1996adult2}, California housing (\emph{CH}) of
+\cite{pace1997sparse}, Default of Credit Card Clients (\emph{Cred}) of
+\cite{yeh2016default}, and Give Me Some Credit (\emph{GMSC}) of
+\cite{kaggle2011give2}. Finally, for the convenience of illustration, we
+use of the 10-class \emph{MNIST} vision dataset \cite{lecun1998mnist}.
 
 \subsection{Experimental Results}\label{experimental-results}
 
@@ -739,7 +758,7 @@ varies. For the simple synthetic datasets, distance reductions range
 from around 20-40\% (\emph{LS}, \emph{Moon}) to almost 60\%
 (\emph{Circ}). For the real-world tabular datasets, improvements tend to
 be smaller but still substantial, with around 10-15\% for \emph{CH},
-11-28\% for \emph{GMSC}, 7-8\% for \emph{Cred} and around 3\% for
+11-28\% for \emph{GMSC}, 7-8\% for \emph{Cred}, and around 3\% for
 \emph{Adult}. For our only vision dataset (\emph{MNIST}), distances are
 reduced by up to 9\%. The results for our proposed divergence metric are
 qualitatively similar, but generally even more pronounced: for the
@@ -750,30 +769,27 @@ other datasets range from 28\% (\emph{Moon}) to 78\% (\emph{GMSC}). For
 metric. \emph{MNIST} is the only dataset for which the two metrics
 disagree.
 
-These broad and substantial improvements in plausibility generally do
-not come at the cost of decreased predictive performance: test accuracy
-for CT is virtually identical to the baseline for \emph{Adult},
-\emph{Circ}, \emph{LS}, \emph{Moon} and \emph{OL}, and even slightly
+We find that CT can substantially improve the quality of explanations
+learned by models without sacrificing predictive performance. Test
+accuracy for CT is virtually identical to the baseline for \emph{Adult},
+\emph{Circ}, \emph{LS}, \emph{Moon}, and \emph{OL}, and even slightly
 improved for \emph{Cred}. Exceptions to this general pattern are
-\emph{MNIST}, \emph{CH} and \emph{GMSC}, for which we observe reduction
-in test accuracy of 2, 5 and 15 percentage points, respectively. We note
-in this context, that we have not optimized our models for predictive
-performance at all and worked with very small networks. In summary, we
-find that CT can substantially improve the quality of explanations
-learned by models without sacrificing predictive accuracy.
+\emph{MNIST}, \emph{CH}, and \emph{GMSC}, for which we observe reduction
+in test accuracy of 2, 5, and 15 percentage points respectively. In this
+context, we also note that we have not optimized the models (very small
+networks) for predictive performance at all.
 
 \begin{table}
 
-\caption{\label{tbl-main}Key explainability and predictive performance
-metrics for all datasets. \textbf{Plausibility}: the top five rows show
-the percentage reduction in implausibility according to
-Equation~\ref{eq-impl-dist} for varying degrees of the energy penalty
-used for \emph{ECCo} at test time. The following row shows the reduction
-in implausibility as measured by Equation~\ref{eq-impl-div} and
-aggregated across all test specifications. \textbf{Accuracy}: The
-following two rows show the test accuracies for the models trained with
-CT and the baseline. \textbf{Actionability}: The final row present the
-average reduction in costs when imposing mutability constraints.}
+\caption{\label{tbl-main}Key performance metrics across all datasets.
+\textbf{Plausibility}: Rows 1-5 show the percentage reduction in
+implausibility via Equation~\ref{eq-impl-dist} for varying degrees of
+the energy penalty used for \emph{ECCo} at test time; row 6 shows the
+reduction in implausibility via Equation~\ref{eq-impl-div} and
+aggregated across all test specifications. \textbf{Accuracy} (rows 7-8):
+test accuracies for models trained with CT and the baseline.
+\textbf{Actionability} (row 9): average reduction in costs when imposing
+mutability constraints.}
 
 \centering{
 
@@ -791,62 +807,59 @@ In Section~\ref{sec-method}, we show that our proposed way for encoding
 mutability constraints leads to lower classifier sensitivity wrt.
 immutable features for linear models, tilting the decision boundary in
 favour of mutable features instead. For binding constraints at test
-time, this has the effect of shorter counterfactual paths and hence
-smaller average costs to individuals. To extend this to the non-linear
-case, we test the effect of imposing mutability constraints empirically
-for our synthetic data using the same evaluation scheme as above. The
-final row in Table~\ref{tbl-main} reports the average reduction in costs
-for CT compared to the baseline, when imposing that either the first or
-the second feature is immutable. In all cases, costs are reduced
-substantially indicating that classifiers trained with CT are indeed
-more sensitive to mutable features.
+time, this leads to shorter counterfactual paths and hence smaller
+average costs (\(\ell_1\)-norm) to individuals. To extend this to the
+non-linear case, we test the effect of imposing mutability constraints
+empirically for our synthetic data using the same evaluation scheme as
+above. The final row in Table~\ref{tbl-main} reports the average
+reduction in costs for CT compared to the ``vanilla'' baseline, when
+imposing that either the first or the second feature is immutable. In
+all cases, costs are reduced substantially, indicating that classifiers
+trained with CT are indeed more sensitive to mutable features.
 
 \subsubsection{Impact of hyperparameter
 settings.}\label{sec-hyperparameters}
 
 We test the impact of three types of hyperparameters; our complete
 results are in the supplementary appendix.\\
-\textbf{\emph{Hyperparameters of the CE generators.}} First, we observe
-that CT is highly sensitive to hyperparameter settings but (a) there are
-manageable patterns and (b) we can typically identify settings that
-improve either plausibility or cost, and commonly both of them at the
-same time. Second, we note that the choice of a CE generator has a major
-impact on the results. For example, \emph{REVISE} tends to perform the
-worst, most likely because it uses a surrogate VAE to generate
-counterfactuals which impedes faithfulness \cite{altmeyer2024faithful}.
-Third, increasing \(T\), the maximum number of steps, generally yields
-better outcomes because more CEs can mature in each training epoch.
-Fourth, the impact of \(\tau\), the required decision threshold is more
-difficult to predict. On ``harder'' datasets it may be difficult to
-satisfy high \(\tau\) for any given sample (i.e., also factuals) and so
-increasing this threshold does not seem to correlate with better
-outcomes. In fact, we have generally found that a choice of \(\tau=0.5\)
-leads to optimal results because it is associated with high proportions
-of mature counterfactuals.\\
-\textbf{\emph{Hyperparameters for penalties.}} We find that the strength
-of the energy regularization, \(\lambda_{\text{reg}}\) is highly
-impactful; energy must be sufficiently regularized to avoid poor
-performance in terms of decreased plausibility and increased costs. The
-sensitivity with respect to \(\lambda_{\text{div}}\) and
-\(\lambda_{\text{adv}}\) is much less evident. While high values of
-\(\lambda_{\text{reg}}\) may increase the variability in outcomes when
-combined with high values of \(\lambda_{\text{div}}\) or
-\(\lambda_{\text{adv}}\), this effect is not very pronounced.\\
-\textbf{\emph{Other hyperparameters.}} We observe that the effectiveness
-and stability of CT is positively associated with the number of
-counterfactuals generated during each training epoch. We also confirm
-that a higher number of training epochs is beneficial. Interestingly, we
-observed desired improvements in explainability when CT was combined
+\indent We note that CT is highly sensitive to the choice of a CE
+generator and its hyperparameters but (a) there are manageable patterns
+and (b) we can typically identify settings that improve either
+plausibility or cost, and commonly both of them at the same time. For
+example, \emph{REVISE} tends to perform the worst, most likely because
+it uses a surrogate VAE to generate counterfactuals which impedes
+faithfulness \cite{altmeyer2024faithful}. Increasing \(T\), the maximum
+number of steps, generally yields better outcomes because more CEs can
+mature in each training epoch. The impact of \(\tau\), the required
+decision threshold is more difficult to predict. On ``harder'' datasets
+it may be difficult to satisfy high \(\tau\) for any given sample (i.e.,
+also factuals) and so increasing this threshold does not seem to
+correlate with better outcomes. In fact, the choice of \(\tau=0.5\)
+generally leads to optimal results because it is associated with high
+proportions of mature counterfactuals.\\
+\indent The strength of the energy regularization,
+\(\lambda_{\text{reg}}\) is highly impactful and leads to poor
+performance in terms of decreased plausibility and increased costs if
+insufficiently high. The sensitivity with respect to
+\(\lambda_{\text{div}}\) and \(\lambda_{\text{adv}}\) is much less
+evident. While high values of \(\lambda_{\text{reg}}\) may increase the
+variability in outcomes when combined with high values of
+\(\lambda_{\text{div}}\) or \(\lambda_{\text{adv}}\), this effect is not
+very pronounced.\\
+\indent The effectiveness and stability of CT is positively associated
+with the number of counterfactuals generated during each training epoch.
+We also confirm that a higher number of training epochs is beneficial.
+Interestingly, we observed desired improvements when CT was combined
 with conventional training and applied only for the final 50\% of epochs
-of the complete training process. Put differently, CT may be a way to
-improve the explainability of models in a fine-tuning manner.
+of the complete training process. Put differently, CT can improve the
+explainability of models in a fine-tuning manner.
 
 \section{Discussion}\label{sec-discussion}
 
 As our results indicate, counterfactual training produces models that
-are more explainable. However, our approach is not without
+are more explainable. Nonetheless, it brings about three important
 limitations.\\
-\textbf{\emph{CT increases the training time of models.}} CT can be more
+\indent \emph{CT increases the training time of models.} CT can be more
 time-consuming than conventional training regimes. While higher numbers
 of CEs per iteration positively impact the quality of solutions, they
 also increase the amount of computations. Relatively small grids with
@@ -858,7 +871,7 @@ training samples. Second, we find that it can retain its value when used
 as a ``fine-tuning'' technique for conventionally-trained models. Third,
 it yields itself to parallel execution, which we have leveraged for our
 own experiments.\\
-\textbf{\emph{Immutable features may have proxies.}} We propose an
+\indent \emph{Immutable features may have proxies.} We propose an
 approach to protect immutable features and thus increase the
 actionability of the generated CEs. However, it requires that model
 owners define the mutability constraints for (all) features considered
@@ -866,13 +879,14 @@ by the model. Even if all immutable features are protected, there may
 exist proxies that are mutable (and hence should not be protected) but
 preserve enough information about the principals to hinder the
 protections. Delineating actionability is a major undecided challenge in
-the AR literature \cite{venkatasubramanian2020philosophical} impacting
-the capacity of CT to fulfill its intended goal.\\
-\textbf{\emph{Interventions on features may impact fairness.}} We
-provide a tool that allows practitioners to modify the sensitivity of a
-model with respect to certain features, which may have implication for
-the fair and equitable treatment of decision subjects. As protecting a
-set of features leads the model to assign higher relative importance to
+the AR literature (see, e.g.,
+\cite{venkatasubramanian2020philosophical}) impacting the capacity of CT
+to fulfill its intended goal.\\
+\indent \emph{Interventions on features may impact fairness.} We provide
+a tool that allows practitioners to modify the sensitivity of a model
+with respect to certain features, which may have implication for the
+fair and equitable treatment of decision subjects. As protecting a set
+of features leads the model to assign higher relative importance to
 unprotected features, model owners could misuse our solution by
 enforcing explanations based on features that are more difficult to
 modify by some (group of) individuals. For example, consider the Adult
@@ -880,40 +894,39 @@ dataset used in our experiments, where \emph{workclass} or
 \emph{education} may be more difficult to change for underpriviledged
 groups. When applied irresponsibly, CT could result in an unfairly
 assigned burden of recourse \cite{sharma2020certifai}, threatening the
-equality of opportunity in the system \cite{bell2024fairness}. Still,
-these phenomena are not specific to CT.
+equality of opportunity in the system \cite{bell2024fairness}.
+Nonetheless, these phenomena are not specific to CT.
 
-We also highlight several interesting directions for future research.\\
-\textbf{\emph{Extending CT beyond classification settings.}} Our
-formulation relies on the distinction between non-target class(es)
-\(y^{-}\) and target class(es) \(y^{+}\) to generate counterfactuals
-through Equation~\ref{eq-obj}. While \(y^{-}\) and \(y^{+}\) can be
-arbitrarily defined, CT requires the output space \(\mathcal{Y}\) to be
-discrete. Thus, it does not apply to ML tasks where the change in
-outcome cannot be readily quantified. Focus on classification models is
-a common restriction in research on CEs and AR. Other settings have
-attracted some interest (e.g., regression in
-\cite{spooner2021counterfactual,zhao2023counterfactual}), but there is
-little consensus how to robustly extend the notion of CEs.\\
-\textbf{\emph{Addressing the training instabilities.}} JEMs are
-susceptible to instabilities during training \cite{grathwohl2020your}
-and even though we depart from the SGLD-based sampling, we still
-encounter major variability in the outcomes. CT is exposed to two
-potential sources of instabilities: (1) the energy-based contrastive
-divergence term in Equation~\ref{eq-div}, and (2) the underlying
-counterfactual explainers. Still, we find that training instabilities
-can be successfully mitigated by regularizing energy
-(\(\lambda_{\text{reg}}\)), generating sufficiently many counterfactuals
-during each training epoch, and including only mature counterfactuals
-for contrastive divergence.\\
-\textbf{\emph{Improving hyperparameter selection procedures.}} Our
-method benefits from the tuning of certain key hyperparameters (see
-Section~\ref{sec-hyperparameters}). In this work, we have relied
-exclusively on grid search for this task. Future work on CT could
-benefit from investigating more sophisticated approaches towards
-hyperparameter tuning. Notably, CT is iterative which makes a variety of
-methods applicable, including Bayesian \cite{snoek2012practical} or
-gradient-based \cite{franceschi2017forward} optimization.
+We also highlight several important directions for future research.
+Firstly, it is an interesting challenge to extend CT beyond
+classification settings. Our formulation relies on the distinction
+between non-target class(es) \(y^{-}\) and target class(es) \(y^{+}\) to
+generate counterfactuals through Equation~\ref{eq-obj}. While \(y^{-}\)
+and \(y^{+}\) can be arbitrarily defined, CT requires the output space
+\(\mathcal{Y}\) to be discrete. Thus, it does not apply to ML tasks
+where the change in outcome cannot be readily quantified. Focus on
+classification models is a common restriction in research on CEs and AR.
+Other settings have attracted some interest (e.g., regression in
+\cite{spooner2021counterfactual}), but there is little consensus how to
+robustly extend the notion of CEs.\\
+\indent Secondly, our approach is susceptible to training instabilities.
+This problem has been recognized for JEMs \cite{grathwohl2020your} and
+even though we depart from the SGLD-based sampling, we still encounter
+considerable variability in the outcomes. CT is exposed to two potential
+sources of instabilities: (1) the energy-based contrastive divergence
+term in Equation~\ref{eq-div}, and (2) the underlying counterfactual
+explainers. We find several promising ways to mitigate this problem:
+regularizing energy (\(\lambda_{\text{reg}}\)), generating sufficiently
+many counterfactuals during each epoch, and including only mature
+counterfactuals for contrastive divergence.\\
+\indent Finally, we believe that it is possible to substantially improve
+hyperparameter selection procedures. Our method benefits from the tuning
+of certain key hyperparameters (see Section~\ref{sec-hyperparameters}).
+In this work, we have relied exclusively on grid search for this task.
+Future work on CT could benefit from investigating more sophisticated
+approaches. Notably, CT is iterative which makes methods such as
+Bayesian or gradient-based optimization applicable (see, e.g.,
+\cite{bischl2023hyperparameter}).
 
 \section{Conclusion}\label{sec-conclusion}
 

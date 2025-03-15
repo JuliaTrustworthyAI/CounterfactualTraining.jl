@@ -1,9 +1,10 @@
 {
   "cells": [
     {
-      "cell_type": "code",
+      "cell_type": "markdown",
       "metadata": {},
       "source": [
+        "```{julia}\n",
         "#| eval: false\n",
         "\n",
         "projectdir = splitpath(pwd()) |>\n",
@@ -16,16 +17,10 @@
         "using CTExperiments.Flux\n",
         "using CTExperiments.Plots\n",
         "using CTExperiments.TaijaPlotting\n",
-        "using Plots.PlotMeasures"
-      ],
-      "id": "f1954cef",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "using Plots.PlotMeasures\n",
+        "```\n",
+        "\n",
+        "\n",
         "## Protecting Mutability Constraints with Linear Classifiers {#sec-app-constraints}\n",
         "\n",
         "In @sec-constraints we explain that to avoid penalizing implausibility that arises due to mutability constraints, we impose a point mass prior on $p(\\mathbf{x})$ for the corresponding feature. We argue in @sec-constraints that this approach induces models to be less sensitive to immutable features and demonstrate this empirically in @sec-experiments. Below we derive the analytical results in Prp.~\\ref{prp-mtblty}.\n",
@@ -72,14 +67,10 @@
         "\n",
         "Thus, our proposed approach of protecting feature $d_{\\text{immtbl}}$ has the net affect of decreasing the classifier's sensitivity to the immutable feature relative to the mutable feature (i.e. no change in sensitivity for $d_{\\text{immtbl}}$ relative to increased sensitivity for $d_{\\text{mtbl}}$).\n",
         "\n",
-        ":::\n"
-      ],
-      "id": "accb91b4"
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        ":::\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
         "#| eval: false\n",
         "\n",
         "using CTExperiments: \n",
@@ -150,16 +141,10 @@
         "    # (\"(b)\", FullObjective(lambda=[1.0,0.5,0.01,0.1]), [\"both\", \"both\"]),\n",
         "    # (\"(c)\", VanillaObjective(needs_ce=true), [\"both\", \"none\"]),\n",
         "    (\"(d)\", FullObjective(lambda=[1.0,0.5,0.01,0.1]), [\"both\", \"none\"]),\n",
-        "]"
-      ],
-      "id": "b2174de5",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "]\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
         "#| eval: false\n",
         "\n",
         "using CounterfactualExplanations.Convergence\n",
@@ -213,16 +198,10 @@
         "\n",
         "    push!(models, model)\n",
         "    push!(plts, current())\n",
-        "end"
-      ],
-      "id": "75d97383",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "end\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
         "#| eval: false\n",
         "\n",
         "plt = Plots.plot(\n",
@@ -235,16 +214,10 @@
         "    right_margin = 10mm,\n",
         ")\n",
         "display(plt)\n",
-        "Plots.savefig(plt, \"paper/figures/poc.svg\")"
-      ],
-      "id": "7037b6b9",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "code",
-      "metadata": {},
-      "source": [
+        "Plots.savefig(plt, \"paper/figures/poc.svg\")\n",
+        "```\n",
+        "\n",
+        "```{julia}\n",
         "#| eval: false\n",
         "\n",
         "plts = []\n",
@@ -263,16 +236,10 @@
         "end\n",
         "\n",
         "plt = Plots.plot(plts..., layout=(1,2), size=(600,300))\n",
-        "Plots.savefig(plt, \"paper/figures/app_mtblty.svg\")"
-      ],
-      "id": "f4939a08",
-      "execution_count": null,
-      "outputs": []
-    },
-    {
-      "cell_type": "markdown",
-      "metadata": {},
-      "source": [
+        "Plots.savefig(plt, \"paper/figures/app_mtblty.svg\")\n",
+        "```\n",
+        "\n",
+        "\n",
         "## Domain Constraints\n",
         "\n",
         "We apply domain constraints on counterfactuals during training and evaluation. There are at least two good reasons for doing so. Firstly, within the context of explainability and algorithmic recourse, real-world attributes are often domain constrained: the *age* feature, for example, is lower bounded by zero and upper bounded by the maximum human lifespan. Secondly, domain constraints help mitigate training instabilities commonly associated with energy-based modelling [@grathwohl2020your;@altmeyer2024faithful].\n",
@@ -288,15 +255,15 @@
         "\n",
         "where $\\mu_d$ and $\\sigma_d$ denote the sample mean and standard deviation of feature $d$. We set $n_{\\sigma_d}=3$ across the board but higher values and hence wider bounds may be appropriate depending on the application."
       ],
-      "id": "915a6aa9"
+      "id": "ffb2d876"
     }
   ],
   "metadata": {
     "kernelspec": {
-      "name": "julia-1.11",
-      "language": "julia",
-      "display_name": "Julia 1.11.1",
-      "path": "/Users/paltmeyer/Library/Jupyter/kernels/julia-1.11"
+      "name": "comp_vis",
+      "language": "python",
+      "display_name": "comp_vis",
+      "path": "C:\\Users\\Olek\\AppData\\Roaming\\jupyter\\kernels\\comp_vis"
     }
   },
   "nbformat": 4,
