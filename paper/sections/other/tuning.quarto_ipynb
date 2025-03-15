@@ -354,9 +354,13 @@
         "_str = join(include_img_commands, \"\\n\\n\")\n",
         "println(_str)"
       ],
+<<<<<<< HEAD
       "id": "001a5229",
       "execution_count": null,
       "outputs": []
+=======
+      "id": "ddd54af4"
+>>>>>>> 16-final-things-ecml
     }
   ],
   "metadata": {

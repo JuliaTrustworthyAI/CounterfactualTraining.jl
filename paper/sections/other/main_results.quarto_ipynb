@@ -97,6 +97,7 @@
         "        alignment=[:l,fill(:r,size(df,2)-1)...],\n",
         "        formatters=formatters\n",
         "    )\n",
+<<<<<<< HEAD
         "end"
       ],
       "id": "3564d856",
@@ -115,6 +116,16 @@
       "cell_type": "code",
       "metadata": {},
       "source": [
+=======
+        "end\n",
+        "```\n",
+        "\n",
+        "\n",
+        "## Qualitative Findings for Image Data\n",
+        "\n",
+        "\n",
+        "```{julia}\n",
+>>>>>>> 16-final-things-ecml
         "#| eval: false\n",
         "\n",
         "Random.seed!(42)    # change seed for different outcome\n",
@@ -150,7 +161,11 @@
         "![The same setup, factuals, model architecture and generator as in @fig-mnist, but the model was trained with CT.](/paper/figures/mnist_mlp_vanilla.png){#fig-mnist-vanilla}\n",
         ":::"
       ],
+<<<<<<< HEAD
       "id": "4966974c"
+=======
+      "id": "fcaa1d0b"
+>>>>>>> 16-final-things-ecml
     }
   ],
   "metadata": {
