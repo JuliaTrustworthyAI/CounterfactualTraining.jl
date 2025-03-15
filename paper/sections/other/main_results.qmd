@@ -43,7 +43,7 @@ get_table_inputs(df, nothing; backend=Val(:latex)) |>
 
 :::
 
-Final hyperparameters used for the main results preseneted in @sec-experiments. Any hyperparameter not shown here is set to its default value (@nte-train-default).
+Final hyperparameters used for the main results presented in @sec-experiments. Any hyperparameter not shown here is set to its default value (@nte-train-default).
 
 :::
 

@@ -5,9 +5,9 @@ julia:
 format:
   arxiv-pdf:
     keep-tex: true  
-    linenumbers: true
+    linenumbers: false
     doublespacing: false
-    runninghead: "Counterfactual Training (A Preprint)"
+    runninghead: "Counterfactual Training"
     authorcols: true
     include-in-header:
       text: |
