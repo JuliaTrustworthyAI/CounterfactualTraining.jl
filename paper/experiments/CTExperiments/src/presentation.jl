@@ -332,13 +332,13 @@ end
 Aggregate performance variable `y` from an experiment grid by columns specified in `byvars`.
 """
 function aggregate_performance(
-    cfg::EvalConfigOrGrid; measure=[accuracy, multiclass_f1score], kwrgs...
+    cfg::EvalConfigOrGrid; measure=[accuracy, multiclass_f1score], adversarial::Bool=false, kwrgs...
 )
 
     # Load data:
     exper_grid = ExperimentGrid(cfg.grid_file)
     df, df_meta, df_perf = merge_with_meta(
-        cfg, CTExperiments.test_performance(exper_grid; measure, return_df=true)
+        cfg, CTExperiments.test_performance(exper_grid; measure, adversarial, return_df=true)
     )
 
     return aggregate_performance(df, df_meta, df_perf; kwrgs...)
@@ -668,7 +668,7 @@ end
 
 global allowed_perf_measures = Dict("acc" => accuracy, "f1" => multiclass_f1score)
 
-function aggregate_performance(res_dir::String; measure::Vector=["acc"])
+function aggregate_performance(res_dir::String; measure::Vector=["acc"], adversarial::Bool=false)
 
     # Get measures:
     if eltype(measure) == String
@@ -676,7 +676,7 @@ function aggregate_performance(res_dir::String; measure::Vector=["acc"])
     end
 
     eval_grids, _ = final_results(res_dir)
-    df = aggregate_performance(eval_grids; measure)
+    df = aggregate_performance(eval_grids; measure, adversarial)
     df.objective .= replace.(df.objective, "Full" => "CT")
     df.objective .= replace.(df.objective, "Vanilla" => "vanilla")
     df.variable .= replace.(df.variable, "Accuracy" => "Acc.")

@@ -155,26 +155,25 @@ function test_performance(
     return_df::Bool=false,
     measure=[accuracy, multiclass_f1score],
     n::Union{Nothing,Int}=nothing,
-    eps::Real=0.3,
+    eps::Real=0.03,
+    attack_fun::Function=fgsm,
 )
     model, _, M = load_results(exper)
 
     # Get test data:
     Xtest, ytest = get_data(exper.data; n=n, test_set=true)
+    _ytest = Flux.onehotbatch(ytest, sort(unique(ytest)))
 
     if adversarial
         # Generate adversarial examples:
-        Xtest = generate_ae(model, nothing, Xtest, ytest; eps)
+        domain = exper.data.domain
+        domain = domain isa Vector ? nothing : domain
+        Xtest = generate_ae(model, Xtest, _ytest; attack_fun, eps, clamp_range=domain)
     end
 
     yhat = predict_label(M, CounterfactualData(Xtest, ytest), Xtest)
 
     return compute_performance_measures(exper, ytest, yhat; measure, return_df)
-end
-
-function generate_ae(model, loss, x, y; eps::Real=0.3, p=Inf)
-    delta = randn(size(x)...)
-    return x + eps * delta
 end
 
 function adv_performance(exper::Experiment; kwrgs...)

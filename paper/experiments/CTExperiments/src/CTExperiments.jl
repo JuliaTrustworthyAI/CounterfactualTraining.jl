@@ -25,6 +25,7 @@ include("config.jl")
 include("utils.jl")
 include("grid.jl")
 include("experiment.jl")
+include("adversarial.jl")
 include("evaluate.jl")
 include("evaluation_grid.jl")
 include("presentation.jl")
@@ -54,5 +55,6 @@ export get_data, get_ce_data, ntotal
 export get_domain, get_mutability
 export default_save_dir
 export has_results, needs_results
+export get_labels
 
 end

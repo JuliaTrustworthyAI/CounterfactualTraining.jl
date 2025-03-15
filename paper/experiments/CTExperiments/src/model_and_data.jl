@@ -4,6 +4,11 @@ using Random
 using Serialization
 using TaijaData
 
+function get_labels(d::Dataset)
+    _, y = get_data(d)
+    return sort(unique(y))
+end
+
 """
     apply_inferred_domain!(d::Dataset)
 
