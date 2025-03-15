@@ -302,18 +302,18 @@ inputs using the cosine distance as the loss function.
 
 In the natural language processing (NLP) domain, CEs have also been used
 to improve models through data augmentation. \cite{wu2021polyjuice2}
-propose \emph{Polyjuice}, a general-purpose counterfactual generator for
-language models. The authors empirically demonstrate that the
+proposes \emph{Polyjuice}, a general-purpose counterfactual generator
+for language models. The authors empirically demonstrate that the
 augmentation of training data with their method improves robustness in a
-number of NLP tasks. \cite{balashankar2023improving} similarly use
+number of NLP tasks. \cite{balashankar2023improving} similarly uses
 \emph{Polyjuice} to augment NLP datasets through diverse counterfactuals
 and show that classifier robustness improves by up to 20\%. Finally,
-\cite{luu2023counterfactual} introduce Counterfactual Adversarial
-Training (CAT), which also aims at improving generalization and
-robustness of language models through a three-step procedure: the
-authors identify training samples that are subject to high predictive
-uncertainty, generate CEs for those samples, and then fine-tune the
-language model on a dataset augmented with the CEs.
+\cite{luu2023counterfactual} introduces Counterfactual Adversarial
+Training (CAT) that also aims to improve generalization and robustness
+of language models through a three-step procedure: the authors identify
+training samples that are subject to high predictive uncertainty,
+generate CEs for them, and fine-tune the language model on a dataset
+augmented with the CEs.
 
 There have also been several attempts at formalizing the relationship
 between counterfactual explanations and adversarial examples. Pointing
@@ -322,19 +322,19 @@ to clear similarities in how CEs and AEs are generated,
 opaqueness and robustness problems in representation learning. Formally,
 AEs can be seen as the subset of CEs for which misclassification is
 achieved \cite{freiesleben2022intriguing}. Similarly,
-\cite{pawelczyk2022exploring} show that CEs and AEs are equivalent under
-certain conditions.
+\cite{pawelczyk2022exploring} shows that CEs and AEs are equivalent
+under certain conditions.
 
 Two recent works are closely related to ours in that they use
 counterfactuals during training with the explicit goal of affecting
 certain properties of the post-hoc counterfactual explanations. Firstly,
-\cite{ross2021learning} propose a way to train models that guarantee
+\cite{ross2021learning} proposes a way to train models that guarantee
 individual recourse to some positive target class with high probability.
 Their approach builds on adversarial training by explicitly inducing
 susceptibility to targeted adversarial examples for the positive class.
 Additionally, the proposed method allows for imposing a set of
 actionability constraints ex-ante. For example, users can specify that
-certain features are immutable. Secondly, \cite{guo2023counternet} are
+certain features are immutable. Secondly, \cite{guo2023counternet} is
 the first to propose an end-to-end training pipeline that includes CEs
 as part of the training procedure. In particular, they propose a
 specific network architecture that includes a predictor and CE generator
@@ -348,7 +348,7 @@ Explanations}\label{aligning-representations-with-plausible-explanations}
 
 Improving the adversarial robustness of models is not the only path
 towards aligning representations with plausible explanations. In a work
-closely related to this one, \cite{altmeyer2024faithful} show that
+closely related to this one, \cite{altmeyer2024faithful} shows that
 explainability can be improved through model averaging and refined model
 objectives. The authors propose a way to generate counterfactuals that
 are maximally faithful to the model in that they are consistent with
@@ -368,7 +368,7 @@ approximate Bayesian model averages, which are most called for when
 models are underspecified by the available data \cite{wilson2020case}.
 Averaging across solutions mitigates the aforementioned risk of relying
 on a single locally optimal representations that corresponds to
-semantically meaningless explanations for the data. Previous work by
+semantically meaningless explanations for the data. Previous work of
 \cite{schut2021generating} similarly found that generating plausible
 (``interpretable'') CEs is almost trivial for deep ensembles that have
 also undergone adversarial training. The case for JEMs is even clearer:
@@ -543,11 +543,11 @@ t_\varepsilon &= \max_t \{t: ||\Delta_t||_\infty < \varepsilon\}
 }\end{equation} Under this choice, we consider nascent counterfactuals
 \(\mathbf{x}_{t\leq T}^\prime\) as AEs as long as the magnitude of the
 perturbation to any single feature is at most \(\varepsilon\). This is
-closely aligned with \cite{szegedy2013intriguing} who define an
+closely aligned with \cite{szegedy2013intriguing} that defines an
 adversarial attack as an ``imperceptible non-random perturbation''.
 Thus, we choose to work with a different distinction between CE and AE
-than \cite{freiesleben2022intriguing} who consider misclassification as
-the key distinguishing feature of AE. One of the key observations of
+than \cite{freiesleben2022intriguing} that considers misclassification
+as the key distinguishing feature of AE. One of the key observations of
 this work is that we can leverage CEs during training and get
 adversarial examples essentially for free, which can be used to reap the
 aforementioned benefits of adversarial training.
@@ -637,10 +637,10 @@ points belong to the target class, \(y^+=2\), blue points belong to the
 non-target class, \(y^-=1\). Stars indicate CEs in the target class
 generated at test time using generic gradient descent until convergence.
 
-In all cases the counterfactuals are valid but their quality differs. In
-panel (a), they are not plausible: they do not comply with the
-distribution of the factuals in \(y^+\) to the point where they form a
-clearly distinguishable cluster. In panel (b), they are highly
+In all cases the counterfactuals are all valid but their quality
+differs. In panel (a), they are not plausible: they do not comply with
+the distribution of the factuals in \(y^+\) to the point where they form
+a clearly distinguishable cluster. In panel (b), they are highly
 plausible, meeting the first objective of Def. \ref{def-explainability}.
 In panel (c), the CEs involve substantial reductions in \emph{debt} for
 younger applicants. By comparison, counterfactual paths are shorter on
@@ -674,8 +674,8 @@ questions:
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  To what extent does the counterfactual training objective (as defined
-  in Equation~\ref{eq-obj}) induce models to learn plausible
+  To what extent does the counterfactual training objective as it is
+  defined in Equation~\ref{eq-obj} induce models to learn plausible
   explanations?
 \item
   To what extent does the CT objective produce more favorable
@@ -696,7 +696,7 @@ follow the standard convention of using distances (\(\ell_1\)-norm)
 between factuals and counterfactuals as a proxy. For plausibility, we
 assess how similar counterfactuals are to observed samples in the target
 domain, \(\mathbf{X}^+\subset\mathcal{X}^+\). We rely on the
-distance-based metric used by \cite{altmeyer2024faithful},
+distance-based metric used in \cite{altmeyer2024faithful},
 
 \begin{equation}\phantomsection\label{eq-impl-dist}{
 \text{IP}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
@@ -758,7 +758,7 @@ varies. For the simple synthetic datasets, distance reductions range
 from around 20-40\% (\emph{LS}, \emph{Moon}) to almost 60\%
 (\emph{Circ}). For the real-world tabular datasets, improvements tend to
 be smaller but still substantial, with around 10-15\% for \emph{CH},
-11-28\% for \emph{GMSC}, 7-8\% for \emph{Cred} and around 3\% for
+11-28\% for \emph{GMSC}, 7-8\% for \emph{Cred}, and around 3\% for
 \emph{Adult}. For our only vision dataset (\emph{MNIST}), distances are
 reduced by up to 9\%. The results for our proposed divergence metric are
 qualitatively similar, but generally even more pronounced: for the
@@ -772,10 +772,10 @@ disagree.
 We find that CT can substantially improve the quality of explanations
 learned by models without sacrificing predictive performance. Test
 accuracy for CT is virtually identical to the baseline for \emph{Adult},
-\emph{Circ}, \emph{LS}, \emph{Moon} and \emph{OL}, and even slightly
+\emph{Circ}, \emph{LS}, \emph{Moon}, and \emph{OL}, and even slightly
 improved for \emph{Cred}. Exceptions to this general pattern are
-\emph{MNIST}, \emph{CH} and \emph{GMSC}, for which we observe reduction
-in test accuracy of 2, 5 and 15 percentage points, respectively. In this
+\emph{MNIST}, \emph{CH}, and \emph{GMSC}, for which we observe reduction
+in test accuracy of 2, 5, and 15 percentage points respectively. In this
 context, we also note that we have not optimized the models (very small
 networks) for predictive performance at all.
 
@@ -879,8 +879,9 @@ by the model. Even if all immutable features are protected, there may
 exist proxies that are mutable (and hence should not be protected) but
 preserve enough information about the principals to hinder the
 protections. Delineating actionability is a major undecided challenge in
-the AR literature \cite{venkatasubramanian2020philosophical} impacting
-the capacity of CT to fulfill its intended goal.\\
+the AR literature (see, e.g.,
+\cite{venkatasubramanian2020philosophical}) impacting the capacity of CT
+to fulfill its intended goal.\\
 \indent \emph{Interventions on features may impact fairness.} We provide
 a tool that allows practitioners to modify the sensitivity of a model
 with respect to certain features, which may have implication for the
