@@ -33,18 +33,37 @@ function is_empty_value(v::Any)
 end
 
 # Function to filter dictionary
-function filter_dict(dict::Dict; drop_fields=["name", "data", "data_params"])
+function filter_dict(
+    dict::Dict;
+    drop_fields=[
+        "name",
+        "data",
+        "data_params",
+        "experiment_name",
+        "dim_reduction",
+        "nneighbours",
+        "grid_file",
+    ],
+    filter_empty::Bool=true,
+)
 
     # Take care of nested dicts:
     for (k, v) in dict
         if v isa Dict
-            dict[k] = filter_dict(v; drop_fields)
+            dict[k] = filter_dict(v; drop_fields, filter_empty)
         end
     end
 
-    # Filter out empty values and specified fields
-    dict = filter(dict) do (k, v)
-        !is_empty_value(v) && !(k in drop_fields)
+    if filter_empty
+        # Filter out empty values and specified fields
+        dict = filter(dict) do (k, v)
+            !is_empty_value(v) && !(k in drop_fields)
+        end
+    else
+        # Filter out empty values and specified fields
+        dict = filter(dict) do (k, v)
+            !(k in drop_fields)
+        end
     end
 
     return dict
@@ -175,21 +194,22 @@ function format_header(s::String; replacements::Dict=LatexReplacements)
     return s
 end
 
-function to_mkd(dict::Dict, level::Int=0; header::Union{Nothing,String}=nothing)
-    drop_fields = [
-        "name",
-        "concatenate_output",
-        "parallelizer",
-        "store_ce",
-        "threaded",
-        "verbose",
-        "vertical_splits",
-        "grid_file",
-        "inherit",
-        "save_dir",
-        "test_time",
-        "ndiv",
-    ]
+global _drop_fields = [
+    "name",
+    "concatenate_output",
+    "parallelizer",
+    "store_ce",
+    "threaded",
+    "verbose",
+    "vertical_splits",
+    "grid_file",
+    "inherit",
+    "save_dir",
+    "test_time",
+    "ndiv",
+]
+
+function to_mkd(dict::Dict, level::Int=0; header::Union{Nothing,String}=nothing, drop_fields=_drop_fields)
     dict = filter(((k, v),) -> length(v) > 0 && !(k in drop_fields), dict)
 
     # Create indent string based on level
@@ -229,14 +249,16 @@ function to_mkd(dict::Dict, level::Int=0; header::Union{Nothing,String}=nothing)
 end
 
 # Function to create final Markdown string
-function dict_to_markdown(dict::Dict; header::Union{Nothing,String}=nothing)
-    filtered_dict = filter_dict(dict)
+function dict_to_markdown(dict::Dict; header::Union{Nothing,String}=nothing, filter_empty::Bool=true)
+    filtered_dict = filter_dict(dict; filter_empty) 
     return "md\"\"\"\n$(to_mkd(filtered_dict; header=header))\n\"\"\""
 end
 
 # New function specifically for Quarto output
-function dict_to_quarto_markdown(dict::Dict; header::Union{Nothing,String}=nothing)
-    filtered_dict = filter_dict(dict)
+function dict_to_quarto_markdown(
+    dict::Dict; header::Union{Nothing,String}=nothing, filter_empty::Bool=true
+)
+    filtered_dict = filter_dict(dict; filter_empty)
     return "$(to_mkd(filtered_dict; header=header))\n"
 end
 
@@ -691,10 +713,10 @@ function aggregate_counterfactuals(
     )
 end
 
-function get_img_command(data_names, full_paths, fig_labels; fig_caption="")
+function get_img_command(data_names, full_paths, fig_labels; fig_caption="", width=100)
     fig_cap = fig_caption == "" ? fig_caption : "$fig_caption "
     return [
-        "![$(fig_cap)Data: $(CTExperiments.get_data_name(nm)).](/$pth){#$(lbl)}" for
+        "![$(fig_cap)Data: $(CTExperiments.get_data_name(nm)).](/$pth){#$(lbl) width=$(width)%}" for
         (nm, pth, lbl) in zip(data_names, full_paths, fig_labels)
     ]
 end

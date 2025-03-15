@@ -1,10 +1,9 @@
 {
   "cells": [
     {
-      "cell_type": "markdown",
+      "cell_type": "code",
       "metadata": {},
       "source": [
-        "```{julia}\n",
         "projectdir = splitpath(pwd()) |>\n",
         "    ss -> joinpath(ss[1:findall([s == \"CounterfactualTraining.jl\" for s in ss])[1]]...) \n",
         "cd(projectdir)\n",
@@ -17,15 +16,27 @@
         "using Random\n",
         "\n",
         "using DotEnv\n",
-        "DotEnv.load!()\n",
-        "```\n",
-        "\n",
-        "```{julia}\n",
+        "DotEnv.load!()"
+      ],
+      "id": "7058cadd",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "res_dir = joinpath(ENV[\"FINAL_GRID_RESULTS\"],\"single\")\n",
-        "mtbl_dir = joinpath(ENV[\"FINAL_GRID_RESULTS\"],\"mutability\")\n",
-        "```\n",
-        "\n",
-        "\n",
+        "mtbl_dir = joinpath(ENV[\"FINAL_GRID_RESULTS\"],\"mutability\")"
+      ],
+      "id": "b8569604",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
         "# Details on Main Experiments {#sec-app-main .appendix}\n",
         "\n",
         "## Final Hyperparameters\n",
@@ -34,40 +45,76 @@
         "\n",
         "::: {#tbl-final-params}\n",
         "\n",
-        "::: {.content-hidden unless-format=\"pdf\"}\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        "::: {.content-hidden unless-format=\"pdf\"}\n"
+      ],
+      "id": "c91a089b"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| output: asis\n",
         "\n",
         "df = final_params(res_dir)\n",
         "get_table_inputs(df, nothing; backend=Val(:latex)) |>\n",
-        "    inputs -> tabulate_results(inputs; table_type=:tabular)\n",
-        "```\n",
-        "\n",
-        "\n",
+        "    inputs -> tabulate_results(inputs; table_type=:tabular)"
+      ],
+      "id": "43937a97",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
         ":::\n",
         "\n",
         "Final hyperparameters used for the main results for the different datasets.\n",
         "\n",
-        ":::\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        ":::\n"
+      ],
+      "id": "992725c2"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| eval: false\n",
         "\n",
         "tbl_mtbl = final_mutability(mtbl_dir; var=[\"distance\"])\n",
         "df = final_table(res_dir; tbl_mtbl)\n",
         "inputs = get_table_inputs(df, nothing; backend=Val(:latex))\n",
-        "tabulate_results(inputs; table_type=:tabular, save_name=\"paper/quarto_ecml/tables/main.tex\", wrap_table=false)\n",
-        "tabulate_results(inputs; table_type=:tabular, save_name=\"paper/preprint/tables/main.tex\", wrap_table=false)\n",
-        "```\n",
-        "\n",
-        "\n",
-        "## Qualitative Findings for Image Data\n",
-        "\n",
-        "\n",
-        "```{julia}\n",
+        "formatters = (\n",
+        "    PrettyTables.ft_round(1,findall(.!contains.(names(df),\"Acc\"))),\n",
+        "    PrettyTables.ft_round(2,findall(contains.(names(df),\"Acc\")))\n",
+        ")\n",
+        "for fname in [\"paper/quarto_ecml/tables/main.tex\",\"paper/preprint/tables/main.tex\"]\n",
+        "    tabulate_results(\n",
+        "        inputs; \n",
+        "        table_type=:tabular, \n",
+        "        save_name=fname, \n",
+        "        wrap_table=false, \n",
+        "        alignment=[:l,fill(:r,size(df,2)-1)...],\n",
+        "        formatters=formatters\n",
+        "    )\n",
+        "end"
+      ],
+      "id": "3564d856",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Qualitative Findings for Image Data\n"
+      ],
+      "id": "41d0c1d5"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
         "#| eval: false\n",
         "\n",
         "Random.seed!(42)    # change seed for different outcome\n",
@@ -85,12 +132,16 @@
         "generate_factual_target_pairs(cfg; overwrite, nce=10)\n",
         "plts = plot_ce(MNIST(), cfg; byvars=\"objective\")\n",
         "savefig(plts[\"objective\"][\"full\"][\"ecco\"], \"paper/figures/mnist_mlp.png\")\n",
-        "savefig(plts[\"objective\"][\"vanilla\"][\"ecco\"], \"paper/figures/mnist_mlp_vanilla.png\")\n",
-        "```\n",
-        "\n",
-        "\n",
-        "\n",
-        "\n",
+        "savefig(plts[\"objective\"][\"vanilla\"][\"ecco\"], \"paper/figures/mnist_mlp_vanilla.png\")"
+      ],
+      "id": "e3cbf151",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
         "@fig-mnist shows much more plausible (faithful) counterfactuals for a model with CT than the model with conventional training (@fig-mnist-vanilla).\n",
         "\n",
         "::: {layout=\"[10,-2,10]\" layout-valign=\"top\"}\n",
@@ -99,15 +150,15 @@
         "![The same setup, factuals, model architecture and generator as in @fig-mnist, but the model was trained with CT.](/paper/figures/mnist_mlp_vanilla.png){#fig-mnist-vanilla}\n",
         ":::"
       ],
-      "id": "154b9441"
+      "id": "4966974c"
     }
   ],
   "metadata": {
     "kernelspec": {
-      "name": "comp_vis",
-      "language": "python",
-      "display_name": "comp_vis",
-      "path": "C:\\Users\\Olek\\AppData\\Roaming\\jupyter\\kernels\\comp_vis"
+      "name": "julia-1.11",
+      "language": "julia",
+      "display_name": "Julia 1.11.1",
+      "path": "/Users/paltmeyer/Library/Jupyter/kernels/julia-1.11"
     }
   },
   "nbformat": 4,

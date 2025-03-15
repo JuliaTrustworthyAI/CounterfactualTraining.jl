@@ -34,13 +34,14 @@ As discussed @sec-experiments, CT is sensitive to certain hyperparameter choices
 #| output: asis
 
 df = final_params(res_dir)
+float_cols = ["decision_threshold", "lambda_energy_reg"]
 get_table_inputs(df, nothing; backend=Val(:latex)) |>
-    inputs -> tabulate_results(inputs; table_type=:tabular)
+    inputs -> tabulate_results(inputs; table_type=:tabular, formatters=PrettyTables.ft_round(2, findall([x in float_cols for x in names(df)])))
 ```
 
 :::
 
-Final hyperparameters used for the main results for the different datasets.
+Final hyperparameters used for the main results preseneted in @sec-experiments. Any hyperparameter not shown here is set to its default value (@nte-train-default).
 
 :::
 

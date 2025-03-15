@@ -255,17 +255,18 @@ capacity of models. Counterfactual explanations have emerged as a
 popular post-hoc explanation method for opaque machine learning models:
 they inform how factual inputs would need to change in order for a model
 to produce some desired output. To be useful in real-word
-decision-making systems, counterfactuals should be plausible with
-respect to the underlying data and actionable with respect to the
-stakeholder requirements. Much existing research has therefore focused
-on developing post-hoc methods to generate counterfactuals that meet
-these desiderata. In this work, we instead hold models directly
-accountable for the desired end goal: counterfactual training employs
-counterfactuals ad-hoc during the training phase to minimize the
-divergence between learned representations and plausible, actionable
-explanations. We demonstrate empirically and theoretically that our
-proposed method facilitates training models that deliver inherently
-desirable explanations while maintaining high predictive performance.
+decision-making systems, counterfactuals should be (1) plausible with
+respect to the underlying data and (2) actionable with respect to the
+user-defined mutability constraints. Much existing research has
+therefore focused on developing post-hoc methods to generate
+counterfactuals that meet these desiderata. In this work, we instead
+hold models directly accountable for the desired end goal:
+counterfactual training employs counterfactuals ad-hoc during the
+training phase to minimize the divergence between learned
+representations and plausible, actionable explanations. We demonstrate
+empirically and theoretically that our proposed method facilitates
+training models that deliver inherently desirable explanations while
+maintaining high predictive performance.
 \end{abstract}
 {\bfseries \emph Keywords}
 \def\sep{\textbullet\ }
@@ -333,11 +334,11 @@ which practitioners deploy opaque models and blindly rely on their
 predictions. On countless occasions, this has happened in practice and
 caused real harms to people who were adversely and unfairly affected by
 automated decision-making (ADM) systems involving opaque models
-(\citeproc{ref-oneil2016weapons}{O'Neil 2016};
-\citeproc{ref-mcgregor2021preventing}{McGregor 2021}). Effective XAI
-tools can aid us in monitoring models and providing recourse to
-individuals to turn negative outcomes (e.g., ``loan application
-rejected'') into positive ones (e.g., ``application accepted''). Our
+(\citeproc{ref-mcgregor2021preventing}{McGregor 2021};
+\citeproc{ref-oneil2016weapons}{O'Neil 2016}). Effective XAI tools can
+aid us in monitoring models and providing recourse to individuals to
+turn negative outcomes (e.g., ``loan application rejected'') into
+positive ones (e.g., ``application accepted''). In line with this, our
 work builds upon \textbf{counterfactual explanations} (CE) proposed by
 Wachter, Mittelstadt, and Russell
 (\citeproc{ref-wachter2017counterfactual}{2017}) as an effective
@@ -353,55 +354,55 @@ are \textbf{interpretable} and deemed \textbf{plausible} by humans (see
 Def. \ref{def-explainability}). Instead, the choice has generally been
 to improve the ability of XAI tools to identify the subset of
 explanations that are both plausible and valid for any given model,
-independent of whether the learned representations are also compatible
-with plausible explanations
+independent of whether the learned representations are in fact
+compatible with plausible explanations
 (\citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024}).
 Fortunately, recent findings indicate that improved explanatory capacity
 can arise as a consequence of regularization techniques aimed at other
-training objectives such as robustness, generalization, and generative
-capacity (\citeproc{ref-schut2021generating}{Schut et al. 2021};
+training objectives such as generative capacity, generalization, or
+robustness (\citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024};
 \citeproc{ref-augustin2020adversarial}{Augustin, Meinke, and Hein 2020};
-\citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024}). As further
+\citeproc{ref-schut2021generating}{Schut et al. 2021}). As further
 discussed in Section~\ref{sec-lit}, our work consolidates these findings
 within a single objective.
 
-\textbf{Specifically, we propose counterfactual training (CT)}: a novel
-training regime that aligns learned representations with plausible
-explanations respecting actionability constraints. The remainder of this
-paper is structured as follows. Section~\ref{sec-lit} presents related
-work, focusing on the link between adversarial examples and
-counterfactual explanations. Then follow our two principal
-contributions. In Section~\ref{sec-method}, we introduce our
-methodological framework and show theoretically that it can be employed
-to enforce global actionability constraints. In
-Section~\ref{sec-experiments}, through extensive experiments, we
-demonstrate that CT substantially improves explainability without
-sacrificing predictive performance. We discuss the challenges in
-Section~\ref{sec-discussion} and conclude in
+\textbf{Specifically, we introduce Counterfactual Training (CT)}: a
+novel training regime explicitly geared towards improving the
+explainability of models. In high-level terms, we define this concept as
+as the extent to which valid explanations derived for an opaque model
+are also deemed plausible with respect to the underlying data and the
+global actionability constraints. To the best of our knowledge, our
+framework represents the first attempt to address this challenge by
+employing counterfactual explanations already in the training phase.
+
+The remainder of this manuscript is structured as follows.
+Section~\ref{sec-lit} presents related work, focusing on the link
+between AEs and CEs. Then follow our two principal contributions. In
+Section~\ref{sec-method}, we introduce our methodological framework and
+show theoretically that it can be employed to enforce global
+actionability constraints. In Section~\ref{sec-experiments}, through
+extensive experiments, we demonstrate that CT substantially improves
+explainability without sacrificing predictive performance. We discuss
+the challenges in Section~\ref{sec-discussion} and conclude in
 Section~\ref{sec-conclusion} that CT is a promising approach towards
 making opaque models more trustworthy.
 
 \section{Related Literature}\label{sec-lit}
 
-To the best of our knowledge, the proposed framework for counterfactual
-training represents the first attempt to use counterfactual explanations
-during training to improve model explainability. In high-level terms, we
-define model explainability as the extent to which valid explanations
-derived for an opaque model are also deemed plausible with respect to
-the underlying data and (global) actionability constraints. To make the
-desiderata for our framework more concrete, we follow Augustin, Meinke,
-and Hein (\citeproc{ref-augustin2020adversarial}{2020}) in tying the
-concept of explainability to the quality of CEs that can be generated
-for a given model. The authors show that CEs---understood as minimal
-input perturbations that yield some desired model prediction---tend to
-be more meaningful if the underlying model is more robust to adversarial
+To make the desiderata for our framework more concrete, we follow
+Augustin, Meinke, and Hein
+(\citeproc{ref-augustin2020adversarial}{2020}) in tying the concept of
+explainability to the quality of CEs that can be generated for a given
+model. The authors show that CEs---understood as minimal input
+perturbations that yield some desired model prediction---tend to be more
+meaningful if the underlying model is more robust to adversarial
 examples. We can make intuitive sense of this finding when looking at
 adversarial training (AT) through the lens of representation learning
 with high degrees of freedom. As argued before, learned representations
 may be sensitive to producing implausible explanations and mispredicting
 for worst-case counterfactuals (i.e., AEs). Thus, by inducing models to
-``unlearn'' susceptiblity to such examples, AT can effectively remove
-implausible explanations from the solution space.
+``unlearn'' susceptiblity to such examples, adversarial training can
+effectively remove implausible explanations from the solution space.
 
 \subsection{Adversarial Examples are Counterfactual
 Explanations}\label{adversarial-examples-are-counterfactual-explanations}
@@ -409,7 +410,7 @@ Explanations}\label{adversarial-examples-are-counterfactual-explanations}
 This interpretation of the link between explainability through
 counterfactuals on one side and robustness to adversarial examples on
 the other is backed by empirical evidence. Sauer and Geiger
-(\citeproc{ref-sauer2021counterfactual}{2021}) demonstrate that using
+(\citeproc{ref-sauer2021counterfactual}{2021}) demonstrates that using
 counterfactual images during classifier training improves model
 robustness. Similarly, Abbasnejad et al.
 (\citeproc{ref-abbasnejad2020counterfactual}{2020}) argue that
@@ -428,20 +429,20 @@ counterfactual inputs using the cosine distance as the loss function.
 
 In the natural language processing (NLP) domain, CEs have also been used
 to improve models through data augmentation. Wu et al.
-(\citeproc{ref-wu2021polyjuice}{2021}) propose \emph{Polyjuice}, a
+(\citeproc{ref-wu2021polyjuice2}{2021}) proposes \emph{Polyjuice}, a
 general-purpose counterfactual generator for language models. The
 authors empirically demonstrate that the augmentation of training data
 with their method improves robustness in a number of NLP tasks.
 Balashankar et al. (\citeproc{ref-balashankar2023improving}{2023})
-similarly use \emph{Polyjuice} to augment NLP datasets through diverse
+similarly uses \emph{Polyjuice} to augment NLP datasets through diverse
 counterfactuals and show that classifier robustness improves by up to
 20\%. Finally, Luu and Inoue
-(\citeproc{ref-luu2023counterfactual}{2023}) introduce Counterfactual
-Adversarial Training (CAT), which also aims at improving generalization
-and robustness of language models through a three-step procedure: the
+(\citeproc{ref-luu2023counterfactual}{2023}) introduces Counterfactual
+Adversarial Training (CAT) that also aims to improve generalization and
+robustness of language models through a three-step procedure: the
 authors identify training samples that are subject to high predictive
-uncertainty, generate CEs for those samples, and then fine-tune the
-language model on a dataset augmented with the CEs.
+uncertainty, generate CEs for them, and fine-tune the language model on
+a dataset augmented with the CEs.
 
 There have also been several attempts at formalizing the relationship
 between counterfactual explanations and adversarial examples. Pointing
@@ -451,22 +452,21 @@ jointly studying the opaqueness and robustness problems in
 representation learning. Formally, AEs can be seen as the subset of CEs
 for which misclassification is achieved
 (\citeproc{ref-freiesleben2022intriguing}{Freiesleben 2022}). Similarly,
-Pawelczyk et al. (\citeproc{ref-pawelczyk2022exploring}{2022}) show that
-CEs and AEs are equivalent under certain conditions and derive
-theoretical upper bounds on distances between them.
+Pawelczyk et al. (\citeproc{ref-pawelczyk2022exploring}{2022}) shows
+that CEs and AEs are equivalent under certain conditions.
 
 Two recent works are closely related to ours in that they use
 counterfactuals during training with the explicit goal of affecting
 certain properties of the post-hoc counterfactual explanations. Firstly,
 Ross, Lakkaraju, and Bastani (\citeproc{ref-ross2021learning}{2024})
-propose a way to train models that guarantee individual recourse to some
-positive target class with high probability. Their approach builds on
-adversarial training by explicitly inducing susceptibility to targeted
-adversarial examples for the positive class. Additionally, the proposed
-method allows for imposing a set of actionability constraints ex-ante.
-For example, users can specify that certain features are immutable.
-Secondly, Guo, Nguyen, and Yadav
-(\citeproc{ref-guo2023counternet}{2023}) are the first to propose an
+proposes a way to train models that guarantee individual recourse to
+some positive target class with high probability. Their approach builds
+on adversarial training by explicitly inducing susceptibility to
+targeted adversarial examples for the positive class. Additionally, the
+proposed method allows for imposing a set of actionability constraints
+ex-ante. For example, users can specify that certain features are
+immutable. Secondly, Guo, Nguyen, and Yadav
+(\citeproc{ref-guo2023counternet}{2023}) is the first to propose an
 end-to-end training pipeline that includes CEs as part of the training
 procedure. In particular, they propose a specific network architecture
 that includes a predictor and CE generator network, where the parameters
@@ -476,24 +476,25 @@ contrast to Guo, Nguyen, and Yadav
 (\citeproc{ref-guo2023counternet}{2023}), we impose no restrictions on
 the ANN architecture at all.
 
-\subsection{Beyond Robustness}\label{beyond-robustness}
+\subsection{Aligning Representations with Plausible
+Explanations}\label{aligning-representations-with-plausible-explanations}
 
 Improving the adversarial robustness of models is not the only path
 towards aligning representations with plausible explanations. In a work
 closely related to this one, Altmeyer et al.
-(\citeproc{ref-altmeyer2024faithful}{2024}) show that explainability can
-be improved through model averaging and refined model objectives. The
-authors propose a way to generate counterfactuals that are maximally
+(\citeproc{ref-altmeyer2024faithful}{2024}) shows that explainability
+can be improved through model averaging and refined model objectives.
+The authors propose a way to generate counterfactuals that are maximally
 faithful to the model in that they are consistent with what the model
 has learned about the underlying data. Formally, they rely on tools from
-energy-based modelling to minimize the divergence between the
-distribution of counterfactuals and the conditional posterior over
-inputs learned by the model. Their proposed counterfactual explainer,
-\emph{ECCCo}, yields plausible explanations if and only if the
-underlying model has learned representations that align with them. The
-authors find that both deep ensembles
-(\citeproc{ref-lakshminarayanan2016simple}{Lakshminarayanan, Pritzel,
-and Blundell 2017}) and joint energy-based models (JEMs)
+energy-based modelling (\citeproc{ref-teh2003energy}{Teh et al. 2003})
+to minimize the divergence between the distribution of counterfactuals
+and the conditional posterior over inputs learned by the model. Their
+proposed counterfactual explainer, \emph{ECCCo}, yields plausible
+explanations if and only if the underlying model has learned
+representations that align with them. The authors find that both deep
+ensembles (\citeproc{ref-lakshminarayanan2016simple}{Lakshminarayanan,
+Pritzel, and Blundell 2017}) and joint energy-based models (JEMs)
 (\citeproc{ref-grathwohl2020your}{Grathwohl et al. 2020}) tend to do
 well in this regard.
 
@@ -504,42 +505,43 @@ models are underspecified by the available data
 (\citeproc{ref-wilson2020case}{Wilson 2020}). Averaging across solutions
 mitigates the aforementioned risk of relying on a single locally optimal
 representations that corresponds to semantically meaningless
-explanations for the data. Previous work by Schut et al.
+explanations for the data. Previous work of Schut et al.
 (\citeproc{ref-schut2021generating}{2021}) similarly found that
-generating plausible (``interpretable'') counterfactual explanations is
-almost trivial for deep ensembles that have also undergone adversarial
-training. The case for JEMs is even clearer: they involve a hybrid
-objective that induces both high predictive performance and generative
-capacity (\citeproc{ref-grathwohl2020your}{Grathwohl et al. 2020}). This
-is closely related to the idea of aligning models with plausible
-explanations and has inspired our proposed CT objective, as we explain
-in Section~\ref{sec-method}.
+generating plausible (``interpretable'') CEs is almost trivial for deep
+ensembles that have also undergone adversarial training. The case for
+JEMs is even clearer: they involve a hybrid objective that induces both
+high predictive performance and generative capacity
+(\citeproc{ref-grathwohl2020your}{Grathwohl et al. 2020}). This is
+closely related to the idea of aligning models with plausible
+explanations and has inspired our CT objective.
 
 \section{Counterfactual Training}\label{sec-method}
 
-Counterfactual training combines ideas from adversarial training,
-energy-based modelling and counterfactuals explanations with the
-explicit goal of aligning representations with plausible explanations
-that comply with user requirements. In the context of CEs, plausibility
-has broadly been defined as the degree to which counterfactuals comply
-with the underlying data-generating process
-(\citeproc{ref-poyiadzi2020face}{Poyiadzi et al. 2020};
+In this section we propose our novel counterfactual training objective.
+In CT, we combine ideas from adversarial training, counterfactual
+explanations, and energy-based modelling with the explicit goal of
+aligning representations with plausible explanations that comply with
+user-defined actionability constraints.
+
+In the context of counterfactual explanations, plausibility has broadly
+been defined as the degree to which counterfactuals comply with the
+underlying data-generating process
+(\citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024};
 \citeproc{ref-guidotti2022counterfactual}{Guidotti 2022};
-\citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024}). Plausibility
-is a necessary but insufficient condition for using CEs to provide
+\citeproc{ref-poyiadzi2020face}{Poyiadzi et al. 2020}). Plausibility is
+a necessary but insufficient condition for using CEs to provide
 algorithmic recourse (AR) to individuals (negatively) affected by opaque
-models. For AR recommendations to be actionable, they need to not only
-result in plausible counterfactuals but also be attainable. A plausible
-CE for a rejected 20-year-old loan applicant, for example, might reveal
-that their application would have been accepted, if only they were 20
-years older. Ignoring all other features, this would comply with the
-definition of plausibility if 40-year-old individuals were in fact more
-credit-worthy on average than young adults. But of course this CE does
-not qualify for providing actionable recourse to the applicant since
-\emph{age} is not a (directly) mutable feature. CT aims to improve model
-explainability by aligning models with counterfactuals that meet both
-desiderata: plausibility and actionability. Formally, we define
-explainability as follows:
+models. To be actionable, AR recommendations must also be attainable. A
+plausible CE for a rejected 20-year-old loan applicant, for example,
+might reveal that their application would have been accepted, if only
+they were 20 years older. Ignoring all other features, this would comply
+with the definition of plausibility if 40-year-old individuals were in
+fact more credit-worthy on average than young adults. But of course this
+CE does not qualify for providing actionable recourse to the applicant
+since \emph{age} is not a (directly) mutable feature. Counterfactual
+training aims to improve model explainability by aligning models with
+counterfactuals that meet both desiderata: plausibility and
+actionability. Formally, we define explainability as follows:
 
 \begin{definition}[Model Explainability]
 \label{def-explainability}
@@ -555,7 +557,7 @@ We say that $\mathbf{M}_\theta$ is \textbf{explainable} to the extent that faith
 where $p_\theta(\mathbf{x}|\mathbf{y}^{+})$ denotes the conditional posterior over inputs. 
 \end{definition}
 
-The characterization of faithfulness and plausibility in Def.
+\noindent The characterization of faithfulness and plausibility in Def.
 \ref{def-explainability} is the same as in Altmeyer et al.
 (\citeproc{ref-altmeyer2024faithful}{2024}), with adapted notation.
 Intuitively, plausible counterfactuals are consistent with the data and
@@ -619,9 +621,9 @@ perform well at both tasks by directly maximizing the joint
 log-likelihood factorized as
 \(\log p_\theta(\mathbf{x},\mathbf{y})=\log p_\theta(\mathbf{y}|\mathbf{x}) + \log p_\theta(\mathbf{x})\).
 The first term can be optimized using conventional cross-entropy as in
-Equation~\ref{eq-obj}. Then, to optimize \(\log p_\theta(\mathbf{x})\)
-Grathwohl et al. (\citeproc{ref-grathwohl2020your}{2020}) minimize the
-contrastive divergence between these observed samples from
+Equation~\ref{eq-obj}. To optimize \(\log p_\theta(\mathbf{x})\),
+Grathwohl et al. (\citeproc{ref-grathwohl2020your}{2020}) minimizes the
+contrastive divergence between the observed samples from
 \(p(\mathbf{x})\) and generated samples from \(p_\theta(\mathbf{x})\).
 
 A key empirical finding in Altmeyer et al.
@@ -631,7 +633,7 @@ well with respect to the plausibility objective in Def.
 drawn from \(p_\theta(\mathbf{x})\) as counterfactuals because the JEM
 objective effectively minimizes the divergence between the conditional
 posterior and \(p(\mathbf{x}|\mathbf{y}^{+})\). To generate samples,
-Grathwohl et al. (\citeproc{ref-grathwohl2020your}{2020}) rely on
+Grathwohl et al. (\citeproc{ref-grathwohl2020your}{2020}) relies on
 Stochastic Gradient Langevin Dynamics (SGLD) using an uninformative
 prior for initialization but we depart from their methodology. Instead
 of SGLD, we propose to use counterfactual explainers to generate
@@ -640,7 +642,7 @@ counterfactuals of observed training samples. Specifically, we have:
 \begin{equation}\phantomsection\label{eq-div}{
 \text{div}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta) = \mathcal{E}_\theta(\mathbf{x}^+,y) - \mathcal{E}_\theta(\mathbf{x}_T^\prime,y)
 }\end{equation} where \(\mathcal{E}_\theta(\cdot)\) denotes the energy
-function. We set
+function defined as
 \(\mathcal{E}_\theta(\mathbf{x},y)=-\mathbf{M}_\theta(\mathbf{x})[y^+]\)
 where \(y^+\) denotes the index of the randomly drawn target class,
 \(y^+ \sim p(y)\). Conditional on the target class \(y^+\),
@@ -658,12 +660,13 @@ counterfactuals get more plausible (Def. \ref{def-explainability})
 during training, these opposing effects gradually balance each other out
 (\citeproc{ref-lippe2024uvadlc}{Lippe 2024}).
 
-The departure from SGLD allows us to tap into the vast repertoire of
-explainers that have been proposed in the literature to meet different
-desiderata. For example, many methods facilitate the imposition of
-domain and mutability constraints. In principle, any existing approach
-for generating counterfactual explanations is viable, so long as it does
-not violate the faithfulness condition. Like JEMs
+The departure from SGLD of (\citeproc{ref-grathwohl2020your}{Grathwohl
+et al. 2020}) allows us to tap into the vast repertoire of explainers
+that have been proposed in the literature to meet different desiderata.
+For example, many methods facilitate the imposition of domain and
+mutability constraints. In principle, any existing approach for
+generating counterfactual explanations is viable, so long as it does not
+violate the faithfulness condition. Like JEMs
 (\citeproc{ref-murphy2022probabilistic}{Murphy 2022}), CT can be
 considered a form of contrastive representation learning.
 
@@ -672,14 +675,13 @@ Robustness}\label{indirectly-inducing-explainability-with-adversarial-robustness
 
 Based on our analysis in Section~\ref{sec-lit}, counterfactuals
 \(\mathbf{x}^\prime\) can be repurposed as additional training samples
-(\citeproc{ref-luu2023counterfactual}{Luu and Inoue 2023};
-\citeproc{ref-balashankar2023improving}{Balashankar et al. 2023}) or AEs
-(\citeproc{ref-freiesleben2022intriguing}{Freiesleben 2022};
+(\citeproc{ref-balashankar2023improving}{Balashankar et al. 2023};
+\citeproc{ref-luu2023counterfactual}{Luu and Inoue 2023}) or adversarial
+examples (\citeproc{ref-freiesleben2022intriguing}{Freiesleben 2022};
 \citeproc{ref-pawelczyk2022exploring}{Pawelczyk et al. 2022}). This
-leaves some flexibility with respect to the choice for
-\(\text{advloss}(\cdot)\) in Equation~\ref{eq-obj}. An intuitive
-functional form, but likely not the only sensible choice, is inspired by
-adversarial training:
+leaves some flexibility wrt. the choice for \(\text{advloss}(\cdot)\) in
+Equation~\ref{eq-obj}. An intuitive functional form, but likely not the
+only sensible choice, is inspired by adversarial training:
 
 \begin{equation}\phantomsection\label{eq-adv}{
 \begin{aligned}
@@ -690,13 +692,14 @@ t_\varepsilon &= \max_t \{t: ||\Delta_t||_\infty < \varepsilon\}
 \(\mathbf{x}_{t\leq T}^\prime\) as AEs as long as the magnitude of the
 perturbation to any single feature is at most \(\varepsilon\). This is
 closely aligned with Szegedy et al.
-(\citeproc{ref-szegedy2013intriguing}{2014}) who define an adversarial
+(\citeproc{ref-szegedy2013intriguing}{2014}) that defines an adversarial
 attack as an ``imperceptible non-random perturbation''. Thus, we choose
 to work with a different distinction between CE and AE than Freiesleben
-(\citeproc{ref-freiesleben2022intriguing}{2022}) who consider
+(\citeproc{ref-freiesleben2022intriguing}{2022}) that considers
 misclassification as the key distinguishing feature of AE. One of the
-key observations in this work is that we can leverage CEs during
-training and get adversarial examples essentially for free.
+key observations of this work is that we can leverage CEs during
+training and get adversarial examples essentially for free, which can be
+used to reap the aforementioned benefits of adversarial training.
 
 \subsection{Encoding Actionability Constraints}\label{sec-constraints}
 
@@ -737,7 +740,7 @@ we set \(\mathbf{x}^+[d] := \mathbf{x}^\prime[d]\) if:
   can only be increased in practice.
 \end{enumerate}
 
-From a Bayesian perspective, setting
+\noindent From a Bayesian perspective, setting
 \(\mathbf{x}^+[d] := \mathbf{x}^\prime[d]\) can be understood as
 assuming a point mass prior for \(p(\mathbf{x}^+)\) with respect to
 feature \(d\). Intuitively, we think of this simply in terms ignoring
@@ -754,10 +757,11 @@ conditions, this result holds theoretically:\footnote{For the proof, see
 Let $f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})$ denote a linear classifier with softmax activation $\mathcal{S}$ where $y\in\{1,...,K\}=\mathcal{K}$ and $\mathbf{x} \in \mathbb{R}^D$. If we assume multivariate Gaussian class densities with common diagonal covariance matrix $\Sigma_k=\Sigma$ for all $k \in \mathcal{K}$, then protecting an immutable feature from the contrastive divergence penalty will result in lower classifier sensitivity to that feature relative to the remaining features, provided that at least one of those is discriminative and mutable.
 \end{proposition}
 
-It is worth highlighting that \mbox{Proposition \ref{prp-mtblty}}
-assumes independence of features. This raises a valid concern about the
-effect of protecting immutable features in the presence of proxies that
-remain unprotected. We address this in Section~\ref{sec-discussion}.
+\noindent It is worth highlighting that
+\mbox{Proposition \ref{prp-mtblty}} assumes independence of features.
+This raises a valid concern about the effect of protecting immutable
+features in the presence of proxies that remain unprotected. We address
+this in Section~\ref{sec-discussion}.
 
 \subsection{Example (Prediction of Consumer Credit
 Default)}\label{example-prediction-of-consumer-credit-default}
@@ -770,27 +774,22 @@ features: (1) the subjects' \emph{age}, which we define as immutable,
 and (2) the subjects' existing level of \emph{debt}, which we define as
 mutable.
 
-We have simulated this scenario using synthetic data with two
-independent features and Gaussian class-conditional densities in
+We have simulated this scenario using synthetic data with independent
+\emph{age} and \emph{debt}, and Gaussian class-conditional densities in
 Figure~\ref{fig-poc}. The four panels show the outcomes for different
 training procedures using the same model architectures (a linear
 classifier). In panels (a) and (c) we have trained the models
-conventionally, while in panels (b) and (d) we used CT. Only in panels
-(c) and (d) do we impose the mutability constraint on \emph{age} at test
-time. In each case, we show the decision boundary (in green) and the
-training data colored according to their ground-truth label: orange
-points belong to the target class, \(y^+=2\), blue points belong to the
-non-target class, \(y^-=1\). Stars indicate CEs in the target class
-generated at test time using generic gradient descent until convergence.
+conventionally, while in panels (b) and (d) we used CT.
 
-In all cases the counterfactuals are valid but their quality differs. In
-panel (a), they are not plausible: they do not comply with the
-distribution of the factuals in \(y^+\) to the point where they form a
-clearly distinguishable cluster. In panel (b), they are highly
-plausible, meeting the first objective of Def. \ref{def-explainability}.
-In panel (c), the CEs involve substantial reductions in \emph{debt} for
-younger applicants. By comparison, counterfactual paths are shorter on
-average in panel (d) where we have protected the immutable \emph{age} as
+In all cases, all counterfactuals (stars) are valid---they have cross
+the decision boundary (green)---but their quality differs. In panel (a),
+they are not plausible: they do not comply with the distribution of the
+factuals in \(y^+\) to the point where they form a clearly
+distinguishable cluster. In panel (b), they are highly plausible,
+meeting the first objective of Def. \ref{def-explainability}. In panel
+(c), the CEs involve substantial reductions in \emph{debt} for younger
+applicants. By comparison, counterfactual paths are shorter on average
+in panel (d) where we have protected the immutable \emph{age} as
 described in Section~\ref{sec-constraints}. Due to the classifier's
 lower sensitivity to \emph{age}, recommendations with respect to
 \emph{debt} are much more homogenous and do not unfairly punish younger
@@ -807,21 +806,25 @@ most explainable according to Def. \ref{def-explainability}.
 }
 
 \caption{\label{fig-poc}Illustration of how CT improves model
-explainability.}
+explainability: (a) conventional training, all mutable; (b) CT, all
+mutable; (c) conventional, \emph{age} immutable; (d) CT, \emph{age}
+immutable. The decision boundary is shown in green along with training
+data colored according to their ground-truth label: \(y^+=2\) (orange)
+and \(y^-=1\) (blue). Stars indicate CEs for the target class.}
 
 \end{figure}%
 
 \section{Experiments}\label{sec-experiments}
 
-Here we present the experiments conducted to answer our research
+In our experiments we seek to answer the following three research
 questions:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  To what extent does our counterfactual training objective as defined
-  in Equation~\ref{eq-obj} induce models to learn plausible
+  To what extent does the counterfactual training objective as it is
+  defined in Equation~\ref{eq-obj} induce models to learn plausible
   explanations?
 \item
   To what extent does the CT objective produce more favorable
@@ -834,15 +837,15 @@ questions:
 
 \subsection{Experimental Setup}\label{experimental-setup}
 
-Our key outcome of interest is how well do models perform with respect
-to explainability (Def. \ref{def-explainability}). To this end, we focus
-primarily on the plausibility and cost of faithfully generated
-counterfactuals at test time. To measure the cost of counterfactuals, we
-follow the standard convention of using distances (\(\ell_1\)-norm)
-between factuals and counterfactuals as a proxy. For plausibility, we
-assess how similar counterfactuals are to observed samples in the target
-domain, \(\mathbf{X}^+\subset\mathcal{X}^+\). We rely on the
-distance-based metric used by Altmeyer et al.
+Our key outcome of interest is improved explainability (Def.
+\ref{def-explainability}). To this end, we focus primarily on the
+plausibility and cost of faithfully generated counterfactuals at test
+time. To measure the cost of counterfactuals, we follow the standard
+convention of using distances (\(\ell_1\)-norm) between factuals and
+counterfactuals as a proxy. For plausibility, we assess how similar
+counterfactuals are to observed samples in the target domain,
+\(\mathbf{X}^+\subset\mathcal{X}^+\). We rely on the distance-based
+metric used in Altmeyer et al.
 (\citeproc{ref-altmeyer2024faithful}{2024}),
 
 \begin{equation}\phantomsection\label{eq-impl-dist}{
@@ -858,10 +861,12 @@ squared population maximum mean discrepancy
 Equation~\ref{eq-impl-div} is equal to zero iff the two distributions
 are the same, \(\mathbf{X}^\prime=\mathbf{X}^+\).
 
-In addition to cost and plausibility, we also compute other standard
-metrics to evaluate counterfactuals at test time including validity and
-redundancy. Finally, we also assess the predictive performance of models
-using standard metrics.
+In addition to cost and plausibility, we compute other standard metrics
+to evaluate counterfactuals including validity and redundancy. Finally,
+we also assess the predictive performance of models using standard
+metrics, including robust accuracy estimated on adversarially perturbed
+data using FGSM (\citeproc{ref-goodfellow2014explaining}{Goodfellow,
+Shlens, and Szegedy 2015}).
 
 We run the experiments with three gradient-based generators:
 \emph{Generic} of Wachter, Mittelstadt, and Russell
@@ -871,137 +876,150 @@ approach, \emph{REVISE} (\citeproc{ref-joshi2019realistic}{Joshi et al.
 Variational Autoencoder (VAE), and \emph{ECCo}---the generator of
 Altmeyer et al. (\citeproc{ref-altmeyer2024faithful}{2024}) but without
 the conformal prediction component---as a method that directly targets
-both faithfulness and plausibility of the CEs.
+both faithfulness and plausibility of the counterfactuals.
+
+We make use of nine classification datasets common in the CE/AR
+literature. Four of them are synthetic with two classes and different
+characteristics: linearly separable clusters (\emph{LS}), overlapping
+clusters (\emph{OL}), concentric circles (\emph{Circ}), and interlocking
+moons (\emph{Moon}). These datasets are generated using the library of
+(\citeproc{ref-altmeyer2023explaining}{Altmeyer, Deursen, and Liem
+2023}) and we present them in the supplementary appendix. Next, we have
+four real-world binary tabular datasets from the domain of economics:
+\emph{Adult} (a.k.a. Census data) of
+(\citeproc{ref-becker1996adult2}{Becker and Kohavi 1996}), California
+housing (\emph{CH}) of (\citeproc{ref-pace1997sparse}{Pace and Barry
+1997}), Default of Credit Card Clients (\emph{Cred}) of
+(\citeproc{ref-yeh2016default}{Yeh 2016}), and Give Me Some Credit
+(\emph{GMSC}) of (\citeproc{ref-kaggle2011give2}{Kaggle 2011}). Finally,
+for the convenience of illustration, we use of the 10-class \emph{MNIST}
+vision dataset (\citeproc{ref-lecun1998mnist}{LeCun 1998}).
+
+To assess our proposed training regime, we investigate the improvements
+in performance metrics when using CT on top of a weak baseline (BL):
+specifically, a multilayer perceptron (\emph{MLP}). This is the best way
+to get a clear picture of how effective CT is and consistent with how
+assessment is done in the related literature
+(\citeproc{ref-ross2021learning}{Ross, Lakkaraju, and Bastani 2024};
+\citeproc{ref-teney2020learning}{Teney, Abbasnedjad, and Hengel 2020};
+\citeproc{ref-goodfellow2014explaining}{Goodfellow, Shlens, and Szegedy
+2015}).
 
 \subsection{Experimental Results}\label{experimental-results}
 
-\subsubsection{Plausibility.}\label{sec-plaus}
+\subsubsection{Plausibility}\label{sec-plaus}
 
-Table~\ref{tbl-main} presents our main empirical findings. The top five
-rows show the percentage reduction in implausibility according to
-Equation~\ref{eq-impl-dist} for varying degrees of the energy penalty
-used for \emph{ECCo} at test time. Row 6 shows the reduction in
-implausibility as measured by Equation~\ref{eq-impl-div} and aggregated
-across all test specifications of \emph{ECCo}. Rows 7 and 8 show the
-test accuracies for the model trained with CT and conventionally trained
-models (``vanilla'').
+Table~\ref{tbl-main} presents our main empirical findings. For all
+datasets except \emph{OL} and across all test settings, the average
+distance of CEs from observed samples in the target class is reduced,
+indicating improved plausibility. The magnitude of improvements varies.
+For the simple synthetic datasets, distance reductions range from around
+20-40\% (\emph{LS}, \emph{Moon}) to almost 60\% (\emph{Circ}). For the
+real-world tabular datasets, improvements tend to be smaller but still
+substantial, with around 10-15\% for \emph{CH}, 11-28\% for \emph{GMSC},
+7-8\% for \emph{Cred}, and around 3\% for \emph{Adult}. For our only
+vision dataset (\emph{MNIST}), distances are reduced by up to 9\%. The
+results for our proposed divergence metric are qualitatively similar,
+but generally even more pronounced: for the \emph{Circ} dataset,
+implausibility is reduced by almost 94\% to virtually zero as we
+verified by the absolute outcome. Improvements for other datasets range
+from 28\% (\emph{Moon}) to 78\% (\emph{GMSC}). For \emph{OL} the
+reduction is negative, consistent with the distance-based metric.
+\emph{MNIST} is the only dataset for which the distance and divergence
+metrics disagree. Upon visual inspection of the image counterfactuals we
+find that CT clearly improves plausibility (see appendix).
 
-For all datasets except \emph{OL} and across all test settings, the
-average distance of CEs from observed samples in the target class is
-reduced, indicating improved plausibility. The magnitude of improvements
-varies. For the simple synthetic datasets, distance reductions range
-from around 20-40\% (\emph{LS}, \emph{Moon}) to almost 60\%
-(\emph{Circ}). For the real-world tabular datasets, improvements tend to
-be smaller but still substantial, with around 10-15\% for \emph{CH},
-11-28\% for \emph{GMSC}, 7-8\% for \emph{Cred} and around 3\% for
-\emph{Adult}. For our only vision dataset (\emph{MNIST}), distances are
-reduced by up to 9\%. The results for our proposed divergence metric are
-qualitatively similar, but generally even more pronounced: for the
-\emph{Circ} dataset, implausibility is reduced by almost 94\% to
-virtually zero as we verified by the absolute outcome. Improvements for
-other datasets range from 28\% (\emph{Moon}) to 78\% (\emph{GMSC}). For
-\emph{OL} the reduction is negative, consistent with the distance-based
-metric. \emph{MNIST} is the only dataset for which the two metrics
-disagree.
+\subsubsection{Predictive Performance}\label{sec-pred}
 
-These broad and substantial improvements in plausibility generally do
-not come at the cost of decreased predictive performance: test accuracy
-for CT is virtually identical to the baseline for \emph{Adult},
-\emph{Circ}, \emph{LS}, \emph{Moon} and \emph{OL}, and even slightly
-improved for \emph{Cred}. Exceptions to this general pattern are
-\emph{MNIST}, \emph{CH} and \emph{GMSC}, for which we observe reduction
-in test accuracy of 2, 5 and 15 percentage points, respectively. We note
-in this context, that we have not optimized our models for predictive
-performance at all and worked with very small networks. In summary, we
-find that CT can substantially improve the quality of explanations
-learned by models without sacrificing predictive accuracy.
+Test accuracy for CT is virtually identical to the baseline for
+\emph{Adult}, \emph{Circ}, \emph{LS}, \emph{Moon}, and \emph{OL}, and
+even slightly improved for \emph{Cred}. Exceptions to this general
+pattern are \emph{MNIST}, \emph{CH}, and \emph{GMSC}, for which we
+observe a reduction in test accuracy of 2, 5, and 15 percentage points
+respectively. When looking at robust test accuracies (Acc.\(^*\)) for
+these datasets in particular, we find that CT strongly outperforms the
+baseline. In fact, we find that CT improves adversarial robustness on
+all datasets.
 
 \begin{table}
 
-\caption{\label{tbl-main}Key explainability and predictive performance
-metrics for all datasets. \textbf{Plausibility}: the top five rows show
-the percentage reduction in implausibility according to
-Equation~\ref{eq-impl-dist} for varying degrees of the energy penalty
-used for \emph{ECCo} at test time. The following row shows the reduction
-in implausibility as measured by Equation~\ref{eq-impl-div} and
-aggregated across all test specifications. \textbf{Accuracy}: The
-following two rows show the test accuracies for the models trained with
-CT and the baseline. \textbf{Actionability}: The final row present the
-average reduction in costs when imposing mutability constraints.}
+\caption{\label{tbl-main}Key performance metrics across all datasets.
+\textbf{Plausibility}: Columns 2-6 show the percentage reduction in
+implausibility (\(\text{IP}\)) for varying degrees of the energy penalty
+used for \emph{ECCo} at test time; column 7 shows the reduction in
+\(\text{IP}^*\) (\(\text{MMD}\)), aggregated across all test
+specifications. \textbf{Accuracy} (columns 8-11): test accuracies and
+robust accuracies (\(\text{Acc}^*\)) for CT and the baseline (BL).
+\textbf{Actionability} (column 9): average reduction in costs when
+imposing mutability constraints.}
 
 \centering{
 
-\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}} cccccc }
 \input{tables/main.tex}
-\end{tabular*}
 
 }
 
 \end{table}%
 
-\subsubsection{Actionability.}\label{sec-act}
+\subsubsection{Actionability}\label{sec-act}
 
 In Section~\ref{sec-method}, we show that our proposed way for encoding
 mutability constraints leads to lower classifier sensitivity wrt.
 immutable features for linear models, tilting the decision boundary in
 favour of mutable features instead. For binding constraints at test
-time, this has the effect of shorter counterfactual paths and hence
-smaller average costs to individuals. To extend this to the non-linear
-case, we test the effect of imposing mutability constraints empirically
-for our synthetic data using the same evaluation scheme as above. The
-final row in Table~\ref{tbl-main} reports the average reduction in costs
-for CT compared to the baseline, when imposing that either the first or
-the second feature is immutable. In all cases, costs are reduced
-substantially indicating that classifiers trained with CT are indeed
-more sensitive to mutable features.
+time, this leads to shorter counterfactual paths and hence smaller
+average costs (\(\ell_1\)-norm) to individuals. To extend this to the
+non-linear case, we test the effect of imposing mutability constraints
+empirically for our synthetic data using the same evaluation scheme as
+above. The final row in Table~\ref{tbl-main} reports the average
+reduction in costs for CT compared to the ``vanilla'' baseline, when
+imposing that either the first or the second feature is immutable. In
+all cases, costs are reduced substantially, indicating that classifiers
+trained with CT are indeed more sensitive to mutable features.
 
 \subsubsection{Impact of hyperparameter
 settings.}\label{sec-hyperparameters}
 
 We test the impact of three types of hyperparameters; our complete
 results are in the supplementary appendix.\\
-\textbf{\emph{Hyperparameters of the CE generators.}} First, we observe
-that CT is highly sensitive to hyperparameter settings but (a) there are
-manageable patterns and (b) we can typically identify settings that
-improve either plausibility or cost, and commonly both of them at the
-same time. Second, we note that the choice of a CE generator has a major
-impact on the results. For example, \emph{REVISE} tends to perform the
-worst, most likely because it uses a surrogate VAE to generate
-counterfactuals which impedes faithfulness
-(\citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024}). Third,
-increasing \(T\), the maximum number of steps, generally yields better
-outcomes because more CEs can mature in each training epoch. Fourth, the
+\indent We note that CT is highly sensitive to the choice of a CE
+generator and its hyperparameters but (a) there are manageable patterns
+and (b) we can typically identify settings that improve either
+plausibility or cost, and commonly both of them at the same time. For
+example, \emph{REVISE} tends to perform the worst, most likely because
+it uses a surrogate VAE to generate counterfactuals which impedes
+faithfulness (\citeproc{ref-altmeyer2024faithful}{Altmeyer et al.
+2024}). Increasing \(T\), the maximum number of steps, generally yields
+better outcomes because more CEs can mature in each training epoch. The
 impact of \(\tau\), the required decision threshold is more difficult to
 predict. On ``harder'' datasets it may be difficult to satisfy high
 \(\tau\) for any given sample (i.e., also factuals) and so increasing
 this threshold does not seem to correlate with better outcomes. In fact,
-we have generally found that a choice of \(\tau=0.5\) leads to optimal
-results because it is associated with high proportions of mature
-counterfactuals.\\
-\textbf{\emph{Hyperparameters for penalties.}} We find that the strength
-of the energy regularization, \(\lambda_{\text{reg}}\) is highly
-impactful; energy must be sufficiently regularized to avoid poor
-performance in terms of decreased plausibility and increased costs. The
-sensitivity with respect to \(\lambda_{\text{div}}\) and
-\(\lambda_{\text{adv}}\) is much less evident. While high values of
-\(\lambda_{\text{reg}}\) may increase the variability in outcomes when
-combined with high values of \(\lambda_{\text{div}}\) or
-\(\lambda_{\text{adv}}\), this effect is not very pronounced.\\
-\textbf{\emph{Other hyperparameters.}} We observe that the effectiveness
-and stability of CT is positively associated with the number of
-counterfactuals generated during each training epoch. We also confirm
-that a higher number of training epochs is beneficial. Interestingly, we
-observed desired improvements in explainability when CT was combined
+the choice of \(\tau=0.5\) generally leads to optimal results because it
+is associated with high proportions of mature counterfactuals.\\
+\indent The strength of the energy regularization,
+\(\lambda_{\text{reg}}\) is highly impactful and leads to poor
+performance in terms of decreased plausibility and increased costs if
+insufficiently high. The sensitivity with respect to
+\(\lambda_{\text{div}}\) and \(\lambda_{\text{adv}}\) is much less
+evident. While high values of \(\lambda_{\text{reg}}\) may increase the
+variability in outcomes when combined with high values of
+\(\lambda_{\text{div}}\) or \(\lambda_{\text{adv}}\), this effect is not
+very pronounced.\\
+\indent The effectiveness and stability of CT is positively associated
+with the number of counterfactuals generated during each training epoch.
+We also confirm that a higher number of training epochs is beneficial.
+Interestingly, we observed desired improvements when CT was combined
 with conventional training and applied only for the final 50\% of epochs
-of the complete training process. Put differently, CT may be a way to
-improve the explainability of models in a fine-tuning manner.
+of the complete training process. Put differently, CT can improve the
+explainability of models in a fine-tuning manner.
 
 \section{Discussion}\label{sec-discussion}
 
 As our results indicate, counterfactual training produces models that
-are more explainable. However, our approach is not without
+are more explainable. Nonetheless, it brings about three important
 limitations.\\
-\textbf{\emph{CT increases the training time of models.}} CT can be more
+\indent \emph{CT increases the training time of models.} CT can be more
 time-consuming than conventional training regimes. While higher numbers
 of CEs per iteration positively impact the quality of solutions, they
 also increase the amount of computations. Relatively small grids with
@@ -1013,7 +1031,7 @@ training samples. Second, we find that it can retain its value when used
 as a ``fine-tuning'' technique for conventionally-trained models. Third,
 it yields itself to parallel execution, which we have leveraged for our
 own experiments.\\
-\textbf{\emph{Immutable features may have proxies.}} We propose an
+\indent \emph{Immutable features may have proxies.} We propose an
 approach to protect immutable features and thus increase the
 actionability of the generated CEs. However, it requires that model
 owners define the mutability constraints for (all) features considered
@@ -1022,61 +1040,56 @@ exist proxies that are mutable (and hence should not be protected) but
 preserve enough information about the principals to hinder the
 protections. Delineating actionability is a major undecided challenge in
 the AR literature (see, e.g.,
-\citeproc{ref-venkatasubramanian2020philosophical}{Venkatasubramanian
-and Alfano 2020}) impacting the capacity of CT to fulfill its intended
+(\citeproc{ref-venkatasubramanian2020philosophical}{Venkatasubramanian
+and Alfano 2020})) impacting the capacity of CT to fulfill its intended
 goal.\\
-\textbf{\emph{Interventions on features may impact fairness.}} We
-provide a tool that allows practitioners to modify the sensitivity of a
-model with respect to certain features, which may have implication for
-the fair and equitable treatment of decision subjects. As protecting a
-set of features leads the model to assign higher relative importance to
+\indent \emph{Interventions on features may impact fairness.} We provide
+a tool that allows practitioners to modify the sensitivity of a model
+with respect to certain features, which may have implication for the
+fair and equitable treatment of decision subjects. As protecting a set
+of features leads the model to assign higher relative importance to
 unprotected features, model owners could misuse our solution by
 enforcing explanations based on features that are more difficult to
 modify by some (group of) individuals. For example, consider the Adult
 dataset used in our experiments, where \emph{workclass} or
 \emph{education} may be more difficult to change for underpriviledged
 groups. When applied irresponsibly, CT could result in an unfairly
-assigned burden of recourse (e.g.,
-\citeproc{ref-sharma2020certifai}{Sharma, Henderson, and Ghosh 2020}),
-threatening the equality of opportunity in the system
-(\citeproc{ref-bell2024fairness}{Bell et al. 2024}). Still, these
-phenomena are not specific to CT.
+assigned burden of recourse (\citeproc{ref-sharma2020certifai}{Sharma,
+Henderson, and Ghosh 2020}), threatening the equality of opportunity in
+the system (\citeproc{ref-bell2024fairness}{Bell et al. 2024}).
+Nonetheless, these phenomena are not specific to CT.
 
-We also highlight several interesting directions for future research.\\
-\textbf{\emph{Extending CT beyond classification settings.}} Our
-formulation relies on the distinction between non-target class(es)
-\(y^{-}\) and target class(es) \(y^{+}\) to generate counterfactuals
-through Equation~\ref{eq-obj}. While \(y^{-}\) and \(y^{+}\) can be
-arbitrarily defined, CT requires the output space \(\mathcal{Y}\) to be
-discrete. Thus, it does not apply to ML tasks where the change in
-outcome cannot be readily quantified. Focus on classification models is
-a common restriction in research on CEs and AR. Other settings have
-attracted some interest (e.g., regression in
-(\citeproc{ref-spooner2021counterfactual}{Spooner et al. 2021};
-\citeproc{ref-zhao2023counterfactual}{Zhao, Broelemann, and Kasneci
-2023})), but there is little consensus how to robustly extend the notion
-of CEs.\\
-\textbf{\emph{Addressing the training instabilities.}} JEMs are
-susceptible to instabilities during training
+We also highlight several important directions for future research.
+Firstly, it is an interesting challenge to extend CT beyond
+classification settings. Our formulation relies on the distinction
+between non-target class(es) \(y^{-}\) and target class(es) \(y^{+}\) to
+generate counterfactuals through Equation~\ref{eq-obj}. While \(y^{-}\)
+and \(y^{+}\) can be arbitrarily defined, CT requires the output space
+\(\mathcal{Y}\) to be discrete. Thus, it does not apply to ML tasks
+where the change in outcome cannot be readily quantified. Focus on
+classification models is a common restriction in research on CEs and AR.
+Other settings have attracted some interest (e.g., regression in
+(\citeproc{ref-spooner2021counterfactual}{Spooner et al. 2021})), but
+there is little consensus how to robustly extend the notion of CEs.\\
+\indent Secondly, our approach is susceptible to training instabilities.
+This problem has been recognized for JEMs
 (\citeproc{ref-grathwohl2020your}{Grathwohl et al. 2020}) and even
-though we depart from the SGLD-based sampling, we still encounter major
-variability in the outcomes. CT is exposed to two potential sources of
-instabilities: (1) the energy-based contrastive divergence term in
-Equation~\ref{eq-div}, and (2) the underlying counterfactual explainers.
-Still, we find that training instabilities can be successfully mitigated
-by regularizing energy (\(\lambda_{\text{reg}}\)), generating
-sufficiently many counterfactuals during each training epoch, and
-including only mature counterfactuals for contrastive divergence.\\
-\textbf{\emph{Improving hyperparameter selection procedures.}} Our
-method benefits from the tuning of certain key hyperparameters (see
-Section~\ref{sec-hyperparameters}). In this work, we have relied
-exclusively on grid search for this task. Future work on CT could
-benefit from investigating more sophisticated approaches towards
-hyperparameter tuning. Notably, CT is iterative which makes a variety of
-methods applicable, including Bayesian (e.g.,
-\citeproc{ref-snoek2012practical}{Snoek, Larochelle, and Adams 2012}) or
-gradient-based (e.g., \citeproc{ref-franceschi2017forward}{Franceschi et
-al. 2017}) optimization.
+though we depart from the SGLD-based sampling, we still encounter
+considerable variability in the outcomes. CT is exposed to two potential
+sources of instabilities: (1) the energy-based contrastive divergence
+term in Equation~\ref{eq-div}, and (2) the underlying counterfactual
+explainers. We find several promising ways to mitigate this problem:
+regularizing energy (\(\lambda_{\text{reg}}\)), generating sufficiently
+many counterfactuals during each epoch, and including only mature
+counterfactuals for contrastive divergence.\\
+\indent Finally, we believe that it is possible to substantially improve
+hyperparameter selection procedures. Our method benefits from the tuning
+of certain key hyperparameters (see Section~\ref{sec-hyperparameters}).
+In this work, we have relied exclusively on grid search for this task.
+Future work on CT could benefit from investigating more sophisticated
+approaches. Notably, CT is iterative which makes methods such as
+Bayesian or gradient-based optimization applicable (see, e.g.,
+(\citeproc{ref-bischl2023hyperparameter}{Bischl et al. 2023})).
 
 \section{Conclusion}\label{sec-conclusion}
 
@@ -1111,7 +1124,7 @@ Recognition (CVPR)}, 10041--51.
 \bibitem[\citeproctext]{ref-altmeyer2023explaining}
 Altmeyer, Patrick, Arie van Deursen, and Cynthia C. S. Liem. 2023.
 {``{Explaining Black-Box Models through Counterfactuals}.''} In
-\emph{Proceedings of the JuliaCon Conferences}, 1:130. 1.
+\emph{Proceedings of the JuliaCon Conferences}, 1:130.
 
 \bibitem[\citeproctext]{ref-altmeyer2024faithful}
 Altmeyer, Patrick, Mojtaba Farmanbar, Arie van Deursen, and Cynthia C.
@@ -1135,6 +1148,10 @@ Augmentation}.''} In \emph{Findings of the Association for Computational
 Linguistics: EMNLP 2023}, 127--39. ACL.
 \url{https://doi.org/10.18653/v1/2023.findings-emnlp.10}.
 
+\bibitem[\citeproctext]{ref-becker1996adult2}
+Becker, Barry, and Ronny Kohavi. 1996. {``{Adult}.''} UCI Machine
+Learning Repository.
+
 \bibitem[\citeproctext]{ref-bell2024fairness}
 Bell, Andrew, Joao Fonseca, Carlo Abrate, Francesco Bonchi, and Julia
 Stoyanovich. 2024. {``{Fairness in Algorithmic Recourse Through the Lens
@@ -1145,6 +1162,13 @@ of Substantive Equality of Opportunity}.''}
 Bezanson, Jeff, Alan Edelman, Stefan Karpinski, and Viral B Shah. 2017.
 {``Julia: A Fresh Approach to Numerical Computing.''} \emph{SIAM Review}
 59 (1): 65--98. \url{https://doi.org/10.1137/141000671}.
+
+\bibitem[\citeproctext]{ref-bischl2023hyperparameter}
+Bischl, Bernd, Martin Binder, Michel Lang, Tobias Pielok, Jakob Richter,
+Stefan Coors, Janek Thomas, et al. 2023. {``{Hyperparameter
+optimization: Foundations, algorithms, best practices, and open
+challenges}.''} \emph{WIREs Data Mining and Knowledge Discovery} 13 (2):
+e1484. https://doi.org/\url{https://doi.org/10.1002/widm.1484}.
 
 \bibitem[\citeproctext]{ref-milan2023dataframes}
 Bouchet-Valat, Milan, and Bogumił Kamiński. 2023. {``DataFrames.jl:
@@ -1179,13 +1203,6 @@ Open Source Software} 6 (65): 3349.
 Du, Yilun, and Igor Mordatch. 2020. {``{Implicit Generation and
 Generalization in Energy-Based Models}.''}
 \url{https://arxiv.org/abs/1903.08689}.
-
-\bibitem[\citeproctext]{ref-franceschi2017forward}
-Franceschi, Luca, Michele Donini, Paolo Frasconi, and Massimiliano
-Pontil. 2017. {``{Forward and Reverse Gradient-Based Hyperparameter
-Optimization}.''} In \emph{Proceedings of the 34th International
-Conference on Machine Learning}, 1165--73. ICML'17. Sydney, NSW,
-Australia: JMLR.org.
 
 \bibitem[\citeproctext]{ref-frankle2018lottery}
 Frankle, Jonathan, and Michael Carbin. 2019. {``{The Lottery Ticket
@@ -1253,6 +1270,12 @@ Joydeep Ghosh. 2019. {``{Towards Realistic Individual Recourse and
 Actionable Explanations in Black-Box Decision Making Systems}.''}
 \url{https://arxiv.org/abs/1907.09615}.
 
+\bibitem[\citeproctext]{ref-kaggle2011give2}
+Kaggle. 2011. {``Give Me Some Credit, {Improve} on the State of the Art
+in Credit Scoring by Predicting the Probability That Somebody Will
+Experience Financial Distress in the Next Two Years.''}
+https://www.kaggle.com/c/GiveMeSomeCredit; {Kaggle}.
+
 \bibitem[\citeproctext]{ref-kolter2023keynote}
 Kolter, Zico. 2023.{``{Keynote Addresses: SaTML 2023 }.''} In \emph{2023
 IEEE Conference on Secure and Trustworthy Machine Learning (SaTML)}. Los
@@ -1265,6 +1288,10 @@ Lakshminarayanan, Balaji, Alexander Pritzel, and Charles Blundell. 2017.
 Ensembles.''} In \emph{Proceedings of the 31st International Conference
 on Neural Information Processing Systems}, 6405--16. NIPS'17. Red Hook,
 NY, USA: Curran Associates Inc.
+
+\bibitem[\citeproctext]{ref-lecun1998mnist}
+LeCun, Yann. 1998. {``{The MNIST database of handwritten digits}.''}
+http://yann.lecun.com/exdb/mnist/.
 
 \bibitem[\citeproctext]{ref-lippe2024uvadlc}
 Lippe, Phillip. 2024. {``{UvA Deep Learning Tutorials}.''}
@@ -1289,6 +1316,11 @@ Introduction}. {MIT Press}.
 \bibitem[\citeproctext]{ref-oneil2016weapons}
 O'Neil, Cathy. 2016. \emph{Weapons of Math Destruction: {How} Big Data
 Increases Inequality and Threatens Democracy}. {Crown}.
+
+\bibitem[\citeproctext]{ref-pace1997sparse}
+Pace, R Kelley, and Ronald Barry. 1997. {``Sparse Spatial
+Autoregressions.''} \emph{Statistics \& Probability Letters} 33 (3):
+291--97. \url{https://doi.org/10.1016/s0167-7152(96)00140-x}.
 
 \bibitem[\citeproctext]{ref-pawelczyk2022exploring}
 Pawelczyk, Martin, Chirag Agarwal, Shalmali Joshi, Sohini Upadhyay, and
@@ -1331,14 +1363,6 @@ Conference on AI, Ethics, and Society}, 166--72. AIES '20. New York, NY,
 USA: Association for Computing Machinery.
 \url{https://doi.org/10.1145/3375627.3375812}.
 
-\bibitem[\citeproctext]{ref-snoek2012practical}
-Snoek, Jasper, Hugo Larochelle, and Ryan P. Adams. 2012. {``{Practical
-Bayesian Optimization of Machine Learning Algorithms}.''} In
-\emph{Proceedings of the 26th International Conference on Neural
-Information Processing Systems - Volume 2}, edited by F. Pereira, C. J.
-Burges, L. Bottou, and K. Q. Weinberger. Vol. 25. NIPS'12. Curran
-Associates, Inc.
-
 \bibitem[\citeproctext]{ref-spooner2021counterfactual}
 Spooner, Thomas, Danial Dervovic, Jason Long, Jon Shepard, Jiahao Chen,
 and Daniele Magazzeni. 2021. {``{Counterfactual Explanations for
@@ -1348,6 +1372,11 @@ Arbitrary Regression Models}.''} \url{https://arxiv.org/abs/2106.15212}.
 Szegedy, Christian, Wojciech Zaremba, Ilya Sutskever, Joan Bruna,
 Dumitru Erhan, Ian Goodfellow, and Rob Fergus. 2014. {``Intriguing
 Properties of Neural Networks.''} \url{https://arxiv.org/abs/1312.6199}.
+
+\bibitem[\citeproctext]{ref-teh2003energy}
+Teh, Yee Whye, Max Welling, Simon Osindero, and Geoffrey E. Hinton.
+2003. {``Energy-Based Models for Sparse Overcomplete Representations.''}
+\emph{J. Mach. Learn. Res.} 4 (null): 1235--60.
 
 \bibitem[\citeproctext]{ref-teney2020learning}
 Teney, Damien, Ehsan Abbasnedjad, and Anton van den Hengel. 2020.
@@ -1373,28 +1402,24 @@ Wachter, Sandra, Brent Mittelstadt, and Chris Russell. 2017.
 Wilson, Andrew Gordon. 2020. {``{The Case for Bayesian Deep
 Learning}.''} \url{https://arxiv.org/abs/2001.10995}.
 
-\bibitem[\citeproctext]{ref-wu2021polyjuice}
+\bibitem[\citeproctext]{ref-wu2021polyjuice2}
 Wu, Tongshuang, Marco Tulio Ribeiro, Jeffrey Heer, and Daniel Weld.
 2021. {``Polyjuice: Generating Counterfactuals for Explaining,
 Evaluating, and Improving Models.''} In \emph{Proceedings of the 59th
 Annual Meeting of the Association for Computational Linguistics and the
 11th International Joint Conference on Natural Language Processing
-(Volume 1: Long Papers)}, edited by Chengqing Zong, Fei Xia, Wenjie Li,
-and Roberto Navigli, 6707--23. Online: ACL.
+(Volume 1: Long Papers)}, 6707--23. ACL.
 \url{https://doi.org/10.18653/v1/2021.acl-long.523}.
+
+\bibitem[\citeproctext]{ref-yeh2016default}
+Yeh, I-Cheng. 2016. {``{Default of Credit Card Clients}.''} UCI Machine
+Learning Repository.
 
 \bibitem[\citeproctext]{ref-zhang2021understanding}
 Zhang, Chiyuan, Samy Bengio, Moritz Hardt, Benjamin Recht, and Oriol
 Vinyals. 2021. {``Understanding Deep Learning (Still) Requires
 Rethinking Generalization.''} \emph{Commun. ACM} 64 (3): 107--15.
 \url{https://doi.org/10.1145/3446776}.
-
-\bibitem[\citeproctext]{ref-zhao2023counterfactual}
-Zhao, Xuan, Klaus Broelemann, and Gjergji Kasneci. 2023.
-{``{Counterfactual Explanation for Regression via Disentanglement in
-Latent Space}.''} In \emph{2023 IEEE International Conference on Data
-Mining Workshops (ICDMW)}, 976--84. Los Alamitos, CA, USA: IEEE Computer
-Society. \url{https://doi.org/10.1109/ICDMW60847.2023.00130}.
 
 \end{CSLReferences}
 
@@ -1564,16 +1589,16 @@ penalty Equation~\ref{eq-div} with respect to coefficient
 \(\theta_{y^+,d}\) is equal to
 
 \begin{equation}\phantomsection\label{eq-grad}{
-\frac{\partial}{\partial\theta_{y^+,d}} \left(\text{div}(\mathbf{x},\mathbf{x^\prime},\mathbf{y};\theta)\right) = \frac{\partial}{\partial\theta_{y^+,d}} \left( \left(-\mathbf{M}_\theta(\mathbf{x})[y^+]\right) - \left(-\mathbf{M}_\theta(\mathbf{x}^\prime)[y^+]\right) \right) = x_{d}^\prime - x_{d}
+\frac{\partial}{\partial\theta_{y^+,d}} \left(\text{div}(\mathbf{x}^+,\mathbf{x^\prime},\mathbf{y};\theta)\right) = \frac{\partial}{\partial\theta_{y^+,d}} \left( \left(-\mathbf{M}_\theta(\mathbf{x}^+)[y^+]\right) - \left(-\mathbf{M}_\theta(\mathbf{x}^\prime)[y^+]\right) \right) = x_{d}^\prime - x^+_{d}
 }\end{equation}
 
 and equal to zero everywhere else.
 
 Since \((\mu_{y^-,d_{\text{immtbl}}} < \mu_{y^+,d_{\text{immtbl}}})\) we
 are more likely to have
-\((x_{d_{\text{immtbl}}}^\prime - x_{d_{\text{immtbl}}}) < 0\) than vice
-versa at initialization. Similarly, we are more likely to have
-\((x_{d_{\text{mtbl}}}^\prime - x_{d_{\text{mtbl}}}) > 0\) since
+\((x_{d_{\text{immtbl}}}^\prime - x^+_{d_{\text{immtbl}}}) < 0\) than
+vice versa at initialization. Similarly, we are more likely to have
+\((x_{d_{\text{mtbl}}}^\prime - x^+_{d_{\text{mtbl}}}) > 0\) since
 \((\mu_{y^-,d_{\text{mtbl}}} > \mu_{y^+,d_{\text{mtbl}}})\).
 
 This implies that if we do not protect feature \(d_{\text{immtbl}}\),
@@ -1638,6 +1663,144 @@ details laid out here are not crucial for understanding our proposed
 approach, they are of importance to anyone looking to implement
 counterfactual training.
 
+\subsubsection{Default Hyperparameters}\label{default-hyperparameters}
+
+Note~\ref{nte-train-default} presents the default hyperparameters used
+during training.
+
+\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, opacityback=0, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, rightrule=.15mm, breakable, titlerule=0mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, colback=white, coltitle=black, toptitle=1mm, bottomtitle=1mm, title={Note \ref*{nte-train-default}: Training Phase}]
+
+\quartocalloutnte{nte-train-default} 
+
+\begin{itemize}
+\tightlist
+\item
+  Meta Parameters:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Generator: \texttt{ecco}
+  \item
+    Model: \texttt{mlp}
+  \end{itemize}
+\item
+  Model:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Activation: \texttt{relu}
+  \item
+    No.~Hidden: \texttt{32}
+  \item
+    No.~Layers: \texttt{1}
+  \end{itemize}
+\item
+  Training Parameters:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Burnin: \texttt{0.0}
+  \item
+    Class Loss: \texttt{logitcrossentropy}
+  \item
+    Convergence: \texttt{threshold}
+  \item
+    Generator Parameters:
+
+    \begin{itemize}
+    \tightlist
+    \item
+      Decision Threshold: \texttt{0.75}
+    \item
+      \(\lambda_{\text{cst}}\): \texttt{0.001}
+    \item
+      \(\lambda_{\text{egy}}\): \texttt{5.0}
+    \item
+      Learning Rate: \texttt{0.25}
+    \item
+      Maximum Iterations: \texttt{30}
+    \item
+      Optimizer: \texttt{sgd}
+    \item
+      Type: \texttt{ECCo}
+    \end{itemize}
+  \item
+    \(\lambda_{\text{adv}}\): \texttt{0.25}
+  \item
+    \(\lambda_{\text{clf}}\): \texttt{1.0}
+  \item
+    \(\lambda_{\text{div}}\): \texttt{0.5}
+  \item
+    \(\lambda_{\text{reg}}\): \texttt{0.1}
+  \item
+    Learning Rate: \texttt{0.001}
+  \item
+    No.~Counterfactuals: \texttt{1000}
+  \item
+    No.~Epochs: \texttt{100}
+  \item
+    Objective: \texttt{full}
+  \item
+    Optimizer: \texttt{adam}
+  \end{itemize}
+\end{itemize}
+
+\end{tcolorbox}
+
+\subsection{Evaluation Details}\label{sec-app-eval}
+
+Note~\ref{nte-eval-default} presents the default hyperparameters used
+during evaluation.
+
+\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, opacityback=0, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, rightrule=.15mm, breakable, titlerule=0mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, colback=white, coltitle=black, toptitle=1mm, bottomtitle=1mm, title={Note \ref*{nte-eval-default}: Evaluation Phase}]
+
+\quartocalloutnte{nte-eval-default} 
+
+\begin{itemize}
+\tightlist
+\item
+  Counterfactual Parameters:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Convergence: \texttt{threshold}
+  \item
+    Decision Threshold: \texttt{0.95}
+  \item
+    Generator Parameters:
+
+    \begin{itemize}
+    \tightlist
+    \item
+      Decision Threshold: \texttt{0.75}
+    \item
+      \(\lambda_{\text{cst}}\): \texttt{0.001}
+    \item
+      \(\lambda_{\text{egy}}\): \texttt{5.0}
+    \item
+      Learning Rate: \texttt{0.25}
+    \item
+      Maximum Iterations: \texttt{30}
+    \item
+      Optimizer: \texttt{sgd}
+    \item
+      Type: \texttt{ECCo}
+    \end{itemize}
+  \item
+    Maximum Iterations: \texttt{50}
+  \item
+    No.~Individuals: \texttt{100}
+  \item
+    No.~Runs: \texttt{5}
+  \end{itemize}
+\end{itemize}
+
+\end{tcolorbox}
+
 \section{Details on Main Experiments}\label{sec-app-main}
 
 \subsection{Final Hyperparameters}\label{final-hyperparameters}
@@ -1652,22 +1815,24 @@ Table~\ref{tbl-final-params} along with training, test and batch sizes.
 \begin{table}
 
 \caption{\label{tbl-final-params}Final hyperparameters used for the main
-results for the different datasets.}
+results preseneted in Section~\ref{sec-experiments}. Any hyperparameter
+not shown here is set to its default value
+(Note~\ref{nte-train-default}).}
 
 \centering{
 
   \begin{tabular}{cccccccc}
     \toprule
     \textbf{Data} & \textbf{No. Train} & \textbf{No. Test} & \textbf{Batchsize} & \textbf{Domain} & \textbf{Decision Threshold} & \textbf{No. Counterfactuals} & \textbf{$\lambda_{\text{reg}}$} \\\midrule
-    Adult & $2.6 \cdot 10^{4}$ & $5.01 \cdot 10^{3}$ & $1 \cdot 10^{3}$ & none & 0.75 & $5 \cdot 10^{3}$ & 0.25 \\
-    CH & $1.65 \cdot 10^{4}$ & $3.1 \cdot 10^{3}$ & $1 \cdot 10^{3}$ & none & 0.5 & $5 \cdot 10^{3}$ & 0.25 \\
-    Circ & $3.6 \cdot 10^{3}$ & 600 & 30 & none & 0.5 & $1 \cdot 10^{3}$ & 0.5 \\
-    Cred & $1.06 \cdot 10^{4}$ & $1.92 \cdot 10^{3}$ & $1 \cdot 10^{3}$ & none & 0.5 & $5 \cdot 10^{3}$ & 0.25 \\
-    GMSC & $1.34 \cdot 10^{4}$ & $2.47 \cdot 10^{3}$ & $1 \cdot 10^{3}$ & none & 0.5 & $5 \cdot 10^{3}$ & 0.5 \\
-    LS & $3.6 \cdot 10^{3}$ & 600 & 30 & none & 0.5 & $1 \cdot 10^{3}$ & 0.01 \\
-    MNIST & $1.1 \cdot 10^{4}$ & $2 \cdot 10^{3}$ & $1 \cdot 10^{3}$ & (-1.0, 1.0) & 0.5 & $5 \cdot 10^{3}$ & 0.01 \\
-    Moon & $3.6 \cdot 10^{3}$ & 600 & 30 & none & 0.9 & $1 \cdot 10^{3}$ & 0.25 \\
-    OL & $3.6 \cdot 10^{3}$ & 600 & 30 & none & 0.5 & $1 \cdot 10^{3}$ & 0.25 \\\bottomrule
+    Adult & 26049 & 5010 & 1000 & none & 0.75 & 5000 & 0.25 \\
+    CH & 16504 & 3101 & 1000 & none & 0.5 & 5000 & 0.25 \\
+    Circ & 3600 & 600 & 30 & none & 0.5 & 1000 & 0.5 \\
+    Cred & 10617 & 1923 & 1000 & none & 0.5 & 5000 & 0.25 \\
+    GMSC & 13371 & 2474 & 1000 & none & 0.5 & 5000 & 0.5 \\
+    LS & 3600 & 600 & 30 & none & 0.5 & 1000 & 0.01 \\
+    MNIST & 11000 & 2000 & 1000 & (-1.0, 1.0) & 0.5 & 5000 & 0.01 \\
+    Moon & 3600 & 600 & 30 & none & 0.9 & 1000 & 0.25 \\
+    OL & 3600 & 600 & 30 & none & 0.5 & 1000 & 0.25 \\\bottomrule
   \end{tabular}
 
 }
@@ -1864,7 +2029,7 @@ training is shown in Note~\ref{nte-gen-params-final-run-train}. The
 corresponding evaluation grid used for these experiments is shown in
 Note~\ref{nte-gen-params-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, left=2mm, leftrule=.75mm, opacityback=0, colback=white, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, toprule=.15mm, bottomrule=.15mm, arc=.35mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, coltitle=black, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, titlerule=0mm, bottomtitle=1mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, opacityback=0, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, rightrule=.15mm, breakable, titlerule=0mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, colback=white, coltitle=black, toptitle=1mm, bottomtitle=1mm, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}]
 
 \quartocalloutnte{nte-gen-params-final-run-train} 
 
@@ -1898,7 +2063,7 @@ Note~\ref{nte-gen-params-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, left=2mm, leftrule=.75mm, opacityback=0, colback=white, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, toprule=.15mm, bottomrule=.15mm, arc=.35mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, coltitle=black, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, titlerule=0mm, bottomtitle=1mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, opacityback=0, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, rightrule=.15mm, breakable, titlerule=0mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, colback=white, coltitle=black, toptitle=1mm, bottomtitle=1mm, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}]
 
 \quartocalloutnte{nte-gen-params-final-run-eval} 
 
@@ -1941,22 +2106,22 @@ parameters (Note~\ref{nte-gen-params-final-run-eval}).}
   \bottomrule
   \endfoot
   \endlastfoot
-  Circ & Accuracy & Full & 0.997 & 0.00309 \\
-  Circ & Accuracy & Vanilla & 0.998 & 0.000557 \\
-  Circ & F1-score & Full & 0.997 & 0.00309 \\
-  Circ & F1-score & Vanilla & 0.998 & 0.000558 \\
-  LS & Accuracy & Full & 0.999 & 0.00201 \\
-  LS & Accuracy & Vanilla & 1 & 0 \\
-  LS & F1-score & Full & 0.999 & 0.00201 \\
-  LS & F1-score & Vanilla & 1 & 0 \\
-  Moon & Accuracy & Full & 0.999 & 0.000696 \\
-  Moon & Accuracy & Vanilla & 1 & 0.00111 \\
-  Moon & F1-score & Full & 0.999 & 0.000696 \\
-  Moon & F1-score & Vanilla & 1 & 0.00111 \\
-  OL & Accuracy & Full & 0.915 & 0.00477 \\
-  OL & Accuracy & Vanilla & 0.917 & 0.00123 \\
-  OL & F1-score & Full & 0.915 & 0.00478 \\
-  OL & F1-score & Vanilla & 0.917 & 0.00124 \\\bottomrule
+  Circ & Accuracy & Full & 1.0 & 0.0 \\
+  Circ & Accuracy & Vanilla & 1.0 & 0.0 \\
+  Circ & F1-score & Full & 1.0 & 0.0 \\
+  Circ & F1-score & Vanilla & 1.0 & 0.0 \\
+  LS & Accuracy & Full & 1.0 & 0.0 \\
+  LS & Accuracy & Vanilla & 1.0 & 0.0 \\
+  LS & F1-score & Full & 1.0 & 0.0 \\
+  LS & F1-score & Vanilla & 1.0 & 0.0 \\
+  Moon & Accuracy & Full & 1.0 & 0.0 \\
+  Moon & Accuracy & Vanilla & 1.0 & 0.0 \\
+  Moon & F1-score & Full & 1.0 & 0.0 \\
+  Moon & F1-score & Vanilla & 1.0 & 0.0 \\
+  OL & Accuracy & Full & 0.91 & 0.0 \\
+  OL & Accuracy & Vanilla & 0.92 & 0.0 \\
+  OL & F1-score & Full & 0.91 & 0.0 \\
+  OL & F1-score & Vanilla & 0.92 & 0.0 \\\bottomrule
 
 \end{longtable}
 
@@ -1970,12 +2135,16 @@ Figure~\ref{fig-grid-gen_params-plaus-over}.
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/circles/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/plausibility_distance_from_target.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/circles/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-grid-gen_params-plaus-circles}Average outcomes for
-the plausibility measure across hyperparameters. Data: Circles.}
+the plausibility measure across hyperparameters. This shows the \%
+change from the baseline model for the distance-based implausibility
+metric (Equation~\ref{eq-impl-dist}). Boxplots indicate the variation
+across evaluation runs and test settings (varying parameters for
+\emph{ECCo}). Data: Circles.}
 
 \end{figure}%
 
@@ -1983,13 +2152,16 @@ the plausibility measure across hyperparameters. Data: Circles.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/lin_sep/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/plausibility_distance_from_target.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/lin_sep/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-grid-gen_params-plaus-lin_sep}Average outcomes for
-the plausibility measure across hyperparameters. Data: Linearly
-Separable.}
+the plausibility measure across hyperparameters. This shows the \%
+change from the baseline model for the distance-based implausibility
+metric (Equation~\ref{eq-impl-dist}). Boxplots indicate the variation
+across evaluation runs and test settings (varying parameters for
+\emph{ECCo}). Data: Linearly Separable.}
 
 \end{figure}%
 
@@ -1997,12 +2169,16 @@ Separable.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/moons/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/plausibility_distance_from_target.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/moons/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-grid-gen_params-plaus-moons}Average outcomes for the
-plausibility measure across hyperparameters. Data: Moons.}
+plausibility measure across hyperparameters. This shows the \% change
+from the baseline model for the distance-based implausibility metric
+(Equation~\ref{eq-impl-dist}). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCo}).
+Data: Moons.}
 
 \end{figure}%
 
@@ -2010,12 +2186,16 @@ plausibility measure across hyperparameters. Data: Moons.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/over/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/plausibility_distance_from_target.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/over/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-grid-gen_params-plaus-over}Average outcomes for the
-plausibility measure across hyperparameters. Data: Overlapping.}
+plausibility measure across hyperparameters. This shows the \% change
+from the baseline model for the distance-based implausibility metric
+(Equation~\ref{eq-impl-dist}). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCo}).
+Data: Overlapping.}
 
 \end{figure}%
 
@@ -2029,12 +2209,16 @@ Figure~\ref{fig-grid-gen_params-cost-over}.
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/circles/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/distance.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/circles/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/distance.png}
 
 }
 
 \caption{\label{fig-grid-gen_params-cost-circles}Average outcomes for
-the cost measure across hyperparameters. Data: Circles.}
+the cost measure across hyperparameters. This shows the \% change from
+the baseline model for the distance-based cost metric
+(\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
+Russell 2017}). Boxplots indicate the variation across evaluation runs
+and test settings (varying parameters for \emph{ECCo}). Data: Circles.}
 
 \end{figure}%
 
@@ -2042,12 +2226,17 @@ the cost measure across hyperparameters. Data: Circles.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/lin_sep/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/distance.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/lin_sep/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/distance.png}
 
 }
 
 \caption{\label{fig-grid-gen_params-cost-lin_sep}Average outcomes for
-the cost measure across hyperparameters. Data: Linearly Separable.}
+the cost measure across hyperparameters. This shows the \% change from
+the baseline model for the distance-based cost metric
+(\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
+Russell 2017}). Boxplots indicate the variation across evaluation runs
+and test settings (varying parameters for \emph{ECCo}). Data: Linearly
+Separable.}
 
 \end{figure}%
 
@@ -2055,12 +2244,16 @@ the cost measure across hyperparameters. Data: Linearly Separable.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/moons/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/distance.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/moons/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/distance.png}
 
 }
 
 \caption{\label{fig-grid-gen_params-cost-moons}Average outcomes for the
-cost measure across hyperparameters. Data: Moons.}
+cost measure across hyperparameters. This shows the \% change from the
+baseline model for the distance-based cost metric
+(\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
+Russell 2017}). Boxplots indicate the variation across evaluation runs
+and test settings (varying parameters for \emph{ECCo}). Data: Moons.}
 
 \end{figure}%
 
@@ -2068,12 +2261,17 @@ cost measure across hyperparameters. Data: Moons.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/over/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/distance.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/gen_params/mlp/over/evaluation/results/ce/decision_threshold_exper---lambda_energy_exper---maxiter_exper---maxiter---decision_threshold_exper/distance.png}
 
 }
 
 \caption{\label{fig-grid-gen_params-cost-over}Average outcomes for the
-cost measure across hyperparameters. Data: Overlapping.}
+cost measure across hyperparameters. This shows the \% change from the
+baseline model for the distance-based cost metric
+(\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
+Russell 2017}). Boxplots indicate the variation across evaluation runs
+and test settings (varying parameters for \emph{ECCo}). Data:
+Overlapping.}
 
 \end{figure}%
 
@@ -2084,7 +2282,7 @@ is shown in Note~\ref{nte-pen-final-run-train}. The corresponding
 evaluation grid used for these experiments is shown in
 Note~\ref{nte-pen-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, left=2mm, leftrule=.75mm, opacityback=0, colback=white, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, toprule=.15mm, bottomrule=.15mm, arc=.35mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, coltitle=black, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, titlerule=0mm, bottomtitle=1mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, opacityback=0, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, rightrule=.15mm, breakable, titlerule=0mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, colback=white, coltitle=black, toptitle=1mm, bottomtitle=1mm, title={Note \ref*{nte-pen-final-run-train}: Training Phase}]
 
 \quartocalloutnte{nte-pen-final-run-train} 
 
@@ -2112,7 +2310,7 @@ Note~\ref{nte-pen-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, left=2mm, leftrule=.75mm, opacityback=0, colback=white, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, toprule=.15mm, bottomrule=.15mm, arc=.35mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, coltitle=black, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, titlerule=0mm, bottomtitle=1mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, opacityback=0, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, rightrule=.15mm, breakable, titlerule=0mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, colback=white, coltitle=black, toptitle=1mm, bottomtitle=1mm, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}]
 
 \quartocalloutnte{nte-pen-final-run-eval} 
 
@@ -2155,22 +2353,22 @@ and objective averaged across training-phase parameters
   \bottomrule
   \endfoot
   \endlastfoot
-  Circ & Accuracy & Full & 0.994 & 0.0144 \\
-  Circ & Accuracy & Vanilla & 0.998 & 0.000875 \\
-  Circ & F1-score & Full & 0.994 & 0.0145 \\
-  Circ & F1-score & Vanilla & 0.998 & 0.000875 \\
-  LS & Accuracy & Full & 0.998 & 0.00772 \\
-  LS & Accuracy & Vanilla & 1 & 0 \\
-  LS & F1-score & Full & 0.998 & 0.00773 \\
-  LS & F1-score & Vanilla & 1 & 0 \\
-  Moon & Accuracy & Full & 0.987 & 0.0351 \\
-  Moon & Accuracy & Vanilla & 0.998 & 0.0101 \\
-  Moon & F1-score & Full & 0.987 & 0.0352 \\
-  Moon & F1-score & Vanilla & 0.998 & 0.0102 \\
-  OL & Accuracy & Full & 0.911 & 0.0217 \\
-  OL & Accuracy & Vanilla & 0.916 & 0.00236 \\
-  OL & F1-score & Full & 0.911 & 0.0219 \\
-  OL & F1-score & Vanilla & 0.916 & 0.00236 \\\bottomrule
+  Circ & Accuracy & Full & 0.99 & 0.01 \\
+  Circ & Accuracy & Vanilla & 1.0 & 0.0 \\
+  Circ & F1-score & Full & 0.99 & 0.01 \\
+  Circ & F1-score & Vanilla & 1.0 & 0.0 \\
+  LS & Accuracy & Full & 1.0 & 0.01 \\
+  LS & Accuracy & Vanilla & 1.0 & 0.0 \\
+  LS & F1-score & Full & 1.0 & 0.01 \\
+  LS & F1-score & Vanilla & 1.0 & 0.0 \\
+  Moon & Accuracy & Full & 0.99 & 0.04 \\
+  Moon & Accuracy & Vanilla & 1.0 & 0.01 \\
+  Moon & F1-score & Full & 0.99 & 0.04 \\
+  Moon & F1-score & Vanilla & 1.0 & 0.01 \\
+  OL & Accuracy & Full & 0.91 & 0.02 \\
+  OL & Accuracy & Vanilla & 0.92 & 0.0 \\
+  OL & F1-score & Full & 0.91 & 0.02 \\
+  OL & F1-score & Vanilla & 0.92 & 0.0 \\\bottomrule
 
 \end{longtable}
 
@@ -2184,12 +2382,16 @@ Figure~\ref{fig-grid-pen-plaus-over}.
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/circles/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/plausibility_distance_from_target.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/circles/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-grid-pen-plaus-circles}Average outcomes for the
-plausibility measure across hyperparameters. Data: Circles.}
+plausibility measure across hyperparameters. This shows the \% change
+from the baseline model for the distance-based implausibility metric
+(Equation~\ref{eq-impl-dist}). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCo}).
+Data: Circles.}
 
 \end{figure}%
 
@@ -2197,12 +2399,16 @@ plausibility measure across hyperparameters. Data: Circles.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/lin_sep/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/plausibility_distance_from_target.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/lin_sep/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-grid-pen-plaus-lin_sep}Average outcomes for the
-plausibility measure across hyperparameters. Data: Linearly Separable.}
+plausibility measure across hyperparameters. This shows the \% change
+from the baseline model for the distance-based implausibility metric
+(Equation~\ref{eq-impl-dist}). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCo}).
+Data: Linearly Separable.}
 
 \end{figure}%
 
@@ -2210,12 +2416,16 @@ plausibility measure across hyperparameters. Data: Linearly Separable.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/moons/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/plausibility_distance_from_target.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/moons/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-grid-pen-plaus-moons}Average outcomes for the
-plausibility measure across hyperparameters. Data: Moons.}
+plausibility measure across hyperparameters. This shows the \% change
+from the baseline model for the distance-based implausibility metric
+(Equation~\ref{eq-impl-dist}). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCo}).
+Data: Moons.}
 
 \end{figure}%
 
@@ -2223,12 +2433,16 @@ plausibility measure across hyperparameters. Data: Moons.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/over/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/plausibility_distance_from_target.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/over/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-grid-pen-plaus-over}Average outcomes for the
-plausibility measure across hyperparameters. Data: Overlapping.}
+plausibility measure across hyperparameters. This shows the \% change
+from the baseline model for the distance-based implausibility metric
+(Equation~\ref{eq-impl-dist}). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCo}).
+Data: Overlapping.}
 
 \end{figure}%
 
@@ -2242,12 +2456,16 @@ Figure~\ref{fig-grid-pen-cost-over}.
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/circles/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/distance.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/circles/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/distance.png}
 
 }
 
 \caption{\label{fig-grid-pen-cost-circles}Average outcomes for the cost
-measure across hyperparameters. Data: Circles.}
+measure across hyperparameters. This shows the \% change from the
+baseline model for the distance-based cost metric
+(\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
+Russell 2017}). Boxplots indicate the variation across evaluation runs
+and test settings (varying parameters for \emph{ECCo}). Data: Circles.}
 
 \end{figure}%
 
@@ -2255,12 +2473,17 @@ measure across hyperparameters. Data: Circles.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/lin_sep/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/distance.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/lin_sep/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/distance.png}
 
 }
 
 \caption{\label{fig-grid-pen-cost-lin_sep}Average outcomes for the cost
-measure across hyperparameters. Data: Linearly Separable.}
+measure across hyperparameters. This shows the \% change from the
+baseline model for the distance-based cost metric
+(\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
+Russell 2017}). Boxplots indicate the variation across evaluation runs
+and test settings (varying parameters for \emph{ECCo}). Data: Linearly
+Separable.}
 
 \end{figure}%
 
@@ -2268,12 +2491,16 @@ measure across hyperparameters. Data: Linearly Separable.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/moons/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/distance.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/moons/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/distance.png}
 
 }
 
 \caption{\label{fig-grid-pen-cost-moons}Average outcomes for the cost
-measure across hyperparameters. Data: Moons.}
+measure across hyperparameters. This shows the \% change from the
+baseline model for the distance-based cost metric
+(\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
+Russell 2017}). Boxplots indicate the variation across evaluation runs
+and test settings (varying parameters for \emph{ECCo}). Data: Moons.}
 
 \end{figure}%
 
@@ -2281,12 +2508,17 @@ measure across hyperparameters. Data: Moons.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/over/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/distance.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/penalties/mlp/over/evaluation/results/ce/lambda_adversarial---lambda_energy_reg---lambda_energy_diff---lambda_adversarial---lambda_adversarial/distance.png}
 
 }
 
 \caption{\label{fig-grid-pen-cost-over}Average outcomes for the cost
-measure across hyperparameters. Data: Overlapping.}
+measure across hyperparameters. This shows the \% change from the
+baseline model for the distance-based cost metric
+(\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
+Russell 2017}). Boxplots indicate the variation across evaluation runs
+and test settings (varying parameters for \emph{ECCo}). Data:
+Overlapping.}
 
 \end{figure}%
 
@@ -2297,7 +2529,7 @@ in Note~\ref{nte-train-final-run-train}. The corresponding evaluation
 grid used for these experiments is shown in
 Note~\ref{nte-train-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, left=2mm, leftrule=.75mm, opacityback=0, colback=white, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, toprule=.15mm, bottomrule=.15mm, arc=.35mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, coltitle=black, title={Note \ref*{nte-train-final-run-train}: Training Phase}, titlerule=0mm, bottomtitle=1mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, opacityback=0, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, rightrule=.15mm, breakable, titlerule=0mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, colback=white, coltitle=black, toptitle=1mm, bottomtitle=1mm, title={Note \ref*{nte-train-final-run-train}: Training Phase}]
 
 \quartocalloutnte{nte-train-final-run-train} 
 
@@ -2325,7 +2557,7 @@ Note~\ref{nte-train-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, left=2mm, leftrule=.75mm, opacityback=0, colback=white, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, toprule=.15mm, bottomrule=.15mm, arc=.35mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, coltitle=black, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, titlerule=0mm, bottomtitle=1mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, opacityback=0, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, rightrule=.15mm, breakable, titlerule=0mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, colback=white, coltitle=black, toptitle=1mm, bottomtitle=1mm, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}]
 
 \quartocalloutnte{nte-train-final-run-eval} 
 
@@ -2368,22 +2600,22 @@ and objective averaged across training-phase parameters
   \bottomrule
   \endfoot
   \endlastfoot
-  Circ & Accuracy & Full & 0.995 & 0.00431 \\
-  Circ & Accuracy & Vanilla & 0.998 & 0.000566 \\
-  Circ & F1-score & Full & 0.995 & 0.00432 \\
-  Circ & F1-score & Vanilla & 0.998 & 0.000566 \\
-  LS & Accuracy & Full & 0.999 & 0.00231 \\
-  LS & Accuracy & Vanilla & 1 & 0 \\
-  LS & F1-score & Full & 0.999 & 0.00231 \\
-  LS & F1-score & Vanilla & 1 & 0 \\
-  Moon & Accuracy & Full & 0.996 & 0.0136 \\
-  Moon & Accuracy & Vanilla & 0.988 & 0.022 \\
-  Moon & F1-score & Full & 0.996 & 0.0136 \\
-  Moon & F1-score & Vanilla & 0.988 & 0.022 \\
-  OL & Accuracy & Full & 0.914 & 0.00563 \\
-  OL & Accuracy & Vanilla & 0.918 & 0.00116 \\
-  OL & F1-score & Full & 0.914 & 0.0057 \\
-  OL & F1-score & Vanilla & 0.918 & 0.00116 \\\bottomrule
+  Circ & Accuracy & Full & 0.99 & 0.0 \\
+  Circ & Accuracy & Vanilla & 1.0 & 0.0 \\
+  Circ & F1-score & Full & 0.99 & 0.0 \\
+  Circ & F1-score & Vanilla & 1.0 & 0.0 \\
+  LS & Accuracy & Full & 1.0 & 0.0 \\
+  LS & Accuracy & Vanilla & 1.0 & 0.0 \\
+  LS & F1-score & Full & 1.0 & 0.0 \\
+  LS & F1-score & Vanilla & 1.0 & 0.0 \\
+  Moon & Accuracy & Full & 1.0 & 0.01 \\
+  Moon & Accuracy & Vanilla & 0.99 & 0.02 \\
+  Moon & F1-score & Full & 1.0 & 0.01 \\
+  Moon & F1-score & Vanilla & 0.99 & 0.02 \\
+  OL & Accuracy & Full & 0.91 & 0.01 \\
+  OL & Accuracy & Vanilla & 0.92 & 0.0 \\
+  OL & F1-score & Full & 0.91 & 0.01 \\
+  OL & F1-score & Vanilla & 0.92 & 0.0 \\\bottomrule
 
 \end{longtable}
 
@@ -2397,12 +2629,16 @@ Figure~\ref{fig-grid-train-plaus-over}.
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/circles/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/plausibility_distance_from_target.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/circles/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-grid-train-plaus-circles}Average outcomes for the
-plausibility measure across hyperparameters. Data: Circles.}
+plausibility measure across hyperparameters. This shows the \% change
+from the baseline model for the distance-based implausibility metric
+(Equation~\ref{eq-impl-dist}). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCo}).
+Data: Circles.}
 
 \end{figure}%
 
@@ -2410,12 +2646,16 @@ plausibility measure across hyperparameters. Data: Circles.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/lin_sep/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/plausibility_distance_from_target.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/lin_sep/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-grid-train-plaus-lin_sep}Average outcomes for the
-plausibility measure across hyperparameters. Data: Linearly Separable.}
+plausibility measure across hyperparameters. This shows the \% change
+from the baseline model for the distance-based implausibility metric
+(Equation~\ref{eq-impl-dist}). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCo}).
+Data: Linearly Separable.}
 
 \end{figure}%
 
@@ -2423,12 +2663,16 @@ plausibility measure across hyperparameters. Data: Linearly Separable.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/moons/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/plausibility_distance_from_target.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/moons/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-grid-train-plaus-moons}Average outcomes for the
-plausibility measure across hyperparameters. Data: Moons.}
+plausibility measure across hyperparameters. This shows the \% change
+from the baseline model for the distance-based implausibility metric
+(Equation~\ref{eq-impl-dist}). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCo}).
+Data: Moons.}
 
 \end{figure}%
 
@@ -2436,12 +2680,16 @@ plausibility measure across hyperparameters. Data: Moons.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/over/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/plausibility_distance_from_target.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/over/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-grid-train-plaus-over}Average outcomes for the
-plausibility measure across hyperparameters. Data: Overlapping.}
+plausibility measure across hyperparameters. This shows the \% change
+from the baseline model for the distance-based implausibility metric
+(Equation~\ref{eq-impl-dist}). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCo}).
+Data: Overlapping.}
 
 \end{figure}%
 
@@ -2455,12 +2703,16 @@ Figure~\ref{fig-grid-train-cost-over}.
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/circles/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/distance.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/circles/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/distance.png}
 
 }
 
 \caption{\label{fig-grid-train-cost-circles}Average outcomes for the
-cost measure across hyperparameters. Data: Circles.}
+cost measure across hyperparameters. This shows the \% change from the
+baseline model for the distance-based cost metric
+(\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
+Russell 2017}). Boxplots indicate the variation across evaluation runs
+and test settings (varying parameters for \emph{ECCo}). Data: Circles.}
 
 \end{figure}%
 
@@ -2468,12 +2720,17 @@ cost measure across hyperparameters. Data: Circles.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/lin_sep/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/distance.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/lin_sep/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/distance.png}
 
 }
 
 \caption{\label{fig-grid-train-cost-lin_sep}Average outcomes for the
-cost measure across hyperparameters. Data: Linearly Separable.}
+cost measure across hyperparameters. This shows the \% change from the
+baseline model for the distance-based cost metric
+(\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
+Russell 2017}). Boxplots indicate the variation across evaluation runs
+and test settings (varying parameters for \emph{ECCo}). Data: Linearly
+Separable.}
 
 \end{figure}%
 
@@ -2481,12 +2738,16 @@ cost measure across hyperparameters. Data: Linearly Separable.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/moons/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/distance.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/moons/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/distance.png}
 
 }
 
 \caption{\label{fig-grid-train-cost-moons}Average outcomes for the cost
-measure across hyperparameters. Data: Moons.}
+measure across hyperparameters. This shows the \% change from the
+baseline model for the distance-based cost metric
+(\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
+Russell 2017}). Boxplots indicate the variation across evaluation runs
+and test settings (varying parameters for \emph{ECCo}). Data: Moons.}
 
 \end{figure}%
 
@@ -2494,12 +2755,17 @@ measure across hyperparameters. Data: Moons.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/over/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/distance.png}}
+\includegraphics[width=0.8\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/training_params/mlp/over/evaluation/results/ce/burnin---nce---nepochs---burnin---burnin/distance.png}
 
 }
 
 \caption{\label{fig-grid-train-cost-over}Average outcomes for the cost
-measure across hyperparameters. Data: Overlapping.}
+measure across hyperparameters. This shows the \% change from the
+baseline model for the distance-based cost metric
+(\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
+Russell 2017}). Boxplots indicate the variation across evaluation runs
+and test settings (varying parameters for \emph{ECCo}). Data:
+Overlapping.}
 
 \end{figure}%
 
@@ -2550,7 +2816,7 @@ counterfactuals reaches 100\%.
 One consideration worth exploring is to combine high decision thresholds
 with high learning rates, which we have not investigated here.
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, left=2mm, leftrule=.75mm, opacityback=0, colback=white, colbacktitle=quarto-callout-warning-color!10!white, toptitle=1mm, toprule=.15mm, bottomrule=.15mm, arc=.35mm, colframe=quarto-callout-warning-color-frame, rightrule=.15mm, coltitle=black, title={Package Version (Reproducibility)}, titlerule=0mm, bottomtitle=1mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, opacityback=0, colframe=quarto-callout-warning-color-frame, leftrule=.75mm, bottomrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, rightrule=.15mm, breakable, titlerule=0mm, left=2mm, colbacktitle=quarto-callout-warning-color!10!white, colback=white, coltitle=black, toptitle=1mm, bottomtitle=1mm, title={Package Version (Reproducibility)}]
 
 Tuning was run using \texttt{v1.1.3} of \texttt{TaijaData}. The
 follow-up version \texttt{v1.1.4} introduced an option to split
@@ -2571,7 +2837,7 @@ The hyperparameter grid for tuning key parameters is shown in
 Note~\ref{nte-tune-train}. The corresponding evaluation grid used for
 these experiments is shown in Note~\ref{nte-tune-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, left=2mm, leftrule=.75mm, opacityback=0, colback=white, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, toprule=.15mm, bottomrule=.15mm, arc=.35mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, coltitle=black, title={Note \ref*{nte-tune-train}: Training Phase}, titlerule=0mm, bottomtitle=1mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, opacityback=0, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, rightrule=.15mm, breakable, titlerule=0mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, colback=white, coltitle=black, toptitle=1mm, bottomtitle=1mm, title={Note \ref*{nte-tune-train}: Training Phase}]
 
 \quartocalloutnte{nte-tune-train} 
 
@@ -2601,7 +2867,7 @@ these experiments is shown in Note~\ref{nte-tune-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, left=2mm, leftrule=.75mm, opacityback=0, colback=white, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, toprule=.15mm, bottomrule=.15mm, arc=.35mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, coltitle=black, title={Note \ref*{nte-tune-eval}: Evaluation Phase}, titlerule=0mm, bottomtitle=1mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, opacityback=0, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, rightrule=.15mm, breakable, titlerule=0mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, colback=white, coltitle=black, toptitle=1mm, bottomtitle=1mm, title={Note \ref*{nte-tune-eval}: Evaluation Phase}]
 
 \quartocalloutnte{nte-tune-eval} 
 
@@ -2628,12 +2894,16 @@ Figure~\ref{fig-tune-plaus-adult} to Figure~\ref{fig-tune-plaus-over}.
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/adult/evaluation/results/ce/lambda_energy_reg---decision_threshold_exper---lambda_energy_eval---lambda_energy_reg---decision_threshold_exper/plausibility_distance_from_target.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/adult/evaluation/results/ce/lambda_energy_reg---decision_threshold_exper---lambda_energy_eval---lambda_energy_reg---decision_threshold_exper/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-tune-plaus-adult}Average outcomes for the
-plausibility measure across key hyperparameters. Data: Adult.}
+plausibility measure across key hyperparameters. This shows the \%
+change from the baseline model for the distance-based implausibility
+metric (Equation~\ref{eq-impl-dist}). Boxplots indicate the variation
+across evaluation runs and test settings (varying parameters for
+\emph{ECCo}). Data: Adult.}
 
 \end{figure}%
 
@@ -2641,13 +2911,16 @@ plausibility measure across key hyperparameters. Data: Adult.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/cali/evaluation/results/ce/lambda_energy_reg---decision_threshold_exper---lambda_energy_eval---lambda_energy_reg---decision_threshold_exper/plausibility_distance_from_target.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/cali/evaluation/results/ce/lambda_energy_reg---decision_threshold_exper---lambda_energy_eval---lambda_energy_reg---decision_threshold_exper/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-tune-plaus-cali}Average outcomes for the
-plausibility measure across key hyperparameters. Data: California
-Housing.}
+plausibility measure across key hyperparameters. This shows the \%
+change from the baseline model for the distance-based implausibility
+metric (Equation~\ref{eq-impl-dist}). Boxplots indicate the variation
+across evaluation runs and test settings (varying parameters for
+\emph{ECCo}). Data: California Housing.}
 
 \end{figure}%
 
@@ -2655,12 +2928,16 @@ Housing.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/circles/evaluation/results/ce/lambda_energy_reg---decision_threshold_exper---lambda_energy_eval---lambda_energy_reg---decision_threshold_exper/plausibility_distance_from_target.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/circles/evaluation/results/ce/lambda_energy_reg---decision_threshold_exper---lambda_energy_eval---lambda_energy_reg---decision_threshold_exper/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-tune-plaus-circles}Average outcomes for the
-plausibility measure across key hyperparameters. Data: Circles.}
+plausibility measure across key hyperparameters. This shows the \%
+change from the baseline model for the distance-based implausibility
+metric (Equation~\ref{eq-impl-dist}). Boxplots indicate the variation
+across evaluation runs and test settings (varying parameters for
+\emph{ECCo}). Data: Circles.}
 
 \end{figure}%
 
@@ -2668,12 +2945,16 @@ plausibility measure across key hyperparameters. Data: Circles.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/credit/evaluation/results/ce/lambda_energy_reg---decision_threshold_exper---lambda_energy_eval---lambda_energy_reg---decision_threshold_exper/plausibility_distance_from_target.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/credit/evaluation/results/ce/lambda_energy_reg---decision_threshold_exper---lambda_energy_eval---lambda_energy_reg---decision_threshold_exper/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-tune-plaus-credit}Average outcomes for the
-plausibility measure across key hyperparameters. Data: Credit.}
+plausibility measure across key hyperparameters. This shows the \%
+change from the baseline model for the distance-based implausibility
+metric (Equation~\ref{eq-impl-dist}). Boxplots indicate the variation
+across evaluation runs and test settings (varying parameters for
+\emph{ECCo}). Data: Credit.}
 
 \end{figure}%
 
@@ -2681,12 +2962,16 @@ plausibility measure across key hyperparameters. Data: Credit.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/gmsc/evaluation/results/ce/lambda_energy_reg---decision_threshold_exper---lambda_energy_eval---lambda_energy_reg---decision_threshold_exper/plausibility_distance_from_target.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/gmsc/evaluation/results/ce/lambda_energy_reg---decision_threshold_exper---lambda_energy_eval---lambda_energy_reg---decision_threshold_exper/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-tune-plaus-gmsc}Average outcomes for the
-plausibility measure across key hyperparameters. Data: GMSC.}
+plausibility measure across key hyperparameters. This shows the \%
+change from the baseline model for the distance-based implausibility
+metric (Equation~\ref{eq-impl-dist}). Boxplots indicate the variation
+across evaluation runs and test settings (varying parameters for
+\emph{ECCo}). Data: GMSC.}
 
 \end{figure}%
 
@@ -2694,13 +2979,16 @@ plausibility measure across key hyperparameters. Data: GMSC.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/lin_sep/evaluation/results/ce/lambda_energy_reg---decision_threshold_exper---lambda_energy_eval---lambda_energy_reg---decision_threshold_exper/plausibility_distance_from_target.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/lin_sep/evaluation/results/ce/lambda_energy_reg---decision_threshold_exper---lambda_energy_eval---lambda_energy_reg---decision_threshold_exper/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-tune-plaus-lin_sep}Average outcomes for the
-plausibility measure across key hyperparameters. Data: Linearly
-Separable.}
+plausibility measure across key hyperparameters. This shows the \%
+change from the baseline model for the distance-based implausibility
+metric (Equation~\ref{eq-impl-dist}). Boxplots indicate the variation
+across evaluation runs and test settings (varying parameters for
+\emph{ECCo}). Data: Linearly Separable.}
 
 \end{figure}%
 
@@ -2708,12 +2996,16 @@ Separable.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/mnist/evaluation/results/ce/lambda_energy_reg---decision_threshold_exper---lambda_energy_eval---lambda_energy_reg---decision_threshold_exper/plausibility_distance_from_target.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/mnist/evaluation/results/ce/lambda_energy_reg---decision_threshold_exper---lambda_energy_eval---lambda_energy_reg---decision_threshold_exper/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-tune-plaus-mnist}Average outcomes for the
-plausibility measure across key hyperparameters. Data: MNIST.}
+plausibility measure across key hyperparameters. This shows the \%
+change from the baseline model for the distance-based implausibility
+metric (Equation~\ref{eq-impl-dist}). Boxplots indicate the variation
+across evaluation runs and test settings (varying parameters for
+\emph{ECCo}). Data: MNIST.}
 
 \end{figure}%
 
@@ -2721,12 +3013,16 @@ plausibility measure across key hyperparameters. Data: MNIST.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/moons/evaluation/results/ce/lambda_energy_reg---decision_threshold_exper---lambda_energy_eval---lambda_energy_reg---decision_threshold_exper/plausibility_distance_from_target.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/moons/evaluation/results/ce/lambda_energy_reg---decision_threshold_exper---lambda_energy_eval---lambda_energy_reg---decision_threshold_exper/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-tune-plaus-moons}Average outcomes for the
-plausibility measure across key hyperparameters. Data: Moons.}
+plausibility measure across key hyperparameters. This shows the \%
+change from the baseline model for the distance-based implausibility
+metric (Equation~\ref{eq-impl-dist}). Boxplots indicate the variation
+across evaluation runs and test settings (varying parameters for
+\emph{ECCo}). Data: Moons.}
 
 \end{figure}%
 
@@ -2734,12 +3030,16 @@ plausibility measure across key hyperparameters. Data: Moons.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/over/evaluation/results/ce/lambda_energy_reg---decision_threshold_exper---lambda_energy_eval---lambda_energy_reg---decision_threshold_exper/plausibility_distance_from_target.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/over/evaluation/results/ce/lambda_energy_reg---decision_threshold_exper---lambda_energy_eval---lambda_energy_reg---decision_threshold_exper/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-tune-plaus-over}Average outcomes for the
-plausibility measure across key hyperparameters. Data: Overlapping.}
+plausibility measure across key hyperparameters. This shows the \%
+change from the baseline model for the distance-based implausibility
+metric (Equation~\ref{eq-impl-dist}). Boxplots indicate the variation
+across evaluation runs and test settings (varying parameters for
+\emph{ECCo}). Data: Overlapping.}
 
 \end{figure}%
 
@@ -2753,7 +3053,7 @@ Figure~\ref{fig-tune-mat-over}.
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/adult/evaluation/results/logs/objective---decision_threshold---lambda_energy_reg/percent_valid.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/adult/evaluation/results/logs/objective---decision_threshold---lambda_energy_reg/percent_valid.png}
 
 }
 
@@ -2766,7 +3066,7 @@ in each epoch. Data: Adult.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/cali/evaluation/results/logs/objective---decision_threshold---lambda_energy_reg/percent_valid.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/cali/evaluation/results/logs/objective---decision_threshold---lambda_energy_reg/percent_valid.png}
 
 }
 
@@ -2779,7 +3079,7 @@ in each epoch. Data: California Housing.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/circles/evaluation/results/logs/objective---decision_threshold---lambda_energy_reg/percent_valid.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/circles/evaluation/results/logs/objective---decision_threshold---lambda_energy_reg/percent_valid.png}
 
 }
 
@@ -2792,7 +3092,7 @@ counterfactuals in each epoch. Data: Circles.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/credit/evaluation/results/logs/objective---decision_threshold---lambda_energy_reg/percent_valid.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/credit/evaluation/results/logs/objective---decision_threshold---lambda_energy_reg/percent_valid.png}
 
 }
 
@@ -2805,7 +3105,7 @@ in each epoch. Data: Credit.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/gmsc/evaluation/results/logs/objective---decision_threshold---lambda_energy_reg/percent_valid.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/gmsc/evaluation/results/logs/objective---decision_threshold---lambda_energy_reg/percent_valid.png}
 
 }
 
@@ -2818,7 +3118,7 @@ in each epoch. Data: GMSC.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/lin_sep/evaluation/results/logs/objective---decision_threshold---lambda_energy_reg/percent_valid.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/lin_sep/evaluation/results/logs/objective---decision_threshold---lambda_energy_reg/percent_valid.png}
 
 }
 
@@ -2831,7 +3131,7 @@ counterfactuals in each epoch. Data: Linearly Separable.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/mnist/evaluation/results/logs/objective---decision_threshold---lambda_energy_reg/percent_valid.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/mnist/evaluation/results/logs/objective---decision_threshold---lambda_energy_reg/percent_valid.png}
 
 }
 
@@ -2844,7 +3144,7 @@ in each epoch. Data: MNIST.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/moons/evaluation/results/logs/objective---decision_threshold---lambda_energy_reg/percent_valid.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/moons/evaluation/results/logs/objective---decision_threshold---lambda_energy_reg/percent_valid.png}
 
 }
 
@@ -2857,7 +3157,7 @@ in each epoch. Data: Moons.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/over/evaluation/results/logs/objective---decision_threshold---lambda_energy_reg/percent_valid.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune/mlp/over/evaluation/results/logs/objective---decision_threshold---lambda_energy_reg/percent_valid.png}
 
 }
 
@@ -2872,7 +3172,7 @@ The hyperparameter grid for tuning the learning rate is shown in
 Note~\ref{nte-tune_lr-train}. The corresponding evaluation grid used for
 these experiments is shown in Note~\ref{nte-tune_lr-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, left=2mm, leftrule=.75mm, opacityback=0, colback=white, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, toprule=.15mm, bottomrule=.15mm, arc=.35mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, coltitle=black, title={Note \ref*{nte-tune_lr-train}: Training Phase}, titlerule=0mm, bottomtitle=1mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, opacityback=0, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, rightrule=.15mm, breakable, titlerule=0mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, colback=white, coltitle=black, toptitle=1mm, bottomtitle=1mm, title={Note \ref*{nte-tune_lr-train}: Training Phase}]
 
 \quartocalloutnte{nte-tune_lr-train} 
 
@@ -2902,7 +3202,7 @@ these experiments is shown in Note~\ref{nte-tune_lr-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, left=2mm, leftrule=.75mm, opacityback=0, colback=white, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, toprule=.15mm, bottomrule=.15mm, arc=.35mm, colframe=quarto-callout-note-color-frame, rightrule=.15mm, coltitle=black, title={Note \ref*{nte-tune_lr-eval}: Evaluation Phase}, titlerule=0mm, bottomtitle=1mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, arc=.35mm, opacityback=0, colframe=quarto-callout-note-color-frame, leftrule=.75mm, bottomrule=.15mm, toprule=.15mm, opacitybacktitle=0.6, rightrule=.15mm, breakable, titlerule=0mm, left=2mm, colbacktitle=quarto-callout-note-color!10!white, colback=white, coltitle=black, toptitle=1mm, bottomtitle=1mm, title={Note \ref*{nte-tune_lr-eval}: Evaluation Phase}]
 
 \quartocalloutnte{nte-tune_lr-eval} 
 
@@ -2930,12 +3230,16 @@ Figure~\ref{fig-tune_lr-plaus-over}.
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/adult/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/adult/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-tune_lr-plaus-adult}Average outcomes for the
-plausibility measure across key hyperparameters. Data: Adult.}
+plausibility measure across key hyperparameters. This shows the \%
+change from the baseline model for the distance-based implausibility
+metric (Equation~\ref{eq-impl-dist}). Boxplots indicate the variation
+across evaluation runs and test settings (varying parameters for
+\emph{ECCo}). Data: Adult.}
 
 \end{figure}%
 
@@ -2943,12 +3247,16 @@ plausibility measure across key hyperparameters. Data: Adult.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/credit/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/credit/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-tune_lr-plaus-credit}Average outcomes for the
-plausibility measure across key hyperparameters. Data: Credit.}
+plausibility measure across key hyperparameters. This shows the \%
+change from the baseline model for the distance-based implausibility
+metric (Equation~\ref{eq-impl-dist}). Boxplots indicate the variation
+across evaluation runs and test settings (varying parameters for
+\emph{ECCo}). Data: Credit.}
 
 \end{figure}%
 
@@ -2956,12 +3264,16 @@ plausibility measure across key hyperparameters. Data: Credit.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/gmsc/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/gmsc/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-tune_lr-plaus-gmsc}Average outcomes for the
-plausibility measure across key hyperparameters. Data: GMSC.}
+plausibility measure across key hyperparameters. This shows the \%
+change from the baseline model for the distance-based implausibility
+metric (Equation~\ref{eq-impl-dist}). Boxplots indicate the variation
+across evaluation runs and test settings (varying parameters for
+\emph{ECCo}). Data: GMSC.}
 
 \end{figure}%
 
@@ -2969,13 +3281,16 @@ plausibility measure across key hyperparameters. Data: GMSC.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/lin_sep/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/lin_sep/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-tune_lr-plaus-lin_sep}Average outcomes for the
-plausibility measure across key hyperparameters. Data: Linearly
-Separable.}
+plausibility measure across key hyperparameters. This shows the \%
+change from the baseline model for the distance-based implausibility
+metric (Equation~\ref{eq-impl-dist}). Boxplots indicate the variation
+across evaluation runs and test settings (varying parameters for
+\emph{ECCo}). Data: Linearly Separable.}
 
 \end{figure}%
 
@@ -2983,12 +3298,16 @@ Separable.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/mnist/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/mnist/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-tune_lr-plaus-mnist}Average outcomes for the
-plausibility measure across key hyperparameters. Data: MNIST.}
+plausibility measure across key hyperparameters. This shows the \%
+change from the baseline model for the distance-based implausibility
+metric (Equation~\ref{eq-impl-dist}). Boxplots indicate the variation
+across evaluation runs and test settings (varying parameters for
+\emph{ECCo}). Data: MNIST.}
 
 \end{figure}%
 
@@ -2996,12 +3315,16 @@ plausibility measure across key hyperparameters. Data: MNIST.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/over/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/over/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}
 
 }
 
 \caption{\label{fig-tune_lr-plaus-over}Average outcomes for the
-plausibility measure across key hyperparameters. Data: Overlapping.}
+plausibility measure across key hyperparameters. This shows the \%
+change from the baseline model for the distance-based implausibility
+metric (Equation~\ref{eq-impl-dist}). Boxplots indicate the variation
+across evaluation runs and test settings (varying parameters for
+\emph{ECCo}). Data: Overlapping.}
 
 \end{figure}%
 
@@ -3015,7 +3338,7 @@ Figure~\ref{fig-tune_lr-mat-over}.
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/adult/evaluation/results/logs/objective---lr---lambda_energy_reg/percent_valid.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/adult/evaluation/results/logs/objective---lr---lambda_energy_reg/percent_valid.png}
 
 }
 
@@ -3028,7 +3351,7 @@ counterfactuals in each epoch. Data: Adult.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/credit/evaluation/results/logs/objective---lr---lambda_energy_reg/percent_valid.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/credit/evaluation/results/logs/objective---lr---lambda_energy_reg/percent_valid.png}
 
 }
 
@@ -3041,7 +3364,7 @@ counterfactuals in each epoch. Data: Credit.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/gmsc/evaluation/results/logs/objective---lr---lambda_energy_reg/percent_valid.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/gmsc/evaluation/results/logs/objective---lr---lambda_energy_reg/percent_valid.png}
 
 }
 
@@ -3054,7 +3377,7 @@ counterfactuals in each epoch. Data: GMSC.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/lin_sep/evaluation/results/logs/objective---lr---lambda_energy_reg/percent_valid.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/lin_sep/evaluation/results/logs/objective---lr---lambda_energy_reg/percent_valid.png}
 
 }
 
@@ -3067,7 +3390,7 @@ counterfactuals in each epoch. Data: Linearly Separable.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/mnist/evaluation/results/logs/objective---lr---lambda_energy_reg/percent_valid.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/mnist/evaluation/results/logs/objective---lr---lambda_energy_reg/percent_valid.png}
 
 }
 
@@ -3080,7 +3403,7 @@ counterfactuals in each epoch. Data: MNIST.}
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/over/evaluation/results/logs/objective---lr---lambda_energy_reg/percent_valid.png}}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/over/evaluation/results/logs/objective---lr---lambda_energy_reg/percent_valid.png}
 
 }
 

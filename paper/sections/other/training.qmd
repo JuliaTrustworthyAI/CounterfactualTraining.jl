@@ -1,4 +1,56 @@
+```{julia}
+projectdir = splitpath(pwd()) |>
+    ss -> joinpath(ss[1:findall([s == "CounterfactualTraining.jl" for s in ss])[1]]...) 
+cd(projectdir)
+
+using CTExperiments
+using CTExperiments.CSV
+using CTExperiments.DataFrames
+using CTExperiments.StatsBase
+using Logging
+
+using DotEnv
+DotEnv.load!()
+```
+
 ## Training Details {#sec-app-training}
 
 In this section, we describe the training procedure in detail. While the details laid out here are not crucial for understanding our proposed approach, they are of importance to anyone looking to implement counterfactual training. 
 
+### Default Hyperparameters
+
+@nte-train-default presents the default hyperparameters used during training.
+
+::: {#nte-train-default .callout-note}
+
+## Training Phase
+
+```{julia}
+#| output: asis
+
+dict = Logging.with_logger(Logging.NullLogger()) do 
+    CTExperiments.to_dict(Experiment()) 
+end
+println(CTExperiments.dict_to_quarto_markdown(dict, filter_empty=false))
+```
+
+:::
+
+## Evaluation Details {#sec-app-eval}
+
+@nte-eval-default presents the default hyperparameters used during evaluation.
+
+::: {#nte-eval-default .callout-note}
+
+## Evaluation Phase
+
+```{julia}
+#| output: asis
+
+dict = Logging.with_logger(Logging.NullLogger()) do  
+    CTExperiments.to_dict(EvaluationConfig(ExperimentGrid()))
+end
+println(CTExperiments.dict_to_quarto_markdown(dict, filter_empty=false))
+```
+
+:::
