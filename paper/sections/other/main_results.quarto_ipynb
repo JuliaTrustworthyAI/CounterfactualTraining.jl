@@ -59,8 +59,20 @@
         "tbl_mtbl = final_mutability(mtbl_dir; var=[\"distance\"])\n",
         "df = final_table(res_dir; tbl_mtbl)\n",
         "inputs = get_table_inputs(df, nothing; backend=Val(:latex))\n",
-        "tabulate_results(inputs; table_type=:tabular, save_name=\"paper/quarto_ecml/tables/main.tex\", wrap_table=false)\n",
-        "tabulate_results(inputs; table_type=:tabular, save_name=\"paper/preprint/tables/main.tex\", wrap_table=false)\n",
+        "formatters = (\n",
+        "    PrettyTables.ft_round(1,findall(.!contains.(names(df),\"Acc\"))),\n",
+        "    PrettyTables.ft_round(2,findall(contains.(names(df),\"Acc\")))\n",
+        ")\n",
+        "for fname in [\"paper/quarto_ecml/tables/main.tex\",\"paper/preprint/tables/main.tex\"]\n",
+        "    tabulate_results(\n",
+        "        inputs; \n",
+        "        table_type=:tabular, \n",
+        "        save_name=fname, \n",
+        "        wrap_table=false, \n",
+        "        alignment=[:l,fill(:r,size(df,2)-1)...],\n",
+        "        formatters=formatters\n",
+        "    )\n",
+        "end\n",
         "```\n",
         "\n",
         "\n",
@@ -99,7 +111,7 @@
         "![The same setup, factuals, model architecture and generator as in @fig-mnist, but the model was trained with CT.](/paper/figures/mnist_mlp_vanilla.png){#fig-mnist-vanilla}\n",
         ":::"
       ],
-      "id": "154b9441"
+      "id": "fcaa1d0b"
     }
   ],
   "metadata": {
