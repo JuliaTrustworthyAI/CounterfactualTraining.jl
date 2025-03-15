@@ -60,7 +60,7 @@ for fname in ["paper/quarto_ecml/tables/main.tex","paper/preprint/tables/main.te
         table_type=:tabular, 
         save_name=fname, 
         wrap_table=false, 
-        alignment=[:c,fill(:r,size(df,2)-1)...],
+        alignment=[:l,fill(:r,size(df,2)-1)...],
         formatters=formatters
     )
 end

@@ -629,22 +629,17 @@ We have simulated this scenario using synthetic data with independent
 Figure~\ref{fig-poc}. The four panels show the outcomes for different
 training procedures using the same model architectures (a linear
 classifier). In panels (a) and (c) we have trained the models
-conventionally, while in panels (b) and (d) we used CT. Only in panels
-(c) and (d) do we impose the mutability constraint on \emph{age} at test
-time. In each case, we show the decision boundary (in green) and the
-training data colored according to their ground-truth label: orange
-points belong to the target class, \(y^+=2\), blue points belong to the
-non-target class, \(y^-=1\). Stars indicate CEs in the target class
-generated at test time using generic gradient descent until convergence.
+conventionally, while in panels (b) and (d) we used CT.
 
-In all cases the counterfactuals are all valid but their quality
-differs. In panel (a), they are not plausible: they do not comply with
-the distribution of the factuals in \(y^+\) to the point where they form
-a clearly distinguishable cluster. In panel (b), they are highly
-plausible, meeting the first objective of Def. \ref{def-explainability}.
-In panel (c), the CEs involve substantial reductions in \emph{debt} for
-younger applicants. By comparison, counterfactual paths are shorter on
-average in panel (d) where we have protected the immutable \emph{age} as
+In all cases, all counterfactuals (stars) are valid---they have cross
+the decision boundary (green)---but their quality differs. In panel (a),
+they are not plausible: they do not comply with the distribution of the
+factuals in \(y^+\) to the point where they form a clearly
+distinguishable cluster. In panel (b), they are highly plausible,
+meeting the first objective of Def. \ref{def-explainability}. In panel
+(c), the CEs involve substantial reductions in \emph{debt} for younger
+applicants. By comparison, counterfactual paths are shorter on average
+in panel (d) where we have protected the immutable \emph{age} as
 described in Section~\ref{sec-constraints}. Due to the classifier's
 lower sensitivity to \emph{age}, recommendations with respect to
 \emph{debt} are much more homogenous and do not unfairly punish younger
@@ -661,7 +656,11 @@ most explainable according to Def. \ref{def-explainability}.
 }
 
 \caption{\label{fig-poc}Illustration of how CT improves model
-explainability.}
+explainability: (a) conventional training, all mutable; (b) CT, all
+mutable; (c) conventional, \emph{age} immutable; (d) CT, \emph{age}
+immutable. The decision boundary is shown in green along with training
+data colored according to their ground-truth label: \(y^+=2\) (orange)
+and \(y^-=1\) (blue). Stars indicate CEs for the target class.}
 
 \end{figure}%
 
@@ -688,15 +687,15 @@ questions:
 
 \subsection{Experimental Setup}\label{experimental-setup}
 
-Our key outcome of interest is how well models perform with respect to
-explainability (Def. \ref{def-explainability}). To this end, we focus
-primarily on the plausibility and cost of faithfully generated
-counterfactuals at test time. To measure the cost of counterfactuals, we
-follow the standard convention of using distances (\(\ell_1\)-norm)
-between factuals and counterfactuals as a proxy. For plausibility, we
-assess how similar counterfactuals are to observed samples in the target
-domain, \(\mathbf{X}^+\subset\mathcal{X}^+\). We rely on the
-distance-based metric used in \cite{altmeyer2024faithful},
+Our key outcome of interest is improved explainability (Def.
+\ref{def-explainability}). To this end, we focus primarily on the
+plausibility and cost of faithfully generated counterfactuals at test
+time. To measure the cost of counterfactuals, we follow the standard
+convention of using distances (\(\ell_1\)-norm) between factuals and
+counterfactuals as a proxy. For plausibility, we assess how similar
+counterfactuals are to observed samples in the target domain,
+\(\mathbf{X}^+\subset\mathcal{X}^+\). We rely on the distance-based
+metric used in \cite{altmeyer2024faithful},
 
 \begin{equation}\phantomsection\label{eq-impl-dist}{
 \text{IP}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
@@ -710,10 +709,11 @@ squared population maximum mean discrepancy \cite{gretton2012kernel}.
 The metric in Equation~\ref{eq-impl-div} is equal to zero iff the two
 distributions are the same, \(\mathbf{X}^\prime=\mathbf{X}^+\).
 
-In addition to cost and plausibility, we also compute other standard
-metrics to evaluate counterfactuals at test time including validity and
-redundancy. Finally, we also assess the predictive performance of models
-using standard metrics.
+In addition to cost and plausibility, we compute other standard metrics
+to evaluate counterfactuals including validity and redundancy. Finally,
+we also assess the predictive performance of models using standard
+metrics, including robust accuracy estimated on adversarially perturbed
+data using FGSM \cite{goodfellow2014explaining}.
 
 We run the experiments with three gradient-based generators:
 \emph{Generic} of \cite{wachter2017counterfactual} as a simple baseline
@@ -738,58 +738,60 @@ domain of economics: \emph{Adult} (a.k.a. Census data) of
 \cite{kaggle2011give2}. Finally, for the convenience of illustration, we
 use of the 10-class \emph{MNIST} vision dataset \cite{lecun1998mnist}.
 
+To assess our proposed training regime, we investigate the improvements
+in performance metrics when using CT on top of a weak baseline (BL):
+specifically, a multilayer perceptron (\emph{MLP}). This is the best way
+to get a clear picture of how effective CT is and consistent with how
+assessment is done in the related literature
+\cite{ross2021learning,teney2020learning,goodfellow2014explaining}.
+
 \subsection{Experimental Results}\label{experimental-results}
 
-\subsubsection{Plausibility.}\label{sec-plaus}
+\subsubsection{Plausibility}\label{sec-plaus}
 
-Table~\ref{tbl-main} presents our main empirical findings. The top five
-rows show the percentage reduction in implausibility according to
-Equation~\ref{eq-impl-dist} for varying degrees of the energy penalty
-used for \emph{ECCo} at test time. Row 6 shows the reduction in
-implausibility as measured by Equation~\ref{eq-impl-div} and aggregated
-across all test specifications of \emph{ECCo}. Rows 7 and 8 show the
-test accuracies for the model trained with CT and conventionally trained
-models (``vanilla'').
+Table~\ref{tbl-main} presents our main empirical findings. For all
+datasets except \emph{OL} and across all test settings, the average
+distance of CEs from observed samples in the target class is reduced,
+indicating improved plausibility. The magnitude of improvements varies.
+For the simple synthetic datasets, distance reductions range from around
+20-40\% (\emph{LS}, \emph{Moon}) to almost 60\% (\emph{Circ}). For the
+real-world tabular datasets, improvements tend to be smaller but still
+substantial, with around 10-15\% for \emph{CH}, 11-28\% for \emph{GMSC},
+7-8\% for \emph{Cred}, and around 3\% for \emph{Adult}. For our only
+vision dataset (\emph{MNIST}), distances are reduced by up to 9\%. The
+results for our proposed divergence metric are qualitatively similar,
+but generally even more pronounced: for the \emph{Circ} dataset,
+implausibility is reduced by almost 94\% to virtually zero as we
+verified by the absolute outcome. Improvements for other datasets range
+from 28\% (\emph{Moon}) to 78\% (\emph{GMSC}). For \emph{OL} the
+reduction is negative, consistent with the distance-based metric.
+\emph{MNIST} is the only dataset for which the distance and divergence
+metrics disagree. Upon visual inspection of the image counterfactuals we
+find that CT clearly improves plausibility (see appendix).
 
-For all datasets except \emph{OL} and across all test settings, the
-average distance of CEs from observed samples in the target class is
-reduced, indicating improved plausibility. The magnitude of improvements
-varies. For the simple synthetic datasets, distance reductions range
-from around 20-40\% (\emph{LS}, \emph{Moon}) to almost 60\%
-(\emph{Circ}). For the real-world tabular datasets, improvements tend to
-be smaller but still substantial, with around 10-15\% for \emph{CH},
-11-28\% for \emph{GMSC}, 7-8\% for \emph{Cred}, and around 3\% for
-\emph{Adult}. For our only vision dataset (\emph{MNIST}), distances are
-reduced by up to 9\%. The results for our proposed divergence metric are
-qualitatively similar, but generally even more pronounced: for the
-\emph{Circ} dataset, implausibility is reduced by almost 94\% to
-virtually zero as we verified by the absolute outcome. Improvements for
-other datasets range from 28\% (\emph{Moon}) to 78\% (\emph{GMSC}). For
-\emph{OL} the reduction is negative, consistent with the distance-based
-metric. \emph{MNIST} is the only dataset for which the two metrics
-disagree.
+\subsubsection{Predictive Performance}\label{sec-pred}
 
-We find that CT can substantially improve the quality of explanations
-learned by models without sacrificing predictive performance. Test
-accuracy for CT is virtually identical to the baseline for \emph{Adult},
-\emph{Circ}, \emph{LS}, \emph{Moon}, and \emph{OL}, and even slightly
-improved for \emph{Cred}. Exceptions to this general pattern are
-\emph{MNIST}, \emph{CH}, and \emph{GMSC}, for which we observe reduction
-in test accuracy of 2, 5, and 15 percentage points respectively. In this
-context, we also note that we have not optimized the models (very small
-networks) for predictive performance at all.
+Test accuracy for CT is virtually identical to the baseline for
+\emph{Adult}, \emph{Circ}, \emph{LS}, \emph{Moon}, and \emph{OL}, and
+even slightly improved for \emph{Cred}. Exceptions to this general
+pattern are \emph{MNIST}, \emph{CH}, and \emph{GMSC}, for which we
+observe a reduction in test accuracy of 2, 5, and 15 percentage points
+respectively. When looking at robust test accuracies (Acc.\(^*\)) for
+these datasets in particular, we find that CT strongly outperforms the
+baseline. In fact, we find that CT improves adversarial robustness on
+all datasets.
 
 \begin{table}
 
 \caption{\label{tbl-main}Key performance metrics across all datasets.
-\textbf{Plausibility}: Rows 1-5 show the percentage reduction in
-implausibility via Equation~\ref{eq-impl-dist} for varying degrees of
-the energy penalty used for \emph{ECCo} at test time; row 6 shows the
-reduction in implausibility via Equation~\ref{eq-impl-div} and
-aggregated across all test specifications. \textbf{Accuracy} (rows 7-8):
-test accuracies for models trained with CT and the baseline.
-\textbf{Actionability} (row 9): average reduction in costs when imposing
-mutability constraints.}
+\textbf{Plausibility}: Columns 2-6 show the percentage reduction in
+implausibility (\(\text{IP}\)) for varying degrees of the energy penalty
+used for \emph{ECCo} at test time; column 7 shows the reduction in
+\(\text{IP}^*\) (\(\text{MMD}\)), aggregated across all test
+specifications. \textbf{Accuracy} (columns 8-11): test accuracies and
+robust accuracies (\(\text{Acc}^*\)) for CT and the baseline (BL).
+\textbf{Actionability} (column 9): average reduction in costs when
+imposing mutability constraints.}
 
 \centering{
 
@@ -799,7 +801,7 @@ mutability constraints.}
 
 \end{table}%
 
-\subsubsection{Actionability.}\label{sec-act}
+\subsubsection{Actionability}\label{sec-act}
 
 In Section~\ref{sec-method}, we show that our proposed way for encoding
 mutability constraints leads to lower classifier sensitivity wrt.
