@@ -288,12 +288,12 @@ counterfactuals on one side and robustness to adversarial examples on
 the other is backed by empirical evidence.
 \cite{sauer2021counterfactual} demonstrates that using counterfactual
 images during classifier training improves model robustness. Similarly,
-\cite{abbasnejad2020counterfactual} argue that counterfactuals represent
-potentially useful training data in machine learning, especially in
-supervised settings where inputs may be reasonably mapped to multiple
-outputs. They, too, demonstrate that augmenting the training data of
-image classifiers can improve generalization. Finally,
-\cite{teney2020learning} propose an approach using counterfactuals in
+\cite{abbasnejad2020counterfactual} argues that counterfactuals
+represent potentially useful training data in machine learning,
+especially in supervised settings where inputs may be reasonably mapped
+to multiple outputs. They, too, demonstrate that augmenting the training
+data of image classifiers can improve generalization. Finally,
+\cite{teney2020learning} proposes an approach using counterfactuals in
 training that does not rely on data augmentation: they argue that
 counterfactual pairs typically already exist in training datasets.
 Specifically, their approach relies on identifying similar input samples
@@ -500,8 +500,8 @@ training samples. Specifically, we have:
 \text{div}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta) = \mathcal{E}_\theta(\mathbf{x}^+,y) - \mathcal{E}_\theta(\mathbf{x}_T^\prime,y)
 }\end{equation} where \(\mathcal{E}_\theta(\cdot)\) denotes the energy
 function defined as
-\(\mathcal{E}_\theta(\mathbf{x},y)=-\mathbf{M}_\theta(\mathbf{x})[y^+]\)
-where \(y^+\) denotes the index of the randomly drawn target class,
+\(\mathcal{E}_\theta(\mathbf{x},y)=-\mathbf{M}_\theta(\mathbf{x})[y^+]\),
+with \(y^+\) denoting the index of the randomly drawn target class,
 \(y^+ \sim p(y)\). Conditional on the target class \(y^+\),
 \(\mathbf{x}_T^\prime\) denotes a mature counterfactual for a randomly
 sampled factual from a non-target class generated with a gradient-based
@@ -626,13 +626,13 @@ and (2) the subjects' existing level of \emph{debt}, which we define as
 mutable.
 
 We have simulated this scenario using synthetic data with independent
-\emph{age} and \emph{debt}, and Gaussian class-conditional densities in
-Figure~\ref{fig-poc}. The four panels show the outcomes for different
-training procedures using the same model architectures (a linear
-classifier). In panels (a) and (c) we have trained the models
+\emph{age} and \emph{debt} features, and Gaussian class-conditional
+densities in Figure~\ref{fig-poc}. The four panels show the outcomes for
+different training procedures using the same model architectures (a
+linear classifier). In panels (a) and (c) we have trained the models
 conventionally, while in panels (b) and (d) we used CT.
 
-In all cases, all counterfactuals (stars) are valid---they have cross
+In all cases, all counterfactuals (stars) are valid---they have crossed
 the decision boundary (green)---but their quality differs. In panel (a),
 they are not plausible: they do not comply with the distribution of the
 factuals in \(y^+\) to the point where they form a clearly
@@ -768,7 +768,8 @@ from 28\% (\emph{Moon}) up to 78\% (\emph{GMSC}). For \emph{OL} the
 reduction is negative, consistent with the distance-based metric.
 \emph{MNIST} is the only dataset for which the distance and divergence
 metrics disagree. Upon visual inspection of the image counterfactuals we
-find that CT clearly improves plausibility (see supplementary appendix).
+find that CT clearly improves plausibility (see supplementary appendix
+for images).
 
 \subsubsection{Predictive Performance}\label{sec-pred}
 
