@@ -20,6 +20,8 @@ res_dir = joinpath(ENV["FINAL_GRID_RESULTS"],"single")
 mtbl_dir = joinpath(ENV["FINAL_GRID_RESULTS"],"mutability")
 ```
 
+\FloatBarrier
+
 # Details on Main Experiments {#sec-app-main .appendix}
 
 ## Final Hyperparameters
