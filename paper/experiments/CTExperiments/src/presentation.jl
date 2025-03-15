@@ -67,7 +67,75 @@ global LatexReplacements = Dict(
     "credit" => "Cred",
 )
 
+function split_at_parentheses_precise(s::String)
+    # This regex looks for either:
+    # 1. Standard parentheses: (...)
+    # 2. LaTeX math expressions: $\(...\)$
+    m = match(r"(.*)\s+((?:\$\\?\([^)]*\\?\)\$)|(?:\([^)]*\)).*$)", s)
+
+    if m === nothing
+        return (s, "")  # No match found
+    else
+        return m.captures[1], m.captures[2]  # Return the two parts
+    end
+end
+
+function swap_legy(s::Vector{String})
+    if !any(contains.(s,"\\lambda_{\\text{egy}}"))
+        return s
+    end
+    idx = contains.(s, r"\$ \\lambda_{\\text{egy}}=[^$]*\$")
+    s[idx] = [replace(si, r"\$ \\lambda_{\\text{egy}}=[^$]*\$" => match(r"\d*\.?\d+", si).match) for si in s[idx]]
+    s[1] = "$(uppercasefirst(s[1])) \\\\ \$ \\lambda_{\\text{egy}} \$"
+    return s
+end
+
+function multi_row_header(s::Vector{String})
+
+    s = swap_legy(s)
+
+    if !any(contains.(s,"\\\\"))
+        return [s]
+    else
+        h1 = String[]
+        h2 = String[]
+        for si in s
+            if contains(si, "\\\\")
+                h1i, h2i = split(si, " \\\\ ")
+            else
+                h1i = si
+                h2i = ""
+            end
+            push!(h1, string(h1i))
+            push!(h2, string(h2i))
+        end
+    end
+
+    if !any(contains.(h1,r"\([^)]*\)"))
+        return [h1,h2]
+    else
+        h3 = h2
+        s = h1
+        h1 = []
+        h2 = []
+        for si in s
+            if contains(si, r"\([^)]*\)")
+                h1i, h2i = split_at_parentheses_precise(si)
+            else
+                h1i = si
+                h2i = ""
+            end
+            push!(h1, string(h1i))
+            push!(h2, string(h2i))
+        end
+        return [h1,h2,h3]
+    end
+end
+
 function format_header(s::String; replacements::Dict=LatexReplacements)
+    if contains(s, "\$")
+        return LatexCell(s)
+    end
     s =
         replace(s, r"\bnce\b" => "ncounterfactuals") |>
         s ->
@@ -660,7 +728,7 @@ function aggregate_ce_evaluation(
     end
     df.variable .= CTExperiments.format_metric.(y)
     if rebase
-        df.variable .= (x -> LatexCell("$(x) \$(-\\Delta %)\$")).(df.variable)
+        df.variable .= (x -> LatexCell("$(x) \$(-%)\$")).(df.variable)
         select!(df, Not([:is_pct, :objective]))
     end
     return df
@@ -678,8 +746,8 @@ function aggregate_performance(res_dir::String; measure::Vector=["acc"], adversa
     eval_grids, _ = final_results(res_dir)
     df = aggregate_performance(eval_grids; measure, adversarial)
     df.objective .= replace.(df.objective, "Full" => "CT")
-    df.objective .= replace.(df.objective, "Vanilla" => "vanilla")
-    df.variable .= replace.(df.variable, "Accuracy" => "Acc.")
+    df.objective .= replace.(df.objective, "Vanilla" => "BL")
+    df.variable .= replace.(df.variable, "Accuracy" => adversarial ? "Acc.\$^*\$" : "Acc.")
     df.variable .= ["$v ($o)" for (v, o) in zip(df.variable, df.objective)]
     select!(df, Not([:std, :objective]))
     return df
@@ -710,6 +778,7 @@ function final_table(
     ce_var=["plausibility_distance_from_target", "mmd"],
     perf_var=["acc"],
     agg_further_vars=[["run"], ["run", "lambda_energy_eval"]],
+    longformat::Bool=true,
 )
     # CE:
     df_ce = DataFrame()
@@ -724,7 +793,9 @@ function final_table(
     df_ce = coalesce.(df_ce, "(agg.)")
 
     # Performance:
-    df_perf = aggregate_performance(res_dir; measure=perf_var)
+    df_perf = aggregate_performance(res_dir; measure=perf_var)                          # unperturbed
+    df_adv_perf = aggregate_performance(res_dir; measure=perf_var, adversarial=true)    # adversarial
+    df_perf = vcat(df_perf, df_adv_perf)
     df = vcat(df_ce, df_perf; cols=:union) |> df -> DataFrames.unstack(df, :dataset, :mean)
 
     # Mutability:
@@ -734,10 +805,33 @@ function final_table(
 
     # Missing:
     df = coalesce.(df, "")
-
     rename!(df, :variable => :measure)
     select!(df, :measure, Not([:measure]))
+
+    if longformat
+        df.measure = combine_header.(df.measure, string.(df.lambda_energy_eval))
+        select!(df, Not(:lambda_energy_eval))
+        df =
+            DataFrames.stack(df, Not(:measure)) |>
+            df -> DataFrames.unstack(df, :measure, :value)
+        rename!(df, :variable => :data)
+    end
     return df
+end
+
+combine_header(m::String, l::String) = m
+
+function combine_header(m::LatexCell, l::String) 
+    s = m.data
+    if l=="(agg.)"
+        new_s = "$s \\\\ (agg.)"
+        return new_s
+    end
+    if l==""
+        return m.data
+    end
+    new_s = "$s \\\\ \$ \\lambda_{\\text{egy}}=$l \$"
+    return new_s
 end
 
 function final_mutability(

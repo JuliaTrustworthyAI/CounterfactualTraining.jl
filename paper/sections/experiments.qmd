@@ -39,9 +39,7 @@ We find that CT can substantially improve the quality of explanations learned by
 ::: {#tbl-main}
 
 ```{=latex}
-\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}} cccccc }
 \input{tables/main.tex}
-\end{tabular*}
 ```
 
 Key performance metrics across all datasets. **Plausibility**: Rows 1-5 show the percentage reduction in implausibility via @eq-impl-dist for varying degrees of the energy penalty used for *ECCo* at test time; row 6 shows the reduction in implausibility via @eq-impl-div and aggregated across all test specifications. **Accuracy** (rows 7-8): test accuracies for models trained with CT and the baseline. **Actionability** (row 9): average reduction in costs when imposing mutability constraints.

@@ -10,12 +10,13 @@ function tabulate_results(
     table_type=:longtable,
     longtable_footer="Continuing table below.",
     save_name::Union{String,Nothing}=nothing,
+    formatters=PrettyTables.ft_round(2),
+    alignment=:c,
     kwrgs...,
 )
     df = inputs[1]
     other_inputs = inputs[2]
     if isa(other_inputs.backend, Val{:latex})
-        formatters = PrettyTables.ft_latex_sn(3)
         tf = PrettyTables.tf_latex_booktabs
         if isnothing(save_name)
             tab = pretty_table(
@@ -25,7 +26,7 @@ function tabulate_results(
                 wrap_table=wrap_table,
                 table_type=table_type,
                 longtable_footer=longtable_footer,
-                alignment=:c,
+                alignment,
                 other_inputs...,
                 kwrgs...,
             )
@@ -40,7 +41,7 @@ function tabulate_results(
                     wrap_table=wrap_table,
                     table_type=table_type,
                     longtable_footer=longtable_footer,
-                    alignment=:c,
+                    alignment,
                     other_inputs...,
                     kwrgs...,
                 )
@@ -48,11 +49,11 @@ function tabulate_results(
         end
     else
         if isnothing(save_name)
-            tab = pretty_table(df; alignment=:c, other_inputs..., kwrgs...)
+            tab = pretty_table(df; alignment, other_inputs..., kwrgs...)
             return tab
         else
             open(save_name, "w") do io
-                pretty_table(io, df; alignment=:c, other_inputs..., kwrgs...)
+                pretty_table(io, df; alignment, other_inputs..., kwrgs...)
             end
         end
     end
@@ -80,7 +81,8 @@ function get_table_inputs(
         hls = ()
     end
 
-    header = format_header.(names(df); replacements=LatexHeaderReplacements)
+    hs = multi_row_header(names(df))
+    header = [format_header.(h; replacements=LatexHeaderReplacements) for h in hs] |> x -> tuple(x...)
     return df, (; highlighters=hls, backend=backend, header=header)
 end
 

@@ -50,8 +50,20 @@ Final hyperparameters used for the main results for the different datasets.
 tbl_mtbl = final_mutability(mtbl_dir; var=["distance"])
 df = final_table(res_dir; tbl_mtbl)
 inputs = get_table_inputs(df, nothing; backend=Val(:latex))
-tabulate_results(inputs; table_type=:tabular, save_name="paper/quarto_ecml/tables/main.tex", wrap_table=false)
-tabulate_results(inputs; table_type=:tabular, save_name="paper/preprint/tables/main.tex", wrap_table=false)
+formatters = (
+    PrettyTables.ft_round(1,findall(.!contains.(names(df),"Acc"))),
+    PrettyTables.ft_round(2,findall(contains.(names(df),"Acc")))
+)
+for fname in ["paper/quarto_ecml/tables/main.tex","paper/preprint/tables/main.tex"]
+    tabulate_results(
+        inputs; 
+        table_type=:tabular, 
+        save_name=fname, 
+        wrap_table=false, 
+        alignment=[:c,fill(:r,size(df,2)-1)...],
+        formatters=formatters
+    )
+end
 ```
 
 ## Qualitative Findings for Image Data
