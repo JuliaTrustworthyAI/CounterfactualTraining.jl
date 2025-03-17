@@ -5,8 +5,8 @@ using StatsBase
 "Base type of training objectives."
 abstract type AbstractObjective end
 
-const default_energy_lambda = [0.5, 0.0001]
-const default_adversarial_lambda = 0.1
+const default_energy_lambda = [0.5, 0.1]
+const default_adversarial_lambda = 0.25
 
 needs_counterfactuals(obj::AbstractObjective) = true
 
@@ -30,9 +30,18 @@ end
 needs_counterfactuals(obj::VanillaObjective) = obj.needs_ce
 
 """
+    VanillaObjective(class_loss, lambda; needs_ce=false)
+
+Outer constructor to allow passing just `class_loss` and `lambda` as positional arguments.
+"""
+VanillaObjective(class_loss, lambda; needs_ce=false) =
+    VanillaObjective(class_loss, lambda, needs_ce)
+
+"""
     VanillaObjective(;
         class_loss::Function=Flux.Losses.logitcrossentropy,
         lambda::Vector{<:AbstractFloat}=[1.0],
+        needs_ce::Bool=false,
     )
 
 Outer constructor for the `VanillaObjective` type.

@@ -24,21 +24,25 @@ When called on any generator type `generator_type`, returns a string representat
 to_dict(generator_type::AbstractGeneratorType) = String(nameof(typeof(generator_type)))
 
 """
+    to_dict(domain::Vector)
+
+Handles the case where domain constraints are automatically inferred.
+"""
+function to_dict(domain::Vector)
+    if eltype(domain) == Tuple
+        dom = [[x...] for x in domain]
+    else
+        dom = domain
+    end
+    return dom
+end
+
+"""
     to_dict(config::AbstractConfiguration)
 
 When called on any configuration `config`, returns a dictionary representation of its fields and their values. 
 """
 function to_dict(config::AbstractConfiguration)
-
-    # println(config)
-
-    # Adjust for inferred domain constraints:
-    if hasfield(typeof(config), :domain)
-        if isa(config.domain, Vector{<:Tuple})
-            config.domain = "none"
-        end
-    end
-
     return Dict{String,Any}(
         String.(fieldnames(typeof(config))) .=>
             to_dict.(getfield.(Ref(config), fieldnames(typeof(config)))),
@@ -136,126 +140,3 @@ function has_results(cfg::AbstractConfiguration)
 end
 
 needs_results(cfg::AbstractConfiguration) = !has_results(cfg)
-
-# Function to check if a value is effectively empty
-function is_empty_value(v::Any)
-    if v isa String
-        return isempty(v)
-    elseif v isa Vector
-        return isempty(v)
-    elseif v isa Dict
-        # A dictionary is empty if it's empty itself or if all its filtered values would be empty
-        filtered = filter_dict(v)
-        return isempty(filtered)
-    else
-        return false
-    end
-end
-
-# Function to filter dictionary
-function filter_dict(dict::Dict)
-    # Filter out empty values and specified fields
-    drop_fields = ["name"]
-    return filter(dict) do (k, v)
-        !is_empty_value(v) && !(k in drop_fields)
-    end
-end
-
-global LatexReplacements = Dict(
-    "lambda_energy" => "\$\\lambda_{\\text{div}}\$",
-    "lambda_cost" => "\$\\lambda_{\\text{cost}}\$",
-)
-
-function format_header(s::String; replacements::Dict=LatexReplacements)
-    s =
-        replace(s, "_type" => "") |>
-        s ->
-            replace(s, "_params" => "_parameters") |>
-            s ->
-                replace(s, "lr" => "learning_rate") |>
-                s ->
-                    replace(s, "maxiter" => "maximum_iterations") |>
-                    s ->
-                        replace(s, "opt" => "optimizer") |>
-                        s ->
-                            replace(s, "conv" => "convergence") |>
-                            s ->
-                                replace(s, "opt" => "optimizer") |>
-                                s ->
-                                    replace(s, "n_" => "no._") |>
-                                    s -> if s in keys(replacements)
-                                        replacements[s]
-                                    else
-                                        s |>
-                                        s ->
-                                            split(s, "_") |>
-                                            ss ->
-                                                [uppercasefirst(s) for s in ss] |> ss -> join(ss, " ")
-                                    end
-    return s
-end
-
-function to_mkd(dict::Dict, level::Int=0; header::Union{Nothing,String}=nothing)
-    drop_fields = [
-        "name",
-        "concatenate_output",
-        "parallelizer",
-        "store_ce",
-        "threaded",
-        "verbose",
-        "vertical_splits",
-        "grid_file",
-        "inherit",
-        "save_dir",
-        "test_time",
-        "ndiv",
-    ]
-    dict = filter(((k, v),) -> length(v) > 0 && !(k in drop_fields), dict)
-
-    # Create indent string based on level
-    indent = repeat("    ", level)
-
-    # Initialize array to store markdown lines
-    if isnothing(header)
-        lines = String[]
-    else
-        header = "\n*$header*\n"
-        lines = [header]
-    end
-
-    # Sort dictionary keys for consistent output
-    for key in sort(collect(keys(dict)))
-        value = dict[key]
-        key = format_header(key; replacements=LatexReplacements)
-
-        if value isa Dict
-            # Handle nested dictionary
-            push!(lines, "$(indent)- $(key):")
-            # Recursively process nested dictionary with increased indentation
-            nested_lines = to_mkd(value, level + 1)
-            push!(lines, nested_lines)
-        elseif value isa Vector
-            # Handle vector values by joining with commas
-            value_str = join(value, ", ")
-            push!(lines, "$(indent)- $(key): `$(value_str)`")
-        else
-            # Handle single values
-            push!(lines, "$(indent)- $(key): `$(value)`")
-        end
-    end
-
-    # Join all lines with newlines
-    return join(lines, "\n")
-end
-
-# Function to create final Markdown string
-function dict_to_markdown(dict::Dict; header::Union{Nothing,String}=nothing)
-    filtered_dict = filter_dict(dict)
-    return "md\"\"\"\n$(to_mkd(filtered_dict; header=header))\n\"\"\""
-end
-
-# New function specifically for Quarto output
-function dict_to_quarto_markdown(dict::Dict; header::Union{Nothing,String}=nothing)
-    filtered_dict = filter_dict(dict)
-    return "$(to_mkd(filtered_dict; header=header))\n"
-end

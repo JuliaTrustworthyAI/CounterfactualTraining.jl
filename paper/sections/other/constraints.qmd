@@ -16,7 +16,7 @@ using Plots.PlotMeasures
 
 ## Protecting Mutability Constraints with Linear Classifiers {#sec-app-constraints}
 
-In @sec-constraints we explain that to avoid penalizing implausibility that arises due to mutability constraints, we impose a point mass prior on $p(\mathbf{x})$ for the corresponding feature. We argue in @sec-constraints that this approach induces models to be less sensitive to immutable features and demonstrate this empirically in @sec-experiments. Below we derive the analytical results in @prp-mtblty.
+In @sec-constraints we explain that to avoid penalizing implausibility that arises due to mutability constraints, we impose a point mass prior on $p(\mathbf{x})$ for the corresponding feature. We argue in @sec-constraints that this approach induces models to be less sensitive to immutable features and demonstrate this empirically in @sec-experiments. Below we derive the analytical results in Prp.~\ref{prp-mtblty}.
 
 ::: {.proof}
 
@@ -47,24 +47,18 @@ Based on @eq-loglike-decomp and @eq-multi we can identify that $(\mu_{k,d}-\mu_{
 Let $\mathbf{x}^\prime$ denote some randomly chosen individual from class $y^-$ and let $y^+ \sim p(y)$ denote the randomly chosen target class. Then the partial derivative of the contrastive divergence penalty [@eq-div] with respect to coefficient $\theta_{y^+,d}$ is equal to 
 
 $$
-\frac{\partial}{\partial\theta_{y^+,d}} \left(\text{div}(\mathbf{x},\mathbf{x^\prime},\mathbf{y};\theta)\right) = \frac{\partial}{\partial\theta_{y^+,d}} \left( \left(-\mathbf{M}_\theta(\mathbf{x})[y^+]\right) - \left(-\mathbf{M}_\theta(\mathbf{x}^\prime)[y^+]\right) \right) = x_{d}^\prime - x_{d}
+\frac{\partial}{\partial\theta_{y^+,d}} \left(\text{div}(\mathbf{x}^+,\mathbf{x^\prime},\mathbf{y};\theta)\right) = \frac{\partial}{\partial\theta_{y^+,d}} \left( \left(-\mathbf{M}_\theta(\mathbf{x}^+)[y^+]\right) - \left(-\mathbf{M}_\theta(\mathbf{x}^\prime)[y^+]\right) \right) = x_{d}^\prime - x^+_{d}
 $$ {#eq-grad}
 
 and equal to zero everywhere else.
 
-Since $(\mu_{y^-,d_{\text{immtbl}}} < \mu_{y^+,d_{\text{immtbl}}})$ we are more likely to have $(x_{d_{\text{immtbl}}}^\prime - x_{d_{\text{immtbl}}}) < 0$ than vice versa at initialization. Similarly, we are more likely to have $(x_{d_{\text{mtbl}}}^\prime - x_{d_{\text{mtbl}}}) > 0$ since $(\mu_{y^-,d_{\text{mtbl}}} > \mu_{y^+,d_{\text{mtbl}}})$.
+Since $(\mu_{y^-,d_{\text{immtbl}}} < \mu_{y^+,d_{\text{immtbl}}})$ we are more likely to have $(x_{d_{\text{immtbl}}}^\prime - x^+_{d_{\text{immtbl}}}) < 0$ than vice versa at initialization. Similarly, we are more likely to have $(x_{d_{\text{mtbl}}}^\prime - x^+_{d_{\text{mtbl}}}) > 0$ since $(\mu_{y^-,d_{\text{mtbl}}} > \mu_{y^+,d_{\text{mtbl}}})$.
 
 This implies that if we do not protect feature $d_{\text{immtbl}}$, the contrastive divergence penalty will decrease $\theta_{y^-,d_{\text{immtbl}}}$ thereby exacerbating the existing effect $(\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}}) < 0$. In words, not protecting the immutable feature would have the undesirable effect of making the classifier more sensitive to this feature, in that it would be more likely to predict class $y^-$ as opposed to $y^+$ for lower values of $d_{\text{immtbl}}$. 
 
 By the same rationale, the contrastive divergence penalty can generally be expected to increase $\theta_{y^-,d_{\text{mtbl}}}$ exacerbating $(\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}}) > 0$. In words, this has the effect of making the classifier more sensitive to the mutable feature, in that it would be more likely to predict class $y^-$ as opposed to $y^+$ for higher values of $d_{\text{mtbl}}$.
 
 Thus, our proposed approach of protecting feature $d_{\text{immtbl}}$ has the net affect of decreasing the classifier's sensitivity to the immutable feature relative to the mutable feature (i.e. no change in sensitivity for $d_{\text{immtbl}}$ relative to increased sensitivity for $d_{\text{mtbl}}$).
-
-:::
-
-::: {.callout-warning}
-
-\@Cynthia, \@Arie, I have tentatively phrased the above in terms of a theorem and proof. This is something I've so far shied away from because I feel a bit out of my depth when it comes to mathematical proofs. The above makes intuitive sense to me, but I don't know for sure if it's correct. 
 
 :::
 
@@ -76,6 +70,7 @@ using CTExperiments:
     train_val_split, 
     build_model, 
     LinearModel, 
+    MLPModel,
     get_input_encoder
 
 # Callback:
@@ -90,8 +85,6 @@ function plot_db(model, ces; _xlab="Debt", _ylab="Age", plot_contour::Bool=false
     ylab = _constraint[2] == "both" ? "$(_ylab) (mutable)" : "$(_ylab) (immutable)"
 
     # Data and decision boundary:
-    coeff = get_log_reg_params(model)
-    db = get_decision_boundary(coeff)
     plt = Plots.scatter(
         ce_data, 
         # label=["1=Default" "2=No Default"], 
@@ -101,7 +94,11 @@ function plot_db(model, ces; _xlab="Debt", _ylab="Age", plot_contour::Bool=false
         legend=false,
         title=_title
     )
-    Plots.abline!(plt, db.slope, db.intercept; lw=5, label="Dec. Boundary")
+    if length(model) == 1
+        coeff = get_log_reg_params(model)
+        db = get_decision_boundary(coeff)
+        Plots.abline!(plt, db.slope, db.intercept; lw=5, label="Dec. Boundary")
+    end
 
     # Counterfactuals:
     target = 2
@@ -109,18 +106,18 @@ function plot_db(model, ces; _xlab="Debt", _ylab="Age", plot_contour::Bool=false
     if !any(isnothing.(x))
         yhat = [argmax(y) for y in eachcol(model(x))]
         yhat0 = [argmax(y) for y in eachcol(model(x0))]
-        idx_plotted = yhat0.==factual
+        idx_plotted = yhat0.==factual .|| yhat0.==target
         if any(idx_plotted)
 
-            # Paths:
-            u = []
-            v = []
-            for (i,ce) in enumerate(eachcol(x))
-                Δ = ce - x0[:,i]
-                push!(u, Δ[1])
-                push!(v, Δ[2])
-            end
-            Plots.quiver!(x0[1,idx_plotted], x0[2,idx_plotted], quiver=(u[idx_plotted], v[idx_plotted]), color=factual)
+            # # Paths:
+            # u = []
+            # v = []
+            # for (i,ce) in enumerate(eachcol(x))
+            #     Δ = ce - x0[:,i]
+            #     push!(u, Δ[1])
+            #     push!(v, Δ[2])
+            # end
+            # Plots.quiver!(x0[1,idx_plotted], x0[2,idx_plotted], quiver=(u[idx_plotted], v[idx_plotted]), color=yhat0[idx_plotted])
             
             # End points:
             Plots.scatter!(x[1,idx_plotted], x[2,idx_plotted], label=["CE (y⁺=1)" "CE (y⁺=2)"], ms=15, shape=:star, color=yhat[idx_plotted], group=yhat[idx_plotted], mscolor=yhat0[idx_plotted])
@@ -133,9 +130,9 @@ end
 # Data:
 specs = [
     # ("(a)", VanillaObjective(needs_ce=true), ["both", "both"]),
-    # ("(b)", FullObjective(lambda=[1.0,1.0,0.0,1.0]), ["both", "both"]),
+    # ("(b)", FullObjective(lambda=[1.0,0.5,0.01,0.1]), ["both", "both"]),
     # ("(c)", VanillaObjective(needs_ce=true), ["both", "none"]),
-    ("(d)", FullObjective(lambda=[1.0,1.0,0.0,1.0]), ["both", "none"]),
+    ("(d)", FullObjective(lambda=[1.0,0.5,0.01,0.1]), ["both", "none"]),
 ]
 ```
 
@@ -157,7 +154,7 @@ for (title, obj, constraint) in specs
 
     # Data:
     data = LinearlySeparable(
-        n_train=500,
+        n_train=3000,
         batchsize=50,
         mutability=constraint
     )
@@ -168,12 +165,13 @@ for (title, obj, constraint) in specs
     # Model:
     nin = size(first(train_set)[1], 1)
     nout = size(first(train_set)[2], 1)
-    model = build_model(LinearModel(), nin, nout)
+    model = build_model(MLPModel(), nin, nout)
 
     # Objective:
-    generator = ECCoGenerator(λ=[0.1,0.1])
-    opt_state = Flux.setup(Descent(), model)
-    conv = DecisionThresholdConvergence(decision_threshold=0.90)
+    opt = AMSGrad()
+    generator = GenericGenerator(opt=Descent(0.1))
+    opt_state = Flux.setup(opt, model)
+    conv = DecisionThresholdConvergence(decision_threshold=0.75, max_iter=30)
 
     model, logs = counterfactual_training(
         obj,
@@ -182,10 +180,10 @@ for (title, obj, constraint) in specs
         train_set,
         opt_state;
         val_set = val_set,
-        nepochs = 50,
+        nepochs = 100,
         mutability = Symbol.(constraint),
         callback = plot_db,
-        nce=50,
+        nce=1000,
         convergence=conv, 
         verbose=3
     )

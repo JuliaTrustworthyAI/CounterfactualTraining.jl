@@ -29,7 +29,8 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
     n_individuals::Int = get_global_param("n_individuals", 100)
     n_runs::Int = get_global_param("n_runs", 5)
     conv::AbstractString = "threshold"
-    maxiter::Int = 100
+    decision_threshold::AbstractFloat = 0.95
+    maxiter::Int = get_global_param("maxiter_eval", 50)
     vertical_splits::Int = get_global_param("vertical_splits", 100)
     store_ce::Bool = false
     parallelizer::AbstractString = "mpi"
@@ -42,6 +43,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
         n_individuals,
         n_runs,
         conv,
+        decision_threshold,
         maxiter,
         vertical_splits,
         store_ce,
@@ -68,6 +70,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
             n_individuals,
             n_runs,
             conv,
+            decision_threshold,
             maxiter,
             vertical_splits,
             store_ce,
@@ -84,7 +87,9 @@ function get_parallelizer(cfg::CounterfactualParams)
     return get_parallelizer(cfg.parallelizer; threaded=cfg.threaded)
 end
 
-get_convergence(cfg::CounterfactualParams) = get_convergence(cfg.conv, cfg.maxiter)
+function get_convergence(cfg::CounterfactualParams)
+    return get_convergence(cfg.conv, cfg.maxiter, cfg.decision_threshold)
+end
 
 """
     evaluate_counterfactuals(
@@ -117,7 +122,6 @@ function evaluate_counterfactuals(
     measure::Vector{<:PenaltyOrFun}=get_ce_measures(),
 )
     grid = ExperimentGrid(cfg.grid_file)
-    exper_list = load_list(grid)
 
     # Get parallelizer:
     pllr = get_parallelizer(cfg.counterfactual_params)
@@ -160,6 +164,9 @@ function evaluate_counterfactuals(
             bmk, measure, data; rng=rng, nsamples=cfg.counterfactual_params.ndiv
         )
     end
+
+    # In case `feature_sensitivity` was computed, store index of feature:
+    add_sensitivity!(bmk)
 
     rm(interim_storage_path; recursive=true)
 
@@ -226,20 +233,24 @@ function load_data_models_generators(cfg::AbstractEvaluationConfig)
 
     # Counterfactual generators (same for each exper):
     gen_params = cfg.counterfactual_params.generator_params
-    _gen_name = get_generator_name(gen_params)
+    _gen_name = get_name(gen_params)
     _generator = get_generator(gen_params)
     generators = Dict(_gen_name => _generator)
 
     # Get data:
-    unique_dataset = unique([exper.data for exper in exper_list])
+    datasets = [exper.data for exper in exper_list]
+    unique_dataset = unique(x -> CTExperiments.to_dict(x), datasets)
 
     out_list = Tuple[]
 
     for dataset in unique_dataset
-        exper_with_this_dataset = [exper for exper in exper_list if exper.data == dataset]
+        exper_with_this_dataset = [
+            exper for exper in exper_list if
+            CTExperiments.to_dict(exper.data) == CTExperiments.to_dict(dataset)
+        ]
 
         # Data:
-        data = get_ce_data(dataset; test_set=true)
+        data = get_ce_data(dataset; test_set=cfg.test_time)
 
         # Get models:
         models = Logging.with_logger(Logging.NullLogger()) do
@@ -380,6 +391,7 @@ function generate_factual_target_pairs(
     cfg::AbstractEvaluationConfig;
     fname::Union{Nothing,String}=nothing,
     overwrite::Bool=false,
+    nce::Int=1,
 )
     fname = if isnothing(fname)
         default_factual_target_pairs_name(cfg)
@@ -391,7 +403,7 @@ function generate_factual_target_pairs(
         input_list = load_data_models_generators(cfg)
         output = Benchmark[]
         for (data, models, generators) in input_list
-            _output = generate_factual_target_pairs(cfg, data, models, generators)
+            _output = generate_factual_target_pairs(cfg, data, models, generators; nce=nce)
             push!(output, _output)
         end
         output = reduce(vcat, output)
@@ -419,7 +431,8 @@ function generate_factual_target_pairs(
     cfg::AbstractEvaluationConfig,
     data::CounterfactualData,
     models::AbstractDict,
-    generators::AbstractDict,
+    generators::AbstractDict;
+    nce::Int=1,
 )
 
     # Targets and factuals:
@@ -434,7 +447,7 @@ function generate_factual_target_pairs(
     output = Benchmark[]
 
     for factual in factuals
-        chosen = rand(findall(data.output_encoder.labels .== factual))
+        chosen = rand(findall(data.output_encoder.labels .== factual), nce)
         x = select_factual(data, chosen)
         for target in targets
             if cfg.counterfactual_params.verbose

@@ -106,7 +106,9 @@ for (i, eval_config) in enumerate(worker_chunk)
     end
 
     # Generate factual target pairs for plotting:
-    generate_factual_target_pairs(eval_config)
+    generate_factual_target_pairs(
+        eval_config; nce=CTExperiments.get_global_param("nce_pairs", 10)
+    )
 
     # Working directory:
     if !isdummy(eval_config)

@@ -142,7 +142,10 @@ function get_config_from_args(;
     end
 
     # Do not return adjust path:
-    if !return_adjusted
+    if !return_adjusted || isinteractive()
+        if isinteractive()
+            @warn "Interactive session: returning unadjusted filepath."
+        end
         return fname
     end
 
@@ -155,8 +158,10 @@ function get_config_from_args(;
         subdirname = ARGS[(x -> contains(x, "--subdir=")).(ARGS)]
         @assert length(subdirname) == 1 "Please provide exactly one name for the subdirectory."
         subdirname = replace(subdirname[1], "--subdir=" => "")
-    else
+    elseif haskey(ENV, "OUTPUT_SUBDIR")
         subdirname = ENV["OUTPUT_SUBDIR"]
+    else
+        subdirname = ""
     end
     new_save_dir = mkpath(joinpath(new_save_dir, subdirname))
     @info "Storing results in $(new_save_dir)."
@@ -195,7 +200,7 @@ function get_config_from_args(;
         cfg["save_dir"] = default_save_dir(
             new_save_dir, cfg["name"], cfg["data"], cfg["model_type"]
         )
-        rootdir, fonly = (dirname(fname), splitdir(fname)[end])
+        rootdir, fonly = (joinpath(dirname(fname), subdirname), basename(fname))
         fname = joinpath(
             default_save_dir(rootdir, cfg["name"], cfg["data"], cfg["model_type"]), fonly
         )

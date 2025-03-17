@@ -46,7 +46,7 @@ valid_y = CTExperiments.valid_y_ce(all_data[1])
 params = PlotParams(; rowvar="lambda_energy_diff", colorvar="conv", colvar="dim_reduction")
 final_save_dir = save_dir(params, output_dir; prefix)
 for y in valid_y
-    plt = boxplot_ce(all_data...; y=y, params()...)
+    plt = plot_measure_ce(all_data...; y=y, params()...)
     display(plt)
     save(joinpath(final_save_dir, "$y.png"), plt; px_per_unit=3)
 end
@@ -57,7 +57,7 @@ params = PlotParams(;
 )
 final_save_dir = save_dir(params, output_dir; prefix)
 for y in valid_y
-    plt = boxplot_ce(all_data...; y=y, params()...)
+    plt = plot_measure_ce(all_data...; y=y, params()...)
     display(plt)
     save(joinpath(final_save_dir, "$y.png"), plt; px_per_unit=3)
 end

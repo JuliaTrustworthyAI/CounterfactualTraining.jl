@@ -55,7 +55,7 @@ end
 abstract type AbstractAECriterium end
 
 Base.@kwdef struct NormBound <: AbstractAECriterium
-    epsilon::AbstractFloat = 0.5
+    epsilon::AbstractFloat = 0.3
     p::Real = Inf
 end
 

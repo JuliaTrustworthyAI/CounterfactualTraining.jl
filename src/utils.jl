@@ -40,7 +40,7 @@ end
 
 Automatically infers reasonable domain constraints for the counterfactuals. 
 """
-function infer_domain_constraints(X::AbstractArray; nstd=3)
+function infer_domain_constraints(X::AbstractArray; nstd=2)
     bounds = Tuple[]
     for x in eachrow(X)
         xmin, xmax = extrema(x)

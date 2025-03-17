@@ -5,10 +5,22 @@ julia:
 format:
   arxiv-pdf:
     keep-tex: true  
-    linenumbers: true
+    linenumbers: false
     doublespacing: false
-    runninghead: "Counterfactual Training (A Preprint)"
+    runninghead: "Counterfactual Training"
     authorcols: true
+    include-in-header:
+      text: |
+        \usepackage[title]{appendix}
+        \usepackage{placeins}
+        \usepackage{amsthm}
+        \theoremstyle{plain}
+        \newtheorem{proposition}{Proposition}[section]
+        \theoremstyle{definition}
+        \newtheorem{definition}{Definition}[section]
+        \theoremstyle{definition}
+        \newtheorem{example}{Example}[section]
+        \theoremstyle{plain}
 ---
 
 {{< include /paper/body.qmd >}}
@@ -20,5 +32,12 @@ format:
 
 {{< pagebreak >}}
 
+```{=latex}
+\begin{appendices}
+```
+
 {{< include /paper/sections/appendix.qmd >}}
 
+```{=latex}
+\end{appendices}
+```

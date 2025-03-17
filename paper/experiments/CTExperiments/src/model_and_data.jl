@@ -4,6 +4,11 @@ using Random
 using Serialization
 using TaijaData
 
+function get_labels(d::Dataset)
+    _, y = get_data(d)
+    return sort(unique(y))
+end
+
 """
     apply_inferred_domain!(d::Dataset)
 
@@ -45,6 +50,7 @@ const data_sets = Dict(
     dname(Adult()) => Adult,
     dname(Circles()) => Circles,
     dname(Overlapping()) => Overlapping,
+    dname(Credit()) => Credit,
 )
 
 """
@@ -124,6 +130,7 @@ function get_ce_data(data::Dataset, n=nothing; test_set::Bool=false, train_only:
         get_data(data; n=n, test_set=test_set)...;
         domain=get_domain(data),
         mutability=get_mutability(data),
+        features_categorical=get_cats(data),
     )
     if train_only
         _, _, ce_data = train_val_split(data, ce_data, data.n_validation / ntotal(data))
@@ -193,7 +200,6 @@ end
 Helper function to get the domain constraints for the dataset. If `data.domain` is a string other than "none", it throws an error. If it's a vector of two elements, it converts them to a tuple.
 """
 function get_domain(d::Dataset)
-    apply_inferred_domain!(d::Dataset)
     if d.domain isa String
         if d.domain == "none"
             domain = nothing
@@ -202,9 +208,7 @@ function get_domain(d::Dataset)
         end
     elseif typeof(d.domain) <: Vector{<:Real}
         domain = tuple(d.domain...)
-    elseif typeof(d.domain) <: Vector{Vector{<:Real}}
-        domain = [tuple(x...) for x in d.domain]
-    elseif typeof(d.domain) <: Vector{<:Tuple}
+    else
         domain = d.domain
     end
     return domain
@@ -218,3 +222,10 @@ Loads pre-trained VAE from the dataset directory. The file name is constructed u
 function load_vae(d::Dataset)
     return Serialization.deserialize(joinpath(d.datadir, "vae", "$(dname(d)).jls"))
 end
+
+"""
+    get_cats(d::Dataset)
+
+Get the vector of indeces for categorical features. By default, this returns `nothing`, i.e. no categorical features are assumed to be present.
+"""
+get_cats(d::Dataset) = nothing

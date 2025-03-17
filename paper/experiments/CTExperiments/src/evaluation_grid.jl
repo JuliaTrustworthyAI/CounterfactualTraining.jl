@@ -3,9 +3,7 @@ using JLD2
 using UUIDs
 
 global _default_generator_params_eval_grid = (
-    type=["ecco", "generic"],
-    lambda_cost=[0.0],
-    lambda_energy=[0.1, 0.5, 1.0, 5.0, 10.0, 20.0],
+    type=["ecco", "generic"], lambda_cost=[0.0], lambda_energy=[0.1, 0.5, 1.0, 5.0, 10.0]
 )
 
 """
@@ -87,7 +85,7 @@ function EvaluationGrid(
     save_dir::Union{Nothing,String}=nothing,
     counterfactual_params::NamedTuple=(;),
     generator_params::NamedTuple=_default_generator_params_eval_grid,
-    test_time::Bool=false,
+    test_time::Bool=get_global_param("test_time", false),
     inherit::Bool=get_global_param("inherit", true),
 )
     save_dir = if isnothing(save_dir)
@@ -322,37 +320,3 @@ function load_ce_evaluation(grid::EvaluationGrid)
 end
 
 get_data_set(grid::EvalConfigOrGrid) = get_data_set(ExperimentGrid(grid.grid_file).data)
-
-function get_data_seed(grid::EvalConfigOrGrid)
-    _seed = ExperimentGrid(grid.grid_file).data_params["train_test_seed"] |> unique
-    @assert length(_seed) == 1 "Did you specify multiple seeds?"
-    return _seed[1]
-end
-
-function get_data_params(grid::EvalConfigOrGrid, param::String)
-    data_params = ExperimentGrid(grid.grid_file).data_params
-    @assert param in keys(data_params)
-    val = data_params[param] |> unique
-    println(val)
-    @assert length(val) == 1 "Did you specify multiple values for $param?"
-    return val[1]
-end
-
-function get_ce_data(cfg::AbstractEvaluationConfig)
-    return (dt -> CounterfactualData(dt...))(get_data(cfg))
-end
-
-function get_data(cfg::AbstractEvaluationConfig)
-    # Get data:
-    data = (
-        dataset_type -> (get_data(
-            dataset_type(; train_test_seed=get_data_params(cfg, "train_test_seed"));
-            n=nothing,
-            test_set=cfg.test_time,
-        ))
-    )(
-        get_data_set(cfg)
-    )
-
-    return data
-end

@@ -1,0 +1,25 @@
+# Notation {.appendix}
+
+Below we provide an overview of some notation used frequently throughout the paper:
+
+- $y^+$: The target class and also the index of the target class.
+- $y^-$: The non-target class and also the index of non-the target class.
+- $\mathbf{x}$: a single training sample.
+- $\mathbf{x}^\prime$: a counterfactual. 
+- $\mathbf{x}^+$: a training sample in the target class (ground-truth).
+- $\mathbf{y}^+$: The one-hot encoded output vector for the target class. 
+- $\theta$: Model parameters (unspecified).
+- $\Theta$: Matrix of parameters. 
+- $\mathbf{M}(\cdot)$: linear predictions (logits) of the classifier.
+
+## Other Technical Details
+
+Maximum mean discrepancy is defined as follows,
+
+$$
+\begin{aligned}
+\text{MMD}({X}^\prime,\tilde{X}^\prime) &= \frac{1}{m(m-1)}\sum_{i=1}^m\sum_{j\neq i}^m k(x_i,x_j) \\ &+ \frac{1}{n(n-1)}\sum_{i=1}^n\sum_{j\neq i}^n k(\tilde{x}_i,\tilde{x}_j) \\ &- \frac{2}{mn}\sum_{i=1}^m\sum_{j=1}^n k(x_i,\tilde{x}_j)
+\end{aligned}
+$$ {#eq-mmd}
+
+where $k(\cdot,\cdot)$ is a kernel function [@gretton2012kernel]. We make use of a Gaussian kernel with a constant length-scale parameter of $0.5$. In our implementation, @eq-mmd is by default applied to the entire subset of the training data for which $y=y^+$.

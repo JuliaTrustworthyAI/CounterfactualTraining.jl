@@ -8,6 +8,7 @@ using TaijaParallel
 using Flux
 
 const Opt = Flux.Optimise.AbstractOptimiser
+const default_ce_search_lr = 0.25
 
 "Type for the ECCoGenerator."
 struct ECCo <: AbstractGeneratorType end
@@ -21,10 +22,10 @@ struct Generic <: AbstractGeneratorType end
 "Type for the GravitationalGenerator."
 struct Gravitational <: AbstractGeneratorType end
 
-get_generator_name(gen::ECCo; pretty::Bool=false) = pretty ? "ECCo" : "ecco"
-get_generator_name(gen::Generic; pretty::Bool=false) = pretty ? "Generic" : "generic"
-get_generator_name(gen::REVISE; pretty::Bool=false) = pretty ? "REVISE" : "revise"
-function get_generator_name(gen::Gravitational; pretty::Bool=false)
+get_name(gen::ECCo; pretty::Bool=false) = pretty ? "ECCo" : "ecco"
+get_name(gen::Generic; pretty::Bool=false) = pretty ? "Generic" : "generic"
+get_name(gen::REVISE; pretty::Bool=false) = pretty ? "REVISE" : "revise"
+function get_name(gen::Gravitational; pretty::Bool=false)
     return pretty ? "Gravitational" : "gravi"
 end
 
@@ -34,10 +35,10 @@ end
 Catalogue of available generator types.
 """
 const generator_types = Dict(
-    get_generator_name(ECCo()) => ECCo,
-    get_generator_name(Generic()) => Generic,
-    get_generator_name(REVISE()) => REVISE,
-    get_generator_name(Gravitational()) => Gravitational,
+    get_name(ECCo()) => ECCo,
+    get_name(Generic()) => Generic,
+    get_name(REVISE()) => REVISE,
+    get_name(Gravitational()) => Gravitational,
 )
 
 """
@@ -75,14 +76,15 @@ Mutable struct holding keyword arguments relevant to counterfactual generator.
 """
 Base.@kwdef struct GeneratorParams <: AbstractGeneratorParams
     type::AbstractGeneratorType = ECCo()
-    lr::AbstractFloat = 1.0
+    lr::AbstractFloat = default_ce_search_lr
     opt::AbstractString = "sgd"
-    maxiter::Int = 50
+    maxiter::Int = 30
+    decision_threshold::AbstractFloat = get_global_param("tau", 0.75)
     lambda_cost::AbstractFloat = 0.001
     lambda_energy::AbstractFloat = 5.0
 end
 
-get_generator_name(params::GeneratorParams) = get_generator_name(params.type)
+get_name(params::GeneratorParams) = get_name(params.type)
 
 """
     get_generator(params::GeneratorParams)
@@ -178,13 +180,15 @@ Base.@kwdef struct TrainingParams <: AbstractConfiguration
     objective::AbstractString = "full"
     lambda_class_loss::AbstractFloat = 1.0
     lambda_energy_diff::AbstractFloat = CounterfactualTraining.default_energy_lambda[1]
-    lambda_energy_reg::AbstractFloat = CounterfactualTraining.default_energy_lambda[2]
+    lambda_energy_reg::AbstractFloat = get_global_param(
+        "reg_strength", CounterfactualTraining.default_energy_lambda[2]
+    )
     lambda_adversarial::AbstractFloat = CounterfactualTraining.default_adversarial_lambda
     class_loss::AbstractString = "logitcrossentropy"
     burnin::AbstractFloat = get_global_param("burnin", 0.0f0)
-    nepochs::Int = get_global_param("nepochs", 50)
+    nepochs::Int = get_global_param("nepochs", 100)
     generator_params::GeneratorParams = GeneratorParams()
-    nce::Int = get_global_param("nce", 100)
+    nce::Int = get_global_param("nce", 1000)
     nneighbours::Int = 100
     conv::AbstractString = "threshold"
     lr::AbstractFloat = 0.001
@@ -283,13 +287,21 @@ const conv_catalogue = Dict(
     "gen_con" => Convergence.GeneratorConditionsConvergence,
 )
 
-function get_convergence(s::String, maxiter::Int)
+function get_convergence(s::String, max_iter::Int, decision_threshold::AbstractFloat)
     s = lowercase(s)
     @assert s in keys(conv_catalogue) "Unknown convergence type: $s. Available types are $(keys(conv_catalogue))"
-    conv = conv_catalogue[s](; max_iter=maxiter)
+    if s == "threshold"
+        conv = conv_catalogue[s](; max_iter, decision_threshold)
+    else
+        conv = conv_catalogue[s](; max_iter)
+    end
     return conv
 end
 
 function get_convergence(params::TrainingParams)
-    return get_convergence(params.conv, params.generator_params.maxiter)
+    return get_convergence(
+        params.conv,
+        params.generator_params.maxiter,
+        params.generator_params.decision_threshold,
+    )
 end

@@ -1,0 +1,11 @@
+---
+engine: julia
+julia: 
+  exeflags: ["--project=../experiments/"]
+format:
+  quarto-ecml-pdf:
+    keep-tex: true  
+blind-review: true
+---
+
+{{< include /paper/body.qmd >}}

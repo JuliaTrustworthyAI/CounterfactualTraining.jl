@@ -57,14 +57,19 @@ function generate!(
         callback=callback,
     )
 
-    counterfactuals = (ce -> ce.counterfactual).(ces)                                   # get actual counterfactuals
+    # counterfactuals = (ce -> ce.counterfactual).(ces)                                   # get actual counterfactuals
     advexms = (ce -> ce.search[:last_valid_ae]).(ces)                                   # get adversarial example
-    perturbations = (ce -> ce.counterfactual - ce.factual).(ces)                        # get perturbations
     targets = (ce -> ce.target).(ces)                                                   # get targets
     neighbours = (ce -> find_potential_neighbours(ce, counterfactual_data, 1)).(ces)    # randomly draw a sample from the target class
+    validities = (ce -> ce.search[:converged]).(ces)
+    # Extract counterfactual if converged, else use neighbour:
+    counterfactuals = [
+        validities[i] ? ce.counterfactual : neighbours[i] for (i, ce) in enumerate(ces)
+    ]
+
     protect_immutable!(neighbours, counterfactuals, counterfactual_data.mutability)     # adjust for mutability
     targets_enc = (ce -> target_encoded(ce, counterfactual_data)).(ces)                 # one-hot encoded targets
-    validities = (ce -> isvalid(ce, model, counterfactual_data)).(ces)                  # validity (label flip rate)
+    # validities = (ce -> isvalid(ce, model, counterfactual_data)).(ces)                  # validity (label flip rate)
 
     n_total = length(counterfactuals)
     percent_valid = sum(reduce(vcat, validities)) / n_total
