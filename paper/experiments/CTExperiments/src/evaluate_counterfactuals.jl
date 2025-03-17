@@ -245,7 +245,8 @@ function load_data_models_generators(cfg::AbstractEvaluationConfig)
 
     for dataset in unique_dataset
         exper_with_this_dataset = [
-            exper for exper in exper_list if CTExperiments.to_dict(exper.data) == CTExperiments.to_dict(dataset)
+            exper for exper in exper_list if
+            CTExperiments.to_dict(exper.data) == CTExperiments.to_dict(dataset)
         ]
 
         # Data:

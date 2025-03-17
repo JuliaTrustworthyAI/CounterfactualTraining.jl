@@ -482,7 +482,6 @@ function plot_ce(
     nsamples::Int=25,
     kwrgs...,
 )
-
     M = load_results(exper)[3]
     generator = CTExperiments.get_generator(params.generator_params)
     conv = CTExperiments.get_convergence(params)

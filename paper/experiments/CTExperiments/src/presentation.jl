@@ -100,20 +100,22 @@ function split_at_parentheses_precise(s::String)
 end
 
 function swap_legy(s::Vector{String})
-    if !any(contains.(s,"\\lambda_{\\text{egy}}"))
+    if !any(contains.(s, "\\lambda_{\\text{egy}}"))
         return s
     end
     idx = contains.(s, r"\$ \\lambda_{\\text{egy}}=[^$]*\$")
-    s[idx] = [replace(si, r"\$ \\lambda_{\\text{egy}}=[^$]*\$" => match(r"\d*\.?\d+", si).match) for si in s[idx]]
+    s[idx] = [
+        replace(si, r"\$ \\lambda_{\\text{egy}}=[^$]*\$" => match(r"\d*\.?\d+", si).match)
+        for si in s[idx]
+    ]
     s[1] = "$(uppercasefirst(s[1])) \\\\ \$ \\lambda_{\\text{egy}} \$"
     return s
 end
 
 function multi_row_header(s::Vector{String})
-
     s = swap_legy(s)
 
-    if !any(contains.(s,"\\\\"))
+    if !any(contains.(s, "\\\\"))
         return [s]
     else
         h1 = String[]
@@ -130,8 +132,8 @@ function multi_row_header(s::Vector{String})
         end
     end
 
-    if !any(contains.(h1,r"\([^)]*\)"))
-        return [h1,h2]
+    if !any(contains.(h1, r"\([^)]*\)"))
+        return [h1, h2]
     else
         h3 = h2
         s = h1
@@ -147,7 +149,7 @@ function multi_row_header(s::Vector{String})
             push!(h1, string(h1i))
             push!(h2, string(h2i))
         end
-        return [h1,h2,h3]
+        return [h1, h2, h3]
     end
 end
 
@@ -209,7 +211,12 @@ global _drop_fields = [
     "ndiv",
 ]
 
-function to_mkd(dict::Dict, level::Int=0; header::Union{Nothing,String}=nothing, drop_fields=_drop_fields)
+function to_mkd(
+    dict::Dict,
+    level::Int=0;
+    header::Union{Nothing,String}=nothing,
+    drop_fields=_drop_fields,
+)
     dict = filter(((k, v),) -> length(v) > 0 && !(k in drop_fields), dict)
 
     # Create indent string based on level
@@ -249,8 +256,10 @@ function to_mkd(dict::Dict, level::Int=0; header::Union{Nothing,String}=nothing,
 end
 
 # Function to create final Markdown string
-function dict_to_markdown(dict::Dict; header::Union{Nothing,String}=nothing, filter_empty::Bool=true)
-    filtered_dict = filter_dict(dict; filter_empty) 
+function dict_to_markdown(
+    dict::Dict; header::Union{Nothing,String}=nothing, filter_empty::Bool=true
+)
+    filtered_dict = filter_dict(dict; filter_empty)
     return "md\"\"\"\n$(to_mkd(filtered_dict; header=header))\n\"\"\""
 end
 
@@ -422,13 +431,17 @@ end
 Aggregate performance variable `y` from an experiment grid by columns specified in `byvars`.
 """
 function aggregate_performance(
-    cfg::EvalConfigOrGrid; measure=[accuracy, multiclass_f1score], adversarial::Bool=false, kwrgs...
+    cfg::EvalConfigOrGrid;
+    measure=[accuracy, multiclass_f1score],
+    adversarial::Bool=false,
+    kwrgs...,
 )
 
     # Load data:
     exper_grid = ExperimentGrid(cfg.grid_file)
     df, df_meta, df_perf = merge_with_meta(
-        cfg, CTExperiments.test_performance(exper_grid; measure, adversarial, return_df=true)
+        cfg,
+        CTExperiments.test_performance(exper_grid; measure, adversarial, return_df=true),
     )
 
     return aggregate_performance(df, df_meta, df_perf; kwrgs...)
@@ -716,8 +729,8 @@ end
 function get_img_command(data_names, full_paths, fig_labels; fig_caption="", width=100)
     fig_cap = fig_caption == "" ? fig_caption : "$fig_caption "
     return [
-        "![$(fig_cap)Data: $(CTExperiments.get_data_name(nm)).](/$pth){#$(lbl) width=$(width)%}" for
-        (nm, pth, lbl) in zip(data_names, full_paths, fig_labels)
+        "![$(fig_cap)Data: $(CTExperiments.get_data_name(nm)).](/$pth){#$(lbl) width=$(width)%}"
+        for (nm, pth, lbl) in zip(data_names, full_paths, fig_labels)
     ]
 end
 
@@ -758,7 +771,9 @@ end
 
 global allowed_perf_measures = Dict("acc" => accuracy, "f1" => multiclass_f1score)
 
-function aggregate_performance(res_dir::String; measure::Vector=["acc"], adversarial::Bool=false)
+function aggregate_performance(
+    res_dir::String; measure::Vector=["acc"], adversarial::Bool=false
+)
 
     # Get measures:
     if eltype(measure) == String
@@ -843,13 +858,13 @@ end
 
 combine_header(m::String, l::String) = m
 
-function combine_header(m::LatexCell, l::String) 
+function combine_header(m::LatexCell, l::String)
     s = m.data
-    if l=="(agg.)"
+    if l == "(agg.)"
         new_s = "$s \\\\ (agg.)"
         return new_s
     end
-    if l==""
+    if l == ""
         return m.data
     end
     new_s = "$s \\\\ \$ \\lambda_{\\text{egy}}=$l \$"

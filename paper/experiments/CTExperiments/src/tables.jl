@@ -82,7 +82,8 @@ function get_table_inputs(
     end
 
     hs = multi_row_header(names(df))
-    header = [format_header.(h; replacements=LatexHeaderReplacements) for h in hs] |> x -> tuple(x...)
+    header =
+        [format_header.(h; replacements=LatexHeaderReplacements) for h in hs] |> x -> tuple(x...)
     return df, (; highlighters=hls, backend=backend, header=header)
 end
 
