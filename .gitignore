@@ -16,5 +16,7 @@
 **.synctex.gz
 
 /.quarto/
+/.vscode/
+**.DS_Store
 
 /.luarc.json
