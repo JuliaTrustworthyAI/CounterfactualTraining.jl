@@ -1,0 +1,11 @@
+---
+engine: julia
+julia: 
+  exeflags: ["--project=../experiments/"]
+format:
+  quarto-barebones-latex:
+    cite-method: natbib
+    header-includes: header.tex
+---
+
+{{< include /paper/body.qmd >}}
