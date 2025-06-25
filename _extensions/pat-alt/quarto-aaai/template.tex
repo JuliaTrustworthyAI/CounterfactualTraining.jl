@@ -1,0 +1,24 @@
+\makeatletter
+\@ifpackageloaded{hyperref}{}{%
+  \newcommand{\texorpdfstring}[2]{#1}%
+}
+\newcommand{\tightlist}
+\makeatother
+\providecommand\phantomsection{}
+
+$before-title.tex()$
+
+\usepackage{amsmath}
+
+$tables.tex()$
+
+$graphics.tex()$
+
+$babel-lang.tex()$
+
+$title.tex()$
+
+\begin{document}
+$before-body.tex()$
+$body$
+\end{document}
