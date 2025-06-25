@@ -8,3 +8,8 @@ format:
 ---
 
 {{< include /paper/body.qmd >}}
+
+# References {-}
+
+::: {#refs}
+:::

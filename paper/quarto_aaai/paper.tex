@@ -168,7 +168,13 @@
 % This is only needed to show inline citations in the guidelines document. You should not need it and can safely delete it.
 \usepackage{bibentry}
 % END REMOVE bibentry
+\usepackage{amsfonts}
 \usepackage{amsmath}
+\usepackage{amsthm}
+\newtheorem{proposition}{Proposition}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+
 
 \usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
@@ -1008,4 +1014,10 @@ models. It can also be used to fine-tune conventionally-trained models
 and achieve similar gains. Finally, this work showcases that it is
 practical to improve models \emph{and} their explanations at the same
 time.
+
+\section*{References}\label{references}
+\addcontentsline{toc}{section}{References}
+
+\renewcommand{\bibsection}{}
+\bibliography{../quarto_ecml/bibliography.bib}
 \end{document}
