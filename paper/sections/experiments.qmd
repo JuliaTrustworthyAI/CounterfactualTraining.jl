@@ -41,7 +41,9 @@ Test accuracy for CT is virtually identical to the baseline for *Adult*, *Circ*,
 ::: {#tbl-main}
 
 ```{=latex}
+\begin{table*}
 \input{tables/main.tex}
+\end{table*}
 ```
 
 Key performance metrics across all datasets (column 1). **Plausibility**: Columns 2-6 show the percentage reduction in implausibility ($\text{IP}$) for varying degrees of the energy penalty $\lambda_{\text{egy}}$ used for *ECCo* at test time; column 7 shows the reduction in $\text{IP}^*$ ($\text{MMD}$), aggregated across all test specifications. **Accuracy** (columns 8-11): test accuracies and robust accuracies ($\text{Acc}^*$) for CT and the baseline (BL). **Actionability** (column 12): average reduction in costs when imposing mutability constraints reported for the four datasets for which we could identify meaningful features to protect.
