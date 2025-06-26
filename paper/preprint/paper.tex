@@ -1,26 +1,28 @@
 % Options for packages loaded elsewhere
+% Options for packages loaded elsewhere
 \PassOptionsToPackage{unicode}{hyperref}
 \PassOptionsToPackage{hyphens}{url}
 \PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
 %
 \documentclass[
 ]{article}
-
+\usepackage{xcolor}
 \usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{5}
 \usepackage{iftex}
 \ifPDFTeX
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
   \usepackage{textcomp} % provide euro and other symbols
 \else % if luatex or xetex
-  \usepackage{unicode-math}
+  \usepackage{unicode-math} % this also loads fontspec
   \defaultfontfeatures{Scale=MatchLowercase}
   \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
 \fi
 \usepackage{lmodern}
-\ifPDFTeX\else  
-    % xetex/luatex font selection
-    \setmainfont[]{Latin Modern Roman}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+  \setmainfont[]{Latin Modern Roman}
   \setmathfont[]{Latin Modern Math}
 \fi
 % Use upquote if available, for straight quotes in verbatim environments
@@ -39,9 +41,6 @@
 }{% if KOMA class
   \KOMAoptions{parskip=half}}
 \makeatother
-\usepackage{xcolor}
-\setlength{\emergencystretch}{3em} % prevent overfull lines
-\setcounter{secnumdepth}{5}
 % Make \paragraph and \subparagraph free-standing
 \makeatletter
 \ifx\paragraph\undefined\else
@@ -67,8 +66,7 @@
 \makeatother
 
 
-\providecommand{\tightlist}{%
-  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
 % Correct order of tables after \paragraph or \subparagraph
 \usepackage{etoolbox}
@@ -93,6 +91,8 @@
 % Set default figure placement to htbp
 \def\fps@figure{htbp}
 \makeatother
+
+
 % definitions for citeproc citations
 \NewDocumentCommand\citeproctext{}{}
 \NewDocumentCommand\citeproc{mm}{%
@@ -126,6 +126,18 @@
 \newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
 \newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
 \newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+
+
+
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+
+ 
+
 
 \usepackage[title]{appendix}
 \usepackage{placeins}
@@ -208,11 +220,9 @@
 \makeatother
 \newcounter{quartocalloutnteno}
 \newcommand{\quartocalloutnte}[1]{\refstepcounter{quartocalloutnteno}\label{#1}}
-
 \usepackage{bookmark}
-
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
-\urlstyle{same} % disable monospaced font for URLs
+\urlstyle{same}
 \hypersetup{
   pdftitle={Counterfactual Training: Teaching Models Plausible and Actionable Explanations},
   pdfauthor={Patrick Altmeyer; Aleksander Buszydlik; Arie van Deursen; Cynthia C. S. Liem},
@@ -587,7 +597,7 @@ following objective:
 
 \begin{equation}\phantomsection\label{eq-obj}{
 \begin{split}
-\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta) &+ \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y}) \\ &+ \lambda_{\text{reg}}\text{ridge}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta)
+\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) &+ \lambda_{\text{div}} \text{div}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta) \\+ \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y}) &+ \lambda_{\text{reg}}\text{ridge}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta)
 \end{split}
 }\end{equation} where \(\text{yloss}(\cdot)\) is a classification loss
 that induces discriminative performance (e.g., cross-entropy). The
@@ -795,7 +805,7 @@ individuals. These counterfactuals are also plausible with respect to
 the mutable feature. Thus, we consider the model in panel (d) as the
 most explainable according to Def. \ref{def-explainability}.
 
-\begin{figure}
+\begin{figure*}
 
 \centering{
 
@@ -811,7 +821,7 @@ training data colored according to their ground-truth label: \(y^-=1\)
 in blue and \(y^+=2\) in orange. Stars indicate counterfactuals in the
 target class.}
 
-\end{figure}%
+\end{figure*}%
 
 \section{Experiments}\label{sec-experiments}
 
@@ -940,7 +950,7 @@ these datasets in particular, we find that CT strongly outperforms the
 baseline. In fact, we find that CT improves adversarial robustness on
 all datasets.
 
-\begin{table}
+\begin{table*}
 
 \caption{\label{tbl-main}Key performance metrics across all datasets
 (column 1). \textbf{Plausibility}: Columns 2-6 show the percentage
@@ -960,7 +970,7 @@ protect.}
 
 }
 
-\end{table}%
+\end{table*}%
 
 \subsubsection{Actionability}\label{sec-act}
 
@@ -1672,7 +1682,7 @@ the application.
 Note~\ref{nte-train-default} presents the default hyperparameters used
 during training.
 
-\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-train-default}: Training Phase}, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, breakable, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, rightrule=.15mm, toprule=.15mm, leftrule=.75mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-note-color-frame, colback=white, titlerule=0mm, title={Note \ref*{nte-train-default}: Training Phase}, opacitybacktitle=0.6, breakable, coltitle=black, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, left=2mm, toprule=.15mm, arc=.35mm, bottomrule=.15mm]
 
 \quartocalloutnte{nte-train-default} 
 
@@ -1779,7 +1789,7 @@ as randomly perturbed data. Although not reported here, we have
 consistently found strong outperformance of CT compared to the weak
 baseline.
 
-\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-eval-default}: Evaluation Phase}, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, breakable, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, rightrule=.15mm, toprule=.15mm, leftrule=.75mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-note-color-frame, colback=white, titlerule=0mm, title={Note \ref*{nte-eval-default}: Evaluation Phase}, opacitybacktitle=0.6, breakable, coltitle=black, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, left=2mm, toprule=.15mm, arc=.35mm, bottomrule=.15mm]
 
 \quartocalloutnte{nte-eval-default} 
 
@@ -1847,6 +1857,7 @@ not shown here is set to its default value
 
 \centering{
 
+\begin{table*}
   \begin{tabular}{cccccccc}
     \toprule
     \textbf{Data} & \textbf{No. Train} & \textbf{No. Test} & \textbf{Batchsize} & \textbf{Domain} & \textbf{Decision Threshold} & \textbf{No. Counterfactuals} & \textbf{$\lambda_{\text{reg}}$} \\\midrule
@@ -1860,6 +1871,7 @@ not shown here is set to its default value
     Moon & 3600 & 600 & 30 & none & 0.9 & 1000 & 0.25 \\
     OL & 3600 & 600 & 30 & none & 0.5 & 1000 & 0.25 \\\bottomrule
   \end{tabular}
+\end{table*}
 
 }
 
@@ -2055,7 +2067,7 @@ training is shown in Note~\ref{nte-gen-params-final-run-train}. The
 corresponding evaluation grid used for these experiments is shown in
 Note~\ref{nte-gen-params-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, breakable, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, rightrule=.15mm, toprule=.15mm, leftrule=.75mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-note-color-frame, colback=white, titlerule=0mm, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, opacitybacktitle=0.6, breakable, coltitle=black, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, left=2mm, toprule=.15mm, arc=.35mm, bottomrule=.15mm]
 
 \quartocalloutnte{nte-gen-params-final-run-train} 
 
@@ -2089,7 +2101,7 @@ Note~\ref{nte-gen-params-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, breakable, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, rightrule=.15mm, toprule=.15mm, leftrule=.75mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-note-color-frame, colback=white, titlerule=0mm, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, opacitybacktitle=0.6, breakable, coltitle=black, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, left=2mm, toprule=.15mm, arc=.35mm, bottomrule=.15mm]
 
 \quartocalloutnte{nte-gen-params-final-run-eval} 
 
@@ -2308,7 +2320,7 @@ is shown in Note~\ref{nte-pen-final-run-train}. The corresponding
 evaluation grid used for these experiments is shown in
 Note~\ref{nte-pen-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, breakable, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, rightrule=.15mm, toprule=.15mm, leftrule=.75mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-note-color-frame, colback=white, titlerule=0mm, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, opacitybacktitle=0.6, breakable, coltitle=black, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, left=2mm, toprule=.15mm, arc=.35mm, bottomrule=.15mm]
 
 \quartocalloutnte{nte-pen-final-run-train} 
 
@@ -2336,7 +2348,7 @@ Note~\ref{nte-pen-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, breakable, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, rightrule=.15mm, toprule=.15mm, leftrule=.75mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-note-color-frame, colback=white, titlerule=0mm, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, opacitybacktitle=0.6, breakable, coltitle=black, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, left=2mm, toprule=.15mm, arc=.35mm, bottomrule=.15mm]
 
 \quartocalloutnte{nte-pen-final-run-eval} 
 
@@ -2555,7 +2567,7 @@ in Note~\ref{nte-train-final-run-train}. The corresponding evaluation
 grid used for these experiments is shown in
 Note~\ref{nte-train-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-train-final-run-train}: Training Phase}, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, breakable, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, rightrule=.15mm, toprule=.15mm, leftrule=.75mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-note-color-frame, colback=white, titlerule=0mm, title={Note \ref*{nte-train-final-run-train}: Training Phase}, opacitybacktitle=0.6, breakable, coltitle=black, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, left=2mm, toprule=.15mm, arc=.35mm, bottomrule=.15mm]
 
 \quartocalloutnte{nte-train-final-run-train} 
 
@@ -2583,7 +2595,7 @@ Note~\ref{nte-train-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, breakable, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, rightrule=.15mm, toprule=.15mm, leftrule=.75mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-note-color-frame, colback=white, titlerule=0mm, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, opacitybacktitle=0.6, breakable, coltitle=black, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, left=2mm, toprule=.15mm, arc=.35mm, bottomrule=.15mm]
 
 \quartocalloutnte{nte-train-final-run-eval} 
 
@@ -2848,7 +2860,7 @@ The hyperparameter grid for tuning key parameters is shown in
 Note~\ref{nte-tune-train}. The corresponding evaluation grid used for
 these experiments is shown in Note~\ref{nte-tune-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-tune-train}: Training Phase}, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, breakable, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, rightrule=.15mm, toprule=.15mm, leftrule=.75mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-note-color-frame, colback=white, titlerule=0mm, title={Note \ref*{nte-tune-train}: Training Phase}, opacitybacktitle=0.6, breakable, coltitle=black, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, left=2mm, toprule=.15mm, arc=.35mm, bottomrule=.15mm]
 
 \quartocalloutnte{nte-tune-train} 
 
@@ -2878,7 +2890,7 @@ these experiments is shown in Note~\ref{nte-tune-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-tune-eval}: Evaluation Phase}, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, breakable, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, rightrule=.15mm, toprule=.15mm, leftrule=.75mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-note-color-frame, colback=white, titlerule=0mm, title={Note \ref*{nte-tune-eval}: Evaluation Phase}, opacitybacktitle=0.6, breakable, coltitle=black, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, left=2mm, toprule=.15mm, arc=.35mm, bottomrule=.15mm]
 
 \quartocalloutnte{nte-tune-eval} 
 
@@ -3183,7 +3195,7 @@ The hyperparameter grid for tuning the learning rate is shown in
 Note~\ref{nte-tune_lr-train}. The corresponding evaluation grid used for
 these experiments is shown in Note~\ref{nte-tune_lr-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-tune_lr-train}: Training Phase}, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, breakable, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, rightrule=.15mm, toprule=.15mm, leftrule=.75mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-note-color-frame, colback=white, titlerule=0mm, title={Note \ref*{nte-tune_lr-train}: Training Phase}, opacitybacktitle=0.6, breakable, coltitle=black, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, left=2mm, toprule=.15mm, arc=.35mm, bottomrule=.15mm]
 
 \quartocalloutnte{nte-tune_lr-train} 
 
@@ -3213,7 +3225,7 @@ these experiments is shown in Note~\ref{nte-tune_lr-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-tune_lr-eval}: Evaluation Phase}, colframe=quarto-callout-note-color-frame, bottomrule=.15mm, colback=white, opacitybacktitle=0.6, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, coltitle=black, breakable, toptitle=1mm, arc=.35mm, left=2mm, titlerule=0mm, rightrule=.15mm, toprule=.15mm, leftrule=.75mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, rightrule=.15mm, colframe=quarto-callout-note-color-frame, colback=white, titlerule=0mm, title={Note \ref*{nte-tune_lr-eval}: Evaluation Phase}, opacitybacktitle=0.6, breakable, coltitle=black, opacityback=0, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, bottomtitle=1mm, toptitle=1mm, left=2mm, toprule=.15mm, arc=.35mm, bottomrule=.15mm]
 
 \quartocalloutnte{nte-tune_lr-eval} 
 
@@ -3251,6 +3263,40 @@ change from the baseline model for the distance-based implausibility
 metric (Equation~\ref{eq-impl-dist}). Boxplots indicate the variation
 across evaluation runs and test settings (varying parameters for
 \emph{ECCo}). Data: Adult.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/cali/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}
+
+}
+
+\caption{\label{fig-tune_lr-plaus-cali}Average outcomes for the
+plausibility measure across key hyperparameters. This shows the \%
+change from the baseline model for the distance-based implausibility
+metric (Equation~\ref{eq-impl-dist}). Boxplots indicate the variation
+across evaluation runs and test settings (varying parameters for
+\emph{ECCo}). Data: California Housing.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/circles/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}
+
+}
+
+\caption{\label{fig-tune_lr-plaus-circles}Average outcomes for the
+plausibility measure across key hyperparameters. This shows the \%
+change from the baseline model for the distance-based implausibility
+metric (Equation~\ref{eq-impl-dist}). Boxplots indicate the variation
+across evaluation runs and test settings (varying parameters for
+\emph{ECCo}). Data: Circles.}
 
 \end{figure}%
 
@@ -3326,6 +3372,23 @@ across evaluation runs and test settings (varying parameters for
 
 \centering{
 
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/moons/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}
+
+}
+
+\caption{\label{fig-tune_lr-plaus-moons}Average outcomes for the
+plausibility measure across key hyperparameters. This shows the \%
+change from the baseline model for the distance-based implausibility
+metric (Equation~\ref{eq-impl-dist}). Boxplots indicate the variation
+across evaluation runs and test settings (varying parameters for
+\emph{ECCo}). Data: Moons.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
 \includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/over/evaluation/results/ce/lambda_energy_reg---lr_exper---lambda_energy_eval---lambda_energy_reg---lr_exper/plausibility_distance_from_target.png}
 
 }
@@ -3355,6 +3418,32 @@ Figure~\ref{fig-tune_lr-mat-over}.
 
 \caption{\label{fig-tune_lr-mat-adult}Proportion of mature
 counterfactuals in each epoch. Data: Adult.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/cali/evaluation/results/logs/objective---lr---lambda_energy_reg/percent_valid.png}
+
+}
+
+\caption{\label{fig-tune_lr-mat-cali}Proportion of mature
+counterfactuals in each epoch. Data: California Housing.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/circles/evaluation/results/logs/objective---lr---lambda_energy_reg/percent_valid.png}
+
+}
+
+\caption{\label{fig-tune_lr-mat-circles}Proportion of mature
+counterfactuals in each epoch. Data: Circles.}
 
 \end{figure}%
 
@@ -3407,6 +3496,19 @@ counterfactuals in each epoch. Data: Linearly Separable.}
 
 \caption{\label{fig-tune_lr-mat-mnist}Proportion of mature
 counterfactuals in each epoch. Data: MNIST.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{../../paper/experiments/output/final_run/tune_lr/mlp/moons/evaluation/results/logs/objective---lr---lambda_energy_reg/percent_valid.png}
+
+}
+
+\caption{\label{fig-tune_lr-mat-moons}Proportion of mature
+counterfactuals in each epoch. Data: Moons.}
 
 \end{figure}%
 

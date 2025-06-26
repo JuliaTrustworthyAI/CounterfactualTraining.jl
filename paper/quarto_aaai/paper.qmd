@@ -5,6 +5,10 @@ julia:
 format:
   quarto-aaai-pdf:
     keep-tex: true
+    include-in-header:
+      text: |
+        \usepackage[title]{appendix}
+        \usepackage{placeins}
 ---
 
 {{< include /paper/body.qmd >}}
