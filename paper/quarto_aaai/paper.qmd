@@ -4,7 +4,7 @@ julia:
   exeflags: ["--project=../experiments/"]
 format:
   quarto-aaai-pdf:
-    keep-tex: true  
+    keep-tex: true
 ---
 
 {{< include /paper/body.qmd >}}

@@ -12,6 +12,7 @@ function tabulate_results(
     save_name::Union{String,Nothing}=nothing,
     formatters=PrettyTables.ft_round(2),
     alignment=:c,
+    wrap_table_environment="table*",
     kwrgs...,
 )
     df = inputs[1]
@@ -24,6 +25,7 @@ function tabulate_results(
                 tf=tf,
                 formatters=formatters,
                 wrap_table=wrap_table,
+                wrap_table_environment=wrap_table_environment,
                 table_type=table_type,
                 longtable_footer=longtable_footer,
                 alignment,
@@ -39,6 +41,7 @@ function tabulate_results(
                     tf=tf,
                     formatters=formatters,
                     wrap_table=wrap_table,
+                    wrap_table_environment=wrap_table_environment,
                     table_type=table_type,
                     longtable_footer=longtable_footer,
                     alignment,

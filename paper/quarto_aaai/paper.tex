@@ -518,7 +518,7 @@ following objective:
 
 \begin{equation}\phantomsection\label{eq-obj}{
 \begin{split}
-\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta) &+ \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y}) \\ &+ \lambda_{\text{reg}}\text{ridge}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta)
+\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) &+ \lambda_{\text{div}} \text{div}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta) \\+ \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y}) &+ \lambda_{\text{reg}}\text{ridge}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta)
 \end{split}
 }\end{equation} where \(\text{yloss}(\cdot)\) is a classification loss
 that induces discriminative performance (e.g., cross-entropy). The
@@ -717,7 +717,7 @@ individuals. These counterfactuals are also plausible with respect to
 the mutable feature. Thus, we consider the model in panel (d) as the
 most explainable according to Def. \ref{def-explainability}.
 
-\begin{figure}
+\begin{figure*}
 
 \centering{
 
@@ -733,7 +733,7 @@ training data colored according to their ground-truth label: \(y^-=1\)
 in blue and \(y^+=2\) in orange. Stars indicate counterfactuals in the
 target class.}
 
-\end{figure}%
+\end{figure*}%
 
 \section{Experiments}\label{sec-experiments}
 
