@@ -38,10 +38,12 @@ To assess CT, we investigate the improvements in performance metrics when using 
 
 Test accuracy for CT is virtually identical to the baseline for *Adult*, *Circ*, *LS*, *Moon*, and *OL*, and even slightly improved for *Cred*. Exceptions to this general pattern are *MNIST*, *CH*, and *GMSC*, for which we observe a reduction in test accuracy of 2, 5, and 15 percentage points respectively. When looking at robust test accuracies (Acc.$^*$) for these datasets in particular, we find that CT strongly outperforms the baseline. In fact, we find that CT improves adversarial robustness on all datasets. 
 
-::: {#tbl-main table-env="table*"}
+::: {#tbl-main}
 
 ```{=latex}
+\begin{table*}
 \input{tables/main.tex}
+\end{table*}
 ```
 
 Key performance metrics across all datasets (column 1). **Plausibility**: Columns 2-6 show the percentage reduction in implausibility ($\text{IP}$) for varying degrees of the energy penalty $\lambda_{\text{egy}}$ used for *ECCo* at test time; column 7 shows the reduction in $\text{IP}^*$ ($\text{MMD}$), aggregated across all test specifications. **Accuracy** (columns 8-11): test accuracies and robust accuracies ($\text{Acc}^*$) for CT and the baseline (BL). **Actionability** (column 12): average reduction in costs when imposing mutability constraints reported for the four datasets for which we could identify meaningful features to protect.
