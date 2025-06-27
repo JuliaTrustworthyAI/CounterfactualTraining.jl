@@ -299,19 +299,20 @@ improve the ability of XAI tools to identify the subset of explanations
 that are plausible and valid for any given model, independent of whether
 these explanations are compatible with the learned representations
 \citep{altmeyer2024faithful}. Fortunately, recent findings indicate that
-improved ``explainability'' of a model can arise as a consequence of
-regularization techniques aimed at other training objectives such as
+improved ``explanatory capacity'' of a model can arise as a consequence
+of regularization techniques aimed at other training objectives such as
 generative capacity, generalization, or robustness
 \citep{altmeyer2024faithful, augustin2020adversarial, schut2021generating}.
 Our contribution consolidates these findings within a unified framework.
 
 Specifically, \textbf{we propose Counterfactual Training (CT)}: a novel
-training regime explicitly geared towards improving the explainability
-of models. In high-level terms, we posit that the explainability of a
-model depends on the extent to which valid explanations derived for this
-model are also deemed plausible with respect to the underlying data and
-the global actionability constraints (see Def.
-\ref{def-explainability}). To the best of our knowledge, Counterfactual
+training regime explicitly geared towards improving the explanatory
+capacity of models that, in high-level terms, we define as the extent to
+which valid explanations derived for a model can be deemed plausible
+with respect to the underlying data and global actionability constraints
+(we refine this notion in Def. \ref{def-explainability}). For
+simplicity, we refer to models with high explanatory capacity as
+\emph{explainable}. To the best of our knowledge, Counterfactual
 Training represents the first attempt to achieve more explainable models
 by employing counterfactual explanations already in the training phase.
 
@@ -331,54 +332,50 @@ trustworthy.
 \section{Related Literature}\label{sec-lit}
 
 To make the desiderata for our framework more concrete, we follow
-\citet{augustin2020adversarial} in tying the concept of explainability
-to the quality of CEs that can be generated for a given model. The
-authors show that CEs---understood as minimal input perturbations that
-yield some desired model prediction---tend to be more meaningful if the
-underlying model is more robust to adversarial examples. We can make
-intuitive sense of this finding when looking at adversarial training
-(AT) through the lens of representation learning with high degrees of
-freedom. As argued before, learned representations may be sensitive to
-producing implausible explanations and mispredicting for worst-case
-counterfactuals (i.e., AEs). Thus, by inducing models to ``unlearn''
-susceptiblity to such examples, adversarial training can effectively
-remove implausible explanations from the solution space.
+\citet{augustin2020adversarial} in tying explainability to the quality
+of CEs that can be generated for a given model. The authors show that
+CEs (understood as minimal input perturbations that yield some desired
+model prediction) tend to be more meaningful if the underlying model is
+more robust to adversarial examples. We can make intuitive sense of this
+finding if we look at adversarial training (AT) through the lens of
+representation learning with high degrees of freedom. As argued before,
+learned representations may be sensitive to producing implausible
+explanations and mispredicting for worst-case counterfactuals (i.e.,
+AEs). Thus, by inducing models to ``unlearn'' susceptiblity to such
+examples, adversarial training can effectively remove implausible
+explanations from the solution space.
 
-\subsection{Adversarial Examples are Counterfactual
-Explanations}\label{adversarial-examples-are-counterfactual-explanations}
+\subsection{Adversarial Examples are
+Counterfactuals}\label{adversarial-examples-are-counterfactuals}
 
-This interpretation of the link between explainability through
-counterfactuals on one side and robustness to adversarial examples on
-the other is backed by empirical evidence.
-\citet{sauer2021counterfactual} demonstrates that using counterfactual
+The interpretation of the link between explainability through
+counterfactuals on the one side, and robustness to adversarial examples
+on the other is backed by empirical evidence.
+\citet{sauer2021counterfactual} demonstrate that using counterfactual
 images during classifier training improves model robustness. Similarly,
-\citet{abbasnejad2020counterfactual} argues that counterfactuals
+\citet{abbasnejad2020counterfactual} argue that counterfactuals
 represent potentially useful training data in machine learning,
 especially in supervised settings where inputs may be reasonably mapped
-to multiple outputs. They, too, demonstrate that augmenting the training
-data of image classifiers can improve generalization. Finally,
-\citet{teney2020learning} proposes an approach using counterfactuals in
-training that does not rely on data augmentation: they argue that
-counterfactual pairs typically already exist in training datasets.
-Specifically, their approach relies on identifying similar input samples
-with different annotations and ensuring that the gradient of the
+to multiple outputs. They, too, show that augmenting the training data
+of (image) classifiers can improve generalization performance. Finally,
+\citet{teney2020learning} argue that counterfactual pairs tend to exist
+in training data. Hence, their approach aims to identify similar input
+samples with different annotations and ensure that the gradient of the
 classifier aligns with the vector between such pairs of counterfactual
-inputs using the cosine distance as the loss function.
+inputs using a cosine distance loss function.
 
-In the natural language processing (NLP) domain, CEs have also been used
-to improve models through data augmentation. \citet{wu2021polyjuice2}
-proposes \emph{Polyjuice}, a general-purpose counterfactual generator
-for language models. The authors empirically demonstrate that the
+CEs have also been used to improve models in the natural language
+processing (NLP) domain. First, \citet{wu2021polyjuice2} propose
+\emph{Polyjuice}, a general-purpose counterfactual generator for
+language models. The authors empirically demonstrate that the
 augmentation of training data with their method improves robustness in a
-number of NLP tasks. \citet{balashankar2023improving} similarly uses
+number of NLP tasks. Second, \citet{balashankar2023improving} use
 \emph{Polyjuice} to augment NLP datasets through diverse counterfactuals
 and show that classifier robustness improves by up to 20\%. Finally,
-\citet{luu2023counterfactual} introduces Counterfactual Adversarial
-Training (CAT) that also aims to improve generalization and robustness
-of language models through a three-step procedure: the authors identify
-training samples that are subject to high predictive uncertainty,
-generate CEs for them, and fine-tune the language model on a dataset
-augmented with the CEs.
+\citet{luu2023counterfactual} introduce Counterfactual Adversarial
+Training (CAT) that aims to improve generalization and robustness of
+language models by generating counterfactuals for training samples that
+are subject to high predictive uncertainty.
 
 There have also been several attempts at formalizing the relationship
 between counterfactual explanations and adversarial examples. Pointing
@@ -387,60 +384,60 @@ to clear similarities in how CEs and AEs are generated,
 the opaqueness and robustness problems in representation learning.
 Formally, AEs can be seen as the subset of CEs for which
 misclassification is achieved \citep{freiesleben2022intriguing}.
-Similarly, \citet{pawelczyk2022exploring} shows that CEs and AEs are
+Similarly, \citet{pawelczyk2022exploring} show that CEs and AEs are
 equivalent under certain conditions.
 
-Two recent works are closely related to ours in that they use
+Two other works are closely related to ours in that they use
 counterfactuals during training with the explicit goal of affecting
 certain properties of the post-hoc counterfactual explanations. Firstly,
-\citet{ross2021learning} proposes a way to train models that guarantee
-individual recourse to some positive target class with high probability.
-Their approach builds on adversarial training by explicitly inducing
-susceptibility to targeted adversarial examples for the positive class.
-Additionally, the proposed method allows for imposing a set of
-actionability constraints ex-ante. For example, users can specify that
-certain features are immutable. Secondly, \citet{guo2023counternet} is
-the first to propose an end-to-end training pipeline that includes CEs
-as part of the training procedure. In particular, they propose a
-specific network architecture that includes a predictor and CE generator
-network, where the parameters of the CE generator network are learnable.
-Counterfactuals are generated during each training iteration and fed
-back to the predictor network. In contrast to \citet{guo2023counternet},
-we impose no restrictions on the ANN architecture at all.
+\citet{ross2021learning} propose a way to train models that guarantee
+recourse to a positive target class with high probability. Their
+approach builds on adversarial training by explicitly inducing
+susceptibility to targeted AEs for the positive class. Additionally, the
+method allows for imposing a set of actionability constraints ex-ante.
+For example, users can specify that certain features are immutable.
+Secondly, \citet{guo2023counternet} are the first to propose an
+end-to-end training pipeline that includes CEs as part of the training
+procedure. Their \emph{CounterNet} network architecture includes a
+predictor and a CE generator, where the parameters of the CE generator
+are learnable. Counterfactuals are generated during each training
+iteration and fed back to the predictor. In contrast, we impose no
+restrictions on the ANN architecture at all.
 
-\subsection{Aligning Representations with Plausible
-Explanations}\label{aligning-representations-with-plausible-explanations}
+\subsection{Aligning Representations with
+Explanations}\label{aligning-representations-with-explanations}
 
 Improving the adversarial robustness of models is not the only path
-towards aligning representations with plausible explanations. In a work
-closely related to this one, \citet{altmeyer2024faithful} shows that
+towards aligning representations with plausible explanations. In a
+closely related work, \citet{altmeyer2024faithful} show that
 explainability can be improved through model averaging and refined model
-objectives. The authors propose a way to generate counterfactuals that
-are maximally faithful to the model in that they are consistent with
-what the model has learned about the underlying data. Formally, they
-rely on tools from energy-based modelling \citep{teh2003energy} to
-minimize the divergence between the distribution of counterfactuals and
-the conditional posterior over inputs learned by the model. Their
-proposed counterfactual explainer, \emph{ECCCo}, yields plausible
-explanations if and only if the underlying model has learned
-representations that align with them. The authors find that both deep
-ensembles \citep{lakshminarayanan2016simple} and joint energy-based
-models (JEMs) \citep{grathwohl2020your} tend to do well in this regard.
+objectives. They propose a way to generate counterfactuals that are
+maximally faithful to the model in that they are consistent with what
+the model has learned about the underlying data. Formally, they rely on
+tools from energy-based modelling \citep{teh2003energy} to minimize the
+divergence between the distribution of counterfactuals and the
+conditional posterior over inputs learned by the model. Their
+counterfactual explainer, \emph{ECCCo}, yields plausible explanations if
+and only if the underlying model has learned representations that align
+with them. The authors find that both deep ensembles
+\citep{lakshminarayanan2016simple} and joint energy-based models (JEMs)
+\citep{grathwohl2020your} tend to do well in this regard.
 
 Once again it helps to look at these findings through the lens of
 representation learning with high degrees of freedom. Deep ensembles are
-approximate Bayesian model averages, which are most called for when
-models are underspecified by the available data \citep{wilson2020case}.
-Averaging across solutions mitigates the aforementioned risk of relying
-on a single locally optimal representations that corresponds to
-semantically meaningless explanations for the data. Previous work of
-\citet{schut2021generating} similarly found that generating plausible
-(``interpretable'') CEs is almost trivial for deep ensembles that have
-also undergone adversarial training. The case for JEMs is even clearer:
-they involve a hybrid objective that induces both high predictive
-performance and generative capacity \citep{grathwohl2020your}. This is
-closely related to the idea of aligning models with plausible
-explanations and has inspired our CT objective.
+approximate Bayesian model averages, which are particularly effective
+when models are underspecified by the available data
+\citep{wilson2020case}. Averaging across solutions mitigates the
+aforementioned risk of overrelying on a single locally optimal
+representation that corresponds to semantically meaningless explanations
+for the data. Likewise, previous work of \citet{schut2021generating}
+found that generating plausible (``interpretable'') CEs is almost
+trivial for deep ensembles that have undergone adversarial training. The
+case for JEMs is even clearer: they optimize a hybrid objective that
+induces both high predictive performance and strong generative capacity
+\citep{grathwohl2020your}, which bears resemblance to the idea of
+aligning models with plausible explanations and has inspired our CT
+objective.
 
 \section{Counterfactual Training}\label{sec-method}
 
@@ -473,14 +470,14 @@ follows:
 \label{def-explainability}
 Let $\mathbf{M}_\theta: \mathcal{X} \mapsto \mathcal{Y}$ denote a supervised classification model that maps from the $D$-dimensional input space $\mathcal{X}$ to representations $\phi(\mathbf{x};\theta)$ and finally to the $K$-dimensional output space $\mathcal{Y}$. Assume that for any given input-output pair $\{\mathbf{x},\mathbf{y}\}_i$ there exists a counterfactual $\mathbf{x}^{\prime} = \mathbf{x} + \Delta: \mathbf{M}_\theta(\mathbf{x}^{\prime}) = \mathbf{y}^{+} \neq \mathbf{y} = \mathbf{M}_\theta(\mathbf{x})$ where $\arg\max_y{\mathbf{y}^{+}}=y^+$ and $y^+$ denotes the index of the target class. 
 
-We say that $\mathbf{M}_\theta$ is \textbf{explainable} to the extent that faithfully generated counterfactuals are also plausible and actionable. We define these properties as follows:
+We say that $\mathbf{M}_\theta$ has an \textbf{explanatory capacity} to the extent that faithfully generated counterfactuals are also plausible and actionable. We define these properties as follows:
 
 \begin{enumerate}
     \item (Plausibility) $\int^{A} p(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$ where $A$ is some small region around $\mathbf{x}^{\prime}$.
     \item (Actionability) Permutations $\Delta$ are subject to some actionability constraints.
     \item (Faithfulness) $\int^{A} p_\theta(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$ where $A$ is defined as above.
 \end{enumerate}
-where $p_\theta(\mathbf{x}|\mathbf{y}^{+})$ denotes the conditional posterior over inputs. 
+where $p_\theta(\mathbf{x}|\mathbf{y}^{+})$ denotes the conditional posterior distribution over inputs. For simplicity, we refer to a model with high explanatory capacity as \textbf{explainable}. 
 \end{definition}
 
 \noindent The characterization of faithfulness and plausibility in Def.

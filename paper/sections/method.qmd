@@ -8,14 +8,14 @@ In the context of counterfactual explanations, plausibility has broadly been def
 \label{def-explainability}
 Let $\mathbf{M}_\theta: \mathcal{X} \mapsto \mathcal{Y}$ denote a supervised classification model that maps from the $D$-dimensional input space $\mathcal{X}$ to representations $\phi(\mathbf{x};\theta)$ and finally to the $K$-dimensional output space $\mathcal{Y}$. Assume that for any given input-output pair $\{\mathbf{x},\mathbf{y}\}_i$ there exists a counterfactual $\mathbf{x}^{\prime} = \mathbf{x} + \Delta: \mathbf{M}_\theta(\mathbf{x}^{\prime}) = \mathbf{y}^{+} \neq \mathbf{y} = \mathbf{M}_\theta(\mathbf{x})$ where $\arg\max_y{\mathbf{y}^{+}}=y^+$ and $y^+$ denotes the index of the target class. 
 
-We say that $\mathbf{M}_\theta$ is \textbf{explainable} to the extent that faithfully generated counterfactuals are also plausible and actionable. We define these properties as follows:
+We say that $\mathbf{M}_\theta$ has an \textbf{explanatory capacity} to the extent that faithfully generated counterfactuals are also plausible and actionable. We define these properties as follows:
 
 \begin{enumerate}
     \item (Plausibility) $\int^{A} p(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$ where $A$ is some small region around $\mathbf{x}^{\prime}$.
     \item (Actionability) Permutations $\Delta$ are subject to some actionability constraints.
     \item (Faithfulness) $\int^{A} p_\theta(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$ where $A$ is defined as above.
 \end{enumerate}
-where $p_\theta(\mathbf{x}|\mathbf{y}^{+})$ denotes the conditional posterior over inputs. 
+where $p_\theta(\mathbf{x}|\mathbf{y}^{+})$ denotes the conditional posterior distribution over inputs. For simplicity, we refer to a model with high explanatory capacity as \textbf{explainable}. 
 \end{definition}
 
 `\noindent`{=latex} The characterization of faithfulness and plausibility in Def. \ref{def-explainability} is the same as in @altmeyer2024faithful, with adapted notation. Intuitively, plausible counterfactuals are consistent with the data and faithful counterfactuals are consistent with what the model has learned about input data. Actionability constraints in Def. \ref{def-explainability} vary and depend on the context in which $\mathbf{M}_\theta$ is deployed. In this work, we focus on domain and mutability constraints for individual features $x_d$ for $d=1,...,D$. We limit ourselves to classification tasks for reasons discussed in @sec-discussion.
