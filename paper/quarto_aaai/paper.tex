@@ -292,28 +292,28 @@ produce an alternative, more desirable output.
 
 To our surprise, the second challenge has not yet attracted major
 research interest. In particular, there has been no concerted effort
-towards improving the degree to which learned representations correspond
-to explanations that are \textbf{interpretable} and deemed
-\textbf{plausible} by humans, which we simply term ``explainability'' in
-this manuscript (see Def. \ref{def-explainability}). Instead, the choice
-has generally been to improve the ability of XAI tools to identify the
-subset of explanations that are both plausible and valid for any given
-model, independent of whether these explanations are compatible with the
-learned representations \citep{altmeyer2024faithful}. Fortunately,
-recent findings indicate that improved explainability can arise as a
-consequence of regularization techniques aimed at other training
-objectives such as generative capacity, generalization, or robustness
+towards improving the degree to which learned representations promote
+explanations that are both \textbf{interpretable} to and deemed
+\textbf{plausible} by humans. Instead, the typical choice has been to
+improve the ability of XAI tools to identify the subset of explanations
+that are plausible and valid for any given model, independent of whether
+these explanations are compatible with the learned representations
+\citep{altmeyer2024faithful}. Fortunately, recent findings indicate that
+improved ``explainability'' of a model can arise as a consequence of
+regularization techniques aimed at other training objectives such as
+generative capacity, generalization, or robustness
 \citep{altmeyer2024faithful, augustin2020adversarial, schut2021generating}.
-Our work consolidates these findings within a single framework.
+Our contribution consolidates these findings within a unified framework.
 
 Specifically, \textbf{we propose Counterfactual Training (CT)}: a novel
 training regime explicitly geared towards improving the explainability
-of models. In high-level terms, we define this concept as as the extent
-to which valid explanations derived for an opaque model are also deemed
-plausible with respect to the underlying data and the global
-actionability constraints. To our knowledge, our framework represents
-the first attempt to address this challenge by employing counterfactual
-explanations already during the training phase.
+of models. In high-level terms, we posit that the explainability of a
+model depends on the extent to which valid explanations derived for this
+model are also deemed plausible with respect to the underlying data and
+the global actionability constraints (see Def.
+\ref{def-explainability}). To the best of our knowledge, Counterfactual
+Training represents the first attempt to achieve more explainable models
+by employing counterfactual explanations already in the training phase.
 
 The remainder of this manuscript is structured as follows.
 Section~\ref{sec-lit} presents related work, focusing on the link
@@ -473,7 +473,7 @@ follows:
 \label{def-explainability}
 Let $\mathbf{M}_\theta: \mathcal{X} \mapsto \mathcal{Y}$ denote a supervised classification model that maps from the $D$-dimensional input space $\mathcal{X}$ to representations $\phi(\mathbf{x};\theta)$ and finally to the $K$-dimensional output space $\mathcal{Y}$. Assume that for any given input-output pair $\{\mathbf{x},\mathbf{y}\}_i$ there exists a counterfactual $\mathbf{x}^{\prime} = \mathbf{x} + \Delta: \mathbf{M}_\theta(\mathbf{x}^{\prime}) = \mathbf{y}^{+} \neq \mathbf{y} = \mathbf{M}_\theta(\mathbf{x})$ where $\arg\max_y{\mathbf{y}^{+}}=y^+$ and $y^+$ denotes the index of the target class. 
 
-We say that $\mathbf{M}_\theta$ is \textbf{explainable} to the extent that faithfully generated counterfactuals are plausible and actionable. We define these properties as follows:
+We say that $\mathbf{M}_\theta$ is \textbf{explainable} to the extent that faithfully generated counterfactuals are also plausible and actionable. We define these properties as follows:
 
 \begin{enumerate}
     \item (Plausibility) $\int^{A} p(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$ where $A$ is some small region around $\mathbf{x}^{\prime}$.
