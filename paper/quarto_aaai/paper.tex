@@ -441,55 +441,56 @@ objective.
 
 \section{Counterfactual Training}\label{sec-method}
 
-In this section we propose our novel counterfactual training objective.
-In CT, we combine ideas from adversarial training, counterfactual
-explanations, and energy-based modelling with the explicit goal of
-aligning representations with plausible explanations that comply with
-user-defined actionability constraints.
+This section introduces the Counterfactual Training objective. CT
+combines ideas from adversarial training, counterfactual explanations,
+and energy-based modelling with the explicit goal of producing models
+whose learned representations align with plausible explanations that
+further comply with user-defined actionability constraints.
 
 In the context of counterfactual explanations, plausibility has broadly
-been defined as the degree to which counterfactuals comply with the
+been defined as the degree to which generated CEs comply with the
 underlying data-generating process
 \citep{altmeyer2024faithful, guidotti2022counterfactual, poyiadzi2020face}.
 Plausibility is a necessary but insufficient condition for using CEs to
 provide algorithmic recourse (AR) to individuals (negatively) affected
-by opaque models. To be actionable, AR recommendations must also be
-attainable. A plausible CE for a rejected 20-year-old loan applicant,
-for example, might reveal that their application would have been
-accepted, if only they were 20 years older. Ignoring all other features,
-this would comply with the definition of plausibility if 40-year-old
-individuals were in fact more credit-worthy on average than young
-adults. But of course this CE does not qualify for providing actionable
-recourse to the applicant since \emph{age} is not a (directly) mutable
-feature. Counterfactual training aims to improve model explainability by
-aligning models with counterfactuals that meet both desiderata:
-plausibility and actionability. Formally, we define explainability as
-follows:
+by opaque models. An AR recommendations must also be actionable, i.e.,
+possible to attain by the recipient. A plausible CE for a rejected
+20-year-old loan applicant, for example, might reveal that their
+application would have been accepted, if only they had been 20 years
+older. Ignoring all other features, this would comply with the
+definition of plausibility if 40-year-old individuals were in fact more
+credit-worthy on average than young adults. But of course this CE does
+not qualify for providing actionable recourse to the applicant since
+\emph{age} is not a (directly) mutable feature. Counterfactual training
+aims to improve model explainability by aligning models with
+counterfactuals that meet both desiderata: plausibility and
+actionability. Formally, we define explainability as follows:
 
 \begin{definition}[Model Explainability]
 \label{def-explainability}
-Let $\mathbf{M}_\theta: \mathcal{X} \mapsto \mathcal{Y}$ denote a supervised classification model that maps from the $D$-dimensional input space $\mathcal{X}$ to representations $\phi(\mathbf{x};\theta)$ and finally to the $K$-dimensional output space $\mathcal{Y}$. Assume that for any given input-output pair $\{\mathbf{x},\mathbf{y}\}_i$ there exists a counterfactual $\mathbf{x}^{\prime} = \mathbf{x} + \Delta: \mathbf{M}_\theta(\mathbf{x}^{\prime}) = \mathbf{y}^{+} \neq \mathbf{y} = \mathbf{M}_\theta(\mathbf{x})$ where $\arg\max_y{\mathbf{y}^{+}}=y^+$ and $y^+$ denotes the index of the target class. 
+Let $\mathbf{M}_\theta: \mathcal{X} \mapsto \mathcal{Y}$ denote a supervised classification model that maps from the $D$-dimensional input space $\mathcal{X}$ to representations $\phi(\mathbf{x};\theta)$ and finally to the $K$-dimensional output space $\mathcal{Y}$. Assume that for any given input-output pair $\{\mathbf{x},\mathbf{y}\}_i$ there exists a counterfactual $\mathbf{x}^{\prime} = \mathbf{x} + \Delta: \mathbf{M}_\theta(\mathbf{x}^{\prime}) = \mathbf{y}^{+} \neq \mathbf{y} = \mathbf{M}_\theta(\mathbf{x})$, where $\arg\max_y{\mathbf{y}^{+}}=y^+$ is the index of the target class. 
 
 We say that $\mathbf{M}_\theta$ has an \textbf{explanatory capacity} to the extent that faithfully generated counterfactuals are also plausible and actionable. We define these properties as follows:
 
 \begin{enumerate}
-    \item (Plausibility) $\int^{A} p(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$ where $A$ is some small region around $\mathbf{x}^{\prime}$.
+    \item (Faithfulness) $\int^{A} p_\theta(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$, where $A$ is some arbitrarily small region around $\mathbf{x}^{\prime}$.
+    \item (Plausibility) $\int^{A} p(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$; $A$ as specified above.
     \item (Actionability) Permutations $\Delta$ are subject to some actionability constraints.
-    \item (Faithfulness) $\int^{A} p_\theta(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$ where $A$ is defined as above.
 \end{enumerate}
-where $p_\theta(\mathbf{x}|\mathbf{y}^{+})$ denotes the conditional posterior distribution over inputs. For simplicity, we refer to a model with high explanatory capacity as \textbf{explainable}. 
+and $p_\theta(\mathbf{x}|\mathbf{y}^{+})$ denotes the conditional posterior distribution over inputs. For simplicity, we refer to a model with high explanatory capacity as \textbf{explainable} in this manuscript. 
 \end{definition}
 
 \noindent The characterization of faithfulness and plausibility in Def.
 \ref{def-explainability} is the same as in \citet{altmeyer2024faithful},
 with adapted notation. Intuitively, plausible counterfactuals are
 consistent with the data and faithful counterfactuals are consistent
-with what the model has learned about input data. Actionability
+with what the model has learned about the input data. Actionability
 constraints in Def. \ref{def-explainability} vary and depend on the
 context in which \(\mathbf{M}_\theta\) is deployed. In this work, we
-focus on domain and mutability constraints for individual features
-\(x_d\) for \(d=1,...,D\). We limit ourselves to classification tasks
-for reasons discussed in Section~\ref{sec-discussion}.
+choose to only consider domain and mutability constraints for individual
+features \(x_d\) for \(d=1,...,D\). We also limit ourselves to
+classification tasks for reasons discussed in
+Section~\ref{sec-discussion}.
 
 \subsection{Our Proposed Objective}\label{our-proposed-objective}
 
@@ -504,9 +505,8 @@ where \(\mathcal{S}\) is the softmax function.\footnote{For detailed
   background information on gradient-based counterfactual search and
   convergence see supplementary appendix.}
 
-To train models with high explainability as defined in Def.
-\ref{def-explainability}, we propose to leverage counterfactuals in the
-following objective:
+To train explainable models as defined in Def. \ref{def-explainability},
+we propose to leverage counterfactuals in the following objective:
 
 \begin{equation}\phantomsection\label{eq-obj}{
 \begin{split}
@@ -516,10 +516,11 @@ following objective:
 that induces discriminative performance (e.g., cross-entropy). The
 second and third terms are explained in detail below. For now, they can
 be summarized as inducing explainability directly and indirectly by
-penalizing: (1) the contrastive divergence, \(\text{div}(\cdot)\),
-between mature counterfactuals \(\mathbf{x}_T^\prime\) and observed
-samples \(\mathbf{x}^+\in\mathcal{X}^+=\{\mathbf{x}:y=y^+\}\) in the
-target class \(y^+\), and, (2) the adversarial loss,
+penalizing (in 2\textsuperscript{nd} term) the contrastive divergence,
+\(\text{div}(\cdot)\), between mature counterfactuals
+\(\mathbf{x}_T^\prime\) and observed samples
+\(\mathbf{x}^+\in\mathcal{X}^+=\{\mathbf{x}:y=y^+\}\) in the target
+class \(y^+\), and (in 3\textsuperscript{rd} term) the adversarial loss,
 \(\text{advloss}(.)\), with respect to nascent counterfactuals
 \(\mathbf{x}_{t\leq T}^\prime\). Finally, \(\text{ridge}(\cdot)\)
 denotes a Ridge penalty (\(\ell_2\)-norm) that regularizes the magnitude
@@ -531,31 +532,31 @@ governed through penalties \(\lambda_{\text{div}}\),
 \subsection{Directly Inducing Explainability with Contrastive
 Divergence}\label{directly-inducing-explainability-with-contrastive-divergence}
 
-As observed by \citet{grathwohl2020your}, any classifier can be
-re-interpreted as a joint energy-based model (JEM) that learns to
-discriminate output classes conditional on the observed (training)
-samples from \(p(\mathbf{x})\) and the generated samples from
-\(p_\theta(\mathbf{x})\). The authors show that JEMs can be trained to
-perform well at both tasks by directly maximizing the joint
-log-likelihood factorized as
-\(\log p_\theta(\mathbf{x},\mathbf{y})=\log p_\theta(\mathbf{y}|\mathbf{x}) + \log p_\theta(\mathbf{x})\).
-The first term can be optimized using conventional cross-entropy as in
-Equation~\ref{eq-obj}. To optimize \(\log p_\theta(\mathbf{x})\),
-\citet{grathwohl2020your} minimizes the contrastive divergence between
-the observed samples from \(p(\mathbf{x})\) and generated samples from
+\citet{grathwohl2020your} observed that any classifier can be
+re-interpreted as a joint energy-based model that learns to discriminate
+output classes conditional on the observed (training) samples from
+\(p(\mathbf{x})\) and the generated samples from
+\(p_\theta(\mathbf{x})\). \citet{grathwohl2020your} show that JEMs can
+be trained to perform well at both tasks by directly maximizing the
+joint log-likelihood:
+\(\log p_\theta(\mathbf{x},\mathbf{y})=\log p_\theta(\mathbf{y}|\mathbf{x}) + \log p_\theta(\mathbf{x})\),
+where the first term can be optimized using cross-entropy as in
+Equation~\ref{eq-obj}. To optimize \(\log p_\theta(\mathbf{x})\), they
+minimize the contrastive divergence between the observed samples from
+\(p(\mathbf{x})\) and the generated samples from
 \(p_\theta(\mathbf{x})\).
 
-A key empirical finding in \citet{altmeyer2024faithful} was that JEMs
-tend to do well with respect to the plausibility objective in Def.
+A key empirical finding of \citet{altmeyer2024faithful} was that JEMs
+perform well on the plausibility objective in Def.
 \ref{def-explainability}. This follows directly if we consider samples
-drawn from \(p_\theta(\mathbf{x})\) as counterfactuals because the JEM
+drawn from \(p_\theta(\mathbf{x})\) as counterfactuals --- the JEM
 objective effectively minimizes the divergence between the conditional
 posterior and \(p(\mathbf{x}|\mathbf{y}^{+})\). To generate samples,
-\citet{grathwohl2020your} relies on Stochastic Gradient Langevin
-Dynamics (SGLD) using an uninformative prior for initialization but we
-depart from their methodology. Instead of SGLD, we propose to use
-counterfactual explainers to generate counterfactuals of observed
-training samples. Specifically, we have:
+\citet{grathwohl2020your} use Stochastic Gradient Langevin Dynamics
+(SGLD) with an uninformative prior for initialization but we depart from
+their methodology. Instead we propose to leverage counterfactual
+explainers to generate counterfactuals of observed training samples.
+Specifically, we have:
 
 \begin{equation}\phantomsection\label{eq-div}{
 \text{div}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta) = \mathcal{E}_\theta(\mathbf{x}^+,y) - \mathcal{E}_\theta(\mathbf{x}_T^\prime,y)
@@ -577,13 +578,12 @@ the counterfactuals get more plausible (Def. \ref{def-explainability})
 during training, these opposing effects gradually balance each other out
 \citep{lippe2024uvadlc}.
 
-The departure from SGLD of \citep{grathwohl2020your} allows us to tap
-into the vast repertoire of explainers that have been proposed in the
-literature to meet different desiderata. For example, many methods
-facilitate the imposition of domain and mutability constraints. In
-principle, any existing approach for generating counterfactual
-explanations is viable, so long as it does not violate the faithfulness
-condition. Like JEMs \citep{murphy2022probabilistic}, CT can be
+The departure from SGLD allows us to tap into the vast repertoire of
+explainers that have been proposed in the literature to meet different
+desiderata. For example, many methods support domain and mutability
+constraints. In principle, any existing approach for generating CEs is
+viable, so long as it does not violate the faithfulness condition. Like
+JEMs \citep{murphy2022probabilistic}, Counterfactual Training can be
 considered a form of contrastive representation learning.
 
 \subsection{Indirectly Inducing Explainability with Adversarial
@@ -593,9 +593,10 @@ Based on our analysis in Section~\ref{sec-lit}, counterfactuals
 \(\mathbf{x}^\prime\) can be repurposed as additional training samples
 \citep{balashankar2023improving, luu2023counterfactual} or adversarial
 examples \citep{freiesleben2022intriguing, pawelczyk2022exploring}. This
-leaves some flexibility wrt. the choice for \(\text{advloss}(\cdot)\) in
-Equation~\ref{eq-obj}. An intuitive functional form, but likely not the
-only sensible choice, is inspired by adversarial training:
+leaves some flexibility with regards to the choice for the
+\(\text{advloss}(\cdot)\) term in Equation~\ref{eq-obj}. An intuitive
+functional form, but likely not the only sensible choice, is inspired by
+adversarial training:
 
 \begin{equation}\phantomsection\label{eq-adv}{
 \begin{aligned}
@@ -605,11 +606,11 @@ t_\varepsilon &= \max_t \{t: ||\Delta_t||_\infty < \varepsilon\}
 }\end{equation} Under this choice, we consider nascent counterfactuals
 \(\mathbf{x}_{t\leq T}^\prime\) as AEs as long as the magnitude of the
 perturbation to any single feature is at most \(\varepsilon\). This is
-closely aligned with \citet{szegedy2013intriguing} that defines an
+closely aligned with \citet{szegedy2013intriguing} who define an
 adversarial attack as an ``imperceptible non-random perturbation''.
 Thus, we choose to work with a different distinction between CE and AE
-than \citet{freiesleben2022intriguing} that considers misclassification
-as the key distinguishing feature of AE. One of the key observations of
+than \citet{freiesleben2022intriguing} who consider misclassification as
+the key distinguishing feature of AE. One of the key observations of
 this work is that we can leverage CEs during training and get
 adversarial examples essentially for free, which can be used to reap the
 aforementioned benefits of adversarial training.
@@ -618,19 +619,19 @@ aforementioned benefits of adversarial training.
 
 Many existing counterfactual explainers support domain and mutability
 constraints out-of-the-box. In fact, both types of constraints can be
-implemented for any counterfactual explainer that relies on gradient
-descent in the feature space for optimization
-\citep{altmeyer2023explaining}. In this context, domain constraints can
-be imposed by simply projecting counterfactuals back to the specified
-domain, if the previous gradient step resulted in updated feature values
-that were out-of-domain. Mutability constraints can similarly be
-enforced by setting partial derivatives to zero to ensure that features
-are only perturbed in the allowed direction, if at all.
+implemented for any explainer that relies on gradient descent in the
+feature space for optimization \citep{altmeyer2023explaining}. In this
+context, domain constraints can be imposed by simply projecting
+counterfactuals back to the specified domain, if the previous gradient
+step resulted in updated feature values that were out-of-domain.
+Similarly, mutability constraints can be enforced by setting partial
+derivatives to zero to ensure that features are only perturbed in the
+allowed direction, if at all.
 
-Since such actionability constraints are binding at test time, we should
-also impose them when generating \(\mathbf{x}^\prime\) during each
-training iteration to inform model representations. Through their effect
-on \(\mathbf{x}^\prime\), both types of constraints influence model
+Since actionability constraints are binding at test time, we should also
+impose them when generating \(\mathbf{x}^\prime\) during each training
+iteration to inform model representations. Through their effect on
+\(\mathbf{x}^\prime\), both types of constraints influence model
 outcomes via Equation~\ref{eq-div}. Here it is crucial that we avoid
 penalizing implausibility that arises due to mutability constraints. For
 any mutability-constrained feature \(d\) this can be achieved by
@@ -645,35 +646,34 @@ we set \(\mathbf{x}^+[d] := \mathbf{x}^\prime[d]\) if:
 \item
   Feature \(d\) is strictly immutable in practice.
 \item
-  We have \(\mathbf{x}^+[d]>\mathbf{x}^\prime[d]\), but feature \(d\)
-  can only be decreased in practice.
+  \(\mathbf{x}^+[d]>\mathbf{x}^\prime[d]\), but \(d\) can only be
+  decreased in practice.
 \item
-  We have \(\mathbf{x}^+[d]<\mathbf{x}^\prime[d]\), but feature \(d\)
-  can only be increased in practice.
+  \(\mathbf{x}^+[d]<\mathbf{x}^\prime[d]\), but \(d\) can only be
+  increased in practice.
 \end{enumerate}
 
 \noindent From a Bayesian perspective, setting
 \(\mathbf{x}^+[d] := \mathbf{x}^\prime[d]\) can be understood as
 assuming a point mass prior for \(p(\mathbf{x}^+)\) with respect to
-feature \(d\). Intuitively, we think of this simply in terms ignoring
-implausibility costs with respect to immutable features, which
-effectively forces the model to instead seek plausibility with respect
-to the remaining features. This in turn results in lower overall
-sensitivity to immutable features, which we demonstrate empirically for
-different classifiers in Section~\ref{sec-experiments}. Under certain
-conditions, this result holds theoretically:\footnote{For the proof, see
-  the supplementary appendix.}
+feature \(d\). Intuitively, we think of this as ignoring implausibility
+costs with respect to immutable features, which effectively forces the
+model to instead seek plausibility with respect to the remaining
+features. This in turn results in lower overall sensitivity to immutable
+features, which we demonstrate empirically for different classifiers in
+Section~\ref{sec-experiments}. Under certain conditions, this result
+holds theoretically:\footnote{For the proof, see the supplementary
+  appendix.}
 
 \begin{proposition}[Protecting Immutable Features]
 \label{prp-mtblty}
-Let $f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})$ denote a linear classifier with softmax activation $\mathcal{S}$ where $y\in\{1,...,K\}=\mathcal{K}$ and $\mathbf{x} \in \mathbb{R}^D$. If we assume multivariate Gaussian class densities with common diagonal covariance matrix $\Sigma_k=\Sigma$ for all $k \in \mathcal{K}$, then protecting an immutable feature from the contrastive divergence penalty will result in lower classifier sensitivity to that feature relative to the remaining features, provided that at least one of those is discriminative and mutable.
+Let $f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})$ denote a linear classifier with softmax activation $\mathcal{S}$ where $y\in\{1,...,K\}=\mathcal{K}$ and $\mathbf{x} \in \mathbb{R}^D$. Assume multivariate Gaussian class densities with common diagonal covariance matrix $\Sigma_k=\Sigma$ for all $k \in \mathcal{K}$, then protecting an immutable feature from the contrastive divergence penalty will result in lower classifier sensitivity to that feature relative to the remaining features, provided that at least one of those is discriminative and mutable.
 \end{proposition}
 
-\noindent It is worth highlighting that
-\mbox{Proposition \ref{prp-mtblty}} assumes independence of features.
-This raises a valid concern about the effect of protecting immutable
-features in the presence of proxies that remain unprotected. We address
-this in Section~\ref{sec-discussion}.
+\noindent It is worth noting that \mbox{Proposition \ref{prp-mtblty}}
+assumes independence of features. This raises a valid concern about the
+effect of protecting immutable features in the presence of proxies that
+remain unprotected. We address this in Section~\ref{sec-discussion}.
 
 \subsection{Example (Prediction of Consumer Credit
 Default)}\label{example-prediction-of-consumer-credit-default}
@@ -684,30 +684,30 @@ previous loan takers comprised of a binary outcome variable
 (\(y\in\{1=\text{default},2=\text{no default}\}\)) with two input
 features: (1) the subjects' \emph{age}, which we define as immutable,
 and (2) the subjects' existing level of \emph{debt}, which we define as
-mutable.
+mutable. We have simulated this scenario using synthetic data with
+independent \emph{age} and \emph{debt} features, and Gaussian
+class-conditional densities in Figure~\ref{fig-poc}. The four panels
+show the outcomes for different training procedures using the same model
+architecture (a linear classifier). In panels (a) and (c) we have
+trained the models conventionally, while in panels (b) and (d) we have
+applied CT.
 
-We have simulated this scenario using synthetic data with independent
-\emph{age} and \emph{debt} features, and Gaussian class-conditional
-densities in Figure~\ref{fig-poc}. The four panels show the outcomes for
-different training procedures using the same model architectures (a
-linear classifier). In panels (a) and (c) we have trained the models
-conventionally, while in panels (b) and (d) we used CT.
-
-In all cases, all counterfactuals (stars) are valid---they have crossed
-the decision boundary (green)---but their quality differs. In panel (a),
-they are not plausible: they do not comply with the distribution of the
-factuals in \(y^+\) to the point where they form a clearly
-distinguishable cluster. In panel (b), they are highly plausible,
-meeting the first objective of Def. \ref{def-explainability}. In panel
-(c), the CEs involve substantial reductions in \emph{debt} for younger
-applicants. By comparison, counterfactual paths are shorter on average
-in panel (d) where we have protected the immutable \emph{age} as
-described in Section~\ref{sec-constraints}. Due to the classifier's
-lower sensitivity to \emph{age}, recommendations with respect to
-\emph{debt} are much more homogenous and do not unfairly punish younger
-individuals. These counterfactuals are also plausible with respect to
-the mutable feature. Thus, we consider the model in panel (d) as the
-most explainable according to Def. \ref{def-explainability}.
+In all four cases, all counterfactuals (stars) are valid---they have
+crossed the decision boundary (green) into the target class---but their
+quality differs. In panel (a), they are not plausible: they do not
+comply with the distribution of the factuals in \(y^+\) to the point
+where they form a clearly discernible cluster. In panel (b), they are
+highly plausible, meeting the first objective of Def.
+\ref{def-explainability}. In panel (c), the CEs involve substantial
+reductions in \emph{debt} for younger applicants. By comparison,
+counterfactual paths are shorter on average in panel (d) where we have
+protected the immutable \emph{age} as described in
+Section~\ref{sec-constraints}. Due to the classifier's lower sensitivity
+to \emph{age}, recommendations with respect to \emph{debt} are much more
+homogenous and do not unfairly punish younger individuals. These
+counterfactuals are also plausible with respect to the mutable feature.
+Thus, we consider the model in panel (d) as the most explainable
+according to Def. \ref{def-explainability}.
 
 \begin{figure*}
 
@@ -721,9 +721,9 @@ most explainable according to Def. \ref{def-explainability}.
 explainability: (a) conventional training, all mutable; (b) CT, all
 mutable; (c) conventional, \emph{age} immutable; (d) CT, \emph{age}
 immutable. The linear decision boundary is shown in green along with
-training data colored according to their ground-truth label: \(y^-=1\)
-in blue and \(y^+=2\) in orange. Stars indicate counterfactuals in the
-target class.}
+training data colored according to ground-truth labels: \(y^-=1\) (blue)
+and \(y^+=2\) (orange). Stars indicate counterfactuals in the target
+class.}
 
 \end{figure*}%
 
