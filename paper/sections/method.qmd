@@ -81,7 +81,7 @@ Let $f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}
 
 `\noindent`{=latex} It is worth noting that \mbox{Proposition \ref{prp-mtblty}} assumes independence of features. This raises a valid concern about the effect of protecting immutable features in the presence of proxies that remain unprotected. We address this in @sec-discussion.
 
-## Example (Prediction of Consumer Credit Default)
+## Example: Prediction of Credit Defaults
 
 Suppose we are interested in predicting the likelihood that loan applicants default on their credit. We have access to historical data on previous loan takers comprised of a binary outcome variable ($y\in\{1=\text{default},2=\text{no default}\}$) with two input features: (1) the subjects' *age*, which we define as immutable, and (2) the subjects' existing level of *debt*, which we define as mutable. We have simulated this scenario using synthetic data with independent *age* and *debt* features, and Gaussian class-conditional densities in @fig-poc. The four panels show the outcomes for different training procedures using the same model architecture (a linear classifier). In panels (a) and (c) we have trained the models conventionally, while in panels (b) and (d) we have applied CT. 
 
