@@ -365,17 +365,15 @@ classifier aligns with the vector between such pairs of counterfactual
 inputs using a cosine distance loss function.
 
 CEs have also been used to improve models in the natural language
-processing (NLP) domain. First, \citet{wu2021polyjuice2} propose
-\emph{Polyjuice}, a general-purpose counterfactual generator for
-language models. The authors empirically demonstrate that the
-augmentation of training data with their method improves robustness in a
-number of NLP tasks. Second, \citet{balashankar2023improving} use
-\emph{Polyjuice} to augment NLP datasets through diverse counterfactuals
-and show that classifier robustness improves by up to 20\%. Finally,
-\citet{luu2023counterfactual} introduce Counterfactual Adversarial
-Training (CAT) that aims to improve generalization and robustness of
-language models by generating counterfactuals for training samples that
-are subject to high predictive uncertainty.
+processing domain. For example, \citet{wu2021polyjuice2} propose
+\emph{Polyjuice}, a general-purpose CE generator for language models and
+demonstrate that the augmentation of training data with \emph{Polyjuice}
+improves robustness in a number of tasks, while
+\citet{luu2023counterfactual} introduce the \emph{Counterfactual
+Adversarial Training} (CAT) framework that aims to improve
+generalization and robustness of language models by generating
+counterfactuals for training samples that are subject to high predictive
+uncertainty.
 
 There have also been several attempts at formalizing the relationship
 between counterfactual explanations and adversarial examples. Pointing
@@ -441,7 +439,7 @@ objective.
 
 \section{Counterfactual Training}\label{sec-method}
 
-This section introduces the Counterfactual Training objective. CT
+This section introduces the Counterfactual Training framework. CT
 combines ideas from adversarial training, counterfactual explanations,
 and energy-based modelling with the explicit goal of producing models
 whose learned representations align with plausible explanations that
@@ -495,38 +493,53 @@ Section~\ref{sec-discussion}.
 \subsection{Our Proposed Objective}\label{our-proposed-objective}
 
 Let \(\mathbf{x}_t^\prime\) for \(t=0,...,T\) denote a counterfactual
-explanation generated through gradient descent over \(T\) iterations as
-initially proposed by \citet{wachter2017counterfactual}. For our
-purposes, we let \(T\) vary and consider the counterfactual search as
+generated through gradient descent over \(T\) iterations as originally
+proposed by \citet{wachter2017counterfactual}. In broad terms,
+generating CEs using gradient descent entails solving some form of an
+objective that balances (1) the classification loss
+\(\text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y})\), and (2) one
+or more penalty terms \(\lambda_{i}\text{cost}_{i}(\cdot)\). The exact
+specification of these penalties induces various properties in the
+counterfactual outcomes, and tends to be the key feature that
+distinguishes various gradient-based ``generators'' or ``explainers''
+(CE algorithms) from the literature \citep{altmeyer2023explaining}.
+
+For our purposes, we let \(T\) vary and consider the search to be
 converged as soon as the predicted probability for the target class has
 reached a pre-determined threshold, \(\tau\):
 \(\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}^\prime))[y^+] \geq \tau\),
-where \(\mathcal{S}\) is the softmax function.\footnote{For detailed
-  background information on gradient-based counterfactual search and
-  convergence see supplementary appendix.}
+where \(\mathcal{S}\) is the softmax function.
 
-To train explainable models as defined in Def. \ref{def-explainability},
-we propose to leverage counterfactuals in the following objective:
+CT leverages gradient-based CE search already in training to produce
+perturbed versions of the factual samples \(\mathbf{x}\). Initially,
+until \(\tau\) is reached or when \(t\leq T\), generated samples
+\(\mathbf{x}_t^\prime\) serve as adversarial examples; we term them
+\emph{nascent} counterfactuals \(\mathbf{x}_{t\leq T}^\prime\). Over
+multiple training iterations up to time \(T\), these nascent
+counterfactuals move towards the decision boundary and turn into
+\emph{mature} counterfactuals \(\mathbf{x}_T^\prime\) when they cross
+into the target class or when \(t > T\).
+
+Formally, we propose the following counterfactual training objective to
+train explainable (as in Def. \ref{def-explainability}) models:
 
 \begin{equation}\phantomsection\label{eq-obj}{
 \begin{split}
 \min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) &+ \lambda_{\text{div}} \text{div}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta) \\+ \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y}) &+ \lambda_{\text{reg}}\text{ridge}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta)
 \end{split}
-}\end{equation} where \(\text{yloss}(\cdot)\) is a classification loss
+}\end{equation} where \(\text{yloss}(\cdot)\) is any classification loss
 that induces discriminative performance (e.g., cross-entropy). The
 second and third terms are explained in detail below. For now, they can
 be summarized as inducing explainability directly and indirectly by
-penalizing (in 2\textsuperscript{nd} term) the contrastive divergence,
-\(\text{div}(\cdot)\), between mature counterfactuals
-\(\mathbf{x}_T^\prime\) and observed samples
+penalizing the contrastive divergence, \(\text{div}(\cdot)\), between
+mature counterfactuals \(\mathbf{x}_T^\prime\) and observed samples
 \(\mathbf{x}^+\in\mathcal{X}^+=\{\mathbf{x}:y=y^+\}\) in the target
-class \(y^+\), and (in 3\textsuperscript{rd} term) the adversarial loss,
-\(\text{advloss}(.)\), with respect to nascent counterfactuals
-\(\mathbf{x}_{t\leq T}^\prime\). Finally, \(\text{ridge}(\cdot)\)
-denotes a Ridge penalty (\(\ell_2\)-norm) that regularizes the magnitude
-of the energy terms involved in \(\text{div}(\cdot)\)
-\citep{du2019implicit}. The trade-off between the components can
-governed through penalties \(\lambda_{\text{div}}\),
+class \(y^+\), and the adversarial loss, \(\text{advloss}(.)\), wrt.
+nascent counterfactuals \(\mathbf{x}_{t\leq T}^\prime\). Finally,
+\(\text{ridge}(\cdot)\) denotes a Ridge penalty (\(\ell_2\)-norm) that
+regularizes the magnitude of the energy terms involved in
+\(\text{div}(\cdot)\) \citep{du2019implicit}. The trade-off between the
+components are governed through \(\lambda_{\text{div}}\),
 \(\lambda_{\text{adv}}\) and \(\lambda_{\text{reg}}\).
 
 \subsection{Directly Inducing Explainability with Contrastive
@@ -670,10 +683,10 @@ holds theoretically:\footnote{For the proof, see the supplementary
 Let $f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})$ denote a linear classifier with softmax activation $\mathcal{S}$ where $y\in\{1,...,K\}=\mathcal{K}$ and $\mathbf{x} \in \mathbb{R}^D$. Assume multivariate Gaussian class densities with common diagonal covariance matrix $\Sigma_k=\Sigma$ for all $k \in \mathcal{K}$, then protecting an immutable feature from the contrastive divergence penalty will result in lower classifier sensitivity to that feature relative to the remaining features, provided that at least one of those is discriminative and mutable.
 \end{proposition}
 
-\noindent It is worth noting that \mbox{Proposition \ref{prp-mtblty}}
-assumes independence of features. This raises a valid concern about the
-effect of protecting immutable features in the presence of proxies that
-remain unprotected. We address this in Section~\ref{sec-discussion}.
+\noindent Proposition \ref{prp-mtblty} assumes independent features,
+which raises a concern about the effect of protecting immutable features
+in the presence of proxies. We address it in
+Section~\ref{sec-discussion}.
 
 \subsection{Example: Prediction of Credit
 Defaults}\label{example-prediction-of-credit-defaults}
@@ -681,7 +694,7 @@ Defaults}\label{example-prediction-of-credit-defaults}
 Suppose we are interested in predicting the likelihood that loan
 applicants default on their credit. We have access to historical data on
 previous loan takers comprised of a binary outcome variable
-(\(y\in\{1=\text{default},2=\text{no default}\}\)) with two input
+\(y\in\{1=\text{default},2=\text{no default}\}\) with two input
 features: (1) the subjects' \emph{age}, which we define as immutable,
 and (2) the subjects' existing level of \emph{debt}, which we define as
 mutable. We have simulated this scenario using synthetic data with
@@ -925,17 +938,15 @@ are more explainable. Nonetheless, these advantages come at the cost of
 two important limitations.
 
 \emph{CT increases the training time of models.} CT can be more
-time-consuming than conventional training regimes. While higher numbers
-of CEs per iteration positively impact the quality of solutions, they
-also increase the amount of computations. In our experiments, grids with
-270 settings took up to four hours for more demanding datasets on a
-high-performance computing cluster with 34 2GB CPUs.\footnote{See
-  supplementary appendix for computational details.} Three factors
-attenuate this effect: (1) CT yields itself to parallel execution, which
-we have leveraged for our own experiments; (2) it amortizes the cost of
-CEs for the training samples; (3) as demonstrated, it retains its value
-when used as a ``fine-tuning'' technique for conventionally-trained
-models.
+time-consuming than conventional training regimes. Higher numbers of CEs
+per iteration positively impact the quality of solutions, but they also
+increase the amount of computations. In our experiments, grids with 270
+settings took up to four hours for more demanding datasets on a
+high-performance computing cluster with 34 2GB CPUs (see supplementary
+appendix for details). Three factors attenuate this effect: (1) CT
+inherently yields itself to parallel execution; (2) it amortizes the
+cost of CEs for the training samples; (3) it retains its value when used
+to fine-tune conventionally-trained models.
 
 \emph{Interventions on features have implications for fairness.} We
 provide a tool that allows practitioners to modify the sensitivity of a
@@ -943,18 +954,16 @@ model with respect to certain features. Model owners can use our
 solution to support the fair and equitable treatment of decision
 subjects, but they could also misuse it by enforcing explanations based
 on features that are more difficult to modify by some (group of)
-individuals. When applied irresponsibly, CT could result in an unfairly
+individuals. When used irresponsibly, CT could result in an unfairly
 assigned burden of recourse \citep{sharma2020certifai}, threatening the
-equality of opportunity in the system \citep{bell2024fairness}.
-Additionally, CT requires that model owners define the mutability
-constraints for the features considered by the model. Even if all
-immutable features are protected, there may exist proxies that are
-mutable --- and hence should not be protected --- but preserve
-sufficient information about the principals to hinder the protections.
-Deciding on actionability is still a major open challenge in the AR
-literature \citep{venkatasubramanian2020philosophical} impacting the
-capacity of CT to fulfill its intended goal. As such, neither of these
-phenomena is ultimately specific to CT.
+equality of opportunity \citep{bell2024fairness}. Additionally, CT
+requires mutability constraints for the features considered by the
+model. Even if all immutable features are protected, there may exist
+proxies that are mutable, and hence should not be protected, but
+preserve sufficient information about the principals to hinder the
+protections. Deciding on actionability is still a major open challenge
+in the AR literature \citep{venkatasubramanian2020philosophical}
+impacting the capacity of CT to fulfill its intended goal.
 
 We also highlight several important directions for future research.
 Firstly, it is an interesting challenge to extend CT beyond
@@ -968,16 +977,16 @@ classification is a common choice in research on CEs and AR. Other
 settings have attracted some interest, e.g., regression
 \citep{spooner2021counterfactual}, but there is little consensus how to
 robustly extend the notion of CEs.\\
-Secondly, CT is susceptible to instabilities in training. This problem
-has been recognized for JEMs \citep{grathwohl2020your} and even though
-we depart from the SGLD-based sampling, we still encounter variability
-in outcomes. CT is exposed to two potential sources of training
-instabilities: (1) the energy-based contrastive divergence term in
-Equation~\ref{eq-div}, and (2) the underlying counterfactual explainers.
-We find several promising ways to mitigate this problem: regularizing
-energy (\(\lambda_{\text{reg}}\)), generating sufficiently many
-counterfactuals during each epoch, and including only mature
-counterfactuals for contrastive divergence.\\
+Secondly, CT is susceptible to training instabilities. This problem has
+been recognized for JEMs \citep{grathwohl2020your} and even though we
+depart from the SGLD sampling, we still encounter variability in
+outcomes. CT is exposed to two potential sources of instabilities: (1)
+the energy-based contrastive divergence term, \(\text{div}(\cdot)\), in
+Equation~\ref{eq-div}, and (2) the underlying explainers. We find
+several promising ways to mitigate this problem: regularizing energy
+(\(\lambda_{\text{reg}}\)), generating sufficiently many counterfactuals
+during each epoch, and including only mature counterfactuals in
+\(\text{div}(\cdot)\).\\
 Finally, we believe that it is possible to substantially improve
 hyperparameter selection procedures, and thus performance. In this work,
 we have relied exclusively on grid searches for this task. Future work
