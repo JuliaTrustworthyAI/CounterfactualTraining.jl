@@ -473,7 +473,7 @@ We say that $\mathbf{M}_\theta$ has an \textbf{explanatory capacity} to the exte
 \begin{enumerate}
     \item (Faithfulness) $\int^{A} p_\theta(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$, where $A$ is some arbitrarily small region around $\mathbf{x}^{\prime}$.
     \item (Plausibility) $\int^{A} p(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$; $A$ as specified above.
-    \item (Actionability) Permutations $\Delta$ are subject to some actionability constraints.
+    \item (Actionability) Perturbations $\Delta$ are subject to some actionability constraints.
 \end{enumerate}
 and $p_\theta(\mathbf{x}|\mathbf{y}^{+})$ denotes the conditional posterior distribution over inputs. For simplicity, we refer to a model with high explanatory capacity as \textbf{explainable} in this manuscript. 
 \end{definition}
@@ -494,8 +494,8 @@ Section~\ref{sec-discussion}.
 
 Let \(\mathbf{x}_t^\prime\) for \(t=0,...,T\) denote a counterfactual
 generated through gradient descent over \(T\) iterations as originally
-proposed by \citet{wachter2017counterfactual}. In broad terms,
-generating CEs using gradient descent entails solving some form of an
+proposed by \citet{wachter2017counterfactual}. In broad terms, searching
+for CEs using gradient descent entails optimizing some form of an
 objective that balances (1) the classification loss
 \(\text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y})\), and (2) one
 or more penalty terms \(\lambda_{i}\text{cost}_{i}(\cdot)\). The exact
@@ -510,15 +510,15 @@ reached a pre-determined threshold, \(\tau\):
 \(\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}^\prime))[y^+] \geq \tau\),
 where \(\mathcal{S}\) is the softmax function.
 
-CT leverages gradient-based CE search already in training to produce
-perturbed versions of the factual samples \(\mathbf{x}\). Initially,
-until \(\tau\) is reached or when \(t\leq T\), generated samples
-\(\mathbf{x}_t^\prime\) serve as adversarial examples; we term them
-\emph{nascent} counterfactuals \(\mathbf{x}_{t\leq T}^\prime\). Over
-multiple training iterations up to time \(T\), these nascent
-counterfactuals move towards the decision boundary and turn into
-\emph{mature} counterfactuals \(\mathbf{x}_T^\prime\) when they cross
-into the target class or when \(t > T\).
+CT adapts gradient-based CE search already in training to generate
+\(\mathbf{x}^\prime\), the perturbed versions of the factual samples
+\(\mathbf{x}\). We use the term \emph{nascent} to denote counterfactuals
+for which the search has not converged, \(\mathbf{x}_{t\leq T}^\prime\).
+Initially, when the perturbations are small, nascent counterfactuals
+serve as AEs. Over multiple iterations, they move towards the decision
+boundary and turn into \emph{mature} counterfactuals
+\(\mathbf{x}_T^\prime\) when they cross into the target class (becoming
+CEs) or when \(t > T\).
 
 Formally, we propose the following counterfactual training objective to
 train explainable (as in Def. \ref{def-explainability}) models:
