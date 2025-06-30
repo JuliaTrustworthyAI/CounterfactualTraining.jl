@@ -280,12 +280,12 @@ model representations, aiming to mitigate scenarios in which
 practitioners deploy opaque models and have to blindly rely on their
 predictions. On many occasions, this has happened in practice, causing
 harms to people who were adversely and unfairly affected by automated
-decision-making (ADM) systems involving opaque models (see, e.g.,
-\citet{oneil2016weapons}). Effective XAI tools can also aid in
-monitoring models and providing recourse, empowering people to turn
-negative outcomes (e.g., ``loan application rejected'') into positive
-ones (e.g., ``loan application accepted''). In line with this, our work
-builds upon \textbf{counterfactual explanations} (CE) proposed by
+decision-making (ADM) systems involving opaque models; see, e.g.,
+\citet{oneil2016weapons}. Effective XAI tools can also aid in monitoring
+models and providing recourse, empowering people to turn negative
+outcomes (e.g., ``loan application rejected'') into positive ones (e.g.,
+``loan application accepted''). In line with this, our work builds upon
+\textbf{counterfactual explanations} (CE) proposed by
 \citet{wachter2017counterfactual}; CEs prescribe minimal changes for
 factual inputs that, if implemented, would prompt some fitted model to
 produce an alternative, more desirable output.
@@ -545,13 +545,13 @@ components are governed through \(\lambda_{\text{div}}\),
 \subsection{Directly Inducing Explainability with Contrastive
 Divergence}\label{directly-inducing-explainability-with-contrastive-divergence}
 
-\citet{grathwohl2020your} observed that any classifier can be
+\citet{grathwohl2020your} observe that any classifier can be
 re-interpreted as a joint energy-based model that learns to discriminate
 output classes conditional on the observed (training) samples from
 \(p(\mathbf{x})\) and the generated samples from
-\(p_\theta(\mathbf{x})\). \citet{grathwohl2020your} show that JEMs can
-be trained to perform well at both tasks by directly maximizing the
-joint log-likelihood:
+\(p_\theta(\mathbf{x})\). The authors show that JEMs can be trained to
+perform well at both tasks by directly maximizing the joint
+log-likelihood:
 \(\log p_\theta(\mathbf{x},\mathbf{y})=\log p_\theta(\mathbf{y}|\mathbf{x}) + \log p_\theta(\mathbf{x})\),
 where the first term can be optimized using cross-entropy as in
 Equation~\ref{eq-obj}. To optimize \(\log p_\theta(\mathbf{x})\), they
@@ -621,12 +621,12 @@ t_\varepsilon &= \max_t \{t: ||\Delta_t||_\infty < \varepsilon\}
 perturbation to any single feature is at most \(\varepsilon\). This is
 closely aligned with \citet{szegedy2013intriguing} who define an
 adversarial attack as an ``imperceptible non-random perturbation''.
-Thus, we choose to work with a different distinction between CE and AE
-than \citet{freiesleben2022intriguing} who consider misclassification as
-the key distinguishing feature of AE. One of the key observations of
-this work is that we can leverage CEs during training and get
-adversarial examples essentially for free, which can be used to reap the
-aforementioned benefits of adversarial training.
+Thus, we work with a different distinction between CE and AE than
+\citet{freiesleben2022intriguing} who considers misclassification as the
+distinguishing feature of adversarial examples. One of the key
+observations of this work is that we can leverage CEs during training
+and get AEs essentially for free to reap the aforementioned benefits of
+adversarial training.
 
 \subsection{Encoding Actionability Constraints}\label{sec-constraints}
 
@@ -802,15 +802,14 @@ literature. Four of them are synthetic with two classes and different
 characteristics: linearly separable clusters (\emph{LS}), overlapping
 clusters (\emph{OL}), concentric circles (\emph{Circ}), and interlocking
 moons (\emph{Moon}). These datasets are generated using the library of
-\citep{altmeyer2023explaining} and we present them in the supplementary
+\citet{altmeyer2023explaining} and we present them in the supplementary
 appendix. Next, we have four real-world binary tabular datasets from the
 domain of economics: \emph{Adult} (a.k.a. Census data) of
-\citep{becker1996adult2}, California housing (\emph{CH}) of
-\citep{pace1997sparse}, Default of Credit Card Clients (\emph{Cred}) of
-\citep{yeh2016default}, and Give Me Some Credit (\emph{GMSC}) of
-\citep{kaggle2011give2}. Finally, for the convenience of illustration,
-we use of the 10-class \emph{MNIST} vision dataset
-\citep{lecun1998mnist}.
+\citet{becker1996adult2}, California housing (\emph{CH}) of
+\citet{pace1997sparse}, Default of Credit Card Clients (\emph{Cred}) of
+\citet{yeh2016default}, and Give Me Some Credit (\emph{GMSC}) from
+\citet{kaggle2011give2}. Finally, for the convenience of illustration,
+we use the 10-class \emph{MNIST} dataset \citep{lecun1998mnist}.
 
 To assess CT, we investigate the improvements in performance metrics
 when using it on top of a weak baseline (BL): a multilayer perceptron
@@ -960,7 +959,7 @@ equality of opportunity \citep{bell2024fairness}. Additionally, CT
 requires mutability constraints for the features considered by the
 model. Even if all immutable features are protected, there may exist
 proxies that are mutable, and hence should not be protected, but
-preserve sufficient information about the principals to hinder the
+preserve sufficient information about the principals to hinder these
 protections. Deciding on actionability is still a major open challenge
 in the AR literature \citep{venkatasubramanian2020philosophical}
 impacting the capacity of CT to fulfill its intended goal.
