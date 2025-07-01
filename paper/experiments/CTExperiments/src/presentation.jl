@@ -580,6 +580,7 @@ function aggregate_ce_evaluation(
     agg_further_vars::Union{Nothing,Vector{String}}=nothing,
     rebase::Bool=true,
     lambda_eval::Union{Nothing,Vector{<:Real}}=nothing,
+    ratio::Bool=false
 )
     # Assertions:
     valid_y = valid_y_ce(df)
@@ -616,6 +617,20 @@ function aggregate_ce_evaluation(
             byvars =
                 isnothing(byvars) ? byvars_must_include : union(byvars_must_include, byvars)
             filter!(x -> x ∉ agg_further_vars, byvars)
+
+            # Computing across-fold averages and between fold standard errors for ratios:
+            if ratio
+                @assert sort(unique(df_agg.objective)) == ["full", "vanilla"] "Ratio calculation only works when comparing `full` vs. `vanilla`"
+                df_agg = DataFrames.unstack(df_agg[:, Not(:std)], :objective, :mean)
+                df_agg.ratio .= df_agg.full ./ df_agg.vanilla
+                byvars = setdiff(byvars, ["objective"])
+                df_agg =
+                    groupby(df_agg, byvars) |>
+                    df -> combine(df, :ratio => (y -> (mean=-(mean(y)-1)*100, 
+                    se=std(y)/sqrt(length(y)))) => AsTable)
+                return df_agg
+            end
+
             df_agg =
                 groupby(df_agg, byvars) |>
                 df -> combine(df, :mean => (y -> (mean=mean(y), std=std(y))) => AsTable)
