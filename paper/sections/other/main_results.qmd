@@ -50,8 +50,7 @@ Final hyperparameters used for the main results presented in @sec-experiments. A
 ```{julia}
 #| eval: false
 
-tbl_mtbl = final_mutability(mtbl_dir; var=["distance"])
-df = final_table(res_dir; tbl_mtbl)
+df = final_table(res_dir)
 inputs = get_table_inputs(df, nothing; backend=Val(:latex))
 formatters = (
     PrettyTables.ft_round(1,findall(.!contains.(names(df),"Acc"))),

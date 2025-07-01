@@ -610,6 +610,7 @@ function aggregate_ce_evaluation(
         byvars_must_include = byvars_must_include[[
             x in names(df) for x in byvars_must_include
         ]]
+
         df_agg = aggregate_data(df, y, byvars; byvars_must_include=byvars_must_include)
 
         if !isnothing(agg_further_vars)
@@ -626,8 +627,8 @@ function aggregate_ce_evaluation(
                 byvars = setdiff(byvars, ["objective"])
                 df_agg =
                     groupby(df_agg, byvars) |>
-                    df -> combine(df, :ratio => (y -> (mean=-(mean(y)-1)*100, 
-                    se=100*std(y)/sqrt(length(y)))) => AsTable)
+                    df -> combine(df, :ratio => (y -> (mean=-(mean(skipmissing(y))-1)*100, 
+                        se=100*std(skipmissing(y))/sqrt(length(y)))) => AsTable)
                 return df_agg
             end
 
@@ -832,7 +833,7 @@ function final_table(
     tbl_mtbl::Union{Nothing,DataFrame}=nothing,
     ce_var=["plausibility_distance_from_target", "mmd"],
     perf_var=["acc"],
-    agg_further_vars=[["run"], ["run", "lambda_energy_eval"]],
+    agg_further_vars=[["run", "lambda_energy_eval"], ["run", "lambda_energy_eval"]],
     longformat::Bool=true,
 )
     # CE:
@@ -863,7 +864,6 @@ function final_table(
         df = vcat(df, tbl_mtbl; cols=:union)
     end
 
-    println(df)
 
     # Missing:
     df = coalesce.(df, "")
@@ -871,8 +871,10 @@ function final_table(
     select!(df, :measure, Not([:measure]))
 
     if longformat
-        df.measure = combine_header.(df.measure, string.(df.lambda_energy_eval))
-        select!(df, Not(:lambda_energy_eval))
+        if "lambda_energy_eval" in names(df)
+            df.measure = combine_header.(df.measure, string.(df.lambda_energy_eval))
+            select!(df, Not(:lambda_energy_eval))
+        end
         println(df)
         df =
             DataFrames.stack(df, Not(:measure)) |>
@@ -907,7 +909,7 @@ function final_mutability(
     df_ce = DataFrame()
     for (i, y) in enumerate(var)
         df = aggregate_ce_evaluation(
-            res_dir; byvars=byvars, y, agg_further_vars=["run"], rebase=false, ratio=true,
+            res_dir; byvars=byvars, y, agg_further_vars=["run"], rebase=true
         )
         df_ce = vcat(df_ce, df; cols=:union)
     end
