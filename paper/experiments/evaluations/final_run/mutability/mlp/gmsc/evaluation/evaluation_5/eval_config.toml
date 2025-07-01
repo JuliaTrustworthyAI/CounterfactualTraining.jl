@@ -1,0 +1,26 @@
+grid_file = "paper/experiments/output/final_run/mutability/mlp/gmsc/grid_config.toml"
+test_time = true
+save_dir = "paper/experiments/output/final_run/mutability/mlp/gmsc/evaluation/evaluation_5"
+
+[counterfactual_params]
+threaded = false
+maxiter = 50
+store_ce = false
+decision_threshold = 0.95
+verbose = true
+n_individuals = 100
+n_runs = 5
+vertical_splits = 100
+parallelizer = "mpi"
+ndiv = 100
+conv = "threshold"
+concatenate_output = true
+
+    [counterfactual_params.generator_params]
+    opt = "sgd"
+    lambda_cost = 0.0
+    lr = 0.25
+    maxiter = 30
+    lambda_energy = 10.0
+    decision_threshold = 0.75
+    type = "ECCo"

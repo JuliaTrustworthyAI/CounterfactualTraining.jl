@@ -57,14 +57,13 @@ function generate!(
         callback=callback,
     )
 
-    # counterfactuals = (ce -> ce.counterfactual).(ces)                                   # get actual counterfactuals
-    advexms = (ce -> ce.search[:last_valid_ae]).(ces)                                   # get adversarial example
+    advexms = (ce -> Float32.(ce.search[:last_valid_ae])).(ces)                                   # get adversarial example
     targets = (ce -> ce.target).(ces)                                                   # get targets
-    neighbours = (ce -> find_potential_neighbours(ce, counterfactual_data, 1)).(ces)    # randomly draw a sample from the target class
+    neighbours = (ce -> Float32.(find_potential_neighbours(ce, counterfactual_data, 1))).(ces)    # randomly draw a sample from the target class
     validities = (ce -> ce.search[:converged]).(ces)
     # Extract counterfactual if converged, else use neighbour:
     counterfactuals = [
-        validities[i] ? ce.counterfactual : neighbours[i] for (i, ce) in enumerate(ces)
+    validities[i] ? Float32.(ce.counterfactual) : neighbours[i] for (i, ce) in enumerate(ces)
     ]
 
     protect_immutable!(neighbours, counterfactuals, counterfactual_data.mutability)     # adjust for mutability

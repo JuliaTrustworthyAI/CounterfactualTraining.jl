@@ -163,6 +163,10 @@ function train_val_split(data::Dataset, ce_data::CounterfactualData, val_size)
         train_test_split(ce_data; test_size=val_size, keep_class_ratio=true)
     )
 
+    # Reduce float precision:
+    Xtrain = Float32.(Xtrain)
+    Xval = Float32.(Xval)
+
     train_set = Flux.DataLoader((Xtrain, ytrain); batchsize=data.batchsize)
     val_set = if data.n_validation > 0
         Flux.DataLoader((Xval, yval); batchsize=data.batchsize)
