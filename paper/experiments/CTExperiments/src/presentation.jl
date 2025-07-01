@@ -115,7 +115,7 @@ end
 function multi_row_header(s::Vector{String})
     s = swap_legy(s)
 
-    if !any(contains.(s, "\\\\"))
+    if !any(contains.(s, r" \\\\ "))
         return [s]
     else
         h1 = String[]
@@ -875,7 +875,6 @@ function final_table(
             df.measure = combine_header.(df.measure, string.(df.lambda_energy_eval))
             select!(df, Not(:lambda_energy_eval))
         end
-        println(df)
         df =
             DataFrames.stack(df, Not(:measure)) |>
             df -> DataFrames.unstack(df, :measure, :value)
