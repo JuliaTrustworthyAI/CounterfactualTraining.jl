@@ -9,12 +9,10 @@ We seek to answer the following three research questions:
 ## Experimental Setup
 
 Our key outcome of interest is improvement in explainability (Def. \ref{def-explainability}). Thus, we focus primarily on the plausibility and cost of faithfully generated counterfactuals at test time. To measure the cost, we follow the standard convention of using distances ($\ell_1$-norm) between factuals and counterfactuals as a proxy. For plausibility, we assess how similar CEs are to the observed samples in the target domain, $\mathbf{X}^+\subset\mathcal{X}^+$. We rely on the metric used by @altmeyer2024faithful,
-
 $$
 \text{IP}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
 $$ {#eq-impl-dist}
 and introduce a novel divergence metric,
-
 $$
 \text{IP}^*(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
 $$ {#eq-impl-div}

@@ -166,7 +166,7 @@
 
 % REMOVE THIS: bibentry
 % This is only needed to show inline citations in the guidelines document. You should not need it and can safely delete it.
-\usepackage{bibentry}
+% \usepackage{bibentry}
 % END REMOVE bibentry
 \usepackage{amsfonts}
 \usepackage{amsmath}
@@ -174,7 +174,8 @@
 \newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
-
+% For mathematical environments, you may reduce fontsize but not below 6.5 point.
+\DeclareMathSizes{10}{9}{7}{6.5}
 
 \usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
@@ -522,11 +523,10 @@ CEs) or when \(t > T\).
 
 Formally, we propose the following counterfactual training objective to
 train explainable (as in Def. \ref{def-explainability}) models:
-
 \begin{equation}\phantomsection\label{eq-obj}{
-\begin{split}
-\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) &+ \lambda_{\text{div}} \text{div}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta) \\+ \lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y}) &+ \lambda_{\text{reg}}\text{ridge}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta)
-\end{split}
+\begin{aligned}
+&\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta) \\+ &\lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y}) + \lambda_{\text{reg}}\text{ridge}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta)
+\end{aligned}
 }\end{equation} where \(\text{yloss}(\cdot)\) is any classification loss
 that induces discriminative performance (e.g., cross-entropy). The
 second and third terms are explained in detail below. For now, they can
@@ -569,9 +569,7 @@ posterior and \(p(\mathbf{x}|\mathbf{y}^{+})\). To generate samples,
 (SGLD) with an uninformative prior for initialization but we depart from
 their methodology. Instead we propose to leverage counterfactual
 explainers to generate counterfactuals of observed training samples.
-Specifically, we have:
-
-\begin{equation}\phantomsection\label{eq-div}{
+Specifically, we have: \begin{equation}\phantomsection\label{eq-div}{
 \text{div}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta) = \mathcal{E}_\theta(\mathbf{x}^+,y) - \mathcal{E}_\theta(\mathbf{x}_T^\prime,y)
 }\end{equation} where \(\mathcal{E}_\theta(\cdot)\) denotes the energy
 function defined as
@@ -609,9 +607,7 @@ examples \citep{freiesleben2022intriguing, pawelczyk2022exploring}. This
 leaves some flexibility with regards to the choice for the
 \(\text{advloss}(\cdot)\) term in Equation~\ref{eq-obj}. An intuitive
 functional form, but likely not the only sensible choice, is inspired by
-adversarial training:
-
-\begin{equation}\phantomsection\label{eq-adv}{
+adversarial training: \begin{equation}\phantomsection\label{eq-adv}{
 \begin{aligned}
 \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y};\varepsilon)&=\text{yloss}(\mathbf{M}_\theta(\mathbf{x}_{t_\varepsilon}^\prime),\mathbf{y}) \\
 t_\varepsilon &= \max_t \{t: ||\Delta_t||_\infty < \varepsilon\}
@@ -768,11 +764,9 @@ measure the cost, we follow the standard convention of using distances
 plausibility, we assess how similar CEs are to the observed samples in
 the target domain, \(\mathbf{X}^+\subset\mathcal{X}^+\). We rely on the
 metric used by \citet{altmeyer2024faithful},
-
 \begin{equation}\phantomsection\label{eq-impl-dist}{
 \text{IP}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
 }\end{equation} and introduce a novel divergence metric,
-
 \begin{equation}\phantomsection\label{eq-impl-div}{
 \text{IP}^*(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
 }\end{equation} where \(\mathbf{X}^\prime\) denotes a collection of
