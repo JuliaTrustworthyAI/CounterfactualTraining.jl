@@ -390,10 +390,10 @@ function aggregate_data(
         df_agg = groupby(df, byvars_must_include)
     end
     if agg_fun == :identity
-        df_agg = combine(df_agg, y => (y -> (mean=y, std=y)) => AsTable)
+        df_agg = combine(df_agg, y => (y -> (mean=y, se=y)) => AsTable)
         return df_agg
     else
-        df_agg = combine(df_agg, y => (y -> (mean=agg_fun(y), std=std(y))) => AsTable)
+        df_agg = combine(df_agg, y => (y -> (mean=agg_fun(y), se=std(y)/sqrt(length(y)))) => AsTable)
         return sort(df_agg)
     end
 end
@@ -621,13 +621,13 @@ function aggregate_ce_evaluation(
             # Computing across-fold averages and between fold standard errors for ratios:
             if ratio
                 @assert sort(unique(df_agg.objective)) == ["full", "vanilla"] "Ratio calculation only works when comparing `full` vs. `vanilla`"
-                df_agg = DataFrames.unstack(df_agg[:, Not(:std)], :objective, :mean)
+                df_agg = DataFrames.unstack(df_agg[:, Not(:se)], :objective, :mean)
                 df_agg.ratio .= df_agg.full ./ df_agg.vanilla
                 byvars = setdiff(byvars, ["objective"])
                 df_agg =
                     groupby(df_agg, byvars) |>
                     df -> combine(df, :ratio => (y -> (mean=-(mean(y)-1)*100, 
-                    se=std(y)/sqrt(length(y)))) => AsTable)
+                    se=100*std(y)/sqrt(length(y)))) => AsTable)
                 return df_agg
             end
 
@@ -762,13 +762,13 @@ function format_metric(m::String)
 end
 
 function aggregate_ce_evaluation(
-    res_dir::String; y="mmd", byvars=nothing, rebase=true, kwrgs...
+    res_dir::String; y="mmd", byvars=nothing, rebase=true, ratio=true, kwrgs...
 )
     byvars = gather_byvars(byvars, "data")
     eval_grids, _ = final_results(res_dir)
     df = DataFrame()
     for (i, cfg) in enumerate(eval_grids)
-        df_i = aggregate_ce_evaluation(cfg; y, byvars, rebase, kwrgs...)
+        df_i = aggregate_ce_evaluation(cfg; y, byvars, rebase, ratio, kwrgs...)
         df = vcat(df, df_i)
     end
     rename!(df, :data => :dataset)
@@ -777,9 +777,11 @@ function aggregate_ce_evaluation(
         df.objective .= CTExperiments.format_header.(df.objective)
     end
     df.variable .= CTExperiments.format_metric.(y)
-    if rebase
+    if rebase || ratio
         df.variable .= (x -> LatexCell("$(x) \$(-%)\$")).(df.variable)
-        select!(df, Not([:is_pct, :objective]))
+        if rebase 
+            select!(df, Not([:is_pct, :objective]))
+        end
     end
     return df
 end
@@ -801,7 +803,8 @@ function aggregate_performance(
     df.objective .= replace.(df.objective, "Vanilla" => "BL")
     df.variable .= replace.(df.variable, "Accuracy" => adversarial ? "Acc.\$^*\$" : "Acc.")
     df.variable .= ["$v ($o)" for (v, o) in zip(df.variable, df.objective)]
-    select!(df, Not([:std, :objective]))
+
+    select!(df, Not([:objective]))
     return df
 end
 
@@ -836,7 +839,9 @@ function final_table(
     df_ce = DataFrame()
     for (i, y) in enumerate(ce_var)
         df = aggregate_ce_evaluation(
-            res_dir; y, agg_further_vars=agg_further_vars[i], rebase=true
+            res_dir; y, agg_further_vars=agg_further_vars[i], 
+            rebase=false, 
+            ratio=true,
         )
         df_ce = vcat(df_ce, df; cols=:union)
     end
@@ -848,12 +853,17 @@ function final_table(
     df_perf = aggregate_performance(res_dir; measure=perf_var)                          # unperturbed
     df_adv_perf = aggregate_performance(res_dir; measure=perf_var, adversarial=true)    # adversarial
     df_perf = vcat(df_perf, df_adv_perf)
-    df = vcat(df_ce, df_perf; cols=:union) |> df -> DataFrames.unstack(df, :dataset, :mean)
+    df = vcat(df_ce, df_perf; cols=:union) |> 
+        df -> transform!(df, [:mean, :se] => ((m, s) -> [isnan(si) ? "$(round(mi, digits=2))" : "$(round(mi, digits=2)) ($(round(si, digits=2)))" for (mi, si) in zip(m, s)]) => :mean) |>
+        df -> select!(df, Not(:se)) |>
+        df -> DataFrames.unstack(df, :dataset, :mean)
 
     # Mutability:
     if !isnothing(tbl_mtbl)
         df = vcat(df, tbl_mtbl; cols=:union)
     end
+
+    println(df)
 
     # Missing:
     df = coalesce.(df, "")
@@ -863,6 +873,7 @@ function final_table(
     if longformat
         df.measure = combine_header.(df.measure, string.(df.lambda_energy_eval))
         select!(df, Not(:lambda_energy_eval))
+        println(df)
         df =
             DataFrames.stack(df, Not(:measure)) |>
             df -> DataFrames.unstack(df, :measure, :value)
@@ -896,7 +907,7 @@ function final_mutability(
     df_ce = DataFrame()
     for (i, y) in enumerate(var)
         df = aggregate_ce_evaluation(
-            res_dir; byvars=byvars, y, agg_further_vars=["run"], rebase=true
+            res_dir; byvars=byvars, y, agg_further_vars=["run"], rebase=false, ratio=true,
         )
         df_ce = vcat(df_ce, df; cols=:union)
     end
