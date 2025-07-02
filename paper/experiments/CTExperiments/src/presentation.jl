@@ -622,7 +622,14 @@ function aggregate_ce_evaluation(
             # Computing across-fold averages and between fold standard errors for ratios:
             if ratio
                 @assert sort(unique(df_agg.objective)) == ["full", "vanilla"] "Ratio calculation only works when comparing `full` vs. `vanilla`"
-                df_agg = DataFrames.unstack(df_agg[:, Not(:se)], :objective, :mean)
+
+                # Aggregate by all variables not including "run" and "objective"
+                bootstrap_vars = ["run", "objective"]
+                df_agg = groupby(df_agg, bootstrap_vars) |>
+                    df -> combine(df, :mean => (y -> mean(skipmissing(y))) => :mean)
+
+                # Final aggregation and standard errors:
+                df_agg = DataFrames.unstack(df_agg, :objective, :mean)
                 df_agg.ratio .= df_agg.full ./ df_agg.vanilla
                 byvars = setdiff(byvars, ["objective"])
                 df_agg =
