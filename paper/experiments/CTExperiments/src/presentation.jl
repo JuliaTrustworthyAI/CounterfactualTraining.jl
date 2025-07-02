@@ -643,7 +643,7 @@ function aggregate_ce_evaluation(
 
             df_agg =
                 groupby(df_agg, byvars) |>
-                df -> combine(df, :mean => (y -> (mean=mean(y), std=std(y))) => AsTable)
+                df -> combine(df, :mean => (y -> (mean=mean(y), se=std(y))) => AsTable)
         end
     else
         df_agg = aggregate_data(df, y, byvars)
@@ -653,7 +653,7 @@ function aggregate_ce_evaluation(
     if rebase
         @assert "objective" in names(df_agg) "Cannot rebase with respect to 'vanilla' objective is the 'objective' column is not present."
         objectives = unique(df_agg.objective)
-        df_agg = DataFrames.unstack(df_agg[:, Not(:std)], :objective, :mean)
+        df_agg = DataFrames.unstack(df_agg[:, Not(:se)], :objective, :mean)
         vanilla_name = objectives[lowercase.(objectives) .== "vanilla"][1]
         other_names = objectives[lowercase.(objectives) .!= "vanilla"]
         for obj in other_names
