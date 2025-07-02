@@ -178,7 +178,7 @@ function test_performance(
             idx = rand(1:size(Xtest,2),size(Xtest,2))
         end
         Xtest_j = Xtest[:,idx]
-        ytest_j = ytest[:,idx]
+        ytest_j = ytest[idx]
         _ytest_j = _ytest[:,idx]    # OHE version
 
         # Adversarial accuracy
@@ -191,7 +191,13 @@ function test_performance(
 
         yhat = predict_label(M, CounterfactualData(Xtest_j, ytest_j), Xtest_j)
 
-        push!(output,compute_performance_measures(exper, ytest_j, yhat; measure, return_df))
+        output_j = compute_performance_measures(exper, ytest_j, yhat; measure, return_df) 
+
+        if return_df
+            output_j.run .= j
+        end
+
+        push!(output, output_j)
     end
 
     # If no bootstrap requested, just return single eval:
@@ -201,7 +207,7 @@ function test_performance(
 
     # If dataframe, concatenate:
     if return_df
-        return reduce(vcat, output)
+        output = reduce(vcat, output)
     end
 
     return output 
