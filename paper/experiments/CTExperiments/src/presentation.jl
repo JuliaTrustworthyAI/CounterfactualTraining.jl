@@ -434,6 +434,7 @@ function aggregate_performance(
     cfg::EvalConfigOrGrid;
     measure=[accuracy, multiclass_f1score],
     adversarial::Bool=false,
+    bootstrap::Union{Nothing,Int}=nothing,
     kwrgs...,
 )
 
@@ -441,7 +442,7 @@ function aggregate_performance(
     exper_grid = ExperimentGrid(cfg.grid_file)
     df, df_meta, df_perf = merge_with_meta(
         cfg,
-        CTExperiments.test_performance(exper_grid; measure, adversarial, return_df=true),
+        CTExperiments.test_performance(exper_grid; measure, adversarial, bootstrap, return_df=true),
     )
 
     return aggregate_performance(df, df_meta, df_perf; kwrgs...)
@@ -459,6 +460,7 @@ function aggregate_performance(
         byvars = [byvars]
     end
     @assert byvars isa Nothing || all(col -> col in names(df_meta), byvars) "Columns specified in `byvars` must be one of the following: $(names(df_meta))."
+
 
     # Aggregate data:
     df = aggregate_data(df, "value", byvars; byvars_must_include=["variable"])
