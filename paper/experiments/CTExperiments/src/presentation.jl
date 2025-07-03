@@ -454,6 +454,7 @@ function aggregate_performance(
     df_perf::DataFrame;
     y::Union{Nothing,String}=nothing,
     byvars::Union{Nothing,String,Vector{String}}=nothing,
+    bootstrap::Union{Nothing,Int}=nothing,
 )
     # Assertions:
     if isa(byvars, String)
@@ -626,17 +627,15 @@ function aggregate_ce_evaluation(
                 @assert sort(unique(df_agg.objective)) == ["full", "vanilla"] "Ratio calculation only works when comparing `full` vs. `vanilla`"
 
                 # Aggregate by all variables not including "run" and "objective"
-                display(df_agg)
                 bootstrap_vars = ["run", "objective"]
-                if "data" in names(df)
-                    push!(bootstrap_vars, "data")
-                end
                 df_agg = groupby(df_agg, bootstrap_vars) |>
                     df -> combine(df, :mean => (y -> mean(skipmissing(y))) => :mean)
-                display(df_agg)
+                if "data" in names(df)
+                    df_agg.data .= unique(df.data)
+                end
 
                 # Final aggregation and standard errors:
-                df_agg = DataFrames.unstack(df_agg[:,:se], :objective, :mean)
+                df_agg = DataFrames.unstack(df_agg, :objective, :mean)
                 df_agg.ratio .= df_agg.full ./ df_agg.vanilla
                 byvars = setdiff(byvars, ["objective"])
                 df_agg =
@@ -804,7 +803,7 @@ end
 global allowed_perf_measures = Dict("acc" => accuracy, "f1" => multiclass_f1score)
 
 function aggregate_performance(
-    res_dir::String; measure::Vector=["acc"], adversarial::Bool=false
+    res_dir::String; measure::Vector=["acc"], adversarial::Bool=false, bootstrap::Union{Nothing,Int}=nothing,
 )
 
     # Get measures:
@@ -813,7 +812,7 @@ function aggregate_performance(
     end
 
     eval_grids, _ = final_results(res_dir)
-    df = aggregate_performance(eval_grids; measure, adversarial)
+    df = aggregate_performance(eval_grids; measure, adversarial, bootstrap)
     df.objective .= replace.(df.objective, "Full" => "CT")
     df.objective .= replace.(df.objective, "Vanilla" => "BL")
     df.variable .= replace.(df.variable, "Accuracy" => adversarial ? "Acc.\$^*\$" : "Acc.")
@@ -849,6 +848,7 @@ function final_table(
     perf_var=["acc"],
     agg_further_vars=[["run", "lambda_energy_eval"], ["run", "lambda_energy_eval"]],
     longformat::Bool=true,
+    bootstrap::Int=100,
 )
     # CE:
     df_ce = DataFrame()
@@ -865,11 +865,11 @@ function final_table(
     df_ce = coalesce.(df_ce, "(agg.)")
 
     # Performance:
-    df_perf = aggregate_performance(res_dir; measure=perf_var)                          # unperturbed
-    df_adv_perf = aggregate_performance(res_dir; measure=perf_var, adversarial=true)    # adversarial
+    df_perf = aggregate_performance(res_dir; measure=perf_var, bootstrap)                          # unperturbed
+    df_adv_perf = aggregate_performance(res_dir; measure=perf_var, adversarial=true, bootstrap)    # adversarial
     df_perf = vcat(df_perf, df_adv_perf)
     df = vcat(df_ce, df_perf; cols=:union) |> 
-        df -> transform!(df, [:mean, :se] => ((m, s) -> [isnan(si) ? "$(round(mi, digits=2))" : "$(round(mi, digits=2)) ($(round(si, digits=2)))" for (mi, si) in zip(m, s)]) => :mean) |>
+        df -> transform!(df, [:mean, :se] => ((m, s) -> [isnan(si) ? "$(round(mi, digits=2))" : "$(round(mi, digits=2))+-$(round(si, digits=2))" for (mi, si) in zip(m, s)]) => :mean) |>
         df -> select!(df, Not(:se)) |>
         df -> DataFrames.unstack(df, :dataset, :mean)
 
