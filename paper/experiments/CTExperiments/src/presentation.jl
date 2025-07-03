@@ -869,6 +869,7 @@ function final_table(
             res_dir; y, agg_further_vars=agg_further_vars[i], 
             rebase=false, 
             ratio=true,
+            total_uncertainty
         )
         df_ce = vcat(df_ce, df; cols=:union)
     end
