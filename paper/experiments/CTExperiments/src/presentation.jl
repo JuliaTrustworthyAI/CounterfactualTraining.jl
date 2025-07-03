@@ -583,7 +583,8 @@ function aggregate_ce_evaluation(
     agg_further_vars::Union{Nothing,Vector{String}}=nothing,
     rebase::Bool=true,
     lambda_eval::Union{Nothing,Vector{<:Real}}=nothing,
-    ratio::Bool=false
+    ratio::Bool=false,
+    total_uncertainty::Bool=true,
 )
     # Assertions:
     valid_y = valid_y_ce(df)
@@ -625,13 +626,22 @@ function aggregate_ce_evaluation(
             # Computing across-fold averages and between fold standard errors for ratios:
             if ratio
                 @assert sort(unique(df_agg.objective)) == ["full", "vanilla"] "Ratio calculation only works when comparing `full` vs. `vanilla`"
-
-                # Aggregate by all variables not including "run" and "objective"
-                bootstrap_vars = ["run", "objective"]
-                df_agg = groupby(df_agg, bootstrap_vars) |>
-                    df -> combine(df, :mean => (y -> mean(skipmissing(y))) => :mean)
-                if "data" in names(df)
-                    df_agg.data .= unique(df.data)
+                
+                if total_uncertainty
+                    # Include uncertainty around lambda_energy_eval in standard error.
+                    # This means that standard error also reflects possibly different hyperparameter
+                    # choices at test time as a source of uncertainty.
+                    select!(df_agg, Not(:se))
+                else
+                    # Otherwise, aggregate by all variables not including "run" and "objective".
+                    # This means that uncertainty around lambda_energy_eval is marginalised out
+                    # allowing for a clean model comparison.
+                    bootstrap_vars = ["run", "objective"]
+                    df_agg = groupby(df_agg, bootstrap_vars) |>
+                        df -> combine(df, :mean => (y -> mean(skipmissing(y))) => :mean)
+                    if "data" in names(df)
+                        df_agg.data .= unique(df.data)
+                    end
                 end
 
                 # Final aggregation and standard errors:
@@ -849,6 +859,7 @@ function final_table(
     agg_further_vars=[["run", "lambda_energy_eval"], ["run", "lambda_energy_eval"]],
     longformat::Bool=true,
     bootstrap::Int=100,
+    total_uncertainty::Bool=true,
 )
     # CE:
     df_ce = DataFrame()
