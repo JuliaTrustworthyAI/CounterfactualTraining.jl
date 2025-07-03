@@ -393,7 +393,7 @@ function aggregate_data(
         df_agg = combine(df_agg, y => (y -> (mean=y, se=y)) => AsTable)
         return df_agg
     else
-        df_agg = combine(df_agg, y => (y -> (mean=agg_fun(y), se=std(y)/sqrt(length(y)))) => AsTable)
+        df_agg = combine(df_agg, y => (y -> (mean=agg_fun(y), se=std(y))) => AsTable)
         return sort(df_agg)
     end
 end
@@ -652,7 +652,7 @@ function aggregate_ce_evaluation(
                 df_agg =
                     groupby(df_agg, byvars) |>
                     df -> combine(df, :ratio => (y -> (mean=-(mean(skipmissing(y))-1)*100, 
-                        se=100*std(skipmissing(y))/sqrt(length(y)))) => AsTable)
+                        se=100*std(skipmissing(y)))) => AsTable)
                 return df_agg
             end
 
@@ -860,7 +860,7 @@ function final_table(
     agg_further_vars=[["run", "lambda_energy_eval"], ["run", "lambda_energy_eval"]],
     longformat::Bool=true,
     bootstrap::Int=100,
-    total_uncertainty::Bool=true,
+    total_uncertainty::Bool=false,
 )
     # CE:
     df_ce = DataFrame()
@@ -881,7 +881,7 @@ function final_table(
     df_adv_perf = aggregate_performance(res_dir; measure=perf_var, adversarial=true, bootstrap)    # adversarial
     df_perf = vcat(df_perf, df_adv_perf)
     df = vcat(df_ce, df_perf; cols=:union) |> 
-        df -> transform!(df, [:mean, :se] => ((m, s) -> [isnan(si) ? "$(round(mi, digits=2))" : PrettyTables.LatexCell("$(round(mi, digits=2))\\pm$(round(si, digits=2))") for (mi, si) in zip(m, s)]) => :mean) |>
+        df -> transform!(df, [:mean, :se] => ((m, s) -> [isnan(si) ? "$(round(mi, digits=2))" : PrettyTables.LatexCell("$(round(mi, digits=2))\\pm$(round(2si, digits=2))") for (mi, si) in zip(m, s)]) => :mean) |>
         df -> select!(df, Not(:se)) |>
         df -> DataFrames.unstack(df, :dataset, :mean)
 
