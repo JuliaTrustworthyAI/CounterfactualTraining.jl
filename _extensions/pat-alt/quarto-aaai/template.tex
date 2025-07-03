@@ -14,8 +14,9 @@ $before-title.tex()$
 \newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
-% For mathematical environments, you may reduce fontsize but not below 6.5 point.
-\DeclareMathSizes{10}{9}{7}{6.5}
+\usepackage{placeins}
+\usepackage{siunitx}
+\sisetup{uncertainty-mode = separate}
 
 $tables.tex()$
 

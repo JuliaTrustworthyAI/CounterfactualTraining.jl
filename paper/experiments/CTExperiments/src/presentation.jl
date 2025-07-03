@@ -626,7 +626,7 @@ function aggregate_ce_evaluation(
             # Computing across-fold averages and between fold standard errors for ratios:
             if ratio
                 @assert sort(unique(df_agg.objective)) == ["full", "vanilla"] "Ratio calculation only works when comparing `full` vs. `vanilla`"
-                
+
                 if total_uncertainty
                     # Include uncertainty around lambda_energy_eval in standard error.
                     # This means that standard error also reflects possibly different hyperparameter
@@ -647,6 +647,7 @@ function aggregate_ce_evaluation(
                 # Final aggregation and standard errors:
                 df_agg = DataFrames.unstack(df_agg, :objective, :mean)
                 df_agg.ratio .= df_agg.full ./ df_agg.vanilla
+
                 byvars = setdiff(byvars, ["objective"])
                 df_agg =
                     groupby(df_agg, byvars) |>
@@ -880,7 +881,7 @@ function final_table(
     df_adv_perf = aggregate_performance(res_dir; measure=perf_var, adversarial=true, bootstrap)    # adversarial
     df_perf = vcat(df_perf, df_adv_perf)
     df = vcat(df_ce, df_perf; cols=:union) |> 
-        df -> transform!(df, [:mean, :se] => ((m, s) -> [isnan(si) ? "$(round(mi, digits=2))" : "$(round(mi, digits=2))+-$(round(si, digits=2))" for (mi, si) in zip(m, s)]) => :mean) |>
+        df -> transform!(df, [:mean, :se] => ((m, s) -> [isnan(si) ? "$(round(mi, digits=2))" : PrettyTables.LatexCell("$(round(mi, digits=2))\\pm$(round(si, digits=2))") for (mi, si) in zip(m, s)]) => :mean) |>
         df -> select!(df, Not(:se)) |>
         df -> DataFrames.unstack(df, :dataset, :mean)
 
@@ -893,6 +894,9 @@ function final_table(
     # Missing:
     df = coalesce.(df, "")
     rename!(df, :variable => :measure)
+    if !("lambda_energy_eval" in names(df))
+        df.measure .= (x -> x isa PrettyTables.LatexCell ? x.data : x).(df.measure)
+    end
     select!(df, :measure, Not([:measure]))
 
     if longformat

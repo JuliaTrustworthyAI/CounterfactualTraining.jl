@@ -47,6 +47,8 @@ Final hyperparameters used for the main results presented in @sec-experiments. A
 
 :::
 
+## Final Results {#sec-app-final-results}
+
 ```{julia}
 #| eval: false
 
@@ -56,7 +58,52 @@ formatters = (
     PrettyTables.ft_round(1,findall(.!contains.(names(df),"Acc"))),
     PrettyTables.ft_round(2,findall(contains.(names(df),"Acc")))
 )
-for fname in ["paper/quarto_ecml/tables/main.tex","paper/preprint/tables/main.tex"]
+for fname in ["paper/quarto_aaai/tables/main.tex","paper/preprint/tables/main.tex"]
+    tabulate_results(
+        inputs; 
+        table_type=:tabular, 
+        save_name=fname, 
+        wrap_table=false, 
+        alignment=[:l,fill(:r,size(df,2)-1)...],
+        formatters=formatters
+    )
+end
+```
+
+```{julia}
+#| eval: false
+
+# Detailed table with varying levels of hyperparameter:
+df = final_table(res_dir; agg_further_vars=[["run"], ["run"]])
+inputs = get_table_inputs(df, nothing; backend=Val(:latex))
+formatters = (
+    PrettyTables.ft_round(1,findall(.!contains.(names(df),"Acc"))),
+    PrettyTables.ft_round(2,findall(contains.(names(df),"Acc")))
+)
+for fname in ["paper/quarto_aaai/tables/main_detailed.tex","paper/preprint/tables/main_detailed.tex"]
+    tabulate_results(
+        inputs; 
+        table_type=:tabular, 
+        save_name=fname, 
+        wrap_table=false, 
+        alignment=[:l,fill(:r,size(df,2)-1)...],
+        formatters=formatters
+    )
+end
+```
+
+
+```{julia}
+#| eval: false
+
+# Standard errors with hyperparameter uncertainty marginalized out:
+df = final_table(res_dir, total_uncertainty=false)
+inputs = get_table_inputs(df, nothing; backend=Val(:latex))
+formatters = (
+    PrettyTables.ft_round(1,findall(.!contains.(names(df),"Acc"))),
+    PrettyTables.ft_round(2,findall(contains.(names(df),"Acc")))
+)
+for fname in ["paper/quarto_aaai/tables/main_marginalized.tex","paper/preprint/tables/main_marginalized.tex"]
     tabulate_results(
         inputs; 
         table_type=:tabular, 

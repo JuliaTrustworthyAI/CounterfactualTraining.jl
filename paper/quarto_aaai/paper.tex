@@ -166,7 +166,7 @@
 
 % REMOVE THIS: bibentry
 % This is only needed to show inline citations in the guidelines document. You should not need it and can safely delete it.
-% \usepackage{bibentry}
+\usepackage{bibentry}
 % END REMOVE bibentry
 \usepackage{amsfonts}
 \usepackage{amsmath}
@@ -174,8 +174,9 @@
 \newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
-% For mathematical environments, you may reduce fontsize but not below 6.5 point.
-\DeclareMathSizes{10}{9}{7}{6.5}
+\usepackage{placeins}
+\usepackage{siunitx}
+\sisetup{uncertainty-mode = separate}
 
 \usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
