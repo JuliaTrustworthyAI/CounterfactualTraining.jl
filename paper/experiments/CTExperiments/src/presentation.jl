@@ -629,20 +629,14 @@ function aggregate_ce_evaluation(
                 display(df_agg)
                 bootstrap_vars = ["run", "objective"]
                 if "data" in names(df)
-                    df_agg = groupby(df_agg, bootstrap_vars) |>
-                        df -> combine(
-                            df,
-                            :mean => (y -> mean(skipmissing(y))) => :mean,
-                            :data => (d -> unique(d)) => :data  # Wrap in vector
-                        )
-                else
-                    df_agg = groupby(df_agg, bootstrap_vars) |>
-                        df -> combine(df, :mean => (y -> mean(skipmissing(y))) => :mean)
+                    push!(bootstrap_vars, "data")
                 end
+                df_agg = groupby(df_agg, bootstrap_vars) |>
+                    df -> combine(df, :mean => (y -> mean(skipmissing(y))) => :mean)
                 display(df_agg)
 
                 # Final aggregation and standard errors:
-                df_agg = DataFrames.unstack(df_agg, :objective, :mean)
+                df_agg = DataFrames.unstack(df_agg[:,:se], :objective, :mean)
                 df_agg.ratio .= df_agg.full ./ df_agg.vanilla
                 byvars = setdiff(byvars, ["objective"])
                 df_agg =
