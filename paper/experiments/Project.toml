@@ -7,7 +7,9 @@ DotEnv = "4dc1fcf4-5e3b-5448-94ab-0c38ec0385c1"
 Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
 MPI = "da04e1cc-30fd-572f-bb4f-1f8673147195"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 TaijaParallel = "bf1c2c22-5e42-4e78-8b6b-92e6c673eeb0"
+UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
 
 [extras]
 MPIPreferences = "3da0fdf6-3ccc-4f1b-acd9-58baa6c99267"

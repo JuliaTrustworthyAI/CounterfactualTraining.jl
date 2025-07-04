@@ -877,6 +877,8 @@ function final_table(
     # Missing:
     df_ce = coalesce.(df_ce, "(agg.)")
 
+    display(df_ce)
+
     # Performance:
     df_perf = aggregate_performance(res_dir; measure=perf_var, bootstrap)                          # unperturbed
     df_adv_perf = aggregate_performance(res_dir; measure=perf_var, adversarial=true, bootstrap)    # adversarial
