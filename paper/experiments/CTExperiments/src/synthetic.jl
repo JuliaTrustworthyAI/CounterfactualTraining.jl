@@ -17,7 +17,7 @@ Base.@kwdef mutable struct Moons <: Dataset
     n_validation::Int = 600
     train_test_ratio::Float32 = 0.8
     train_test_seed::Int = get_global_seed()
-    mutability::Union{String,Vector{String}} = "none"
+    mutability::Union{String,Vector{Int},Vector{String}} = "none"
     domain::Union{String,Vector{<:Any}} = "none"
     datadir::String = get_global_dev_dir()
 end
@@ -37,7 +37,7 @@ Base.@kwdef mutable struct LinearlySeparable <: Dataset
     n_validation::Int = 600
     train_test_ratio::Float32 = 0.8
     train_test_seed::Int = get_global_seed()
-    mutability::Union{String,Vector{String}} = "none"
+    mutability::Union{String,Vector{Int},Vector{String}} = "none"
     domain::Union{String,Vector{<:Any}} = "none"
     datadir::String = get_global_dev_dir()
 end
@@ -59,7 +59,7 @@ Base.@kwdef mutable struct Overlapping <: Dataset
     n_validation::Int = 600
     train_test_ratio::Float32 = 0.8
     train_test_seed::Int = get_global_seed()
-    mutability::Union{String,Vector{String}} = "none"
+    mutability::Union{String,Vector{Int},Vector{String}} = "none"
     domain::Union{String,Vector{<:Any}} = "none"
     datadir::String = get_global_dev_dir()
 end
@@ -81,7 +81,7 @@ Base.@kwdef mutable struct Circles <: Dataset
     n_validation::Int = 600
     train_test_ratio::Float32 = 0.8
     train_test_seed::Int = get_global_seed()
-    mutability::Union{String,Vector{String}} = "none"
+    mutability::Union{String,Vector{Int},Vector{String}} = "none"
     domain::Union{String,Vector{<:Any}} = "none"
     datadir::String = get_global_dev_dir()
 end

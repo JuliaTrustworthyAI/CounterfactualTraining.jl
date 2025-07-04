@@ -181,17 +181,25 @@ input_dim(data::Dataset) = size(get_data(data; n=1)[1], 1)
 Helper function to get the mutability constraints for the dataset. If `data.mutability` is a string, it converts it to a vector of symbols. If it's a vector of strings, it converts each string to a symbol.
 """
 function get_mutability(data::Dataset)
+
     mtblty = data.mutability
+
+    # Single string:
     if mtblty isa String
         if mtblty == "none"
             mtblty = nothing
         else
             mtblty = fill(Symbol(mtblty), input_dim(data))
         end
-    else
+    end
+
+    # Vector of strings:
+    if mtblty isa Vector{String}
         mtblty = Symbol.(mtblty)
     end
+    
     return mtblty
+
 end
 
 """

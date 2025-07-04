@@ -1,9 +1,9 @@
 name = "mutability"
 dim_reduction = []
 generator_type = ["ecco"]
-data = ""
+data = "adult"
 model_type = "mlp"
-save_dir = ""
+save_dir = "paper/experiments/output/final_run/mutability/mlp/adult"
 
 [data_params]
 datadir = []
@@ -24,26 +24,26 @@ nhidden = []
 opt = []
 lambda_cost = []
 lr = []
-decision_threshold = []
 maxiter = []
 lambda_energy = []
+decision_threshold = [0.75]
 type = []
 
 [training_params]
 opt = []
-nce = []
 lr = []
-threaded = [false]
-class_loss = []
 objective = ["full", "vanilla"]
 lambda_class_loss = []
 lambda_energy_diff = []
 burnin = []
 nepochs = []
+lambda_adversarial = [0.25]
+parallelizer = ["mpi"]
+nce = [5000]
+threaded = [false]
+class_loss = []
 lambda_energy_reg = []
 verbose = []
-lambda_adversarial = []
-parallelizer = ["mpi"]
 generator_params = []
 conv = []
 nneighbours = []

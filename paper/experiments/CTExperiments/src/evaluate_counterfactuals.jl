@@ -29,7 +29,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
     n_individuals::Int = get_global_param("n_individuals", 100)
     n_runs::Int = get_global_param("n_runs", 5)
     conv::AbstractString = "threshold"
-    decision_threshold::AbstractFloat = 0.95
+    decision_threshold::AbstractFloat = get_global_param("tau_eval", 0.95)
     maxiter::Int = get_global_param("maxiter_eval", 50)
     vertical_splits::Int = get_global_param("vertical_splits", 100)
     store_ce::Bool = false

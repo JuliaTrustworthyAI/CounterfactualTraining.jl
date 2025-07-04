@@ -1,13 +1,13 @@
 name = "mutability"
 dim_reduction = []
 generator_type = ["ecco"]
-data = ""
-model_type = "mlp"
+data = "cali"
+model_type = ""
 save_dir = ""
 
 [data_params]
 datadir = []
-mutability = [[1]]
+mutability = [[2]]  # second feature is 'houseage'
 domain = []
 n_validation = []
 train_test_ratio = []
@@ -24,14 +24,14 @@ nhidden = []
 opt = []
 lambda_cost = []
 lr = []
-decision_threshold = []
+decision_threshold = [0.5]
 maxiter = []
 lambda_energy = []
 type = []
 
 [training_params]
 opt = []
-nce = []
+nce = [5000]
 lr = []
 threaded = [false]
 class_loss = []
@@ -40,7 +40,7 @@ lambda_class_loss = []
 lambda_energy_diff = []
 burnin = []
 nepochs = []
-lambda_energy_reg = []
+lambda_energy_reg = [0.25]
 verbose = []
 lambda_adversarial = []
 parallelizer = ["mpi"]

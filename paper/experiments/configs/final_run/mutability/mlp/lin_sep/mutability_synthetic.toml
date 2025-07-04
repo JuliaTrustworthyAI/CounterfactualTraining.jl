@@ -1,9 +1,9 @@
 name = "mutability"
 dim_reduction = []
 generator_type = ["ecco"]
-data = ""
+data = "lin_sep"
 model_type = "mlp"
-save_dir = ""
+save_dir = "paper/experiments/output/final_run/mutability/mlp/lin_sep"
 
 [data_params]
 datadir = []
@@ -24,26 +24,26 @@ nhidden = []
 opt = []
 lambda_cost = []
 lr = []
-decision_threshold = []
 maxiter = []
 lambda_energy = []
+decision_threshold = []
 type = []
 
 [training_params]
 opt = []
-nce = []
 lr = []
-threaded = [false]
-class_loss = []
 objective = ["full", "vanilla"]
 lambda_class_loss = []
 lambda_energy_diff = []
 burnin = []
 nepochs = []
-lambda_energy_reg = []
-verbose = []
 lambda_adversarial = []
 parallelizer = ["mpi"]
+nce = []
+threaded = [false]
+class_loss = []
+lambda_energy_reg = []
+verbose = []
 generator_params = []
 conv = []
 nneighbours = []

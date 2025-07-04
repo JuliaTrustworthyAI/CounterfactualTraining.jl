@@ -1,13 +1,13 @@
 name = "mutability"
 dim_reduction = []
 generator_type = ["ecco"]
-data = ""
-model_type = "mlp"
+data = "credit"
+model_type = ""
 save_dir = ""
 
 [data_params]
 datadir = []
-mutability = [[1]]
+mutability = [[15]]  # 15th feature is 'age'
 domain = []
 n_validation = []
 train_test_ratio = []
@@ -24,14 +24,14 @@ nhidden = []
 opt = []
 lambda_cost = []
 lr = []
-decision_threshold = []
+decision_threshold = [0.5]
 maxiter = []
 lambda_energy = []
 type = []
 
 [training_params]
 opt = []
-nce = []
+nce = [5000]
 lr = []
 threaded = [false]
 class_loss = []
@@ -42,7 +42,7 @@ burnin = []
 nepochs = []
 lambda_energy_reg = []
 verbose = []
-lambda_adversarial = []
+lambda_adversarial = [0.25]
 parallelizer = ["mpi"]
 generator_params = []
 conv = []
