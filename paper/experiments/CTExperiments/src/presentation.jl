@@ -585,6 +585,7 @@ function aggregate_ce_evaluation(
     lambda_eval::Union{Nothing,Vector{<:Real}}=nothing,
     ratio::Bool=false,
     total_uncertainty::Bool=true,
+    valid_only::Bool=true,
 )
     # Assertions:
     valid_y = valid_y_ce(df)
@@ -594,13 +595,20 @@ function aggregate_ce_evaluation(
     end
     @assert isnothing(byvars) || all(col -> col in names(df_meta), byvars) "Columns specified in `byvars` must be one of the following: $(names(df_meta))."
 
-    df = df[df.variable .== y, :]
+    # Filter for "valid" if so specified:
+    df = df[df.variable .== y .|| df.variable .== "validity", :]
+    df = DataFrames.unstack(df, Not(:variable, :value), :variable, :value)
+    if y != "validity"
+        if valid_only 
+            df = filter(df -> df.validity == 1.0, df)
+        end
+        select!(df, Not(:validity))
+    end
+
     if y == "mmd"
         # To align with plausibility metric (negative distance), we need to invert the MMD metric. We also first clamp values to 0 (sometimes MMD is slightly negative for numeric reasons).
-        df.value .= .-clamp.(df.value, 0, Inf)
+        df.mmd .= .-clamp.(df.mmd, 0, Inf)
     end
-    rename!(df, :value => y)
-    select!(df, Not(:variable))
 
     # Filter:
     if !isnothing(lambda_eval)
