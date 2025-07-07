@@ -1,6 +1,7 @@
 using CounterfactualExplanations
 using CounterfactualExplanations.Evaluation
 using DataFrames
+using IntegratedGradients
 using JLD2
 using Serialization
 using TaijaParallel
@@ -491,4 +492,11 @@ function generate_factual_target_pairs(
     output = reduce(vcat, output)
 
     return output
+end
+
+function integrated_gradients(cfg::Experiment; n=nothing, test_set=true, kwrgs...)
+    model, _, _ = load_results(cfg)
+    X, y = get_data(cfg.data; n, test_set)
+    # y .= -1 .* y .+ 1
+    calculate_average_contributions(model, X, y; kwrgs...)
 end
