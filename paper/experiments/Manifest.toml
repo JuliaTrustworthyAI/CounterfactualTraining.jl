@@ -430,9 +430,9 @@ version = "0.4.1"
 
 [[deps.ColorSchemes]]
 deps = ["ColorTypes", "ColorVectorSpace", "Colors", "FixedPointNumbers", "PrecompileTools", "Random"]
-git-tree-sha1 = "403f2d8e209681fcbd9468a8514efff3ea08452e"
+git-tree-sha1 = "a656525c8b46aa6a1c76891552ed5381bb32ae7b"
 uuid = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
-version = "3.29.0"
+version = "3.30.0"
 
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
@@ -543,7 +543,7 @@ version = "0.6.4"
 
 [[deps.CounterfactualExplanations]]
 deps = ["CategoricalArrays", "CausalInference", "ChainRulesCore", "DataFrames", "Distributions", "EnergySamplers", "Flux", "Graphs", "KernelFunctions", "LazyArtifacts", "LinearAlgebra", "Logging", "MLJBase", "MLJDecisionTreeInterface", "MLUtils", "MultivariateStats", "PackageExtensionCompat", "ProgressMeter", "Random", "Serialization", "Statistics", "StatsBase", "Tables", "TaijaBase", "UUIDs"]
-git-tree-sha1 = "13565c352b944ad187179d67f671a851dc039c8a"
+git-tree-sha1 = "b3c6dee42068ba23f8c1e62e5ff35a94bd0a0524"
 repo-rev = "counterfactual-training"
 repo-url = "https://github.com/JuliaTrustworthyAI/CounterfactualExplanations.jl.git"
 uuid = "2f13d31b-18db-44c1-bc43-ebaf2cff0be0"
@@ -1353,10 +1353,8 @@ uuid = "1d092043-8f09-5a30-832f-7509e371ab51"
 version = "0.1.6"
 
 [[deps.IntegratedGradients]]
-deps = ["Flux", "Statistics", "Zygote"]
-git-tree-sha1 = "49053b2a7c1a4ce1aaa5907093a277a96287cb90"
-repo-rev = "counterfactual-training"
-repo-url = "../../../IntegratedGradients"
+deps = ["Flux", "LinearAlgebra", "Statistics", "Zygote"]
+path = "../../../IntegratedGradients"
 uuid = "03e9713a-fa7e-4938-b010-9648760faf04"
 version = "0.1.0"
 
@@ -2332,9 +2330,9 @@ version = "1.2.1"
 
 [[deps.Pickle]]
 deps = ["BFloat16s", "DataStructures", "InternedStrings", "Mmap", "Serialization", "SparseArrays", "StridedViews", "StringEncodings", "ZipFile"]
-git-tree-sha1 = "e99da19b86b7e1547b423fc1721b260cfbe83acb"
+git-tree-sha1 = "b10600c3a4094c9a35a81c4d109ad5da8a99875f"
 uuid = "fbb45041-c46e-462f-888f-7c521cafbc2c"
-version = "0.3.5"
+version = "0.3.6"
 
 [[deps.Pixman_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "LLVMOpenMP_jll", "Libdl"]
@@ -2910,15 +2908,17 @@ version = "0.15.7"
 
 [[deps.StridedViews]]
 deps = ["LinearAlgebra", "PackageExtensionCompat"]
-git-tree-sha1 = "5b765c4e401693ab08981989f74a36a010aa1d8e"
+git-tree-sha1 = "425158c52aa58d42593be6861befadf8b2541e9b"
 uuid = "4db3bf67-4bd7-4b4e-b153-31dc3fb37143"
-version = "0.2.2"
+version = "0.4.1"
 
     [deps.StridedViews.extensions]
     StridedViewsCUDAExt = "CUDA"
+    StridedViewsPtrArraysExt = "PtrArrays"
 
     [deps.StridedViews.weakdeps]
     CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+    PtrArrays = "43287f4e-b6f4-7ad1-bb20-aadabca52c3d"
 
 [[deps.StringEncodings]]
 deps = ["Libiconv_jll"]
@@ -3217,9 +3217,9 @@ version = "1.3.243+0"
 
 [[deps.Wayland_jll]]
 deps = ["Artifacts", "EpollShim_jll", "Expat_jll", "JLLWrappers", "Libdl", "Libffi_jll", "XML2_jll"]
-git-tree-sha1 = "53ab3e9c94f4343c68d5905565be63002e13ec8c"
+git-tree-sha1 = "9300077d83c9eccfcac6a18b442d857d7e4f1684"
 uuid = "a2964d1f-97da-50d4-b82a-358c7fce9d89"
-version = "1.23.1+1"
+version = "1.23.1+2"
 
 [[deps.WeakRefStrings]]
 deps = ["DataAPI", "InlineStrings", "Parsers"]
@@ -3523,10 +3523,10 @@ uuid = "075b6546-f08a-558a-be8f-8157d0f608a5"
 version = "1.10.5+0"
 
 [[deps.libvorbis_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Ogg_jll", "Pkg"]
-git-tree-sha1 = "490376214c4721cdaca654041f635213c6165cb3"
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Ogg_jll"]
+git-tree-sha1 = "11e1772e7f3cc987e9d3de991dd4f6b2602663a5"
 uuid = "f27f6e37-5d2b-51aa-960f-b287f2bc3b7a"
-version = "1.3.7+2"
+version = "1.3.8+0"
 
 [[deps.libwebp_jll]]
 deps = ["Artifacts", "Giflib_jll", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libglvnd_jll", "Libtiff_jll", "libpng_jll"]
