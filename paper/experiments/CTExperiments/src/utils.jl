@@ -383,3 +383,45 @@ end
 get_global_dev_dir() = _global_dev_dir
 
 export set_global_seed, get_global_seed
+
+using Plots 
+
+function approximate_decision_boundary(expers::Vector{Experiment}; length::Int=100)
+    results = load_results.(expers)
+    data = expers[1].data
+    X, y = get_data(data)
+    plt = Plots.scatter(X[1,:], X[2,:], group = Int.(y))
+    for (i, exper) in enumerate(expers)
+        model = load_results(exper)[1]
+        db = approximate_decision_boundary(model, data; length)
+        Plots.plot!(plt, db[1,:], db[2,:], label=exper.training_params.objective)
+    end
+    return plt
+end
+
+function approximate_decision_boundary(model, data::Dataset; length::Int=100)
+    X, y = get_data(data)
+    ranges = extrema(X, dims=2) |> x -> (x -> range(x[1], x[2]; length)).(x)
+    xrange = ranges[1]
+    yrange = ranges[2]
+    return approximate_decision_boundary(model, xrange, yrange)
+end
+
+using IntegratedGradients
+
+function approximate_decision_boundary(model, xrange, yrange)
+    dbs = []
+    for x in xrange
+        db = [x, first(yrange)]
+        max_entropy = -Inf
+        for y in yrange
+            current_entropy = IntegratedGradients.entropy(model([x, y]))
+            if current_entropy > max_entropy
+                max_entropy = current_entropy
+                db[2] = y
+            end
+        end
+        push!(dbs, db)
+    end
+    return reduce(hcat, dbs)
+end
