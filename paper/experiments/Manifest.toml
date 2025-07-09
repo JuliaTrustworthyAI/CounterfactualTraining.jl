@@ -1364,7 +1364,7 @@ uuid = "1d092043-8f09-5a30-832f-7509e371ab51"
 version = "0.1.6"
 
 [[deps.IntegratedGradients]]
-deps = ["Flux", "Statistics", "Zygote"]
+deps = ["Flux", "LinearAlgebra", "Statistics", "Zygote"]
 path = "../../../IntegratedGradients"
 uuid = "03e9713a-fa7e-4938-b010-9648760faf04"
 version = "0.1.0"
