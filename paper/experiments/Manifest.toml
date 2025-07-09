@@ -676,9 +676,9 @@ version = "1.15.1"
 
 [[deps.DifferentiationInterface]]
 deps = ["ADTypes", "LinearAlgebra"]
-git-tree-sha1 = "210933c93f39f832d92f9efbbe69a49c453db36d"
+git-tree-sha1 = "c092fd1dd0d94e609cd0d29e13897b2825c804bb"
 uuid = "a0c0ee7d-e4b9-4e03-894e-1c5f64a51d63"
-version = "0.7.1"
+version = "0.7.2"
 
     [deps.DifferentiationInterface.extensions]
     DifferentiationInterfaceChainRulesCoreExt = "ChainRulesCore"
@@ -1364,7 +1364,7 @@ uuid = "1d092043-8f09-5a30-832f-7509e371ab51"
 version = "0.1.6"
 
 [[deps.IntegratedGradients]]
-deps = ["Flux", "LinearAlgebra", "Statistics", "Zygote"]
+deps = ["Flux", "Statistics", "Zygote"]
 path = "../../../IntegratedGradients"
 uuid = "03e9713a-fa7e-4938-b010-9648760faf04"
 version = "0.1.0"

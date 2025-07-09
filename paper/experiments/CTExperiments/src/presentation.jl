@@ -845,7 +845,7 @@ function final_table(
     agg_further_vars=[["run", "lambda_energy_eval"], ["run", "lambda_energy_eval"]],
     longformat::Bool=true,
     bootstrap::Int=100,
-    total_uncertainty::Bool=true,
+    total_uncertainty::Bool=false,
     drop_models::Vector{String}=String[]
 )
     # CE:
