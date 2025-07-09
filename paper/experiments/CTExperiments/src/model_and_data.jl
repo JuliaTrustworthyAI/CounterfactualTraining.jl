@@ -42,6 +42,7 @@ Catalogue of available model types.
 """
 const data_sets = Dict(
     dname(LinearlySeparable()) => LinearlySeparable,
+    dname(GaussMulti()) => GaussMulti,
     dname(GMSC()) => GMSC,
     dname(MNIST()) => MNIST,
     dname(Moons()) => Moons,

@@ -78,6 +78,7 @@ global LatexReplacements = Dict(
     "lambda_class_loss" => "\$\\lambda_{\\text{clf}}\$",
     "gmsc" => get_name(GMSC(); pretty=true),
     "lin_sep" => "LS",
+    "gaussm" => "Gauss10",
     "over" => "OL",
     "cali" => "CH",
     "mnist" => get_name(MNIST(); pretty=true),
