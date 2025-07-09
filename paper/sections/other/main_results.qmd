@@ -10,6 +10,7 @@ using CTExperiments.DataFrames
 using CTExperiments.Plots
 using CTExperiments.StatsBase
 using Random
+using Serialization
 
 using DotEnv
 DotEnv.load!()
@@ -56,7 +57,16 @@ Plus/minus two standard deviations of bootstrap estimates.
 ```{julia}
 #| eval: false
 
-df = final_table(res_dir)
+df_mtbl = aggregate_ce_evaluation(
+    mtbl_dir; 
+    ratio=true, 
+    rebase=false, 
+    y="distance", 
+    agg_further_vars=["run", "lambda_energy_eval"], 
+    total_uncertainty=false, 
+    drop_models=["linear"]
+)
+df = final_table(res_dir; tbl_mtbl=df_mtbl)
 inputs = get_table_inputs(df, nothing; backend=Val(:latex))
 formatters = (
     PrettyTables.ft_round(1,findall(.!contains.(names(df),"Acc"))),

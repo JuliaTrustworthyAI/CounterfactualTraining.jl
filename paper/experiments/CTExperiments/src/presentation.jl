@@ -768,13 +768,13 @@ function format_metric(m::String)
 end
 
 function aggregate_ce_evaluation(
-    res_dir::String; y="mmd", byvars=nothing, rebase=true, ratio=true, drop_models=[], kwrgs...
+    res_dir::String; y="mmd", byvars=nothing, rebase=true, ratio=true, drop_models::Vector{String}=String[], kwrgs...
 )
     byvars = gather_byvars(byvars, "data")
     eval_grids, _ = final_results(res_dir; drop_models)
     df = DataFrame()
     for (i, cfg) in enumerate(eval_grids)
-        @info "Evaluating model+data $i ..."
+        @info "Evaluating model+data $i/$(length(eval_grids)) ..."
         df_i = aggregate_ce_evaluation(cfg; y, byvars, rebase, ratio, kwrgs...)
         df = vcat(df, df_i)
     end
@@ -796,7 +796,7 @@ end
 global allowed_perf_measures = Dict("acc" => accuracy, "f1" => multiclass_f1score)
 
 function aggregate_performance(
-    res_dir::String; measure::Vector=["acc"], adversarial::Bool=false, bootstrap::Union{Nothing,Int}=nothing, drop_models=[],
+    res_dir::String; measure::Vector=["acc"], adversarial::Bool=false, bootstrap::Union{Nothing,Int}=nothing, drop_models::Vector{String}=String[],
 )
 
     # Get measures:
@@ -815,7 +815,7 @@ function aggregate_performance(
     return df
 end
 
-function final_results(res_dir::String; drop_models::Vector{String}=[])
+function final_results(res_dir::String; drop_models::Vector{String}=String[])
 
     # Get model and data directories:
     model_dirs = joinpath.(res_dir, readdir(res_dir)) |> x -> x[isdir.(x)]
@@ -845,8 +845,8 @@ function final_table(
     agg_further_vars=[["run", "lambda_energy_eval"], ["run", "lambda_energy_eval"]],
     longformat::Bool=true,
     bootstrap::Int=100,
-    total_uncertainty::Bool=false,
-    drop_models=[]
+    total_uncertainty::Bool=true,
+    drop_models::Vector{String}=String[]
 )
     # CE:
     df_ce = DataFrame()
@@ -864,22 +864,25 @@ function final_table(
     # Missing:
     df_ce = coalesce.(df_ce, "(agg.)")
 
-    display(df_ce)
-
     # Performance:
     df_perf = aggregate_performance(res_dir; measure=perf_var, bootstrap, drop_models)                          # unperturbed
     df_adv_perf = aggregate_performance(res_dir; measure=perf_var, adversarial=true, bootstrap, drop_models)    # adversarial
     df_perf = vcat(df_perf, df_adv_perf)
-    df = vcat(df_ce, df_perf; cols=:union) |> 
-        df -> transform!(df, [:mean, :se] => ((m, s) -> [isnan(si) ? "$(round(mi, digits=2))" : PrettyTables.LatexCell("$(round(mi, digits=2))\\pm$(round(2si, digits=2))") for (mi, si) in zip(m, s)]) => :mean) |>
-        df -> select!(df, Not(:se)) |>
-        df -> DataFrames.unstack(df, :dataset, :mean)
 
-    # Mutability:
-    if !isnothing(tbl_mtbl)
-        df = vcat(df, tbl_mtbl; cols=:union)
+    # Merge
+    df = if !isnothing(tbl_mtbl)
+        vcat(df_ce, tbl_mtbl, df_perf; cols=:union)
+    else
+        vcat(df_ce, df_perf; cols=:union)
     end
 
+    # Post-process
+    df = DataFrames.transform(
+        df, 
+        [:mean, :se] => ((m, s) -> [isnan(si) ? "$(round(mi, digits=2))" : PrettyTables.LatexCell("$(round(mi, digits=2))\\pm$(round(2si, digits=2))") for (mi, si) in zip(m, s)]) => :mean
+    ) |>
+        df -> select!(df, Not(:se)) |>
+        df -> DataFrames.unstack(df, :dataset, :mean)
 
     # Missing:
     df = coalesce.(df, "")
@@ -965,7 +968,7 @@ function final_mutability(
     return df
 end
 
-function final_params(res_dir::String; drop_models=[])
+function final_params(res_dir::String; drop_models::Vector{String}=String[])
     _, exper_grids = final_results(res_dir; drop_models)
     df = DataFrame()
     for cfg in exper_grids
