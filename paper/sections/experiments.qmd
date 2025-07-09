@@ -36,6 +36,14 @@ To assess CT, we investigate the improvements in performance metrics when using 
 
 Test accuracy for CT is virtually identical to the baseline for *Adult*, *Circ*, *LS*, *Moon*, and *OL*, and even slightly improved for *Cred*. Exceptions to this general pattern are *MNIST*, *CH*, and *GMSC*, for which we observe a reduction in test accuracy of 2, 5, and 15 percentage points respectively. When looking at robust test accuracies (Acc.$^*$) for these datasets in particular, we find that CT strongly outperforms the baseline. In fact, we observe that CT improves adversarial robustness on all datasets. 
 
+<!-- Final Results -->
+<!---->
+<!-- Columns 1-3 show mean outcome +- TWO (2) bootstrapped standard errors. -->
+<!---->
+<!-- - IP: significant and in many cases substantial reduction in implausibility, except for OL and Adult (both insfignficant) -->
+<!-- - IP*: significant and in many cases substantial reduction (up to 90%) in implausibility, except for MNIST and OL. -->
+<!-- - Cost: significant and in some cases substantial reduction, except for Adult, MNIST (both insignificant) and Credit (significant increase in costs). -->
+
 ::: {#tbl-main}
 
 ```{=latex}
