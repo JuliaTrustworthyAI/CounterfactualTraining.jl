@@ -587,6 +587,7 @@ function aggregate_ce_evaluation(
     ratio::Bool=false,
     total_uncertainty::Bool=true,
     valid_only::Bool=true,
+    protected_only::Bool=false,
 )
     # Assertions:
     valid_y = valid_y_ce(df)
@@ -604,6 +605,9 @@ function aggregate_ce_evaluation(
             df = filter(df -> df.validity == 1.0, df)
         end
         select!(df, Not(:validity))
+    end
+    if protected_only
+        df = filter(df -> df.mutability != "none", df)
     end
 
     if y == "mmd"
