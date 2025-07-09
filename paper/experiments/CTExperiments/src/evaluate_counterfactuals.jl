@@ -142,7 +142,6 @@ function evaluate_counterfactuals(
     end
 
     # Generate and benchmark counterfactuals:
-    rng = get_data_set(cfg)() |> get_rng
     bmk = benchmark(
         data;
         models=models,
@@ -161,6 +160,7 @@ function evaluate_counterfactuals(
         verbose=cfg.counterfactual_params.verbose,
     )
     if Evaluation.includes_divergence_metric(measure)
+        rng = get_data_set(cfg)() |> get_rng    # ensure that same test set columns are chosen for MMD (for reproducibility)
         bmk = compute_divergence(
             bmk, measure, data; rng=rng, nsamples=cfg.counterfactual_params.ndiv
         )

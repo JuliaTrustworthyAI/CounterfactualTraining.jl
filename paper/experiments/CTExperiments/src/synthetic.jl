@@ -49,6 +49,28 @@ function load_data(d::LinearlySeparable, n::Int; seed=TaijaData.data_seed)
 end
 
 """
+    GaussMulti
+
+Keyword container for the `GaussMulti` data set. Can specify the number of samples `n`, the batch size `batchsize`.
+"""
+Base.@kwdef mutable struct GaussMulti <: Dataset
+    n_train::Int = 3000
+    batchsize::Int = 30
+    n_validation::Int = 600
+    train_test_ratio::Float32 = 0.8
+    train_test_seed::Int = get_global_seed()
+    mutability::Union{String,Vector{Int},Vector{String}} = "none"
+    domain::Union{String,Vector{<:Any}} = "none"
+    datadir::String = get_global_dev_dir()
+end
+
+dname(d::GaussMulti) = "gaussm"
+
+function load_data(d::GaussMulti, n::Int; seed=TaijaData.data_seed)
+    return  TaijaData.load_blobs(n; k=10, cluster_std=0.5)
+end
+
+"""
     Overlapping
 
 Keyword container for the `Overlapping` data set. Can specify the number of samples `n`, the batch size `batchsize`.

@@ -1,0 +1,46 @@
+name = "mutability"
+dim_reduction = []
+generator_type = ["ecco"]
+data = "adult"
+model_type = "linear"
+save_dir = "paper/experiments/output/final_run/mutability/linear/adult"
+
+[data_params]
+datadir = ["paper/experiments/dev"]
+mutability = [[1]]
+domain = ["none"]
+n_validation = [1000]
+train_test_ratio = [0.800000011920929]
+train_test_seed = [2025]
+n_train = [25049]
+batchsize = [1000]
+
+[model_params]
+
+[generator_params]
+opt = ["sgd"]
+lambda_cost = [0.001]
+lr = [0.25]
+maxiter = [30]
+lambda_energy = [5.0]
+decision_threshold = [0.75]
+type = []
+
+[training_params]
+opt = ["adam"]
+lr = [0.001]
+objective = ["full", "vanilla"]
+lambda_class_loss = [1.0]
+lambda_energy_diff = [0.5]
+burnin = [0.0]
+nepochs = [100]
+lambda_adversarial = [0.25]
+parallelizer = ["mpi"]
+nce = [5000]
+threaded = [false]
+class_loss = ["logitcrossentropy"]
+lambda_energy_reg = [0.25]
+verbose = [1]
+generator_params = []
+conv = ["threshold"]
+nneighbours = [100]
