@@ -32,4 +32,5 @@ crossref:
 filters: [abstract-section]
 header-includes: |
   \usepackage{placeins}
+  \usepackage{siunitx}
 link-citations: true

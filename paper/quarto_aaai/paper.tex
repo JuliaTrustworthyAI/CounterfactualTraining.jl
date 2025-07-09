@@ -166,7 +166,7 @@
 
 % REMOVE THIS: bibentry
 % This is only needed to show inline citations in the guidelines document. You should not need it and can safely delete it.
-% \usepackage{bibentry}
+\usepackage{bibentry}
 % END REMOVE bibentry
 \usepackage{amsfonts}
 \usepackage{amsmath}
@@ -174,8 +174,9 @@
 \newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
-% For mathematical environments, you may reduce fontsize but not below 6.5 point.
-\DeclareMathSizes{10}{9}{7}{6.5}
+\usepackage{placeins}
+\usepackage{siunitx}
+\sisetup{uncertainty-mode = separate}
 
 \usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
@@ -491,7 +492,7 @@ features \(x_d\) for \(d=1,...,D\). We also limit ourselves to
 classification tasks for reasons discussed in
 Section~\ref{sec-discussion}.
 
-\subsection{Our Proposed Objective}\label{our-proposed-objective}
+\subsection{Proposed Objective}\label{proposed-objective}
 
 Let \(\mathbf{x}_t^\prime\) for \(t=0,...,T\) denote a counterfactual
 generated through gradient descent over \(T\) iterations as originally
@@ -503,7 +504,9 @@ or more penalty terms \(\lambda_{i}\text{cost}_{i}(\cdot)\). The exact
 specification of these penalties induces various properties in the
 counterfactual outcomes, and tends to be the key feature that
 distinguishes various gradient-based ``generators'' or ``explainers''
-(CE algorithms) from the literature \citep{altmeyer2023explaining}.
+(CE algorithms) from the literature \citep{altmeyer2023explaining},
+including all generators used in our experiments. We refer the reader to
+the supplementary appendix for details.
 
 For our purposes, we let \(T\) vary and consider the search to be
 converged as soon as the predicted probability for the target class has
@@ -930,17 +933,6 @@ As our results indicate, counterfactual training produces models that
 are more explainable. Nonetheless, these advantages come at the cost of
 two important limitations.
 
-\emph{CT increases the training time of models.} CT can be more
-time-consuming than conventional training regimes. Higher numbers of CEs
-per iteration positively impact the quality of solutions, but they also
-increase the amount of computations. In our experiments, grids with 270
-settings took up to four hours for more demanding datasets on a
-high-performance computing cluster with 34 2GB CPUs (see supplementary
-appendix for details). Three factors attenuate this effect: (1) CT
-inherently yields itself to parallel execution; (2) it amortizes the
-cost of CEs for the training samples; (3) it retains its value when used
-to fine-tune conventionally-trained models.
-
 \emph{Interventions on features have implications for fairness.} We
 provide a tool that allows practitioners to modify the sensitivity of a
 model with respect to certain features. Model owners can use our
@@ -957,6 +949,18 @@ preserve sufficient information about the principals to hinder these
 protections. Deciding on actionability is still a major open challenge
 in the AR literature \citep{venkatasubramanian2020philosophical}
 impacting the capacity of CT to fulfill its intended goal.
+
+\emph{CT increases the training time of models.} Just like adversarial
+training, CT is more resource-intensive than conventional training
+regimes. Higher numbers of CEs per iteration improve the quality of
+learned representations, but they also increase the number of
+computations. As our codebase is not performance optimized, grids of 270
+settings took up to four hours for more demanding datasets in our
+experiments, when ran on 34 2GB CPUs (see supplementary appendix). Other
+than optimization, three factors mitigate this effect: (1) CT yields
+itself to parallel execution; (2) it amortizes the cost of CEs for the
+training samples; (3) it can be used to fine-tune conventionally-trained
+models.
 
 We also highlight several important directions for future research.
 Firstly, it is an interesting challenge to extend CT beyond

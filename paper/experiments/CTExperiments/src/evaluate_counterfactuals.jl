@@ -1,6 +1,7 @@
 using CounterfactualExplanations
 using CounterfactualExplanations.Evaluation
 using DataFrames
+using IntegratedGradients
 using JLD2
 using Serialization
 using TaijaParallel
@@ -29,7 +30,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
     n_individuals::Int = get_global_param("n_individuals", 100)
     n_runs::Int = get_global_param("n_runs", 5)
     conv::AbstractString = "threshold"
-    decision_threshold::AbstractFloat = 0.95
+    decision_threshold::AbstractFloat = get_global_param("tau_eval", 0.95)
     maxiter::Int = get_global_param("maxiter_eval", 50)
     vertical_splits::Int = get_global_param("vertical_splits", 100)
     store_ce::Bool = false
@@ -141,7 +142,6 @@ function evaluate_counterfactuals(
     end
 
     # Generate and benchmark counterfactuals:
-    rng = get_data_set(cfg)() |> get_rng
     bmk = benchmark(
         data;
         models=models,
@@ -160,6 +160,7 @@ function evaluate_counterfactuals(
         verbose=cfg.counterfactual_params.verbose,
     )
     if Evaluation.includes_divergence_metric(measure)
+        rng = get_data_set(cfg)() |> get_rng    # ensure that same test set columns are chosen for MMD (for reproducibility)
         bmk = compute_divergence(
             bmk, measure, data; rng=rng, nsamples=cfg.counterfactual_params.ndiv
         )
@@ -491,4 +492,11 @@ function generate_factual_target_pairs(
     output = reduce(vcat, output)
 
     return output
+end
+
+function integrated_gradients(cfg::Experiment; n=nothing, test_set=true, kwrgs...)
+    model, _, _ = load_results(cfg)
+    X, y = get_data(cfg.data; n, test_set)
+    # y .= -1 .* y .+ 1
+    calculate_average_contributions(model, X, y; kwrgs...)
 end

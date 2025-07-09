@@ -17,7 +17,7 @@ Base.@kwdef mutable struct MNIST <: Dataset
     n_validation::Int = 1000
     train_test_ratio::Float32 = 0.8
     train_test_seed::Int = get_global_seed()
-    mutability::Union{String,Vector{String}} = "none"
+    mutability::Union{String,Vector{Int},Vector{String}} = "none"
     domain::Union{String,Vector{<:Any}} = [-1.0f0, 1.0f0]
     datadir::String = get_global_dev_dir()
 end
