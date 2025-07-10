@@ -69,7 +69,7 @@ Since actionability constraints are binding at test time, we should also impose 
 2. $\mathbf{x}^+[d]>\mathbf{x}^\prime[d]$, but $d$ can only be decreased in practice.
 3. $\mathbf{x}^+[d]<\mathbf{x}^\prime[d]$, but $d$ can only be increased in practice.
 
-`\noindent`{=latex} From a Bayesian perspective, setting $\mathbf{x}^+[d] := \mathbf{x}^\prime[d]$ can be understood as assuming a point mass prior for $p(\mathbf{x}^+)$ with respect to feature $d$. Intuitively, we think of this as ignoring implausibility costs with respect to immutable features, which effectively forces the model to instead seek plausibility with respect to the remaining features. This can be expected to result in lower overall sensitivity to immutable features, which we investigate empirically in @sec-experiments. Under certain conditions, this result holds theoretically:^[For the proof, see the supplementary appendix.]
+`\noindent`{=latex} From a Bayesian perspective, setting $\mathbf{x}^+[d] := \mathbf{x}^\prime[d]$ can be understood as assuming a point mass prior for $p(\mathbf{x}^+)$ wrt. feature $d$. Intuitively, we think of this as ignoring implausibility costs of immutable features, which effectively forces the model to instead seek plausibility through the remaining features. This can be expected to result in lower overall sensitivity to immutable features, which we investigate empirically in @sec-experiments. Under certain conditions, this result holds theoretically; for the proof, see the supplementary appendix:
 
 \begin{proposition}[Protecting Immutable Features]
 \label{prp-mtblty}
