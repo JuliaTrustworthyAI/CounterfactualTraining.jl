@@ -671,8 +671,8 @@ assuming a point mass prior for \(p(\mathbf{x}^+)\) with respect to
 feature \(d\). Intuitively, we think of this as ignoring implausibility
 costs with respect to immutable features, which effectively forces the
 model to instead seek plausibility with respect to the remaining
-features. This in turn results in lower overall sensitivity to immutable
-features, which we demonstrate empirically for different classifiers in
+features. This can be expected to result in lower overall sensitivity to
+immutable features, which we investigate empirically in
 Section~\ref{sec-experiments}. Under certain conditions, this result
 holds theoretically:\footnote{For the proof, see the supplementary
   appendix.}
@@ -681,63 +681,6 @@ holds theoretically:\footnote{For the proof, see the supplementary
 \label{prp-mtblty}
 Let $f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})$ denote a linear classifier with softmax activation $\mathcal{S}$ where $y\in\{1,...,K\}=\mathcal{K}$ and $\mathbf{x} \in \mathbb{R}^D$. Assume multivariate Gaussian class densities with common diagonal covariance matrix $\Sigma_k=\Sigma$ for all $k \in \mathcal{K}$, then protecting an immutable feature from the contrastive divergence penalty will result in lower classifier sensitivity to that feature relative to the remaining features, provided that at least one of those is discriminative and mutable.
 \end{proposition}
-
-\noindent Proposition \ref{prp-mtblty} assumes independent features,
-which raises a concern about the effect of protecting immutable features
-in the presence of proxies. We address it in
-Section~\ref{sec-discussion}.
-
-\subsection{Example: Prediction of Credit
-Defaults}\label{example-prediction-of-credit-defaults}
-
-Suppose we are interested in predicting the likelihood that loan
-applicants default on their credit. We have access to historical data on
-previous loan takers comprised of a binary outcome variable
-\(y\in\{1=\text{default},2=\text{no default}\}\) with two input
-features: (1) the subjects' \emph{age}, which we define as immutable,
-and (2) the subjects' existing level of \emph{debt}, which we define as
-mutable. We have simulated this scenario using synthetic data with
-independent \emph{age} and \emph{debt} features, and Gaussian
-class-conditional densities in Figure~\ref{fig-poc}. The four panels
-show the outcomes for different training procedures using the same model
-architecture (a linear classifier). In panels (a) and (c) we have
-trained the models conventionally, while in panels (b) and (d) we have
-applied CT.
-
-In all four cases, all counterfactuals (stars) are valid---they have
-crossed the decision boundary (green) into the target class---but their
-quality differs. In panel (a), they are not plausible: they do not
-comply with the distribution of the factuals in \(y^+\) to the point
-where they form a clearly discernible cluster. In panel (b), they are
-highly plausible, meeting the first objective of Def.
-\ref{def-explainability}. In panel (c), the CEs involve substantial
-reductions in \emph{debt} for younger applicants. By comparison,
-counterfactual paths are shorter on average in panel (d) where we have
-protected the immutable \emph{age} as described in
-Section~\ref{sec-constraints}. Due to the classifier's lower sensitivity
-to \emph{age}, recommendations with respect to \emph{debt} are much more
-homogenous and do not unfairly punish younger individuals. These
-counterfactuals are also plausible with respect to the mutable feature.
-Thus, we consider the model in panel (d) as the most explainable
-according to Def. \ref{def-explainability}.
-
-\begin{figure*}
-
-\centering{
-
-\pandocbounded{\includegraphics[keepaspectratio]{paper_files/mediabag/../../paper/figures/poc.pdf}}
-
-}
-
-\caption{\label{fig-poc}Illustration of how CT improves model
-explainability: (a) conventional training, all mutable; (b) CT, all
-mutable; (c) conventional, \emph{age} immutable; (d) CT, \emph{age}
-immutable. The linear decision boundary is shown in green along with
-training data colored according to ground-truth labels: \(y^-=1\) (blue)
-and \(y^+=2\) (orange). Stars indicate counterfactuals in the target
-class.}
-
-\end{figure*}%
 
 \section{Experiments}\label{sec-experiments}
 
@@ -762,12 +705,14 @@ We seek to answer the following three research questions:
 
 Our key outcome of interest is improvement in explainability (Def.
 \ref{def-explainability}). Thus, we focus primarily on the plausibility
-and cost of faithfully generated counterfactuals at test time. To
-measure the cost, we follow the standard convention of using distances
-(\(\ell_1\)-norm) between factuals and counterfactuals as a proxy. For
-plausibility, we assess how similar CEs are to the observed samples in
-the target domain, \(\mathbf{X}^+\subset\mathcal{X}^+\). We rely on the
-metric used by \citet{altmeyer2024faithful},
+and cost of faithfully generated counterfactuals at test
+time\footnote{Additional metrics such as validity and redundancy are
+  reported in the appendix.}. To measure the cost, we follow the
+standard convention of using distances (\(\ell_1\)-norm) between
+factuals and counterfactuals as a proxy. For plausibility, we assess how
+similar CEs are to the observed samples in the target domain,
+\(\mathbf{X}^+\subset\mathcal{X}^+\). We rely on the metric used by
+\citet{altmeyer2024faithful},
 \begin{equation}\phantomsection\label{eq-impl-dist}{
 \text{IP}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
 }\end{equation} and introduce a novel divergence metric,
@@ -780,20 +725,17 @@ the squared population maximum mean discrepancy, proposed by
 equal to zero if and only if the two distributions are exactly the same,
 \(\mathbf{X}^\prime=\mathbf{X}^+\).
 
-In addition to cost and plausibility, we compute other standard metrics
-to evaluate counterfactuals such as validity and redundancy. Finally, we
-also assess the predictive performance of models using standard metrics,
-including robust accuracy estimated on adversarially perturbed data
-using FGSM \citep{goodfellow2014explaining}.
+We also assess the predictive performance of models using standard
+metrics, including robust accuracy estimated on adversarially perturbed
+data using FGSM \citep{goodfellow2014explaining}.
 
-We run the experiments with three gradient-based generators:
-\emph{Generic} of \citet{wachter2017counterfactual} as a simple baseline
-approach, \emph{REVISE} \citep{joshi2019realistic} that aims to generate
-plausible counterfactuals using a surrogate Variational Autoencoder
-(VAE), and \emph{ECCo}---the generator of \citet{altmeyer2024faithful}
-but without the conformal prediction component---as a method that
-directly targets both faithfulness and plausibility of the
-counterfactuals.
+We run experiments with three gradient-based generators: \emph{Generic}
+of \citet{wachter2017counterfactual} as a simple baseline approach,
+\emph{REVISE} \citep{joshi2019realistic} that aims to generate plausible
+counterfactuals using a surrogate Variational Autoencoder (VAE), and
+\emph{ECCo}---the generator of \citet{altmeyer2024faithful} but without
+the conformal prediction component---as a method that directly targets
+both faithfulness and plausibility of the counterfactuals.
 
 We make use of nine classification datasets common in the CE/AR
 literature. Four of them are synthetic with two classes and different
@@ -818,28 +760,107 @@ the related literature
 
 \subsection{Experimental Results}\label{experimental-results}
 
+Our main quantitative results for the \emph{MLP} are summarised in
+Table~\ref{tbl-main}, which shows average outcomes along with
+bootstrapped standard errors for key metrics. The following example
+illustrates how to read Table~\ref{tbl-main}.
+
+\begin{figure*}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{paper_files/mediabag/../../paper/figures/poc.pdf}}
+
+}
+
+\caption{\label{fig-poc}Illustration of how CT improves model
+explainability: (a) conventional training, all mutable; (b) CT, all
+mutable; (c) conventional, \emph{age} immutable; (d) CT, \emph{age}
+immutable. The linear decision boundary is shown in green along with
+training data colored according to ground-truth labels: \(y^-=1\) (blue)
+and \(y^+=2\) (orange). Stars indicate counterfactuals in the target
+class.}
+
+\end{figure*}%
+
+\subsubsection{Synthetic Example: Prediction of Credit
+Defaults}\label{synthetic-example-prediction-of-credit-defaults}
+
+Figure~\ref{fig-poc} presents results for a linear classifier fitted to
+\emph{LS}, which complies with the data assumptions in Proposition
+\ref{prp-mtblty}. The four panels show the outcomes for different
+training procedures: in panels (a) and (c) we have trained the models
+conventionally, while in panels (b) and (d) we have applied CT. For
+illustrative purposes, suppose the first feature represents \emph{debt}
+(mutable) and the second feature represents \emph{age} (immutable) of
+loan applicants seeking counterfactual explanations for moving to the
+target class: loan provided (orange).
+
+In all four cases, it is possible to generate valid counterfactuals
+(stars) for unsuccessful applicants (blue). They cross the decision
+boundary (green) into the target class, but their quality differs. In
+panel (a), they are not plausible: they do not comply with the
+distribution of the factuals in \(y^+\) to the point where they form a
+clearly discernible cluster. In panel (b), they are highly plausible,
+meeting the first objective of Def. \ref{def-explainability}. This
+difference in outcomes is quantified for the non-linear MLP in the first
+two columns of Table~\ref{tbl-main} as the \(\%\)-reduction in
+implausibility: it is substantial and statistically significant for
+\emph{LS} across both metrics, the distance-based \(IP\) (29\%) and
+divergence-based \(IP^{*}\) (55\%).
+
+In panel (c) of Figure~\ref{fig-poc}, the CEs involve substantial
+reductions in \emph{debt} for younger applicants. By comparison,
+counterfactual paths are shorter on average in panel (d) where we have
+protected the immutable \emph{age} as described in
+Section~\ref{sec-constraints}. Due to the classifier's lower sensitivity
+to \emph{age}, recommendations with respect to \emph{debt} are much more
+homogenous and do not unfairly punish younger individuals. These
+counterfactuals are also plausible with respect to the mutable feature,
+despite requiring smaller debt reductions on average, resulting in
+smaller costs to individuals. This result is quantified for the
+non-linear case in column three of Table~\ref{tbl-main}, which shows the
+\(\%\)-reduction in costs averaged across valid counterfactuals. Once
+again, the impact of CT is statistically significant and substantial
+(14\%). Thus, we consider the model in panel (d) as the most explainable
+according to Def. \ref{def-explainability}. In the following, we present
+the results for all remaining datasets.
+
 \subsubsection{Plausibility.}\label{sec-plaus}
 
-Table~\ref{tbl-main} presents our main empirical findings. For all
-datasets except \emph{OL} and across all test settings, the average
-distance of CEs from observed samples in the target class is reduced,
-indicating improved plausibility. The magnitude of improvements varies.
-For the simple synthetic datasets, distance reductions range from around
-20-40\% (\emph{LS}, \emph{Moon}) to almost 60\% (\emph{Circ}). For the
-real-world tabular datasets, improvements tend to be smaller but still
-substantial, with around 10-15\% for \emph{CH}, 11-28\% for \emph{GMSC},
-7-8\% for \emph{Cred}, and around 3\% for \emph{Adult}. For the vision
-dataset (\emph{MNIST}), distances are reduced by up to 9\%. The results
-for our proposed divergence metric are qualitatively similar, but
-generally even more pronounced: for the \emph{Circ} dataset,
-implausibility is reduced by almost 94\% to virtually zero as we
-verified by the absolute outcome. Improvements for other datasets range
-from 28\% (\emph{Moon}) up to 78\% (\emph{GMSC}). For \emph{OL} the
-reduction is negative, consistent with the distance-based metric.
-\emph{MNIST} is the only dataset for which the two metrics disagree.
-However, upon visual inspection of the image counterfactuals (available
-in the supplementary appendix), we find that CT clearly improves
-plausibility.
+We find that CT generally leads to substantial and statistically
+significant improvements in plausibility: average reductions in \(IP\)
+range from around 7\% for \emph{MNIST} to almost 60\% for \emph{Circ};
+for the real-world tabular datasets they are around 12\% for both
+\emph{CH} and \emph{Cred} and almost 25\% for \emph{GMSC}; for
+\emph{Adult} and \emph{OL} we find no significant impact of CT on
+\(IP\). Reductions in \(IP^{*}\) are even more substantial and generally
+statistically significant, although the average degree of uncertainty is
+higher than for \(IP\): average reductions range from around 20\%
+(\emph{Moons}) to almost 90\% (\emph{Circ}). The only negative findings
+for \emph{OL} and \emph{MNIST} are statistically insignificant and, in
+the latter case, do not align with qualitative findings.
+
+\subsubsection{Actionability.}\label{sec-act}
+
+We also find that CT can reduce sensitivity to immutable, protected
+features and thus lead to less costly counterfactual outcomes as
+illustrated in Figure~\ref{fig-poc}. In column three of
+Table~\ref{tbl-main}, we impose mutability constraints on selected
+features and compute the reduction in average costs of counterfactuals
+associated with CT compared to the weak baseline: for synthetic
+datasets, we always protect the first feature; for all real-world
+tabular datasets we could identify and protect an \emph{age} variable;
+for \emph{MNIST}, we protect the five top and bottom rows of digits.
+Reductions in costs are overwhelmingly positive and significant of up to
+nearly 60\% for \emph{GMSC}. While the estimated cost reductions for
+\emph{Adult} and \emph{MNIST} are not significant, FIGURE demonstrates
+that CT does have the expected effect: sensitivity to protected features
+as proxied by integrated gradients is drastically reduced\footnote{Additional
+  findings for integrated gradients are reported in the appendix.}. In
+the case of \emph{Cred}, average costs increase, likely because any
+potential benefits from protecting the \emph{age} are outweighed by the
+increase in costs required for greater plausibility.
 
 \subsubsection{Predictive Performance.}\label{sec-pred}
 
@@ -855,17 +876,16 @@ all datasets.
 
 \begin{table*}
 
-\caption{\label{tbl-main}Key performance metrics across all datasets
-(column 1). \textbf{Plausibility}: Columns 2-6 show the percentage
-reduction in implausibility (\(\text{IP}\)) for varying degrees of the
-energy penalty \(\lambda_{\text{egy}}\) used for \emph{ECCo} at test
-time; column 7 shows the reduction in \(\text{IP}^*\) (\(\text{MMD}\)),
-aggregated across all test specifications. \textbf{Accuracy} (columns
-8-11): test accuracies and robust accuracies (\(\text{Acc}^*\)) for CT
-and the baseline (BL). \textbf{Actionability} (column 12): average
-reduction in costs when imposing mutability constraints reported for the
-four datasets for which we could identify meaningful features to
-protect.}
+\caption{\label{tbl-main}Key performance metrics and bootstrapped
+standard errors for all datasets. \textbf{Plausibility} (columns 1-2):
+percentage reduction in implausibility for \(IP\) and \(IP^*\),
+respectively; \textbf{Actionability} (column 3): percentage reduction in
+costs with protected features. \textbf{Accuracy} (columns 4-7): test
+accuracies and robust accuracies (\(\text{Acc}^*\)) for CT and the
+baseline (BL). Counterfactual outcomes in columns 1-3 are aggregated
+across bootstrap samples and varying degrees of the energy penalty
+\(\lambda_{\text{egy}}\) used for \emph{ECCo} at test time. Standard
+errors for accuracy are bootstrapped from the test set.}
 
 \centering{
 
@@ -874,22 +894,6 @@ protect.}
 }
 
 \end{table*}%
-
-\subsubsection{Actionability.}\label{sec-act}
-
-In Section~\ref{sec-method}, we show that our method of encoding
-mutability constraints decreases sensitivity to immutable features for
-linear models, tilting the decision boundary in favour of mutable
-features. For constraints binding at test time, this leads to shorter
-counterfactual paths and hence smaller average costs (\(\ell_1\)-norm)
-to individuals. To extend this to the non-linear case, we test the
-effect of imposing mutability constraints for the synthetic datasets
-using the same evaluation scheme as above. The final row in
-Table~\ref{tbl-main} reports the average reduction in costs for CT
-compared to the ``vanilla'' baseline, when imposing that either the
-first or the second feature is immutable. In all cases, costs are
-reduced substantially, indicating that classifiers trained with CT are
-indeed more sensitive to mutable features.
 
 \subsubsection{Hyperparameter settings.}\label{sec-hyperparameters}
 
