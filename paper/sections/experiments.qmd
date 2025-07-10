@@ -2,7 +2,7 @@
 
 In our experiments we seek to answer the following three research questions:
 
-1. To what extent does the counterfactual training objective as it is defined in @eq-obj induce models to learn plausible explanations?
+1. To what extent does the CT objective in Equation 1 induce models to learn plausible explanations?
 2. To what extent does the CT objective produce more favorable algorithmic recourse outcomes in the presence of actionability constraints?
 3. What are the effects of hyperparameter selection wrt. the CT objective?
 
