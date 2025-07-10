@@ -10,8 +10,8 @@ bl_preffix = "mnist2"
 
 chosen_digits = 5:9
 
-imgs_ct = [Images.load(joinpath(ig_save_dir, "$(ct_preffix)_$(i).png")) for i in chosen_digits]
-imgs_bl = [Images.load(joinpath(ig_save_dir, "$(bl_preffix)_$(i).png")) for i in chosen_digits]
+imgs_ct = [Images.load(joinpath(ig_save_dir, "$(ct_preffix)_$(i).png")) |> x -> imresize(x, (28,28)) for i in chosen_digits]
+imgs_bl = [Images.load(joinpath(ig_save_dir, "$(bl_preffix)_$(i).png")) |> x -> imresize(x, (28,28)) for i in chosen_digits]
 img_ig = mosaicview(imgs_bl..., imgs_ct..., nrow=2, rowmajor=true)
 
 ## Counterfactuals:
