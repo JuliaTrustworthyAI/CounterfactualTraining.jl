@@ -836,7 +836,24 @@ statistically significant, although the average degree of uncertainty is
 higher than for \(IP\): average reductions range from around 20\%
 (\emph{Moons}) to almost 90\% (\emph{Circ}). The only negative findings
 for \emph{OL} and \emph{MNIST} are statistically insignificant and, in
-the latter case, do not align with qualitative findings.
+the latter case, do not align with qualitative findings, which are much
+more plausible for CT (Figure~\ref{fig-mnist}).
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/figures/mnist_body.png}}
+
+}
+
+\caption{\label{fig-mnist}Explanations for \emph{MNIST} for BL (top) and
+CT (bottom). First columns is a randomly chosen factual 0. Columns 2
+through 5 are \emph{ECCo} counterfactuals for that factual in target
+classes 1 to 4. Columns 6 trough 10 show integrated gradients averaged
+over all test images in the corresponding classes (5-9).}
+
+\end{figure}%
 
 \subsubsection{Actionability.}\label{sec-act}
 
@@ -851,13 +868,14 @@ tabular datasets we could identify and protect an \emph{age} variable;
 for \emph{MNIST}, we protect the five top and bottom rows of digits.
 Reductions in costs are overwhelmingly positive and significant of up to
 nearly 60\% for \emph{GMSC}. While the estimated cost reductions for
-\emph{Adult} and \emph{MNIST} are not significant, FIGURE demonstrates
-that CT does have the expected effect: sensitivity to protected features
-as proxied by integrated gradients is drastically reduced\footnote{Additional
-  findings for integrated gradients are reported in the appendix.}. In
-the case of \emph{Cred}, average costs increase, likely because any
-potential benefits from protecting the \emph{age} are outweighed by the
-increase in costs required for greater plausibility.
+\emph{Adult} and \emph{MNIST} are not significant,
+Figure~\ref{fig-mnist} demonstrates that CT does have the expected
+effect: sensitivity to protected features as proxied by integrated
+gradients is drastically reduced\footnote{Additional findings for
+  integrated gradients are reported in the appendix.}. In the case of
+\emph{Cred}, average costs increase, likely because any potential
+benefits from protecting the \emph{age} are outweighed by the increase
+in costs required for greater plausibility.
 
 \subsubsection{Predictive Performance.}\label{sec-pred}
 
