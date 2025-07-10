@@ -44,7 +44,7 @@ In panel (c) of @fig-poc, the CEs involve substantial reductions in *debt* for y
 
 We find that CT generally leads to substantial and statistically significant improvements in plausibility: average reductions in $IP$ range from around 7% for *MNIST* to almost 60% for *Circ*; for the real-world tabular datasets they are around 12% for both *CH* and *Cred* and almost 25% for *GMSC*; for *Adult* and *OL* we find no significant impact of CT on $IP$. Reductions in $IP^{*}$ are even more substantial and generally statistically significant, although the average degree of uncertainty is higher than for $IP$: average reductions range from around 20% (*Moons*) to almost 90% (*Circ*). The only negative findings for *OL* and *MNIST* are statistically insignificant and, in the latter case, do not align with qualitative findings, which are much more plausible for CT (@fig-mnist).
 
-![Explanations for *MNIST* for BL (top) and CT (bottom). First columns is a randomly chosen factual 0. Columns 2 through 5 are *ECCo* counterfactuals for that factual in target classes 1 to 4. Columns 6 trough 10 show integrated gradients averaged over all test images in the corresponding classes (5-9).](/paper/figures/mnist_body.png){#fig-mnist}
+![Explanations for *MNIST* for BL (top) and CT (bottom). First column is a random factual 0. Columns 2 to 5 are corresponding *ECCo* counterfactuals in target classes 1 to 4. Columns 6 to 10 show integrated gradients averaged over all test images in classes 5 to 9.](/paper/figures/mnist_body.png){#fig-mnist}
 
 ### Actionability. {#sec-act}
 
