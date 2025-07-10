@@ -848,8 +848,8 @@ more plausible for CT (Figure~\ref{fig-mnist}).
 }
 
 \caption{\label{fig-mnist}Explanations for \emph{MNIST} for BL (top) and
-CT (bottom). First column is a random factual 0. Columns 2 to 5 are
-corresponding \emph{ECCo} counterfactuals in target classes 1 to 4.
+CT (bottom). First column is a random factual 0 (blue). Columns 2 to 5
+are corresponding \emph{ECCo} counterfactuals in target classes 1 to 4.
 Columns 6 to 10 show integrated gradients averaged over all test images
 in classes 5 to 9.}
 
@@ -869,8 +869,8 @@ for \emph{MNIST}, we protect the five top and bottom rows of digits.
 Reductions in costs are overwhelmingly positive and significant of up to
 nearly 60\% for \emph{GMSC}. While the estimated cost reductions for
 \emph{Adult} and \emph{MNIST} are not significant,
-Figure~\ref{fig-mnist} demonstrates that CT does have the expected
-effect: sensitivity to protected features as proxied by integrated
+Figure~\ref{fig-mnist} (columns 6-10) demonstrates that CT does have the
+expected effect: sensitivity to protected features as per integrated
 gradients is drastically reduced\footnote{Additional findings for
   integrated gradients are reported in the appendix.}. In the case of
 \emph{Cred}, average costs increase, likely because any potential

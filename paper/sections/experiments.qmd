@@ -44,23 +44,15 @@ In panel (c) of @fig-poc, the CEs involve substantial reductions in *debt* for y
 
 We find that CT generally leads to substantial and statistically significant improvements in plausibility: average reductions in $IP$ range from around 7% for *MNIST* to almost 60% for *Circ*; for the real-world tabular datasets they are around 12% for both *CH* and *Cred* and almost 25% for *GMSC*; for *Adult* and *OL* we find no significant impact of CT on $IP$. Reductions in $IP^{*}$ are even more substantial and generally statistically significant, although the average degree of uncertainty is higher than for $IP$: average reductions range from around 20% (*Moons*) to almost 90% (*Circ*). The only negative findings for *OL* and *MNIST* are statistically insignificant and, in the latter case, do not align with qualitative findings, which are much more plausible for CT (@fig-mnist).
 
-![Explanations for *MNIST* for BL (top) and CT (bottom). First column is a random factual 0. Columns 2 to 5 are corresponding *ECCo* counterfactuals in target classes 1 to 4. Columns 6 to 10 show integrated gradients averaged over all test images in classes 5 to 9.](/paper/figures/mnist_body.png){#fig-mnist}
+![Explanations for *MNIST* for BL (top) and CT (bottom). First column is a random factual 0 (blue). Columns 2 to 5 are corresponding *ECCo* counterfactuals in target classes 1 to 4. Columns 6 to 10 show integrated gradients averaged over all test images in classes 5 to 9.](/paper/figures/mnist_body.png){#fig-mnist}
 
 ### Actionability. {#sec-act}
 
-We also find that CT can reduce sensitivity to immutable, protected features and thus lead to less costly counterfactual outcomes as illustrated in @fig-poc. In column three of @tbl-main, we impose mutability constraints on selected features and compute the reduction in average costs of counterfactuals associated with CT compared to the weak baseline: for synthetic datasets, we always protect the first feature; for all real-world tabular datasets we could identify and protect an *age* variable; for *MNIST*, we protect the five top and bottom rows of digits. Reductions in costs are overwhelmingly positive and significant of up to nearly 60% for *GMSC*. While the estimated cost reductions for *Adult* and *MNIST* are not significant, @fig-mnist demonstrates that CT does have the expected effect: sensitivity to protected features as proxied by integrated gradients is drastically reduced^[Additional findings for integrated gradients are reported in the appendix.]. In the case of *Cred*, average costs increase, likely because any potential benefits from protecting the *age* are outweighed by the increase in costs required for greater plausibility.
+We also find that CT can reduce sensitivity to immutable, protected features and thus lead to less costly counterfactual outcomes as illustrated in @fig-poc. In column three of @tbl-main, we impose mutability constraints on selected features and compute the reduction in average costs of counterfactuals associated with CT compared to the weak baseline: for synthetic datasets, we always protect the first feature; for all real-world tabular datasets we could identify and protect an *age* variable; for *MNIST*, we protect the five top and bottom rows of digits. Reductions in costs are overwhelmingly positive and significant of up to nearly 60% for *GMSC*. While the estimated cost reductions for *Adult* and *MNIST* are not significant, @fig-mnist (columns 6-10) demonstrates that CT does have the expected effect: sensitivity to protected features as per integrated gradients is drastically reduced^[Additional findings for integrated gradients are reported in the appendix.]. In the case of *Cred*, average costs increase, likely because any potential benefits from protecting the *age* are outweighed by the increase in costs required for greater plausibility.
 
 ### Predictive Performance. {#sec-pred} 
 
 Test accuracy for CT is virtually identical to the baseline for *Adult*, *Circ*, *LS*, *Moon*, and *OL*, and even slightly improved for *Cred*. Exceptions to this general pattern are *MNIST*, *CH*, and *GMSC*, for which we observe a reduction in test accuracy of 2, 5, and 15 percentage points respectively. When looking at robust test accuracies (Acc.$^*$) for these datasets in particular, we find that CT strongly outperforms the baseline. In fact, we observe that CT improves adversarial robustness on all datasets. 
-
-<!-- Final Results -->
-<!---->
-<!-- Columns 1-3 show mean outcome +- TWO (2) bootstrapped standard errors. -->
-<!---->
-<!-- - IP: significant and in many cases substantial reduction in implausibility, except for OL and Adult (both insfignficant) -->
-<!-- - IP*: significant and in many cases substantial reduction (up to 90%) in implausibility, except for MNIST and OL. -->
-<!-- - Cost: significant and in some cases substantial reduction, except for Adult, MNIST (both insignificant) and Credit (significant increase in costs). -->
 
 ::: {#tbl-main}
 
