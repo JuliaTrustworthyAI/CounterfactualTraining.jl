@@ -123,7 +123,7 @@ Random.seed!(42)    # change seed for different outcome
 overwrite = false   # set to `true` if you want to overwrite the file
 fname = joinpath(res_dir,"mlp/mnist/grid_config.toml")
 output_dir = mkpath("paper/experiments/output/extra/")
-gen = CTExperiments.GeneratorParams(lambda_energy=25.0)
+gen = CTExperiments.GeneratorParams(lambda_energy=25.0)     # instead of a high penalty, you can also use e.g. 1.0 and many iterations e.g 1000
 conv = "max_iter"
 cfg = EvaluationConfig(
     grid_file=fname, 
