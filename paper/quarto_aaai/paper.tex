@@ -162,12 +162,6 @@
     firstAuthor@affiliation1.com, secondAuthor@affilation2.com, thirdAuthor@affiliation1.com
 }
 \fi
-
-
-% REMOVE THIS: bibentry
-% This is only needed to show inline citations in the guidelines document. You should not need it and can safely delete it.
-\usepackage{bibentry}
-% END REMOVE bibentry
 \usepackage{amsfonts}
 \usepackage{amsmath}
 \usepackage{amsthm}
@@ -259,21 +253,20 @@ proposed---most notably \textbf{adversarial training}
 remains unattainable even for models that are considered ``shallow'' by
 today's standards \citep{kolter2023keynote}.
 
-Part of the problem is that the high degrees of freedom provide room for
-many solutions that are locally optimal with respect to narrow
-objectives \citep{wilson2020case}.\footnote{We follow the standard ML
-  convention, where ``degrees of freedom'' refer to the number of
-  parameters estimated from data.} As one example, research on the
-``lottery ticket hypothesis'' suggests that modern neural networks can
-be pruned by up to 90\% without losing predictive performance
-\citep{frankle2018lottery}. Thus, looking at the predictive performance
-alone, found solutions may seem to provide compelling explanations for
-the data, when in fact they are based on purely associative and
-semantically meaningless patterns. This poses two related challenges.
-Firstly, there is no dependable way to verify if learned representations
-correspond to meaningful, plausible explanations. Secondly, even if we
-resolve this challenge, it remains undecided how to ensure that machine
-learning models can \emph{only} learn valuable explanations.
+Part of the problem is that the high degrees of freedom---high number of
+parameters estimated from data---provide room for many solutions that
+are locally optimal with respect to narrow objectives
+\citep{wilson2020case}. As one example, research on the ``lottery ticket
+hypothesis'' suggests that modern neural networks can be pruned by up to
+90\% without losing predictive performance \citep{frankle2018lottery}.
+Thus, looking at the predictive performance alone, found solutions may
+seem to provide compelling explanations for the data, when in fact they
+are based on purely associative and semantically meaningless patterns.
+This poses two related challenges. Firstly, there is no dependable way
+to verify if learned representations correspond to meaningful, plausible
+explanations. Secondly, even if we resolve this challenge, it remains
+undecided how to ensure that machine learning models can \emph{only}
+learn valuable explanations.
 
 The first challenge has attracted an abundance of work on
 \textbf{explainable AI} (XAI), a paradigm that focuses on the
@@ -503,26 +496,23 @@ objective that balances (1) the classification loss
 or more penalty terms \(\lambda_{i}\text{cost}_{i}(\cdot)\). The exact
 specification of these penalties induces various properties in the
 counterfactual outcomes, and tends to be the key feature that
-distinguishes various gradient-based ``generators'' or ``explainers''
-(CE algorithms) from the literature \citep{altmeyer2023explaining},
-including all generators used in our experiments. We refer the reader to
-the supplementary appendix for details.
+distinguishes various gradient-based ``generators'' or ``explainers'' in
+the literature \citep{altmeyer2023explaining}, including all generators
+used in our experiments. We refer the reader to the supplementary
+appendix for details.
 
-For our purposes, we let \(T\) vary and consider the search to be
-converged as soon as the predicted probability for the target class has
-reached a pre-determined threshold, \(\tau\):
+CT adopts gradient-based CE search during training to generate
+on-the-fly model explanations \(\mathbf{x}^\prime\) for training
+samples. We use the term \emph{nascent} to denote counterfactuals
+\(\mathbf{x}_{t\leq T}^\prime\) that are not yet valid where \(t\)
+indicates the last iteration before the label is flipped. We store and
+use these interim counterfactuals as adversarial examples. Conversely,
+we consider counterfactuals \(\mathbf{x}_T^\prime\) as \emph{mature}
+explanations if they have either exhausted all \(T\) iterations or
+converged in terms reaching a pre-specified threshold, \(\tau\), for the
+predicted probability of the target class:
 \(\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}^\prime))[y^+] \geq \tau\),
 where \(\mathcal{S}\) is the softmax function.
-
-CT adapts gradient-based CE search already in training to generate
-\(\mathbf{x}^\prime\), the perturbed versions of the factual samples
-\(\mathbf{x}\). We use the term \emph{nascent} to denote counterfactuals
-for which the search has not converged, \(\mathbf{x}_{t\leq T}^\prime\).
-Initially, when the perturbations are small, nascent counterfactuals
-serve as AEs. Over multiple iterations, they move towards the decision
-boundary and turn into \emph{mature} counterfactuals
-\(\mathbf{x}_T^\prime\) when they cross into the target class (becoming
-CEs) or when \(t > T\).
 
 Formally, we propose the following counterfactual training objective to
 train explainable (as in Def. \ref{def-explainability}) models:
@@ -667,59 +657,100 @@ we set \(\mathbf{x}^+[d] := \mathbf{x}^\prime[d]\) if:
 
 \noindent From a Bayesian perspective, setting
 \(\mathbf{x}^+[d] := \mathbf{x}^\prime[d]\) can be understood as
-assuming a point mass prior for \(p(\mathbf{x}^+)\) with respect to
-feature \(d\). Intuitively, we think of this as ignoring implausibility
-costs with respect to immutable features, which effectively forces the
-model to instead seek plausibility with respect to the remaining
-features. This in turn results in lower overall sensitivity to immutable
-features, which we demonstrate empirically for different classifiers in
-Section~\ref{sec-experiments}. Under certain conditions, this result
-holds theoretically:\footnote{For the proof, see the supplementary
-  appendix.}
+assuming a point mass prior for \(p(\mathbf{x}^+)\) wrt. feature \(d\).
+Intuitively, we think of this as ignoring implausibility costs of
+immutable features, which effectively forces the model to instead seek
+plausibility through the remaining features. This can be expected to
+result in lower overall sensitivity to immutable features, which we
+investigate empirically in Section~\ref{sec-experiments}. Under certain
+conditions, this result holds theoretically; for the proof, see the
+supplementary appendix:
 
 \begin{proposition}[Protecting Immutable Features]
 \label{prp-mtblty}
 Let $f_\theta(\mathbf{x})=\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}))=\mathcal{S}(\Theta\mathbf{x})$ denote a linear classifier with softmax activation $\mathcal{S}$ where $y\in\{1,...,K\}=\mathcal{K}$ and $\mathbf{x} \in \mathbb{R}^D$. Assume multivariate Gaussian class densities with common diagonal covariance matrix $\Sigma_k=\Sigma$ for all $k \in \mathcal{K}$, then protecting an immutable feature from the contrastive divergence penalty will result in lower classifier sensitivity to that feature relative to the remaining features, provided that at least one of those is discriminative and mutable.
 \end{proposition}
 
-\noindent Proposition \ref{prp-mtblty} assumes independent features,
-which raises a concern about the effect of protecting immutable features
-in the presence of proxies. We address it in
-Section~\ref{sec-discussion}.
+\section{Experiments}\label{sec-experiments}
 
-\subsection{Example: Prediction of Credit
-Defaults}\label{example-prediction-of-credit-defaults}
+We seek to answer the following three research questions:
 
-Suppose we are interested in predicting the likelihood that loan
-applicants default on their credit. We have access to historical data on
-previous loan takers comprised of a binary outcome variable
-\(y\in\{1=\text{default},2=\text{no default}\}\) with two input
-features: (1) the subjects' \emph{age}, which we define as immutable,
-and (2) the subjects' existing level of \emph{debt}, which we define as
-mutable. We have simulated this scenario using synthetic data with
-independent \emph{age} and \emph{debt} features, and Gaussian
-class-conditional densities in Figure~\ref{fig-poc}. The four panels
-show the outcomes for different training procedures using the same model
-architecture (a linear classifier). In panels (a) and (c) we have
-trained the models conventionally, while in panels (b) and (d) we have
-applied CT.
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  To what extent does the CT objective in Equation 1 induce models to
+  learn plausible explanations?
+\item
+  To what extent does CT lead to more favorable AR outcomes in the
+  presence of actionability constraints?
+\item
+  What are the effects of hyperparameter selection on CT?
+\end{enumerate}
 
-In all four cases, all counterfactuals (stars) are valid---they have
-crossed the decision boundary (green) into the target class---but their
-quality differs. In panel (a), they are not plausible: they do not
-comply with the distribution of the factuals in \(y^+\) to the point
-where they form a clearly discernible cluster. In panel (b), they are
-highly plausible, meeting the first objective of Def.
-\ref{def-explainability}. In panel (c), the CEs involve substantial
-reductions in \emph{debt} for younger applicants. By comparison,
-counterfactual paths are shorter on average in panel (d) where we have
-protected the immutable \emph{age} as described in
-Section~\ref{sec-constraints}. Due to the classifier's lower sensitivity
-to \emph{age}, recommendations with respect to \emph{debt} are much more
-homogenous and do not unfairly punish younger individuals. These
-counterfactuals are also plausible with respect to the mutable feature.
-Thus, we consider the model in panel (d) as the most explainable
-according to Def. \ref{def-explainability}.
+\subsection{Experimental Setup}\label{experimental-setup}
+
+Our focus is the improvement in explainability (Def.
+\ref{def-explainability}). Thus, we primarily look at the plausibility
+and cost of faithfully generated counterfactuals at test time. Other
+metrics, such as validity and redundancy, are reported in the
+supplementary appendix. To measure the cost, we follow the standard
+proxy of distances (\(\ell_1\)-norm) between factuals and
+counterfactuals. For plausibility, we assess how similar CEs are to the
+observed samples in the target domain,
+\(\mathbf{X}^+\subset\mathcal{X}^+\). We rely on the metric used by
+\citet{altmeyer2024faithful},
+\begin{equation}\phantomsection\label{eq-impl-dist}{
+\text{IP}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
+}\end{equation} and introduce a novel divergence metric,
+\begin{equation}\phantomsection\label{eq-impl-div}{
+\text{IP}^*(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
+}\end{equation} where \(\mathbf{X}^\prime\) denotes a collection of
+counterfactuals and \(\text{MMD}(\cdot)\) is the unbiased estimate of
+the squared population maximum mean discrepancy, proposed by
+\citet{gretton2012kernel}. The metric in Equation~\ref{eq-impl-div} is
+equal to zero if and only if the two distributions are exactly the same,
+\(\mathbf{X}^\prime=\mathbf{X}^+\).
+
+For predictive performance, we use standard metrics, such as robust
+accuracy estimated on adversarially perturbed data using FGSM
+\citep{goodfellow2014explaining}.
+
+We run experiments with three gradient-based generators: \emph{Generic}
+of \citet{wachter2017counterfactual} as a simple baseline approach,
+\emph{REVISE} \citep{joshi2019realistic} that aims to generate plausible
+counterfactuals using a surrogate Variational Autoencoder (VAE), and
+\emph{ECCo}---the generator of \citet{altmeyer2024faithful} without the
+conformal prediction component---as a method that directly targets both
+faithfulness and plausibility of the counterfactuals.
+
+We make use of nine classification datasets common in the CE/AR
+literature. Four of them are synthetic with two classes and different
+characteristics: linearly separable clusters (\emph{LS}), overlapping
+clusters (\emph{OL}), concentric circles (\emph{Circ}), and interlocking
+moons (\emph{Moon}). They are generated using the library of
+\citet{altmeyer2023explaining} and we present them in the supplementary
+appendix. Next, we have four real-world binary tabular datasets:
+\emph{Adult} (Census data) of \citet{becker1996adult2}, California
+housing (\emph{CH}) of \citet{pace1997sparse}, Default of Credit Card
+Clients (\emph{Cred}) of \citet{yeh2016default}, and Give Me Some Credit
+(\emph{GMSC}) from \citet{kaggle2011give2}. Finally, for the convenience
+of illustration, we use the 10-class \emph{MNIST}
+\citep{lecun1998mnist}.
+
+To assess CT, we investigate the improvements in performance metrics
+when using it on top of a weak baseline (BL): a multilayer perceptron
+(\emph{MLP}). This is the best way to get a clear picture of the
+effectiveness of CT, and it is consistent with evaluation practices in
+the related literature
+\citep{goodfellow2014explaining, ross2021learning, teney2020learning}.
+
+\subsection{Experimental Results}\label{experimental-results}
+
+Our main quantitative results for \emph{MLP} models are summarised in
+Table~\ref{tbl-main}, which presents average outcomes along with
+bootstrapped two standard errors. The following example motivates CT and
+illustrates how to read Table~\ref{tbl-main}.
 
 \begin{figure*}
 
@@ -739,106 +770,101 @@ class.}
 
 \end{figure*}%
 
-\section{Experiments}\label{sec-experiments}
+\subsubsection{Synthetic Example: Prediction of Credit Card
+Defaults.}\label{synthetic-example-prediction-of-credit-card-defaults.}
 
-We seek to answer the following three research questions:
+Figure~\ref{fig-poc} presents results for a linear classifier fitted to
+\emph{LS} that complies with the data assumptions in Proposition
+\ref{prp-mtblty}. The four panels show the outcomes for different
+training procedures: in panels (a) and (c) we have trained the models
+conventionally, while in panels (b) and (d) we have applied CT. For
+illustrative purposes, suppose the first feature represents \emph{debt}
+(mutable) and the second feature represents \emph{age} (immutable) of
+loan applicants seeking counterfactual explanations for moving to the
+target class: loan provided (orange).
 
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  To what extent does the counterfactual training objective as it is
-  defined in Equation~\ref{eq-obj} induce models to learn plausible
-  explanations?
-\item
-  To what extent does CT produce more favorable AR outcomes in the
-  presence of actionability constraints?
-\item
-  What are the effects of hyperparameter selection on CT?
-\end{enumerate}
+In all four cases, it is possible to generate valid counterfactuals
+(stars) for unsuccessful applicants (blue). They cross the decision
+boundary (green) into the target class, but their quality differs. In
+panel (a), they are not plausible: they do not comply with the
+distribution of the factuals in \(y^+\) to the point where they form a
+clearly discernible cluster. In panel (b), they are highly plausible,
+meeting the first objective of Def. \ref{def-explainability}. This
+difference in outcomes is quantified for the non-linear MLP in the first
+two columns of Table~\ref{tbl-main} as the \(\%\)-reduction in
+implausibility: it is substantial and statistically significant for
+\emph{LS} across both metrics, the distance-based \(IP\) (29\%) and
+divergence-based \(IP^{*}\) (55\%).
 
-\subsection{Experimental Setup}\label{experimental-setup}
-
-Our key outcome of interest is improvement in explainability (Def.
-\ref{def-explainability}). Thus, we focus primarily on the plausibility
-and cost of faithfully generated counterfactuals at test time. To
-measure the cost, we follow the standard convention of using distances
-(\(\ell_1\)-norm) between factuals and counterfactuals as a proxy. For
-plausibility, we assess how similar CEs are to the observed samples in
-the target domain, \(\mathbf{X}^+\subset\mathcal{X}^+\). We rely on the
-metric used by \citet{altmeyer2024faithful},
-\begin{equation}\phantomsection\label{eq-impl-dist}{
-\text{IP}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
-}\end{equation} and introduce a novel divergence metric,
-\begin{equation}\phantomsection\label{eq-impl-div}{
-\text{IP}^*(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
-}\end{equation} where \(\mathbf{X}^\prime\) denotes a collection of
-counterfactuals and \(\text{MMD}(\cdot)\) is the unbiased estimate of
-the squared population maximum mean discrepancy, proposed by
-\citet{gretton2012kernel}. The metric in Equation~\ref{eq-impl-div} is
-equal to zero if and only if the two distributions are exactly the same,
-\(\mathbf{X}^\prime=\mathbf{X}^+\).
-
-In addition to cost and plausibility, we compute other standard metrics
-to evaluate counterfactuals such as validity and redundancy. Finally, we
-also assess the predictive performance of models using standard metrics,
-including robust accuracy estimated on adversarially perturbed data
-using FGSM \citep{goodfellow2014explaining}.
-
-We run the experiments with three gradient-based generators:
-\emph{Generic} of \citet{wachter2017counterfactual} as a simple baseline
-approach, \emph{REVISE} \citep{joshi2019realistic} that aims to generate
-plausible counterfactuals using a surrogate Variational Autoencoder
-(VAE), and \emph{ECCo}---the generator of \citet{altmeyer2024faithful}
-but without the conformal prediction component---as a method that
-directly targets both faithfulness and plausibility of the
-counterfactuals.
-
-We make use of nine classification datasets common in the CE/AR
-literature. Four of them are synthetic with two classes and different
-characteristics: linearly separable clusters (\emph{LS}), overlapping
-clusters (\emph{OL}), concentric circles (\emph{Circ}), and interlocking
-moons (\emph{Moon}). These datasets are generated using the library of
-\citet{altmeyer2023explaining} and we present them in the supplementary
-appendix. Next, we have four real-world binary tabular datasets from the
-domain of economics: \emph{Adult} (a.k.a. Census data) of
-\citet{becker1996adult2}, California housing (\emph{CH}) of
-\citet{pace1997sparse}, Default of Credit Card Clients (\emph{Cred}) of
-\citet{yeh2016default}, and Give Me Some Credit (\emph{GMSC}) from
-\citet{kaggle2011give2}. Finally, for the convenience of illustration,
-we use the 10-class \emph{MNIST} dataset \citep{lecun1998mnist}.
-
-To assess CT, we investigate the improvements in performance metrics
-when using it on top of a weak baseline (BL): a multilayer perceptron
-(\emph{MLP}). This is the best way to get a clear picture of the
-effectiveness of CT, and it is consistent with evaluation practices in
-the related literature
-\citep{goodfellow2014explaining, ross2021learning, teney2020learning}.
-
-\subsection{Experimental Results}\label{experimental-results}
+In panel (c) of Figure~\ref{fig-poc}, the CEs involve substantial
+reductions in \emph{debt} for younger applicants. By comparison,
+counterfactual paths are shorter on average in panel (d) where we have
+protected the immutable \emph{age} as described in
+Section~\ref{sec-constraints}. Due to the classifier's lower sensitivity
+to \emph{age}, recommendations with respect to \emph{debt} are much more
+homogenous and do not unfairly punish younger individuals. These CEs are
+also plausible with respect to the mutable feature, despite requiring
+smaller debt reductions on average, resulting in smaller costs to
+individuals. This result is quantified for the non-linear case in column
+three of Table~\ref{tbl-main}, which shows the \(\%\)-reduction in costs
+averaged across valid counterfactuals. Once again, the impact of CT is
+statistically significant and substantial (14\%). Thus, we consider the
+model in panel (d) as the most explainable according to Def.
+\ref{def-explainability}. Next, we present the results for all remaining
+datasets.
 
 \subsubsection{Plausibility.}\label{sec-plaus}
 
-Table~\ref{tbl-main} presents our main empirical findings. For all
-datasets except \emph{OL} and across all test settings, the average
-distance of CEs from observed samples in the target class is reduced,
-indicating improved plausibility. The magnitude of improvements varies.
-For the simple synthetic datasets, distance reductions range from around
-20-40\% (\emph{LS}, \emph{Moon}) to almost 60\% (\emph{Circ}). For the
-real-world tabular datasets, improvements tend to be smaller but still
-substantial, with around 10-15\% for \emph{CH}, 11-28\% for \emph{GMSC},
-7-8\% for \emph{Cred}, and around 3\% for \emph{Adult}. For the vision
-dataset (\emph{MNIST}), distances are reduced by up to 9\%. The results
-for our proposed divergence metric are qualitatively similar, but
-generally even more pronounced: for the \emph{Circ} dataset,
-implausibility is reduced by almost 94\% to virtually zero as we
-verified by the absolute outcome. Improvements for other datasets range
-from 28\% (\emph{Moon}) up to 78\% (\emph{GMSC}). For \emph{OL} the
-reduction is negative, consistent with the distance-based metric.
-\emph{MNIST} is the only dataset for which the two metrics disagree.
-However, upon visual inspection of the image counterfactuals (available
-in the supplementary appendix), we find that CT clearly improves
-plausibility.
+We find that CT generally leads to substantial and statistically
+significant improvements in plausibility: average reductions in \(IP\)
+range from around 7\% for \emph{MNIST} to almost 60\% for \emph{Circ};
+for the real-world tabular datasets they are around 12\% for both
+\emph{CH} and \emph{Cred} and almost 25\% for \emph{GMSC}; for
+\emph{Adult} and \emph{OL} we find no significant impact of CT on
+\(IP\). Reductions in \(IP^{*}\) are even more substantial and generally
+statistically significant, although the average degree of uncertainty is
+higher than for \(IP\): average reductions range from around 20\%
+(\emph{Moons}) to almost 90\% (\emph{Circ}). The only negative findings
+for \emph{OL} and \emph{MNIST} are statistically insignificant and, for
+MNIST, do not align with qualitative findings, which are much more
+plausible for CT (Figure~\ref{fig-mnist}).
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/figures/mnist_body.png}}
+
+}
+
+\caption{\label{fig-mnist}Sample explanations for \emph{MNIST} for BL
+(top) and CT (bottom). First column is a random factual 0 (blue).
+Columns 2 to 5 are corresponding \emph{ECCo} counterfactuals in target
+classes 1 to 4. Columns 6 to 10 show integrated gradients averaged over
+all test images in classes 5 to 9.}
+
+\end{figure}%
+
+\subsubsection{Actionability.}\label{sec-act}
+
+We also find that CT can reduce sensitivity to immutable, protected
+features and thus lead to less costly counterfactual outcomes as shown
+in Figure~\ref{fig-poc}. In column three of Table~\ref{tbl-main}, we
+impose mutability constraints on selected features and compute the
+reduction in average costs of CEs associated with CT compared to the
+baseline: for synthetic datasets, we always protect the first feature;
+for all real-world tabular datasets we could identify and protect an
+\emph{age} variable; for \emph{MNIST}, we protect the five top and
+bottom rows of digits. Reductions in costs are overwhelmingly positive
+and significant of up to nearly 60\% for \emph{GMSC}. While the
+estimated cost reductions for \emph{Adult} and \emph{MNIST} are not
+significant, Figure~\ref{fig-mnist} (columns 6-10) demonstrates that CT
+does have the expected effect: sensitivity to protected features as per
+integrated gradients is drastically reduced; details of this experiment
+are reported in the supplementary appendix. In the case of \emph{Cred},
+average costs increase, likely because any potential benefits from
+protecting the \emph{age} are outweighed by the increase in costs
+required for greater plausibility.
 
 \subsubsection{Predictive Performance.}\label{sec-pred}
 
@@ -854,17 +880,16 @@ all datasets.
 
 \begin{table*}
 
-\caption{\label{tbl-main}Key performance metrics across all datasets
-(column 1). \textbf{Plausibility}: Columns 2-6 show the percentage
-reduction in implausibility (\(\text{IP}\)) for varying degrees of the
-energy penalty \(\lambda_{\text{egy}}\) used for \emph{ECCo} at test
-time; column 7 shows the reduction in \(\text{IP}^*\) (\(\text{MMD}\)),
-aggregated across all test specifications. \textbf{Accuracy} (columns
-8-11): test accuracies and robust accuracies (\(\text{Acc}^*\)) for CT
-and the baseline (BL). \textbf{Actionability} (column 12): average
-reduction in costs when imposing mutability constraints reported for the
-four datasets for which we could identify meaningful features to
-protect.}
+\caption{\label{tbl-main}Key performance metrics and bootstrapped
+\emph{two} standard errors for all datasets. \textbf{Plausibility}
+(columns 1-2): percentage reduction in implausibility for \(IP\) and
+\(IP^*\), respectively; \textbf{Actionability} (column 3): percentage
+reduction in costs with protected features. \textbf{Accuracy} (columns
+4-7): test accuracies and robust accuracies (\(\text{Acc}^*\)) for CT
+and the baseline (BL). Counterfactual outcomes in columns 1-3 are
+aggregated across bootstrap samples and varying degrees of the energy
+penalty \(\lambda_{\text{egy}}\) used for \emph{ECCo} at test time.
+Standard errors for accuracy are bootstrapped from the test set.}
 
 \centering{
 
@@ -873,22 +898,6 @@ protect.}
 }
 
 \end{table*}%
-
-\subsubsection{Actionability.}\label{sec-act}
-
-In Section~\ref{sec-method}, we show that our method of encoding
-mutability constraints decreases sensitivity to immutable features for
-linear models, tilting the decision boundary in favour of mutable
-features. For constraints binding at test time, this leads to shorter
-counterfactual paths and hence smaller average costs (\(\ell_1\)-norm)
-to individuals. To extend this to the non-linear case, we test the
-effect of imposing mutability constraints for the synthetic datasets
-using the same evaluation scheme as above. The final row in
-Table~\ref{tbl-main} reports the average reduction in costs for CT
-compared to the ``vanilla'' baseline, when imposing that either the
-first or the second feature is immutable. In all cases, costs are
-reduced substantially, indicating that classifiers trained with CT are
-indeed more sensitive to mutable features.
 
 \subsubsection{Hyperparameter settings.}\label{sec-hyperparameters}
 
@@ -950,19 +959,18 @@ protections. Deciding on actionability is still a major open challenge
 in the AR literature \citep{venkatasubramanian2020philosophical}
 impacting the capacity of CT to fulfill its intended goal.
 
-\emph{CT increases the training time of models.} Just like adversarial
-training, CT is more resource-intensive than conventional training
-regimes. Higher numbers of CEs per iteration improve the quality of
-learned representations, but they also increase the number of
-computations. As our codebase is not performance optimized, grids of 270
-settings took up to four hours for more demanding datasets in our
-experiments, when ran on 34 2GB CPUs (see supplementary appendix). Other
-than optimization, three factors mitigate this effect: (1) CT yields
-itself to parallel execution; (2) it amortizes the cost of CEs for the
-training samples; (3) it can be used to fine-tune conventionally-trained
-models.
+\emph{CT increases the training times.} Like adversarial training, CT is
+more resource-intensive than conventional regimes. Higher numbers of CEs
+improve the quality of learned representations but they also increase
+the number of computations. As our codebase is not performance
+optimized, grids of 270 settings for the largest datasets in our
+experiments took up to four hours using 34 2GB CPUs (see supplementary
+appendix). Other than optimization, three factors mitigate this effect:
+(1) CT yields itself to parallel execution; (2) it amortizes the cost of
+CEs for the training samples; and (3) it can be used to fine-tune
+conventionally-trained models.
 
-We also highlight several important directions for future research.
+We also highlight three important directions for future research.
 Firstly, it is an interesting challenge to extend CT beyond
 classification settings. Our formulation relies on the distinction
 between non-target class(es) \(y^{-}\) and target class(es) \(y^{+}\) to
@@ -984,12 +992,10 @@ several promising ways to mitigate this problem: regularizing energy
 (\(\lambda_{\text{reg}}\)), generating sufficiently many counterfactuals
 during each epoch, and including only mature counterfactuals in
 \(\text{div}(\cdot)\).\\
-Finally, we believe that it is possible to substantially improve
-hyperparameter selection procedures, and thus performance. In this work,
-we have relied exclusively on grid searches for this task. Future work
-on CT could benefit from investigating more sophisticated approaches.
-Notably, our method is iterative which makes methods such as Bayesian or
-gradient-based optimization applicable \citep{bischl2023hyperparameter}.
+Finally, we believe that it is possible to considerably improve
+hyperparameter selection procedures, and thus performance. We have
+relied exclusively on grid searches, but future research could benefit
+from more sophisticated approaches.
 
 To conclude, state-of-the-art machine learning models are prone to
 learning complex representations that cannot be interpreted by humans.
@@ -1003,9 +1009,9 @@ user-specified mutability constraints), and thus meaningful to their
 recipients. Through extensive experiments, we demonstrated that CT
 satisfies its objective while promoting robustness and preserving the
 predictive performance of models. It can also be used to fine-tune
-conventionally-trained models and achieve similar gains. Thus, our work
-showcases that it is practical to simultaneously improve models and
-their explanations.
+conventionally-trained models and achieve similar gains. Lastly, our
+work highlights the value of simultaneously improving models and their
+explanations.
 
 \section*{References}\label{references}
 \addcontentsline{toc}{section}{References}
