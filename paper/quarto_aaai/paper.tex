@@ -303,11 +303,10 @@ Our contribution consolidates these findings within a unified framework.
 Specifically, \textbf{we propose Counterfactual Training (CT)}: a novel
 training regime explicitly geared towards improving the explanatory
 capacity of models that, in high-level terms, we define as the extent to
-which valid explanations derived for a model can be deemed plausible
-with respect to the underlying data and global actionability constraints
-(we refine this notion in Def. \ref{def-explainability}). For
-simplicity, we refer to models with high explanatory capacity as
-\emph{explainable}. To the best of our knowledge, Counterfactual
+which valid counterfactual explanations derived for a model can be
+deemed plausible with respect to the underlying data and global
+actionability constraints (we refine this notion in Def.
+\ref{def-explainability}). To the best of our knowledge, Counterfactual
 Training represents the first attempt to achieve more explainable models
 by employing counterfactual explanations already in the training phase.
 
@@ -452,12 +451,12 @@ possible to attain by the recipient. A plausible CE for a rejected
 application would have been accepted, if only they had been 20 years
 older. Ignoring all other features, this would comply with the
 definition of plausibility if 40-year-old individuals were in fact more
-credit-worthy on average than young adults. But of course this CE does
-not qualify for providing actionable recourse to the applicant since
-\emph{age} is not a (directly) mutable feature. Counterfactual training
-aims to improve model explainability by aligning models with
-counterfactuals that meet both desiderata: plausibility and
-actionability. Formally, we define explainability as follows:
+credit-worthy on average than young adults. But to the applicant, this
+CE does not provide actionable recourse, as age is not a (directly)
+mutable feature. Counterfactual training aims to improve model
+explainability by aligning models with counterfactuals that meet both
+desiderata: plausibility and actionability. Formally, we define
+explainability as follows:
 
 \begin{definition}[Model Explainability]
 \label{def-explainability}
@@ -854,17 +853,17 @@ impose mutability constraints on selected features and compute the
 reduction in average costs of CEs associated with CT compared to the
 baseline: for synthetic datasets, we always protect the first feature;
 for all real-world tabular datasets we could identify and protect an
-\emph{age} variable; for \emph{MNIST}, we protect the five top and
-bottom rows of digits. Reductions in costs are overwhelmingly positive
-and significant of up to nearly 60\% for \emph{GMSC}. While the
-estimated cost reductions for \emph{Adult} and \emph{MNIST} are not
-significant, Figure~\ref{fig-mnist} (columns 6-10) demonstrates that CT
-does have the expected effect: sensitivity to protected features as per
-integrated gradients is drastically reduced; details of this experiment
-are reported in the supplementary appendix. In the case of \emph{Cred},
-average costs increase, likely because any potential benefits from
-protecting the \emph{age} are outweighed by the increase in costs
-required for greater plausibility.
+\emph{age} variable; for \emph{MNIST}, we protect the five upper and
+lower pixel rows of the full image. Reductions in costs are
+overwhelmingly positive and significant of up to nearly 60\% for
+\emph{GMSC}. While the estimated cost reductions for \emph{Adult} and
+\emph{MNIST} are not significant, Figure~\ref{fig-mnist} (columns 6-10)
+demonstrates that CT does have the expected effect: sensitivity to
+protected features as per integrated gradients is drastically reduced;
+details of this experiment are reported in the supplementary appendix.
+In the case of \emph{Cred}, average costs increase, likely because any
+potential benefits from protecting the \emph{age} are outweighed by the
+increase in costs required for greater plausibility.
 
 \subsubsection{Predictive Performance.}\label{sec-pred}
 
@@ -882,11 +881,11 @@ all datasets.
 
 \caption{\label{tbl-main}Key performance metrics and bootstrapped
 \emph{two} standard errors for all datasets. \textbf{Plausibility}
-(columns 1-2): percentage reduction in implausibility for \(IP\) and
-\(IP^*\), respectively; \textbf{Actionability} (column 3): percentage
-reduction in costs with protected features. \textbf{Accuracy} (columns
-4-7): test accuracies and robust accuracies (\(\text{Acc}^*\)) for CT
-and the baseline (BL). Counterfactual outcomes in columns 1-3 are
+(columns 1-2): percentage reduction in implausibility for \(\text{IP}\)
+and \(\text{IP}^*\), respectively; \textbf{Actionability} (column 3):
+percentage reduction in costs with protected features. \textbf{Accuracy}
+(columns 4-7): test accuracies and robust accuracies (\(\text{Acc}^*\))
+for CT and the baseline (BL). Counterfactual outcomes in columns 1-3 are
 aggregated across bootstrap samples and varying degrees of the energy
 penalty \(\lambda_{\text{egy}}\) used for \emph{ECCo} at test time.
 Standard errors for accuracy are bootstrapped from the test set.}
