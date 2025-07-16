@@ -2,6 +2,7 @@ using AlgebraOfGraphics
 using CounterfactualExplanations
 using CairoMakie
 using DataFrames
+using HypothesisTests
 using Plots: Plots, PlotMeasures
 using PrettyTables
 using TaijaPlotting
@@ -565,6 +566,21 @@ function aggregate_ce_evaluation(cfg::EvalConfigOrGrid; kwrgs...)
 end
 
 """
+    cidiff(df::DataFrame; var_interest::String="objective", alpha=0.95)
+
+Computes the bootstrap CI for the difference in outcomes using the percentile method, where `alpha` corresponds to the confidence level.
+"""
+function cidiff(df::DataFrame; var_interest::String="objective", alpha=0.95)
+    vars = sort(unique(df[:,Symbol(var_interest)]))
+    @assert length(vars) == 2 "Can only compare exactly two samples"
+    df = DataFrames.unstack(df, Symbol(var_interest), :mean)
+    x = Float64.(df[:,Symbol(vars[1])])
+    y = Float64.(df[:,Symbol(vars[2])])
+    delta = x .- y
+    return (quantile(delta, (1-alpha)/2), quantile(delta, 1-(1-alpha)/2))
+end
+
+"""
     aggregate_ce_evaluation(
         df::DataFrame, 
         df_meta::DataFrame,
@@ -583,13 +599,15 @@ function aggregate_ce_evaluation(
     byvars::Union{Nothing,String,Vector{String}}=nothing,
     var_interest::String="objective",
     agg_further_vars::Union{Nothing,Vector{String}}=nothing,
-    rebase::Bool=true,
+    rebase::Bool=false,
     lambda_eval::Union{Nothing,Vector{<:Real}}=nothing,
-    ratio::Bool=false,
-    total_uncertainty::Bool=true,
+    ratio::Bool=true,
+    total_uncertainty::Bool=false,
     valid_only::Bool=true,
     protected_only::Bool=false,
     ct_only::Bool=false,
+    conf_int::Union{Nothing,Vector{<:AbstractFloat}}=[0.99],
+    return_sig_level::Bool= true
 )
 
     # Assertions:
@@ -667,6 +685,18 @@ function aggregate_ce_evaluation(
                     end
                 end
 
+                if !isnothing(conf_int)
+                    conf_int = Dict("$(100*alpha)%" => cidiff(df_agg; alpha) for alpha in conf_int)
+                    if return_sig_level
+                        sig_level = ""
+                        for ci in values(conf_int)
+                            if !(ci[1] <= 0.0 <= ci[2])
+                                sig_level = "$(sig_level)*"
+                            end
+                        end
+                    end
+                end
+
                 # Final aggregation and standard errors:
                 df_agg = DataFrames.unstack(df_agg, Symbol(var_interest), :mean)
                 vars = sort(unique(df[:,Symbol(var_interest)]))
@@ -677,7 +707,20 @@ function aggregate_ce_evaluation(
                     groupby(df_agg, byvars) |>
                     df -> combine(df, :ratio => (y -> (mean=-(mean(skipmissing(y))-1)*100, 
                         se=100*std(skipmissing(y)))) => AsTable)
-                return df_agg
+
+                if isnothing(conf_int)
+                    return df_agg
+                else
+                    if return_sig_level
+                        df_agg.sig_level .= sig_level
+                    else
+                        for (k,v) in conf_int
+                            df_agg[:,Symbol(k)] .= v
+                        end
+                    end
+                    return df_agg
+                end
+
             end
 
             df_agg =
@@ -784,11 +827,8 @@ function aggregate_ce_evaluation(
         df.objective .= CTExperiments.format_header.(df.objective)
     end
     df.variable .= CTExperiments.format_metric.(y)
-    if rebase || ratio
+    if ratio
         df.variable .= (x -> LatexCell("$(x) \$(-%)\$")).(df.variable)
-        if rebase 
-            select!(df, Not([:is_pct, :objective]))
-        end
     end
     return df
 end
@@ -840,13 +880,14 @@ end
 function final_table(
     res_dir::String;
     tbl_mtbl::Union{Nothing,DataFrame}=nothing,
-    ce_var=["plausibility_distance_from_target", "mmd"],
+    ce_var::Vector{<:String}=["plausibility_distance_from_target", "mmd"],
     perf_var=["acc"],
     agg_further_vars=[["run", "lambda_energy_eval"], ["run", "lambda_energy_eval"]],
     longformat::Bool=true,
     bootstrap::Int=100,
     total_uncertainty::Bool=false,
-    drop_models::Vector{String}=String[]
+    drop_models::Vector{String}=String[],
+    conf_int::Vector{<:AbstractFloat}=[0.99]
 )
     # CE:
     df_ce = DataFrame()
@@ -856,7 +897,8 @@ function final_table(
             rebase=false, 
             ratio=true,
             total_uncertainty,
-            drop_models
+            drop_models,
+            return_sig_level=true,
         )
         df_ce = vcat(df_ce, df; cols=:union)
     end
@@ -876,12 +918,19 @@ function final_table(
         vcat(df_ce, df_perf; cols=:union)
     end
 
+    # Statistical significance:
+    if !("sig_level" in names(df))
+        df.sig_level .= ""
+    else
+        df.sig_level .=  coalesce.(df.sig_level, "")
+    end
+
     # Post-process
     df = DataFrames.transform(
         df, 
-        [:mean, :se] => ((m, s) -> [isnan(si) ? "$(round(mi, digits=2))" : PrettyTables.LatexCell("$(round(mi, digits=2))\\pm$(round(2si, digits=2))") for (mi, si) in zip(m, s)]) => :mean
+        [:mean, :se, :sig_level] => ((m, s, stars) -> [isnan(si) ? "$(round(mi, digits=2))" : PrettyTables.LatexCell("$(round(mi, digits=2))\\pm$(round(si, digits=2)) \$^{$star}\$") for (mi, si, star) in zip(m, s, stars)]) => :mean
     ) |>
-        df -> select!(df, Not(:se)) |>
+        df -> select!(df, Not(:se, :sig_level)) |>
         df -> DataFrames.unstack(df, :dataset, :mean)
 
     # Missing:
