@@ -606,7 +606,7 @@ function aggregate_ce_evaluation(
     valid_only::Bool=true,
     protected_only::Bool=false,
     ct_only::Bool=false,
-    conf_int::Union{Nothing,Vector{<:AbstractFloat}}=[0.95,0.99],
+    conf_int::Union{Nothing,Vector{<:AbstractFloat}}=[0.99],
     return_sig_level::Bool= true
 )
 
@@ -887,7 +887,7 @@ function final_table(
     bootstrap::Int=100,
     total_uncertainty::Bool=false,
     drop_models::Vector{String}=String[],
-    conf_int::Vector{<:AbstractFloat}=[0.95,0.99]
+    conf_int::Vector{<:AbstractFloat}=[0.99]
 )
     # CE:
     df_ce = DataFrame()
@@ -928,7 +928,7 @@ function final_table(
     # Post-process
     df = DataFrames.transform(
         df, 
-        [:mean, :se, :sig_level] => ((m, s, stars) -> [isnan(si) ? "$(round(mi, digits=2))" : PrettyTables.LatexCell("$(round(mi, digits=2))\\pm$(round(2si, digits=2)) ^{$star}") for (mi, si, star) in zip(m, s, stars)]) => :mean
+        [:mean, :se, :sig_level] => ((m, s, stars) -> [isnan(si) ? "$(round(mi, digits=2))" : PrettyTables.LatexCell("$(round(mi, digits=2))\\pm$(round(si, digits=2)) \$^{$star}\$") for (mi, si, star) in zip(m, s, stars)]) => :mean
     ) |>
         df -> select!(df, Not(:se, :sig_level)) |>
         df -> DataFrames.unstack(df, :dataset, :mean)

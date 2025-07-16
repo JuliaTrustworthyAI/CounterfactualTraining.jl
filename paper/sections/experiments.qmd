@@ -62,7 +62,7 @@ Test accuracy for CT is virtually identical to the baseline for *Adult*, *Circ*,
 \end{table*}
 ```
 
-Key performance metrics and bootstrapped *two* standard errors for all datasets. **Plausibility** (columns 1-2): percentage reduction in implausibility for $\text{IP}$ and $\text{IP}^*$, respectively; **Actionability** (column 3): percentage reduction in costs with protected features. **Accuracy** (columns 4-7): test accuracies and robust accuracies ($\text{Acc}^*$) for CT and the baseline (BL). Counterfactual outcomes in columns 1-3 are aggregated across bootstrap samples and varying degrees of the energy penalty $\lambda_{\text{egy}}$ used for *ECCo* at test time. Standard errors for accuracy are bootstrapped from the test set.
+Key performance metrics and bootstrapped standard errors (omitted if essentially zero) for all datasets. **Plausibility** (columns 1-2): percentage reduction in implausibility for $\text{IP}$ and $\text{IP}^*$, respectively; **Actionability** (column 3): percentage reduction in costs with protected features. **Accuracy** (columns 4-7): test accuracies and robust accuracies ($\text{Acc}^*$) for CT and the baseline (BL). Counterfactual outcomes in columns 1-3 are aggregated across bootstrap samples and varying degrees of the energy penalty $\lambda_{\text{egy}}$ used for *ECCo* at test time. Asterisks ($^*$) in columns 1-3 indicate that difference is statistically significant at 1%-level. Standard errors for accuracy are bootstrapped from the test set.
 :::
 
 ### Hyperparameter settings. {#sec-hyperparameters}
