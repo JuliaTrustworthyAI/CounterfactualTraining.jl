@@ -606,7 +606,8 @@ function aggregate_ce_evaluation(
     valid_only::Bool=true,
     protected_only::Bool=false,
     ct_only::Bool=false,
-    conf_int::Union{Nothing,Vector{<:AbstractFloat}}=[0.95,0.99]
+    conf_int::Union{Nothing,Vector{<:AbstractFloat}}=[0.95,0.99],
+    return_sig_level::Bool= true
 )
 
     # Assertions:
@@ -686,7 +687,14 @@ function aggregate_ce_evaluation(
 
                 if !isnothing(conf_int)
                     conf_int = Dict("$(100*alpha)%" => cidiff(df_agg; alpha) for alpha in conf_int)
-                    return conf_int
+                    if return_sig_level
+                        sig_level = ""
+                        for ci in values(conf_int)
+                            if !(ci[1] <= 0.0 <= ci[2])
+                                sig_level = "$(sig_level)*"
+                            end
+                        end
+                    end
                 end
 
                 # Final aggregation and standard errors:
@@ -702,8 +710,15 @@ function aggregate_ce_evaluation(
 
                 if isnothing(conf_int)
                     return df_agg
-                else 
-                    return df_agg, conf_int
+                else
+                    if return_sig_level
+                        df_agg.sig_level .= sig_level
+                    else
+                        for (k,v) in conf_int
+                            df_agg[:,Symbol(k)] .= v
+                        end
+                    end
+                    return df_agg
                 end
 
             end
@@ -812,11 +827,8 @@ function aggregate_ce_evaluation(
         df.objective .= CTExperiments.format_header.(df.objective)
     end
     df.variable .= CTExperiments.format_metric.(y)
-    if rebase || ratio
+    if ratio
         df.variable .= (x -> LatexCell("$(x) \$(-%)\$")).(df.variable)
-        if rebase 
-            select!(df, Not([:is_pct, :objective]))
-        end
     end
     return df
 end
@@ -868,13 +880,14 @@ end
 function final_table(
     res_dir::String;
     tbl_mtbl::Union{Nothing,DataFrame}=nothing,
-    ce_var=["plausibility_distance_from_target", "mmd"],
+    ce_var::Vector{<:String}=["plausibility_distance_from_target", "mmd"],
     perf_var=["acc"],
     agg_further_vars=[["run", "lambda_energy_eval"], ["run", "lambda_energy_eval"]],
     longformat::Bool=true,
     bootstrap::Int=100,
     total_uncertainty::Bool=false,
-    drop_models::Vector{String}=String[]
+    drop_models::Vector{String}=String[],
+    conf_int::Vector{<:AbstractFloat}=[0.95,0.99]
 )
     # CE:
     df_ce = DataFrame()
@@ -884,7 +897,8 @@ function final_table(
             rebase=false, 
             ratio=true,
             total_uncertainty,
-            drop_models
+            drop_models,
+            return_sig_level=true,
         )
         df_ce = vcat(df_ce, df; cols=:union)
     end
@@ -904,12 +918,19 @@ function final_table(
         vcat(df_ce, df_perf; cols=:union)
     end
 
+    # Statistical significance:
+    if !("sig_level" in names(df))
+        df.sig_level .= ""
+    else
+        df.sig_level .=  coalesce.(df.sig_level, "")
+    end
+
     # Post-process
     df = DataFrames.transform(
         df, 
-        [:mean, :se] => ((m, s) -> [isnan(si) ? "$(round(mi, digits=2))" : PrettyTables.LatexCell("$(round(mi, digits=2))\\pm$(round(2si, digits=2))") for (mi, si) in zip(m, s)]) => :mean
+        [:mean, :se, :sig_level] => ((m, s, stars) -> [isnan(si) ? "$(round(mi, digits=2))" : PrettyTables.LatexCell("$(round(mi, digits=2))\\pm$(round(2si, digits=2)) ^{$star}") for (mi, si, star) in zip(m, s, stars)]) => :mean
     ) |>
-        df -> select!(df, Not(:se)) |>
+        df -> select!(df, Not(:se, :sig_level)) |>
         df -> DataFrames.unstack(df, :dataset, :mean)
 
     # Missing:
