@@ -2,6 +2,7 @@ using AlgebraOfGraphics
 using CounterfactualExplanations
 using CairoMakie
 using DataFrames
+using HypothesisTests
 using Plots: Plots, PlotMeasures
 using PrettyTables
 using TaijaPlotting
@@ -565,6 +566,21 @@ function aggregate_ce_evaluation(cfg::EvalConfigOrGrid; kwrgs...)
 end
 
 """
+    cidiff(df::DataFrame; var_interest::String="objective", alpha=0.95)
+
+Computes the bootstrap CI for the difference in outcomes using the percentile method, where `alpha` corresponds to the confidence level.
+"""
+function cidiff(df::DataFrame; var_interest::String="objective", alpha=0.95)
+    vars = sort(unique(df[:,Symbol(var_interest)]))
+    @assert length(vars) == 2 "Can only compare exactly two samples"
+    df = DataFrames.unstack(df, Symbol(var_interest), :mean)
+    x = Float64.(df[:,Symbol(vars[1])])
+    y = Float64.(df[:,Symbol(vars[2])])
+    delta = x .- y
+    return (quantile(delta, (1-alpha)/2), quantile(delta, 1-(1-alpha)/2))
+end
+
+"""
     aggregate_ce_evaluation(
         df::DataFrame, 
         df_meta::DataFrame,
@@ -583,13 +599,14 @@ function aggregate_ce_evaluation(
     byvars::Union{Nothing,String,Vector{String}}=nothing,
     var_interest::String="objective",
     agg_further_vars::Union{Nothing,Vector{String}}=nothing,
-    rebase::Bool=true,
+    rebase::Bool=false,
     lambda_eval::Union{Nothing,Vector{<:Real}}=nothing,
-    ratio::Bool=false,
-    total_uncertainty::Bool=true,
+    ratio::Bool=true,
+    total_uncertainty::Bool=false,
     valid_only::Bool=true,
     protected_only::Bool=false,
     ct_only::Bool=false,
+    conf_int::Union{Nothing,Vector{<:AbstractFloat}}=[0.95,0.99]
 )
 
     # Assertions:
@@ -667,6 +684,11 @@ function aggregate_ce_evaluation(
                     end
                 end
 
+                if !isnothing(conf_int)
+                    conf_int = Dict("$(100*alpha)%" => cidiff(df_agg; alpha) for alpha in conf_int)
+                    return conf_int
+                end
+
                 # Final aggregation and standard errors:
                 df_agg = DataFrames.unstack(df_agg, Symbol(var_interest), :mean)
                 vars = sort(unique(df[:,Symbol(var_interest)]))
@@ -677,7 +699,13 @@ function aggregate_ce_evaluation(
                     groupby(df_agg, byvars) |>
                     df -> combine(df, :ratio => (y -> (mean=-(mean(skipmissing(y))-1)*100, 
                         se=100*std(skipmissing(y)))) => AsTable)
-                return df_agg
+
+                if isnothing(conf_int)
+                    return df_agg
+                else 
+                    return df_agg, conf_int
+                end
+
             end
 
             df_agg =
