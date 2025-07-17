@@ -869,7 +869,7 @@ function aggregate_performance(
     return df
 end
 
-function plot_performance(res_dir; measure::Vector=["acc"], adversarial::Bool=false, bootstrap::Union{Nothing,Int}=nothing, drop_models::Vector{String}=String[], eps::Vector{<:AbstractFloat}=[0.03], byvars=["objective"]
+function plot_performance(res_dir; measure::Vector=["acc"], adversarial::Bool=false, bootstrap::Union{Nothing,Int}=nothing, drop_models::Vector{String}=String[], eps::Vector{<:AbstractFloat}=[0.03], byvars=["objective"], drop_synthetic::Bool=true
 )
 
     # Get measures:
@@ -879,8 +879,12 @@ function plot_performance(res_dir; measure::Vector=["acc"], adversarial::Bool=fa
 
     eval_grids, _ = final_results(res_dir; drop_models)
     df = aggregate_performance(eval_grids; measure, adversarial, bootstrap, eps, byvars)
+    df.objective .= ifelse.(df.objective .== "Full", "CT", "BL")
+    if drop_synthetic
+        filter!(df -> !(df.dataset in ["LS", "OL", "Circ", "Moon"]), df)
+    end
 
-    plt = data(df) * mapping(:eps, :mean, color=:objective, col=:dataset) * visual(ScatterLines)
+    plt = data(df) * mapping(:eps => L"\text{Perturbation Size: }\varepsilon \in [0,0.1]", :mean => L"\text{Accuracy}", color=:objective => "Model", marker=:objective => "Model", col=:dataset) * visual(ScatterLines)
     return plt
 end
 
@@ -916,7 +920,8 @@ function final_table(
     bootstrap::Int=100,
     total_uncertainty::Bool=false,
     drop_models::Vector{String}=String[],
-    conf_int::Vector{<:AbstractFloat}=[0.99]
+    conf_int::Vector{<:AbstractFloat}=[0.99],
+    include_performance::Bool=false,
 )
     # CE:
     df_ce = DataFrame()
@@ -935,16 +940,19 @@ function final_table(
     # Missing:
     df_ce = coalesce.(df_ce, "(agg.)")
 
-    # Performance:
-    df_perf = aggregate_performance(res_dir; measure=perf_var, bootstrap, drop_models)                          # unperturbed
-    df_adv_perf = aggregate_performance(res_dir; measure=perf_var, adversarial=true, bootstrap, drop_models)    # adversarial
-    df_perf = vcat(df_perf, df_adv_perf)
-
     # Merge
     df = if !isnothing(tbl_mtbl)
-        vcat(df_ce, tbl_mtbl, df_perf; cols=:union)
+        vcat(df_ce, tbl_mtbl; cols=:union)
     else
-        vcat(df_ce, df_perf; cols=:union)
+        df_ce
+    end
+
+    if include_performance
+        # Performance:
+        df_perf = aggregate_performance(res_dir; measure=perf_var, bootstrap, drop_models)                          # unperturbed
+        df_adv_perf = aggregate_performance(res_dir; measure=perf_var, adversarial=true, bootstrap, drop_models)    # adversarial
+        df_perf = vcat(df_perf, df_adv_perf)
+        df = vcat(df, df_perf; cols=:union)
     end
 
     # Statistical significance:

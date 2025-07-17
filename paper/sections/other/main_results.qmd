@@ -71,7 +71,38 @@ df = final_table(res_dir; tbl_mtbl=df_mtbl)
 Serialization.serialize("paper/experiments/output/final_table.jls", df)
 ```
 
+```{julia}
+#| eval: false
+
+df = Serialization.deserialize("paper/experiments/output/final_table.jls")
+inputs = get_table_inputs(df, nothing; backend=Val(:latex))
+formatters = (
+    PrettyTables.ft_round(1,findall(.!contains.(names(df),"Acc"))),
+    PrettyTables.ft_round(2,findall(contains.(names(df),"Acc")))
+)
+for fname in ["paper/quarto_aaai/tables/main.tex","paper/preprint/tables/main.tex"]
+    tabulate_results(
+        inputs; 
+        table_type=:tabular, 
+        save_name=fname, 
+        wrap_table=false, 
+        alignment=[:l,fill(:r,size(df,2)-1)...],
+        formatters=formatters
+    )
+end
+```
+
+### Robust Performance Plots
+
+
+```{julia}
+plt = CTExperiments.plot_performance(res_dir, eps=range(0.0, 0.1, length=10) |> collect, adversarial=true, byvars=["objective", "eps"]) |>
+    plt -> draw(plt, figure=(size=(800, 190),), axis=(yticks=[0.0,0.5,1.0], limits=(nothing, (0,1)), xticklabelsvisible=false, xticksvisible=false))
+save("paper/figures/acc.png", plt; px_per_unit=3)
+```
+
 ## Confidence Intervals
+
 
 ```{julia}
 lvls = [0.90, 0.95, 0.99]
