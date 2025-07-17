@@ -715,7 +715,7 @@ function aggregate_ce_evaluation(
                         df_agg.sig_level .= sig_level
                     else
                         for (k,v) in conf_int
-                            df_agg[:,Symbol(k)] .= v
+                            df_agg[:,Symbol(k)] .= fill(v, nrow(df_agg))
                         end
                     end
                     return df_agg
