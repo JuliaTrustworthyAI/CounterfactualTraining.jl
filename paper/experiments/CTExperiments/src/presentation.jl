@@ -879,19 +879,8 @@ function plot_performance(res_dir; measure::Vector=["acc"], adversarial::Bool=fa
 
     eval_grids, _ = final_results(res_dir; drop_models)
     df = aggregate_performance(eval_grids; measure, adversarial, bootstrap, eps, byvars)
-    # df.eps = string.(df.eps)
-    # Split your data by objective
-    df_full = filter(row -> row.objective == "Full", df)
-    df_vanilla = filter(row -> row.objective == "Vanilla", df)
 
-    plt = (
-           data(df_full) * mapping(:eps, :mean, color=:objective, col=:dataset) *
-           visual(BarPlot)
-       ) + (
-           data(df_vanilla) * mapping(:eps, :mean, color=:objective, col=:dataset) *
-            visual(Scatter; markersize=25, marker=:hline)
-       )
-
+    plt = data(df) * mapping(:eps, :mean, color=:objective, col=:dataset) * visual(ScatterLines)
     return plt
 end
 
