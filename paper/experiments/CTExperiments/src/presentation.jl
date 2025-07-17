@@ -436,16 +436,30 @@ function aggregate_performance(
     cfg::EvalConfigOrGrid;
     measure=[accuracy, multiclass_f1score],
     adversarial::Bool=false,
+    eps::Vector{<:AbstractFloat}=[0.03],
     bootstrap::Union{Nothing,Int}=nothing,
     kwrgs...,
 )
 
     # Load data:
     exper_grid = ExperimentGrid(cfg.grid_file)
-    df, df_meta, df_perf = merge_with_meta(
-        cfg,
-        CTExperiments.test_performance(exper_grid; measure, adversarial, bootstrap, return_df=true),
-    )
+    dfs = DataFrame[]
+    dfs_meta = DataFrame[]
+    dfs_perf = DataFrame[]
+    for e in eps
+        df, df_meta, df_perf = merge_with_meta(
+            cfg,
+            CTExperiments.test_performance(exper_grid; measure, adversarial, bootstrap, return_df=true, eps=e),
+        )
+        df.eps .= e
+        df_meta.eps .= e
+        push!(dfs, df)
+        push!(dfs_meta, df_meta)
+        push!(dfs_perf, df_perf)
+    end
+    df = vcat(dfs...)
+    df_meta = vcat(dfs_meta...)
+    df_perf = vcat(dfs_perf...)
 
     return aggregate_performance(df, df_meta, df_perf; kwrgs...)
 end
@@ -836,7 +850,7 @@ end
 global allowed_perf_measures = Dict("acc" => accuracy, "f1" => multiclass_f1score)
 
 function aggregate_performance(
-    res_dir::String; measure::Vector=["acc"], adversarial::Bool=false, bootstrap::Union{Nothing,Int}=nothing, drop_models::Vector{String}=String[],
+    res_dir::String; measure::Vector=["acc"], adversarial::Bool=false, bootstrap::Union{Nothing,Int}=nothing, drop_models::Vector{String}=String[], eps::Vector{<:AbstractFloat}=[0.03], byvars=["objective"]
 )
 
     # Get measures:
@@ -845,7 +859,7 @@ function aggregate_performance(
     end
 
     eval_grids, _ = final_results(res_dir; drop_models)
-    df = aggregate_performance(eval_grids; measure, adversarial, bootstrap)
+    df = aggregate_performance(eval_grids; measure, adversarial, bootstrap, eps, byvars)
     df.objective .= replace.(df.objective, "Full" => "CT")
     df.objective .= replace.(df.objective, "Vanilla" => "BL")
     df.variable .= replace.(df.variable, "Accuracy" => adversarial ? "Acc.\$^*\$" : "Acc.")
@@ -853,6 +867,32 @@ function aggregate_performance(
 
     select!(df, Not([:objective]))
     return df
+end
+
+function plot_performance(res_dir; measure::Vector=["acc"], adversarial::Bool=false, bootstrap::Union{Nothing,Int}=nothing, drop_models::Vector{String}=String[], eps::Vector{<:AbstractFloat}=[0.03], byvars=["objective"]
+)
+
+    # Get measures:
+    if eltype(measure) == String
+        measure = [allowed_perf_measures[m] for m in measure]
+    end
+
+    eval_grids, _ = final_results(res_dir; drop_models)
+    df = aggregate_performance(eval_grids; measure, adversarial, bootstrap, eps, byvars)
+    df.eps = string.(df.eps)
+    # Split your data by objective
+    df_full = filter(row -> row.objective == "Full", df)
+    df_vanilla = filter(row -> row.objective == "Vanilla", df)
+
+    plt = (
+           data(df_full) * mapping(:eps, :mean, color=:objective, col=:dataset) *
+           visual(BarPlot)
+       ) + (
+           data(df_vanilla) * mapping(:eps, :mean, color=:objective, col=:dataset) *
+            visual(Scatter; markersize=20, marker=:hline)
+       )
+
+    return plt
 end
 
 function final_results(res_dir::String; drop_models::Vector{String}=String[])
