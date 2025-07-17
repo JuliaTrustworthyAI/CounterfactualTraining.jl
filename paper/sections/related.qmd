@@ -1,10 +1,6 @@
----
-bibliography: bibliography.bib
----
-
 # Related Literature {#sec-lit}
 
-To make the desiderata for our framework more concrete, we follow previous work in tying the explanatory capacity of models to the quality of CEs that can be generated for them [@altmeyer2024faithful; @augustin2020adversarial]. For simplicity, we refer to 'explanatory capacity' simply as 'explainability' in what follows.
+To make the desiderata for our framework more concrete, we follow previous work in tying the explanatory capacity of models to the quality of CEs that can be generated for them [@altmeyer2024faithful; @augustin2020adversarial]. For simplicity, we refer to 'explanatory capacity' simply as 'explainability' in what follows (see Def. \ref{def-explainability} below for a more formal exposition).
 
 ## Explainability and Contrastive Learning
 
