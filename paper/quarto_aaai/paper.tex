@@ -320,10 +320,10 @@ show theoretically that it can be employed to enforce global
 actionability constraints. In Section~\ref{sec-experiments}, through
 extensive experiments, we empirically demonstrate that CT substantially
 improves explainability and positively contributes to the robustness of
-trained models without sacrificing predictive performance. Finally, in
-Section~\ref{sec-discussion}, we discuss open challenges and conclude
-that CT is a promising approach towards making opaque models more
-trustworthy.
+trained models without sacrificing predictive performance. In
+Section~\ref{sec-discussion}, we discuss open challenges and, in
+\textbf{?@sec-conclusion}, conclude that CT is a promising approach
+towards making opaque models more trustworthy.
 
 \section{Related Literature}\label{sec-lit}
 
@@ -937,82 +937,75 @@ with conventional training and applied only for the final 50\% of epochs
 of the complete training process. Put differently, CT can improve the
 explainability of models in a fine-tuning manner.
 
-\section{Conclusions}\label{sec-discussion}
+\section{Discussion}\label{sec-discussion}
 
 As our results indicate, counterfactual training produces models that
 are more explainable. Nonetheless, these advantages come at the cost of
 two important limitations.
 
 \emph{Interventions on features have implications for fairness.} We
-provide a tool that allows practitioners to modify the sensitivity of a
-model with respect to certain features. Model owners can use our
-solution to support the fair and equitable treatment of decision
-subjects, but they could also misuse it by enforcing explanations based
-on features that are more difficult to modify by some (group of)
-individuals. When used irresponsibly, CT could result in an unfairly
-assigned burden of recourse \citep{sharma2020certifai}, threatening the
-equality of opportunity \citep{bell2024fairness}. Additionally, CT
-requires mutability constraints for the features considered by the
-model. Even if all immutable features are protected, there may exist
-proxies that are mutable, and hence should not be protected, but
-preserve sufficient information about the principals to hinder these
-protections. Deciding on actionability is still a major open challenge
-in the AR literature \citep{venkatasubramanian2020philosophical}
-impacting the capacity of CT to fulfill its intended goal.
+provide a method to modify the sensitivity of a model to certain
+features, which can be misused by enforcing explanations based on
+features that are more difficult to modify by a (group of) decision
+subjects. Such abuse could result in an unfairly assigned burden of
+recourse \citep{sharma2020certifai}, threatening the equality of
+opportunity \citep{bell2024fairness}. Also, even if all immutable
+features are protected, there may exist proxies that are theoretically
+mutable, but preserve sufficient information about the principals to
+hinder these protections. Indeed, deciding on the actionability of
+features remains a major open challenge in the AR literature
+\citep{venkatasubramanian2020philosophical}.
 
 \emph{CT increases the training times.} Like adversarial training, CT is
 more resource-intensive than conventional regimes. Higher numbers of CEs
-improve the quality of learned representations but they also increase
-the number of computations. As our codebase is not performance
-optimized, grids of 270 settings for the largest datasets in our
+improve the quality of the learned representations but they also
+increase the number of computations. As our codebase is not performance
+optimized, grids of around 300 settings for the largest datasets in our
 experiments took up to four hours using 34 2GB CPUs (see supplementary
 appendix). Other than optimization, three factors mitigate this effect:
 (1) CT yields itself to parallel execution; (2) it amortizes the cost of
 CEs for the training samples; and (3) it can be used to fine-tune
 conventionally-trained models.
 
-We also highlight three important directions for future research.
-Firstly, it is an interesting challenge to extend CT beyond
-classification settings. Our formulation relies on the distinction
-between non-target class(es) \(y^{-}\) and target class(es) \(y^{+}\) to
-generate counterfactuals through Equation~\ref{eq-obj}. While \(y^{-}\)
-and \(y^{+}\) can be arbitrarily defined, CT requires the output space
-\(\mathcal{Y}\) to be discrete. Thus, it does not apply to ML tasks
-where the change in outcome cannot be readily discretized. Focus on
-classification is a common choice in research on CEs and AR. Other
-settings have attracted some interest, e.g., regression
-\citep{spooner2021counterfactual}, but there is little consensus how to
-robustly extend the notion of CEs.\\
-Secondly, CT is susceptible to training instabilities. This problem has
-been recognized for JEMs \citep{grathwohl2020your} and even though we
-depart from the SGLD sampling, we still encounter variability in
-outcomes. CT is exposed to two potential sources of instabilities: (1)
-the energy-based contrastive divergence term, \(\text{div}(\cdot)\), in
-Equation~\ref{eq-div}, and (2) the underlying explainers. We find
-several promising ways to mitigate this problem: regularizing energy
-(\(\lambda_{\text{reg}}\)), generating sufficiently many counterfactuals
-during each epoch, and including only mature counterfactuals in
-\(\text{div}(\cdot)\).\\
+We also highlight three key directions for future research. Firstly, it
+is an interesting challenge to extend CT beyond classification settings.
+Our formulation relies on the distinction between non-target class(es)
+and target class(es), requiring the output space to be discrete. Thus,
+it does not apply to ML tasks where the change in outcome cannot be
+readily discretized. Focus on classification is a common choice in
+research on CEs and AR; other settings have attracted some interest,
+e.g., regression \citep{spooner2021counterfactual}, but there is little
+consensus how to robustly extend the notion of CEs.\\
+Secondly, CT is susceptible to training instabilities, as also
+recognized for the related JEMs \citep{grathwohl2020your}. CT is exposed
+to two sources of instabilities: (1) the energy-based contrastive
+divergence term, \(\text{div}(\cdot)\), in Equation~\ref{eq-div}, and
+(2) the underlying explainers. We find several promising ways to
+mitigate this problem: regularizing energy (\(\lambda_{\text{reg}}\)),
+generating sufficiently many counterfactuals during each epoch, and
+including only mature counterfactuals in \(\text{div}(\cdot)\).\\
 Finally, we believe that it is possible to considerably improve
 hyperparameter selection procedures, and thus performance. We have
-relied exclusively on grid searches, but future research could benefit
-from more sophisticated approaches.
+relied exclusively on grid searches, but future work could benefit from
+more sophisticated approaches.
 
-To conclude, state-of-the-art machine learning models are prone to
-learning complex representations that cannot be interpreted by humans.
-Existing explainability solutions cannot guarantee that explanations
-agree with the model's learned representation of data. As a step towards
-addressing this challenge, we introduced counterfactual training, a
-novel training regime that incentivizes highly-explainable models. Our
-approach leads to explanations that are both plausible (compliant with
-the underlying data-generating process) and actionable (compliant with
-user-specified mutability constraints), and thus meaningful to their
-recipients. Through extensive experiments, we demonstrated that CT
-satisfies its objective while promoting robustness and preserving the
-predictive performance of models. It can also be used to fine-tune
-conventionally-trained models and achieve similar gains. Lastly, our
-work highlights the value of simultaneously improving models and their
-explanations.
+\section{Conclusions}\label{sec-conclusions}
+
+State-of-the-art machine learning models are prone to learning complex
+representations that cannot be interpreted by humans. Existing
+explainability solutions cannot guarantee that explanations agree with
+these learned representation. As a step towards addressing this
+challenge, we introduce counterfactual training, a novel training regime
+that incentivizes highly-explainable models. Through extensive
+experiments, we demonstrate that CT satisfies this objective while
+promoting robustness and preserving the predictive performance of
+models. Explanations generated from CT-based models are both more
+plausible (compliant with the underlying data-generating process) and
+more actionable (compliant with user-specified mutability constraints),
+and thus meaningful to their recipients. We also show that CT can be
+used to fine-tune conventionally-trained models and achieve similar
+gains. Lastly, our work highlights the value of simultaneously improving
+models and their explanations.
 
 \section*{References}\label{references}
 \addcontentsline{toc}{section}{References}
