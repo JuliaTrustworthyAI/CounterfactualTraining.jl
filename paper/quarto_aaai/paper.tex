@@ -230,119 +230,174 @@ promoting robustness and preserving high predictive performance.
 \section{Introduction}\label{introduction}
 
 Today's prominence of artificial intelligence (AI) has largely been
-driven by \textbf{representation learning}: instead of relying on
-features and rules hand-crafted by humans, modern machine learning (ML)
-models are tasked with learning representations directly from the data,
-guided by narrow objectives such as predictive accuracy
-\citep{goodfellow2016deep}. Advances in computing have made it possible
-to provide these models with ever-growing degrees of freedom to achieve
-this task, which often allows them to outperform traditionally
-parsimonious models. Unfortunately, in doing so, models learn
-increasingly complex, sensitive representations that humans can no
-longer easily interpret.
+driven by the success of representation learning with large degrees of
+freedom: instead of relying on features and rules hand-crafted by
+humans, modern machine learning (ML) models are tasked with learning
+highly complex representations directly from the data, guided by narrow
+objectives such as predictive accuracy \citep{goodfellow2016deep}. These
+models tend to be so complex that humans cannot easily interpret their
+decision-making.
 
-The trend towards complexity for the sake of performance has come under
-scrutiny in recent years. At the very cusp of the deep learning (DL)
-revolution, \citet{szegedy2013intriguing} showed that artificial neural
-networks (ANN) are susceptible to adversarial examples (AEs): perturbed
-versions of data instances that yield vastly different model predictions
-despite being semantically indistinguishable from their factual
-counterparts. Some partial mitigation strategies have been
-proposed---most notably \textbf{adversarial training}
-\citep{goodfellow2014explaining}---but truly robust deep learning
-remains unattainable even for models that are considered ``shallow'' by
-today's standards \citep{kolter2023keynote}.
+Counterfactual explanations (CE) have become an integral part of the
+broader explainable AI (XAI) toolkit \citep{molnar2022interpretable}
+that can be employed to make sense of this complexity. Originally
+proposed by \citet{wachter2017counterfactual}, CEs prescribe minimal
+changes for factual inputs that, if implemented, would prompt some
+fitted model to produce an alternative, more desirable output
+(Figure~\ref{fig-poc}). This is useful and necessary to not only
+understand how opaque models make predictions, but also to provide
+recourse to individuals subjected to them: a retail bank, for example,
+could use CE to provide meaningful feedback to unsuccessful loan
+applicants that were rejected based on an opaque AI decision-making
+system (ADM).
 
-Part of the problem is that the high degrees of freedom---high number of
-parameters estimated from data---provide room for many solutions that
-are locally optimal with respect to narrow objectives
-\citep{wilson2020case}. As one example, research on the ``lottery ticket
-hypothesis'' suggests that modern neural networks can be pruned by up to
-90\% without losing predictive performance \citep{frankle2018lottery}.
-Thus, looking at the predictive performance alone, found solutions may
-seem to provide compelling explanations for the data, when in fact they
-are based on purely associative and semantically meaningless patterns.
-This poses two related challenges. Firstly, there is no dependable way
-to verify if learned representations correspond to meaningful, plausible
-explanations. Secondly, even if we resolve this challenge, it remains
-undecided how to ensure that machine learning models can \emph{only}
-learn valuable explanations.
+For feedback to be meaningful, counterfactual explanations need to
+fulfill certain desiderata
+\citep{verma2020counterfactual, karimi2020survey}: they should be
+faithful to the model \citep{altmeyer2024faithful}, plausible
+\citep{joshi2019realistic} and actionable \citep{ustun2019actionable}.
+Plausibility is typically understood as counterfactuals being
+\emph{in-domain}: unsuccessful loan applicants that implement recourse
+should end up with a credit profile that is genuinely similar to that of
+individuals who have successfully repaid their loans in the past.
+Actionable explanations comply with practical constraints: a young,
+unsuccessful loan applicant cannot increase their age in an instance.
 
-The first challenge has attracted an abundance of work on
-\textbf{explainable AI} (XAI), a paradigm that focuses on the
-development of tools to derive (post-hoc) explanations from complex
-model representations, aiming to mitigate scenarios in which
-practitioners deploy opaque models and have to blindly rely on their
-predictions. On many occasions, this has happened in practice, causing
-harms to people who were adversely and unfairly affected by automated
-decision-making (ADM) systems involving opaque models; see, e.g.,
-\citet{oneil2016weapons}. Effective XAI tools can also aid in monitoring
-models and providing recourse, empowering people to turn negative
-outcomes (e.g., ``loan application rejected'') into positive ones (e.g.,
-``loan application accepted''). In line with this, our work builds upon
-\textbf{counterfactual explanations} (CE) proposed by
-\citet{wachter2017counterfactual}; CEs prescribe minimal changes for
-factual inputs that, if implemented, would prompt some fitted model to
-produce an alternative, more desirable output.
-
-To our surprise, the second challenge has not yet attracted major
-research interest. In particular, there has been no concerted effort
-towards improving the degree to which learned representations promote
-explanations that are both \textbf{interpretable} to and deemed
-\textbf{plausible} by humans. Instead, the typical choice has been to
-improve the ability of XAI tools to identify the subset of explanations
-that are plausible and valid for any given model, independent of whether
-these explanations are compatible with the learned representations
-\citep{altmeyer2024faithful}. Fortunately, recent findings indicate that
-improved ``explanatory capacity'' of a model can arise as a consequence
-of regularization techniques aimed at other training objectives such as
-generative capacity, generalization, or robustness
-\citep{altmeyer2024faithful, augustin2020adversarial, schut2021generating}.
-Our contribution consolidates these findings within a unified framework.
+Existing state-of-the-art (SOTA) approaches in the field have largely
+focused on designing model-agnostic CE methods that identify subsets of
+counterfactuals, which comply with specific desiderata. This is
+problematic, because a narrow focus on any specific desideratum can
+adversely affect others: it is possible, for example, to generate
+plausible counterfactuals for models that are also highly vulnerable to
+implausible, possibly adversarial counterfactuals
+\citep{altmeyer2024faithful}. In this work, we therefore follow the
+paradigm that models---as opposed to explanation methods---should be
+held accountable for plausible and actionable explanations. While
+previous work has shown that at least plausibility can be indirectly
+achieved through existing techniques aimed at models' generative
+capacity, generalization and robustness
+\citep{altmeyer2024faithful, augustin2020adversarial, schut2021generating},
+we directly incorporate both plausibility and actionability in the
+training objective of models to improve their overall explanatory
+capacity.
 
 Specifically, \textbf{we propose Counterfactual Training (CT)}: a novel
-training regime explicitly geared towards improving the explanatory
-capacity of models that, in high-level terms, we define as the extent to
-which valid counterfactual explanations derived for a model can be
-deemed plausible with respect to the underlying data and global
-actionability constraints (we refine this notion in Def.
-\ref{def-explainability}). To the best of our knowledge, Counterfactual
-Training represents the first attempt to achieve more explainable models
-by employing counterfactual explanations already in the training phase.
+training regime that leverages counterfactual explanations on-the-fly to
+ensure that differentiable models learn plausible and actionable
+explanations for the underlying data, while at the same time also being
+more robust to adversarial examples (AE). Figure~\ref{fig-poc}
+illustrates the outcome of CT compared to conventionally trained models:
+in panel (a), faithful and valid counterfactuals end up near the
+decision boundary forming a clearly distinguishable cluster in the
+target class (orange); in panel (b), CT is applied to the same
+underlying linear classifier architecture resulting in much more
+plausible counterfactuals; in panel (c), the classifier is again trained
+conventionally and we have introduced a mutability constraint on the
+\emph{age} feature at test time---counterfactuals are valid but the
+classifier is roughly equally sensitive to both features; by contrast,
+the decision boundary in panel (c) has titled, making the model trained
+with CT relatively less sensitive to the immutable \emph{age} feature.
+To achieve these outcomes, CT draws inspiration from the literature on
+contrastive and robust learning: we contrast faithful CE with
+ground-truth data while protecting immutable features, and capitalize on
+methodological links between CE and AE by penalizing the model's
+adversarial loss on interim (\emph{nascent}) counterfactuals. To the
+best of our knowledge, CT represents the first venture in this direction
+with promising results, both empirical and theoretical.
 
 The remainder of this manuscript is structured as follows.
-Section~\ref{sec-lit} presents related work, focusing on the link
-between AEs and CEs. Then follow our two principal contributions. In
-Section~\ref{sec-method}, we introduce our methodological framework and
-show theoretically that it can be employed to enforce global
-actionability constraints. In Section~\ref{sec-experiments}, through
-extensive experiments, we empirically demonstrate that CT substantially
-improves explainability and positively contributes to the robustness of
-trained models without sacrificing predictive performance. Finally, in
-Section~\ref{sec-discussion}, we discuss open challenges and conclude
-that CT is a promising approach towards making opaque models more
-trustworthy.
+Section~\ref{sec-lit} presents related work, focusing on the links to
+contrastive and robust learning. Then follow our two principal
+contributions. In Section~\ref{sec-method}, we introduce our
+methodological framework and show theoretically that it can be employed
+to enforce global actionability constraints. In our experiments
+(Section~\ref{sec-experiments}), we find that thanks to counterfactual
+training, (1) implausibility of CE decreases by 16\% on average; (2) the
+cost of reaching valid counterfactuals with protected features decreases
+by 15\%; and (3) robust accuracy increases for all datasets by up to 42
+percentage points. Finally, in Section~\ref{sec-discussion}, we discuss
+open challenges and conclude.
+
+\begin{figure*}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{paper_files/mediabag/../../paper/figures/poc.pdf}}
+
+}
+
+\caption{\label{fig-poc}Counterfactual explanations (stars) for linear
+classifiers trained under different regimes on synthetic data: (a)
+conventional training, all mutable; (b) CT, all mutable; (c)
+conventional, \emph{age} immutable; (d) CT, \emph{age} immutable. The
+linear decision boundary is shown in green along with training data
+colored according to ground-truth labels: \(y^-=1\) (blue) and \(y^+=2\)
+(orange). Stars indicate counterfactuals in the target class. Synthetic
+features are annotated as \emph{debt} and \emph{age} for illustrative
+purposes.}
+
+\end{figure*}%
 
 \section{Related Literature}\label{sec-lit}
 
 To make the desiderata for our framework more concrete, we follow
-\citet{augustin2020adversarial} in tying explainability to the quality
-of CEs that can be generated for a given model. The authors show that
-CEs (understood as minimal input perturbations that yield some desired
-model prediction) tend to be more meaningful if the underlying model is
-more robust to adversarial examples. We can make intuitive sense of this
-finding if we look at adversarial training (AT) through the lens of
-representation learning with high degrees of freedom. As argued before,
-learned representations may be sensitive to producing implausible
-explanations and mispredicting for worst-case counterfactuals (i.e.,
-AEs). Thus, by inducing models to ``unlearn'' susceptiblity to such
-examples, adversarial training can effectively remove implausible
-explanations from the solution space.
+previous work in tying the explanatory capacity of models to the quality
+of CEs that can be generated for them
+\citep{altmeyer2024faithful, augustin2020adversarial}. For simplicity,
+we refer to `explanatory capacity' simply as `explainability' in what
+follows (see Def. \ref{def-explainability} below for a more formal
+exposition).
 
-\subsection{Adversarial Examples are
-Counterfactuals}\label{adversarial-examples-are-counterfactuals}
+\subsection{Explainability and Contrastive
+Learning}\label{explainability-and-contrastive-learning}
 
-The interpretation of the link between explainability through
+In a closely related work, \citet{altmeyer2024faithful} show that model
+averaging and, in particular, contrastive model objectives can produce
+more explainable and hence trustworthy models. To do so, the authors
+first propose a way to generate counterfactuals that are maximally
+faithful to the model in that they are consistent with what the model
+has learned about the underlying data. Formally, they rely on tools from
+energy-based modelling \citep{teh2003energy} to minimize the divergence
+between the distribution of counterfactuals and the conditional
+posterior over inputs learned by the model. Their counterfactual
+explainer, \emph{ECCCo}, yields plausible explanations if and only if
+the underlying model has learned representations that align with them.
+The authors find that both deep ensembles
+\citep{lakshminarayanan2016simple} and joint energy-based models (JEMs)
+\citep{grathwohl2020your}---a form of constrastive learning---tend to do
+well in this regard.
+
+It helps to look at these findings through the lens of representation
+learning with high degrees of freedom. Deep ensembles are approximate
+Bayesian model averages, which are particularly effective when models
+are underspecified by the available data \citep{wilson2020case}.
+Averaging across solutions mitigates the aforementioned risk of
+overrelying on a single locally optimal representation that corresponds
+to semantically meaningless explanations for the data. Likewise,
+previous work of \citet{schut2021generating} found that generating
+plausible (``interpretable'') CEs is almost trivial for deep ensembles
+that have undergone adversarial training. The case for JEMs is even
+clearer: they optimize a hybrid objective that induces both high
+predictive performance and strong generative capacity
+\citep{grathwohl2020your}, which bears resemblance to the idea of
+aligning models with plausible explanations and has inspired our CT
+objective.
+
+\subsection{Explainability and Robust
+Learning}\label{explainability-and-robust-learning}
+
+\citet{augustin2020adversarial} show that CEs tend to be more meaningful
+(``explainable'') if the underlying model is more robust to adversarial
+examples. Once again, we can make intuitive sense of this finding if we
+look at adversarial training (AT) through the lens of representation
+learning with high degrees of freedom: highly complex and flexible
+models may learn representations that make them sensitive to implausible
+or even adversarial examples \citep{szegedy2013intriguing}. Thus, by
+inducing models to ``unlearn'' susceptibility to such examples,
+adversarial training can effectively remove implausible explanations
+from the solution space.
+
+This interpretation of the link between explainability through
 counterfactuals on the one side, and robustness to adversarial examples
 on the other is backed by empirical evidence.
 \citet{sauer2021counterfactual} demonstrate that using counterfactual
@@ -395,41 +450,6 @@ predictor and a CE generator, where the parameters of the CE generator
 are learnable. Counterfactuals are generated during each training
 iteration and fed back to the predictor. In contrast, we impose no
 restrictions on the ANN architecture at all.
-
-\subsection{Aligning Representations with
-Explanations}\label{aligning-representations-with-explanations}
-
-Improving the adversarial robustness of models is not the only path
-towards aligning representations with plausible explanations. In a
-closely related work, \citet{altmeyer2024faithful} show that
-explainability can be improved through model averaging and refined model
-objectives. They propose a way to generate counterfactuals that are
-maximally faithful to the model in that they are consistent with what
-the model has learned about the underlying data. Formally, they rely on
-tools from energy-based modelling \citep{teh2003energy} to minimize the
-divergence between the distribution of counterfactuals and the
-conditional posterior over inputs learned by the model. Their
-counterfactual explainer, \emph{ECCCo}, yields plausible explanations if
-and only if the underlying model has learned representations that align
-with them. The authors find that both deep ensembles
-\citep{lakshminarayanan2016simple} and joint energy-based models (JEMs)
-\citep{grathwohl2020your} tend to do well in this regard.
-
-Once again it helps to look at these findings through the lens of
-representation learning with high degrees of freedom. Deep ensembles are
-approximate Bayesian model averages, which are particularly effective
-when models are underspecified by the available data
-\citep{wilson2020case}. Averaging across solutions mitigates the
-aforementioned risk of overrelying on a single locally optimal
-representation that corresponds to semantically meaningless explanations
-for the data. Likewise, previous work of \citet{schut2021generating}
-found that generating plausible (``interpretable'') CEs is almost
-trivial for deep ensembles that have undergone adversarial training. The
-case for JEMs is even clearer: they optimize a hybrid objective that
-induces both high predictive performance and strong generative capacity
-\citep{grathwohl2020your}, which bears resemblance to the idea of
-aligning models with plausible explanations and has inspired our CT
-objective.
 
 \section{Counterfactual Training}\label{sec-method}
 
@@ -751,67 +771,6 @@ Table~\ref{tbl-main}, which presents average outcomes along with
 bootstrapped two standard errors. The following example motivates CT and
 illustrates how to read Table~\ref{tbl-main}.
 
-\begin{figure*}
-
-\centering{
-
-\pandocbounded{\includegraphics[keepaspectratio]{paper_files/mediabag/../../paper/figures/poc.pdf}}
-
-}
-
-\caption{\label{fig-poc}Illustration of how CT improves model
-explainability: (a) conventional training, all mutable; (b) CT, all
-mutable; (c) conventional, \emph{age} immutable; (d) CT, \emph{age}
-immutable. The linear decision boundary is shown in green along with
-training data colored according to ground-truth labels: \(y^-=1\) (blue)
-and \(y^+=2\) (orange). Stars indicate counterfactuals in the target
-class.}
-
-\end{figure*}%
-
-\subsubsection{Synthetic Example: Prediction of Credit Card
-Defaults.}\label{synthetic-example-prediction-of-credit-card-defaults.}
-
-Figure~\ref{fig-poc} presents results for a linear classifier fitted to
-\emph{LS} that complies with the data assumptions in Proposition
-\ref{prp-mtblty}. The four panels show the outcomes for different
-training procedures: in panels (a) and (c) we have trained the models
-conventionally, while in panels (b) and (d) we have applied CT. For
-illustrative purposes, suppose the first feature represents \emph{debt}
-(mutable) and the second feature represents \emph{age} (immutable) of
-loan applicants seeking counterfactual explanations for moving to the
-target class: loan provided (orange).
-
-In all four cases, it is possible to generate valid counterfactuals
-(stars) for unsuccessful applicants (blue). They cross the decision
-boundary (green) into the target class, but their quality differs. In
-panel (a), they are not plausible: they do not comply with the
-distribution of the factuals in \(y^+\) to the point where they form a
-clearly discernible cluster. In panel (b), they are highly plausible,
-meeting the first objective of Def. \ref{def-explainability}. This
-difference in outcomes is quantified for the non-linear MLP in the first
-two columns of Table~\ref{tbl-main} as the \(\%\)-reduction in
-implausibility: it is substantial and statistically significant for
-\emph{LS} across both metrics, the distance-based \(\text{IP}\) (29\%)
-and divergence-based \(\text{IP}^*\) (55\%).
-
-In panel (c) of Figure~\ref{fig-poc}, the CEs involve substantial
-reductions in \emph{debt} for younger applicants. By comparison,
-counterfactual paths are shorter on average in panel (d) where we have
-protected the immutable \emph{age} as described in
-Section~\ref{sec-constraints}. Due to the classifier's lower sensitivity
-to \emph{age}, recommendations with respect to \emph{debt} are much more
-homogenous and do not unfairly punish younger individuals. These CEs are
-also plausible with respect to the mutable feature, despite requiring
-smaller debt reductions on average, resulting in smaller costs to
-individuals. This result is quantified for the non-linear case in column
-three of Table~\ref{tbl-main}, which shows the \(\%\)-reduction in costs
-averaged across valid counterfactuals. Once again, the impact of CT is
-statistically significant and substantial (14\%). Thus, we consider the
-model in panel (d) as the most explainable according to Def.
-\ref{def-explainability}. Next, we present the results for all remaining
-datasets.
-
 \subsubsection{Plausibility.}\label{sec-plaus}
 
 We find that CT generally leads to substantial and statistically
@@ -1020,5 +979,5 @@ explanations.
 \addcontentsline{toc}{section}{References}
 
 \renewcommand{\bibsection}{}
-\bibliography{../quarto_ecml/bibliography.bib}
+\bibliography{../quarto_aaai/bibliography.bib}
 \end{document}
