@@ -71,47 +71,45 @@ df = final_table(res_dir; tbl_mtbl=df_mtbl)
 Serialization.serialize("paper/experiments/output/final_table.jls", df)
 ```
 
-```{julia}
-#| eval: false
-
-df = Serialization.deserialize("paper/experiments/output/final_table.jls")
-inputs = get_table_inputs(df, nothing; backend=Val(:latex))
-formatters = (
-    PrettyTables.ft_round(1,findall(.!contains.(names(df),"Acc"))),
-    PrettyTables.ft_round(2,findall(contains.(names(df),"Acc")))
-)
-for fname in ["paper/quarto_aaai/tables/main.tex","paper/preprint/tables/main.tex"]
-    tabulate_results(
-        inputs; 
-        table_type=:tabular, 
-        save_name=fname, 
-        wrap_table=false, 
-        alignment=[:l,fill(:r,size(df,2)-1)...],
-        formatters=formatters
-    )
-end
-```
+## Confidence Intervals
 
 ```{julia}
-#| eval: false
+lvls = [0.90, 0.95, 0.99]
 
-# Standard errors with hyperparameter uncertainty marginalized out:
-df = final_table(res_dir, total_uncertainty=true)
-inputs = get_table_inputs(df, nothing; backend=Val(:latex))
-formatters = (
-    PrettyTables.ft_round(1,findall(.!contains.(names(df),"Acc"))),
-    PrettyTables.ft_round(2,findall(contains.(names(df),"Acc")))
+# Mutability:
+y = "distance"
+df_mtbl = aggregate_ce_evaluation(
+    mtbl_dir; 
+    y,
+    return_sig_level=false, 
+    conf_int=lvls,
+    agg_further_vars=["run", "lambda_energy_eval"],
+    drop_models=["linear"]
 )
-for fname in ["paper/quarto_aaai/tables/main_total.tex","paper/preprint/tables/main_total.tex"]
-    tabulate_results(
-        inputs; 
-        table_type=:tabular, 
-        save_name=fname, 
-        wrap_table=false, 
-        alignment=[:l,fill(:r,size(df,2)-1)...],
-        formatters=formatters
-    )
-end
+df_mtbl.measure .= y
+
+# Distance-based:
+y = "plausibility_distance_from_target"
+df_ip = aggregate_ce_evaluation(
+    res_dir;
+    y,
+    return_sig_level=false, 
+    conf_int=lvls,
+    agg_further_vars=["run", "lambda_energy_eval"],
+) 
+df_ip.measure .= y 
+
+# Divergence-based:
+y = "mmd"
+df_mmd = aggregate_ce_evaluation(
+    res_dir;
+    y
+    return_sig_level=false, 
+    conf_int=lvls,
+    agg_further_vars=["run", "lambda_energy_eval"],
+)
+df_mmd.measure .= y
+df = innerjoin(df_mtbl, df_ip, df_mmd; on=:dataset)
 ```
 
 ## Qualitative Findings for Image Data
