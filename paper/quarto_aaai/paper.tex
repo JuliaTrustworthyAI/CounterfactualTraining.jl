@@ -281,7 +281,7 @@ we directly incorporate both plausibility and actionability in the
 training objective of models to improve their overall explanatory
 capacity.
 
-Specifically, \textbf{we propose Counterfactual Training (CT)}: a novel
+Specifically, we propose \textbf{counterfactual training (CT)}: a novel
 training regime that leverages counterfactual explanations on-the-fly to
 ensure that differentiable models learn plausible and actionable
 explanations for the underlying data, while at the same time also being
@@ -721,7 +721,7 @@ observed samples in the target domain,
 \citet{altmeyer2024faithful},
 \begin{equation}\phantomsection\label{eq-impl-dist}{
 \text{IP}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
-}\end{equation} and introduce a novel divergence metric,
+}\end{equation} and introduce a novel divergence-based adaption,
 \begin{equation}\phantomsection\label{eq-impl-div}{
 \text{IP}^*(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
 }\end{equation} where \(\mathbf{X}^\prime\) denotes a collection of
@@ -731,8 +731,16 @@ the squared population maximum mean discrepancy, proposed by
 equal to zero if and only if the two distributions are exactly the same,
 \(\mathbf{X}^\prime=\mathbf{X}^+\).
 
-For predictive performance, we use standard metrics, such as robust
-accuracy estimated on adversarially perturbed data using FGSM
+To assess outcomes with respect to actionability for non-linear models,
+we look at the average costs of valid counterfactuals in terms of their
+distances from factual starting points. While this an imperfect proxy of
+sensitivity, we hypothesize that CT can reduce these costs by teaching
+models to seek plausibility with respect to mutable features, much like
+we observe in Figure~\ref{fig-poc} (panel (d) vs panel (c)). We
+supplement this analysis with qualitative findings for integrated
+gradients \citep{sundararajan2017ig}. Finally, for predictive
+performance, we use standard metrics, such as robust accuracy estimated
+on adversarially perturbed data using FGSM
 \citep{goodfellow2014explaining}.
 
 We run experiments with three gradient-based generators: \emph{Generic}
@@ -766,22 +774,42 @@ the related literature
 
 \subsection{Experimental Results}\label{experimental-results}
 
-Our main quantitative results for \emph{MLP} models are summarised in
-Table~\ref{tbl-main}, which presents average outcomes along with
-bootstrapped two standard errors. The following example motivates CT and
-illustrates how to read Table~\ref{tbl-main}.
+Our main results for plausibility and actionability for \emph{MLP}
+models are summarised in Table~\ref{tbl-main}, which presents
+counterfactual outcomes grouped by dataset along with standard errors
+averaged across bootstrap samples.
+
+The first two columns (\(\text{IP}\) and \(\text{IP}^*\)) show the
+percentage reduction in implausibility for our two metrics when using CT
+on top of the weak baseline. Focusing on the first row for \emph{LS} for
+a moment, the observed positive values indicate that faithful
+counterfactuals are around 30-55\% more plausible for models trained
+with CT, in line with our observations in Figure~\ref{fig-poc} (panel
+(b) vs.~(a)). Asterisks indicate that reductions are statistically
+significant: bootstrapped 99\%-confidence intervals of differences in
+mean outcomes do \emph{not} include zero.
+
+The third column shows results for the scenario when mutability
+constraints are imposed on selected features. Once again we are
+comparing CT to the baseline, so reductions in the positive direction
+imply that valid counterfactuals are cheaper when using CT with feature
+protection. Relating this back to Figure~\ref{fig-poc}, the third column
+represents the reduction in distances travelled by counterfactuals in
+panel (d) compared to (c). In the following, we summarize the remaining
+results.
 
 \begin{table}
 
-\caption{\label{tbl-main}Key counterfactual evaluation metrics and
-bootstrapped standard errors for all datasets. \textbf{Plausibility}
-(columns 1-2): percentage reduction in implausibility for \(\text{IP}\)
-and \(\text{IP}^*\), respectively; \textbf{Actionability} (column 3):
-percentage reduction in costs with protected features. Outcomes are
-aggregated across bootstrap samples and varying degrees of the energy
-penalty \(\lambda_{\text{egy}}\) used for \emph{ECCo} at test time.
-Asterisks (\(^*\)) indicate that bootstrapped 99\%-confidence interval
-of differences in mean outcomes does \emph{not} include zero.}
+\caption{\label{tbl-main}Key evaluation metrics for valid counterfactual
+along with bootstrapped standard errors for all datasets.
+\textbf{Plausibility} (columns 1-2): percentage reduction in
+implausibility for \(\text{IP}\) and \(\text{IP}^*\), respectively;
+\textbf{Actionability} (column 3): percentage reduction in costs with
+protected features. Outcomes are aggregated across bootstrap samples and
+varying degrees of the energy penalty \(\lambda_{\text{egy}}\) used for
+\emph{ECCo} at test time. Asterisks (\(^*\)) indicate that bootstrapped
+99\%-confidence interval of differences in mean outcomes does \emph{not}
+include zero.}
 
 \centering{
 
@@ -827,24 +855,21 @@ all test images in classes 5 to 9.}
 
 \subsubsection{Actionability.}\label{sec-act}
 
-We also find that CT can reduce sensitivity to immutable, protected
-features and thus lead to less costly counterfactual outcomes as shown
-in Figure~\ref{fig-poc}. In column three of Table~\ref{tbl-main}, we
-impose mutability constraints on selected features and compute the
-reduction in average costs of CEs associated with CT compared to the
-baseline: for synthetic datasets, we always protect the first feature;
-for all real-world tabular datasets we could identify and protect an
-\emph{age} variable; for \emph{MNIST}, we protect the five upper and
-lower pixel rows of the full image. Reductions in costs are
-overwhelmingly positive and significant of up to nearly 60\% for
-\emph{GMSC}. While the estimated cost reductions for \emph{Adult} and
-\emph{MNIST} are not significant, Figure~\ref{fig-mnist} (columns 6-10)
-demonstrates that CT does have the expected effect: sensitivity to
-protected features as per integrated gradients is drastically reduced;
-details of this experiment are reported in the supplementary appendix.
-In the case of \emph{Cred}, average costs increase, likely because any
-potential benefits from protecting the \emph{age} are outweighed by the
-increase in costs required for greater plausibility.
+We also find that CT can improve actionability in the presence of
+immutable features (column 3 in Table~\ref{tbl-main}): for synthetic
+datasets, we always protect the first feature; for all real-world
+tabular datasets we could identify and protect an \emph{age} variable;
+for \emph{MNIST}, we protect the five upper and lower pixel rows of the
+full image. Reductions in costs are overwhelmingly positive and
+significant of up to nearly 60\% for \emph{GMSC}. While the estimated
+cost reductions for \emph{Adult} and \emph{MNIST} are not significant,
+Figure~\ref{fig-mnist} (columns 6-10) demonstrates that in the latter
+case, CT does have the expected effect: sensitivity to protected
+features as per integrated gradients is drastically reduced; details of
+this experiment are reported in the supplementary appendix. In the case
+of \emph{Cred}, average costs increase, likely because any potential
+benefits from protecting the \emph{age} are outweighed by the increase
+in costs required for greater plausibility.
 
 \subsubsection{Predictive Performance.}\label{sec-pred}
 
