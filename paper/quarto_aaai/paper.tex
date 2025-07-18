@@ -348,8 +348,7 @@ previous work in tying the explanatory capacity of models to the quality
 of CEs that can be generated for them
 \citep{altmeyer2024faithful, augustin2020adversarial}. For simplicity,
 we refer to ``explanatory capacity'' as ``explainability'' in the rest
-of this manuscript (see Def. \ref{def-explainability} below for a more
-formal exposition).
+of this manuscript (see Def. \ref{def-explainability}).
 
 \subsection{Explainability and Contrastive
 Learning}\label{explainability-and-contrastive-learning}
@@ -375,15 +374,14 @@ Bayesian model averages, which are particularly effective when models
 are underspecified by the available data \citep{wilson2020case}.
 Averaging across solutions mitigates the aforementioned risk of
 overrelying on a single locally optimal representation that corresponds
-to semantically meaningless explanations for the data. Likewise,
-previous work of \citet{schut2021generating} found that generating
-plausible (``interpretable'') CEs is almost trivial for deep ensembles
-that have undergone adversarial training. The case for JEMs is even
-clearer: they optimize a hybrid objective that induces both high
-predictive performance and strong generative capacity
-\citep{grathwohl2020your}, which bears resemblance to the idea of
-aligning models with plausible explanations and has inspired our CT
-objective.
+to semantically meaningless explanations. Likewise, previous work of
+\citet{schut2021generating} found that generating plausible
+(``interpretable'') CEs is almost trivial for deep ensembles that have
+undergone adversarial training. The case for JEMs is even clearer: they
+optimize a hybrid objective that induces both high predictive
+performance and strong generative capacity \citep{grathwohl2020your},
+which resembles the idea of aligning models with plausible explanations
+and has inspired CT.
 
 \subsection{Explainability and Robust
 Learning}\label{explainability-and-robust-learning}
@@ -481,7 +479,7 @@ between counterfactuals and their original factual values, to ensure
 that individuals seeking recourse through CE face minimal costs in terms
 of feature changes. Different variations of Equation~\ref{eq-general}
 have been proposed in the literature to address various other desiderata
-including those already introduced above (faithfulness, plausibility and
+including those introduced above (faithfulness, plausibility and
 actionability). Like \citet{wachter2017counterfactual}, most of these
 approaches rely on gradient descent to optimize
 Equation~\ref{eq-general}. For more details on various approaches tested
@@ -492,9 +490,9 @@ used in CT.
 \subsection{Proposed Training
 Objective}\label{proposed-training-objective}
 
-The principal goal of CT is to improve model explainability by aligning
-models with faithful explanations that are plausible and actionable.
-Formally, we define explainability as follows:
+The goal of CT is to improve model explainability by aligning models
+with faithful explanations that are plausible and actionable. Formally,
+we define explainability as follows:
 
 \begin{definition}[Model Explainability]
 \label{def-explainability}
@@ -510,7 +508,7 @@ We say that $\mathbf{M}_\theta$ has an \textbf{explanatory capacity} to the exte
 and $p_\theta(\mathbf{x}|\mathbf{y}^{+})$ denotes the conditional posterior distribution over inputs. For simplicity, we refer to a model with high explanatory capacity as \textbf{explainable} in this manuscript. 
 \end{definition}
 
-\noindent The characterization of faithfulness and plausibility in Def.
+The characterization of faithfulness and plausibility in Def.
 \ref{def-explainability} is the same as in \citet{altmeyer2024faithful},
 with adapted notation. Intuitively, plausible counterfactuals are
 consistent with the data and faithful counterfactuals are consistent
@@ -921,8 +919,7 @@ datasets, predictive performance of CT is virtually identical to the
 baseline and unaffected by perturbations. For all real-world datasets,
 we find that CT substantially improves robustness: while in some cases
 baseline accuracies drop to essentially zero for large enough
-perturbation sizes, accuracies of CT models are remarkably robust to
-gradient-based adversarial attacks.
+perturbation sizes, accuracies of CT models remain remarkably robust.
 
 \subsubsection{Hyperparameter settings
 (RQ4).}\label{sec-hyperparameters}
@@ -936,17 +933,15 @@ We evaluate the impacts of three types of hyperparameters on CT. In this
 section we focus on the highlights and make the full results available
 in the supplementary appendix.
 
-For example, \emph{REVISE} tends to perform the worst, most likely
-because it uses a surrogate VAE to generate counterfactuals which
-impedes faithfulness \citep{altmeyer2024faithful}. Increasing \(T\), the
-maximum number of steps, generally yields better outcomes because more
-CEs can mature in each training epoch. The impact of \(\tau\), the
-required decision threshold is more difficult to predict. On ``harder''
-datasets it may be difficult to satisfy high \(\tau\) for any given
-sample (i.e., also factuals) and so increasing this threshold does not
-seem to correlate with better outcomes. In fact, \(\tau=0.5\) generally
-leads to optimal results as it is associated with high proportions of
-mature counterfactuals.
+First, we look at hyperparameters that guide the gradient-based
+counterfactual search. Increasing \(T\), the maximum number of steps,
+generally yields better outcomes because more CEs can mature in each
+training epoch. The impact of \(\tau\), the required decision threshold
+is more difficult to predict. On ``harder'' datasets it may be difficult
+to satisfy high \(\tau\) for any given sample (i.e., also factuals) and
+so increasing this threshold does not seem to correlate with better
+outcomes. In fact, \(\tau=0.5\) generally leads to optimal results as it
+is associated with high proportions of mature counterfactuals.
 
 Second, the strength of the energy regularization,
 \(\lambda_{\text{reg}}\) is highly impactful and leads to poor
