@@ -216,29 +216,29 @@ capacity of models. Counterfactual explanations have emerged as a
 popular post-hoc explanation method for opaque machine learning models:
 they inform how factual inputs would need to change in order for a model
 to produce some desired output. To be useful in real-word
-decision-making systems, counterfactuals should be (1) plausible with
-respect to the underlying data and (2) actionable with respect to the
+decision-making systems, counterfactuals should be plausible with
+respect to the underlying data and actionable with respect to the
 user-defined mutability constraints. Much existing research has
 therefore focused on developing post-hoc methods to generate
 counterfactuals that meet these desiderata. In this work, we instead
 hold models directly accountable for the desired end goal:
-counterfactual training employs counterfactuals ad-hoc during the
-training phase to minimize the divergence between learned
-representations and plausible, actionable explanations. We demonstrate
-empirically and theoretically that our proposed method facilitates
-training models that deliver inherently desirable explanations while
-promoting robustness and preserving high predictive performance.
+counterfactual training employs counterfactuals during the training
+phase to minimize the divergence between learned representations and
+plausible, actionable explanations. We demonstrate empirically and
+theoretically that our proposed method facilitates training models that
+deliver inherently desirable explanations while promoting robustness and
+preserving high predictive performance of the models.
 \end{abstract}
 \section{Introduction}\label{introduction}
 
 Today's prominence of artificial intelligence (AI) has largely been
-driven by the success of representation learning with large degrees of
+driven by the success of representation learning with high degrees of
 freedom: instead of relying on features and rules hand-crafted by
 humans, modern machine learning (ML) models are tasked with learning
 highly complex representations directly from the data, guided by narrow
 objectives such as predictive accuracy \citep{goodfellow2016deep}. These
 models tend to be so complex that humans cannot easily interpret their
-decision-making.
+decision logic.
 
 Counterfactual explanations (CE) have become a key part of the broader
 explainable AI (XAI) toolkit \citep{molnar2022interpretable} that can be
@@ -268,11 +268,11 @@ instant.
 Existing state-of-the-art (SOTA) approaches in the field have largely
 focused on designing model-agnostic CE methods that identify subsets of
 counterfactuals, which comply with specific desiderata. This is
-problematic, because a narrow focus on any specific desideratum can
+problematic, because the narrow focus on any specific desideratum can
 adversely affect others: it is possible, for example, to generate
 plausible counterfactuals for models that are also highly vulnerable to
 implausible, possibly adversarial counterfactuals
-\citep{altmeyer2024faithful}. In this work, we therefore follow the
+\citep{altmeyer2024faithful}. In this work, we therefore embrace the
 paradigm that models---as opposed to explanation methods---should be
 held accountable for explanations that are plausible and actionable.
 While previous work has shown that at least plausibility can be
@@ -288,24 +288,24 @@ training regime that leverages counterfactual explanations on-the-fly to
 ensure that differentiable models learn plausible and actionable
 explanations for the underlying data, while at the same time also being
 more robust to adversarial examples (AE). Figure~\ref{fig-poc}
-illustrates the outcome of CT compared to conventionally trained models:
-in panel (a), faithful and valid counterfactuals end up near the
-decision boundary forming a clearly distinguishable cluster in the
-target class (orange); in panel (b), CT is applied to the same
+illustrates the outcomes of CT compared to a conventionally trained
+model. First, in panel (a), faithful and valid counterfactuals end up
+near the decision boundary forming a clearly distinguishable cluster in
+the target class (orange). In panel (b), CT is applied to the same
 underlying linear classifier architecture resulting in much more
-plausible counterfactuals; in panel (c), the classifier is again trained
+plausible counterfactuals. In panel (c), the classifier is again trained
 conventionally and we have introduced a mutability constraint on the
 \emph{age} feature at test time---counterfactuals are valid but the
-classifier is roughly equally sensitive to both features; by contrast,
-the decision boundary in panel (c) has titled, making the model trained
+classifier is roughly equally sensitive to both features. By contrast,
+the decision boundary in panel (d) has titled, making the model trained
 with CT relatively less sensitive to the immutable \emph{age} feature.
 To achieve these outcomes, CT draws inspiration from the literature on
-contrastive and robust learning: we contrast faithful (\emph{mature})
-CEs with ground-truth data while protecting immutable features, and
-capitalize on methodological links between CE and AE by penalizing the
-model's adversarial loss on interim (\emph{nascent}) counterfactuals. To
-the best of our knowledge, CT represents the first venture in this
-direction with promising empirical and theoretical results.
+contrastive and robust learning: we contrast faithful CEs with
+ground-truth data while protecting immutable features, and capitalize on
+methodological links between CE and AE by penalizing the model's
+adversarial loss on interim (\emph{nascent}) counterfactuals. To the
+best of our knowledge, CT represents the first venture in this direction
+with promising empirical and theoretical results.
 
 The remainder of this manuscript is structured as follows.
 Section~\ref{sec-lit} presents related work, focusing on the links to
@@ -316,8 +316,8 @@ to enforce global actionability constraints. In our experiments
 (Section~\ref{sec-experiments}), we find that thanks to counterfactual
 training, (1) the implausibility of CEs decreases by up to 90\%; (2) the
 cost of reaching valid counterfactuals with protected features decreases
-by 19\% on average; and (3) adversarial robustness improves across the
-board. Finally, we discuss open challenges in
+by 19\% on average; and (3) the adversarial robustness improves across
+the board. Finally, we discuss open challenges in
 Section~\ref{sec-discussion} and conclude in
 Section~\ref{sec-conclusion}.
 
@@ -475,17 +475,16 @@ class (a conventional choice is cross-entropy). Finally, we use
 \(\text{reg}(\cdot)\) to denote any form of regularization used to
 induce certain properties on the counterfactual. In their seminal paper,
 \citet{wachter2017counterfactual} propose regularizing the distance
-between counterfactuals and their original factual values, to ensure
-that individuals seeking recourse through CE face minimal costs in terms
-of feature changes. Different variations of Equation~\ref{eq-general}
-have been proposed in the literature to address various other desiderata
-including those introduced above (faithfulness, plausibility and
-actionability). Like \citet{wachter2017counterfactual}, most of these
-approaches rely on gradient descent to optimize
-Equation~\ref{eq-general}. For more details on various approaches tested
-in this work, we refer the reader to the supplementary appendix. In the
-following, we describe in detail how counterfactuals are generated and
-used in CT.
+between counterfactuals and their original factual values to ensure that
+individuals seeking recourse through CE face minimal costs in terms of
+feature changes. Different variations of Equation~\ref{eq-general} have
+been proposed in the literature to address many desiderata including the
+ones discussed above (faithfulness, plausibility and actionability).
+Like \citet{wachter2017counterfactual}, most of these approaches rely on
+gradient descent to optimize Equation~\ref{eq-general}. For more details
+on the approaches tested in this work, we refer the reader to the
+supplementary appendix. In the following, we describe in detail how
+counterfactuals are generated and used in counterfactual training.
 
 \subsection{Proposed Training
 Objective}\label{proposed-training-objective}
@@ -500,11 +499,11 @@ Let $\mathbf{M}_\theta: \mathcal{X} \mapsto \mathcal{Y}$ denote a supervised cla
 
 We say that $\mathbf{M}_\theta$ has an \textbf{explanatory capacity} to the extent that faithfully generated counterfactuals are also plausible and actionable. We define these properties as follows:
 
-\begin{enumerate}
-    \item (Faithfulness) $\int^{A} p_\theta(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$, where $A$ is some arbitrarily small region around $\mathbf{x}^{\prime}$.
+\begin{itemize}
+    \item (Faithfulness) $\int^{A} p_\theta(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$; $A$ is an arbitrarily small region around $\mathbf{x}^{\prime}$.
     \item (Plausibility) $\int^{A} p(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$; $A$ as specified above.
-    \item (Actionability) Perturbations $\Delta$ are subject to some actionability constraints.
-\end{enumerate}
+    \item (Actionability) Perturbations $\Delta$ may be subject to some actionability constraints.
+\end{itemize}
 and $p_\theta(\mathbf{x}|\mathbf{y}^{+})$ denotes the conditional posterior distribution over inputs. For simplicity, we refer to a model with high explanatory capacity as \textbf{explainable} in this manuscript. 
 \end{definition}
 
@@ -523,16 +522,16 @@ Section~\ref{sec-discussion}.
 Let \(\mathbf{x}_t^\prime\) for \(t=0,...,T\) denote a counterfactual
 generated through gradient descent over \(T\) iterations as originally
 proposed by \citet{wachter2017counterfactual}. CT adopts gradient-based
-CE search during training to generate on-the-fly model explanations
-\(\mathbf{x}^\prime\) for training samples. We use the term
+CE search in training to generate on-the-fly model explanations
+\(\mathbf{x}^\prime\) for the training samples. We use the term
 \emph{nascent} to denote interim counterfactuals
 \(\mathbf{x}_{t\leq T}^\prime\) that have not yet converged. As we
 explain below, these nascent counterfactuals can be stored and
 repurposed as adversarial examples. Conversely, we consider
 counterfactuals \(\mathbf{x}_T^\prime\) as \emph{mature} explanations if
-they have either exhausted all \(T\) iterations or converged in terms
-reaching a pre-specified threshold, \(\tau\), for the predicted
-probability of the target class:
+they have either exhausted all \(T\) iterations or converged by reaching
+a pre-specified threshold, \(\tau\), for the predicted probability of
+the target class:
 \(\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}^\prime))[y^+] \geq \tau\),
 where \(\mathcal{S}\) is the softmax function.
 
@@ -546,17 +545,18 @@ train explainable (as in Def. \ref{def-explainability}) models:
 that induces discriminative performance (e.g., cross-entropy). The
 second and third terms are explained in detail below. For now, they can
 be summarized as inducing explainability directly and indirectly by
-penalizing the contrastive divergence, \(\text{div}(\cdot)\), between
-mature counterfactuals \(\mathbf{x}_T^\prime\) and observed samples
-\(\mathbf{x}^+\in\mathcal{X}^+=\{\mathbf{x}:y=y^+\}\) in the target
-class \(y^+\), and the adversarial loss, \(\text{advloss}(.)\), wrt.
-nascent counterfactuals \(\mathbf{x}_{t\leq T}^\prime\). Finally,
-\(\text{ridge}(\cdot)\) denotes a Ridge penalty (\(\ell_2\)-norm) that
-regularizes the magnitude of the energy terms involved in
-\(\text{div}(\cdot)\) \citep{du2019implicit}. The trade-off between the
-components are governed through \(\lambda_{\text{div}}\),
-\(\lambda_{\text{adv}}\) and \(\lambda_{\text{reg}}\). The full training
-regime is sketched out in Algorithm \ref{alg-experiment}.
+penalizing (1) the contrastive divergence, \(\text{div}(\cdot)\),
+between mature counterfactuals \(\mathbf{x}_T^\prime\) and observed
+samples \(\mathbf{x}^+\in\mathcal{X}^+=\{\mathbf{x}:y=y^+\}\) in the
+target class \(y^+\), and (2) the adversarial loss,
+\(\text{advloss}(.)\), wrt. nascent counterfactuals
+\(\mathbf{x}_{t\leq T}^\prime\). Finally, \(\text{ridge}(\cdot)\)
+denotes a Ridge penalty (\(\ell_2\)-norm) that regularizes the magnitude
+of the energy terms involved in \(\text{div}(\cdot)\)
+\citep{du2019implicit}. The trade-offs between these components are
+adjusted through \(\lambda_{\text{div}}\), \(\lambda_{\text{adv}}\) and
+\(\lambda_{\text{reg}}\). The full training regime is sketched out in
+Algorithm \ref{alg-experiment}.
 
 \begin{algorithm}[h]
   \caption{Counterfactual Training}
@@ -736,7 +736,7 @@ observed samples in the target domain,
 \citet{altmeyer2024faithful},
 \begin{equation}\phantomsection\label{eq-impl-dist}{
 \text{IP}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
-}\end{equation} and introduce a novel divergence-based adaption,
+}\end{equation} and introduce a novel divergence-based adaptation,
 \begin{equation}\phantomsection\label{eq-impl-div}{
 \text{IP}^*(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
 }\end{equation} where \(\mathbf{X}^\prime\) denotes a collection of
@@ -751,7 +751,7 @@ we look at the average costs of valid counterfactuals in terms of their
 distances from factual starting points. While this an imperfect proxy of
 sensitivity, we hypothesize that CT can reduce these costs by teaching
 models to seek plausibility with respect to mutable features, much like
-we observe in Figure~\ref{fig-poc} (panel (d) vs panel (c)). We
+we observe in Figure~\ref{fig-poc} in panel (d) compared to (c). We
 supplement this analysis with qualitative findings for integrated
 gradients \citep{sundararajan2017ig}. Finally, for predictive
 performance, we use standard metrics, such as robust accuracy estimated

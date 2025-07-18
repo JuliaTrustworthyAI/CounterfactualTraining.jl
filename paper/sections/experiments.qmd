@@ -15,13 +15,13 @@ Our focus is the improvement in explainability (Def. \ref{def-explainability}). 
 $$
 \text{IP}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
 $$ {#eq-impl-dist}
-and introduce a novel divergence-based adaption,
+and introduce a novel divergence-based adaptation,
 $$
 \text{IP}^*(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
 $$ {#eq-impl-div}
 where $\mathbf{X}^\prime$ denotes a collection of counterfactuals and $\text{MMD}(\cdot)$ is the unbiased estimate of the squared population maximum mean discrepancy, proposed by @gretton2012kernel. The metric in @eq-impl-div is equal to zero if and only if the two distributions are exactly the same, $\mathbf{X}^\prime=\mathbf{X}^+$.
 
-To assess outcomes with respect to actionability for non-linear models, we look at the average costs of valid counterfactuals in terms of their distances from factual starting points. While this an imperfect proxy of sensitivity, we hypothesize that CT can reduce these costs by teaching models to seek plausibility with respect to mutable features, much like we observe in @fig-poc (panel (d) vs panel (c)). We supplement this analysis with qualitative findings for integrated gradients [@sundararajan2017ig]. Finally, for predictive performance, we use standard metrics, such as robust accuracy estimated on adversarially perturbed data using FGSM [@goodfellow2014explaining].
+To assess outcomes with respect to actionability for non-linear models, we look at the average costs of valid counterfactuals in terms of their distances from factual starting points. While this an imperfect proxy of sensitivity, we hypothesize that CT can reduce these costs by teaching models to seek plausibility with respect to mutable features, much like we observe in @fig-poc in panel (d) compared to (c). We supplement this analysis with qualitative findings for integrated gradients [@sundararajan2017ig]. Finally, for predictive performance, we use standard metrics, such as robust accuracy estimated on adversarially perturbed data using FGSM [@goodfellow2014explaining].
 
 We run experiments with three gradient-based generators: *Generic* of @wachter2017counterfactual as a simple baseline approach, *REVISE* [@joshi2019realistic] that aims to generate plausible counterfactuals using a surrogate Variational Autoencoder (VAE), and *ECCo*---the generator of @altmeyer2024faithful without the conformal prediction component---as a method that directly targets both faithfulness and plausibility of the counterfactuals.
 
