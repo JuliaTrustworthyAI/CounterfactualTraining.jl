@@ -29,7 +29,8 @@ crossref:
   exr-prefix: "Parameters"
   cor-title: "Research Question"
   cor-prefix: "RQ"
-filters: [abstract-section]
+filters: 
+  - abstract-section
 header-includes: |
   \usepackage{placeins}
   \usepackage{siunitx}
