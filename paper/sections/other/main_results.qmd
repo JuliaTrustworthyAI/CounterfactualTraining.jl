@@ -5,6 +5,7 @@ projectdir = splitpath(pwd()) |>
 cd(projectdir)
 
 using CTExperiments
+using CTExperiments.CairoMakie
 using CTExperiments.CSV
 using CTExperiments.DataFrames
 using CTExperiments.Plots
@@ -96,9 +97,9 @@ end
 
 
 ```{julia}
-plt = CTExperiments.plot_performance(res_dir, eps=range(0.0, 0.1, length=10) |> collect, adversarial=true, byvars=["objective", "eps"]) |>
-    plt -> draw(plt, figure=(size=(800, 190),), axis=(yticks=[0.0,0.5,1.0], limits=(nothing, (0,1)), xticklabelsvisible=false, xticksvisible=false))
-save("paper/figures/acc.png", plt; px_per_unit=3)
+plt = CTExperiments.plot_performance(res_dir, eps=range(0.0, 0.1, length=10) |> collect, adversarial=true, byvars=["objective", "eps"], drop_synthetic=false)
+plt_out = draw(plt, figure=(size=(800, 130),), axis=(yticks=[0.0,0.5,1.0], limits=(nothing, (0,1)), xticklabelsvisible=false, xticksvisible=false))
+save("paper/figures/acc.png", plt_out; px_per_unit=3)
 ```
 
 ## Confidence Intervals

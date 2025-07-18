@@ -1,4 +1,5 @@
 using AlgebraOfGraphics
+using CategoricalArrays
 using CounterfactualExplanations
 using CairoMakie
 using DataFrames
@@ -86,6 +87,7 @@ global LatexReplacements = Dict(
     "circles" => "Circ",
     "moons" => "Moon",
     "credit" => "Cred",
+    "adult" => "Adult",
 )
 
 function split_at_parentheses_precise(s::String)
@@ -869,6 +871,18 @@ function aggregate_performance(
     return df
 end
 
+const ds_order = [
+    LatexReplacements["lin_sep"],
+    LatexReplacements["circles"],
+    LatexReplacements["moons"],
+    LatexReplacements["over"],
+    LatexReplacements["adult"],
+    LatexReplacements["cali"],
+    LatexReplacements["credit"],
+    LatexReplacements["gmsc"],
+    LatexReplacements["mnist"],
+]
+
 function plot_performance(res_dir; measure::Vector=["acc"], adversarial::Bool=false, bootstrap::Union{Nothing,Int}=nothing, drop_models::Vector{String}=String[], eps::Vector{<:AbstractFloat}=[0.03], byvars=["objective"], drop_synthetic::Bool=true
 )
 
@@ -880,6 +894,7 @@ function plot_performance(res_dir; measure::Vector=["acc"], adversarial::Bool=fa
     eval_grids, _ = final_results(res_dir; drop_models)
     df = aggregate_performance(eval_grids; measure, adversarial, bootstrap, eps, byvars)
     df.objective .= ifelse.(df.objective .== "Full", "CT", "BL")
+    df.dataset .= categorical(df.dataset, levels=ds_order)
     if drop_synthetic
         filter!(df -> !(df.dataset in ["LS", "OL", "Circ", "Moon"]), df)
     end
