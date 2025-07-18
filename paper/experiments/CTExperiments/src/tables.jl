@@ -1,3 +1,4 @@
+using CategoricalArrays
 using ColorSchemes
 using DataFrames
 using PrettyTables
@@ -16,6 +17,17 @@ function tabulate_results(
     kwrgs...,
 )
     df = inputs[1]
+
+    # Group averages:
+    if "Avg." in df.data
+        _ds_order = [ds_order..., "Avg."]
+        hlines = [0,1,5,length(ds_order)+1,length(ds_order)+2]
+    else
+        _ds_order = ds_order
+        hlines =  [0,1,5,length(ds_order)+2]
+    end
+    df.data = categorical(df.data, levels=_ds_order)
+    sort!(df, :data)
     other_inputs = inputs[2]
     if isa(other_inputs.backend, Val{:latex})
         tf = PrettyTables.tf_latex_booktabs
@@ -29,6 +41,7 @@ function tabulate_results(
                 table_type=table_type,
                 longtable_footer=longtable_footer,
                 alignment,
+                hlines,
                 other_inputs...,
                 kwrgs...,
             )
@@ -45,6 +58,7 @@ function tabulate_results(
                     table_type=table_type,
                     longtable_footer=longtable_footer,
                     alignment,
+                    hlines,
                     other_inputs...,
                     kwrgs...,
                 )
@@ -52,11 +66,11 @@ function tabulate_results(
         end
     else
         if isnothing(save_name)
-            tab = pretty_table(df; alignment, other_inputs..., kwrgs...)
+            tab = pretty_table(df; alignment, hlines, other_inputs..., kwrgs...)
             return tab
         else
             open(save_name, "w") do io
-                pretty_table(io, df; alignment, other_inputs..., kwrgs...)
+                pretty_table(io, df; alignment, hlines, other_inputs..., kwrgs...)
             end
         end
     end

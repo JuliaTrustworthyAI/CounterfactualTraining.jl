@@ -33,7 +33,11 @@ Our main quantitative results for *MLP* models are summarised in @tbl-main, whic
 ::: {#tbl-main}
 
 ```{=latex}
+\begin{table}[h]
+\small
+\centering
 \input{tables/main.tex}
+\end{table}
 ```
 
 Key counterfactual evaluation metrics and bootstrapped standard errors for all datasets. **Plausibility** (columns 1-2): percentage reduction in implausibility for $\text{IP}$ and $\text{IP}^*$, respectively; **Actionability** (column 3): percentage reduction in costs with protected features. Outcomes are aggregated across bootstrap samples and varying degrees of the energy penalty $\lambda_{\text{egy}}$ used for *ECCo* at test time. Asterisks ($^*$) indicate that bootstrapped 99%-confidence interval of differences in mean outcomes does *not* include zero.
@@ -52,7 +56,7 @@ We also find that CT can reduce sensitivity to immutable, protected features and
 
 ### Predictive Performance. {#sec-pred} 
 
-Test accuracy for CT is virtually identical to the baseline for *Adult*, *Circ*, *LS*, *Moon*, and *OL*, and even slightly improved for *Cred*. Exceptions to this general pattern are *MNIST*, *CH*, and *GMSC*, for which we observe a reduction in test accuracy of 2, 5, and 15 percentage points respectively. When looking at robust test accuracies (Acc.$^*$) for these datasets in particular, we find that CT strongly outperforms the baseline. In fact, we observe that CT improves adversarial robustness on all datasets.
+Test accuracies on adversarially perturbed data are shown in @fig-acc. The perturbations size, $\varepsilon \in [0,0.1]$, increases along the horizontal axis and includes zero, corresponding to standard test accuracy for non-perturbed data. We observe that for all synthetic datasets, predictive performance of CT is virtually identical to the baseline and unaffected by adversarial perturbations. For all real-world datasets, we find that CT substantially improves robustness: while in some cases baseline accuracies drop to essentially zero for large enough perturbation sizes, accuracies for CT are remarkably robust to gradient-based adversarial attacks.
 
 ![Test accuracies on adversarially perturbed data with varying perturbation sizes for all non-synthetic datasets.](/paper/figures/acc.png){#fig-acc fig-env="figure*"}
 

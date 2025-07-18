@@ -937,6 +937,7 @@ function final_table(
     drop_models::Vector{String}=String[],
     conf_int::Vector{<:AbstractFloat}=[0.99],
     include_performance::Bool=false,
+    add_aggregates::Bool=true,
 )
     # CE:
     df_ce = DataFrame()
@@ -975,6 +976,18 @@ function final_table(
         df.sig_level .= ""
     else
         df.sig_level .=  coalesce.(df.sig_level, "")
+    end
+    
+    if add_aggregates
+        df_agg =combine(groupby(df, :variable), :mean => mean => :mean)
+        df_agg.dataset .= "Avg."
+        df_agg.se .= NaN
+        df = vcat(df, df_agg; cols=:union)
+        df = coalesce.(df, "")
+        df.var_id = (x -> x.data).(df.variable)
+        sort!(df, [:var_id, :dataset])
+        select!(df, Not(:var_id))
+        display(df)
     end
 
     # Post-process
