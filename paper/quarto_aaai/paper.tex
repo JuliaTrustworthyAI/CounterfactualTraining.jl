@@ -562,7 +562,7 @@ Algorithm \ref{alg-experiment}.
   \caption{Counterfactual Training}
     \label{alg-experiment}
     \begin{algorithmic}[1]
-    \REQUIRE Training dataset $\mathcal{D}$, initial model $\mathbf{M}_{\theta_0}$
+    \REQUIRE Training dataset $\mathcal{D}$, initialize model $\mathbf{M}_{\theta}$
     \WHILE{not converged}
         \STATE Sample $\mathbf{x}$ and $\mathbf{y}$ from dataset $\mathcal{D}$.
         \STATE Sample $\mathbf{x}^{\prime}_0$, $\mathbf{y}^+$ and $\mathbf{x}^+$.
@@ -627,7 +627,7 @@ explainers that have been proposed in the literature to meet different
 desiderata. For example, many methods support domain and mutability
 constraints. In principle, any existing approach for generating CEs is
 viable, so long as it does not violate the faithfulness condition. Like
-JEMs \citep{murphy2022probabilistic}, Counterfactual Training can be
+JEMs \citep{murphy2022probabilistic}, counterfactual training can be
 considered a form of contrastive representation learning.
 
 \subsection{Indirectly Inducing Explainability with Adversarial
