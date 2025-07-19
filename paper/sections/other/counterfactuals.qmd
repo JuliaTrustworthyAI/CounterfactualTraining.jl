@@ -16,6 +16,8 @@ where $g: \mathcal{Z} \mapsto \mathcal{X}$ is an invertible function that maps f
 
 For all generators used in this work we use standard logit crossentropy loss for $\text{yloss}(\cdot)$. All generators also penalize the distance ($\ell_1$-norm) of counterfactuals from their original factual state. For *Generic* and *ECCo*, we have $\mathcal{Z}:=\mathcal{X}$ and $g(\mathbf{z})=g(\mathbf{z})^{-1}=\mathbf{z}$, that is counterfactual are searched directly in the feature space. Conversely, *REVISE* traverses the latent space of a variational autoencoder (VAE) fitted to the training data, where $g(\cdot)$ corresponds to the decoder [@joshi2019realistic]. In addition to the distance penalty, *ECCo* uses an additional penalty component that regularizes the energy associated with the counterfactual, $\mathbf{x}^\prime$ [@altmeyer2024faithful]. 
 
+<!-- TODO: Add note on why we omit the conformal prediction component. -->
+
 ### Convergence {#sec-app-conv}
 
 An important consideration when generating counterfactual explanations using gradient-based methods is how to define convergence. Two common choices are to 1) perform gradient descent over a fixed number of iterations $T$, or 2) conclude the search as soon as the predicted probability for the target class has reached a pre-determined threshold, $\tau$: $\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}^\prime))[y^+] \geq \tau$. We prefer the latter for our purposes, because it explicitly defines convergence in terms of the black-box model, $\mathbf{M}(\mathbf{x})$.

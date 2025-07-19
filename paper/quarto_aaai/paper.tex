@@ -316,8 +316,8 @@ to enforce global actionability constraints. In our experiments
 (Section~\ref{sec-experiments}), we find that thanks to counterfactual
 training, (1) the implausibility of CEs decreases by up to 90\%; (2) the
 cost of reaching valid counterfactuals with protected features decreases
-by 19\% on average; and (3) the adversarial robustness improves across
-the board. Finally, we discuss open challenges in
+by 19\% on average; and (3) models' adversarial robustness improves
+across the board. Finally, we discuss open challenges in
 Section~\ref{sec-discussion} and conclude in
 Section~\ref{sec-conclusion}.
 
@@ -762,9 +762,7 @@ We run experiments with three gradient-based generators: \emph{Generic}
 of \citet{wachter2017counterfactual} as a simple baseline approach,
 \emph{REVISE} \citep{joshi2019realistic} that aims to generate plausible
 counterfactuals using a surrogate Variational Autoencoder (VAE), and
-\emph{ECCo}---the generator of \citet{altmeyer2024faithful} without the
-conformal prediction component---as a method that directly targets both
-faithfulness and plausibility of the counterfactuals.
+\emph{ECCCo} \citep{altmeyer2024faithful}, which targets faithfulness.
 
 We make use of nine classification datasets common in the CE/AR
 literature. Four of them are synthetic with two classes and different
@@ -824,7 +822,7 @@ implausibility for \(\text{IP}\) and \(\text{IP}^*\), respectively;
 \textbf{Cost} / \textbf{Actionability} (column 3): percentage reduction
 in costs when selected features are protected. Outcomes are aggregated
 across bootstrap samples and varying degrees of the energy penalty
-\(\lambda_{\text{egy}}\) used for \emph{ECCo} at test time. Asterisks
+\(\lambda_{\text{egy}}\) used for \emph{ECCCo} at test time. Asterisks
 (\(^*\)) indicate that the bootstrapped 99\%-confidence interval of
 differences in mean outcomes does \emph{not} include zero.}
 
@@ -850,10 +848,11 @@ significant impact of CT on \(\text{IP}\). Reductions in \(\text{IP}^*\)
 are even more substantial and generally statistically significant,
 although the average degree of uncertainty is higher than for
 \(\text{IP}\): reductions range from around 20\% (\emph{Moons}) to
-almost 90\% (\emph{Circ}). The only negative findings for \emph{OL} and
-\emph{MNIST} are not statistically significant and, for MNIST, do not
-align with qualitative findings, which are much more plausible for CT
-(Figure~\ref{fig-mnist}).
+almost 90\% (\emph{Circ}). The only negative findings are for OL and
+MNIST, but they are not statistically significant. A qualitative
+inspection of the counterfactuals in Figure~\ref{fig-mnist} (columns
+2-5) suggests recognizable digits 1-4 for the model trained with CT
+(bottom row), unlike the baseline (top row).
 
 \begin{figure}
 
@@ -863,11 +862,11 @@ align with qualitative findings, which are much more plausible for CT
 
 }
 
-\caption{\label{fig-mnist}Sample explanations for \emph{MNIST} for BL
-(top) and CT (bottom). First column is a random factual 0 (blue).
-Columns 2 to 5 are corresponding \emph{ECCo} counterfactuals in target
-classes 1 to 4. Columns 6 to 10 show integrated gradients averaged over
-all test images in classes 5 to 9.}
+\caption{\label{fig-mnist}Visual explanations for \emph{MNIST} for BL
+(top) and CT (bottom). \textbf{Plausibility}: col.~1 is a random factual
+0 (blue); cols. 2-5 are corresponding \emph{ECCCo} counterfactuals in
+target classes 1 to 4. \textbf{Actionability}: cols. 6-10 show
+integrated gradients averaged over test images in classes 5 to 9.}
 
 \end{figure}%
 
@@ -880,17 +879,17 @@ e.g., feature interactions.}
 For synthetic datasets, we always protect the first feature; for all
 real-world tabular datasets we could identify and protect an \emph{age}
 variable; for \emph{MNIST}, we protect the five upper and lower pixel
-rows of the full image. Reductions in costs are overwhelmingly positive
-and significant, of up to around 60\% for \emph{GMSC}. While the
-estimated cost increase for \emph{Adult} and \emph{MNIST}, these effects
-are not significant and Figure~\ref{fig-mnist} (columns 6-10)
-demonstrates that in the latter case, CT does have the expected effect:
-sensitivity to protected features as per integrated gradients is
-drastically reduced; details of this experiment are reported in the
-supplementary appendix. In the case of \emph{Cred}, average costs
-increase, likely because any potential benefits from protecting the
-\emph{age} are outweighed by the increase in costs required for greater
-plausibility.
+rows of the full image. Statistically significant reductions in costs
+overwhelmingly point in the expected positive direction reaching up to
+around 60\% for \emph{GMSC}. Only in the case of \emph{Cred}, average
+costs increase, likely because any potential benefits from protecting
+the \emph{age} are outweighed by the increase in costs required for
+greater plausibility. The findings for \emph{Adult} and \emph{MNIST} are
+not significant. A qualitative inspection of the class-conditional
+integrated gradients in Figure~\ref{fig-mnist} (columns 6-10) suggests
+that CT still has the expected effect: the model (bottom) is insensitive
+(blue) to the protected rows of pixels; details of this experiment are
+reported in the supplementary appendix.
 
 \begin{figure*}
 
