@@ -218,16 +218,15 @@ they inform how factual inputs would need to change in order for a model
 to produce some desired output. To be useful in real-word
 decision-making systems, counterfactuals should be plausible with
 respect to the underlying data and actionable with respect to the
-user-defined mutability constraints. Much existing research has
-therefore focused on developing post-hoc methods to generate
-counterfactuals that meet these desiderata. In this work, we instead
-hold models directly accountable for the desired end goal:
-counterfactual training employs counterfactuals during the training
-phase to minimize the divergence between learned representations and
-plausible, actionable explanations. We demonstrate empirically and
-theoretically that our proposed method facilitates training models that
-deliver inherently desirable explanations while promoting robustness and
-preserving high predictive performance of the models.
+feature mutability constraints. Much existing research has therefore
+focused on developing post-hoc methods to generate counterfactuals that
+meet these desiderata. In this work, we instead hold models directly
+accountable for the desired end goal: counterfactual training employs
+counterfactuals during the training phase to minimize the divergence
+between learned representations and plausible, actionable explanations.
+We demonstrate empirically and theoretically that our proposed method
+facilitates training models that deliver inherently desirable
+explanations and have improved adversarial robustness.
 \end{abstract}
 \section{Introduction}\label{introduction}
 
@@ -245,12 +244,13 @@ explainable AI (XAI) toolkit \citep{molnar2022interpretable} that can be
 applied to make sense of this complexity. Originally proposed by
 \citet{wachter2017counterfactual}, CEs prescribe minimal changes for
 factual inputs that, if implemented, would prompt some fitted model to
-produce an alternative, more desirable output (Figure~\ref{fig-poc}).
-This is useful and necessary to not only understand how opaque models
-make their predictions, but also to provide algorithmic recourse (AR) to
+produce an alternative, more desirable output. This is useful and
+necessary to not only understand how opaque models make their
+predictions, but also to provide algorithmic recourse (AR) to
 individuals subjected to them: a retail bank, for example, could use CE
 to provide meaningful feedback to unsuccessful loan applicants that were
-rejected based on an opaque automated decision-making (ADM) system.
+rejected based on an opaque automated decision-making (ADM) system
+(Figure~\ref{fig-poc}).
 
 For such feedback to be meaningful, counterfactual explanations need to
 fulfill certain desiderata
@@ -263,7 +263,7 @@ provided recourse should end up with credit profiles that are genuinely
 similar to that of individuals who have successfully repaid their loans
 in the past. Actionable explanations comply with practical constraints:
 a young, unsuccessful loan applicant cannot increase their age in an
-instant.
+instance.
 
 Existing state-of-the-art (SOTA) approaches in the field have largely
 focused on designing model-agnostic CE methods that identify subsets of
@@ -273,11 +273,11 @@ adversely affect others: it is possible, for example, to generate
 plausible counterfactuals for models that are also highly vulnerable to
 implausible, possibly adversarial counterfactuals
 \citep{altmeyer2024faithful}. In this work, we therefore embrace the
-paradigm that models---as opposed to explanation methods---should be
-held accountable for explanations that are plausible and actionable.
-While previous work has shown that at least plausibility can be
-indirectly achieved through existing techniques aimed at models'
-generative capacity, generalization and robustness
+paradigm that models (as opposed to explanation methods) should be held
+accountable for explanations that are plausible and actionable. While
+previous work has shown that at least plausibility can be indirectly
+achieved through existing techniques aimed at models' generative
+capacity, generalization and robustness
 \citep{altmeyer2024faithful, augustin2020adversarial, schut2021generating},
 we directly incorporate both plausibility and actionability in the
 training objective of models to improve their overall explanatory
@@ -312,7 +312,7 @@ Section~\ref{sec-lit} presents related work, focusing on the links to
 contrastive and robust learning. Then follow our two principal
 contributions. In Section~\ref{sec-method}, we introduce our
 methodological framework and show theoretically that it can be employed
-to enforce global actionability constraints. In our experiments
+to respect global actionability constraints. In our experiments
 (Section~\ref{sec-experiments}), we find that thanks to counterfactual
 training, (1) the implausibility of CEs decreases by up to 90\%; (2) the
 cost of reaching valid counterfactuals with protected features decreases
@@ -334,16 +334,15 @@ classifiers trained under different regimes on synthetic data: (a)
 conventional training, all mutable; (b) CT, all mutable; (c)
 conventional, \emph{age} immutable; (d) CT, \emph{age} immutable. The
 linear decision boundary is shown in green along with training data
-colored according to ground-truth labels: \(y^-=1\) (blue) and \(y^+=2\)
-(orange). Stars indicate counterfactuals in the target class. For
-illustration, synthetic features are annotated as \emph{debt} and
-\emph{age}.}
+colored according to ground-truth labels: \(y^-=\text{"loan withheld"}\)
+(blue) and \(y^+=\text{"loan provided"}\) (orange). Class and feature
+annotations (\emph{debt} and \emph{age}) are for illustrative purposes.}
 
 \end{figure*}%
 
 \section{Related Literature}\label{sec-lit}
 
-To make the desiderata for our framework more concrete, we follow the
+To make the desiderata for our framework more concrete, we follow
 previous work in tying the explanatory capacity of models to the quality
 of CEs that can be generated for them
 \citep{altmeyer2024faithful, augustin2020adversarial}. For simplicity,
