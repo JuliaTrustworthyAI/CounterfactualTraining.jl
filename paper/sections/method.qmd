@@ -18,7 +18,7 @@ The goal of CT is to improve model explainability by aligning models with faithf
 \label{def-explainability}
 Let $\mathbf{M}_\theta: \mathcal{X} \mapsto \mathcal{Y}$ denote a supervised classification model that maps from the $D$-dimensional input space $\mathcal{X}$ to representations $\phi(\mathbf{x};\theta)$ and finally to the $K$-dimensional output space $\mathcal{Y}$. Assume that for any given input-output pair $\{\mathbf{x},\mathbf{y}\}_i$ there exists a counterfactual $\mathbf{x}^{\prime} = \mathbf{x} + \Delta: \mathbf{M}_\theta(\mathbf{x}^{\prime}) = \mathbf{y}^{+} \neq \mathbf{y} = \mathbf{M}_\theta(\mathbf{x})$, where $\arg\max_y{\mathbf{y}^{+}}=y^+$ is the index of the target class. 
 
-We say that $\mathbf{M}_\theta$ has an \textbf{explanatory capacity} to the extent that faithfully generated, valid counterfactuals are also plausible and actionable. We define these properties as follows:
+We say that $\mathbf{M}_\theta$ has an \textbf{explanatory capacity} to the extent that faithfully generated, valid counterfactuals are also plausible and actionable. We define these properties as:
 
 \begin{itemize}
     \item (Faithfulness) $\int^{A} p_\theta(\mathbf{x}^\prime|\mathbf{y}^{+})d\mathbf{x} \rightarrow 1$; $A$ is an arbitrarily small region around $\mathbf{x}^{\prime}$.

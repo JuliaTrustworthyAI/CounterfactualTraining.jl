@@ -56,7 +56,7 @@ Average reductions in $\text{IP}$ range from around 7% for *MNIST* to almost 60%
 ![Visual explanations for *MNIST* for BL (top) and CT (bottom). **Plausibility**: col. 1 is a random factual 0 (blue); cols. 2-5 are corresponding *ECCCo* counterfactuals in target classes 1 to 4. **Actionability**: cols. 6-10 show integrated gradients averaged over test images in classes 5 to 9.](/paper/figures/mnist_body.png){#fig-mnist}
 
 ### Actionability (RQ2). {#sec-act}
-*CT tends to improve actionability in the presence of immutable features, but this is not guaranteed if the assumptions in Prp. \ref{prp-mtblty} are violated.*
+*CT tends to improve actionability in the presence of immutable features, but this is not guaranteed if the assumptions in Proposition \ref{prp-mtblty} are violated.*
 
 For synthetic datasets, we always protect the first feature; for all real-world tabular datasets we could identify and protect an *age* variable; for *MNIST*, we protect the five upper and lower pixel rows of the full image. Statistically significant reductions in costs overwhelmingly point in the expected positive direction reaching up to around 60% for *GMSC*. Only in the case of *Cred*, average costs increase, likely because any potential benefits from protecting the *age* are outweighed by the increase in costs required for greater plausibility. The findings for *Adult* and *MNIST* are not significant. A qualitative inspection of the class-conditional integrated gradients in @fig-mnist (columns 6-10) suggests that CT still has the expected effect: the model (bottom) is insensitive (blue) to the protected rows of pixels; details of this experiment are reported in the supplementary appendix.
 
