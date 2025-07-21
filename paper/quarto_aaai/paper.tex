@@ -513,9 +513,9 @@ with the data and faithful counterfactuals are consistent with what the
 model has learned about the input data. Ac tionability constraints in
 Def. \ref{def-explainability} vary and depend on the context in which
 \(\mathbf{M}_\theta\) is deployed. In this work, we choose to only
-consider mutability constraints for individual features \(x_d\) for
-\(d=1,...,D\). We also limit ourselves to classification tasks for
-reasons discussed in Section~\ref{sec-discussion}.
+consider domain and mutability constraints for individual features
+\(x_d\) for \(d=1,...,D\). We also limit ourselves to classification
+tasks for reasons discussed in Section~\ref{sec-discussion}.
 
 Let \(\mathbf{x}_t^\prime\) for \(t=0,...,T\) denote a counterfactual
 generated through gradient descent over \(T\) iterations as originally
@@ -653,18 +653,18 @@ adversarial training.
 \subsection{Encoding Actionability Constraints}\label{sec-constraints}
 
 Many existing counterfactual explainers support domain and mutability
-constraints out-of-the-box. In fact, both types of constraints can be
-implemented for any explainer that relies on gradient descent in the
-feature space for optimization \citep{altmeyer2023explaining}. In this
-context, domain constraints can be imposed by simply projecting
-counterfactuals back to the specified domain, if the previous gradient
-step resulted in updated feature values that were out-of-domain.
-Similarly, mutability constraints can be enforced by setting partial
-derivatives to zero to ensure that features are only perturbed in the
-allowed direction, if at all.
+constraints. In fact, both types of constraints can be implemented for
+any explainer that relies on gradient descent in the feature space for
+optimization \citep{altmeyer2023explaining}. In this context, domain
+constraints can be imposed by simply projecting counterfactuals back to
+the specified domain, if the previous gradient step resulted in updated
+feature values that were out-of-domain. Similarly, mutability
+constraints can be enforced by setting partial derivatives to zero to
+ensure that features are only perturbed in the allowed direction, if at
+all.
 
-Since actionability constraints are binding at test time, we should also
-impose them when generating \(\mathbf{x}^\prime\) during each training
+Since actionability constraints are binding at test time, we also impose
+them when generating \(\mathbf{x}^\prime\) during each training
 iteration to inform model representations. Through their effect on
 \(\mathbf{x}^\prime\), both types of constraints influence model
 outcomes via Equation~\ref{eq-div}. Here it is crucial that we avoid
@@ -694,10 +694,11 @@ assuming a point mass prior for \(p(\mathbf{x}^+)\) wrt. feature \(d\).
 Intuitively, we think of this as ignoring implausibility costs of
 immutable features, which effectively forces the model to instead seek
 plausibility through the remaining features. This can be expected to
-result in lower overall sensitivity to immutable features, which we
-investigate empirically in Section~\ref{sec-experiments}. Under certain
-conditions, this result holds theoretically; for the proof, see the
-supplementary appendix:
+result in relatively lower sensitivity to immutable features; and higher
+relative sensitivity to mutable features should make
+mutability-constrained recourse less costly
+(Section~\ref{sec-experiments}). Under certain conditions, this result
+holds theoretically; for the proof, see the supplementary appendix:
 
 \begin{proposition}[Protecting Immutable Features]
 \label{prp-mtblty}
@@ -723,7 +724,7 @@ and cost of faithfully generated counterfactuals at test time. Other
 metrics, such as validity and redundancy, are reported in the
 supplementary appendix. To measure the cost, we follow the standard
 proxy of distances (\(\ell_1\)-norm) between factuals and
-counterfactuals. For plausibility, we assess how similar CEs are to the
+counterfactuals. For plausibility, we assess how similar CEs are to
 observed samples in the target domain,
 \(\mathbf{X}^+\subset\mathcal{X}^+\). We rely on the metric used by
 \citet{altmeyer2024faithful},
@@ -761,14 +762,12 @@ We make use of nine classification datasets common in the CE/AR
 literature. Four of them are synthetic with two classes and different
 characteristics: linearly separable clusters (\emph{LS}), overlapping
 clusters (\emph{OL}), concentric circles (\emph{Circ}), and interlocking
-moons (\emph{Moon}). They are generated using the library of
-\citet{altmeyer2023explaining} and we present them in the supplementary
-appendix. Next, we have four real-world binary tabular datasets:
-\emph{Adult} (Census data) of \citet{becker1996adult2}, California
-housing (\emph{CH}) of \citet{pace1997sparse}, Default of Credit Card
-Clients (\emph{Cred}) of \citet{yeh2016default}, and Give Me Some Credit
-(\emph{GMSC}) from \citet{kaggle2011give}. Finally, for the convenience
-of illustration, we use the 10-class \emph{MNIST}
+moons (\emph{Moon}). Next, we have four real-world binary tabular
+datasets: \emph{Adult} (Census data) of \citet{becker1996adult2},
+California housing (\emph{CH}) of \citet{pace1997sparse}, Default of
+Credit Card Clients (\emph{Cred}) of \citet{yeh2016default}, and Give Me
+Some Credit (\emph{GMSC}) from \citet{kaggle2011give}. Finally, for the
+convenience of illustration, we use the 10-class \emph{MNIST}
 \citep{lecun1998mnist}.
 
 To assess CT, we investigate the improvements in performance metrics
@@ -793,8 +792,8 @@ percentage reduction in implausibility for our two metrics when using CT
 on top of the weak baseline. As an example, consider the first row for
 \emph{LS} data: the observed positive values indicate that faithful
 counterfactuals are around 30-55\% more plausible for models trained
-with CT, in line with our observations in Figure~\ref{fig-poc} in panel
-(b) compared to panel (a).
+with CT, in line with our observations in panel (b) of
+Figure~\ref{fig-poc} compared to panel (a).
 
 The third column shows the results for a scenario when mutability
 constraints are imposed on the selected features. Again, we are
@@ -832,7 +831,8 @@ differences in mean outcomes does \emph{not} include zero.}
 \subsubsection{Plausibility (RQ1).}\label{sec-plaus}
 
 \emph{CT generally produces substantial and statistically significant
-improvements in plausibility.}\\
+improvements in plausibility.}
+
 Average reductions in \(\text{IP}\) range from around 7\% for
 \emph{MNIST} to almost 60\% for \emph{Circ}. For the real-world tabular
 datasets they are around 12\% for \emph{CH} and \emph{Cred} and almost
@@ -866,8 +866,8 @@ integrated gradients averaged over test images in classes 5 to 9.}
 \subsubsection{Actionability (RQ2).}\label{sec-act}
 
 \emph{CT tends to improve actionability in the presence of immutable
-features, but the exact effect is sometimes hard to establish due to,
-e.g., feature interactions.}
+features, but this is not guaranteed if the assumptions in Prp.
+\ref{prp-mtblty} are violated.}
 
 For synthetic datasets, we always protect the first feature; for all
 real-world tabular datasets we could identify and protect an \emph{age}
@@ -925,33 +925,35 @@ We evaluate the impacts of three types of hyperparameters on CT. In this
 section we focus on the highlights and make the full results available
 in the supplementary appendix.
 
-First, we look at hyperparameters that guide the gradient-based
-counterfactual search. Increasing \(T\), the maximum number of steps,
-generally yields better outcomes because more CEs can mature in each
-training epoch. The impact of \(\tau\), the required decision threshold
-is more difficult to predict. On ``harder'' datasets it may be difficult
-to satisfy high \(\tau\) for any given sample (i.e., also factuals) and
-so increasing this threshold does not seem to correlate with better
-outcomes. In fact, \(\tau=0.5\) generally leads to optimal results as it
-is associated with high proportions of mature counterfactuals.
+Firstly, we find that optimal results are generally obtained when using
+\emph{ECCCo} to generate counterfactuals. Conversely, using a generator
+that may inhibit faithfulness (\emph{REVISE}), tends to yield poor
+results. Concerning hyperparameters that guide the gradient-based
+counterfactual search, we find that increasing \(T\), the maximum number
+of steps, generally yields better outcomes because more CEs can mature.
+Relatedly, we also find that the effectiveness and stability of CT is
+positively associated with the total number of counterfactuals generated
+during each training epoch. The impact of \(\tau\), the decision
+threshold, is more difficult to predict. On ``harder'' datasets it may
+be difficult to satisfy high \(\tau\) for any given sample (i.e., also
+factuals) and so increasing this threshold does not seem to correlate
+with better outcomes. In fact, \(\tau=0.5\) generally leads to optimal
+results as it is associated with high proportions of mature
+counterfactuals.
 
-Second, the strength of the energy regularization,
-\(\lambda_{\text{reg}}\) is highly impactful and leads to poor
-performance in terms of decreased plausibility and increased costs if
-insufficiently high. The sensitivity with respect to
-\(\lambda_{\text{div}}\) and \(\lambda_{\text{adv}}\) is much less
-evident. While high values of \(\lambda_{\text{reg}}\) may increase the
-variability in outcomes when combined with high values of
-\(\lambda_{\text{div}}\) or \(\lambda_{\text{adv}}\), this effect is not
-particularly pronounced.
+Secondly, the strength of the energy regularization,
+\(\lambda_{\text{reg}}\) is highly impactful and should be set
+sufficiently high to avoid common problems associated with exploding
+gradients. The sensitivity with respect to \(\lambda_{\text{div}}\) and
+\(\lambda_{\text{adv}}\) is much less evident. While high values of
+\(\lambda_{\text{reg}}\) may increase the variability in outcomes when
+combined with high values of \(\lambda_{\text{div}}\) or
+\(\lambda_{\text{adv}}\), this effect is not particularly pronounced.
 
-Third, the effectiveness and stability of CT is positively associated
-with the number of counterfactuals generated during each training epoch.
-A higher number of training epochs is also beneficial. Interestingly, we
-observed desired improvements when CT was combined with conventional
-training and applied only for the final 50\% of epochs of the complete
-training process. Put differently, CT can improve the explainability of
-models in a fine-tuning manner.
+Finally, we also observe desired improvements when CT was combined with
+conventional training and applied only for the final 50\% of epochs of
+the complete training process. Put differently, CT can improve the
+explainability of models in a post-hoc, fine-tuning manner.
 
 \section{Discussion}\label{sec-discussion}
 
@@ -972,16 +974,18 @@ hinder these protections. Indeed, deciding on the actionability of
 features remains a major open challenge in the AR literature
 \citep{venkatasubramanian2020philosophical}.
 
-\emph{CT increases the training times.} Like adversarial training, CT is
-more resource-intensive than conventional regimes. Higher numbers of CEs
-improve the quality of the learned representations but they also
-increase the number of computations. As our codebase is not performance
-optimized, grids of around 300 settings for the largest datasets in our
-experiments took up to four hours using 34 2GB CPUs (see supplementary
-appendix). Other than optimization, three factors mitigate this effect:
-(1) CT yields itself to parallel execution; (2) it amortizes the cost of
-CEs for the training samples; and (3) it can be used to fine-tune
-conventionally-trained models.
+\emph{Plausibility is costly.} As noted elsewhere
+\citep{altmeyer2024faithful}, more plausible counterfactuals are
+inevitably more costly. Thus, while CT improves plausibility and
+robustness, it can impact average costs and validity as cheap,
+implausible and adversarial explanations are removed from the solution
+space.
+
+\emph{CT increases the training times.} Like contrastive and robust
+learning, CT is more resource-intensive than conventional regimes. Three
+factors mitigate this effect: (1) CT yields itself to parallel
+execution; (2) it amortizes the cost of CEs for the training samples;
+and (3) it can be used to fine-tune conventionally-trained models.
 
 We also highlight three key directions for future research. Firstly, it
 is an interesting challenge to extend CT beyond classification settings.
@@ -993,14 +997,10 @@ research on CEs and AR; other settings have attracted some interest,
 e.g., regression \citep{spooner2021counterfactual}, but there is little
 consensus how to robustly extend the notion of CEs.
 
-Secondly, CT is susceptible to training instabilities, as is also the
-case for the related JEMs \citep{grathwohl2020your}. CT is exposed to
-two sources of instabilities: (1) the energy-based contrastive
-divergence term, \(\text{div}(\cdot)\), in Equation~\ref{eq-div}, and
-(2) the underlying explainers. We find several promising ways to
-mitigate this problem: regularizing energy (\(\lambda_{\text{reg}}\)),
-generating sufficiently many counterfactuals during each epoch, and
-including only mature counterfactuals in \(\text{div}(\cdot)\).
+Secondly, it is worth extending the analysis done here to additional CE
+generators including those that do not rely on computationally costly
+gradient-based optimization. This would reduce training costs while
+potentially maintaining benefits of CT.
 
 Finally, we believe that it is possible to considerably improve
 hyperparameter selection procedures, and thus performance. We have
