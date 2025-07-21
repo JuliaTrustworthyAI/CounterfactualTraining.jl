@@ -823,7 +823,25 @@ differences in mean outcomes does \emph{not} include zero.}
 
 \small
 \centering
-\input{tables/main.tex}
+\begin{tabular}{
+  l
+  S[table-format=2.2(1.2)]
+  S[table-format=3.2(3.2)]
+  S[table-format=3.2(1.2)]
+}
+  \toprule
+  \textbf{Data} & \textbf{$ \text{IP} $ $(-\%)$} & \textbf{$ \text{IP}^* $ $(-\%)$} & \textbf{Cost $(-\%)$} \\\midrule
+  LS & 29.05\pm0.67 $^{*}$ & 55.33\pm2.03 $^{*}$ & 14.07\pm0.6 $^{*}$ \\
+  Circ & 56.29\pm0.44 $^{*}$ & 89.38\pm9.3 $^{*}$ & 45.55\pm0.76 $^{*}$ \\
+  Moon & 20.62\pm0.69 $^{*}$ & 19.26\pm8.12 $^{*}$ & 2.86\pm1.03 $^{*}$ \\
+  OL & -1.13\pm0.88 $^{}$ & -24.52\pm14.52 $^{}$ & 38.39\pm2.21 $^{*}$ \\\midrule
+  Adult & 0.77\pm1.34 $^{}$ & 32.29\pm6.87 $^{*}$ & -2.82\pm4.88 $^{}$ \\
+  CH & 12.05\pm1.41 $^{*}$ & 70.27\pm3.72 $^{*}$ & 40.71\pm1.55 $^{*}$ \\
+  Cred & 12.31\pm1.84 $^{*}$ & 54.89\pm11.21 $^{*}$ & -17.43\pm5.17 $^{*}$ \\
+  GMSC & 23.44\pm1.99 $^{*}$ & 73.31\pm4.83 $^{*}$ & 62.64\pm2.04 $^{*}$ \\
+  MNIST & 7.05\pm1.8 $^{*}$ & -25.09\pm109.05 $^{}$ & -12.34\pm6.52 $^{}$ \\\midrule
+  Avg. & 17.83 & 38.35 & 19.07 \\\bottomrule
+\end{tabular}
 
 }
 
@@ -1026,9 +1044,5 @@ user-specified mutability constraints), and thus meaningful to their
 recipients. In turn, our work highlights the value of simultaneously
 improving models and their explanations.
 
-\section*{References}\label{references}
-\addcontentsline{toc}{section}{References}
-
-\renewcommand{\bibsection}{}
 \bibliography{../quarto_aaai/bibliography.bib}
 \end{document}
