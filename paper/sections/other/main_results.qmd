@@ -98,8 +98,7 @@ plt_out = draw(plt, figure=(size=(1000, 150),), axis=(yticks=[0.0,0.5,1.0], limi
 save("paper/figures/acc.png", plt_out; px_per_unit=3)
 ```
 
-## Confidence Intervals
-
+### Confidence Intervals
 
 ```{julia}
 #| eval: false
@@ -172,7 +171,7 @@ Mean outcomes for **CT** and **BL** along with bootstrapped confidence intervals
 
 :::
 
-## Qualitative Findings for Image Data
+### Qualitative Findings for Image Data
 
 ```{julia}
 #| eval: false
@@ -203,4 +202,116 @@ savefig(plts["objective"]["vanilla"]["ecco"], "paper/figures/mnist_mlp_vanilla.p
 ![Counterfactual images for *MLP* with counterfactual training. Factual images are shown on the diagonal, with the corresponding counterfactual for each target class (columns) in that same row. The underlying generator, *ECCo*, aims to generate counterfactuals that are faithful to the model [@altmeyer2024faithful].](/paper/figures/mnist_mlp.png){#fig-mnist}
 
 ![The same setup, factuals, model architecture and generator as in @fig-mnist, but the model was trained conventionally.](/paper/figures/mnist_mlp_vanilla.png){#fig-mnist-vanilla}
+:::
+
+### Costs
+
+
+```{julia}
+#| eval: false
+
+df = final_table(
+    res_dir; 
+    ce_var=["distance"], 
+    agg_further_vars=[["run", "lambda_energy_eval"]], 
+    total_uncertainty=false, 
+)
+Serialization.serialize("paper/experiments/output/costs.jls", df)
+```
+
+::: {#tbl-costs}
+
+```{julia}
+#| output: asis
+#| eval: true
+
+df = Serialization.deserialize("paper/experiments/output/costs.jls")
+inputs = get_table_inputs(df, nothing; backend=Val(:latex))
+tabulate_results(
+    inputs; 
+    table_type=:tabular,
+    alignment = [:l, fill(:c, ncol(df)-1)...],
+    wrap_table = false,
+)
+
+```
+
+Costs
+
+:::
+
+### Validity
+
+```{julia}
+#| eval: false
+
+# Unconstrained:
+df = aggregate_ce_evaluation(
+    res_dir; 
+    ratio=false, 
+    rebase=false, 
+    y="validity", 
+    agg_further_vars=["run", "lambda_energy_eval"], 
+    total_uncertainty=false, 
+    drop_models=["linear"]
+)
+df = select(df, Not(:se, :variable)) |> df -> unstack(df, :objective, :mean)
+rename!(df, :dataset => :data, :Full => :CT, :Vanilla => :BL)
+Serialization.serialize("paper/experiments/output/validity.jls", df)
+
+# Mutability constrained:
+df = aggregate_ce_evaluation(
+    mtbl_dir; 
+    ratio=false, 
+    rebase=false, 
+    y="validity", 
+    agg_further_vars=["run", "lambda_energy_eval"], 
+    total_uncertainty=false, 
+    drop_models=["linear"]
+)
+df = select(df, Not(:se, :variable)) |> df -> unstack(df, :objective, :mean)
+rename!(df, :dataset => :data, :Full => :CT, :Vanilla => :BL)
+Serialization.serialize("paper/experiments/output/validity_mtbl.jls", df)
+```
+
+::: {#tbl-val}
+
+```{julia}
+#| output: asis
+#| eval: true
+
+df = Serialization.deserialize("paper/experiments/output/validity.jls")
+inputs = get_table_inputs(df, nothing; backend=Val(:latex))
+tabulate_results(
+    inputs; 
+    table_type=:tabular,
+    alignment = [:l, fill(:c, ncol(df)-1)...],
+    wrap_table = false,
+)
+
+```
+
+Validity
+
+:::
+
+::: {#tbl-val-mtbl}
+
+```{julia}
+#| output: asis
+#| eval: true
+
+df = Serialization.deserialize("paper/experiments/output/validity_mtbl.jls")
+inputs = get_table_inputs(df, nothing; backend=Val(:latex))
+tabulate_results(
+    inputs; 
+    table_type=:tabular,
+    alignment = [:l, fill(:c, ncol(df)-1)...],
+    wrap_table = false,
+)
+
+```
+
+Validity
+
 :::

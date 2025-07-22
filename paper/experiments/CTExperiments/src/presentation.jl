@@ -727,8 +727,6 @@ function aggregate_ce_evaluation(
                     end
                 end
 
-                display(df_agg)
-
                 # Final aggregation and standard errors:
                 df_agg = DataFrames.unstack(df_agg, Symbol(var_interest), :mean)
                 vars = sort(unique(df[:, Symbol(var_interest)]))
@@ -835,6 +833,7 @@ global LatexMetricReplacements = Dict(
     "mmd" => "\$ \\text{IP}^* \$",
     "plausibility_distance_from_target" => "\$ \\text{IP} \$",
     "distance" => "Cost",
+    "validity" => "Validity",
     "sens_outid:1" => "sens_1",
     "sens_outid:2" => "sens_2",
 )
@@ -1040,7 +1039,6 @@ function final_table(
         df.var_id = (x -> x.data).(df.variable)
         sort!(df, [:var_id, :dataset])
         select!(df, Not(:var_id))
-        display(df)
     end
 
     # Post-process
