@@ -100,7 +100,6 @@ save("paper/figures/acc.png", plt_out; px_per_unit=3)
 
 ## Confidence Intervals
 
-
 ```{julia}
 #| eval: false
 
@@ -204,3 +203,28 @@ savefig(plts["objective"]["vanilla"]["ecco"], "paper/figures/mnist_mlp_vanilla.p
 
 ![The same setup, factuals, model architecture and generator as in @fig-mnist, but the model was trained conventionally.](/paper/figures/mnist_mlp_vanilla.png){#fig-mnist-vanilla}
 :::
+
+## Validity
+
+```{julia}
+#| eval: false
+
+df_mtbl = aggregate_ce_evaluation(
+    mtbl_dir; 
+    ratio=true, 
+    rebase=false, 
+    y="validity", 
+    agg_further_vars=["run", "lambda_energy_eval"], 
+    total_uncertainty=false, 
+    drop_models=["linear"]
+)
+df_mtbl.variable .= "val"
+df = final_table(
+    res_dir; 
+    ce_var=["validity"],
+    agg_further_vars=[["run", "lambda_energy_eval"]],
+    tbl_mtbl=df_mtbl
+)
+Serialization.serialize("paper/experiments/output/validity.jls", df)
+```
+
