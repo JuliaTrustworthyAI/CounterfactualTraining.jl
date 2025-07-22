@@ -157,7 +157,7 @@ function test_performance(
     n::Union{Nothing,Int}=nothing,
     eps::Real=0.03,
     attack_fun::Function=fgsm,
-    bootstrap::Union{Nothing,Int}=nothing
+    bootstrap::Union{Nothing,Int}=nothing,
 )
     model, _, M = load_results(exper)
 
@@ -170,28 +170,30 @@ function test_performance(
     output = []
 
     for j in 1:J
-       
+
         # Bootstrap:
-        idx = 1:size(Xtest,2)
+        idx = 1:size(Xtest, 2)
         if !isnothing(bootstrap)
             # Sample with replacement:
-            idx = rand(1:size(Xtest,2),size(Xtest,2))
+            idx = rand(1:size(Xtest, 2), size(Xtest, 2))
         end
-        Xtest_j = Xtest[:,idx]
+        Xtest_j = Xtest[:, idx]
         ytest_j = ytest[idx]
-        _ytest_j = _ytest[:,idx]    # OHE version
+        _ytest_j = _ytest[:, idx]    # OHE version
 
         # Adversarial accuracy
         if adversarial
             # Generate adversarial examples:
             domain = exper.data.domain
             domain = domain isa Vector ? nothing : domain
-            Xtest_j = generate_ae(model, Xtest_j, _ytest_j; attack_fun, eps, clamp_range=domain)
+            Xtest_j = generate_ae(
+                model, Xtest_j, _ytest_j; attack_fun, eps, clamp_range=domain
+            )
         end
 
         yhat = predict_label(M, CounterfactualData(Xtest_j, ytest_j), Xtest_j)
 
-        output_j = compute_performance_measures(exper, ytest_j, yhat; measure, return_df) 
+        output_j = compute_performance_measures(exper, ytest_j, yhat; measure, return_df)
 
         if return_df
             output_j.run .= j
@@ -210,7 +212,7 @@ function test_performance(
         output = reduce(vcat, output)
     end
 
-    return output 
+    return output
 end
 
 function adv_performance(exper::Experiment; kwrgs...)

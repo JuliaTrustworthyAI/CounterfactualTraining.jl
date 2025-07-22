@@ -21,12 +21,12 @@ function tabulate_results(
     # Group averages:
     if "Avg." in df.data
         _ds_order = [ds_order..., "Avg."]
-        hlines = [0,1,5,length(ds_order)+1,length(ds_order)+2]
+        hlines = [0, 1, 5, length(ds_order)+1, length(ds_order)+2]
     else
         _ds_order = ds_order
-        hlines =  [0,1,5,length(ds_order)+2]
+        hlines = [0, 1, 5, length(ds_order)+2]
     end
-    df.data = categorical(df.data, levels=_ds_order)
+    df.data = categorical(df.data; levels=_ds_order)
     sort!(df, :data)
     other_inputs = inputs[2]
     if isa(other_inputs.backend, Val{:latex})

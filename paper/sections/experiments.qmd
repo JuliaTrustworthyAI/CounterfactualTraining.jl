@@ -63,7 +63,8 @@ The third column shows the results for a scenario when mutability constraints ar
 \end{tabular}
 \end{table}
 ```
-Key evaluation metrics for valid counterfactual along with bootstrapped standard errors for all datasets. **Plausibility** (columns 1-2): percentage reduction in implausibility for $\text{IP}$ and $\text{IP}^*$, respectively; **Cost** / **Actionability** (column 3): percentage reduction in costs when selected features are protected. Outcomes are aggregated across bootstrap samples and varying degrees of the energy penalty $\lambda_{\text{egy}}$ used for *ECCCo* at test time. Asterisks ($^*$) indicate that the bootstrapped 99%-confidence interval of differences in mean outcomes does *not* include zero.
+
+Key evaluation metrics for valid counterfactual along with bootstrapped standard errors for all datasets. **Plausibility** (columns 1-2): percentage reduction in implausibility for $\text{IP}$ and $\text{IP}^*$, respectively; **Cost** / **Actionability** (column 3): percentage reduction in costs when selected features are protected. Outcomes are aggregated across bootstrap samples (100 rounds) and varying degrees of the energy penalty $\lambda_{\text{egy}}$ used for *ECCCo* at test time. Asterisks ($^*$) indicate that the bootstrapped 99%-confidence interval of differences in mean outcomes does *not* include zero.
 :::
 
 ### Plausibility (RQ1). {#sec-plaus}

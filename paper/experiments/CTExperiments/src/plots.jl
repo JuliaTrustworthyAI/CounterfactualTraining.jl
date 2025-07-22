@@ -1,5 +1,5 @@
 using IntegratedGradients
-using Plots 
+using Plots
 
 const default_axis = (; width=225, height=225)
 
@@ -596,18 +596,18 @@ function approximate_decision_boundary(
     results = load_results.(expers)
     data = expers[1].data
     X, y = get_data(data)
-    plt = Plots.scatter(X[1,:], X[2,:], group = Int.(y))
+    plt = Plots.scatter(X[1, :], X[2, :]; group=Int.(y))
     for (i, exper) in enumerate(expers)
         model = load_results(exper)[1]
         db = approximate_decision_boundary(model, data; length)
-        Plots.plot!(plt, db[1,:], db[2,:], label=i)
+        Plots.plot!(plt, db[1, :], db[2, :]; label=i)
     end
     return plt
 end
 
 function approximate_decision_boundary(model, data::Dataset; length::Int=100)
     X, y = get_data(data)
-    ranges = extrema(X, dims=2) |> x -> (x -> range(x[1], x[2]; length)).(x)
+    ranges = extrema(X; dims=2) |> x -> (x -> range(x[1], x[2]; length)).(x)
     xrange = ranges[1]
     yrange = ranges[2]
     return approximate_decision_boundary(model, xrange, yrange)
