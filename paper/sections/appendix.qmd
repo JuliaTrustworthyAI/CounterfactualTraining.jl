@@ -1,11 +1,3 @@
-\FloatBarrier
-
-<!-- \renewcommand{\thesection}{\Alph{section}}
-
-\renewcommand{\thetable}{A\arabic{table}}
-
-\renewcommand{\thefigure}{A\arabic{figure}} -->
-
 {{< include /paper/sections/other/notation.qmd >}}
 
 {{< include /paper/sections/other/technical.qmd >}}

@@ -593,7 +593,7 @@ function cidiff(df::DataFrame; var_interest::String="objective", alpha=0.95)
     df = DataFrames.unstack(df, Symbol(var_interest), :mean)
     x = Float64.(df[:, Symbol(vars[1])])
     y = Float64.(df[:, Symbol(vars[2])])
-    delta = x .- y
+    delta = abs.(x) .- abs.(y)      # use absolute values because IP/IP* are always negative (as per CE.jl convention)
     return (quantile(delta, (1-alpha)/2), quantile(delta, 1-(1-alpha)/2))
 end
 
@@ -714,8 +714,20 @@ function aggregate_ce_evaluation(
                                 sig_level = "$(sig_level)*"
                             end
                         end
+                    else
+                        # Return table with CI:
+                        df_agg =
+                            groupby(df_agg, byvars) |>
+                            df -> combine(df, :mean => (x -> mean(abs.(x))) => :mean)       # again using absolute values since negative (CE.jl convention)
+                        for (k, v) in conf_int
+                            df_agg[:, Symbol(k)] .= fill(v, nrow(df_agg))
+                        end
+                        df_agg = DataFrames.unstack(df_agg, Symbol(var_interest), :mean)
+                        return df_agg
                     end
                 end
+
+                display(df_agg)
 
                 # Final aggregation and standard errors:
                 df_agg = DataFrames.unstack(df_agg, Symbol(var_interest), :mean)
@@ -739,13 +751,7 @@ function aggregate_ce_evaluation(
                 if isnothing(conf_int)
                     return df_agg
                 else
-                    if return_sig_level
-                        df_agg.sig_level .= sig_level
-                    else
-                        for (k, v) in conf_int
-                            df_agg[:, Symbol(k)] .= fill(v, nrow(df_agg))
-                        end
-                    end
+                    df_agg.sig_level .= sig_level
                     return df_agg
                 end
             end
@@ -943,13 +949,15 @@ function plot_performance(
     return plt
 end
 
-function final_results(res_dir::String; drop_models::Vector{String}=String[])
+function final_results(res_dir::String; drop_models::Vector{String}=String[], verbose::Bool=false)
 
     # Get model and data directories:
     model_dirs = joinpath.(res_dir, readdir(res_dir)) |> x -> x[isdir.(x)]
     drop_models = (x -> joinpath(res_dir, x)).(drop_models)
     model_dirs = setdiff(model_dirs, drop_models)
-    @info "Aggregating for $model_dirs"
+    if verbose
+        @info "Aggregating for $model_dirs"
+    end
     data_dirs =
         [joinpath.(d, readdir(d)) |> x -> x[isdir.(x)] for d in model_dirs] |> x -> reduce(vcat, x)
 
@@ -1090,54 +1098,6 @@ function combine_header(m::LatexCell, l::String)
     end
     new_s = "$s \\\\ \$ \\lambda_{\\text{egy}}=$l \$"
     return new_s
-end
-
-function final_mutability(
-    res_dir::String;
-    var=["distance", "sens_outid:1", "sens_outid:2"],
-    byvars=["objective", "mutability"],
-    agg_cases::Bool=true,
-)
-    # CE:
-    df_ce = DataFrame()
-    for (i, y) in enumerate(var)
-        df = aggregate_ce_evaluation(
-            res_dir; byvars=byvars, y, agg_further_vars=["run"], rebase=true
-        )
-        df_ce = vcat(df_ce, df; cols=:union)
-    end
-
-    # For sensitivity, need to adjust values cause `aggregate_ce_evaluation` returns levels not changes of zeros are present:
-    adjusted_sens = []
-    if "avg_baseline" in names(df_ce)
-        for (i, val) in enumerate(df_ce.mean)
-            if ismissing(df_ce.avg_baseline[i]) || val == 0
-                push!(adjusted_sens, val)
-            else
-                val_bl = df_ce.baseline[i]
-                val_pct = 100 .* (val - val_bl) ./ abs.(val_bl)
-                push!(adjusted_sens, val_pct)
-            end
-        end
-        select!(df_ce, Not([:avg_baseline, :baseline]))
-        df_ce.mean = adjusted_sens
-    end
-
-    # Multiply by -1 to turn into -Δ%:
-    df_ce.mean .*= -1
-
-    # Aggregate across cases of interest:
-    if agg_cases
-        filter!(df_ce -> !all(df_ce.mutability .== "both"), df_ce)
-        df_ce =
-            groupby(df_ce, [:dataset, :variable]) |>
-            gdf -> combine(gdf, :mean => mean => :mean)
-    end
-
-    df = df_ce
-    df = DataFrames.unstack(df, :dataset, :mean)
-
-    return df
 end
 
 function final_params(res_dir::String; drop_models::Vector{String}=String[])

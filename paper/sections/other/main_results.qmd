@@ -9,6 +9,7 @@ using CTExperiments.CairoMakie
 using CTExperiments.CSV
 using CTExperiments.DataFrames
 using CTExperiments.Plots
+using CTExperiments.PrettyTables
 using CTExperiments.StatsBase
 using Random
 using Serialization
@@ -40,7 +41,7 @@ As discussed @sec-experiments, CT is sensitive to certain hyperparameter choices
 df = final_params(res_dir)
 float_cols = ["decision_threshold", "lambda_energy_reg"]
 get_table_inputs(df, nothing; backend=Val(:latex)) |>
-    inputs -> tabulate_results(inputs; table_type=:tabular, formatters=PrettyTables.ft_round(2, findall([x in float_cols for x in names(df)])))
+    inputs -> tabulate_results(inputs; wrap_table=false, table_type=:tabular, formatters=PrettyTables.ft_round(2, findall([x in float_cols for x in names(df)])))
 ```
 
 :::
@@ -89,8 +90,9 @@ end
 
 ### Robust Performance Plots
 
-
 ```{julia}
+#| eval: false
+
 plt = CTExperiments.plot_performance(res_dir, eps=range(0.0, 0.1, length=10) |> collect, adversarial=true, byvars=["objective", "eps"], drop_synthetic=false)
 plt_out = draw(plt, figure=(size=(1000, 150),), axis=(yticks=[0.0,0.5,1.0], limits=(nothing, (0,1)), xticklabelsvisible=false, xticksvisible=false))
 save("paper/figures/acc.png", plt_out; px_per_unit=3)
@@ -100,6 +102,8 @@ save("paper/figures/acc.png", plt_out; px_per_unit=3)
 
 
 ```{julia}
+#| eval: false
+
 lvls = [0.90, 0.95, 0.99]
 
 # Mutability:
@@ -129,14 +133,44 @@ df_ip.measure .= y
 y = "mmd"
 df_mmd = aggregate_ce_evaluation(
     res_dir;
-    y
+    y,
     return_sig_level=false, 
     conf_int=lvls,
     agg_further_vars=["run", "lambda_energy_eval"],
 )
 df_mmd.measure .= y
-df = innerjoin(df_mtbl, df_ip, df_mmd; on=:dataset)
+df = vcat(df_mtbl, df_ip, df_mmd)
+Serialization.serialize("paper/experiments/output/ci.jls", df)
 ```
+
+::: {#tbl-ci}
+
+```{julia}
+#| output: asis
+
+df = Serialization.deserialize("paper/experiments/output/ci.jls")
+df = select(df, :variable, :measure, :dataset, :full, :vanilla, "99.0%")
+df.variable = (x -> LatexCell(replace(x.data, " \$(-%)\$" => ""))).(df.variable)
+sort!(df, [:measure, :dataset])
+df = select(df, Not(:measure))
+df = transform(df, "99.0%" => AsTable) |>
+    df -> select(df, Not("99.0%"))
+rename!(df, :dataset => :data, :x1 => :LB, :x2 => :UB, :full => :CT, :vanilla => :BL)
+inputs = get_table_inputs(df, nothing; backend=Val(:latex))
+tabulate_results(
+    inputs; 
+    table_type=:tabular,
+    alignment = [:l, fill(:c, ncol(df)-1)...],
+    wrap_table = false,
+    sort_by_data = false,
+    hlines = :none,
+)
+
+```
+
+Mean outcomes for **CT** and **BL** along with bootstrapped confidence intervals (99%) for difference in mean outcomes grouped by dataset and evaluation metric. Column **LB** and **UB** show the lower and upper bound of the intervals, respectively, and computed using the percentile method. The underlying counterfactual evaluations are the same as the ones used to produce @tbl-main. 
+
+:::
 
 ## Qualitative Findings for Image Data
 
