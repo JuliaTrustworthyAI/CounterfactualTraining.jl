@@ -1,0 +1,36 @@
+---
+title: Supplementary Appendix
+engine: julia
+julia: 
+  exeflags: ["--project=../experiments/"]
+format:
+  arxiv-pdf:
+    keep-tex: true  
+    linenumbers: false
+    doublespacing: false
+    runninghead: "Counterfactual Training"
+    authorcols: true
+    include-in-header:
+      text: |
+        \usepackage[title]{appendix}
+        \usepackage{placeins}
+        \usepackage{amsthm}
+        \theoremstyle{plain}
+        \newtheorem{proposition}{Proposition}[section]
+        \theoremstyle{definition}
+        \newtheorem{definition}{Definition}[section]
+        \theoremstyle{definition}
+        \newtheorem{example}{Example}[section]
+        \theoremstyle{plain}
+---
+
+```{=latex}
+\begin{appendices}
+```
+
+{{< include /paper/sections/appendix.qmd >}}
+
+```{=latex}
+\end{appendices}
+```
+

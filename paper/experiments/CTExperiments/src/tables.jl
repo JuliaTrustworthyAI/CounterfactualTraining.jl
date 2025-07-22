@@ -14,20 +14,31 @@ function tabulate_results(
     formatters=PrettyTables.ft_round(2),
     alignment=:c,
     wrap_table_environment="table*",
+    sort_by_data::Bool=true,
+    hlines::Union{Nothing,Symbol}=nothing,
     kwrgs...,
 )
     df = inputs[1]
 
     # Group averages:
-    if "Avg." in df.data
-        _ds_order = [ds_order..., "Avg."]
-        hlines = [0, 1, 5, length(ds_order)+1, length(ds_order)+2]
-    else
-        _ds_order = ds_order
-        hlines = [0, 1, 5, length(ds_order)+2]
+    if "data" in names(df) && hlines != :none
+        if "Avg." in df.data
+            _ds_order = [ds_order..., "Avg."]
+            hlines = [0, 1, 5, length(ds_order)+1, length(ds_order)+2]
+        else
+            _ds_order = ds_order
+            hlines = [0, 1, 5, length(ds_order)+2]
+        end
+        df.data = categorical(df.data; levels=_ds_order)
+        if sort_by_data
+            sort!(df, :data)
+        end
     end
-    df.data = categorical(df.data; levels=_ds_order)
-    sort!(df, :data)
+
+    if hlines == :none
+    hlines = nothing
+    end
+
     other_inputs = inputs[2]
     if isa(other_inputs.backend, Val{:latex})
         tf = PrettyTables.tf_latex_booktabs

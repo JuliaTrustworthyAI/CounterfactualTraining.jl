@@ -949,13 +949,15 @@ function plot_performance(
     return plt
 end
 
-function final_results(res_dir::String; drop_models::Vector{String}=String[])
+function final_results(res_dir::String; drop_models::Vector{String}=String[], verbose::Bool=false)
 
     # Get model and data directories:
     model_dirs = joinpath.(res_dir, readdir(res_dir)) |> x -> x[isdir.(x)]
     drop_models = (x -> joinpath(res_dir, x)).(drop_models)
     model_dirs = setdiff(model_dirs, drop_models)
-    @info "Aggregating for $model_dirs"
+    if verbose
+        @info "Aggregating for $model_dirs"
+    end
     data_dirs =
         [joinpath.(d, readdir(d)) |> x -> x[isdir.(x)] for d in model_dirs] |> x -> reduce(vcat, x)
 
