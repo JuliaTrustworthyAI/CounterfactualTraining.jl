@@ -37,6 +37,7 @@ expers = MPI.bcast(expers, comm; root=0)
 # Compute IG:
 for (i, exper_list) in enumerate(expers)
     data = CTExperiments.dname(exper_list[1].data)      # get dataset name
+    X = get_data(exper_list[1].data)[1]
     dict = Dict(:data => data)
     for exper in exper_list
         @assert exper.data.mutability isa Vector{Int} "No mutability constraints specified"
@@ -44,14 +45,24 @@ for (i, exper_list) in enumerate(expers)
         obj = exper.training_params.objective
 
         # distribute
-        igs = CTExperiments.integrated_gradients(exper; nrounds=10, verbose=true, comm=comm, max_entropy=false)
-
+        if data == "mnist"
+            bl = -ones(size(X,1),1)
+            igs = CTExperiments.integrated_gradients(exper; nrounds=10, verbose=true, comm=comm, max_entropy=false, baseline=bl)
+        else
+            igs = CTExperiments.integrated_gradients(exper; nrounds=10, verbose=true, comm=comm, max_entropy=false, baseline_type="random")
+        end
+        
         if rank == 0
 
             # Collect:
-            igs = (ig -> ig ./ sum(abs.(ig))).(igs)    # compute normalized contributions
-            m = mean((ig -> ig[exper.data.mutability...,1]).(igs))
-            se = std((ig -> ig[exper.data.mutability...,1]).(igs))
+            igs = (ig -> ig ./ (maximum(ig) .- minimum(ig)) ).(igs)    # compute normalized contributions
+            igs = (ig -> ig[exper.data.mutability,1]).(igs) |> igs -> reduce(hcat, igs)
+
+            # Aggregate:
+            m = mean(igs, dims=2)       # across rounds
+            m = mean(m, dims=1)[1]      # across features
+            se = std(igs, dims=2)       # across rounds 
+            se = mean(se, dims=1)[1]    # across features
             df = DataFrame(Dict(
                 :data => data,
                 :objective => obj,
