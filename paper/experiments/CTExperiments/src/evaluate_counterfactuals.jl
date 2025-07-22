@@ -499,7 +499,7 @@ using MPI
 using Random
 
 # Main function with optional comm parameter
-function integrated_gradients(cfg::Experiment; n=1000, test_set=true, max_entropy::Bool=true, 
+function integrated_gradients(cfg::Experiment; n=1000, idx::Union{Nothing,Vector{Int}}=nothing, test_set=true, max_entropy::Bool=true, 
                             nrounds::Int=10, verbose::Bool=false, baseline_type="random", 
                             comm::Union{Nothing,MPI.Comm}=nothing, kwrgs...)
     
@@ -507,7 +507,10 @@ function integrated_gradients(cfg::Experiment; n=1000, test_set=true, max_entrop
     X, y = get_data(cfg.data; n, test_set)
 
     # Bootstrap:
-    idx = rand(1:size(X,2),n)
+    if isnothing(idx)
+        idx = rand(1:size(X,2),n)
+    end
+
     X = X[:,idx]
     y = y[idx]
     

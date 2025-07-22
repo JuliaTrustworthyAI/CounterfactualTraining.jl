@@ -13,6 +13,7 @@ using TaijaParallel
 
 res_dir = get_global_param("res_dir", "paper/experiments/output/final_run/mutability")
 keep_models = [get_global_param("drop_models", "mlp")]
+nrounds = get_global_param("nrounds", 100)
 
 # Initialize MPI
 MPI.Init()
@@ -36,9 +37,10 @@ expers = MPI.bcast(expers, comm; root=0)
 
 # Compute IG:
 for (i, exper_list) in enumerate(expers)
+
     data = CTExperiments.dname(exper_list[1].data)      # get dataset name
     X = get_data(exper_list[1].data)[1]
-    dict = Dict(:data => data)
+
     for exper in exper_list
         @assert exper.data.mutability isa Vector{Int} "No mutability constraints specified"
         exper_name = exper.meta_params.experiment_name
@@ -47,15 +49,15 @@ for (i, exper_list) in enumerate(expers)
         # distribute
         if data == "mnist"
             bl = -ones(size(X,1),1)
-            igs = CTExperiments.integrated_gradients(exper; nrounds=10, verbose=true, comm=comm, max_entropy=false, baseline=bl)
+            igs = CTExperiments.integrated_gradients(exper; nrounds=nrounds, verbose=true, comm=comm, max_entropy=false, baseline=bl)
         else
-            igs = CTExperiments.integrated_gradients(exper; nrounds=10, verbose=true, comm=comm, max_entropy=false, baseline_type="random")
+            igs = CTExperiments.integrated_gradients(exper; nrounds=nrounds, verbose=true, comm=comm, max_entropy=false, baseline_type="random")
         end
         
         if rank == 0
 
             # Collect:
-            igs = (ig -> ig ./ (maximum(ig) .- minimum(ig)) ).(igs)    # compute normalized contributions
+            igs = (ig -> (ig) ./ (maximum(ig) .- minimum(ig) ) ).(igs)    # compute normalized contributions
             igs = (ig -> ig[exper.data.mutability,1]).(igs) |> igs -> reduce(hcat, igs)
 
             # Aggregate:
