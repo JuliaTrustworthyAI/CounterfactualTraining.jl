@@ -14,6 +14,7 @@ using TaijaParallel
 res_dir = get_global_param("res_dir", "paper/experiments/output/final_run/mutability")
 keep_models = [get_global_param("drop_models", "mlp")]
 nrounds = get_global_param("nrounds", 100)
+nsamples = get_global_param("nsamples", 1000)
 
 # Initialize MPI
 MPI.Init()
@@ -39,7 +40,10 @@ expers = MPI.bcast(expers, comm; root=0)
 for (i, exper_list) in enumerate(expers)
 
     data = CTExperiments.dname(exper_list[1].data)      # get dataset name
-    X = get_data(exper_list[1].data)[1]
+
+    # Bootstrap sample indices
+    X, y = get_data(exper_list[1].data; test_set=true)
+    idx = [rand(1:size(X,2),nsamples) for i in 1:nrounds] 
 
     for exper in exper_list
         @assert exper.data.mutability isa Vector{Int} "No mutability constraints specified"
@@ -49,9 +53,9 @@ for (i, exper_list) in enumerate(expers)
         # distribute
         if data == "mnist"
             bl = -ones(size(X,1),1)
-            igs = CTExperiments.integrated_gradients(exper; nrounds=nrounds, verbose=true, comm=comm, max_entropy=false, baseline=bl)
+            igs = CTExperiments.integrated_gradients(exper; idx=idx, nrounds=nrounds, verbose=true, comm=comm, max_entropy=false, baseline=bl)
         else
-            igs = CTExperiments.integrated_gradients(exper; nrounds=nrounds, verbose=true, comm=comm, max_entropy=false, baseline_type="random")
+            igs = CTExperiments.integrated_gradients(exper; idx=idx, nrounds=nrounds, verbose=true, comm=comm, max_entropy=false, baseline_type="random")
         end
         
         if rank == 0

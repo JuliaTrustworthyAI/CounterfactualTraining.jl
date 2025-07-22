@@ -499,30 +499,37 @@ using MPI
 using Random
 
 # Main function with optional comm parameter
-function integrated_gradients(cfg::Experiment; n=1000, idx::Union{Nothing,Vector{Int}}=nothing, test_set=true, max_entropy::Bool=true, 
+function integrated_gradients(cfg::Experiment; n=1000, idx::Union{Nothing,Vector{Vector{Int}}}=nothing, test_set=true, max_entropy::Bool=true, 
                             nrounds::Int=10, verbose::Bool=false, baseline_type="random", 
                             comm::Union{Nothing,MPI.Comm}=nothing, kwrgs...)
     
     model, _, _ = load_results(cfg)
-    X, y = get_data(cfg.data; n, test_set)
+    X, y = get_data(cfg.data; test_set)
 
-    # Bootstrap:
+    # Bootstrap samples:
     if isnothing(idx)
-        idx = rand(1:size(X,2),n)
+        idx = [rand(1:size(X,2),n) for i in 1:nrounds]
     end
-
-    X = X[:,idx]
-    y = y[idx]
+    Xs = []
+    ys = []
+    for i in idx
+        push!(Xs, X[:,i])
+        push!(ys, y[i])
+    end
     
-    return integrated_gradients(model, X, y, comm; max_entropy, nrounds, verbose, baseline_type, kwrgs...)
+    return integrated_gradients(model, Xs, ys, comm; max_entropy, nrounds, verbose, baseline_type, kwrgs...)
 end
 
 # Sequential version (original implementation)
-function integrated_gradients(model, X, y, comm::Nothing; max_entropy::Bool=true, 
+function integrated_gradients(model, Xs, ys, comm::Nothing; max_entropy::Bool=true, 
                             nrounds::Int=10, verbose::Bool=false, baseline_type="random", kwrgs...)
-    
+
     igs = Matrix{<:AbstractFloat}[]
     for i in 1:nrounds
+
+        X = Xs[i]
+        y = ys[i]
+
         if verbose
             @info "Round $i/$nrounds"
         end
@@ -542,7 +549,7 @@ function integrated_gradients(model, X, y, comm::Nothing; max_entropy::Bool=true
 end
 
 # MPI distributed version
-function integrated_gradients(model, X, y, comm::MPI.Comm; max_entropy::Bool=true, 
+function integrated_gradients(model, Xs, ys, comm::MPI.Comm; max_entropy::Bool=true, 
                             nrounds::Int=10, verbose::Bool=false, baseline_type="random", kwrgs...)
     
     rank = MPI.Comm_rank(comm)
@@ -565,6 +572,10 @@ function integrated_gradients(model, X, y, comm::MPI.Comm; max_entropy::Bool=tru
     local_igs = Matrix{<:AbstractFloat}[]
     for i in 1:local_nrounds
         global_round = start_round + i - 1
+
+        X = Xs[global_round]
+        y = ys[global_round]
+
         if verbose
             @info "Process $rank: Round $global_round/$nrounds (local: $i/$local_nrounds)"
         end
