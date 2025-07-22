@@ -17,7 +17,7 @@ author:
   - name: Cynthia C. S. Liem
     affiliation:
       - ref: tu
-bibliography: quarto_ecml/bibliography.bib
+bibliography: quarto_aaai/bibliography.bib
 keywords: 
   - Counterfactual Training
   - Counterfactual Explanations
@@ -29,7 +29,8 @@ crossref:
   exr-prefix: "Parameters"
   cor-title: "Research Question"
   cor-prefix: "RQ"
-filters: [abstract-section]
+filters: 
+  - abstract-section
 header-includes: |
   \usepackage{placeins}
   \usepackage{siunitx}

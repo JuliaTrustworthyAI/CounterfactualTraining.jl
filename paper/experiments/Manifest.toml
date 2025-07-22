@@ -307,7 +307,7 @@ uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 version = "0.10.15"
 
 [[deps.CTExperiments]]
-deps = ["Accessors", "AlgebraOfGraphics", "CSV", "CairoMakie", "ColorSchemes", "CounterfactualExplanations", "CounterfactualTraining", "DataFrames", "Flux", "HypothesisTests", "IntegratedGradients", "JLD2", "JSON", "KernelDensity", "KernelFunctions", "Logging", "MPI", "Markdown", "MultivariateStats", "Plots", "PrettyTables", "Random", "Serialization", "StatisticalMeasures", "StatsBase", "TOML", "TaijaData", "TaijaParallel", "TaijaPlotting", "UUIDs"]
+deps = ["Accessors", "AlgebraOfGraphics", "CSV", "CairoMakie", "CategoricalArrays", "ColorSchemes", "CounterfactualExplanations", "CounterfactualTraining", "DataFrames", "Flux", "HypothesisTests", "IntegratedGradients", "JLD2", "JSON", "KernelDensity", "KernelFunctions", "Logging", "MPI", "Markdown", "MultivariateStats", "Plots", "PrettyTables", "Random", "Serialization", "StatisticalMeasures", "StatsBase", "TOML", "TaijaData", "TaijaParallel", "TaijaPlotting", "UUIDs"]
 path = "CTExperiments"
 uuid = "5eca96c7-09a4-4424-a5a1-dee2b4aead1e"
 version = "0.0.0"
@@ -1371,9 +1371,9 @@ version = "0.1.0"
 
 [[deps.IntelOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "LazyArtifacts", "Libdl"]
-git-tree-sha1 = "0f14a5456bdc6b9731a5682f439a672750a09e48"
+git-tree-sha1 = "ec1debd61c300961f98064cfb21287613ad7f303"
 uuid = "1d5cc7b8-4909-519e-a0f8-d0f5ad9712d0"
-version = "2025.0.4+0"
+version = "2025.2.0+0"
 
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
@@ -2702,9 +2702,9 @@ version = "0.5.0"
 
 [[deps.ScopedValues]]
 deps = ["HashArrayMappedTries", "Logging"]
-git-tree-sha1 = "1147f140b4c8ddab224c94efa9569fc23d63ab44"
+git-tree-sha1 = "7f44eef6b1d284465fafc66baf4d9bdcc239a15b"
 uuid = "7e506255-f358-4e82-b7e4-beb19740aa63"
-version = "1.3.0"
+version = "1.4.0"
 
 [[deps.Scratch]]
 deps = ["Dates"]
@@ -2852,9 +2852,9 @@ weakdeps = ["OffsetArrays", "StaticArrays"]
 
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "PrecompileTools", "Random", "StaticArraysCore"]
-git-tree-sha1 = "0feb6b9031bd5c51f9072393eb5ab3efd31bf9e4"
+git-tree-sha1 = "cbea8a6bd7bed51b1619658dec70035e07b8502f"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.9.13"
+version = "1.9.14"
 weakdeps = ["ChainRulesCore", "Statistics"]
 
     [deps.StaticArrays.extensions]

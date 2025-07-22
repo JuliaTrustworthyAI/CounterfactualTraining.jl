@@ -67,7 +67,7 @@ end
 dname(d::GaussMulti) = "gaussm"
 
 function load_data(d::GaussMulti, n::Int; seed=TaijaData.data_seed)
-    return  TaijaData.load_blobs(n; k=10, cluster_std=0.5)
+    return TaijaData.load_blobs(n; k=10, cluster_std=0.5)
 end
 
 """

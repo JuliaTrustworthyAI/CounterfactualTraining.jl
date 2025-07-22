@@ -1,72 +1,98 @@
 # Experiments {#sec-experiments}
 
-We seek to answer the following three research questions:
+We seek to answer the following four research questions:
 
-1. To what extent does the CT objective in Equation 1 induce models to learn plausible explanations?
-2. To what extent does CT lead to more favorable AR outcomes in the presence of actionability constraints?
-3. What are the effects of hyperparameter selection on CT?
+\begin{enumerate}[label={(\makebox[2em][c]{RQ\arabic*})}, leftmargin=3.5em]
+    \item To what extent does the CT objective in Equation 1 induce models to learn plausible explanations?
+    \item To what extent does CT result in more favorable algorithmic recourse outcomes in the presence of actionability constraints?
+    \item To what extent does CT influence the adversarial robustness of trained models?
+    \item What are the effects of hyperparameter selection on counterfactual training?
+\end{enumerate}
 
 ## Experimental Setup
 
-Our focus is the improvement in explainability (Def. \ref{def-explainability}). Thus, we primarily look at the plausibility and cost of faithfully generated counterfactuals at test time. Other metrics, such as validity and redundancy, are reported in the supplementary appendix. To measure the cost, we follow the standard proxy of distances ($\ell_1$-norm) between factuals and counterfactuals. For plausibility, we assess how similar CEs are to the observed samples in the target domain, $\mathbf{X}^+\subset\mathcal{X}^+$. We rely on the metric used by @altmeyer2024faithful,
+Our focus is the improvement in explainability (Def. \ref{def-explainability}). Thus, we primarily look at the plausibility and cost of faithfully generated counterfactuals at test time. Other metrics, such as validity and redundancy, are reported in the supplementary appendix. To measure the cost, we follow the standard proxy of distances ($\ell_1$-norm) between factuals and counterfactuals. For plausibility, we assess how similar CEs are to observed samples in the target domain, $\mathbf{X}^+\subset\mathcal{X}^+$. We rely on the metric used by @altmeyer2024faithful,
 $$
 \text{IP}(\mathbf{x}^\prime,\mathbf{X}^+) = \frac{1}{\lvert\mathbf{X}^+\rvert}\sum_{\mathbf{x} \in \mathbf{X}^+} \text{dist}(\mathbf{x}^{\prime},\mathbf{x})
 $$ {#eq-impl-dist}
-and introduce a novel divergence metric,
+and introduce a novel divergence-based adaptation,
 $$
 \text{IP}^*(\mathbf{X}^\prime,\mathbf{X}^+) = \text{MMD}(\mathbf{X}^\prime,\mathbf{X}^+)
 $$ {#eq-impl-div}
 where $\mathbf{X}^\prime$ denotes a collection of counterfactuals and $\text{MMD}(\cdot)$ is the unbiased estimate of the squared population maximum mean discrepancy, proposed by @gretton2012kernel. The metric in @eq-impl-div is equal to zero if and only if the two distributions are exactly the same, $\mathbf{X}^\prime=\mathbf{X}^+$.
 
-For predictive performance, we use standard metrics, such as robust accuracy estimated on adversarially perturbed data using FGSM [@goodfellow2014explaining].
+To assess outcomes with respect to actionability for non-linear models, we look at the average costs of valid counterfactuals in terms of their distances from factual starting points. While this an imperfect proxy of sensitivity, we hypothesize that CT can reduce these costs by teaching models to seek plausibility with respect to mutable features, much like we observe in @fig-poc in panel (d) compared to (c). We supplement this analysis with qualitative findings for integrated gradients [@sundararajan2017ig]. Finally, for predictive performance, we use standard metrics, such as robust accuracy estimated on adversarially perturbed data using FGSM [@goodfellow2014explaining].
 
-We run experiments with three gradient-based generators: *Generic* of @wachter2017counterfactual as a simple baseline approach, *REVISE* [@joshi2019realistic] that aims to generate plausible counterfactuals using a surrogate Variational Autoencoder (VAE), and *ECCo*---the generator of @altmeyer2024faithful without the conformal prediction component---as a method that directly targets both faithfulness and plausibility of the counterfactuals.
+We run experiments with three gradient-based generators: *Generic* of @wachter2017counterfactual as a simple baseline approach, *REVISE* [@joshi2019realistic] that aims to generate plausible counterfactuals using a surrogate Variational Autoencoder (VAE), and *ECCCo* [@altmeyer2024faithful], which targets faithfulness.
 
-We make use of nine classification datasets common in the CE/AR literature. Four of them are synthetic with two classes and different characteristics: linearly separable clusters (*LS*), overlapping clusters (*OL*), concentric circles (*Circ*), and interlocking moons (*Moon*). They are generated using the library of @altmeyer2023explaining and we present them in the supplementary appendix. Next, we have four real-world binary tabular datasets: *Adult* (Census data) of @becker1996adult2, California housing (*CH*) of @pace1997sparse, Default of Credit Card Clients (*Cred*) of @yeh2016default, and Give Me Some Credit (*GMSC*) from @kaggle2011give2. Finally, for the convenience of illustration, we use the 10-class *MNIST* [@lecun1998mnist].
+We make use of nine classification datasets common in the CE/AR literature. Four of them are synthetic with two classes and different characteristics: linearly separable clusters (*LS*), overlapping clusters (*OL*), concentric circles (*Circ*), and interlocking moons (*Moon*). Next, we have four real-world binary tabular datasets: *Adult* (Census data) of @becker1996adult2, California housing (*CH*) of @pace1997sparse, Default of Credit Card Clients (*Cred*) of @yeh2016default, and Give Me Some Credit (*GMSC*) from @kaggle2011give. Finally, for the convenience of illustration, we use the 10-class *MNIST* [@lecun1998mnist].
 
 To assess CT, we investigate the improvements in performance metrics when using it on top of a weak baseline (BL): a multilayer perceptron (*MLP*). This is the best way to get a clear picture of the effectiveness of CT, and it is consistent with evaluation practices in the related literature [@goodfellow2014explaining;@ross2021learning;@teney2020learning].
 
 ## Experimental Results
 
-Our main quantitative results for *MLP* models are summarised in @tbl-main, which presents average outcomes along with bootstrapped two standard errors. The following example motivates CT and illustrates how to read @tbl-main.
+Our main results for plausibility and actionability for *MLP* models are summarised in @tbl-main that presents counterfactual outcomes grouped by dataset along with standard errors averaged across bootstrap samples. Asterisks ($^*$) are used when the bootstrapped 99%-confidence interval of differences in mean outcomes does *not* include zero, so the observed effects are statistically significant at the 0.01 level.
 
-![Illustration of how CT improves model explainability: (a) conventional training, all mutable; (b) CT, all mutable; (c) conventional, *age* immutable; (d) CT, *age* immutable. The linear decision boundary is shown in green along with training data colored according to ground-truth labels: $y^-=1$ (blue) and $y^+=2$ (orange). Stars indicate counterfactuals in the target class.](/paper/figures/poc.svg){#fig-poc fig-env="figure*"}
+The first two columns ($\text{IP}$ and $\text{IP}^*$) show the percentage reduction in implausibility for our two metrics when using CT on top of the weak baseline. As an example, consider the first row for *LS* data: the observed positive values indicate that faithful counterfactuals are around 30-55% more plausible for models trained with CT, in line with our observations in panel (b) of @fig-poc compared to panel (a).
 
-### Synthetic Example: Prediction of Credit Card Defaults.
-
-@fig-poc presents results for a linear classifier fitted to *LS* that complies with the data assumptions in Proposition \ref{prp-mtblty}. The four panels show the outcomes for different training procedures: in panels (a) and (c) we have trained the models conventionally, while in panels (b) and (d) we have applied CT. For illustrative purposes, suppose the first feature represents *debt* (mutable) and the second feature represents *age* (immutable) of loan applicants seeking counterfactual explanations for moving to the target class: loan provided (orange).
-
-In all four cases, it is possible to generate valid counterfactuals (stars) for unsuccessful applicants (blue). They cross the decision boundary (green) into the target class, but their quality differs. In panel (a), they are not plausible: they do not comply with the distribution of the factuals in $y^+$ to the point where they form a clearly discernible cluster. In panel (b), they are highly plausible, meeting the first objective of Def. \ref{def-explainability}. This difference in outcomes is quantified for the non-linear MLP in the first two columns of @tbl-main as the $\%$-reduction in implausibility: it is substantial and statistically significant for *LS* across both metrics, the distance-based $\text{IP}$ (29%) and divergence-based $\text{IP}^*$ (55%).
-
-In panel (c) of @fig-poc, the CEs involve substantial reductions in *debt* for younger applicants. By comparison, counterfactual paths are shorter on average in panel (d) where we have protected the immutable *age* as described in @sec-constraints. Due to the classifier's lower sensitivity to *age*, recommendations with respect to *debt* are much more homogenous and do not unfairly punish younger individuals. These CEs are also plausible with respect to the mutable feature, despite requiring smaller debt reductions on average, resulting in smaller costs to individuals. This result is quantified for the non-linear case in column three of @tbl-main, which shows the $\%$-reduction in costs averaged across valid counterfactuals. Once again, the impact of CT is statistically significant and substantial (14%). Thus, we consider the model in panel (d) as the most explainable according to Def. \ref{def-explainability}. Next, we present the results for all remaining datasets.
-
-### Plausibility. {#sec-plaus}
-
-We find that CT generally leads to substantial and statistically significant improvements in plausibility: average reductions in $\text{IP}$ range from around 7% for *MNIST* to almost 60% for *Circ*; for the real-world tabular datasets they are around 12% for both *CH* and *Cred* and almost 25% for *GMSC*; for *Adult* and *OL* we find no significant impact of CT on $\text{IP}$. Reductions in $\text{IP}^*$ are even more substantial and generally statistically significant, although the average degree of uncertainty is higher than for $\text{IP}$: average reductions range from around 20% (*Moons*) to almost 90% (*Circ*). The only negative findings for *OL* and *MNIST* are statistically insignificant and, for MNIST, do not align with qualitative findings, which are much more plausible for CT (@fig-mnist).
-
-![Sample explanations for *MNIST* for BL (top) and CT (bottom). First column is a random factual 0 (blue). Columns 2 to 5 are corresponding *ECCo* counterfactuals in target classes 1 to 4. Columns 6 to 10 show integrated gradients averaged over all test images in classes 5 to 9.](/paper/figures/mnist_body.png){#fig-mnist}
-
-### Actionability. {#sec-act}
-
-We also find that CT can reduce sensitivity to immutable, protected features and thus lead to less costly counterfactual outcomes as shown in @fig-poc. In column three of @tbl-main, we impose mutability constraints on selected features and compute the reduction in average costs of CEs associated with CT compared to the baseline: for synthetic datasets, we always protect the first feature; for all real-world tabular datasets we could identify and protect an *age* variable; for *MNIST*, we protect the five upper and lower pixel rows of the full image. Reductions in costs are overwhelmingly positive and significant of up to nearly 60% for *GMSC*. While the estimated cost reductions for *Adult* and *MNIST* are not significant, @fig-mnist (columns 6-10) demonstrates that CT does have the expected effect: sensitivity to protected features as per integrated gradients is drastically reduced; details of this experiment are reported in the supplementary appendix. In the case of *Cred*, average costs increase, likely because any potential benefits from protecting the *age* are outweighed by the increase in costs required for greater plausibility.
-
-### Predictive Performance. {#sec-pred} 
-
-Test accuracy for CT is virtually identical to the baseline for *Adult*, *Circ*, *LS*, *Moon*, and *OL*, and even slightly improved for *Cred*. Exceptions to this general pattern are *MNIST*, *CH*, and *GMSC*, for which we observe a reduction in test accuracy of 2, 5, and 15 percentage points respectively. When looking at robust test accuracies (Acc.$^*$) for these datasets in particular, we find that CT strongly outperforms the baseline. In fact, we observe that CT improves adversarial robustness on all datasets. 
+The third column shows the results for a scenario when mutability constraints are imposed on the selected features. Again, we are comparing CT to the baseline, so reductions in the positive direction imply that valid counterfactuals are "cheaper" (more actionable) when using CT with feature protection. Relating this back to @fig-poc, the third column represents the reduction in distances travelled by counterfactuals in panel (d) compared to panel (c). In the following paragraphs, we summarize the results for all datasets.
 
 ::: {#tbl-main}
-
 ```{=latex}
-\begin{table*}
-\input{tables/main.tex}
-\end{table*}
+\begin{table}[h]
+\small
+\centering
+\begin{tabular}{
+  l
+  S[table-format=2.2(1.2)]
+  S[table-format=3.2(3.2)]
+  S[table-format=3.2(1.2)]
+}
+  \toprule
+  \textbf{Data} & \textbf{$ \text{IP} $ $(-\%)$} & \textbf{$ \text{IP}^* $ $(-\%)$} & \textbf{Cost $(-\%)$} \\\midrule
+  LS & 29.05\pm0.67 $^{*}$ & 55.33\pm2.03 $^{*}$ & 14.07\pm0.6 $^{*}$ \\
+  Circ & 56.29\pm0.44 $^{*}$ & 89.38\pm9.3 $^{*}$ & 45.55\pm0.76 $^{*}$ \\
+  Moon & 20.62\pm0.69 $^{*}$ & 19.26\pm8.12 $^{*}$ & 2.86\pm1.03 $^{*}$ \\
+  OL & -1.13\pm0.88 $^{}$ & -24.52\pm14.52 $^{}$ & 38.39\pm2.21 $^{*}$ \\\midrule
+  Adult & 0.77\pm1.34 $^{}$ & 32.29\pm6.87 $^{*}$ & -2.82\pm4.88 $^{}$ \\
+  CH & 12.05\pm1.41 $^{*}$ & 70.27\pm3.72 $^{*}$ & 40.71\pm1.55 $^{*}$ \\
+  Cred & 12.31\pm1.84 $^{*}$ & 54.89\pm11.21 $^{*}$ & -17.43\pm5.17 $^{*}$ \\
+  GMSC & 23.44\pm1.99 $^{*}$ & 73.31\pm4.83 $^{*}$ & 62.64\pm2.04 $^{*}$ \\
+  MNIST & 7.05\pm1.8 $^{*}$ & -25.09\pm109.05 $^{}$ & -12.34\pm6.52 $^{}$ \\\midrule
+  Avg. & 17.83 & 38.35 & 19.07 \\\bottomrule
+\end{tabular}
+\end{table}
 ```
 
-Key performance metrics and bootstrapped standard errors (omitted if essentially zero) for all datasets. **Plausibility** (columns 1-2): percentage reduction in implausibility for $\text{IP}$ and $\text{IP}^*$, respectively; **Actionability** (column 3): percentage reduction in costs with protected features. **Accuracy** (columns 4-7): test accuracies and robust accuracies ($\text{Acc}^*$) for CT and the baseline (BL). Counterfactual outcomes (col. 1-3) are aggregated across bootstrap samples and varying degrees of the energy penalty $\lambda_{\text{egy}}$ used for *ECCo* at test time. Asterisks ($^*$) in columns 1-3 indicate that bootstrapped 99%-confidence interval of differences in mean outcomes does *not* include zero. Standard errors for accuracy (col. 4-7) are bootstrapped from the test set.
+Key evaluation metrics for valid counterfactual along with bootstrapped standard errors for all datasets. **Plausibility** (columns 1-2): percentage reduction in implausibility for $\text{IP}$ and $\text{IP}^*$, respectively; **Cost** / **Actionability** (column 3): percentage reduction in costs when selected features are protected. Outcomes are aggregated across bootstrap samples (100 rounds) and varying degrees of the energy penalty $\lambda_{\text{egy}}$ used for *ECCCo* at test time. Asterisks ($^*$) indicate that the bootstrapped 99%-confidence interval of differences in mean outcomes does *not* include zero.
 :::
 
-### Hyperparameter settings. {#sec-hyperparameters}
-We test the impact of three types of hyperparameters. Here we focus on the highlights; full results are available in the supplementary appendix.  
-`\indent`{=latex} First, we note that CT is highly sensitive to the choice of a CE generator and its hyperparameters but (1) there are manageable patterns, and (2) we can usually identify settings that improve either plausibility or cost, and often both of them at the same time. For example, *REVISE* tends to perform the worst, most likely because it uses a surrogate VAE to generate counterfactuals which impedes faithfulness [@altmeyer2024faithful]. Increasing $T$, the maximum number of steps, generally yields better outcomes because more CEs can mature in each training epoch. The impact of $\tau$, the required decision threshold is more difficult to predict. On "harder" datasets it may be difficult to satisfy high $\tau$ for any given sample (i.e., also factuals) and so increasing this threshold does not seem to correlate with better outcomes. In fact, $\tau=0.5$ generally leads to optimal results as it is associated with high proportions of mature counterfactuals.  
-`\indent`{=latex} Second, the strength of the energy regularization, $\lambda_{\text{reg}}$ is highly impactful and leads to poor performance in terms of decreased plausibility and increased costs if insufficiently high. The sensitivity with respect to $\lambda_{\text{div}}$ and $\lambda_{\text{adv}}$ is much less evident. While high values of $\lambda_{\text{reg}}$ may increase the variability in outcomes when combined with high values of $\lambda_{\text{div}}$ or $\lambda_{\text{adv}}$, this effect is not very pronounced.   
-`\indent`{=latex} Third, the effectiveness and stability of CT is positively associated with the number of counterfactuals generated during each training epoch. A higher number of training epochs is also beneficial. Interestingly, we observed desired improvements when CT was combined with conventional training and applied only for the final 50% of epochs of the complete training process. Put differently, CT can improve the explainability of models in a fine-tuning manner. 
+### Plausibility (RQ1). {#sec-plaus}
+*CT generally produces substantial and statistically significant improvements in plausibility.*
+
+Average reductions in $\text{IP}$ range from around 7% for *MNIST* to almost 60% for *Circ*. For the real-world tabular datasets they are around 12% for *CH* and *Cred* and almost 25% for *GMSC*; for *Adult* and *OL* we find no significant impact of CT on $\text{IP}$. Reductions in $\text{IP}^*$ are even more substantial and generally statistically significant, although the average degree of uncertainty is higher than for $\text{IP}$: reductions range from around 20% (*Moons*) to almost 90% (*Circ*). The only negative findings are for OL and MNIST, but they are not statistically significant. A qualitative inspection of the counterfactuals in @fig-mnist (columns 2-5) suggests recognizable digits 1-4 for the model trained with CT (bottom row), unlike the baseline (top row).
+
+![Visual explanations for *MNIST* for BL (top) and CT (bottom). **Plausibility**: col. 1 is a random factual 0 (blue); cols. 2-5 are corresponding *ECCCo* counterfactuals in target classes 1 to 4. **Actionability**: cols. 6-10 show integrated gradients averaged over test images in classes 5 to 9.](/paper/figures/mnist_body.png){#fig-mnist}
+
+### Actionability (RQ2). {#sec-act}
+*CT tends to improve actionability in the presence of immutable features, but this is not guaranteed if the assumptions in Proposition \ref{prp-mtblty} are violated.*
+
+For synthetic datasets, we always protect the first feature; for all real-world tabular datasets we could identify and protect an *age* variable; for *MNIST*, we protect the five upper and lower pixel rows of the full image. Statistically significant reductions in costs overwhelmingly point in the expected positive direction reaching up to around 60% for *GMSC*. Only in the case of *Cred*, average costs increase, likely because any potential benefits from protecting the *age* are outweighed by the increase in costs required for greater plausibility. The findings for *Adult* and *MNIST* are not significant. A qualitative inspection of the class-conditional integrated gradients in @fig-mnist (columns 6-10) suggests that CT still has the expected effect: the model (bottom) is insensitive (blue) to the protected rows of pixels; details of this experiment are reported in the supplementary appendix.
+
+![Test accuracies on adversarially perturbed data with varying perturbation sizes for all non-synthetic datasets.](/paper/figures/acc.png){#fig-acc fig-env="figure*"}
+
+### Predictive Performance (RQ3). {#sec-pred}
+*Models trained with CT are substantially more robust to gradient-based adversarial attacks than conventionally-trained baselines.*
+
+Test accuracies on adversarially perturbed data are shown in @fig-acc. The perturbations size, $\varepsilon\in[0,0.1]$, increases along the horizontal axis and includes zero, corresponding to standard test accuracy for non-perturbed data. For all synthetic datasets, predictive performance of CT is virtually identical to the baseline and unaffected by perturbations. For all real-world datasets, we find that CT substantially improves robustness: while in some cases baseline accuracies drop to essentially zero for large enough perturbation sizes, accuracies of CT models remain remarkably robust.
+
+### Hyperparameter settings (RQ4). {#sec-hyperparameters}
+*CT is highly sensitive to the choice of a CE generator and its hyperparameters but (1) we observe manageable patterns, and (2) we can usually identify settings that improve either plausibility or actionability, and typically both of them at the same time.*
+
+We evaluate the impacts of three types of hyperparameters on CT. In this section we focus on the highlights and make the full results available in the supplementary appendix.
+
+Firstly, we find that optimal results are generally obtained when using *ECCCo* to generate counterfactuals. Conversely, using a generator that may inhibit faithfulness (*REVISE*), tends to yield poor results. Concerning hyperparameters that guide the gradient-based counterfactual search, we find that increasing $T$, the maximum number of steps, generally yields better outcomes because more CEs can mature. Relatedly, we also find that the effectiveness and stability of CT is positively associated with the total number of counterfactuals generated during each training epoch. The impact of $\tau$, the decision threshold, is more difficult to predict. On "harder" datasets it may be difficult to satisfy high $\tau$ for any given sample (i.e., also factuals) and so increasing this threshold does not seem to correlate with better outcomes. In fact, $\tau=0.5$ generally leads to optimal results as it is associated with high proportions of mature counterfactuals.
+
+Secondly, the strength of the energy regularization, $\lambda_{\text{reg}}$ is highly impactful and should be set sufficiently high to avoid common problems associated with exploding gradients. The sensitivity with respect to $\lambda_{\text{div}}$ and $\lambda_{\text{adv}}$ is much less evident. While high values of $\lambda_{\text{reg}}$ may increase the variability in outcomes when combined with high values of $\lambda_{\text{div}}$ or $\lambda_{\text{adv}}$, this effect is not particularly pronounced.
+
+Finally, we also observe desired improvements when CT was combined with conventional training and applied only for the final 50% of epochs of the complete training process. Put differently, CT can improve the explainability of models in a post-hoc, fine-tuning manner.

@@ -7,8 +7,9 @@ using StatsBase
 
 Generate an adversarial example of `x` for `model` using attack `attack_fun`.
 """
-generate_ae(model, x, y; attack_fun::Function=fgsm, eps::Real=0.3, kwrgs...) =
+function generate_ae(model, x, y; attack_fun::Function=fgsm, eps::Real=0.3, kwrgs...)
     attack_fun(model, x, y; eps, kwrgs...)
+end
 
 """
     fgsm(
