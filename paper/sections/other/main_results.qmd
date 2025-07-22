@@ -129,13 +129,34 @@ df_ip.measure .= y
 y = "mmd"
 df_mmd = aggregate_ce_evaluation(
     res_dir;
-    y
+    y,
     return_sig_level=false, 
     conf_int=lvls,
     agg_further_vars=["run", "lambda_energy_eval"],
 )
 df_mmd.measure .= y
-df = innerjoin(df_mtbl, df_ip, df_mmd; on=:dataset)
+df = vcat(df_mtbl, df_ip, df_mmd)
+Serialization.serialize("paper/experiments/output/ci.jls", df)
+```
+
+
+```{julia}
+#| output: asis
+#| label: tbl-ci
+#| tbl-cap: "Confidence Intervals"
+
+df = Serialization.deserialize("paper/experiments/output/ci.jls")
+df = select(df, :variable, :dataset, :full, :vanilla, "99.0%")
+df = transform(df, "99.0%" => AsTable) |>
+    df -> select(df, Not("99.0%"))
+rename!(df, :dataset => :data, :x1 => :LB, :x2 => :UB)
+inputs = get_table_inputs(df, nothing; backend=Val(:latex))
+tabulate_results(
+    inputs; 
+    table_type=:tabular,
+    alignment = [:l, fill(:c, ncol(df)-1)...]
+)
+
 ```
 
 ## Qualitative Findings for Image Data
