@@ -10,11 +10,22 @@ crossref:
 output: asis
 ---
 
-# CounterfactualTraining
+# CounterfactualTraining.jl
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaTrustworthyAI.github.io/CounterfactualTraining.jl/stable/)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://JuliaTrustworthyAI.github.io/CounterfactualTraining.jl/dev/)
-[![Build Status](https://github.com/JuliaTrustworthyAI/CounterfactualTraining.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/JuliaTrustworthyAI/CounterfactualTraining.jl/actions/workflows/CI.yml?query=branch%3Amain)
-[![Coverage](https://codecov.io/gh/JuliaTrustworthyAI/CounterfactualTraining.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/JuliaTrustworthyAI/CounterfactualTraining.jl)
-[![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
-[![Aqua](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
+This repository contains all the code used to generate the experiments for the paper *Counterfactual Training: Teaching Models Plausible and Actionable Explanations*.
+
+## Structure
+
+The repository is structured like a standard Julia package with the main code base in `src/`, the documentation in `docs/` and the test suite in `test/`^[The latter two are both still incomplete]. Everything relating specifically to the paper lives under `paper/`.
+
+### Code Base in `src/`
+
+The main code base for the CounterfactualTraining.jl package in `src/` is relatively simple and small. It implements the core functionality for counterfactual training. The code is commented with reference to relevant parts in the paper.
+
+### Code in `paper/`
+
+The majority of code scripts live in `paper/experiments/`, which is a self-sufficient Julia project that depends on CounterfactualTraining.jl in the root folder. The code scripts in `paper/experiments` include Julia and bash scripts used to implement and run the experiments specific to this paper. The project depends on another self-contained helper package that lives in `paper/experiments/CTExperiments/`. This helper package makes custom functions, structs and other definitions reusable in the project (`paper/experiments/`). All package dependencies are automatically handled in scripts using Julia's package manager, Pkg.jl.
+
+## Reproducibility
+
+If you want to reproduce the results presented in our paper and the supplementary appendix, please see the [paper/experiments/README](/paper/experiments/README.md) for details.
