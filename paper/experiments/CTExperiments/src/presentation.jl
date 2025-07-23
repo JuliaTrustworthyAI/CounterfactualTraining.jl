@@ -948,7 +948,12 @@ function plot_performance(
     return plt
 end
 
-function final_results(res_dir::String; drop_models::Vector{String}=String[], keep_models::Union{Vector{String},Nothing}=nothing, verbose::Bool=false)
+function final_results(
+    res_dir::String;
+    drop_models::Vector{String}=String[],
+    keep_models::Union{Vector{String},Nothing}=nothing,
+    verbose::Bool=false,
+)
 
     # Get model and data directories:
     model_dirs = joinpath.(res_dir, readdir(res_dir)) |> x -> x[isdir.(x)]
@@ -1057,8 +1062,8 @@ function final_table(
                             "$(round(mi, digits=2))"
                         else
                             PrettyTables.LatexCell(
-                            "$(round(mi, digits=2))\\pm$(round(si, digits=2)) \$^{$star}\$",
-                        )
+                                "$(round(mi, digits=2))\\pm$(round(si, digits=2)) \$^{$star}\$",
+                            )
                         end for (mi, si, star) in zip(m, s, stars)
                     ]
                 ) => :mean,

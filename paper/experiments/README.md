@@ -1,38 +1,22 @@
----
-format:
-  commonmark:
-    variant: -raw_html+tex_math_dollars
-    wrap: none
-    mermaid-format: png
-crossref:
-  fig-prefix: Figure
-  tbl-prefix: Table
-output: asis
-engine: julia
-julia: 
-  exeflags: ["--project=./"]
-execute:
-  eval: false
-  echo: true
----
+
 
 # Experiments
 
-This is the folder that contains all code used to generate the results in the paper. You can also use it to reproduce the results. 
+This is the folder that contains all code used to generate the results in the paper. You can also use it to reproduce the results.
 
 ## Getting Started
 
 To get started activate the environment in the Julia REPL:
 
-```{julia}
+``` julia
 # eval: false
 
 using Pkg; Pkg.activate("paper/experiments")
 ```
 
-Next, we load the `CTExperiments` package---a helper package that ships some additional functionality relevant only to the experiments run for the paper. 
+Next, we load the `CTExperiments` package—a helper package that ships some additional functionality relevant only to the experiments run for the paper.
 
-```{julia}
+``` julia
 using CTExperiments
 ```
 
@@ -41,7 +25,7 @@ using CTExperiments
 The Julia functions that live directly under `paper/experiments/` can be used to run the experiments. The main scripts of interest are:
 
 - `run_grid.jl` and `run_grid_sequentially.jl` which can be used to train model architectures on data according to specifications in configuration files (TOML).
-- `run_evaluation_grid.jl` and  `run_evaluation_grid_sequentially.jl` which can be used to evaluate previously run experiments.
+- `run_evaluation_grid.jl` and `run_evaluation_grid_sequentially.jl` which can be used to evaluate previously run experiments.
 
 The `_sequentially` suffix indicates that experiments are run sequentially and tasks underlying experiments are distributed across processes (as opposed to distributed experiments across processes).
 
@@ -58,16 +42,12 @@ The remaining configuration files include those for extensive grid searches used
 
 The Julia scripts introduced above look for certain environment variables pertaining to the configurations of experiments and evaluations, as well as paths to directories that will used to store results. Before running batch jobs, you therefore want to specify these variables as illustrated in the following example:
 
-```
-export CONFIG=paper/experiments/configs/single.toml   # path to configuration file
-export OUTPUT_SUBDIR="final_run"                      # path to store outputs (root directory is /paper/experiments/output by default)
-```
+    export CONFIG=paper/experiments/configs/single.toml   # path to configuration file
+    export OUTPUT_SUBDIR="final_run"                      # path to store outputs (root directory is /paper/experiments/output by default)
 
 You can then run scripts directly from the command line like so:
 
-```
-julia --project=$EXPERIMENT_DIR $EXPERIMENT_DIR/run_grid.jl --config=$CONFIG --data="lin_sep" --model="mlp"
-```
+    julia --project=$EXPERIMENT_DIR $EXPERIMENT_DIR/run_grid.jl --config=$CONFIG --data="lin_sep" --model="mlp"
 
 Note that it is possible to provide extra arguments (here `--data` or `--model`) to overwrite specifications in the configuration file. To understand what arguments you can provide, we recommend familiarizing yourself with the code base in `paper/experiments/CTExperiments/`.
 
@@ -81,10 +61,8 @@ The chart in Figure 1 of the paper is produced in [paper/sections/other/constrai
 
 ### Figure 2
 
-The chart in Figure 2 of the paper can be reproduced using the following script: [paper/experiments/mnist_chart.jls](/paper/experiments/mnist_chart.jls).
+The chart in Figure 2 of the paper can be reproduced using the following script: [paper/experiments/mnist_chart.jls](./paper/experiments/mnist_chart.jls).
 
 ### Figure 3
 
 The chart in Figure 3 of the paper is produced in [paper/sections/other/main_results.qmd](paper/sections/other/main_results.qmd).
-
-

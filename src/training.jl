@@ -73,6 +73,9 @@ function counterfactual_training(
 
     for epoch in start_epoch:nepochs
 
+        # ----- PAPER REF ----- #
+        # This is where the training loop starts (WHILE loop in Algorithm 1)
+
         # Logs:
         losses = Float32[]
         implausibilities = Float32[]
@@ -82,6 +85,14 @@ function counterfactual_training(
 
         # Generate counterfactuals:
         if epoch > burnin && needs_counterfactuals(loss)
+
+            # ----- PAPER REF ----- #
+            # Here we generate counterfactuals in one sweep to benefit from parallelization.
+            # This corresponds to the FOR loop in Algorithm 1. See src/counterfactuals for 
+            # details on how counterfactuals are generated. The counterfactuals are stored
+            # in a data loader that is used below to extract counterfactuals, their neighbours 
+            # in the target class and adversarial examples.
+
             counterfactual_dl, percent_valid, ces = generate!(
                 model,
                 train_set,
@@ -101,6 +112,11 @@ function counterfactual_training(
                 avg_iter = 0
             end
         else
+
+            # ----- PAPER REF ----- #
+            # If the specified training objective does not require counterfactuals (e.g. the baseline)
+            # a placeholder is provided for the data loader.
+
             counterfactual_dl = fill(ntuple(_ -> nothing, 5), length(train_set))
             percent_valid = 1.0
             ces = nothing
@@ -110,21 +126,38 @@ function counterfactual_training(
         # Backprop:
         for (i, batch) in enumerate(train_set)
 
+            # ----- PAPER REF ----- #
+            # Not explicitly stated in the paper, but this is where loop over mini-batches.
+
             # Unpack:
             input, label = batch
             perturbed_input, advexms, targets_enc, neighbours, factual_enc = counterfactual_dl[i]
 
             val, grads = Flux.withgradient(model) do m
 
+                # ----- PAPER REF ----- #
+                # This is where backpropagation through the CT objective begins (line 7 in Algorithm 1).
+
                 # Compute predictions:
                 logits = m(input)
 
                 # Compute implausibility and regulatization:
                 if !isnothing(perturbed_input)
+
+                    # ----- PAPER REF ----- #
+                    # Here the different components of the training objective are computed.
+                    # implausibility() computes the contrastive divergence.
+                    # adversarial_loss() computes the adversarial loss.
+                    # reg_loss() computes the ridge penalty.
+
                     implaus = implausibility(m, perturbed_input, neighbours, targets_enc)
                     regs = reg_loss(m, perturbed_input, neighbours, targets_enc)
                     adversarial_loss = loss.class_loss(m(advexms), factual_enc)
                 else
+
+                    # ----- PAPER REF ----- #
+                    # For the baseline objective, all additional components are irrelevant.
+
                     implaus = [0.0f0]
                     regs = [0.0f0]
                     adversarial_loss = 0.0f0
@@ -136,6 +169,10 @@ function counterfactual_training(
                     push!(reg_losses, sum(regs) / length(regs))
                     push!(validity_losses, adversarial_loss)
                 end
+
+                # ----- PAPER REF ----- #
+                # loss() computes the loss function corresponding to the training
+                # objective. This is what we backpropagate through (line 7, Algorithm 1).
 
                 return loss(logits, label, implaus, regs, adversarial_loss)
             end
