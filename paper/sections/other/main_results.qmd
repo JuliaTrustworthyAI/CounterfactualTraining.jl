@@ -204,6 +204,28 @@ savefig(plts["objective"]["vanilla"]["ecco"], "paper/figures/mnist_mlp_vanilla.p
 ![The same setup, factuals, model architecture and generator as in @fig-mnist, but the model was trained conventionally.](/paper/figures/mnist_mlp_vanilla.png){#fig-mnist-vanilla}
 :::
 
+### Integrated Gradients
+
+
+```{julia}
+#| output: asis
+
+df = Serialization.deserialize(joinpath(mtbl_dir, "ig.jls")) |>
+    df -> transform(df, [:mean, :se] => ByRow((m, s) -> LatexCell("$(round(m, digits=2)) \\pm $(round(s, digits=2))")) => :mean) |>
+    df -> select(df, Not(:se)) |>
+    df -> DataFrames.unstack(df, :objective, :mean) |>
+    df -> rename(df, :full => :CT, :vanilla => :BL) |>
+    df -> transform(df, :data => ByRow(d  -> CTExperiments.format_header(d)) => :data)
+inputs = get_table_inputs(df, nothing; backend=Val(:latex))
+tabulate_results(
+    inputs; 
+    table_type=:tabular,
+    alignment = [:l, fill(:c, ncol(df)-1)...],
+    wrap_table = false,
+)
+
+```
+
 ### Costs
 
 

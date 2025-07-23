@@ -15,6 +15,7 @@ res_dir = get_global_param("res_dir", "paper/experiments/output/final_run/mutabi
 keep_models = [get_global_param("drop_models", "mlp")]
 nrounds = get_global_param("nrounds", 100)
 nsamples = get_global_param("nsamples", 1000)
+verbose = get_global_param("verbose", false)
 
 # Initialize MPI
 MPI.Init()
@@ -50,18 +51,17 @@ for (i, exper_list) in enumerate(expers)
         exper_name = exper.meta_params.experiment_name
         obj = exper.training_params.objective
 
-        # distribute
         if data == "mnist"
             bl = -ones(size(X,1),1)
-            igs = CTExperiments.integrated_gradients(exper; idx=idx, nrounds=nrounds, verbose=true, comm=comm, max_entropy=false, baseline=bl)
+            igs = CTExperiments.integrated_gradients(exper; idx=idx, nrounds=nrounds, comm=comm, max_entropy=false, baseline=bl, verbose)
         else
-            igs = CTExperiments.integrated_gradients(exper; idx=idx, nrounds=nrounds, verbose=true, comm=comm, max_entropy=false, baseline_type="random")
+            igs = CTExperiments.integrated_gradients(exper; idx=idx, nrounds=nrounds, comm=comm, max_entropy=false, baseline_type="random", verbose)
         end
         
         if rank == 0
 
             # Collect:
-            igs = (ig -> (ig) ./ (maximum(ig) .- minimum(ig) ) ).(igs)    # compute normalized contributions
+            igs = (ig -> (abs.(ig)) ./ (maximum(ig) .- minimum(ig) ) ).(igs)    # compute normalized contributions
             igs = (ig -> ig[exper.data.mutability,1]).(igs) |> igs -> reduce(hcat, igs)
 
             # Aggregate:
