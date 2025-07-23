@@ -21,4 +21,4 @@ For data-wrangling and presentation-ready tables we relied on [DataFrames.jl](ht
 
 ## Reproducibility
 
-We have taken care to set random seeds for reproducibility.
+We have taken care to set random seeds for reproducibility using Julia's Random.jl package from the standard library. A global seed and (if applicable or wanted) dataset-specific seeds can be specified in TOML configuration files, environment variables or in interactive Julia sessions. Additional details can be found in the code base.
