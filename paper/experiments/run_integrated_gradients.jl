@@ -25,11 +25,11 @@ nprocs = MPI.Comm_size(comm)
 
 if MPI.Comm_rank(MPI.COMM_WORLD) != 0
     global_logger(NullLogger())
-    expers = nothing 
+    expers = nothing
 else
     @info "Looking for results in $res_dir"
     # Get experiments for all datasets:
-    expers = final_results(res_dir; keep_models)[2] 
+    expers = final_results(res_dir; keep_models)[2]
     expers = load_list.(expers)
     output = DataFrame[]
 end
@@ -39,42 +39,44 @@ expers = MPI.bcast(expers, comm; root=0)
 
 # Compute IG:
 for (i, exper_list) in enumerate(expers)
-
     data = CTExperiments.dname(exper_list[1].data)      # get dataset name
 
     # Bootstrap sample indices
     X, y = get_data(exper_list[1].data; test_set=true)
-    idx = [rand(1:size(X,2),nsamples) for i in 1:nrounds] 
+    idx = [rand(1:size(X, 2), nsamples) for i in 1:nrounds]
 
     for exper in exper_list
         @assert exper.data.mutability isa Vector{Int} "No mutability constraints specified"
         exper_name = exper.meta_params.experiment_name
         obj = exper.training_params.objective
 
-        igs = CTExperiments.integrated_gradients(exper; idx=idx, nrounds=nrounds, comm=comm, max_entropy=false, baseline_type="random", verbose)
-        
+        igs = CTExperiments.integrated_gradients(
+            exper;
+            idx=idx,
+            nrounds=nrounds,
+            comm=comm,
+            max_entropy=false,
+            baseline_type="random",
+            verbose,
+        )
+
         if rank == 0
 
             # Collect:
-            if size(X,1) == 2
-                igs = (ig -> (abs.(ig)) ./ (maximum(ig) .- minimum(ig) ) ).(igs)    # compute normalized contributions
+            if size(X, 1) == 2
+                igs = (ig -> (abs.(ig)) ./ (maximum(ig) .- minimum(ig))).(igs)    # compute normalized contributions
             else
-                igs = (ig -> (ig .- minimum(ig)) ./ (maximum(ig) .- minimum(ig) ) ).(igs)    # compute normalized contributions
+                igs = (ig -> (ig .- minimum(ig)) ./ (maximum(ig) .- minimum(ig))).(igs)    # compute normalized contributions
             end
-            
-            igs = (ig -> ig[exper.data.mutability,1]).(igs) |> igs -> reduce(hcat, igs)
+
+            igs = (ig -> ig[exper.data.mutability, 1]).(igs) |> igs -> reduce(hcat, igs)
 
             # Aggregate:
-            m = mean(igs, dims=2)       # across rounds
-            m = mean(m, dims=1)[1]      # across features
-            se = std(igs, dims=2)       # across rounds 
-            se = mean(se, dims=1)[1]    # across features
-            df = DataFrame(Dict(
-                :data => data,
-                :objective => obj,
-                :mean => m,
-                :se => se,
-            ))
+            m = mean(igs; dims=2)       # across rounds
+            m = mean(m; dims=1)[1]      # across features
+            se = std(igs; dims=2)       # across rounds 
+            se = mean(se; dims=1)[1]    # across features
+            df = DataFrame(Dict(:data => data, :objective => obj, :mean => m, :se => se))
             display(df)
 
             push!(output, df)

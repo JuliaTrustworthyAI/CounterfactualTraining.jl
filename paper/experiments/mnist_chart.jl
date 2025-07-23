@@ -24,7 +24,9 @@ Images.save("paper/figures/mnist_ig.png", img_ig_full)
 
 chosen_digits = 5:9
 
-img_ig = mosaicview(imgs_bl[chosen_digits .+ 1]..., imgs_ct[chosen_digits .+ 1]...; nrow=2, rowmajor=true)
+img_ig = mosaicview(
+    imgs_bl[chosen_digits .+ 1]..., imgs_ct[chosen_digits .+ 1]...; nrow=2, rowmajor=true
+)
 
 ## Counterfactuals:
 Random.seed!(42)    # change seed for different outcome
@@ -68,6 +70,5 @@ imgs_ct = imgs[1]
 imgs_bl = imgs[2]
 img_ce = mosaicview(imgs_bl..., imgs_ct...; nrow=2, rowmajor=true)
 
-img = mosaicview(img_ce, img_ig, nrow=1)
+img = mosaicview(img_ce, img_ig; nrow=1)
 Images.save("paper/figures/mnist_body.png", img)
-

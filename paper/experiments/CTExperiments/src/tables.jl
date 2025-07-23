@@ -5,7 +5,8 @@ using PrettyTables
 using StatsBase
 
 function tabulate_results(
-    inputs, al::Nothing=nothing;
+    inputs,
+    al::Nothing=nothing;
     io::IO=stdout,
     tf=PrettyTables.tf_latex_booktabs,
     wrap_table=true,
@@ -37,7 +38,7 @@ function tabulate_results(
     end
 
     if hlines == :none
-    hlines = nothing
+        hlines = nothing
     end
 
     other_inputs = inputs[2]
@@ -90,7 +91,6 @@ function tabulate_results(
 end
 
 function tabulate_results(inputs, al::Vector{String}; kwargs...)
-
     if isnothing(al)
         return tabulate_results(inputs; kwargs...)
     end
@@ -99,12 +99,13 @@ function tabulate_results(inputs, al::Vector{String}; kwargs...)
     io = IOBuffer()
     tabulate_results(inputs; io=io, kwargs...)
     output = String(take!(io))
-    
+
     # Replace alignment with siunitx format
-    modified = replace(output, 
-        r"\\begin\{tabular\}\{[^}]+\}" => 
-                       "\\begin{tabular}{\n$( reduce((x,y) -> "$x\n$y", al))\n}")
-    
+    modified = replace(
+        output,
+        r"\\begin\{tabular\}\{[^}]+\}" => "\\begin{tabular}{\n$( reduce((x,y) -> "$x\n$y", al))\n}",
+    )
+
     print(modified)
 end
 

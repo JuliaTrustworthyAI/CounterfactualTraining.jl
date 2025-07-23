@@ -20,11 +20,11 @@ The repository is structured like a standard Julia package with the main code ba
 
 ### Code Base in `src/`
 
-The main code base for the CounterfactualTraining.jl package in `src/` is relatively simple and small. It implements the core functionality for counterfactual training. The code is commented with reference to relevant parts in the paper.
+The main code base for the CounterfactualTraining.jl package in `src/` is relatively simple and small. It implements the core functionality for counterfactual training. The code is commented with reference to relevant parts in the paper (look for `# ----- PAPER REF -----`).
 
 ### Code in `paper/`
 
-The majority of code scripts live in `paper/experiments/`, which is a self-sufficient Julia project that depends on CounterfactualTraining.jl in the root folder. The code scripts in `paper/experiments` include Julia and bash scripts used to implement and run the experiments specific to this paper. The project depends on another self-contained helper package that lives in `paper/experiments/CTExperiments/`. This helper package makes custom functions, structs and other definitions reusable in the project (`paper/experiments/`). All package dependencies are automatically handled in scripts using Julia's package manager, Pkg.jl.
+The majority of code scripts live in `paper/experiments/`, which is a self-sufficient Julia project that depends on CounterfactualTraining.jl in the root folder. The code scripts in `paper/experiments` include Julia, bash and TOML scripts used to implement, run and configure the experiments specific to this paper. The project depends on another self-contained helper package that lives in `paper/experiments/CTExperiments/`. This helper package makes custom functions, structs and other definitions reusable in the project (`paper/experiments/`). All package dependencies are automatically handled in scripts using Julia's package manager, Pkg.jl.
 
 ## Reproducibility
 

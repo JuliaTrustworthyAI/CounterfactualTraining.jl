@@ -10,7 +10,7 @@ The repository is structured like a standard Julia package with the main code ba
 
 ### Code Base in `src/`
 
-The main code base for the CounterfactualTraining.jl package in `src/` is relatively simple and small. It implements the core functionality for counterfactual training. The code is commented with reference to relevant parts in the paper.
+The main code base for the CounterfactualTraining.jl package in `src/` is relatively simple and small. It implements the core functionality for counterfactual training. The code is commented with reference to relevant parts in the paper (look for `# ----- PAPER REF -----`).
 
 ### Code in `paper/`
 
