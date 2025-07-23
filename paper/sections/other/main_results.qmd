@@ -204,6 +204,8 @@ savefig(plts["objective"]["vanilla"]["ecco"], "paper/figures/mnist_mlp_vanilla.p
 ![The same setup, factuals, model architecture and generator as in @fig-mnist, but the model was trained conventionally.](/paper/figures/mnist_mlp_vanilla.png){#fig-mnist-vanilla}
 :::
 
+::: {layout-ncol=2}
+
 ### Integrated Gradients
 
 :::{#tbl-ig}
@@ -238,8 +240,13 @@ Integrated gradients.
 
 :::
 
-### Costs
+![Class-conditional integrated gradients.](/paper/figures/mnist_ig.png){#fig-mnist-ig}
 
+:::
+
+### Costs and Validity
+
+::: {#tbl-panel layout-ncol=3}
 
 ```{julia}
 #| eval: false
@@ -277,8 +284,6 @@ tabulate_results(
 Costs
 
 :::
-
-### Validity
 
 ```{julia}
 #| eval: false
@@ -351,5 +356,9 @@ tabulate_results(
 ```
 
 Validity
+
+:::
+
+Costs and validity.
 
 :::
