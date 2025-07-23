@@ -204,8 +204,49 @@ savefig(plts["objective"]["vanilla"]["ecco"], "paper/figures/mnist_mlp_vanilla.p
 ![The same setup, factuals, model architecture and generator as in @fig-mnist, but the model was trained conventionally.](/paper/figures/mnist_mlp_vanilla.png){#fig-mnist-vanilla}
 :::
 
-### Costs
+::: {layout-ncol=2}
 
+### Integrated Gradients
+
+:::{#tbl-ig}
+
+```{julia}
+#| output: asis
+
+df = Serialization.deserialize(joinpath(mtbl_dir, "ig.jls")) |>
+    df -> transform(df, [:mean, :se] => ByRow((m, s) -> LatexCell("$(round(m, digits=2)) \\pm $(round(s, digits=2))")) => :mean) |>
+    df -> select(df, Not(:se)) |>
+    df -> DataFrames.unstack(df, :objective, :mean) |>
+    df -> rename(df, :full => :CT, :vanilla => :BL) |>
+    df -> transform(df, :data => ByRow(d  -> CTExperiments.format_header(d)) => :data)
+inputs = get_table_inputs(df, nothing; backend=Val(:latex))
+al = [
+    "l", 
+    "S[table-format=2.2(3.2)]", 
+    "S[table-format=2.2(2.2)]"
+] 
+tabulate_results(
+    inputs,
+    al
+    ; 
+    table_type=:tabular,
+    alignment = [:l, fill(:c, ncol(df)-1)...],
+    wrap_table = false,
+)
+
+```
+
+Integrated gradients.
+
+:::
+
+![Class-conditional integrated gradients.](/paper/figures/mnist_ig.png){#fig-mnist-ig}
+
+:::
+
+### Costs and Validity
+
+::: {#tbl-panel layout-ncol=3}
 
 ```{julia}
 #| eval: false
@@ -227,8 +268,12 @@ Serialization.serialize("paper/experiments/output/costs.jls", df)
 
 df = Serialization.deserialize("paper/experiments/output/costs.jls")
 inputs = get_table_inputs(df, nothing; backend=Val(:latex))
+al = [
+    "l", 
+    "S[table-format=2.2(1.2)]", 
+]
 tabulate_results(
-    inputs; 
+    inputs, al; 
     table_type=:tabular,
     alignment = [:l, fill(:c, ncol(df)-1)...],
     wrap_table = false,
@@ -239,8 +284,6 @@ tabulate_results(
 Costs
 
 :::
-
-### Validity
 
 ```{julia}
 #| eval: false
@@ -313,5 +356,9 @@ tabulate_results(
 ```
 
 Validity
+
+:::
+
+Costs and validity.
 
 :::

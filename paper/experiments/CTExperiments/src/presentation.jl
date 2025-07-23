@@ -948,12 +948,17 @@ function plot_performance(
     return plt
 end
 
-function final_results(res_dir::String; drop_models::Vector{String}=String[], verbose::Bool=false)
+function final_results(res_dir::String; drop_models::Vector{String}=String[], keep_models::Union{Vector{String},Nothing}=nothing, verbose::Bool=false)
 
     # Get model and data directories:
     model_dirs = joinpath.(res_dir, readdir(res_dir)) |> x -> x[isdir.(x)]
     drop_models = (x -> joinpath(res_dir, x)).(drop_models)
     model_dirs = setdiff(model_dirs, drop_models)
+    if !isnothing(keep_models)
+        keep_models = (x -> joinpath(res_dir, x)).(keep_models)
+        model_dirs = intersect(model_dirs, keep_models)
+    end
+    @assert length(model_dirs) > 0 "No more model directories left"
     if verbose
         @info "Aggregating for $model_dirs"
     end
