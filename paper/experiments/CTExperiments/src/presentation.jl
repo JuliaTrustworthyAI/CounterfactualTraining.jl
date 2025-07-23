@@ -261,18 +261,18 @@ end
 
 # Function to create final Markdown string
 function dict_to_markdown(
-    dict::Dict; header::Union{Nothing,String}=nothing, filter_empty::Bool=true
+    dict::Dict; header::Union{Nothing,String}=nothing, filter_empty::Bool=true, kwrgs...
 )
     filtered_dict = filter_dict(dict; filter_empty)
-    return "md\"\"\"\n$(to_mkd(filtered_dict; header=header))\n\"\"\""
+    return "md\"\"\"\n$(to_mkd(filtered_dict; header=header, kwrgs...))\n\"\"\""
 end
 
 # New function specifically for Quarto output
 function dict_to_quarto_markdown(
-    dict::Dict; header::Union{Nothing,String}=nothing, filter_empty::Bool=true
+    dict::Dict; header::Union{Nothing,String}=nothing, filter_empty::Bool=true, kwrgs...
 )
     filtered_dict = filter_dict(dict; filter_empty)
-    return "$(to_mkd(filtered_dict; header=header))\n"
+    return "$(to_mkd(filtered_dict; header=header, kwrgs...))\n"
 end
 
 function adjust_plot_var(x::Union{Nothing,String}, cfg::CTExperiments.EvalConfigOrGrid)

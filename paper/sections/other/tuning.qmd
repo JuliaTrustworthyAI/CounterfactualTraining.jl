@@ -84,7 +84,7 @@ println(_str)
 #| output: asis
  
 imgfname = "plausibility_distance_from_target.png"
-fig_caption = "Average outcomes for the plausibility measure across key hyperparameters. This shows the % change from the baseline model for the distance-based implausibility metric (\$\text{IP}\$). Boxplots indicate the variation across evaluation runs and test settings (varying parameters for *ECCCo*)."
+fig_caption = "Average outcomes for the plausibility measure across key hyperparameters. This shows the % change from the baseline model for the distance-based implausibility metric (\$\\text{IP}\$). Boxplots indicate the variation across evaluation runs and test settings (varying parameters for *ECCCo*)."
 full_paths = joinpath.(data_dirs, joinpath(ce_suffix,imgfname))
 include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption) 
 _str = join(include_img_commands, "\n\n")
@@ -112,6 +112,8 @@ include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig
 _str = join(include_img_commands, "\n\n")
 println(_str)
 ```
+
+\FloatBarrier
 
 ## Learning Rate {#sec-app-tune-lr}
 
@@ -165,7 +167,7 @@ println(_str)
 #| output: asis
  
 imgfname = "plausibility_distance_from_target.png"
-fig_caption = "Average outcomes for the plausibility measure across key hyperparameters. This shows the % change from the baseline model for the distance-based implausibility metric (\$\text{IP}\$). Boxplots indicate the variation across evaluation runs and test settings (varying parameters for *ECCCo*)."
+fig_caption = "Average outcomes for the plausibility measure across key hyperparameters. This shows the % change from the baseline model for the distance-based implausibility metric (\$\\text{IP}\$). Boxplots indicate the variation across evaluation runs and test settings (varying parameters for *ECCCo*)."
 full_paths = joinpath.(data_dirs, joinpath(ce_suffix,imgfname))
 include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption) 
 _str = join(include_img_commands, "\n\n")

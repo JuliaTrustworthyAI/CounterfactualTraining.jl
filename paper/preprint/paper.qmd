@@ -8,6 +8,7 @@ format:
     linenumbers: false
     doublespacing: false
     runninghead: "Counterfactual Training"
+    thanks: "A Preprint."
     authorcols: true
     include-in-header:
       text: |
@@ -31,21 +32,11 @@ format:
         \usepackage{enumitem}
 ---
 
+\twocolumn
+
 {{< include /paper/body.qmd >}}
 
 # References {-}
 
 ::: {#refs}
 :::
-
-{{< pagebreak >}}
-
-```{=latex}
-\begin{appendices}
-```
-
-{{< include /paper/sections/appendix.qmd >}}
-
-```{=latex}
-\end{appendices}
-```

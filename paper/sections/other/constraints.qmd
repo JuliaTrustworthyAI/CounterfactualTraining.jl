@@ -16,7 +16,7 @@ using Plots.PlotMeasures
 
 ## Protecting Mutability Constraints with Linear Classifiers {#sec-app-constraints}
 
-In the main paper, we explain that to avoid penalizing implausibility that arises due to mutability constraints, we impose a point mass prior on $p(\mathbf{x})$ for the corresponding feature. We argue that this approach induces models to be relatively less sensitive to immutable features, propose a theoretical result supporting this and provide empirical evidence that strengthens our argument (both in the main paper and additional findings in this appendix). Below we derive the analytical results in Prp.~\ref{prp-mtblty}.
+In the main paper, we explain that to avoid penalizing implausibility that arises due to mutability constraints, we impose a point mass prior on $p(\mathbf{x})$ for the corresponding feature. We argue that this approach induces models to be relatively less sensitive to immutable features, propose a theoretical result supporting this and provide empirical evidence that strengthens our argument (both in the main paper and additional findings in this appendix). Below we derive the analytical results in Proposition in the main paper.
 
 ::: {.proof}
 

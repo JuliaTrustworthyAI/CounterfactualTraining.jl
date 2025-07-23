@@ -29,7 +29,7 @@ mtbl_dir = joinpath(ENV["FINAL_GRID_RESULTS"],"mutability")
 
 ## Final Hyperparameters
 
-As discussed the main paper, CT is sensitive to certain hyperparameter choices. We study the effect of many hyperparameters extensively in @sec-app-grid. For the main results, we tune a small set of key hyperparameters (@sec-app-tune). The final choices for the main results are presented for each data set in @tbl-final-params along with training, test and batch sizes.
+As discussed the main paper, CT is sensitive to certain hyperparameter choices. We study the effect of many hyperparameters extensively in @sec-app-grid of this appendix. For the main results, we tune a small set of key hyperparameters (@sec-app-tune). The final choices for the main results are presented for each data set in @tbl-final-params along with training, test and batch sizes.
 
 ::: {#tbl-final-params}
 
@@ -50,12 +50,7 @@ Final hyperparameters used for the main results presented in the main paper. Any
 
 :::
 
-## Final Results {#sec-app-final-results}
-
-Plus/minus two standard deviations of bootstrap estimates. 
-
-<!-- Standard deviation of bootstrap is the standard error. -->
-
+<!-- NOTE: Computing final results below -->
 
 ```{julia}
 #| eval: false
@@ -88,7 +83,7 @@ for fname in ["paper/quarto_aaai/tables/main.tex","paper/preprint/tables/main.te
 end
 ```
 
-### Robust Performance Plots
+<!-- NOTE: Generating robust performance plot below -->
 
 ```{julia}
 #| eval: false
@@ -99,6 +94,8 @@ save("paper/figures/acc.png", plt_out; px_per_unit=3)
 ```
 
 ### Confidence Intervals
+
+@tbl-ci present the exact confidence intervals (99%) for the difference in mean outcomes on which we base our assessment of statistical significance in the main paper. Grouped by evaluation metrics (Variable) and dataset (Data), the table presents the mean outcomes for CT and BT and finally the lower bound (LB) and upper bound (UB) of the confidence interval. To compute the intervals, we used the percentile method for bootstrapped confidence intervals: the lower and upper bound represent the $\alpha/2$- and $(1-\alpha / 2)-$quantile of the bootstrap distribution, respectively, for $\alpha=0.01$.
 
 ```{julia}
 #| eval: false
@@ -167,7 +164,7 @@ tabulate_results(
 
 ```
 
-Mean outcomes for **CT** and **BL** along with bootstrapped confidence intervals (99%) for difference in mean outcomes grouped by dataset and evaluation metric. Column **LB** and **UB** show the lower and upper bound of the intervals, respectively, and computed using the percentile method. The underlying counterfactual evaluations are the same as the ones used to produce the main table in the paper. 
+Mean outcomes for CT and BL along with bootstrapped confidence intervals (99%) for difference in mean outcomes grouped by dataset and evaluation metric. Column LB and UB show the lower and upper bound of the intervals, respectively, and computed using the percentile method. The underlying counterfactual evaluations are the same as the ones used to produce the main table in the paper. 
 
 :::
 
@@ -193,8 +190,6 @@ plts = plot_ce(MNIST(), cfg; byvars="objective")
 savefig(plts["objective"]["full"]["ecco"], "paper/figures/mnist_mlp.png")
 savefig(plts["objective"]["vanilla"]["ecco"], "paper/figures/mnist_mlp_vanilla.png")
 ```
-
-
 
 @fig-mnist shows much more plausible (faithful) counterfactuals for a model with CT than the model with conventional training (@fig-mnist-vanilla).
 
@@ -246,7 +241,17 @@ Integrated gradients.
 
 ### Costs and Validity
 
-::: {#tbl-panel layout-ncol=3}
+In @tbl-panel, we present additional outcomes for common evaluation metrics: @tbl-costs presents the average reduction in costs of counterfactuals for CT vs. BL with no mutability constraints, i.e. corresponding to the first two columns in the main table of the paper; @tbl-val shows the corresponding average validities; finally, @tbl-val-mtbl shows average validities for the case with mutability constraints, i.e. corresponding to the third columns in the main table of the paper.
+
+As noted in the discussion section of the main paper, we observe mixed results results here. Average costs in terms of distances from factual values decrease for most datasets, which is positively surprising since improved plausibility requires counterfactuals to travel further into the target domain than minimum distance counterfactuals. It appears that in these cases faithful counterfactuals for the baseline model still end up far away from their initial starting points, but not close enough for samples in the target domain to be plausible. In that sense, CT can be seen to improve both plausibility and costs for faithful CE. In some cases though (*LS*, *CH*, *MNIST*), we do seem to observe the tradeoff between plausibility and costs play out, as we would expect (compare panels (a) and (b) of Figure 1 in the main paper for reference).
+
+Concerning validity, we find that can lead to substantial reductions and only increases average validity compared to the baseline in one case (*Circ*). As noted in the discussion section of the main paper, this result does not surprise us: by design, CT shrinks the solution space for valid counterfactual explanations, thus making it "harder" to reach validity compared to the baseline model. Note that for a number of reasons this should not be seen as problematic:
+
+1. Validity of gradient-based CE is a function on the number of steps and the step size which we both kept fixed during evaluation: simply adjusting $T=50$ to higher values or choosing a larger step size will lead to higher rates of validity.
+2. Even though reaching validity is sometimes "harder" in terms of the necessary number of steps for a given step size, we have already shown that the average distances that counterfactuals need to travel decrease for most datasets. Users care about costs in terms of feature distances, not search iteration steps.
+3. From a philosophical perspective on algorithmic recourse, validity in and off itself is not a sufficient desideratum for counterfactuals. In fact, @ven2020philosophical propose introducing an upper bound on costs of the flipset (i.e. the set of valid CE), arguing that valid but highly costly counterfactuals are not useful to individuals in practice. In a similar fashion, it could be argued that there should be an upper bound on the implausibility of counterfactuals in the flipset.
+
+::: {#tbl-panel layout="[[40,-20,40], [100]]"}
 
 ```{julia}
 #| eval: false
@@ -281,7 +286,7 @@ tabulate_results(
 
 ```
 
-Costs
+Reduction in average costs for CT vs. the baseline. Results correspond to the case with no mutability constraints in the main table of the paper.
 
 :::
 
@@ -334,7 +339,7 @@ tabulate_results(
 
 ```
 
-Validity
+Average validities of counterfactuals for CT and BL. Unconstrained case.
 
 :::
 
@@ -355,7 +360,7 @@ tabulate_results(
 
 ```
 
-Validity
+Average validities of counterfactuals for CT and BL. Mutability constrained case.
 
 :::
 

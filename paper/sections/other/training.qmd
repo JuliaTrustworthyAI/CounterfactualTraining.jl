@@ -15,7 +15,7 @@ DotEnv.load!()
 
 ## Training Hyperparameters {#sec-app-training}
 
-@nte-train-default presents the default hyperparameters used during training. 
+@nte-train-default presents the default hyperparameters used during training.
 
 ::: {#nte-train-default .callout-note}
 
@@ -34,11 +34,15 @@ println(CTExperiments.dict_to_quarto_markdown(dict, filter_empty=false))
 
 ## Evaluation Details {#sec-app-eval}
 
-For all of our evaluations, we proceed as follows: for each experiment setting we generate multiple counterfactuals ("No. Counterfactuals"), randomly choosing the factual and target class each time (@nte-eval-default). We do this across multiple rounds ("No. Runs") with different random seeds to account for stochasticity (@nte-eval-default). This is in line with standard practice in the related literature on CE. @nte-eval-default presents the default hyperparameters used during evaluation. For our final results presented in the main paper, we rely on held out test sets to sample factuals (and outputs for our performance metrics). For tuning purposes we rely on training or validation sets. 
+### Counterfactual Outcomes
 
-### Robust Accuracy
+For all of our counterfactual evaluations, we proceed as follows: for each dataset we run $J$ bootstrap rounds ("No. Runs") to account for stochasticity (@nte-eval-default); for each bootstrap round, we randomly draw factual and target pairs; then, for each model, we draw samples from the test set (with replacement) for which the model predicts the randomly chosen factual class; finally, we generate multiple counterfactuals ("No. Counterfactuals") and evaluate the outcomes (@nte-eval-default). This is in line with standard practice in the related literature on CE. For our final results presented in the main paper, we rely on held-out test sets for evaluation. For tuning purposes we rely on training and/or validation sets.
 
-To evaluate robust accuracy (Acc.$^*$), we use the Fast Gradient Sign Method (FGSM) to perturb test samples [@goodfellow2014explaining]. For the main results, we have set the perturbation size to $\epsilon=0.03$. We have also tested other perturbation sizes, as well as randomly perturbed data. Although not reported here, we have consistently found strong outperformance of CT compared to the weak baseline. 
+@nte-eval-default presents the default hyperparameters used during evaluation for tuning purposes. For the main results presented in the paper, we use larger evaluations, specifically:
+
+- "No. Runs": We set the number of bootstrap rounds to $J=100$ for all datasets. 
+- "No. Individuals": In each round we draw 1,250, 500 and 125 samples for synthetic datasets, real-world tabular datasets and *MNIST*, respectively, across five different values for the strength of the energy penalty of *ECCCo* at test time, $\lambda_{\text{egy}}\in\{0.1, 0.5, 1.0, 5.0, 10.0\}$.
+
 
 ::: {#nte-eval-default .callout-note}
 
@@ -48,9 +52,13 @@ To evaluate robust accuracy (Acc.$^*$), we use the Fast Gradient Sign Method (FG
 #| output: asis
 
 dict = Logging.with_logger(Logging.NullLogger()) do  
-    CTExperiments.to_dict(EvaluationConfig(ExperimentGrid()))
+    CTExperiments.to_dict(EvaluationGrid(ExperimentGrid()))
 end
-println(CTExperiments.dict_to_quarto_markdown(dict, filter_empty=false))
+println(CTExperiments.dict_to_quarto_markdown(dict["counterfactual_params"], filter_empty=false))
 ```
 
 :::
+
+### Predictive Performance
+
+To assess (robust) predictive performance, we evaluate model accuracy on (adversarially perturbed) test data. To generate adversarial examples we use the Fast Gradient Sign Method (FGSM) [@goodfellow2014explaining]. For the main results in the paper, we choose a range of values $\epsilon=[0.0,0.1]$. In some places of this appendix, you will also find predictive performance evaluations in terms of the F1-score.
