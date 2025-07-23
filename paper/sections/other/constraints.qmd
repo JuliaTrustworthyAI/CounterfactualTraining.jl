@@ -16,7 +16,7 @@ using Plots.PlotMeasures
 
 ## Protecting Mutability Constraints with Linear Classifiers {#sec-app-constraints}
 
-In @sec-constraints we explain that to avoid penalizing implausibility that arises due to mutability constraints, we impose a point mass prior on $p(\mathbf{x})$ for the corresponding feature. We argue in @sec-constraints that this approach induces models to be less sensitive to immutable features and demonstrate this empirically in @sec-experiments. Below we derive the analytical results in Prp.~\ref{prp-mtblty}.
+In the main paper, we explain that to avoid penalizing implausibility that arises due to mutability constraints, we impose a point mass prior on $p(\mathbf{x})$ for the corresponding feature. We argue that this approach induces models to be relatively less sensitive to immutable features, propose a theoretical result supporting this and provide empirical evidence that strengthens our argument (both in the main paper and additional findings in this appendix). Below we derive the analytical results in Prp.~\ref{prp-mtblty}.
 
 ::: {.proof}
 
@@ -44,7 +44,7 @@ where $\theta_{k,d}=\Theta[k,d]$ denotes the coefficient on feature $d$ for clas
 
 Based on @eq-loglike-decomp and @eq-multi we can identify that $(\mu_{k,d}-\mu_{m,d}) \propto (\theta_{k,d} - \theta_{m,d})$ under the assumptions we made above. Hence, we have that $(\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}}) < 0$ and $(\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}}) > 0$
 
-Let $\mathbf{x}^\prime$ denote some randomly chosen individual from class $y^-$ and let $y^+ \sim p(y)$ denote the randomly chosen target class. Then the partial derivative of the contrastive divergence penalty [@eq-div] with respect to coefficient $\theta_{y^+,d}$ is equal to 
+Let $\mathbf{x}^\prime$ denote some randomly chosen individual from class $y^-$ and let $y^+ \sim p(y)$ denote the randomly chosen target class. Then the partial derivative of the contrastive divergence penalty with respect to coefficient $\theta_{y^+,d}$ is equal to 
 
 $$
 \frac{\partial}{\partial\theta_{y^+,d}} \left(\text{div}(\mathbf{x}^+,\mathbf{x^\prime},\mathbf{y};\theta)\right) = \frac{\partial}{\partial\theta_{y^+,d}} \left( \left(-\mathbf{M}_\theta(\mathbf{x}^+)[y^+]\right) - \left(-\mathbf{M}_\theta(\mathbf{x}^\prime)[y^+]\right) \right) = x_{d}^\prime - x^+_{d}

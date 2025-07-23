@@ -226,7 +226,6 @@
 \urlstyle{same}
 \hypersetup{
   pdftitle={Supplementary Appendix},
-  pdfauthor={Patrick Altmeyer; Aleksander Buszydlik; Arie van Deursen; Cynthia C. S. Liem},
   pdfkeywords={Counterfactual Training, Counterfactual
 Explanations, Algorithmic Recourse, Explainable AI, Representation
 Learning},
@@ -241,28 +240,43 @@ Learning},
 \newcommand{\runninghead}{A Preprint }
 \renewcommand{\runninghead}{Counterfactual Training }
 \title{Supplementary Appendix}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{% add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{Counterfactual Training: Teaching Models Plausible and
+Actionable Explanations}
 \def\asep{\\\\\\ } % default: all authors on same column
 \def\asep{\And }
-\author{\textbf{Patrick
-Altmeyer}~\orcidlink{0000-0003-4726-8613}\\Faculty of Electrical
-Engineering, Mathematics and Computer Science\\Delft University of
-Technology\\\\\href{mailto:p.altmeyer@tudelft.nl}{p.altmeyer@tudelft.nl}\asep\textbf{Aleksander
-Buszydlik}\\Faculty of Electrical Engineering, Mathematics and Computer
-Science\\Delft University of Technology\\\\\asep\textbf{Arie van
-Deursen}\\Faculty of Electrical Engineering, Mathematics and Computer
-Science\\Delft University of Technology\\\\\asep\textbf{Cynthia C. S.
-Liem}\\Faculty of Electrical Engineering, Mathematics and Computer
-Science\\Delft University of Technology\\\\}
+\author{}
 \date{}
 \begin{document}
 \maketitle
+\begin{abstract}
+This is the supplementary appendix to our paper titled
+\emph{Counterfactual Training: Teaching Models Plausible and Actionable
+Explanations}. It provides helpful details on mathematical notations and
+formulas, our proposed training regime, extended empirical findings,
+hyperparameter tuning and grid searches as well as software and
+computations.
+\end{abstract}
 {\bfseries \emph Keywords}
 \def\sep{\textbullet\ }
 Counterfactual Training \sep Counterfactual
 Explanations \sep Algorithmic Recourse \sep Explainable AI \sep 
 Representation Learning
 
+\pagebreak
+\renewcommand*\contentsname{Table of contents}
+{
+\hypersetup{linkcolor=}
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
 
+\newpage{}
 
 \begin{appendices}
 
@@ -347,14 +361,14 @@ underlying classifier for \(\mathbf{x}=g(\mathbf{z})\).
 For all generators used in this work we use standard logit crossentropy
 loss for \(\text{yloss}(\cdot)\). All generators also penalize the
 distance (\(\ell_1\)-norm) of counterfactuals from their original
-factual state. For \emph{Generic} and \emph{ECCo}, we have
+factual state. For \emph{Generic} and \emph{ECCCo}, we have
 \(\mathcal{Z}:=\mathcal{X}\) and
 \(g(\mathbf{z})=g(\mathbf{z})^{-1}=\mathbf{z}\), that is counterfactual
 are searched directly in the feature space. Conversely, \emph{REVISE}
 traverses the latent space of a variational autoencoder (VAE) fitted to
 the training data, where \(g(\cdot)\) corresponds to the decoder
 (\citeproc{ref-joshi2019realistic}{Joshi et al. 2019}). In addition to
-the distance penalty, \emph{ECCo} uses an additional penalty component
+the distance penalty, \emph{ECCCo} uses an additional penalty component
 that regularizes the energy associated with the counterfactual,
 \(\mathbf{x}^\prime\) (\citeproc{ref-altmeyer2024faithful}{Altmeyer et
 al. 2024}).
@@ -382,13 +396,14 @@ predictions.
 \subsection{Protecting Mutability Constraints with Linear
 Classifiers}\label{sec-app-constraints}
 
-In \textbf{?@sec-constraints} we explain that to avoid penalizing
-implausibility that arises due to mutability constraints, we impose a
-point mass prior on \(p(\mathbf{x})\) for the corresponding feature. We
-argue in \textbf{?@sec-constraints} that this approach induces models to
-be less sensitive to immutable features and demonstrate this empirically
-in \textbf{?@sec-experiments}. Below we derive the analytical results in
-Prp.\textasciitilde{}\ref{prp-mtblty}.
+In the main paper, we explain that to avoid penalizing implausibility
+that arises due to mutability constraints, we impose a point mass prior
+on \(p(\mathbf{x})\) for the corresponding feature. We argue that this
+approach induces models to be relatively less sensitive to immutable
+features, propose a theoretical result supporting this and provide
+empirical evidence that strengthens our argument (both in the main paper
+and additional findings in this appendix). Below we derive the
+analytical results in Prp.\textasciitilde{}\ref{prp-mtblty}.
 
 \begin{proof}
 Let \(d_{\text{mtbl}}\) and \(d_{\text{immtbl}}\) denote some mutable
@@ -439,8 +454,7 @@ and
 Let \(\mathbf{x}^\prime\) denote some randomly chosen individual from
 class \(y^-\) and let \(y^+ \sim p(y)\) denote the randomly chosen
 target class. Then the partial derivative of the contrastive divergence
-penalty \textbf{?@eq-div} with respect to coefficient \(\theta_{y^+,d}\)
-is equal to
+penalty with respect to coefficient \(\theta_{y^+,d}\) is equal to
 
 \begin{equation}\phantomsection\label{eq-grad}{
 \frac{\partial}{\partial\theta_{y^+,d}} \left(\text{div}(\mathbf{x}^+,\mathbf{x^\prime},\mathbf{y};\theta)\right) = \frac{\partial}{\partial\theta_{y^+,d}} \left( \left(-\mathbf{M}_\theta(\mathbf{x}^+)[y^+]\right) - \left(-\mathbf{M}_\theta(\mathbf{x}^\prime)[y^+]\right) \right) = x_{d}^\prime - x^+_{d}
@@ -515,7 +529,7 @@ the application.
 Note~\ref{nte-train-default} presents the default hyperparameters used
 during training.
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, coltitle=black, arc=.35mm, opacitybacktitle=0.6, bottomtitle=1mm, title={Note \ref*{nte-train-default}: Training Phase}, opacityback=0, titlerule=0mm, rightrule=.15mm, leftrule=.75mm, breakable, left=2mm, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-train-default}: Training Phase}, rightrule=.15mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, colback=white, toptitle=1mm, arc=.35mm, left=2mm, toprule=.15mm, coltitle=black, opacitybacktitle=0.6, breakable, titlerule=0mm, opacityback=0, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm]
 
 \quartocalloutnte{nte-train-default} 
 
@@ -622,7 +636,7 @@ as randomly perturbed data. Although not reported here, we have
 consistently found strong outperformance of CT compared to the weak
 baseline.
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, coltitle=black, arc=.35mm, opacitybacktitle=0.6, bottomtitle=1mm, title={Note \ref*{nte-eval-default}: Evaluation Phase}, opacityback=0, titlerule=0mm, rightrule=.15mm, leftrule=.75mm, breakable, left=2mm, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-eval-default}: Evaluation Phase}, rightrule=.15mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, colback=white, toptitle=1mm, arc=.35mm, left=2mm, toprule=.15mm, coltitle=black, opacitybacktitle=0.6, breakable, titlerule=0mm, opacityback=0, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm]
 
 \quartocalloutnte{nte-eval-default} 
 
@@ -674,18 +688,18 @@ baseline.
 
 \subsection{Final Hyperparameters}\label{final-hyperparameters}
 
-As discussed \textbf{?@sec-experiments}, CT is sensitive to certain
-hyperparameter choices. We study the effect of many hyperparameters
-extensively in Section~\ref{sec-app-grid}. For the main results, we tune
-a small set of key hyperparameters (Section~\ref{sec-app-tune}). The
-final choices for the main results are presented for each data set in
+As discussed the main paper, CT is sensitive to certain hyperparameter
+choices. We study the effect of many hyperparameters extensively in
+Section~\ref{sec-app-grid}. For the main results, we tune a small set of
+key hyperparameters (Section~\ref{sec-app-tune}). The final choices for
+the main results are presented for each data set in
 Table~\ref{tbl-final-params} along with training, test and batch sizes.
 
 \begin{table}
 
 \caption{\label{tbl-final-params}Final hyperparameters used for the main
-results presented in \textbf{?@sec-experiments}. Any hyperparameter not
-shown here is set to its default value (Note~\ref{nte-train-default}).}
+results presented in the main paper. Any hyperparameter not shown here
+is set to its default value (Note~\ref{nte-train-default}).}
 
 \centering{
 
@@ -713,51 +727,57 @@ Plus/minus two standard deviations of bootstrap estimates.
 
 \subsubsection{Robust Performance Plots}\label{robust-performance-plots}
 
-\subsection{Confidence Intervals}\label{confidence-intervals}
+\subsubsection{Confidence Intervals}\label{confidence-intervals}
 
 \begin{table}
 
-\caption{\label{tbl-ci}Confidence intervals}
+\caption{\label{tbl-ci}Mean outcomes for \textbf{CT} and \textbf{BL}
+along with bootstrapped confidence intervals (99\%) for difference in
+mean outcomes grouped by dataset and evaluation metric. Column
+\textbf{LB} and \textbf{UB} show the lower and upper bound of the
+intervals, respectively, and computed using the percentile method. The
+underlying counterfactual evaluations are the same as the ones used to
+produce the main table in the paper.}
 
 \centering{
 
 \begin{tabular}{lccccc}
   \toprule
-  \textbf{Variable} & \textbf{Data} & \textbf{Full} & \textbf{Vanilla} & \textbf{LB} & \textbf{UB} \\\midrule
-  Cost $(-\%)$ & LS & 3.82 & 4.44 & -0.7 & -0.56 \\
-  $ \text{IP}^* $ $(-\%)$ & LS & 0.1 & 0.23 & -0.14 & -0.12 \\
-  $ \text{IP} $ $(-\%)$ & LS & 2.41 & 3.4 & -1.04 & -0.94 \\
-  Cost $(-\%)$ & Circ & 0.67 & 1.23 & -0.58 & -0.53 \\\midrule
-  $ \text{IP}^* $ $(-\%)$ & Circ & 0.0 & 0.0 & -0.01 & -0.0 \\
-  $ \text{IP} $ $(-\%)$ & Circ & 1.03 & 2.36 & -1.37 & -1.29 \\
-  Cost $(-\%)$ & Moon & 1.55 & 1.6 & -0.08 & -0.01 \\
-  $ \text{IP}^* $ $(-\%)$ & Moon & 0.02 & 0.02 & -0.01 & -0.0 \\
-  $ \text{IP} $ $(-\%)$ & Moon & 1.36 & 1.71 & -0.38 & -0.32 \\
-  Cost $(-\%)$ & OL & 1.62 & 2.63 & -1.15 & -0.81 \\\midrule
-  $ \text{IP}^* $ $(-\%)$ & OL & 0.12 & 0.09 & -0.01 & 0.05 \\
-  $ \text{IP} $ $(-\%)$ & OL & 4.49 & 4.44 & -0.03 & 0.13 \\
-  Cost $(-\%)$ & Adult & 2.26 & 2.2 & -0.22 & 0.28 \\
-  $ \text{IP}^* $ $(-\%)$ & Adult & 0.07 & 0.11 & -0.06 & -0.01 \\
-  $ \text{IP} $ $(-\%)$ & Adult & 15.03 & 15.15 & -0.68 & 0.26 \\
-  Cost $(-\%)$ & CH & 1.46 & 2.46 & -1.1 & -0.89 \\
-  $ \text{IP}^* $ $(-\%)$ & CH & 0.02 & 0.06 & -0.06 & -0.04 \\
-  $ \text{IP} $ $(-\%)$ & CH & 6.61 & 7.52 & -1.17 & -0.63 \\
-  Cost $(-\%)$ & Cred & 2.68 & 2.29 & 0.16 & 0.63 \\
-  $ \text{IP}^* $ $(-\%)$ & Cred & 0.03 & 0.06 & -0.05 & -0.01 \\
-  $ \text{IP} $ $(-\%)$ & Cred & 19.31 & 22.03 & -3.69 & -1.74 \\
-  Cost $(-\%)$ & GMSC & 1.14 & 3.05 & -2.45 & -1.77 \\
-  $ \text{IP}^* $ $(-\%)$ & GMSC & 0.02 & 0.07 & -0.06 & -0.04 \\
-  $ \text{IP} $ $(-\%)$ & GMSC & 6.19 & 8.09 & -2.4 & -1.49 \\
-  Cost $(-\%)$ & MNIST & 77.04 & 68.67 & -3.47 & 18.34 \\
-  $ \text{IP}^* $ $(-\%)$ & MNIST & 0.04 & 0.04 & -0.1 & 0.09 \\
-  $ \text{IP} $ $(-\%)$ & MNIST & 258.83 & 278.54 & -30.49 & -7.64 \\
+  \textbf{Variable} & \textbf{Data} & \textbf{CT} & \textbf{BL} & \textbf{LB} & \textbf{UB} \\\midrule
+  Cost & Adult & 2.26 & 2.2 & -0.22 & 0.28 \\
+  Cost & CH & 1.46 & 2.46 & -1.1 & -0.89 \\
+  Cost & Circ & 0.67 & 1.23 & -0.58 & -0.53 \\
+  Cost & Cred & 2.68 & 2.29 & 0.16 & 0.63 \\
+  Cost & GMSC & 1.14 & 3.05 & -2.45 & -1.77 \\
+  Cost & LS & 3.82 & 4.44 & -0.7 & -0.56 \\
+  Cost & MNIST & 77.04 & 68.67 & -3.47 & 18.34 \\
+  Cost & Moon & 1.55 & 1.6 & -0.08 & -0.01 \\
+  Cost & OL & 1.62 & 2.63 & -1.15 & -0.81 \\
+  $ \text{IP}^* $ & Adult & 0.07 & 0.11 & -0.06 & -0.01 \\
+  $ \text{IP}^* $ & CH & 0.02 & 0.06 & -0.06 & -0.04 \\
+  $ \text{IP}^* $ & Circ & 0.0 & 0.0 & -0.01 & -0.0 \\
+  $ \text{IP}^* $ & Cred & 0.03 & 0.06 & -0.05 & -0.01 \\
+  $ \text{IP}^* $ & GMSC & 0.02 & 0.07 & -0.06 & -0.04 \\
+  $ \text{IP}^* $ & LS & 0.1 & 0.23 & -0.14 & -0.12 \\
+  $ \text{IP}^* $ & MNIST & 0.04 & 0.04 & -0.1 & 0.09 \\
+  $ \text{IP}^* $ & Moon & 0.02 & 0.02 & -0.01 & -0.0 \\
+  $ \text{IP}^* $ & OL & 0.12 & 0.09 & -0.01 & 0.05 \\
+  $ \text{IP} $ & Adult & 15.03 & 15.15 & -0.68 & 0.26 \\
+  $ \text{IP} $ & CH & 6.61 & 7.52 & -1.17 & -0.63 \\
+  $ \text{IP} $ & Circ & 1.03 & 2.36 & -1.37 & -1.29 \\
+  $ \text{IP} $ & Cred & 19.31 & 22.03 & -3.69 & -1.74 \\
+  $ \text{IP} $ & GMSC & 6.19 & 8.09 & -2.4 & -1.49 \\
+  $ \text{IP} $ & LS & 2.41 & 3.4 & -1.04 & -0.94 \\
+  $ \text{IP} $ & MNIST & 258.83 & 278.54 & -30.49 & -7.64 \\
+  $ \text{IP} $ & Moon & 1.36 & 1.71 & -0.38 & -0.32 \\
+  $ \text{IP} $ & OL & 4.49 & 4.44 & -0.03 & 0.13 \\\bottomrule
 \end{tabular}
 
 }
 
 \end{table}%
 
-\subsection{Qualitative Findings for Image
+\subsubsection{Qualitative Findings for Image
 Data}\label{qualitative-findings-for-image-data}
 
 Figure~\ref{fig-mnist} shows much more plausible (faithful)
@@ -779,7 +799,7 @@ training (Figure~\ref{fig-mnist-vanilla}).
 \caption{\label{fig-mnist}Counterfactual images for \emph{MLP} with
 counterfactual training. Factual images are shown on the diagonal, with
 the corresponding counterfactual for each target class (columns) in that
-same row. The underlying generator, \emph{ECCo}, aims to generate
+same row. The underlying generator, \emph{ECCCo}, aims to generate
 counterfactuals that are faithful to the model
 (\citeproc{ref-altmeyer2024faithful}{Altmeyer et al. 2024}).}
 
@@ -810,6 +830,144 @@ was trained conventionally.}
 
 \end{figure}%
 
+\begin{figure}
+
+\begin{minipage}{0.50\linewidth}
+
+\subsubsection{Integrated Gradients}\label{integrated-gradients}
+
+\begin{table}[H]
+
+\caption{\label{tbl-ig}Integrated gradients.}
+
+\centering{
+
+\begin{tabular}{
+l
+S[table-format=2.2(3.2)]
+S[table-format=2.2(2.2)]
+}
+  \toprule
+  \textbf{Data} & \textbf{CT} & \textbf{BL} \\\midrule
+  LS & 0.03 \pm 0.0 & 10.24 \pm 2.4 \\
+  Circ & 3.2 \pm 0.67 & 149.76 \pm 842.75 \\
+  Moon & 60.84 \pm 128.51 & 0.55 \pm 0.06 \\
+  OL & 0.78 \pm 0.12 & 4.81 \pm 1.08 \\\midrule
+  Adult & 0.43 \pm 0.01 & 1.0 \pm 0.0 \\
+  CH & 0.08 \pm 0.01 & 0.23 \pm 0.01 \\
+  Cred & 0.0 \pm 0.0 & 0.43 \pm 0.01 \\
+  GMSC & 1.0 \pm 0.0 & 0.21 \pm 0.03 \\
+  MNIST & 0.18 \pm 0.01 & 0.41 \pm 0.01 \\
+\end{tabular}
+
+}
+
+\end{table}%
+
+\end{minipage}%
+%
+\begin{minipage}{0.50\linewidth}
+
+\begin{figure}[H]
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/figures/mnist_ig.png}}
+
+}
+
+\caption{\label{fig-mnist-ig}Class-conditional integrated gradients.}
+
+\end{figure}%
+
+\end{minipage}%
+
+\end{figure}%
+
+\subsubsection{Costs and Validity}\label{costs-and-validity}
+
+\begin{table}
+
+\caption{\label{tbl-panel}Costs and validity.}
+
+\begin{minipage}{0.33\linewidth}
+
+\subcaption{\label{tbl-costs}Costs}
+
+\centering{
+
+\begin{tabular}{
+l
+S[table-format=2.2(1.2)]
+}
+  \toprule
+  \textbf{Data} & \textbf{Cost $(-\%)$} \\\midrule
+  LS & -26.82\pm0.86 $^{*}$ \\
+  Circ & 40.97\pm0.82 $^{*}$ \\
+  Moon & 33.83\pm0.98 $^{*}$ \\
+  OL & 10.35\pm1.28 $^{*}$ \\\midrule
+  Adult & 1.16\pm3.53 $^{}$ \\
+  CH & -34.89\pm2.31 $^{*}$ \\
+  Cred & 28.24\pm1.08 $^{*}$ \\
+  GMSC & 3.54\pm5.78 $^{}$ \\
+  MNIST & -31.67\pm7.72 $^{*}$ \\\midrule
+  Avg. & 2.75 \\\bottomrule
+\end{tabular}
+
+}
+
+\end{minipage}%
+%
+\begin{minipage}{0.33\linewidth}
+
+\subcaption{\label{tbl-val}Validity}
+
+\centering{
+
+\begin{tabular}{lcc}
+  \toprule
+  \textbf{Data} & \textbf{CT} & \textbf{BL} \\\midrule
+  LS & 1.0 & 1.0 \\
+  Circ & 0.97 & 0.52 \\
+  Moon & 1.0 & 1.0 \\
+  OL & 0.87 & 0.98 \\\midrule
+  Adult & 0.61 & 0.99 \\
+  CH & 0.96 & 1.0 \\
+  Cred & 0.7 & 1.0 \\
+  GMSC & 0.63 & 1.0 \\
+  MNIST & 1.0 & 1.0 \\
+\end{tabular}
+
+}
+
+\end{minipage}%
+%
+\begin{minipage}{0.33\linewidth}
+
+\subcaption{\label{tbl-val-mtbl}Validity}
+
+\centering{
+
+\begin{tabular}{lcc}
+  \toprule
+  \textbf{Data} & \textbf{CT} & \textbf{BL} \\\midrule
+  LS & 1.0 & 1.0 \\
+  Circ & 0.67 & 0.49 \\
+  Moon & 0.99 & 0.98 \\
+  OL & 0.37 & 0.57 \\\midrule
+  Adult & 0.56 & 0.99 \\
+  CH & 0.96 & 1.0 \\
+  Cred & 0.67 & 1.0 \\
+  GMSC & 0.38 & 1.0 \\
+  MNIST & 1.0 & 1.0 \\
+\end{tabular}
+
+}
+
+\end{minipage}%
+
+\end{table}%
+
 \FloatBarrier
 
 \section{Grid Searches}\label{sec-app-grid}
@@ -827,8 +985,8 @@ We have grouped these grid searches into multiple categories:
   counterfactual outcomes during the training phase.
 \item
   \textbf{Penalty Strengths} (Section~\ref{sec-app-grid-pen}):
-  Investigates the effect of changing the penalty strengths in out
-  proposed objective (\textbf{?@eq-obj}).
+  Investigates the effect of changing the penalty strengths in our
+  proposed training objective.
 \item
   \textbf{Other Parameters} (Section~\ref{sec-app-grid-train}):
   Investigates the effect of changing other training parameters,
@@ -849,7 +1007,7 @@ for all models on test data (Table~\ref{tbl-acc-gen},
 Table~\ref{tbl-acc-pen}, Table~\ref{tbl-acc-train}). With respect to
 explanatory performance, we report here our findings for the
 (im)plausibility and cost of counterfactuals at test time. Since the
-computation of our proposed divergence metric (\textbf{?@eq-impl-div})
+computation of our proposed divergence-based adaption (\(\text{IP}^*\))
 is memory-intensive, we rely on the distance-based metric for the grid
 searches. For the counterfactual evaluation, we draw factual samples
 from the training data for the grid searches to avoid data leakage with
@@ -897,7 +1055,7 @@ to a substantial decrease in plausibility. This finding can be
 attributed to the fact that \emph{REVISE} effectively assigns the task
 of learning plausible explanations from the model itself to a surrogate
 VAE. In other words, counterfactuals generated by \emph{REVISE} are less
-faithful to the model that \emph{ECCo} and \emph{Generic}, and hence we
+faithful to the model that \emph{ECCCo} and \emph{Generic}, and hence we
 would expect them to be a less effective and, in fact, potentially
 detrimental role in our training regime. Secondly, we observe that
 allowing for a higher number of maximum steps \(T\) for the
@@ -906,7 +1064,7 @@ intuitive, because it allows more counterfactuals to reach maturity in
 any given iteration. Looking in particular at the results for
 \emph{Linearly Separable}, it seems that higher values for \(T\) in
 combination with higher decision thresholds (\(\tau\)) yields the best
-results when using \emph{ECCo}. But depending on the degree of class
+results when using \emph{ECCCo}. But depending on the degree of class
 separability of the underlying data, a high decision-threshold can also
 affect results adversely, as evident from the results for the
 \emph{Overlapping} data (Figure~\ref{fig-grid-gen_params-plaus-over}):
@@ -946,7 +1104,7 @@ training is shown in Note~\ref{nte-gen-params-final-run-train}. The
 corresponding evaluation grid used for these experiments is shown in
 Note~\ref{nte-gen-params-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, coltitle=black, arc=.35mm, opacitybacktitle=0.6, bottomtitle=1mm, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, opacityback=0, titlerule=0mm, rightrule=.15mm, leftrule=.75mm, breakable, left=2mm, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, rightrule=.15mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, colback=white, toptitle=1mm, arc=.35mm, left=2mm, toprule=.15mm, coltitle=black, opacitybacktitle=0.6, breakable, titlerule=0mm, opacityback=0, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm]
 
 \quartocalloutnte{nte-gen-params-final-run-train} 
 
@@ -980,7 +1138,7 @@ Note~\ref{nte-gen-params-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, coltitle=black, arc=.35mm, opacitybacktitle=0.6, bottomtitle=1mm, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, opacityback=0, titlerule=0mm, rightrule=.15mm, leftrule=.75mm, breakable, left=2mm, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, rightrule=.15mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, colback=white, toptitle=1mm, arc=.35mm, left=2mm, toprule=.15mm, coltitle=black, opacitybacktitle=0.6, breakable, titlerule=0mm, opacityback=0, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm]
 
 \quartocalloutnte{nte-gen-params-final-run-eval} 
 
@@ -1059,8 +1217,8 @@ Figure~\ref{fig-grid-gen_params-plaus-over}.
 \caption{\label{fig-grid-gen_params-plaus-circles}Average outcomes for
 the plausibility measure across hyperparameters. This shows the \%
 change from the baseline model for the distance-based implausibility
-metric (\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
+metric (\$ ext\{IP\}\$). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCCo}).
 Data: Circles.}
 
 \end{figure}%
@@ -1076,8 +1234,8 @@ Data: Circles.}
 \caption{\label{fig-grid-gen_params-plaus-lin_sep}Average outcomes for
 the plausibility measure across hyperparameters. This shows the \%
 change from the baseline model for the distance-based implausibility
-metric (\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
+metric (\$ ext\{IP\}\$). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCCo}).
 Data: Linearly Separable.}
 
 \end{figure}%
@@ -1092,10 +1250,9 @@ Data: Linearly Separable.}
 
 \caption{\label{fig-grid-gen_params-plaus-moons}Average outcomes for the
 plausibility measure across hyperparameters. This shows the \% change
-from the baseline model for the distance-based implausibility metric
-(\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
-Data: Moons.}
+from the baseline model for the distance-based implausibility metric (\$
+ext\{IP\}\$). Boxplots indicate the variation across evaluation runs and
+test settings (varying parameters for \emph{ECCCo}). Data: Moons.}
 
 \end{figure}%
 
@@ -1109,10 +1266,9 @@ Data: Moons.}
 
 \caption{\label{fig-grid-gen_params-plaus-over}Average outcomes for the
 plausibility measure across hyperparameters. This shows the \% change
-from the baseline model for the distance-based implausibility metric
-(\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
-Data: Overlapping.}
+from the baseline model for the distance-based implausibility metric (\$
+ext\{IP\}\$). Boxplots indicate the variation across evaluation runs and
+test settings (varying parameters for \emph{ECCCo}). Data: Overlapping.}
 
 \end{figure}%
 
@@ -1135,7 +1291,7 @@ the cost measure across hyperparameters. This shows the \% change from
 the baseline model for the distance-based cost metric
 (\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
 Russell 2017}). Boxplots indicate the variation across evaluation runs
-and test settings (varying parameters for \emph{ECCo}). Data: Circles.}
+and test settings (varying parameters for \emph{ECCCo}). Data: Circles.}
 
 \end{figure}%
 
@@ -1152,7 +1308,7 @@ the cost measure across hyperparameters. This shows the \% change from
 the baseline model for the distance-based cost metric
 (\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
 Russell 2017}). Boxplots indicate the variation across evaluation runs
-and test settings (varying parameters for \emph{ECCo}). Data: Linearly
+and test settings (varying parameters for \emph{ECCCo}). Data: Linearly
 Separable.}
 
 \end{figure}%
@@ -1170,7 +1326,7 @@ cost measure across hyperparameters. This shows the \% change from the
 baseline model for the distance-based cost metric
 (\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
 Russell 2017}). Boxplots indicate the variation across evaluation runs
-and test settings (varying parameters for \emph{ECCo}). Data: Moons.}
+and test settings (varying parameters for \emph{ECCCo}). Data: Moons.}
 
 \end{figure}%
 
@@ -1187,7 +1343,7 @@ cost measure across hyperparameters. This shows the \% change from the
 baseline model for the distance-based cost metric
 (\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
 Russell 2017}). Boxplots indicate the variation across evaluation runs
-and test settings (varying parameters for \emph{ECCo}). Data:
+and test settings (varying parameters for \emph{ECCCo}). Data:
 Overlapping.}
 
 \end{figure}%
@@ -1199,7 +1355,7 @@ is shown in Note~\ref{nte-pen-final-run-train}. The corresponding
 evaluation grid used for these experiments is shown in
 Note~\ref{nte-pen-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, coltitle=black, arc=.35mm, opacitybacktitle=0.6, bottomtitle=1mm, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, opacityback=0, titlerule=0mm, rightrule=.15mm, leftrule=.75mm, breakable, left=2mm, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, rightrule=.15mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, colback=white, toptitle=1mm, arc=.35mm, left=2mm, toprule=.15mm, coltitle=black, opacitybacktitle=0.6, breakable, titlerule=0mm, opacityback=0, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm]
 
 \quartocalloutnte{nte-pen-final-run-train} 
 
@@ -1227,7 +1383,7 @@ Note~\ref{nte-pen-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, coltitle=black, arc=.35mm, opacitybacktitle=0.6, bottomtitle=1mm, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, opacityback=0, titlerule=0mm, rightrule=.15mm, leftrule=.75mm, breakable, left=2mm, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, rightrule=.15mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, colback=white, toptitle=1mm, arc=.35mm, left=2mm, toprule=.15mm, coltitle=black, opacitybacktitle=0.6, breakable, titlerule=0mm, opacityback=0, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm]
 
 \quartocalloutnte{nte-pen-final-run-eval} 
 
@@ -1305,10 +1461,9 @@ Figure~\ref{fig-grid-pen-plaus-over}.
 
 \caption{\label{fig-grid-pen-plaus-circles}Average outcomes for the
 plausibility measure across hyperparameters. This shows the \% change
-from the baseline model for the distance-based implausibility metric
-(\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
-Data: Circles.}
+from the baseline model for the distance-based implausibility metric (\$
+ext\{IP\}\$). Boxplots indicate the variation across evaluation runs and
+test settings (varying parameters for \emph{ECCCo}). Data: Circles.}
 
 \end{figure}%
 
@@ -1322,10 +1477,10 @@ Data: Circles.}
 
 \caption{\label{fig-grid-pen-plaus-lin_sep}Average outcomes for the
 plausibility measure across hyperparameters. This shows the \% change
-from the baseline model for the distance-based implausibility metric
-(\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
-Data: Linearly Separable.}
+from the baseline model for the distance-based implausibility metric (\$
+ext\{IP\}\$). Boxplots indicate the variation across evaluation runs and
+test settings (varying parameters for \emph{ECCCo}). Data: Linearly
+Separable.}
 
 \end{figure}%
 
@@ -1339,10 +1494,9 @@ Data: Linearly Separable.}
 
 \caption{\label{fig-grid-pen-plaus-moons}Average outcomes for the
 plausibility measure across hyperparameters. This shows the \% change
-from the baseline model for the distance-based implausibility metric
-(\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
-Data: Moons.}
+from the baseline model for the distance-based implausibility metric (\$
+ext\{IP\}\$). Boxplots indicate the variation across evaluation runs and
+test settings (varying parameters for \emph{ECCCo}). Data: Moons.}
 
 \end{figure}%
 
@@ -1356,10 +1510,9 @@ Data: Moons.}
 
 \caption{\label{fig-grid-pen-plaus-over}Average outcomes for the
 plausibility measure across hyperparameters. This shows the \% change
-from the baseline model for the distance-based implausibility metric
-(\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
-Data: Overlapping.}
+from the baseline model for the distance-based implausibility metric (\$
+ext\{IP\}\$). Boxplots indicate the variation across evaluation runs and
+test settings (varying parameters for \emph{ECCCo}). Data: Overlapping.}
 
 \end{figure}%
 
@@ -1382,7 +1535,7 @@ measure across hyperparameters. This shows the \% change from the
 baseline model for the distance-based cost metric
 (\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
 Russell 2017}). Boxplots indicate the variation across evaluation runs
-and test settings (varying parameters for \emph{ECCo}). Data: Circles.}
+and test settings (varying parameters for \emph{ECCCo}). Data: Circles.}
 
 \end{figure}%
 
@@ -1399,7 +1552,7 @@ measure across hyperparameters. This shows the \% change from the
 baseline model for the distance-based cost metric
 (\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
 Russell 2017}). Boxplots indicate the variation across evaluation runs
-and test settings (varying parameters for \emph{ECCo}). Data: Linearly
+and test settings (varying parameters for \emph{ECCCo}). Data: Linearly
 Separable.}
 
 \end{figure}%
@@ -1417,7 +1570,7 @@ measure across hyperparameters. This shows the \% change from the
 baseline model for the distance-based cost metric
 (\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
 Russell 2017}). Boxplots indicate the variation across evaluation runs
-and test settings (varying parameters for \emph{ECCo}). Data: Moons.}
+and test settings (varying parameters for \emph{ECCCo}). Data: Moons.}
 
 \end{figure}%
 
@@ -1434,7 +1587,7 @@ measure across hyperparameters. This shows the \% change from the
 baseline model for the distance-based cost metric
 (\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
 Russell 2017}). Boxplots indicate the variation across evaluation runs
-and test settings (varying parameters for \emph{ECCo}). Data:
+and test settings (varying parameters for \emph{ECCCo}). Data:
 Overlapping.}
 
 \end{figure}%
@@ -1446,7 +1599,7 @@ in Note~\ref{nte-train-final-run-train}. The corresponding evaluation
 grid used for these experiments is shown in
 Note~\ref{nte-train-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, coltitle=black, arc=.35mm, opacitybacktitle=0.6, bottomtitle=1mm, title={Note \ref*{nte-train-final-run-train}: Training Phase}, opacityback=0, titlerule=0mm, rightrule=.15mm, leftrule=.75mm, breakable, left=2mm, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-train-final-run-train}: Training Phase}, rightrule=.15mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, colback=white, toptitle=1mm, arc=.35mm, left=2mm, toprule=.15mm, coltitle=black, opacitybacktitle=0.6, breakable, titlerule=0mm, opacityback=0, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm]
 
 \quartocalloutnte{nte-train-final-run-train} 
 
@@ -1474,7 +1627,7 @@ Note~\ref{nte-train-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, coltitle=black, arc=.35mm, opacitybacktitle=0.6, bottomtitle=1mm, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, opacityback=0, titlerule=0mm, rightrule=.15mm, leftrule=.75mm, breakable, left=2mm, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, rightrule=.15mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, colback=white, toptitle=1mm, arc=.35mm, left=2mm, toprule=.15mm, coltitle=black, opacitybacktitle=0.6, breakable, titlerule=0mm, opacityback=0, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm]
 
 \quartocalloutnte{nte-train-final-run-eval} 
 
@@ -1552,10 +1705,9 @@ Figure~\ref{fig-grid-train-plaus-over}.
 
 \caption{\label{fig-grid-train-plaus-circles}Average outcomes for the
 plausibility measure across hyperparameters. This shows the \% change
-from the baseline model for the distance-based implausibility metric
-(\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
-Data: Circles.}
+from the baseline model for the distance-based implausibility metric (\$
+ext\{IP\}\$). Boxplots indicate the variation across evaluation runs and
+test settings (varying parameters for \emph{ECCCo}). Data: Circles.}
 
 \end{figure}%
 
@@ -1569,10 +1721,10 @@ Data: Circles.}
 
 \caption{\label{fig-grid-train-plaus-lin_sep}Average outcomes for the
 plausibility measure across hyperparameters. This shows the \% change
-from the baseline model for the distance-based implausibility metric
-(\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
-Data: Linearly Separable.}
+from the baseline model for the distance-based implausibility metric (\$
+ext\{IP\}\$). Boxplots indicate the variation across evaluation runs and
+test settings (varying parameters for \emph{ECCCo}). Data: Linearly
+Separable.}
 
 \end{figure}%
 
@@ -1586,10 +1738,9 @@ Data: Linearly Separable.}
 
 \caption{\label{fig-grid-train-plaus-moons}Average outcomes for the
 plausibility measure across hyperparameters. This shows the \% change
-from the baseline model for the distance-based implausibility metric
-(\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
-Data: Moons.}
+from the baseline model for the distance-based implausibility metric (\$
+ext\{IP\}\$). Boxplots indicate the variation across evaluation runs and
+test settings (varying parameters for \emph{ECCCo}). Data: Moons.}
 
 \end{figure}%
 
@@ -1603,10 +1754,9 @@ Data: Moons.}
 
 \caption{\label{fig-grid-train-plaus-over}Average outcomes for the
 plausibility measure across hyperparameters. This shows the \% change
-from the baseline model for the distance-based implausibility metric
-(\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
-Data: Overlapping.}
+from the baseline model for the distance-based implausibility metric (\$
+ext\{IP\}\$). Boxplots indicate the variation across evaluation runs and
+test settings (varying parameters for \emph{ECCCo}). Data: Overlapping.}
 
 \end{figure}%
 
@@ -1629,7 +1779,7 @@ cost measure across hyperparameters. This shows the \% change from the
 baseline model for the distance-based cost metric
 (\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
 Russell 2017}). Boxplots indicate the variation across evaluation runs
-and test settings (varying parameters for \emph{ECCo}). Data: Circles.}
+and test settings (varying parameters for \emph{ECCCo}). Data: Circles.}
 
 \end{figure}%
 
@@ -1646,7 +1796,7 @@ cost measure across hyperparameters. This shows the \% change from the
 baseline model for the distance-based cost metric
 (\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
 Russell 2017}). Boxplots indicate the variation across evaluation runs
-and test settings (varying parameters for \emph{ECCo}). Data: Linearly
+and test settings (varying parameters for \emph{ECCCo}). Data: Linearly
 Separable.}
 
 \end{figure}%
@@ -1664,7 +1814,7 @@ measure across hyperparameters. This shows the \% change from the
 baseline model for the distance-based cost metric
 (\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
 Russell 2017}). Boxplots indicate the variation across evaluation runs
-and test settings (varying parameters for \emph{ECCo}). Data: Moons.}
+and test settings (varying parameters for \emph{ECCCo}). Data: Moons.}
 
 \end{figure}%
 
@@ -1681,7 +1831,7 @@ measure across hyperparameters. This shows the \% change from the
 baseline model for the distance-based cost metric
 (\citeproc{ref-wachter2017counterfactual}{Wachter, Mittelstadt, and
 Russell 2017}). Boxplots indicate the variation across evaluation runs
-and test settings (varying parameters for \emph{ECCo}). Data:
+and test settings (varying parameters for \emph{ECCCo}). Data:
 Overlapping.}
 
 \end{figure}%
@@ -1739,7 +1889,7 @@ The hyperparameter grid for tuning key parameters is shown in
 Note~\ref{nte-tune-train}. The corresponding evaluation grid used for
 these experiments is shown in Note~\ref{nte-tune-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, coltitle=black, arc=.35mm, opacitybacktitle=0.6, bottomtitle=1mm, title={Note \ref*{nte-tune-train}: Training Phase}, opacityback=0, titlerule=0mm, rightrule=.15mm, leftrule=.75mm, breakable, left=2mm, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-tune-train}: Training Phase}, rightrule=.15mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, colback=white, toptitle=1mm, arc=.35mm, left=2mm, toprule=.15mm, coltitle=black, opacitybacktitle=0.6, breakable, titlerule=0mm, opacityback=0, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm]
 
 \quartocalloutnte{nte-tune-train} 
 
@@ -1769,7 +1919,7 @@ these experiments is shown in Note~\ref{nte-tune-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, coltitle=black, arc=.35mm, opacitybacktitle=0.6, bottomtitle=1mm, title={Note \ref*{nte-tune-eval}: Evaluation Phase}, opacityback=0, titlerule=0mm, rightrule=.15mm, leftrule=.75mm, breakable, left=2mm, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-tune-eval}: Evaluation Phase}, rightrule=.15mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, colback=white, toptitle=1mm, arc=.35mm, left=2mm, toprule=.15mm, coltitle=black, opacitybacktitle=0.6, breakable, titlerule=0mm, opacityback=0, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm]
 
 \quartocalloutnte{nte-tune-eval} 
 
@@ -1803,8 +1953,8 @@ Figure~\ref{fig-tune-plaus-adult} to Figure~\ref{fig-tune-plaus-over}.
 \caption{\label{fig-tune-plaus-adult}Average outcomes for the
 plausibility measure across key hyperparameters. This shows the \%
 change from the baseline model for the distance-based implausibility
-metric (\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
+metric (\$ ext\{IP\}\$). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCCo}).
 Data: Adult.}
 
 \end{figure}%
@@ -1820,8 +1970,8 @@ Data: Adult.}
 \caption{\label{fig-tune-plaus-cali}Average outcomes for the
 plausibility measure across key hyperparameters. This shows the \%
 change from the baseline model for the distance-based implausibility
-metric (\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
+metric (\$ ext\{IP\}\$). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCCo}).
 Data: California Housing.}
 
 \end{figure}%
@@ -1837,8 +1987,8 @@ Data: California Housing.}
 \caption{\label{fig-tune-plaus-circles}Average outcomes for the
 plausibility measure across key hyperparameters. This shows the \%
 change from the baseline model for the distance-based implausibility
-metric (\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
+metric (\$ ext\{IP\}\$). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCCo}).
 Data: Circles.}
 
 \end{figure}%
@@ -1854,8 +2004,8 @@ Data: Circles.}
 \caption{\label{fig-tune-plaus-credit}Average outcomes for the
 plausibility measure across key hyperparameters. This shows the \%
 change from the baseline model for the distance-based implausibility
-metric (\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
+metric (\$ ext\{IP\}\$). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCCo}).
 Data: Credit.}
 
 \end{figure}%
@@ -1871,8 +2021,8 @@ Data: Credit.}
 \caption{\label{fig-tune-plaus-gmsc}Average outcomes for the
 plausibility measure across key hyperparameters. This shows the \%
 change from the baseline model for the distance-based implausibility
-metric (\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
+metric (\$ ext\{IP\}\$). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCCo}).
 Data: GMSC.}
 
 \end{figure}%
@@ -1888,8 +2038,8 @@ Data: GMSC.}
 \caption{\label{fig-tune-plaus-lin_sep}Average outcomes for the
 plausibility measure across key hyperparameters. This shows the \%
 change from the baseline model for the distance-based implausibility
-metric (\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
+metric (\$ ext\{IP\}\$). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCCo}).
 Data: Linearly Separable.}
 
 \end{figure}%
@@ -1905,8 +2055,8 @@ Data: Linearly Separable.}
 \caption{\label{fig-tune-plaus-mnist}Average outcomes for the
 plausibility measure across key hyperparameters. This shows the \%
 change from the baseline model for the distance-based implausibility
-metric (\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
+metric (\$ ext\{IP\}\$). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCCo}).
 Data: MNIST.}
 
 \end{figure}%
@@ -1922,8 +2072,8 @@ Data: MNIST.}
 \caption{\label{fig-tune-plaus-moons}Average outcomes for the
 plausibility measure across key hyperparameters. This shows the \%
 change from the baseline model for the distance-based implausibility
-metric (\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
+metric (\$ ext\{IP\}\$). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCCo}).
 Data: Moons.}
 
 \end{figure}%
@@ -1939,8 +2089,8 @@ Data: Moons.}
 \caption{\label{fig-tune-plaus-over}Average outcomes for the
 plausibility measure across key hyperparameters. This shows the \%
 change from the baseline model for the distance-based implausibility
-metric (\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
+metric (\$ ext\{IP\}\$). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCCo}).
 Data: Overlapping.}
 
 \end{figure}%
@@ -2074,7 +2224,7 @@ The hyperparameter grid for tuning the learning rate is shown in
 Note~\ref{nte-tune_lr-train}. The corresponding evaluation grid used for
 these experiments is shown in Note~\ref{nte-tune_lr-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, coltitle=black, arc=.35mm, opacitybacktitle=0.6, bottomtitle=1mm, title={Note \ref*{nte-tune_lr-train}: Training Phase}, opacityback=0, titlerule=0mm, rightrule=.15mm, leftrule=.75mm, breakable, left=2mm, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-tune_lr-train}: Training Phase}, rightrule=.15mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, colback=white, toptitle=1mm, arc=.35mm, left=2mm, toprule=.15mm, coltitle=black, opacitybacktitle=0.6, breakable, titlerule=0mm, opacityback=0, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm]
 
 \quartocalloutnte{nte-tune_lr-train} 
 
@@ -2104,7 +2254,7 @@ these experiments is shown in Note~\ref{nte-tune_lr-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, colframe=quarto-callout-note-color-frame, toprule=.15mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm, coltitle=black, arc=.35mm, opacitybacktitle=0.6, bottomtitle=1mm, title={Note \ref*{nte-tune_lr-eval}: Evaluation Phase}, opacityback=0, titlerule=0mm, rightrule=.15mm, leftrule=.75mm, breakable, left=2mm, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, title={Note \ref*{nte-tune_lr-eval}: Evaluation Phase}, rightrule=.15mm, bottomtitle=1mm, colframe=quarto-callout-note-color-frame, colback=white, toptitle=1mm, arc=.35mm, left=2mm, toprule=.15mm, coltitle=black, opacitybacktitle=0.6, breakable, titlerule=0mm, opacityback=0, leftrule=.75mm, colbacktitle=quarto-callout-note-color!10!white, bottomrule=.15mm]
 
 \quartocalloutnte{nte-tune_lr-eval} 
 
@@ -2139,8 +2289,8 @@ Figure~\ref{fig-tune_lr-plaus-over}.
 \caption{\label{fig-tune_lr-plaus-adult}Average outcomes for the
 plausibility measure across key hyperparameters. This shows the \%
 change from the baseline model for the distance-based implausibility
-metric (\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
+metric (\$ ext\{IP\}\$). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCCo}).
 Data: Adult.}
 
 \end{figure}%
@@ -2156,8 +2306,8 @@ Data: Adult.}
 \caption{\label{fig-tune_lr-plaus-cali}Average outcomes for the
 plausibility measure across key hyperparameters. This shows the \%
 change from the baseline model for the distance-based implausibility
-metric (\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
+metric (\$ ext\{IP\}\$). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCCo}).
 Data: California Housing.}
 
 \end{figure}%
@@ -2173,8 +2323,8 @@ Data: California Housing.}
 \caption{\label{fig-tune_lr-plaus-circles}Average outcomes for the
 plausibility measure across key hyperparameters. This shows the \%
 change from the baseline model for the distance-based implausibility
-metric (\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
+metric (\$ ext\{IP\}\$). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCCo}).
 Data: Circles.}
 
 \end{figure}%
@@ -2190,8 +2340,8 @@ Data: Circles.}
 \caption{\label{fig-tune_lr-plaus-credit}Average outcomes for the
 plausibility measure across key hyperparameters. This shows the \%
 change from the baseline model for the distance-based implausibility
-metric (\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
+metric (\$ ext\{IP\}\$). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCCo}).
 Data: Credit.}
 
 \end{figure}%
@@ -2207,8 +2357,8 @@ Data: Credit.}
 \caption{\label{fig-tune_lr-plaus-gmsc}Average outcomes for the
 plausibility measure across key hyperparameters. This shows the \%
 change from the baseline model for the distance-based implausibility
-metric (\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
+metric (\$ ext\{IP\}\$). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCCo}).
 Data: GMSC.}
 
 \end{figure}%
@@ -2224,8 +2374,8 @@ Data: GMSC.}
 \caption{\label{fig-tune_lr-plaus-lin_sep}Average outcomes for the
 plausibility measure across key hyperparameters. This shows the \%
 change from the baseline model for the distance-based implausibility
-metric (\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
+metric (\$ ext\{IP\}\$). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCCo}).
 Data: Linearly Separable.}
 
 \end{figure}%
@@ -2241,8 +2391,8 @@ Data: Linearly Separable.}
 \caption{\label{fig-tune_lr-plaus-mnist}Average outcomes for the
 plausibility measure across key hyperparameters. This shows the \%
 change from the baseline model for the distance-based implausibility
-metric (\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
+metric (\$ ext\{IP\}\$). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCCo}).
 Data: MNIST.}
 
 \end{figure}%
@@ -2258,8 +2408,8 @@ Data: MNIST.}
 \caption{\label{fig-tune_lr-plaus-moons}Average outcomes for the
 plausibility measure across key hyperparameters. This shows the \%
 change from the baseline model for the distance-based implausibility
-metric (\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
+metric (\$ ext\{IP\}\$). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCCo}).
 Data: Moons.}
 
 \end{figure}%
@@ -2275,8 +2425,8 @@ Data: Moons.}
 \caption{\label{fig-tune_lr-plaus-over}Average outcomes for the
 plausibility measure across key hyperparameters. This shows the \%
 change from the baseline model for the distance-based implausibility
-metric (\textbf{?@eq-impl-dist}). Boxplots indicate the variation across
-evaluation runs and test settings (varying parameters for \emph{ECCo}).
+metric (\$ ext\{IP\}\$). Boxplots indicate the variation across
+evaluation runs and test settings (varying parameters for \emph{ECCCo}).
 Data: Overlapping.}
 
 \end{figure}%
@@ -2422,12 +2572,11 @@ units (GPU) were not required.
 
 Model training for the largest grid searches with 270 unique parameter
 combinations was parallelized across 34 CPUs with 2GB memory each. The
-time to completion varied by dataset for reasons discussed in
-\textbf{?@sec-discussion}: 0h49m (\emph{Moons}), 1h4m (\emph{Linearly
-Separable}), 1h49m (\emph{Circles}), 3h52m (\emph{Overlapping}). Model
-evaluations for large grid searches were parallelized across 20 CPUs
-with 3GB memory each. Evaluations for all data sets took less than one
-hour (\textless1h) to complete.
+time to completion varied by dataset: 0h49m (\emph{Moons}), 1h4m
+(\emph{Linearly Separable}), 1h49m (\emph{Circles}), 3h52m
+(\emph{Overlapping}). Model evaluations for large grid searches were
+parallelized across 20 CPUs with 3GB memory each. Evaluations for all
+data sets took less than one hour (\textless1h) to complete.
 
 \subsubsection{Tuning}\label{tuning}
 
@@ -2474,6 +2623,9 @@ relied on \href{https://juliaparallel.org/MPI.jl/v0.20/}{MPI.jl}
 (\citeproc{ref-byrne2021mpi}{Byrne, Wilcox, and Churavy 2021}).
 
 \end{appendices}
+
+\section*{References}\label{references}
+\addcontentsline{toc}{section}{References}
 
 \phantomsection\label{refs}
 \begin{CSLReferences}{1}{0}

@@ -29,7 +29,7 @@ mtbl_dir = joinpath(ENV["FINAL_GRID_RESULTS"],"mutability")
 
 ## Final Hyperparameters
 
-As discussed @sec-experiments, CT is sensitive to certain hyperparameter choices. We study the effect of many hyperparameters extensively in @sec-app-grid. For the main results, we tune a small set of key hyperparameters (@sec-app-tune). The final choices for the main results are presented for each data set in @tbl-final-params along with training, test and batch sizes.
+As discussed the main paper, CT is sensitive to certain hyperparameter choices. We study the effect of many hyperparameters extensively in @sec-app-grid. For the main results, we tune a small set of key hyperparameters (@sec-app-tune). The final choices for the main results are presented for each data set in @tbl-final-params along with training, test and batch sizes.
 
 ::: {#tbl-final-params}
 
@@ -46,7 +46,7 @@ get_table_inputs(df, nothing; backend=Val(:latex)) |>
 
 :::
 
-Final hyperparameters used for the main results presented in @sec-experiments. Any hyperparameter not shown here is set to its default value (@nte-train-default).
+Final hyperparameters used for the main results presented in the main paper. Any hyperparameter not shown here is set to its default value (@nte-train-default).
 
 :::
 
@@ -167,7 +167,7 @@ tabulate_results(
 
 ```
 
-Mean outcomes for **CT** and **BL** along with bootstrapped confidence intervals (99%) for difference in mean outcomes grouped by dataset and evaluation metric. Column **LB** and **UB** show the lower and upper bound of the intervals, respectively, and computed using the percentile method. The underlying counterfactual evaluations are the same as the ones used to produce @tbl-main. 
+Mean outcomes for **CT** and **BL** along with bootstrapped confidence intervals (99%) for difference in mean outcomes grouped by dataset and evaluation metric. Column **LB** and **UB** show the lower and upper bound of the intervals, respectively, and computed using the percentile method. The underlying counterfactual evaluations are the same as the ones used to produce the main table in the paper. 
 
 :::
 
@@ -199,7 +199,7 @@ savefig(plts["objective"]["vanilla"]["ecco"], "paper/figures/mnist_mlp_vanilla.p
 @fig-mnist shows much more plausible (faithful) counterfactuals for a model with CT than the model with conventional training (@fig-mnist-vanilla).
 
 ::: {layout="[10,-2,10]" layout-valign="top"}
-![Counterfactual images for *MLP* with counterfactual training. Factual images are shown on the diagonal, with the corresponding counterfactual for each target class (columns) in that same row. The underlying generator, *ECCo*, aims to generate counterfactuals that are faithful to the model [@altmeyer2024faithful].](/paper/figures/mnist_mlp.png){#fig-mnist}
+![Counterfactual images for *MLP* with counterfactual training. Factual images are shown on the diagonal, with the corresponding counterfactual for each target class (columns) in that same row. The underlying generator, *ECCCo*, aims to generate counterfactuals that are faithful to the model [@altmeyer2024faithful].](/paper/figures/mnist_mlp.png){#fig-mnist}
 
 ![The same setup, factuals, model architecture and generator as in @fig-mnist, but the model was trained conventionally.](/paper/figures/mnist_mlp_vanilla.png){#fig-mnist-vanilla}
 :::
