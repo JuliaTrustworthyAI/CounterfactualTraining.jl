@@ -41,6 +41,10 @@ function generate!(
         data, model, domain, input_encoder, mutability, nneighbours, nsamples
     )
 
+    # ----- PAPER REF ----- #
+    # Below counterfactual are generated in parallel. 
+    # The generate_counterfactual() implements the FOR loop in Algorithm 1.
+
     # Generate counterfactuals:
     ces = TaijaParallel.parallelize(
         parallelizer,
@@ -57,7 +61,12 @@ function generate!(
         callback=callback,
     )
 
-    advexms = (ce -> eltype(xs[1]).(ce.search[:last_valid_ae])).(ces)                                  # get adversarial example
+    # ----- PAPER REF ----- #
+    # `advexms` correspond to the nascent counterfactuals.
+    # `neighbours` correspond to the neighbours in the target class (one per ce).
+    # `counterfactuals` correspond to the mature counterfactuals.
+
+    advexms = (ce -> eltype(xs[1]).(ce.search[:last_valid_ae])).(ces)                               # get adversarial example
     targets = (ce -> ce.target).(ces)                                                               # get targets
     neighbours = (
         ce -> eltype(xs[1]).(find_potential_neighbours(ce, counterfactual_data, 1))
@@ -70,6 +79,11 @@ function generate!(
         validities[i] ? eltype(xs[1]).(ce.counterfactual) : neighbours[i] for
         (i, ce) in enumerate(ces)
     ]
+
+    # ----- PAPER REF ----- #
+    # This is where immutable features are protected by setting feature values of 
+    # counterfactuals equal to those of their corresponding neighbours (i.e. imposing
+    # a point mass prior).
 
     protect_immutable!(neighbours, counterfactuals, counterfactual_data.mutability)     # adjust for mutability
     targets_enc = (ce -> target_encoded(ce, counterfactual_data)).(ces)                 # one-hot encoded targets
