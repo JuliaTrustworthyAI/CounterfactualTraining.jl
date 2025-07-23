@@ -204,8 +204,7 @@
 
 \title{Counterfactual Training: Teaching Models Plausible and Actionable
 Explanations}
-\author{Patrick Altmeyer \and Aleksander Buszydlik \and Arie van
-Deursen \and Cynthia C. S. Liem}
+\author{}
 \date{}
 \begin{document}
 \maketitle
@@ -742,13 +741,13 @@ equal to zero if and only if the two distributions are exactly the same,
 \(\mathbf{X}^\prime=\mathbf{X}^+\).
 
 To assess outcomes with respect to actionability for non-linear models,
-we look at the average costs of valid counterfactuals in terms of their
-distances from factual starting points. While this an imperfect proxy of
-sensitivity, we hypothesize that CT can reduce these costs by teaching
-models to seek plausibility with respect to mutable features, much like
-we observe in Figure~\ref{fig-poc} in panel (d) compared to (c). We
-supplement this analysis with qualitative findings for integrated
-gradients \citep{sundararajan2017ig}. Finally, for predictive
+we look at the costs of (just) valid counterfactuals in terms of their
+distances from factual starting points with \(\tau=0.5\). While this an
+imperfect proxy of sensitivity, we hypothesize that CT can reduce these
+costs by teaching models to seek plausibility with respect to mutable
+features, much like we observe in Figure~\ref{fig-poc} in panel (d)
+compared to (c). We supplement this analysis with estimates for
+integrated gradients \citep{sundararajan2017ig}. Finally, for predictive
 performance, we use standard metrics, such as robust accuracy estimated
 on adversarially perturbed data using FGSM
 \citep{goodfellow2014explaining}.

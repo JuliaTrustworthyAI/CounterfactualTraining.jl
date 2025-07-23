@@ -1,22 +1,20 @@
 ## Generating Counterfactuals through Gradient Descent {#sec-app-ce}
 
-In this section, we provide some background on gradient-based counterfactual generators (@sec-app-ce-background) and discuss how we define convergence in this context (@sec-app-conv).
+In this section, we provide some additional background on gradient-based counterfactual generators (@sec-app-ce-background) and discuss how we define convergence in this context (@sec-app-conv).
 
 ### Background {#sec-app-ce-background}
 
-Gradient-based counterfactual search was originally proposed by @wachter2017counterfactual. It generally solves the following unconstrained objective,
+Gradient-based counterfactual search was originally proposed by @wachter2017counterfactual. A more general version of the counterfactual search objective presented in the paper is as follows,
 
 $$
 \begin{aligned}
-\min_{\mathbf{z}^\prime \in \mathcal{Z}^L} \left\{  {\text{yloss}(\mathbf{M}_{\theta}(g(\mathbf{z}^\prime)),\mathbf{y}^+)}+ \lambda {\text{cost}(g(\mathbf{z}^\prime)) }  \right\} 
+\min_{\mathbf{z}^\prime \in \mathcal{Z}^L} \left\{  {\text{yloss}(\mathbf{M}_{\theta}(g(\mathbf{z}^\prime)),\mathbf{y}^+)}+ \lambda {\text{reg}(g(\mathbf{z}^\prime)) }  \right\} 
 \end{aligned} 
 $$
 
-where $g: \mathcal{Z} \mapsto \mathcal{X}$ is an invertible function that maps from the $L$-dimensional counterfactual state space to the feature space and $\text{cost}(\cdot)$ denotes one or more penalties that are used to induce certain properties of the counterfactual outcome. As above, $\mathbf{y}^+$ denotes the target output and $\mathbf{M}_{\theta}(\mathbf{x})$ returns the logit predictions of the underlying classifier for $\mathbf{x}=g(\mathbf{z})$.
+where $g: \mathcal{Z} \mapsto \mathcal{X}$ is an invertible function that maps from the $L$-dimensional counterfactual state space to the feature space and $\text{reg}(\cdot)$ denotes one or more penalties that are used to induce certain properties of the counterfactual outcome. As above, $\mathbf{y}^+$ denotes the target output and $\mathbf{M}_{\theta}(\mathbf{x})$ returns the logit predictions of the underlying classifier for $\mathbf{x}=g(\mathbf{z})$.
 
-For all generators used in this work we use standard logit crossentropy loss for $\text{yloss}(\cdot)$. All generators also penalize the distance ($\ell_1$-norm) of counterfactuals from their original factual state. For *Generic* and *ECCo*, we have $\mathcal{Z}:=\mathcal{X}$ and $g(\mathbf{z})=g(\mathbf{z})^{-1}=\mathbf{z}$, that is counterfactual are searched directly in the feature space. Conversely, *REVISE* traverses the latent space of a variational autoencoder (VAE) fitted to the training data, where $g(\cdot)$ corresponds to the decoder [@joshi2019realistic]. In addition to the distance penalty, *ECCo* uses an additional penalty component that regularizes the energy associated with the counterfactual, $\mathbf{x}^\prime$ [@altmeyer2024faithful]. 
-
-<!-- TODO: Add note on why we omit the conformal prediction component. -->
+For all generators used in this work we use standard logit crossentropy loss for $\text{yloss}(\cdot)$. All generators also penalize the distance ($\ell_1$-norm) of counterfactuals from their original factual state. For *Generic* and *ECCCo*, we have $\mathcal{Z}:=\mathcal{X}$ and $g(\mathbf{z})=g(\mathbf{z})^{-1}=\mathbf{z}$, that is counterfactual are searched directly in the feature space. Conversely, *REVISE* traverses the latent space of a variational autoencoder (VAE) fitted to the training data, where $g(\cdot)$ corresponds to the decoder [@joshi2019realistic]. In addition to the distance penalty, *ECCCo* uses a penalty that regularizes the energy associated with the counterfactual, $\mathbf{x}^\prime$ [@altmeyer2024faithful]. We omit the conformal set size penalty proposed in the original paper, since a) the authors found faithfulness to primarily depend on the energy penalty and hence this alleviates us from one additional hyperparameter.
 
 ### Convergence {#sec-app-conv}
 

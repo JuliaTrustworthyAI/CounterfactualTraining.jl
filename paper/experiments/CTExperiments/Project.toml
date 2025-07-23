@@ -1,6 +1,6 @@
 name = "CTExperiments"
 uuid = "5eca96c7-09a4-4424-a5a1-dee2b4aead1e"
-authors = ["Patrick Altmeyer and contributors"]
+authors = ["Anonymous"]
 version = "0.0.0"
 
 [deps]

@@ -8,17 +8,23 @@ ig_save_dir = "paper/figures/mnist_ig/"
 ct_preffix = "mnist1"
 bl_preffix = "mnist2"
 
-chosen_digits = 5:9
+all_digits = 0:9
 
 imgs_ct = [
     Images.load(joinpath(ig_save_dir, "$(ct_preffix)_$(i).png")) |>
-    x -> imresize(x, (28, 28)) for i in chosen_digits
+    x -> imresize(x, (28, 28)) for i in all_digits
 ]
 imgs_bl = [
     Images.load(joinpath(ig_save_dir, "$(bl_preffix)_$(i).png")) |>
-    x -> imresize(x, (28, 28)) for i in chosen_digits
+    x -> imresize(x, (28, 28)) for i in all_digits
 ]
-img_ig = mosaicview(imgs_bl..., imgs_ct...; nrow=2, rowmajor=true)
+
+img_ig_full = mosaicview(imgs_bl..., imgs_ct...; nrow=2, rowmajor=true)
+Images.save("paper/figures/mnist_ig.png", img_ig_full)
+
+chosen_digits = 5:9
+
+img_ig = mosaicview(imgs_bl[chosen_digits .+ 1]..., imgs_ct[chosen_digits .+ 1]...; nrow=2, rowmajor=true)
 
 ## Counterfactuals:
 Random.seed!(42)    # change seed for different outcome
@@ -61,3 +67,7 @@ end
 imgs_ct = imgs[1]
 imgs_bl = imgs[2]
 img_ce = mosaicview(imgs_bl..., imgs_ct...; nrow=2, rowmajor=true)
+
+img = mosaicview(img_ce, img_ig, nrow=1)
+Images.save("paper/figures/mnist_body.png", img)
+
