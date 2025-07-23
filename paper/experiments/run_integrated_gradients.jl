@@ -51,17 +51,17 @@ for (i, exper_list) in enumerate(expers)
         exper_name = exper.meta_params.experiment_name
         obj = exper.training_params.objective
 
-        if data == "mnist"
-            bl = -ones(size(X,1),1)
-            igs = CTExperiments.integrated_gradients(exper; idx=idx, nrounds=nrounds, comm=comm, max_entropy=false, baseline=bl, verbose)
-        else
-            igs = CTExperiments.integrated_gradients(exper; idx=idx, nrounds=nrounds, comm=comm, max_entropy=false, baseline_type="random", verbose)
-        end
+        igs = CTExperiments.integrated_gradients(exper; idx=idx, nrounds=nrounds, comm=comm, max_entropy=false, baseline_type="random", verbose)
         
         if rank == 0
 
             # Collect:
-            igs = (ig -> (abs.(ig)) ./ (maximum(ig) .- minimum(ig) ) ).(igs)    # compute normalized contributions
+            if size(X,1) == 2
+                igs = (ig -> (abs.(ig)) ./ (maximum(ig) .- minimum(ig) ) ).(igs)    # compute normalized contributions
+            else
+                igs = (ig -> (ig .- minimum(ig)) ./ (maximum(ig) .- minimum(ig) ) ).(igs)    # compute normalized contributions
+            end
+            
             igs = (ig -> ig[exper.data.mutability,1]).(igs) |> igs -> reduce(hcat, igs)
 
             # Aggregate:
