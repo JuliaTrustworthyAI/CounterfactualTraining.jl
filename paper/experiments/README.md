@@ -70,7 +70,7 @@ The chart in Figure 1 of the paper is produced in [paper/sections/other/constrai
 
 ### Figure 2
 
-The chart in Figure 2 of the paper can be reproduced using the following script: [paper/experiments/mnist_chart.jls](mnist_chart.jls).
+The chart in Figure 2 of the paper can be reproduced using the following script: [paper/experiments/mnist_chart.jl](mnist_chart.jl).
 
 ### Figure 3
 
