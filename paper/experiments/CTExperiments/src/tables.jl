@@ -1,10 +1,13 @@
+using CategoricalArrays
 using ColorSchemes
 using DataFrames
 using PrettyTables
 using StatsBase
 
 function tabulate_results(
-    inputs;
+    inputs,
+    al::Nothing=nothing;
+    io::IO=stdout,
     tf=PrettyTables.tf_latex_booktabs,
     wrap_table=true,
     table_type=:longtable,
@@ -13,14 +16,37 @@ function tabulate_results(
     formatters=PrettyTables.ft_round(2),
     alignment=:c,
     wrap_table_environment="table*",
+    sort_by_data::Bool=true,
+    hlines::Union{Nothing,Symbol}=nothing,
     kwrgs...,
 )
     df = inputs[1]
+
+    # Group averages:
+    if "data" in names(df) && hlines != :none
+        if "Avg." in df.data
+            _ds_order = [ds_order..., "Avg."]
+            hlines = [0, 1, 5, length(_ds_order), length(_ds_order)+1]
+        else
+            _ds_order = ds_order
+            hlines = [0, 1, 5, length(_ds_order)+1]
+        end
+        df.data = categorical(df.data; levels=_ds_order)
+        if sort_by_data
+            sort!(df, :data)
+        end
+    end
+
+    if hlines == :none
+        hlines = nothing
+    end
+
     other_inputs = inputs[2]
     if isa(other_inputs.backend, Val{:latex})
         tf = PrettyTables.tf_latex_booktabs
         if isnothing(save_name)
             tab = pretty_table(
+                io,
                 df;
                 tf=tf,
                 formatters=formatters,
@@ -29,6 +55,7 @@ function tabulate_results(
                 table_type=table_type,
                 longtable_footer=longtable_footer,
                 alignment,
+                hlines,
                 other_inputs...,
                 kwrgs...,
             )
@@ -45,6 +72,7 @@ function tabulate_results(
                     table_type=table_type,
                     longtable_footer=longtable_footer,
                     alignment,
+                    hlines,
                     other_inputs...,
                     kwrgs...,
                 )
@@ -52,14 +80,33 @@ function tabulate_results(
         end
     else
         if isnothing(save_name)
-            tab = pretty_table(df; alignment, other_inputs..., kwrgs...)
+            tab = pretty_table(io, df; alignment, hlines, other_inputs..., kwrgs...)
             return tab
         else
             open(save_name, "w") do io
-                pretty_table(io, df; alignment, other_inputs..., kwrgs...)
+                pretty_table(io, df; alignment, hlines, other_inputs..., kwrgs...)
             end
         end
     end
+end
+
+function tabulate_results(inputs, al::Vector{String}; kwargs...)
+    if isnothing(al)
+        return tabulate_results(inputs; kwargs...)
+    end
+
+    # Capture output
+    io = IOBuffer()
+    tabulate_results(inputs; io=io, kwargs...)
+    output = String(take!(io))
+
+    # Replace alignment with siunitx format
+    modified = replace(
+        output,
+        r"\\begin\{tabular\}\{[^}]+\}" => "\\begin{tabular}{\n$( reduce((x,y) -> "$x\n$y", al))\n}",
+    )
+
+    print(modified)
 end
 
 function get_table_inputs(

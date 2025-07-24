@@ -42,6 +42,7 @@ Catalogue of available model types.
 """
 const data_sets = Dict(
     dname(LinearlySeparable()) => LinearlySeparable,
+    dname(GaussMulti()) => GaussMulti,
     dname(GMSC()) => GMSC,
     dname(MNIST()) => MNIST,
     dname(Moons()) => Moons,
@@ -182,15 +183,21 @@ Helper function to get the mutability constraints for the dataset. If `data.muta
 """
 function get_mutability(data::Dataset)
     mtblty = data.mutability
+
+    # Single string:
     if mtblty isa String
         if mtblty == "none"
             mtblty = nothing
         else
             mtblty = fill(Symbol(mtblty), input_dim(data))
         end
-    else
+    end
+
+    # Vector of strings:
+    if mtblty isa Vector{String}
         mtblty = Symbol.(mtblty)
     end
+
     return mtblty
 end
 

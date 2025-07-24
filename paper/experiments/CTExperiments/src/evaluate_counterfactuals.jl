@@ -1,6 +1,7 @@
 using CounterfactualExplanations
 using CounterfactualExplanations.Evaluation
 using DataFrames
+using IntegratedGradients
 using JLD2
 using Serialization
 using TaijaParallel
@@ -29,7 +30,7 @@ Base.@kwdef struct CounterfactualParams <: AbstractConfiguration
     n_individuals::Int = get_global_param("n_individuals", 100)
     n_runs::Int = get_global_param("n_runs", 5)
     conv::AbstractString = "threshold"
-    decision_threshold::AbstractFloat = 0.95
+    decision_threshold::AbstractFloat = get_global_param("tau_eval", 0.95)
     maxiter::Int = get_global_param("maxiter_eval", 50)
     vertical_splits::Int = get_global_param("vertical_splits", 100)
     store_ce::Bool = false
@@ -141,7 +142,6 @@ function evaluate_counterfactuals(
     end
 
     # Generate and benchmark counterfactuals:
-    rng = get_data_set(cfg)() |> get_rng
     bmk = benchmark(
         data;
         models=models,
@@ -160,6 +160,7 @@ function evaluate_counterfactuals(
         verbose=cfg.counterfactual_params.verbose,
     )
     if Evaluation.includes_divergence_metric(measure)
+        rng = get_data_set(cfg)() |> get_rng    # ensure that same test set columns are chosen for MMD (for reproducibility)
         bmk = compute_divergence(
             bmk, measure, data; rng=rng, nsamples=cfg.counterfactual_params.ndiv
         )
@@ -491,4 +492,162 @@ function generate_factual_target_pairs(
     output = reduce(vcat, output)
 
     return output
+end
+
+using MPI
+using Random
+
+# Main function with optional comm parameter
+function integrated_gradients(
+    cfg::Experiment;
+    n=1000,
+    idx::Union{Nothing,Vector{Vector{Int}}}=nothing,
+    test_set=true,
+    max_entropy::Bool=true,
+    nrounds::Int=10,
+    verbose::Bool=false,
+    baseline_type="random",
+    comm::Union{Nothing,MPI.Comm}=nothing,
+    kwrgs...,
+)
+    model, _, _ = load_results(cfg)
+    X, y = get_data(cfg.data; test_set)
+
+    # Bootstrap samples:
+    if isnothing(idx)
+        idx = [rand(1:size(X, 2), n) for i in 1:nrounds]
+    end
+    Xs = []
+    ys = []
+    for i in idx
+        push!(Xs, X[:, i])
+        push!(ys, y[i])
+    end
+
+    return integrated_gradients(
+        model, Xs, ys, comm; max_entropy, nrounds, verbose, baseline_type, kwrgs...
+    )
+end
+
+# Sequential version (original implementation)
+function integrated_gradients(
+    model,
+    Xs,
+    ys,
+    comm::Nothing;
+    max_entropy::Bool=true,
+    nrounds::Int=10,
+    verbose::Bool=false,
+    baseline_type="random",
+    kwrgs...,
+)
+    igs = Matrix{<:AbstractFloat}[]
+    for i in 1:nrounds
+        X = Xs[i]
+        y = ys[i]
+
+        if verbose
+            @info "Round $i/$nrounds"
+        end
+        if max_entropy
+            x = randn(size(X, 1), 1)  # random starting point (Gaussian init)
+            if verbose
+                @info "Computing maximum entropy baseline ..."
+            end
+            bl = IntegratedGradients.get_maximum_entropy_baseline(model, x)[1]
+            ig = calculate_average_contributions(model, X, y; baseline=bl, kwrgs...)
+        else
+            ig = calculate_average_contributions(model, X, y; baseline_type, kwrgs...)
+        end
+        push!(igs, ig)
+    end
+    return igs
+end
+
+# MPI distributed version
+function integrated_gradients(
+    model,
+    Xs,
+    ys,
+    comm::MPI.Comm;
+    max_entropy::Bool=true,
+    nrounds::Int=10,
+    verbose::Bool=false,
+    baseline_type="random",
+    kwrgs...,
+)
+    rank = MPI.Comm_rank(comm)
+    size_comm = MPI.Comm_size(comm)
+
+    # Distribute rounds across processes
+    rounds_per_proc = div(nrounds, size_comm)
+    remainder = nrounds % size_comm
+
+    # Calculate which rounds this process will handle
+    start_round = rank * rounds_per_proc + 1 + min(rank, remainder)
+    end_round = start_round + rounds_per_proc - 1 + (rank < remainder ? 1 : 0)
+    local_nrounds = end_round - start_round + 1
+
+    if verbose && rank == 0
+        @info "Distributing $nrounds rounds across $size_comm processes"
+    end
+
+    # Each process computes its assigned rounds
+    local_igs = Matrix{<:AbstractFloat}[]
+    for i in 1:local_nrounds
+        global_round = start_round + i - 1
+
+        X = Xs[global_round]
+        y = ys[global_round]
+
+        if verbose
+            @info "Process $rank: Round $global_round/$nrounds (local: $i/$local_nrounds)"
+        end
+
+        if max_entropy
+            # Use a seed based on global round number for reproducibility
+            Random.seed!(global_round)
+            x = randn(size(X, 1), 1)  # random starting point (Gaussian init)
+            if verbose
+                @info "Process $rank: Computing maximum entropy baseline for round $global_round..."
+            end
+            bl = IntegratedGradients.get_maximum_entropy_baseline(model, x)[1]
+            ig = calculate_average_contributions(model, X, y; baseline=bl, kwrgs...)
+        else
+            ig = calculate_average_contributions(model, X, y; baseline_type, kwrgs...)
+        end
+        push!(local_igs, ig)
+    end
+
+    # Gather all results on root process
+    all_igs = MPI.gather(local_igs, comm; root=0)
+
+    if rank == 0
+        # Reconstruct results in correct order
+        igs = Matrix{<:AbstractFloat}[]
+
+        # Create a vector to hold results in correct order
+        ordered_results = Vector{Matrix{<:AbstractFloat}}(undef, nrounds)
+
+        # Place each process's results in the correct positions
+        for proc_rank in 0:(size_comm - 1)
+            proc_rounds_per_proc = div(nrounds, size_comm)
+            proc_remainder = nrounds % size_comm
+            proc_start =
+                proc_rank * proc_rounds_per_proc + 1 + min(proc_rank, proc_remainder)
+
+            for (local_idx, ig) in enumerate(all_igs[proc_rank + 1])
+                global_idx = proc_start + local_idx - 1
+                ordered_results[global_idx] = ig
+            end
+        end
+
+        if verbose
+            @info "Collected and ordered results from all processes"
+        end
+
+        return ordered_results
+    else
+        return nothing  # Non-root processes return nothing
+    end
 end

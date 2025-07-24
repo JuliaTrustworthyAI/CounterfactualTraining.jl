@@ -1,6 +1,6 @@
 name = "CounterfactualTraining"
 uuid = "c5e5e904-ed0d-4ddb-967e-dbb7fd41a507"
-authors = ["Patrick Altmeyer and contributors"]
+authors = ["Anonymous"]
 version = "0.0.4"
 
 [deps]

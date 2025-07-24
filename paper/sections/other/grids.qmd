@@ -23,14 +23,14 @@ res_dir = ENV["FINAL_GRID_RESULTS"]
 To assess the hyperparameter sensitivity of our proposed training regime we ran multiple large grid searches for all of our synthetic datasets. We have grouped these grid searches into multiple categories: 
 
 1. **Generator Parameters** (@sec-app-grid-gen): Investigates the effect of changing hyperparameters that affect the counterfactual outcomes during the training phase.
-2. **Penalty Strengths** (@sec-app-grid-pen): Investigates the effect of changing the penalty strengths in out proposed objective (@eq-obj).
+2. **Penalty Strengths** (@sec-app-grid-pen): Investigates the effect of changing the penalty strengths in our proposed training objective.
 3. **Other Parameters** (@sec-app-grid-train): Investigates the effect of changing other training parameters, including the total number of generated counterfactuals in each epoch.
 
 We begin by summarizing the high-level findings in @sec-app-grid-hl. For each of the categories, @sec-app-grid-gen to @sec-app-grid-train then present all details including the exact parameter grids, average predictive performance outcomes and key evaluation metrics for the generated counterfactuals. 
 
 ## Evaluation Details
 
-To measure predictive performance, we compute the accuracy and F1-score for all models on test data (@tbl-acc-gen, @tbl-acc-pen, @tbl-acc-train). With respect to explanatory performance, we report here our findings for the (im)plausibility and cost of counterfactuals at test time. Since the computation of our proposed divergence metric (@eq-impl-div) is memory-intensive, we rely on the distance-based metric for the grid searches. For the counterfactual evaluation, we draw factual samples from the training data for the grid searches to avoid data leakage with respect to our final results reported in the body of the paper. Specifically, we want to avoid choosing our default hyperparameters based on results on the test data. Since we are optimizing for explainability, not predictive performance, we still present test accuracy and F1-scores. 
+To measure predictive performance, we compute the accuracy and F1-score for all models on test data (@tbl-acc-gen, @tbl-acc-pen, @tbl-acc-train). With respect to explanatory performance, we report here our findings for the (im)plausibility and cost of counterfactuals at test time. Since the computation of our proposed divergence-based adaption ($\text{IP}^*$) is memory-intensive, we rely on the distance-based metric for the grid searches. For the counterfactual evaluation, we draw factual samples from the training data for the grid searches to avoid data leakage with respect to our final results reported in the body of the paper. Specifically, we want to avoid choosing our default hyperparameters based on results on the test data. Since we are optimizing for explainability, not predictive performance, we still present test accuracy and F1-scores. 
 
 ### Predictive Performance
 
@@ -38,9 +38,9 @@ We find that CT is associated with little to no decrease in average predictive p
 
 ### Counterfactual Outcomes {#sec-app-grid-hl}
 
-Overall, we find that counterfactual training (CT) achieves it key objectives consistently across all hyperparameter settings and also broadly across datasets: plausibility is improved by up to ~60 percent (%) for the *Circles* data (e.g. @fig-grid-gen_params-plaus-circles), ~25-30% for the *Moons* data (e.g. @fig-grid-gen_params-plaus-moons) and ~10-20% for the *Linearly Separable* data (e.g. @fig-grid-gen_params-plaus-lin_sep). At the same time, the average costs of faithful counterfactuals are reduced in many cases by around ~20-25% for  *Circles* (e.g. @fig-grid-gen_params-cost-circles) and up to ~50% for *Moons* (e.g. @fig-grid-gen_params-cost-moons). For the *Linearly Separable* data, costs are generally increased although typically by less than 10% (e.g. @fig-grid-gen_params-cost-lin_sep), which reflects a common tradeoff between costs and plausibility [@altmeyer2024faithful]. 
+Overall, we find that counterfactual training achieves it key objectives consistently across all hyperparameter settings and also broadly across datasets: plausibility is improved by up to 60 percent (%) for the *Circles* data (e.g. @fig-grid-gen_params-plaus-circles), 25-30% for the *Moons* data (e.g. @fig-grid-gen_params-plaus-moons) and 10-20% for the *Linearly Separable* data (e.g. @fig-grid-gen_params-plaus-lin_sep). At the same time, the average costs of faithful counterfactuals are reduced in many cases by around 20-25% for  *Circles* (e.g. @fig-grid-gen_params-cost-circles) and up to 50% for *Moons* (e.g. @fig-grid-gen_params-cost-moons). For the *Linearly Separable* data, costs are generally increased although typically by less than 10% (e.g. @fig-grid-gen_params-cost-lin_sep), which reflects a common tradeoff between costs and plausibility [@altmeyer2024faithful]. 
 
-We do observe strong sensitivity to certain hyperparameters, with clear an manageable patterns. Concerning generator parameters, we firstly find that using *REVISE* to generate counterfactuals during training typically yields the worst outcomes out of all generators, often leading to a substantial decrease in plausibility. This finding can be attributed to the fact that *REVISE* effectively assigns the task of learning plausible explanations from the model itself to a surrogate VAE. In other words, counterfactuals generated by *REVISE* are less faithful to the model that *ECCo* and *Generic*, and hence we would expect them to be a less effective and, in fact, potentially detrimental role in our training regime. Secondly, we observe that allowing for a higher number of maximum steps $T$ for the counterfactual search generally yields better outcomes. This is intuitive, because it allows more counterfactuals to reach maturity in any given iteration. Looking in particular at the results for *Linearly Separable*, it seems that higher values for $T$ in combination with higher decision thresholds ($\tau$) yields the best results when using *ECCo*. But depending on the degree of class separability of the underlying data, a high decision-threshold can also affect results adversely, as evident from the results for the *Overlapping* data (@fig-grid-gen_params-plaus-over): here we find that CT generally fails to achieve its objective because only a tiny proportion of counterfactuals ever reaches maturity.
+We do observe strong sensitivity to certain hyperparameters, with clear an manageable patterns. Concerning generator parameters, we firstly find that using *REVISE* to generate counterfactuals during training typically yields the worst outcomes out of all generators, often leading to a substantial decrease in plausibility. This finding can be attributed to the fact that *REVISE* effectively assigns the task of learning plausible explanations from the model itself to a surrogate VAE. In other words, counterfactuals generated by *REVISE* are less faithful to the model that *ECCCo* and *Generic*, and hence we would expect them to be a less effective and, in fact, potentially detrimental role in our training regime. Secondly, we observe that allowing for a higher number of maximum steps $T$ for the counterfactual search generally yields better outcomes. This is intuitive, because it allows more counterfactuals to reach maturity in any given iteration. Looking in particular at the results for *Linearly Separable*, it seems that higher values for $T$ in combination with higher decision thresholds ($\tau$) yields the best results when using *ECCCo*. But depending on the degree of class separability of the underlying data, a high decision-threshold can also affect results adversely, as evident from the results for the *Overlapping* data (@fig-grid-gen_params-plaus-over): here we find that CT generally fails to achieve its objective because only a tiny proportion of counterfactuals ever reaches maturity.
 
 Regarding penalty strengths, we find that the strength of the energy regularization, $\lambda_{\text{reg}}$ is a key hyperparameter, while sensitivity with respect to $\lambda_{\text{div}}$ and $\lambda_{\text{adv}}$ is much less evident. In particular, we observe that not regularizing energy enough or at all typically leads to poor performance in terms of decreased plausibility and increased costs, in particular for *Circles* (@fig-grid-pen-plaus-circles), *Linearly Separable* (@fig-grid-pen-plaus-lin_sep) and *Overlapping* (@fig-grid-pen-plaus-over). High values of $\lambda_{\text{reg}}$ can increase the variability in outcomes, in particular when combined with high values for $\lambda_{\text{div}}$ and $\lambda_{\text{adv}}$, but this effect is less pronounced.
 
@@ -119,7 +119,7 @@ println(_str)
 #| output: asis
  
 imgfname = "plausibility_distance_from_target.png"
-fig_caption = "Average outcomes for the plausibility measure across hyperparameters. This shows the % change from the baseline model for the distance-based implausibility metric (@eq-impl-dist). Boxplots indicate the variation across evaluation runs and test settings (varying parameters for *ECCo*)."
+fig_caption = "Average outcomes for the plausibility measure across hyperparameters. This shows the % change from the baseline model for the distance-based implausibility metric (\$\\text{IP}\$). Boxplots indicate the variation across evaluation runs and test settings (varying parameters for *ECCCo*)."
 full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))
 include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption, width=img_width) 
 _str = join(include_img_commands, "\n\n")
@@ -141,7 +141,7 @@ println(_str)
 #| output: asis
  
 imgfname = "distance.png"
-fig_caption = "Average outcomes for the cost measure across hyperparameters. This shows the % change from the baseline model for the distance-based cost metric [@wachter2017counterfactual]. Boxplots indicate the variation across evaluation runs and test settings (varying parameters for *ECCo*)."
+fig_caption = "Average outcomes for the cost measure across hyperparameters. This shows the % change from the baseline model for the distance-based cost metric [@wachter2017counterfactual]. Boxplots indicate the variation across evaluation runs and test settings (varying parameters for *ECCCo*)."
 full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))
 include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption, width=img_width)
 _str = join(include_img_commands, "\n\n")
@@ -220,7 +220,7 @@ println(_str)
 #| output: asis
  
 imgfname = "plausibility_distance_from_target.png"
-fig_caption = "Average outcomes for the plausibility measure across hyperparameters. This shows the % change from the baseline model for the distance-based implausibility metric (@eq-impl-dist). Boxplots indicate the variation across evaluation runs and test settings (varying parameters for *ECCo*)."
+fig_caption = "Average outcomes for the plausibility measure across hyperparameters. This shows the % change from the baseline model for the distance-based implausibility metric (\$\\text{IP}\$). Boxplots indicate the variation across evaluation runs and test settings (varying parameters for *ECCCo*)."
 full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))
 include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption, width=img_width) 
 _str = join(include_img_commands, "\n\n")
@@ -242,7 +242,7 @@ println(_str)
 #| output: asis
  
 imgfname = "distance.png"
-fig_caption = "Average outcomes for the cost measure across hyperparameters. This shows the % change from the baseline model for the distance-based cost metric [@wachter2017counterfactual]. Boxplots indicate the variation across evaluation runs and test settings (varying parameters for *ECCo*)."
+fig_caption = "Average outcomes for the cost measure across hyperparameters. This shows the % change from the baseline model for the distance-based cost metric [@wachter2017counterfactual]. Boxplots indicate the variation across evaluation runs and test settings (varying parameters for *ECCCo*)."
 full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))
 include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption, width=img_width)
 _str = join(include_img_commands, "\n\n")
@@ -321,7 +321,7 @@ println(_str)
 #| output: asis
  
 imgfname = "plausibility_distance_from_target.png"
-fig_caption = "Average outcomes for the plausibility measure across hyperparameters. This shows the % change from the baseline model for the distance-based implausibility metric (@eq-impl-dist). Boxplots indicate the variation across evaluation runs and test settings (varying parameters for *ECCo*)."
+fig_caption = "Average outcomes for the plausibility measure across hyperparameters. This shows the % change from the baseline model for the distance-based implausibility metric (\$\\text{IP}\$). Boxplots indicate the variation across evaluation runs and test settings (varying parameters for *ECCCo*)."
 full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))
 include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption, width=img_width) 
 _str = join(include_img_commands, "\n\n")
@@ -343,7 +343,7 @@ println(_str)
 #| output: asis
  
 imgfname = "distance.png"
-fig_caption = "Average outcomes for the cost measure across hyperparameters. This shows the % change from the baseline model for the distance-based cost metric [@wachter2017counterfactual]. Boxplots indicate the variation across evaluation runs and test settings (varying parameters for *ECCo*)."
+fig_caption = "Average outcomes for the cost measure across hyperparameters. This shows the % change from the baseline model for the distance-based cost metric [@wachter2017counterfactual]. Boxplots indicate the variation across evaluation runs and test settings (varying parameters for *ECCCo*)."
 full_paths = joinpath.(data_dirs, joinpath(suffix,imgfname))
 include_img_commands = CTExperiments.get_img_command(data_names, full_paths, fig_labels; fig_caption, width=img_width)
 _str = join(include_img_commands, "\n\n")

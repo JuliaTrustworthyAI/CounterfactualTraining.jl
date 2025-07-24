@@ -1,0 +1,49 @@
+name = "mutability"
+dim_reduction = []
+generator_type = ["ecco"]
+data = "credit"
+model_type = ""
+save_dir = ""
+
+[data_params]
+datadir = []
+mutability = [[15]]  # 15th feature is 'age'
+domain = []
+n_validation = []
+train_test_ratio = []
+train_test_seed = []
+n_train = []
+batchsize = []
+
+[model_params]
+nlayers = []
+activation = []
+nhidden = []
+
+[generator_params]
+opt = []
+lambda_cost = []
+lr = []
+decision_threshold = [0.5]
+maxiter = []
+lambda_energy = []
+type = []
+
+[training_params]
+opt = []
+nce = [5000]
+lr = []
+threaded = [false]
+class_loss = []
+objective = ["full", "vanilla"]
+lambda_class_loss = []
+lambda_energy_diff = []
+burnin = []
+nepochs = []
+lambda_energy_reg = [0.25]
+verbose = []
+lambda_adversarial = []
+parallelizer = ["mpi"]
+generator_params = []
+conv = []
+nneighbours = []

@@ -1,7 +1,9 @@
 using AlgebraOfGraphics
+using CategoricalArrays
 using CounterfactualExplanations
 using CairoMakie
 using DataFrames
+using HypothesisTests
 using Plots: Plots, PlotMeasures
 using PrettyTables
 using TaijaPlotting
@@ -78,12 +80,14 @@ global LatexReplacements = Dict(
     "lambda_class_loss" => "\$\\lambda_{\\text{clf}}\$",
     "gmsc" => get_name(GMSC(); pretty=true),
     "lin_sep" => "LS",
+    "gaussm" => "Gauss10",
     "over" => "OL",
     "cali" => "CH",
     "mnist" => get_name(MNIST(); pretty=true),
     "circles" => "Circ",
     "moons" => "Moon",
     "credit" => "Cred",
+    "adult" => "Adult",
 )
 
 function split_at_parentheses_precise(s::String)
@@ -115,7 +119,7 @@ end
 function multi_row_header(s::Vector{String})
     s = swap_legy(s)
 
-    if !any(contains.(s, "\\\\"))
+    if !any(contains.(s, r" \\\\ "))
         return [s]
     else
         h1 = String[]
@@ -257,18 +261,18 @@ end
 
 # Function to create final Markdown string
 function dict_to_markdown(
-    dict::Dict; header::Union{Nothing,String}=nothing, filter_empty::Bool=true
+    dict::Dict; header::Union{Nothing,String}=nothing, filter_empty::Bool=true, kwrgs...
 )
     filtered_dict = filter_dict(dict; filter_empty)
-    return "md\"\"\"\n$(to_mkd(filtered_dict; header=header))\n\"\"\""
+    return "md\"\"\"\n$(to_mkd(filtered_dict; header=header, kwrgs...))\n\"\"\""
 end
 
 # New function specifically for Quarto output
 function dict_to_quarto_markdown(
-    dict::Dict; header::Union{Nothing,String}=nothing, filter_empty::Bool=true
+    dict::Dict; header::Union{Nothing,String}=nothing, filter_empty::Bool=true, kwrgs...
 )
     filtered_dict = filter_dict(dict; filter_empty)
-    return "$(to_mkd(filtered_dict; header=header))\n"
+    return "$(to_mkd(filtered_dict; header=header, kwrgs...))\n"
 end
 
 function adjust_plot_var(x::Union{Nothing,String}, cfg::CTExperiments.EvalConfigOrGrid)
@@ -390,10 +394,10 @@ function aggregate_data(
         df_agg = groupby(df, byvars_must_include)
     end
     if agg_fun == :identity
-        df_agg = combine(df_agg, y => (y -> (mean=y, std=y)) => AsTable)
+        df_agg = combine(df_agg, y => (y -> (mean=y, se=y)) => AsTable)
         return df_agg
     else
-        df_agg = combine(df_agg, y => (y -> (mean=agg_fun(y), std=std(y))) => AsTable)
+        df_agg = combine(df_agg, y => (y -> (mean=agg_fun(y), se=std(y))) => AsTable)
         return sort(df_agg)
     end
 end
@@ -434,15 +438,32 @@ function aggregate_performance(
     cfg::EvalConfigOrGrid;
     measure=[accuracy, multiclass_f1score],
     adversarial::Bool=false,
+    eps::Vector{<:AbstractFloat}=[0.03],
+    bootstrap::Union{Nothing,Int}=nothing,
     kwrgs...,
 )
 
     # Load data:
     exper_grid = ExperimentGrid(cfg.grid_file)
-    df, df_meta, df_perf = merge_with_meta(
-        cfg,
-        CTExperiments.test_performance(exper_grid; measure, adversarial, return_df=true),
-    )
+    dfs = DataFrame[]
+    dfs_meta = DataFrame[]
+    dfs_perf = DataFrame[]
+    for e in eps
+        df, df_meta, df_perf = merge_with_meta(
+            cfg,
+            CTExperiments.test_performance(
+                exper_grid; measure, adversarial, bootstrap, return_df=true, eps=e
+            ),
+        )
+        df.eps .= e
+        df_meta.eps .= e
+        push!(dfs, df)
+        push!(dfs_meta, df_meta)
+        push!(dfs_perf, df_perf)
+    end
+    df = vcat(dfs...)
+    df_meta = vcat(dfs_meta...)
+    df_perf = vcat(dfs_perf...)
 
     return aggregate_performance(df, df_meta, df_perf; kwrgs...)
 end
@@ -453,6 +474,7 @@ function aggregate_performance(
     df_perf::DataFrame;
     y::Union{Nothing,String}=nothing,
     byvars::Union{Nothing,String,Vector{String}}=nothing,
+    bootstrap::Union{Nothing,Int}=nothing,
 )
     # Assertions:
     if isa(byvars, String)
@@ -561,6 +583,21 @@ function aggregate_ce_evaluation(cfg::EvalConfigOrGrid; kwrgs...)
 end
 
 """
+    cidiff(df::DataFrame; var_interest::String="objective", alpha=0.95)
+
+Computes the bootstrap CI for the difference in outcomes using the percentile method, where `alpha` corresponds to the confidence level.
+"""
+function cidiff(df::DataFrame; var_interest::String="objective", alpha=0.95)
+    vars = sort(unique(df[:, Symbol(var_interest)]))
+    @assert length(vars) == 2 "Can only compare exactly two samples"
+    df = DataFrames.unstack(df, Symbol(var_interest), :mean)
+    x = Float64.(df[:, Symbol(vars[1])])
+    y = Float64.(df[:, Symbol(vars[2])])
+    delta = abs.(x) .- abs.(y)      # use absolute values because IP/IP* are always negative (as per CE.jl convention)
+    return (quantile(delta, (1-alpha)/2), quantile(delta, 1-(1-alpha)/2))
+end
+
+"""
     aggregate_ce_evaluation(
         df::DataFrame, 
         df_meta::DataFrame,
@@ -577,10 +614,19 @@ function aggregate_ce_evaluation(
     df_eval::DataFrame=DataFrame();
     y::String="plausibility_distance_from_target",
     byvars::Union{Nothing,String,Vector{String}}=nothing,
+    var_interest::String="objective",
     agg_further_vars::Union{Nothing,Vector{String}}=nothing,
-    rebase::Bool=true,
+    rebase::Bool=false,
     lambda_eval::Union{Nothing,Vector{<:Real}}=nothing,
+    ratio::Bool=true,
+    total_uncertainty::Bool=false,
+    valid_only::Bool=true,
+    protected_only::Bool=false,
+    ct_only::Bool=false,
+    conf_int::Union{Nothing,Vector{<:AbstractFloat}}=[0.99],
+    return_sig_level::Bool=true,
 )
+
     # Assertions:
     valid_y = valid_y_ce(df)
     @assert y in valid_y "Variable `y` must be one of the following: $valid_y."
@@ -589,13 +635,30 @@ function aggregate_ce_evaluation(
     end
     @assert isnothing(byvars) || all(col -> col in names(df_meta), byvars) "Columns specified in `byvars` must be one of the following: $(names(df_meta))."
 
-    df = df[df.variable .== y, :]
+    # Filter for "valid" if so specified:
+    df = df[df.variable .== y .|| df.variable .== "validity", :]
+    df = DataFrames.unstack(df, Not(:variable, :value), :variable, :value)
+    if y != "validity"
+        if valid_only
+            df = filter(df -> df.validity == 1.0, df)
+        end
+        select!(df, Not(:validity))
+    end
+    if protected_only
+        @assert var_interest != "mutability" "Can't compare experiments with different mutability constraints if `protected_only=true`."
+        df = filter(df -> df.mutability != "none", df)
+    end
+
+    if ct_only
+        @assert var_interest != "objective" "Can't compare objectives if `ct_only=true`"
+        df = filter(df -> df.objective == "full", df)
+        df.mutability .= string.(df.mutability)
+    end
+
     if y == "mmd"
         # To align with plausibility metric (negative distance), we need to invert the MMD metric. We also first clamp values to 0 (sometimes MMD is slightly negative for numeric reasons).
-        df.value .= .-clamp.(df.value, 0, Inf)
+        df.mmd .= .-clamp.(df.mmd, 0, Inf)
     end
-    rename!(df, :value => y)
-    select!(df, Not(:variable))
 
     # Filter:
     if !isnothing(lambda_eval)
@@ -605,10 +668,11 @@ function aggregate_ce_evaluation(
 
     # Aggregate:
     if "run" in names(df)
-        byvars_must_include = ["run", "lambda_energy_eval", "objective"]
+        byvars_must_include = ["run", "lambda_energy_eval", var_interest]
         byvars_must_include = byvars_must_include[[
             x in names(df) for x in byvars_must_include
         ]]
+
         df_agg = aggregate_data(df, y, byvars; byvars_must_include=byvars_must_include)
 
         if !isnothing(agg_further_vars)
@@ -616,55 +680,86 @@ function aggregate_ce_evaluation(
             byvars =
                 isnothing(byvars) ? byvars_must_include : union(byvars_must_include, byvars)
             filter!(x -> x ∉ agg_further_vars, byvars)
+
+            # Computing across-fold averages and between fold standard errors for ratios:
+            if ratio
+                @assert length(unique(df_agg[:, Symbol(var_interest)])) == 2 "Ratio calculation only works when comparing exactly two experiments."
+
+                if total_uncertainty
+                    # Include uncertainty around lambda_energy_eval in standard error.
+                    # This means that standard error also reflects possibly different hyperparameter
+                    # choices at test time as a source of uncertainty.
+                    select!(df_agg, Not(:se))
+                else
+                    # Otherwise, aggregate by all variables not including "run" and variables of interest.
+                    # This means that uncertainty around lambda_energy_eval is marginalised out
+                    # allowing for a clean model comparison.
+                    bootstrap_vars = ["run", var_interest]
+                    df_agg =
+                        groupby(df_agg, bootstrap_vars) |>
+                        df -> combine(df, :mean => (y -> mean(skipmissing(y))) => :mean)
+                    if "data" in names(df)
+                        df_agg.data .= unique(df.data)
+                    end
+                end
+
+                if !isnothing(conf_int)
+                    conf_int = Dict(
+                        "$(100*alpha)%" => cidiff(df_agg; alpha) for alpha in conf_int
+                    )
+                    if return_sig_level
+                        sig_level = ""
+                        for ci in values(conf_int)
+                            if !(ci[1] <= 0.0 <= ci[2])
+                                sig_level = "$(sig_level)*"
+                            end
+                        end
+                    else
+                        # Return table with CI:
+                        df_agg =
+                            groupby(df_agg, byvars) |>
+                            df -> combine(df, :mean => (x -> mean(abs.(x))) => :mean)       # again using absolute values since negative (CE.jl convention)
+                        for (k, v) in conf_int
+                            df_agg[:, Symbol(k)] .= fill(v, nrow(df_agg))
+                        end
+                        df_agg = DataFrames.unstack(df_agg, Symbol(var_interest), :mean)
+                        return df_agg
+                    end
+                end
+
+                # Final aggregation and standard errors:
+                df_agg = DataFrames.unstack(df_agg, Symbol(var_interest), :mean)
+                vars = sort(unique(df[:, Symbol(var_interest)]))
+                df_agg.ratio .= df_agg[:, Symbol(vars[1])] ./ df_agg[:, Symbol(vars[2])]
+
+                byvars = setdiff(byvars, [var_interest])
+                df_agg =
+                    groupby(df_agg, byvars) |>
+                    df -> combine(
+                        df,
+                        :ratio =>
+                            (
+                                y -> (
+                                    mean=-(mean(skipmissing(y))-1)*100,
+                                    se=100*std(skipmissing(y)),
+                                )
+                            ) => AsTable,
+                    )
+
+                if isnothing(conf_int)
+                    return df_agg
+                else
+                    df_agg.sig_level .= sig_level
+                    return df_agg
+                end
+            end
+
             df_agg =
                 groupby(df_agg, byvars) |>
-                df -> combine(df, :mean => (y -> (mean=mean(y), std=std(y))) => AsTable)
+                df -> combine(df, :mean => (y -> (mean=mean(y), se=std(y))) => AsTable)
         end
     else
         df_agg = aggregate_data(df, y, byvars)
-    end
-
-    # Subtract from Vanilla:
-    if rebase
-        @assert "objective" in names(df_agg) "Cannot rebase with respect to 'vanilla' objective is the 'objective' column is not present."
-        objectives = unique(df_agg.objective)
-        df_agg = DataFrames.unstack(df_agg[:, Not(:std)], :objective, :mean)
-        vanilla_name = objectives[lowercase.(objectives) .== "vanilla"][1]
-        other_names = objectives[lowercase.(objectives) .!= "vanilla"]
-        for obj in other_names
-
-            # Compute differences:
-            df_agg[:, Symbol(obj)] .= (
-                df_agg[:, Symbol(obj)] .- df_agg[:, Symbol(vanilla_name)]
-            )
-            df_agg.is_pct .= false
-            df_agg = filter(
-                row ->
-                    !ismissing(row[Symbol(vanilla_name)]) &&
-                        isfinite(row[Symbol(vanilla_name)]),
-                df_agg,
-            )
-            # Further adjustment
-            if !any(df_agg[:, Symbol(vanilla_name)] .== 0) .&&
-                !(y in ["validity_strict", "validity", "redundancy"])
-                # Compute percentage if only non-zero:
-                df_agg[:, Symbol(obj)] .=
-                    100 .* df_agg[:, Symbol(obj)] ./ abs.(df_agg[:, Symbol(vanilla_name)])
-                df_agg.is_pct .= true
-            else
-                # Otherwise store average level of baseline:
-                df_agg.avg_baseline .= mean(df_agg[:, Symbol(vanilla_name)])
-                df_agg.baseline .= df_agg[:, Symbol(vanilla_name)]
-                # Let outcome be difference from baseline:
-                df_agg[:, Symbol(obj)] .+= df_agg[:, Symbol(vanilla_name)]
-            end
-        end
-        df_agg = DataFrames.stack(
-            df_agg[:, Not(Symbol(vanilla_name))],
-            Symbol.(other_names);
-            value_name=:mean,
-            variable_name=:objective,
-        )
     end
 
     # Filter out rows with missing, Inf, or NaN values in the mean column 
@@ -738,6 +833,7 @@ global LatexMetricReplacements = Dict(
     "mmd" => "\$ \\text{IP}^* \$",
     "plausibility_distance_from_target" => "\$ \\text{IP} \$",
     "distance" => "Cost",
+    "validity" => "Validity",
     "sens_outid:1" => "sens_1",
     "sens_outid:2" => "sens_2",
 )
@@ -747,13 +843,20 @@ function format_metric(m::String)
 end
 
 function aggregate_ce_evaluation(
-    res_dir::String; y="mmd", byvars=nothing, rebase=true, kwrgs...
+    res_dir::String;
+    y="mmd",
+    byvars=nothing,
+    rebase=true,
+    ratio=true,
+    drop_models::Vector{String}=String[],
+    kwrgs...,
 )
     byvars = gather_byvars(byvars, "data")
-    eval_grids, _ = final_results(res_dir)
+    eval_grids, _ = final_results(res_dir; drop_models)
     df = DataFrame()
     for (i, cfg) in enumerate(eval_grids)
-        df_i = aggregate_ce_evaluation(cfg; y, byvars, rebase, kwrgs...)
+        @info "Evaluating model+data $i/$(length(eval_grids)) ..."
+        df_i = aggregate_ce_evaluation(cfg; y, byvars, rebase, ratio, kwrgs...)
         df = vcat(df, df_i)
     end
     rename!(df, :data => :dataset)
@@ -762,9 +865,8 @@ function aggregate_ce_evaluation(
         df.objective .= CTExperiments.format_header.(df.objective)
     end
     df.variable .= CTExperiments.format_metric.(y)
-    if rebase
+    if ratio
         df.variable .= (x -> LatexCell("$(x) \$(-%)\$")).(df.variable)
-        select!(df, Not([:is_pct, :objective]))
     end
     return df
 end
@@ -772,7 +874,13 @@ end
 global allowed_perf_measures = Dict("acc" => accuracy, "f1" => multiclass_f1score)
 
 function aggregate_performance(
-    res_dir::String; measure::Vector=["acc"], adversarial::Bool=false
+    res_dir::String;
+    measure::Vector=["acc"],
+    adversarial::Bool=false,
+    bootstrap::Union{Nothing,Int}=nothing,
+    drop_models::Vector{String}=String[],
+    eps::Vector{<:AbstractFloat}=[0.03],
+    byvars=["objective"],
 )
 
     # Get measures:
@@ -780,20 +888,85 @@ function aggregate_performance(
         measure = [allowed_perf_measures[m] for m in measure]
     end
 
-    eval_grids, _ = final_results(res_dir)
-    df = aggregate_performance(eval_grids; measure, adversarial)
+    eval_grids, _ = final_results(res_dir; drop_models)
+    df = aggregate_performance(eval_grids; measure, adversarial, bootstrap, eps, byvars)
     df.objective .= replace.(df.objective, "Full" => "CT")
     df.objective .= replace.(df.objective, "Vanilla" => "BL")
     df.variable .= replace.(df.variable, "Accuracy" => adversarial ? "Acc.\$^*\$" : "Acc.")
     df.variable .= ["$v ($o)" for (v, o) in zip(df.variable, df.objective)]
-    select!(df, Not([:std, :objective]))
+
+    select!(df, Not([:objective]))
     return df
 end
 
-function final_results(res_dir::String)
+const ds_order = [
+    LatexReplacements["lin_sep"],
+    LatexReplacements["circles"],
+    LatexReplacements["moons"],
+    LatexReplacements["over"],
+    LatexReplacements["adult"],
+    LatexReplacements["cali"],
+    LatexReplacements["credit"],
+    LatexReplacements["gmsc"],
+    LatexReplacements["mnist"],
+]
+
+function plot_performance(
+    res_dir;
+    measure::Vector=["acc"],
+    adversarial::Bool=false,
+    bootstrap::Union{Nothing,Int}=nothing,
+    drop_models::Vector{String}=String[],
+    eps::Vector{<:AbstractFloat}=[0.03],
+    byvars=["objective"],
+    drop_synthetic::Bool=true,
+)
+
+    # Get measures:
+    if eltype(measure) == String
+        measure = [allowed_perf_measures[m] for m in measure]
+    end
+
+    eval_grids, _ = final_results(res_dir; drop_models)
+    df = aggregate_performance(eval_grids; measure, adversarial, bootstrap, eps, byvars)
+    df.objective .= ifelse.(df.objective .== "Full", "CT", "BL")
+    df.dataset .= categorical(df.dataset; levels=ds_order)
+    if drop_synthetic
+        filter!(df -> !(df.dataset in ["LS", "OL", "Circ", "Moon"]), df)
+    end
+
+    plt =
+        data(df) *
+        mapping(
+            :eps => L"\text{Perturbation Size: }\varepsilon \in [0,0.1]",
+            :mean => L"\text{Accuracy}";
+            color=:objective => "Model",
+            marker=:objective => "Model",
+            col=:dataset,
+        ) *
+        visual(ScatterLines)
+    return plt
+end
+
+function final_results(
+    res_dir::String;
+    drop_models::Vector{String}=String[],
+    keep_models::Union{Vector{String},Nothing}=nothing,
+    verbose::Bool=false,
+)
 
     # Get model and data directories:
     model_dirs = joinpath.(res_dir, readdir(res_dir)) |> x -> x[isdir.(x)]
+    drop_models = (x -> joinpath(res_dir, x)).(drop_models)
+    model_dirs = setdiff(model_dirs, drop_models)
+    if !isnothing(keep_models)
+        keep_models = (x -> joinpath(res_dir, x)).(keep_models)
+        model_dirs = intersect(model_dirs, keep_models)
+    end
+    @assert length(model_dirs) > 0 "No more model directories left"
+    if verbose
+        @info "Aggregating for $model_dirs"
+    end
     data_dirs =
         [joinpath.(d, readdir(d)) |> x -> x[isdir.(x)] for d in model_dirs] |> x -> reduce(vcat, x)
 
@@ -801,8 +974,9 @@ function final_results(res_dir::String)
     data_dirs = filter(
         x -> isfile(joinpath(x, "evaluation/evaluation_grid_config.toml")), data_dirs
     )
-    eval_grids =
-        EvaluationGrid.(joinpath.(data_dirs, "evaluation/evaluation_grid_config.toml"))
+    eval_grids = EvaluationGrid.(
+        joinpath.(data_dirs, "evaluation/evaluation_grid_config.toml")
+    )
     data_dirs = filter(x -> isfile(joinpath(x, "grid_config.toml")), data_dirs)
     exper_grids = ExperimentGrid.(joinpath.(data_dirs, "grid_config.toml"))
 
@@ -812,16 +986,29 @@ end
 function final_table(
     res_dir::String;
     tbl_mtbl::Union{Nothing,DataFrame}=nothing,
-    ce_var=["plausibility_distance_from_target", "mmd"],
+    ce_var::Vector{<:String}=["plausibility_distance_from_target", "mmd"],
     perf_var=["acc"],
-    agg_further_vars=[["run"], ["run", "lambda_energy_eval"]],
+    agg_further_vars=[["run", "lambda_energy_eval"], ["run", "lambda_energy_eval"]],
     longformat::Bool=true,
+    bootstrap::Int=100,
+    total_uncertainty::Bool=false,
+    drop_models::Vector{String}=String[],
+    conf_int::Vector{<:AbstractFloat}=[0.99],
+    include_performance::Bool=false,
+    add_aggregates::Bool=true,
 )
     # CE:
     df_ce = DataFrame()
     for (i, y) in enumerate(ce_var)
         df = aggregate_ce_evaluation(
-            res_dir; y, agg_further_vars=agg_further_vars[i], rebase=true
+            res_dir;
+            y,
+            agg_further_vars=agg_further_vars[i],
+            rebase=false,
+            ratio=true,
+            total_uncertainty,
+            drop_models,
+            return_sig_level=true,
         )
         df_ce = vcat(df_ce, df; cols=:union)
     end
@@ -829,25 +1016,75 @@ function final_table(
     # Missing:
     df_ce = coalesce.(df_ce, "(agg.)")
 
-    # Performance:
-    df_perf = aggregate_performance(res_dir; measure=perf_var)                          # unperturbed
-    df_adv_perf = aggregate_performance(res_dir; measure=perf_var, adversarial=true)    # adversarial
-    df_perf = vcat(df_perf, df_adv_perf)
-    df = vcat(df_ce, df_perf; cols=:union) |> df -> DataFrames.unstack(df, :dataset, :mean)
-
-    # Mutability:
-    if !isnothing(tbl_mtbl)
-        df = vcat(df, tbl_mtbl; cols=:union)
+    # Merge
+    df = if !isnothing(tbl_mtbl)
+        vcat(df_ce, tbl_mtbl; cols=:union)
+    else
+        df_ce
     end
+
+    if include_performance
+        # Performance:
+        df_perf = aggregate_performance(res_dir; measure=perf_var, bootstrap, drop_models)                          # unperturbed
+        df_adv_perf = aggregate_performance(
+            res_dir; measure=perf_var, adversarial=true, bootstrap, drop_models
+        )    # adversarial
+        df_perf = vcat(df_perf, df_adv_perf)
+        df = vcat(df, df_perf; cols=:union)
+    end
+
+    # Statistical significance:
+    if !("sig_level" in names(df))
+        df.sig_level .= ""
+    else
+        df.sig_level .= coalesce.(df.sig_level, "")
+    end
+
+    if add_aggregates
+        df_agg = combine(groupby(df, :variable), :mean => mean => :mean)
+        df_agg.dataset .= "Avg."
+        df_agg.se .= NaN
+        df = vcat(df, df_agg; cols=:union)
+        df = coalesce.(df, "")
+        df.var_id = (x -> x.data).(df.variable)
+        sort!(df, [:var_id, :dataset])
+        select!(df, Not(:var_id))
+    end
+
+    # Post-process
+    df =
+        DataFrames.transform(
+            df,
+            [:mean, :se, :sig_level] =>
+                (
+                    (m, s, stars) -> [
+                        if isnan(si)
+                            "$(round(mi, digits=2))"
+                        else
+                            PrettyTables.LatexCell(
+                                "$(round(mi, digits=2))\\pm$(round(si, digits=2)) \$^{$star}\$",
+                            )
+                        end for (mi, si, star) in zip(m, s, stars)
+                    ]
+                ) => :mean,
+        ) |>
+        df ->
+            select!(df, Not(:se, :sig_level)) |>
+            df -> DataFrames.unstack(df, :dataset, :mean)
 
     # Missing:
     df = coalesce.(df, "")
     rename!(df, :variable => :measure)
+    if !("lambda_energy_eval" in names(df))
+        df.measure .= (x -> x isa PrettyTables.LatexCell ? x.data : x).(df.measure)
+    end
     select!(df, :measure, Not([:measure]))
 
     if longformat
-        df.measure = combine_header.(df.measure, string.(df.lambda_energy_eval))
-        select!(df, Not(:lambda_energy_eval))
+        if "lambda_energy_eval" in names(df)
+            df.measure = combine_header.(df.measure, string.(df.lambda_energy_eval))
+            select!(df, Not(:lambda_energy_eval))
+        end
         df =
             DataFrames.stack(df, Not(:measure)) |>
             df -> DataFrames.unstack(df, :measure, :value)
@@ -871,56 +1108,8 @@ function combine_header(m::LatexCell, l::String)
     return new_s
 end
 
-function final_mutability(
-    res_dir::String;
-    var=["distance", "sens_outid:1", "sens_outid:2"],
-    byvars=["objective", "mutability"],
-    agg_cases::Bool=true,
-)
-    # CE:
-    df_ce = DataFrame()
-    for (i, y) in enumerate(var)
-        df = aggregate_ce_evaluation(
-            res_dir; byvars=byvars, y, agg_further_vars=["run"], rebase=true
-        )
-        df_ce = vcat(df_ce, df; cols=:union)
-    end
-
-    # For sensitivity, need to adjust values cause `aggregate_ce_evaluation` returns levels not changes of zeros are present:
-    adjusted_sens = []
-    if "avg_baseline" in names(df_ce)
-        for (i, val) in enumerate(df_ce.mean)
-            if ismissing(df_ce.avg_baseline[i]) || val == 0
-                push!(adjusted_sens, val)
-            else
-                val_bl = df_ce.baseline[i]
-                val_pct = 100 .* (val - val_bl) ./ abs.(val_bl)
-                push!(adjusted_sens, val_pct)
-            end
-        end
-        select!(df_ce, Not([:avg_baseline, :baseline]))
-        df_ce.mean = adjusted_sens
-    end
-
-    # Multiply by -1 to turn into -Δ%:
-    df_ce.mean .*= -1
-
-    # Aggregate across cases of interest:
-    if agg_cases
-        filter!(df_ce -> !all(df_ce.mutability .== "both"), df_ce)
-        df_ce =
-            groupby(df_ce, [:dataset, :variable]) |>
-            gdf -> combine(gdf, :mean => mean => :mean)
-    end
-
-    df = df_ce
-    df = DataFrames.unstack(df, :dataset, :mean)
-
-    return df
-end
-
-function final_params(res_dir::String)
-    _, exper_grids = final_results(res_dir)
+function final_params(res_dir::String; drop_models::Vector{String}=String[])
+    _, exper_grids = final_results(res_dir; drop_models)
     df = DataFrame()
     for cfg in exper_grids
         df_meta = CTExperiments.expand_grid_to_df(cfg)

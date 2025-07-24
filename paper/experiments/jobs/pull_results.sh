@@ -58,11 +58,13 @@ confirm=$(bash -c "read -p \"About to copy results from long term storage direct
 if [[ $confirm =~ ^[Yy](es)?$ ]]; then
     echo "Proceeding with copy..."
     if [[ -n "$RSYNC_PATTERNS" ]]; then
-        RSYNC_CMD="rsync -av $RSYNC_PATTERNS paltmeyer@login.delftblue.tudelft.nl:$LONG_TERM_STORAGE_DIR/output/ $LOCAL_STORAGE_DIR/"
+        # ID removed below for double-blind
+        RSYNC_CMD="rsync -av $RSYNC_PATTERNS anonymous:$LONG_TERM_STORAGE_DIR/output/ $LOCAL_STORAGE_DIR/"
         echo "Debug: Executing command: $RSYNC_CMD"
         eval "$RSYNC_CMD"
     else
-        rsync -av paltmeyer@login.delftblue.tudelft.nl:$LONG_TERM_STORAGE_DIR/output/ $LOCAL_STORAGE_DIR/
+        # ID removed below for double-blind
+        rsync -av anonymous:$LONG_TERM_STORAGE_DIR/output/ $LOCAL_STORAGE_DIR/
     fi
 else
     echo "Operation cancelled"

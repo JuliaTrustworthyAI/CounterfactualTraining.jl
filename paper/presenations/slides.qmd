@@ -1,11 +1,6 @@
 ---
 title: counterfactual training
 subtitle: Update Meeting Dec 2024
-author: 
-  - name: Patrick Altmeyer
-    url: https://www.patalt.org/
-  - name: Arie van Deursen
-  - name: Cynthia C. S. Liem
 institute: Delft University of Technology
 date: today
 format: 
@@ -40,29 +35,6 @@ crossref:
   prp-prefix: RQ
 classoption: "notheorems"
 ---
-
-## Status
-
-- *Code base*: In place and streamlined for reproducibility and configuration. 
-- *Experiments*: Lots of work done and results largely supportive of idea.
-    - Ran into problems on DelftBlue, which has set me back about 2 weeks. 
-- *Paper*: Still bare-bones. 
-- *ICML*: Potentially still possible to submit something, but this will be rushed and not "finished".
-
-## Problems on Cluster
-
-- Trying to distribute: 
-    1. Models/experiments across processes.
-    2. For each model/experiment distribute the counterfactual search across processes.
-- Out-of-memory issues, data races, ...
-- Multi-processing for models & multi-threading for counterfactual search: low CPU efficiency on DelftBlue (jobs get cancelled).
-
-## The Big Oversight
-
-- **Core problem**: `CounterfactualExplanation` objects are *huge*. They store `X` (the input), `y` (the output), etc. in their own memory.
-- Can't easily fit `CounterfactualExplanation` objects on cluster memory and pass them around processes. 
-- **Good news**: Relatively straightforward to add `FlattenedCE` with gazzilion times lower memory footprint (done!).
-- Nested parallelization issue remains and I will not spend more time trying to make it work. 
 
 # Methodology
 
@@ -116,7 +88,7 @@ Suppose that featue $x[1]$ is immutable (e.g. 'age'), so $x_{t}^\prime[1]=x_s[1]
 
 ## Moons (Plausibility)
 
-- All counterfactuals at test time generated using *ECCo*.
+- All counterfactuals at test time generated using *ECCCo*.
 - Penalty on energy differential increases from *l.* to *r.*
 
 ![Plausibility of faithful counterfactuals $x_{t}^\prime$ measured in terms of their distance from $x_{t}$. Higher values indicate higher plausibility.](www/moons_plaus.png){#fig-moons-plausib}
@@ -125,7 +97,7 @@ Suppose that featue $x[1]$ is immutable (e.g. 'age'), so $x_{t}^\prime[1]=x_s[1]
 
 ::::{.columns}::::
 :::{.column width='50%'}
-![Counterfactual explanations for model trained with CT (*ECCo*).](www/moons_ce_ecco.png){#fig-ce-ecco}
+![Counterfactual explanations for model trained with CT (*ECCCo*).](www/moons_ce_ecco.png){#fig-ce-ecco}
 :::
 :::{.column width='50%'}
 ![Counterfactual explanations for conventionally trained model.](www/moons_ce_vanilla.png){#fig-ce-vanilla}
@@ -136,14 +108,14 @@ Suppose that featue $x[1]$ is immutable (e.g. 'age'), so $x_{t}^\prime[1]=x_s[1]
 
 ![Validation accuracy for different models.](www/moons_acc_val.png){#fig-moons-acc-val}
 
-## MNIST (Vanilla vs *ECCo*)
+## MNIST (Vanilla vs *ECCCo*)
 
 ::::{.columns}::::
 :::{.column width='50%'}
 ![Faithful counterfactuals for conventionally trained MLP.](www/poc_model.png){#fig-mnist-model}
 :::
 :::{.column width='50%'}
-![Faithful counterfactuals for same MLP with CT (*ECCo*).](www/poc_model_ct_ecco.png){#fig-mnist-model-ct-ecco}
+![Faithful counterfactuals for same MLP with CT (*ECCCo*).](www/poc_model_ct_ecco.png){#fig-mnist-model-ct-ecco}
 :::
 ::::
 
@@ -157,24 +129,4 @@ Suppose that featue $x[1]$ is immutable (e.g. 'age'), so $x_{t}^\prime[1]=x_s[1]
 ![Faithful counterfactuals for same MLP with CT (*REVISE*).](www/poc_model_ct_model_revise.png){#fig-mnist-model-ct-model-revise}
 :::
 ::::
-
-# Planning Ahead
-
-## Planned Contributions
-
-- Focus on enhancing trustworthiness and applicability of small opaque models. 
-    - Add more datasets and neuro-tree models (relatively straightforward).
-- Do not pitch as state-of-the-art approach to generative modelling similar to JEMs, but rather as an extension of JEMs to XAI and AR. 
-- Limit use of image datasets to illustrate arguments:
-    - Example: what happens if digit values can only be increased/decreased?
-
-## Timeline
-
-- Code base is already streamlined very well to allow for grid searches with easy configuration.
-- Lots of open tasks and questions (see [issue](https://github.com/JuliaTrustworthyAI/CounterfactualTraining.jl/issues/8))
-    1. Add MMD to measure plausibility.
-    2. Evaluate adversarial robustness and generative capacity. Compare to AT, JEM.
-    3. ... 
-- Still aiming for ICML to commit to a timeline, but it seems unlikely to be in the shape I would like.
-
 

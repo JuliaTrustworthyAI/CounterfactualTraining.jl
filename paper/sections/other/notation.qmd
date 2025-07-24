@@ -1,18 +1,27 @@
 # Notation {.appendix}
 
+## Variables and Parameters
+
 Below we provide an overview of some notation used frequently throughout the paper:
 
+- $\mathcal{Y}$: The output domain.
 - $y^+$: The target class and also the index of the target class.
 - $y^-$: The non-target class and also the index of non-the target class.
+- $\mathcal{X}$: The input domain.
 - $\mathbf{x}$: a single training sample.
-- $\mathbf{x}^\prime$: a counterfactual. 
+- $\mathbf{x}^\prime$: a counterfactual.
+- $t=1,...,T$: Step indicator for counterfactual search iterations.
+- $\mathbf{x}^\prime_{t \leq T}$: a nascent counterfactual, defined as a counterfactual that has not yet converged.
+- $\mathbf{x}^\prime_{T}$: a mature counterfactual, defined as a counterfactual that has either passed a threshold probability or exhausted all $T$ steps.
 - $\mathbf{x}^+$: a training sample in the target class (ground-truth).
-- $\mathbf{y}^+$: The one-hot encoded output vector for the target class. 
+- $\mathbf{y}^+$: The one-hot encoded output vector for the target class.
 - $\theta$: Model parameters (unspecified).
 - $\Theta$: Matrix of parameters. 
 - $\mathbf{M}(\cdot)$: linear predictions (logits) of the classifier.
 
-## Other Technical Details
+## Formulas
+
+### Maximum Mean Discrepancy
 
 Maximum mean discrepancy is defined as follows,
 
@@ -23,3 +32,7 @@ $$
 $$ {#eq-mmd}
 
 where $k(\cdot,\cdot)$ is a kernel function [@gretton2012kernel]. We make use of a Gaussian kernel with a constant length-scale parameter of $0.5$. In our implementation, @eq-mmd is by default applied to the entire subset of the training data for which $y=y^+$.
+
+## Other Conventions
+
+In some place of this appendix, we use the terms *full/Full* (i.e. the full CT objective) and *vanilla/Vanilla* (i.e. vanilla training objective) to refer to models trained with counterfactual training (*CT*) and the baseline (*BL*), respectively.

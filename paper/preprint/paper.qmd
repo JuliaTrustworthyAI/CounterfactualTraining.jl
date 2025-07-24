@@ -8,6 +8,7 @@ format:
     linenumbers: false
     doublespacing: false
     runninghead: "Counterfactual Training"
+    thanks: "A Preprint."
     authorcols: true
     include-in-header:
       text: |
@@ -21,7 +22,17 @@ format:
         \theoremstyle{definition}
         \newtheorem{example}{Example}[section]
         \theoremstyle{plain}
+        \usepackage{algorithm}
+        \usepackage{algorithmic}
+        \usepackage{amsfonts}
+        \usepackage{amsmath}
+        \usepackage{siunitx}
+        \sisetup{uncertainty-mode = separate}
+        \DeclareMathSizes{10}{9}{7}{6.5}
+        \usepackage{enumitem}
 ---
+
+\twocolumn
 
 {{< include /paper/body.qmd >}}
 
@@ -29,15 +40,3 @@ format:
 
 ::: {#refs}
 :::
-
-{{< pagebreak >}}
-
-```{=latex}
-\begin{appendices}
-```
-
-{{< include /paper/sections/appendix.qmd >}}
-
-```{=latex}
-\end{appendices}
-```

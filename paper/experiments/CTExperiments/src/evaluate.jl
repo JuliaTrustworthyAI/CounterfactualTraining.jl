@@ -157,6 +157,7 @@ function test_performance(
     n::Union{Nothing,Int}=nothing,
     eps::Real=0.03,
     attack_fun::Function=fgsm,
+    bootstrap::Union{Nothing,Int}=nothing,
 )
     model, _, M = load_results(exper)
 
@@ -164,16 +165,54 @@ function test_performance(
     Xtest, ytest = get_data(exper.data; n=n, test_set=true)
     _ytest = Flux.onehotbatch(ytest, sort(unique(ytest)))
 
-    if adversarial
-        # Generate adversarial examples:
-        domain = exper.data.domain
-        domain = domain isa Vector ? nothing : domain
-        Xtest = generate_ae(model, Xtest, _ytest; attack_fun, eps, clamp_range=domain)
+    J = isnothing(bootstrap) ? 1 : bootstrap
+    j = 1
+    output = []
+
+    for j in 1:J
+
+        # Bootstrap:
+        idx = 1:size(Xtest, 2)
+        if !isnothing(bootstrap)
+            # Sample with replacement:
+            idx = rand(1:size(Xtest, 2), size(Xtest, 2))
+        end
+        Xtest_j = Xtest[:, idx]
+        ytest_j = ytest[idx]
+        _ytest_j = _ytest[:, idx]    # OHE version
+
+        # Adversarial accuracy
+        if adversarial
+            # Generate adversarial examples:
+            domain = exper.data.domain
+            domain = domain isa Vector ? nothing : domain
+            Xtest_j = generate_ae(
+                model, Xtest_j, _ytest_j; attack_fun, eps, clamp_range=domain
+            )
+        end
+
+        yhat = predict_label(M, CounterfactualData(Xtest_j, ytest_j), Xtest_j)
+
+        output_j = compute_performance_measures(exper, ytest_j, yhat; measure, return_df)
+
+        if return_df
+            output_j.run .= j
+        end
+
+        push!(output, output_j)
     end
 
-    yhat = predict_label(M, CounterfactualData(Xtest, ytest), Xtest)
+    # If no bootstrap requested, just return single eval:
+    if J == 1
+        return output[1]
+    end
 
-    return compute_performance_measures(exper, ytest, yhat; measure, return_df)
+    # If dataframe, concatenate:
+    if return_df
+        output = reduce(vcat, output)
+    end
+
+    return output
 end
 
 function adv_performance(exper::Experiment; kwrgs...)

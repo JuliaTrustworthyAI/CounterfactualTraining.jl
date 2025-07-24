@@ -13,7 +13,4 @@ format:
 
 {{< include /paper/body.qmd >}}
 
-# References {-}
-
-::: {#refs}
-:::
+\bibliography{../quarto_aaai/bibliography.bib}
