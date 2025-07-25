@@ -69,7 +69,7 @@ end
 imgs_ct = imgs[1]
 imgs_bl = imgs[2]
 img_ce = mosaicview(imgs_bl..., imgs_ct...; nrow=2, rowmajor=true)
-Images.save("paper/figures/mnist_ce.png",img_ce)
+Images.save("paper/figures/mnist_ce.png", img_ce)
 
 # Combined image:
 idx = [findall(all_digits .== x)[1] for x in chosen_digits]
