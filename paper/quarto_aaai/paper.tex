@@ -876,8 +876,8 @@ the baseline (top row).
 
 }
 
-\subcaption{\label{fig-mnist-ce}\emph{Plausibility}: faithful
-counterfactuals (\emph{ECCCo}).}
+\subcaption{\label{fig-mnist-ce}\emph{Plausibility}: \emph{ECCCo}
+counterfactuals for factual `0' (blue).}
 
 \end{minipage}%
 \newline
@@ -897,8 +897,8 @@ integrated gradients.}
 \caption{\label{fig-mnist}Visual explanations for \emph{MNIST}. Top and
 bottom rows (of images) show the results for BL and CT, respectively.
 Mutability constraints are imposed on the five top and bottom rows (of
-pixels). CT produces plausible counterfactuals (a) and is insensitive to
-protected features (b).}
+pixels). CT produces plausible counterfactuals (a) and is less sensitive
+to protected features (b).}
 
 \end{figure}%
 
@@ -919,8 +919,8 @@ outweighed by an increase in costs required for greater plausibility.
 The findings for \emph{Adult} and \emph{MNIST} are insignificant. A
 qualitative inspection of the class-conditional integrated gradients in
 Figure~\ref{fig-mnist-ig} suggests that CT still has the expected
-effect: the model (bottom) is insensitive (blue) to the protected rows
-of pixels; details are reported in the appendix.
+effect: the model (bottom) is less sensitive (blue) to the protected
+rows of pixels; details are reported in the appendix.
 
 \begin{figure*}
 

@@ -42,7 +42,7 @@ $$ {#eq-multi}
 
 where $\theta_{k,d}=\Theta[k,d]$ denotes the coefficient on feature $d$ for class $k$. 
 
-Based on @eq-loglike-decomp and @eq-multi we can identify that $(\mu_{k,d}-\mu_{m,d}) \propto (\theta_{k,d} - \theta_{m,d})$ under the assumptions we made above. Hence, we have that $(\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}}) < 0$ and $(\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}}) > 0$
+Based on @eq-loglike-decomp and @eq-multi we can identify that $(\mu_{k,d}-\mu_{m,d}) \propto (\theta_{k,d} - \theta_{m,d})$ under the assumptions we made above. Hence, we have that $(\theta_{y^-,d_{\text{immtbl}}} - \theta_{y^+,d_{\text{immtbl}}}) < 0$ and $(\theta_{y^-,d_{\text{mtbl}}} - \theta_{y^+,d_{\text{mtbl}}}) > 0$.
 
 Let $\mathbf{x}^\prime$ denote some randomly chosen individual from class $y^-$ and let $y^+ \sim p(y)$ denote the randomly chosen target class. Then the partial derivative of the contrastive divergence penalty with respect to coefficient $\theta_{y^+,d}$ is equal to 
 

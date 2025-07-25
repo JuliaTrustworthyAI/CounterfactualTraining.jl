@@ -74,18 +74,18 @@ Average reductions in $\text{IP}$ range from around 7% for *MNIST* to almost 60%
 
 ::: {#fig-mnist layout-nrow=2 layout-ncol=1}
 
-![*Plausibility*: faithful counterfactuals (*ECCCo*).](/paper/figures/mnist_ce.png){#fig-mnist-ce}
+![*Plausibility*: *ECCCo* counterfactuals for factual '0' (blue).](/paper/figures/mnist_ce.png){#fig-mnist-ce}
 
 ![*Actionability*: class-cond. integrated gradients.](/paper/figures/mnist_ig.png){#fig-mnist-ig}
 
-Visual explanations for *MNIST*. Top and bottom rows (of images) show the results for BL and CT, respectively. Mutability constraints are imposed on the five top and bottom rows (of pixels). CT produces plausible counterfactuals (a) and is insensitive to protected features (b).
+Visual explanations for *MNIST*. Top and bottom rows (of images) show the results for BL and CT, respectively. Mutability constraints are imposed on the five top and bottom rows (of pixels). CT produces plausible counterfactuals (a) and is less sensitive to protected features (b).
 
 :::
 
 ### Actionability (RQ2). {#sec-act}
 *CT tends to improve actionability in the presence of immutable features, but this is not guaranteed if the assumptions in Proposition \ref{prp-mtblty} are violated.*
 
-For synthetic datasets, we always protect the first feature; for all real-world tabular datasets we could identify and protect an *age* variable; for *MNIST*, we protect the five top and bottom pixel rows of the full image. Statistically significant reductions in costs overwhelmingly point in the positive direction reaching up to around 60% for *GMSC*. Only in the case of *Cred*, average costs increase, likely because any benefits from protecting *age* are outweighed by an increase in costs required for greater plausibility. The findings for *Adult* and *MNIST* are insignificant. A qualitative inspection of the class-conditional integrated gradients in @fig-mnist-ig suggests that CT still has the expected effect: the model (bottom) is insensitive (blue) to the protected rows of pixels; details are reported in the appendix.
+For synthetic datasets, we always protect the first feature; for all real-world tabular datasets we could identify and protect an *age* variable; for *MNIST*, we protect the five top and bottom pixel rows of the full image. Statistically significant reductions in costs overwhelmingly point in the positive direction reaching up to around 60% for *GMSC*. Only in the case of *Cred*, average costs increase, likely because any benefits from protecting *age* are outweighed by an increase in costs required for greater plausibility. The findings for *Adult* and *MNIST* are insignificant. A qualitative inspection of the class-conditional integrated gradients in @fig-mnist-ig suggests that CT still has the expected effect: the model (bottom) is less sensitive (blue) to the protected rows of pixels; details are reported in the appendix.
 
 ![Test accuracies on adversarially perturbed data with varying perturbation sizes for all non-synthetic datasets.](/paper/figures/acc.png){#fig-acc fig-env="figure*"}
 
