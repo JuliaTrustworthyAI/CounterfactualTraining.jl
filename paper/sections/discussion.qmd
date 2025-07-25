@@ -1,6 +1,6 @@
 # Discussion {#sec-discussion}
 
-As our results indicate, counterfactual training produces models that are more explainable. Nonetheless, these advantages come at the cost of two important limitations.  
+As our results indicate, counterfactual training produces models that are more explainable. Nonetheless, these advantages come with certain limitations.  
 
 *Interventions on features have implications for fairness.* We provide a method to modify the sensitivity of a model to certain features, which can be misused by enforcing explanations based on features that are more difficult to modify by a (group of) decision subjects. Such abuse could result in an unfairly assigned burden of recourse [@sharma2020certifai], threatening the equality of opportunity [@bell2024fairness]. Also, even if all immutable features are protected, there may exist proxies that are theoretically mutable, but preserve sufficient information about the principals to hinder these protections. Indeed, deciding on the actionability of features remains a major open challenge in the AR literature [@venkatasubramanian2020philosophical].
 

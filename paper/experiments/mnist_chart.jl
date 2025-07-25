@@ -44,7 +44,7 @@ factual = chosen_digits[1]
 both_predict_factual = false
 while !both_predict_factual
     chosen = rand(findall(data.output_encoder.labels .== factual))
-    x = select_factual(data, chosen)
+    global x = select_factual(data, chosen)
     both_predict_factual =
         predict_label(models[1], data, x)[1] ==
         predict_label(models[2], data, x)[1] ==
@@ -56,7 +56,7 @@ imgs = []
 conv = CounterfactualExplanations.Convergence.MaxIterConvergence(1000)
 for M in models
     imgs_M = [CTExperiments.convert2mnist(x; blue=true)]
-    for target in chosen_digits[2:end]
+    for target in all_digits[2:end]
         img =
             generate_counterfactual(x, target, data, M, gen; convergence=conv) |>
             CounterfactualExplanations.counterfactual |>
@@ -69,6 +69,10 @@ end
 imgs_ct = imgs[1]
 imgs_bl = imgs[2]
 img_ce = mosaicview(imgs_bl..., imgs_ct...; nrow=2, rowmajor=true)
+Images.save("paper/figures/mnist_ce.png",img_ce)
 
+# Combined image:
+idx = [findall(all_digits .== x)[1] for x in chosen_digits]
+img_ce = mosaicview(imgs_bl[idx]..., imgs_ct[idx]...; nrow=2, rowmajor=true)
 img = mosaicview(img_ce, img_ig; nrow=1)
 Images.save("paper/figures/mnist_body.png", img)
