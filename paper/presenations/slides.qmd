@@ -1,7 +1,6 @@
 ---
 title: counterfactual training
 subtitle: Update Meeting Dec 2024
-institute: Delft University of Technology
 date: today
 format: 
   beamer:

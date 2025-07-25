@@ -171,8 +171,9 @@
 \usepackage{placeins}
 \usepackage{siunitx}
 \sisetup{uncertainty-mode = separate}
-\DeclareMathSizes{10}{9}{7}{6.5}
 \usepackage{enumitem}
+\DeclareMathSizes{10}{9}{7}{6.5}
+\usepackage{subcaption}
 
 \usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
@@ -325,7 +326,7 @@ Section~\ref{sec-conclusion}.
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{paper_files/mediabag/../../paper/figures/poc.pdf}}
+\includegraphics[width=0.85\linewidth,height=\textheight,keepaspectratio]{paper_files/mediabag/../../paper/figures/poc.pdf}
 
 }
 
@@ -859,25 +860,45 @@ significant impact of CT on \(\text{IP}\). Reductions in \(\text{IP}^*\)
 are even more substantial and generally statistically significant,
 although the average degree of uncertainty is higher than for
 \(\text{IP}\): reductions range from around 20\% (\emph{Moons}) to
-almost 90\% (\emph{Circ}). The only negative findings are for OL and
-MNIST, but they are not statistically significant. A qualitative
-inspection of the counterfactuals in Figure~\ref{fig-mnist} (columns
-2-5) suggests recognizable digits 1-4 for the model trained with CT
-(bottom row), unlike the baseline (top row).
+almost 90\% (\emph{Circ}). The only negative findings are for \emph{OL}
+and \emph{MNIST}, but they are insignificant. A qualitative inspection
+of the counterfactuals in Figure~\ref{fig-mnist-ce} suggests
+recognizable digits for the model trained with CT (bottom row), unlike
+the baseline (top row).
 
 \begin{figure}
 
+\begin{minipage}{\linewidth}
+
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{../../paper/figures/mnist_body.png}}
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/figures/mnist_ce.png}}
 
 }
 
-\caption{\label{fig-mnist}Visual explanations for \emph{MNIST} for BL
-(top) and CT (bottom). \textbf{Plausibility}: col.~1 is a random factual
-0 (blue); cols. 2-5 are corresponding \emph{ECCCo} counterfactuals in
-target classes 1 to 4. \textbf{Actionability}: cols. 6-10 show
-integrated gradients averaged over test images in classes 5 to 9.}
+\subcaption{\label{fig-mnist-ce}\emph{Plausibility}: \emph{ECCCo}
+counterfactuals for factual `0' (blue).}
+
+\end{minipage}%
+\newline
+\begin{minipage}{\linewidth}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/figures/mnist_ig.png}}
+
+}
+
+\subcaption{\label{fig-mnist-ig}\emph{Actionability}: class-cond.
+integrated gradients.}
+
+\end{minipage}%
+
+\caption{\label{fig-mnist}Visual explanations for \emph{MNIST}. Top and
+bottom rows (of images) show the results for BL and CT, respectively.
+Mutability constraints are imposed on the five top and bottom rows (of
+pixels). CT produces plausible counterfactuals (a) and is less sensitive
+to protected features (b).}
 
 \end{figure}%
 
@@ -889,18 +910,17 @@ features, but this is not guaranteed if the assumptions in Proposition
 
 For synthetic datasets, we always protect the first feature; for all
 real-world tabular datasets we could identify and protect an \emph{age}
-variable; for \emph{MNIST}, we protect the five upper and lower pixel
+variable; for \emph{MNIST}, we protect the five top and bottom pixel
 rows of the full image. Statistically significant reductions in costs
-overwhelmingly point in the expected positive direction reaching up to
-around 60\% for \emph{GMSC}. Only in the case of \emph{Cred}, average
-costs increase, likely because any potential benefits from protecting
-the \emph{age} are outweighed by the increase in costs required for
-greater plausibility. The findings for \emph{Adult} and \emph{MNIST} are
-not significant. A qualitative inspection of the class-conditional
-integrated gradients in Figure~\ref{fig-mnist} (columns 6-10) suggests
-that CT still has the expected effect: the model (bottom) is insensitive
-(blue) to the protected rows of pixels; details of this experiment are
-reported in the supplementary appendix.
+overwhelmingly point in the positive direction reaching up to around
+60\% for \emph{GMSC}. Only in the case of \emph{Cred}, average costs
+increase, likely because any benefits from protecting \emph{age} are
+outweighed by an increase in costs required for greater plausibility.
+The findings for \emph{Adult} and \emph{MNIST} are insignificant. A
+qualitative inspection of the class-conditional integrated gradients in
+Figure~\ref{fig-mnist-ig} suggests that CT still has the expected
+effect: the model (bottom) is less sensitive (blue) to the protected
+rows of pixels; details are reported in the appendix.
 
 \begin{figure*}
 
@@ -976,8 +996,8 @@ explainability of models in a post-hoc, fine-tuning manner.
 \section{Discussion}\label{sec-discussion}
 
 As our results indicate, counterfactual training produces models that
-are more explainable. Nonetheless, these advantages come at the cost of
-two important limitations.
+are more explainable. Nonetheless, these advantages come with certain
+limitations.
 
 \emph{Interventions on features have implications for fairness.} We
 provide a method to modify the sensitivity of a model to certain
@@ -1028,20 +1048,20 @@ more sophisticated approaches.
 \section{Conclusion}\label{sec-conclusion}
 
 State-of-the-art machine learning models are prone to learning complex
-representations that cannot be interpreted by humans. Existing
-explainability solutions cannot guarantee that explanations agree with
-these learned representation. As a step towards addressing this
-challenge, we introduce counterfactual training, a novel training regime
-that integrates recent advances in contrastive learning, adversarial
-robustness, and counterfactual explanations to incentivize
-highly-explainable models. Through extensive experiments, we demonstrate
-that CT satisfies this goal while preserving the predictive performance
-and promoting robustness of models. Explanations generated from CT-based
-models are both more plausible (compliant with the underlying
-data-generating process) and more actionable (compliant with
-user-specified mutability constraints), and thus meaningful to their
-recipients. In turn, our work highlights the value of simultaneously
-improving models and their explanations.
+representations that cannot be interpreted by humans. Existing work on
+counterfactual explanations has largely focused on designing tools to
+generate plausible and actionable for any model. In this work, we
+instead hold models accountable for delivering such explanations. We
+introduce counterfactual training: a novel training regime that
+integrates recent advances in contrastive learning, adversarial
+robustness, and CE to incentivize highly-explainable models. Through
+theoretical results and extensive experiments, we demonstrate that CT
+satisfies this goal while promoting adversarial robustness of models.
+Explanations generated from CT-based models are both more plausible
+(compliant with the underlying data-generating process) and more
+actionable (compliant with user-specified mutability constraints), and
+thus meaningful to their recipients. In turn, our work highlights the
+value of simultaneously improving models and their explanations.
 
 \bibliography{../quarto_aaai/bibliography.bib}
 \end{document}
