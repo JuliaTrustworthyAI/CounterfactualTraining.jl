@@ -78,7 +78,7 @@ Average reductions in $\text{IP}$ range from around 7% for *MNIST* to almost 60%
 
 ![*Actionability*: class-cond. integrated gradients.](/paper/figures/mnist_ig.png){#fig-mnist-ig}
 
-Visual explanations for *MNIST* for BL (top rows) and CT (bottom rows).
+Visual explanations for *MNIST*. Top and bottom rows (of images) show the results for BL and CT, respectively. Mutability constraints are imposed on the five top and bottom rows (of pixels). CT produces plausible counterfactuals (a) and is insensitive to protected features (b).
 
 :::
 
