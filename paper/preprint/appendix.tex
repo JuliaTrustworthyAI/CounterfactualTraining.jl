@@ -313,11 +313,11 @@ the paper:
 \item
   \(t=1,...,T\): Step indicator for counterfactual search iterations.
 \item
-  \(\mathbf{x}^\prime_{t \leq T}\): a nascent counterfactual, defined as
-  a counterfactual that has not yet converged.
+  \(\mathbf{x}_{\text{AE}}^\prime\): a nascent counterfactual, defined
+  as a counterfactual that has not yet converged.
 \item
-  \(\mathbf{x}^\prime_{T}\): a mature counterfactual, defined as a
-  counterfactual that has either passed a threshold probability or
+  \(\mathbf{x}_{\text{CE}}^\prime\): a mature counterfactual, defined as
+  a counterfactual that has either passed a threshold probability or
   exhausted all \(T\) steps.
 \item
   \(\mathbf{x}^+\): a training sample in the target class
@@ -564,7 +564,7 @@ the application.
 Note~\ref{nte-train-default} presents the default hyperparameters used
 during training.
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, titlerule=0mm, breakable, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, opacitybacktitle=0.6, toprule=.15mm, toptitle=1mm, rightrule=.15mm, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm, title={Note \ref*{nte-train-default}: Training Phase}, opacityback=0, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-train-default}: Training Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
 
 \quartocalloutnte{nte-train-default} 
 
@@ -658,7 +658,8 @@ samples from the test set (with replacement) for which the model
 predicts the randomly chosen factual class; finally, we generate
 multiple counterfactuals (``No.~Counterfactuals'') and evaluate the
 outcomes (Note~\ref{nte-eval-default}). This is in line with standard
-practice in the related literature on CE. For our final results
+practice in the related literature on CE (see e.g. Schut et al.
+(\citeproc{ref-schut2021generating}{2021})). For our final results
 presented in the main paper, we rely on held-out test sets for
 evaluation. For tuning purposes we rely on training and/or validation
 sets.
@@ -680,7 +681,7 @@ the paper, we use larger evaluations, specifically:
   \(\lambda_{\text{egy}}\in\{0.1, 0.5, 1.0, 5.0, 10.0\}\).
 \end{itemize}
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, titlerule=0mm, breakable, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, opacitybacktitle=0.6, toprule=.15mm, toptitle=1mm, rightrule=.15mm, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm, title={Note \ref*{nte-eval-default}: Evaluation Phase}, opacityback=0, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-eval-default}: Evaluation Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
 
 \quartocalloutnte{nte-eval-default} 
 
@@ -1263,7 +1264,7 @@ training is shown in Note~\ref{nte-gen-params-final-run-train}. The
 corresponding evaluation grid used for these experiments is shown in
 Note~\ref{nte-gen-params-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, titlerule=0mm, breakable, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, opacitybacktitle=0.6, toprule=.15mm, toptitle=1mm, rightrule=.15mm, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, opacityback=0, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
 
 \quartocalloutnte{nte-gen-params-final-run-train} 
 
@@ -1297,7 +1298,7 @@ Note~\ref{nte-gen-params-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, titlerule=0mm, breakable, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, opacitybacktitle=0.6, toprule=.15mm, toptitle=1mm, rightrule=.15mm, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, opacityback=0, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
 
 \quartocalloutnte{nte-gen-params-final-run-eval} 
 
@@ -1515,7 +1516,7 @@ is shown in Note~\ref{nte-pen-final-run-train}. The corresponding
 evaluation grid used for these experiments is shown in
 Note~\ref{nte-pen-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, titlerule=0mm, breakable, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, opacitybacktitle=0.6, toprule=.15mm, toptitle=1mm, rightrule=.15mm, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, opacityback=0, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
 
 \quartocalloutnte{nte-pen-final-run-train} 
 
@@ -1543,7 +1544,7 @@ Note~\ref{nte-pen-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, titlerule=0mm, breakable, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, opacitybacktitle=0.6, toprule=.15mm, toptitle=1mm, rightrule=.15mm, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, opacityback=0, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
 
 \quartocalloutnte{nte-pen-final-run-eval} 
 
@@ -1760,7 +1761,7 @@ in Note~\ref{nte-train-final-run-train}. The corresponding evaluation
 grid used for these experiments is shown in
 Note~\ref{nte-train-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, titlerule=0mm, breakable, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, opacitybacktitle=0.6, toprule=.15mm, toptitle=1mm, rightrule=.15mm, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm, title={Note \ref*{nte-train-final-run-train}: Training Phase}, opacityback=0, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-train-final-run-train}: Training Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
 
 \quartocalloutnte{nte-train-final-run-train} 
 
@@ -1788,7 +1789,7 @@ Note~\ref{nte-train-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, titlerule=0mm, breakable, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, opacitybacktitle=0.6, toprule=.15mm, toptitle=1mm, rightrule=.15mm, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, opacityback=0, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
 
 \quartocalloutnte{nte-train-final-run-eval} 
 
@@ -2051,7 +2052,7 @@ The hyperparameter grid for tuning key parameters is shown in
 Note~\ref{nte-tune-train}. The corresponding evaluation grid used for
 these experiments is shown in Note~\ref{nte-tune-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, titlerule=0mm, breakable, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, opacitybacktitle=0.6, toprule=.15mm, toptitle=1mm, rightrule=.15mm, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm, title={Note \ref*{nte-tune-train}: Training Phase}, opacityback=0, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-tune-train}: Training Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
 
 \quartocalloutnte{nte-tune-train} 
 
@@ -2081,7 +2082,7 @@ these experiments is shown in Note~\ref{nte-tune-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, titlerule=0mm, breakable, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, opacitybacktitle=0.6, toprule=.15mm, toptitle=1mm, rightrule=.15mm, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm, title={Note \ref*{nte-tune-eval}: Evaluation Phase}, opacityback=0, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-tune-eval}: Evaluation Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
 
 \quartocalloutnte{nte-tune-eval} 
 
@@ -2388,7 +2389,7 @@ The hyperparameter grid for tuning the learning rate is shown in
 Note~\ref{nte-tune_lr-train}. The corresponding evaluation grid used for
 these experiments is shown in Note~\ref{nte-tune_lr-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, titlerule=0mm, breakable, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, opacitybacktitle=0.6, toprule=.15mm, toptitle=1mm, rightrule=.15mm, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm, title={Note \ref*{nte-tune_lr-train}: Training Phase}, opacityback=0, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-tune_lr-train}: Training Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
 
 \quartocalloutnte{nte-tune_lr-train} 
 
@@ -2418,7 +2419,7 @@ these experiments is shown in Note~\ref{nte-tune_lr-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, coltitle=black, titlerule=0mm, breakable, colbacktitle=quarto-callout-note-color!10!white, arc=.35mm, opacitybacktitle=0.6, toprule=.15mm, toptitle=1mm, rightrule=.15mm, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, left=2mm, bottomrule=.15mm, leftrule=.75mm, title={Note \ref*{nte-tune_lr-eval}: Evaluation Phase}, opacityback=0, colback=white]
+\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-tune_lr-eval}: Evaluation Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
 
 \quartocalloutnte{nte-tune_lr-eval} 
 
@@ -2897,6 +2898,13 @@ Joshi, Shalmali, Oluwasanmi Koyejo, Warut Vijitbenjaronk, Been Kim, and
 Joydeep Ghosh. 2019. {``{Towards Realistic Individual Recourse and
 Actionable Explanations in Black-Box Decision Making Systems}.''}
 \url{https://arxiv.org/abs/1907.09615}.
+
+\bibitem[\citeproctext]{ref-schut2021generating}
+Schut, Lisa, Oscar Key, Rory McGrath, Luca Costabello, Bogdan Sacaleanu,
+Yarin Gal, et al. 2021. {``Generating {Interpretable Counterfactual
+Explanations By Implicit Minimisation} of {Epistemic} and {Aleatoric
+Uncertainties}.''} In \emph{International {Conference} on {Artificial
+Intelligence} and {Statistics}}, 1756--64. {PMLR}.
 
 \bibitem[\citeproctext]{ref-sturmfels2020visualizing}
 Sturmfels, Pascal, Scott Lundberg, and Su-In Lee. 2020. {``Visualizing

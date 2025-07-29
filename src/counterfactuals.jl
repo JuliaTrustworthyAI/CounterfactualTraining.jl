@@ -74,7 +74,7 @@ function generate!(
         ces
     )   # randomly draw a sample from the target class
     validities = (ce -> ce.search[:converged]).(ces)
-    # Extract counterfactual if converged, else use neighbour:
+    # Extract counterfactual if converged, else use neighbour (no penalty):
     counterfactuals = [
         validities[i] ? eltype(xs[1]).(ce.counterfactual) : neighbours[i] for
         (i, ce) in enumerate(ces)

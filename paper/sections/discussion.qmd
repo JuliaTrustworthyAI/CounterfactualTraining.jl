@@ -6,7 +6,7 @@ As our results indicate, counterfactual training produces models that are more e
 
 *Plausibility is costly.* As noted by @altmeyer2024faithful, more plausible counterfactuals are inevitably more costly. CT improves plausibility and robustness, but it can impact average costs and validity when cheap, implausible and adversarial explanations are removed from the solution space.
 
-*CT increases the training times.* Just like contrastive and robust learning, CT is more resource-intensive than conventional regimes. Three factors mitigate this effect: (1) CT yields itself to parallel execution; (2) it amortizes the cost of CEs for the training samples; and (3) it can be used to fine-tune conventionally-trained models.  
+*CT increases training times.* Just like contrastive and robust learning, CT is more resource-intensive than conventional regimes. Three factors mitigate this effect: (1) CT yields itself to parallel execution; (2) it amortizes the cost of CEs for the training samples; and (3) it can be used to fine-tune conventionally-trained models.  
 
 We also highlight three key directions for future research. Firstly, it is an interesting challenge to extend CT beyond classification settings. Our formulation relies on the distinction between non-target class(es) and target class(es), requiring the output space to be discrete. Thus, it does not apply to ML tasks where the change in outcome cannot be readily discretized. Focus on classification is a common choice in research on CEs and AR; other settings have attracted some interest, e.g., regression [@spooner2021counterfactual], but there is little consensus how to robustly extend the notion of CEs.
 
