@@ -11,8 +11,8 @@ Below we provide an overview of some notation used frequently throughout the pap
 - $\mathbf{x}$: a single training sample.
 - $\mathbf{x}^\prime$: a counterfactual.
 - $t=1,...,T$: Step indicator for counterfactual search iterations.
-- $\mathbf{x}^\prime_{t \leq T}$: a nascent counterfactual, defined as a counterfactual that has not yet converged.
-- $\mathbf{x}^\prime_{T}$: a mature counterfactual, defined as a counterfactual that has either passed a threshold probability or exhausted all $T$ steps.
+- $\mathbf{x}_{\text{AE}}^\prime$: a nascent counterfactual, defined as a counterfactual that has not yet converged.
+- $\mathbf{x}_{\text{CE}}^\prime$: a mature counterfactual, defined as a counterfactual that has either passed a threshold probability or exhausted all $T$ steps.
 - $\mathbf{x}^+$: a training sample in the target class (ground-truth).
 - $\mathbf{y}^+$: The one-hot encoded output vector for the target class.
 - $\theta$: Model parameters (unspecified).

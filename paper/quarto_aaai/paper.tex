@@ -298,7 +298,7 @@ plausible counterfactuals. In panel (c), the classifier is again trained
 conventionally and we have introduced a mutability constraint on the
 \emph{age} feature at test time---counterfactuals are valid but the
 classifier is roughly equally sensitive to both features. By contrast,
-the decision boundary in panel (d) has titled, making the model trained
+the decision boundary in panel (d) has tilted, making the model trained
 with CT relatively less sensitive to the immutable \emph{age} feature.
 To achieve these outcomes, CT draws inspiration from the literature on
 contrastive and robust learning: we contrast faithful CEs with
@@ -415,9 +415,9 @@ inputs using a cosine distance loss function.
 
 CEs have also been used to improve models in the natural language
 processing domain. For example, \citet{wu2021polyjuice} propose
-\emph{Polyjuice}, a general-purpose CE generator for language models and
-demonstrate that the augmentation of training data with \emph{Polyjuice}
-improves robustness in a number of tasks, while
+\emph{Polyjuice}, a general-purpose CE generator for language models,
+and demonstrate that the augmentation of training data with
+\emph{Polyjuice} improves robustness in a number of tasks.
 \citet{luu2023counterfactual} introduce the \emph{Counterfactual
 Adversarial Training} (CAT) framework that aims to improve
 generalization and robustness of language models by generating
@@ -511,7 +511,7 @@ The characterization of faithfulness and plausibility in Def.
 \ref{def-explainability} follows \citet{altmeyer2024faithful}, with
 adapted notation. Intuitively, plausible counterfactuals are consistent
 with the data and faithful counterfactuals are consistent with what the
-model has learned about the input data. Ac tionability constraints in
+model has learned about the input data. Actionability constraints in
 Def. \ref{def-explainability} vary and depend on the context in which
 \(\mathbf{M}_\theta\) is deployed. In this work, we choose to only
 consider domain and mutability constraints for individual features
@@ -524,13 +524,13 @@ proposed by \citet{wachter2017counterfactual}. CT adopts gradient-based
 CE search in training to generate on-the-fly model explanations
 \(\mathbf{x}^\prime\) for the training samples. We use the term
 \emph{nascent} to denote interim counterfactuals
-\(\mathbf{x}_{t\leq T}^\prime\) that have not yet converged. As we
+\(\mathbf{x}_{\text{AE}}^\prime\) that have not yet converged. As we
 explain below, these nascent counterfactuals can be stored and
 repurposed as adversarial examples. Conversely, we consider
-counterfactuals \(\mathbf{x}_T^\prime\) as \emph{mature} explanations if
-they have either exhausted all \(T\) iterations or converged by reaching
-a pre-specified threshold, \(\tau\), for the predicted probability of
-the target class:
+counterfactuals \(\mathbf{x}_{\text{CE}}^\prime\) as \emph{mature}
+explanations if they have converged within the \(T\) iterations by
+reaching a pre-specified threshold, \(\tau\), for the predicted
+probability of the target class:
 \(\mathcal{S}(\mathbf{M}_\theta(\mathbf{x}^\prime))[y^+] \geq \tau\),
 where \(\mathcal{S}\) is the softmax function.
 
@@ -538,18 +538,18 @@ Formally, we propose the following counterfactual training objective to
 train explainable (as in Def. \ref{def-explainability}) models,
 \begin{equation}\phantomsection\label{eq-obj}{
 \begin{aligned}
-&\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta) \\+ &\lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y}) + \lambda_{\text{reg}}\text{ridge}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta)
+&\min_\theta \text{yloss}(\mathbf{M}_\theta(\mathbf{x}),\mathbf{y}) + \lambda_{\text{div}} \text{div}(\mathbf{x}^+,\mathbf{x}_{\text{CE}}^\prime,y;\theta) \\+ &\lambda_{\text{adv}} \text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{\text{AE}}^\prime),\mathbf{y}) + \lambda_{\text{reg}}\text{ridge}(\mathbf{x}^+,\mathbf{x}_{\text{CE}}^\prime,y;\theta)
 \end{aligned}
 }\end{equation} where \(\text{yloss}(\cdot)\) is any classification loss
 that induces discriminative performance (e.g., cross-entropy). The
 second and third terms are explained in detail below. For now, they can
 be summarized as inducing explainability directly and indirectly by
 penalizing (1) the contrastive divergence, \(\text{div}(\cdot)\),
-between mature counterfactuals \(\mathbf{x}_T^\prime\) and observed
-samples \(\mathbf{x}^+\in\mathcal{X}^+=\{\mathbf{x}:y=y^+\}\) in the
-target class \(y^+\), and (2) the adversarial loss,
+between mature counterfactuals \(\mathbf{x}_{\text{CE}}^\prime\) and
+observed samples \(\mathbf{x}^+\in\mathcal{X}^+=\{\mathbf{x}:y=y^+\}\)
+in the target class \(y^+\), and (2) the adversarial loss,
 \(\text{advloss}(.)\), wrt. nascent counterfactuals
-\(\mathbf{x}_{t\leq T}^\prime\). Finally, \(\text{ridge}(\cdot)\)
+\(\mathbf{x}_{\text{AE}}^\prime\). Finally, \(\text{ridge}(\cdot)\)
 denotes a Ridge penalty (\(\ell_2\)-norm) that regularizes the magnitude
 of the energy terms involved in \(\text{div}(\cdot)\)
 \citep{du2019implicit}. The trade-offs between these components are
@@ -596,20 +596,20 @@ but we depart from their methodology: we propose to leverage
 counterfactual explainers to generate counterfactuals of observed
 training samples. Specifically, we have:
 \begin{equation}\phantomsection\label{eq-div}{
-\text{div}(\mathbf{x}^+,\mathbf{x}_T^\prime,y;\theta) = \mathcal{E}_\theta(\mathbf{x}^+,y) - \mathcal{E}_\theta(\mathbf{x}_T^\prime,y)
+\text{div}(\mathbf{x}^+,\mathbf{x}_{\text{CE}}^\prime,y;\theta) = \mathcal{E}_\theta(\mathbf{x}^+,y) - \mathcal{E}_\theta(\mathbf{x}_{\text{CE}}^\prime,y)
 }\end{equation} where \(\mathcal{E}_\theta(\cdot)\) denotes the energy
 function defined as
 \(\mathcal{E}_\theta(\mathbf{x},y)=-\mathbf{M}_\theta(\mathbf{x})[y^+]\),
 with \(y^+\) denoting the index of the randomly drawn target class,
 \(y^+ \sim p(y)\). Conditional on the target class \(y^+\),
-\(\mathbf{x}_T^\prime\) denotes a mature counterfactual for a randomly
-sampled factual from a non-target class generated with a gradient-based
-CE generator for up to \(T\) iterations. Intuitively, the gradient of
-Equation~\ref{eq-div} decreases the energy of observed training samples
-(positive samples) while increasing the energy of counterfactuals
-(negative samples) \citep{du2019implicit}. As the counterfactuals get
-more plausible (Def. \ref{def-explainability}) during training, these
-opposing effects gradually balance each other out
+\(\mathbf{x}_{\text{CE}}^\prime\) denotes a mature counterfactual for a
+randomly sampled factual from a non-target class generated with a
+gradient-based CE generator for up to \(T\) iterations. Intuitively, the
+gradient of Equation~\ref{eq-div} decreases the energy of observed
+training samples (positive samples) while increasing the energy of
+counterfactuals (negative samples) \citep{du2019implicit}. As the
+counterfactuals get more plausible (Def. \ref{def-explainability})
+during training, these opposing effects gradually balance each other out
 \citep{lippe2024uvadlc}.
 
 Since maturity of counterfactuals in terms of a probability threshold is
@@ -636,11 +636,11 @@ leaves some flexibility with regards to the choice for the
 functional form, but likely not the only sensible choice, is inspired by
 adversarial training: \begin{equation}\phantomsection\label{eq-adv}{
 \begin{aligned}
-\text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{t\leq T}^\prime),\mathbf{y};\varepsilon)&=\text{yloss}(\mathbf{M}_\theta(\mathbf{x}_{t_\varepsilon}^\prime),\mathbf{y}) \\
+\text{advloss}(\mathbf{M}_\theta(\mathbf{x}_{\text{AE}}^\prime),\mathbf{y};\varepsilon)&=\text{yloss}(\mathbf{M}_\theta(\mathbf{x}_{t_\varepsilon}^\prime),\mathbf{y}) \\
 t_\varepsilon &= \max_t \{t: ||\Delta_t||_\infty < \varepsilon\}
 \end{aligned}
 }\end{equation} Under this choice, we consider nascent counterfactuals
-\(\mathbf{x}_{t\leq T}^\prime\) as AEs as long as the magnitude of the
+\(\mathbf{x}_{\text{AE}}^\prime\) as AEs as long as the magnitude of the
 perturbation to any single feature is at most \(\varepsilon\). This is
 closely aligned with \citet{szegedy2013intriguing} who define an
 adversarial attack as an ``imperceptible non-random perturbation''.
@@ -761,15 +761,15 @@ counterfactuals using a surrogate Variational Autoencoder (VAE), and
 
 We make use of nine classification datasets common in the CE/AR
 literature. Four of them are synthetic with two classes and different
-characteristics: linearly separable clusters (\emph{LS}), overlapping
-clusters (\emph{OL}), concentric circles (\emph{Circ}), and interlocking
-moons (\emph{Moon}). Next, we have four real-world binary tabular
-datasets: \emph{Adult} (Census data) of \citet{becker1996adult2},
-California housing (\emph{CH}) of \citet{pace1997sparse}, Default of
-Credit Card Clients (\emph{Cred}) of \citet{yeh2016default}, and Give Me
-Some Credit (\emph{GMSC}) from \citet{kaggle2011give}. Finally, for the
-convenience of illustration, we use the 10-class \emph{MNIST}
-\citep{lecun1998mnist}.
+characteristics: linearly separable Gaussian clusters (\emph{LS}),
+overlapping clusters (\emph{OL}), concentric circles (\emph{Circ}), and
+interlocking moons (\emph{Moon}). Next, we have four real-world binary
+tabular datasets: \emph{Adult} (Census data) of
+\citet{becker1996adult2}, California housing (\emph{CH}) of
+\citet{pace1997sparse}, Default of Credit Card Clients (\emph{Cred}) of
+\citet{yeh2016default}, and Give Me Some Credit (\emph{GMSC}) from
+\citet{kaggle2011give}. Finally, for the convenience of illustration, we
+use the 10-class \emph{MNIST} \citep{lecun1998mnist}.
 
 To assess CT, we investigate the improvements in performance metrics
 when using it on top of a weak baseline (BL): a multilayer perceptron
@@ -942,7 +942,7 @@ gradient-based adversarial attacks than conventionally-trained
 baselines.}
 
 Test accuracies on adversarially perturbed data are shown in
-Figure~\ref{fig-acc}. The perturbations size, \(\varepsilon\in[0,0.1]\),
+Figure~\ref{fig-acc}. The perturbation size, \(\varepsilon\in[0,0.1]\),
 increases along the horizontal axis and includes zero, corresponding to
 standard test accuracy for non-perturbed data. For all synthetic
 datasets, predictive performance of CT is virtually identical to the
@@ -960,7 +960,7 @@ usually identify settings that improve either plausibility or
 actionability, and typically both of them at the same time.}
 
 We evaluate the impacts of three types of hyperparameters on CT. In this
-section we focus on the highlights and make the full results available
+section, we focus on the highlights and make the full results available
 in the supplementary appendix.
 
 Firstly, we find that optimal results are generally obtained when using
@@ -980,7 +980,7 @@ results as it is associated with high proportions of mature
 counterfactuals.
 
 Secondly, the strength of the energy regularization,
-\(\lambda_{\text{reg}}\) is highly impactful and should be set
+\(\lambda_{\text{reg}}\), is highly impactful and should be set
 sufficiently high to avoid common problems associated with exploding
 gradients. The sensitivity with respect to \(\lambda_{\text{div}}\) and
 \(\lambda_{\text{adv}}\) is much less evident. While high values of
@@ -1018,7 +1018,7 @@ plausibility and robustness, but it can impact average costs and
 validity when cheap, implausible and adversarial explanations are
 removed from the solution space.
 
-\emph{CT increases the training times.} Just like contrastive and robust
+\emph{CT increases training times.} Just like contrastive and robust
 learning, CT is more resource-intensive than conventional regimes. Three
 factors mitigate this effect: (1) CT yields itself to parallel
 execution; (2) it amortizes the cost of CEs for the training samples;
@@ -1050,18 +1050,18 @@ more sophisticated approaches.
 State-of-the-art machine learning models are prone to learning complex
 representations that cannot be interpreted by humans. Existing work on
 counterfactual explanations has largely focused on designing tools to
-generate plausible and actionable for any model. In this work, we
-instead hold models accountable for delivering such explanations. We
-introduce counterfactual training: a novel training regime that
-integrates recent advances in contrastive learning, adversarial
-robustness, and CE to incentivize highly-explainable models. Through
-theoretical results and extensive experiments, we demonstrate that CT
-satisfies this goal while promoting adversarial robustness of models.
-Explanations generated from CT-based models are both more plausible
-(compliant with the underlying data-generating process) and more
-actionable (compliant with user-specified mutability constraints), and
-thus meaningful to their recipients. In turn, our work highlights the
-value of simultaneously improving models and their explanations.
+generate plausible and actionable explanations for any model. In this
+work, we instead hold models accountable for delivering such
+explanations. We introduce counterfactual training: a novel training
+regime that integrates recent advances in contrastive learning,
+adversarial robustness, and CE to incentivize highly explainable models.
+Through theoretical results and extensive experiments, we demonstrate
+that CT satisfies this goal while promoting adversarial robustness of
+models. Explanations generated from CT-based models are both more
+plausible (compliant with the underlying data-generating process) and
+more actionable (compliant with user-specified mutability constraints),
+and thus meaningful to their recipients. In turn, our work highlights
+the value of simultaneously improving models and their explanations.
 
 \bibliography{../quarto_aaai/bibliography.bib}
 \end{document}
