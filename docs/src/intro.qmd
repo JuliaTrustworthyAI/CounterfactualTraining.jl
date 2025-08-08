@@ -1,0 +1,28 @@
+---
+title: "A julia engine notebook"
+engine: julia
+execute: 
+  eval: true
+  echo: false
+format: 
+    pdf: default
+    html: default
+---
+
+## My Notebook
+
+My text about this @fig-mylpot.
+
+```{julia}
+#| fig-cap: "My plot"
+#| label: fig-myplot
+
+using Statistics
+using Plots
+using DataFrames
+
+global x = []
+
+x = randn(2,100)
+scatter(x[1,:],x[2,:])
+```
