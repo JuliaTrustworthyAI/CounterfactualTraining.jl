@@ -1,25 +1,24 @@
-name = "mnist_large"
+name = "ablation"
 dim_reduction = []
-generator_type = ["ecco", "generic", "revise"]
-data = ""
-model_type = ""
-save_dir = ""
+generator_type = ["ecco"]
+data = "cali"
+model_type = "mlp"
+save_dir = "paper/experiments/output/final_run/ablation/mlp/cali"
 
 [data_params]
 datadir = []
 mutability = []
 domain = []
-n_validation = [3000]
+n_validation = []
 train_test_ratio = []
 train_test_seed = []
-n_train = [57000]
-batchsize = [1000]
+n_train = []
+batchsize = []
 
 [model_params]
-channels1 = []
-channels2 = []
+nlayers = []
 activation = []
-filter_size = []
+nhidden = []
 
 [generator_params]
 opt = []
@@ -27,23 +26,24 @@ lambda_cost = []
 lr = []
 maxiter = []
 lambda_energy = []
+decision_threshold = []
 type = []
 
 [training_params]
 opt = []
-nce = []
 lr = []
-threaded = []
-class_loss = []
-objective = ["full", "vanilla"]
+objective = ["full", "energy", "adversarial", "vanilla"]
 lambda_class_loss = []
 lambda_energy_diff = []
 burnin = []
-nepochs = [25]
-lambda_energy_reg = []
-verbose = []
+nepochs = []
 lambda_adversarial = []
 parallelizer = []
+nce = []
+threaded = []
+class_loss = []
+lambda_energy_reg = []
+verbose = []
 generator_params = []
 conv = []
 nneighbours = []
