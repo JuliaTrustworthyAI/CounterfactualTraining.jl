@@ -1,9 +1,9 @@
 name = "ablation"
 dim_reduction = []
 generator_type = ["ecco"]
-data = ""
-model_type = ""
-save_dir = ""
+data = "circles"
+model_type = "mlp"
+save_dir = "paper/experiments/output/final_run/ablation/mlp/circles"
 
 [data_params]
 datadir = []
@@ -24,26 +24,26 @@ nhidden = []
 opt = []
 lambda_cost = []
 lr = []
-decision_threshold = []
 maxiter = []
 lambda_energy = []
+decision_threshold = []
 type = []
 
 [training_params]
 opt = []
-nce = []
 lr = []
-threaded = []
-class_loss = []
 objective = ["full", "energy", "adversarial", "vanilla"]
 lambda_class_loss = []
 lambda_energy_diff = []
 burnin = []
 nepochs = []
-lambda_energy_reg = []
-verbose = []
 lambda_adversarial = []
 parallelizer = []
+nce = []
+threaded = []
+class_loss = []
+lambda_energy_reg = []
+verbose = []
 generator_params = []
 conv = []
 nneighbours = []
