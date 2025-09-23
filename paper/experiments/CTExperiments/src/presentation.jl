@@ -616,7 +616,6 @@ function aggregate_ce_evaluation(
     byvars::Union{Nothing,String,Vector{String}}=nothing,
     var_interest::String="objective",
     agg_further_vars::Union{Nothing,Vector{String}}=nothing,
-    rebase::Bool=false,
     lambda_eval::Union{Nothing,Vector{<:Real}}=nothing,
     ratio::Bool=true,
     total_uncertainty::Bool=false,
@@ -846,17 +845,17 @@ function aggregate_ce_evaluation(
     res_dir::String;
     y="mmd",
     byvars=nothing,
-    rebase=true,
     ratio=true,
+    verbose=false,
     drop_models::Vector{String}=String[],
     kwrgs...,
 )
     byvars = gather_byvars(byvars, "data")
-    eval_grids, _ = final_results(res_dir; drop_models)
+    eval_grids, _ = final_results(res_dir; drop_models, verbose)
     df = DataFrame()
     for (i, cfg) in enumerate(eval_grids)
         @info "Evaluating model+data $i/$(length(eval_grids)) ..."
-        df_i = aggregate_ce_evaluation(cfg; y, byvars, rebase, ratio, kwrgs...)
+        df_i = aggregate_ce_evaluation(cfg; y, byvars, ratio, kwrgs...)
         df = vcat(df, df_i)
     end
     rename!(df, :data => :dataset)
@@ -996,6 +995,8 @@ function final_table(
     conf_int::Vector{<:AbstractFloat}=[0.99],
     include_performance::Bool=false,
     add_aggregates::Bool=true,
+    verbose::Bool=false,
+    ratio::Bool=true
 )
     # CE:
     df_ce = DataFrame()
@@ -1004,11 +1005,11 @@ function final_table(
             res_dir;
             y,
             agg_further_vars=agg_further_vars[i],
-            rebase=false,
-            ratio=true,
+            ratio,
             total_uncertainty,
             drop_models,
             return_sig_level=true,
+            verbose
         )
         df_ce = vcat(df_ce, df; cols=:union)
     end
@@ -1022,6 +1023,8 @@ function final_table(
     else
         df_ce
     end
+
+    display(df)
 
     if include_performance
         # Performance:
@@ -1040,7 +1043,7 @@ function final_table(
         df.sig_level .= coalesce.(df.sig_level, "")
     end
 
-    if add_aggregates
+    if add_aggregates && ratio
         df_agg = combine(groupby(df, :variable), :mean => mean => :mean)
         df_agg.dataset .= "Avg."
         df_agg.se .= NaN

@@ -1,3 +1,5 @@
+@info "Generating table for ablation results ..."
+using Pkg; Pkg.status() 
 
 using CTExperiments
 using CTExperiments.CairoMakie
@@ -14,5 +16,31 @@ DotEnv.load!()
 
 res_dir = joinpath(ENV["FINAL_GRID_RESULTS"],"ablation")
 
-df = final_table(res_dir;)
+df = aggregate_ce_evaluation(
+    res_dir;
+    ratio=false,
+    verbose=true,
+    ce_var="plausibility_distance_from_target", 
+    agg_further_vars=["run", "lambda_energy_eval"], 
+    total_uncertainty=false,    
+    drop_models=String[],
+    return_sig_level=true,
+)
+
+
 Serialization.serialize("paper/experiments/output/final_table_ablation.jls", df)
+
+df = aggregate_ce_evaluation(
+    res_dir;
+    ratio=false,
+    verbose=true,
+    ce_var="mmd", 
+    agg_further_vars=["run", "lambda_energy_eval"], 
+    total_uncertainty=false,    
+    drop_models=String[],
+    return_sig_level=true,
+)
+
+Serialization.serialize("paper/experiments/output/final_table_ablation_mmd.jls", df)
+
+
