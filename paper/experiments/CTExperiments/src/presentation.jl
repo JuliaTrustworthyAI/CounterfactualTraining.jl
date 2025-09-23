@@ -594,7 +594,7 @@ function cidiff(df::DataFrame; var_interest::String="objective", alpha=0.95)
     x = Float64.(df[:, Symbol(vars[1])])
     y = Float64.(df[:, Symbol(vars[2])])
     delta = abs.(x) .- abs.(y)      # use absolute values because IP/IP* are always negative (as per CE.jl convention)
-    return (quantile(delta, (1-alpha)/2), quantile(delta, 1-(1-alpha)/2))
+    return (quantile(delta, (1 - alpha) / 2), quantile(delta, 1 - (1 - alpha) / 2))
 end
 
 """
@@ -739,8 +739,8 @@ function aggregate_ce_evaluation(
                         :ratio =>
                             (
                                 y -> (
-                                    mean=-(mean(skipmissing(y))-1)*100,
-                                    se=100*std(skipmissing(y)),
+                                    mean=-(mean(skipmissing(y)) - 1) * 100,
+                                    se=100 * std(skipmissing(y)),
                                 )
                             ) => AsTable,
                     )
@@ -973,9 +973,8 @@ function final_results(
     data_dirs = filter(
         x -> isfile(joinpath(x, "evaluation/evaluation_grid_config.toml")), data_dirs
     )
-    eval_grids = EvaluationGrid.(
-        joinpath.(data_dirs, "evaluation/evaluation_grid_config.toml")
-    )
+    eval_grids =
+        EvaluationGrid.(joinpath.(data_dirs, "evaluation/evaluation_grid_config.toml"))
     data_dirs = filter(x -> isfile(joinpath(x, "grid_config.toml")), data_dirs)
     exper_grids = ExperimentGrid.(joinpath.(data_dirs, "grid_config.toml"))
 
@@ -996,7 +995,7 @@ function final_table(
     include_performance::Bool=false,
     add_aggregates::Bool=true,
     verbose::Bool=false,
-    ratio::Bool=true
+    ratio::Bool=true,
 )
     # CE:
     df_ce = DataFrame()
@@ -1009,7 +1008,7 @@ function final_table(
             total_uncertainty,
             drop_models,
             return_sig_level=true,
-            verbose
+            verbose,
         )
         df_ce = vcat(df_ce, df; cols=:union)
     end

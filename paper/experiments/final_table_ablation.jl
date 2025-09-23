@@ -1,5 +1,6 @@
 @info "Generating table for ablation results ..."
-using Pkg; Pkg.status() 
+using Pkg;
+Pkg.status();
 
 using CTExperiments
 using CTExperiments.CairoMakie
@@ -14,7 +15,7 @@ using Serialization
 using DotEnv
 DotEnv.load!()
 
-res_dir = joinpath(ENV["FINAL_GRID_RESULTS"],"ablation")
+res_dir = joinpath(ENV["FINAL_GRID_RESULTS"], "ablation")
 
 # df = aggregate_ce_evaluation(
 #     res_dir;
@@ -49,8 +50,7 @@ df = aggregate_performance(
     bootstrap=100,
     measure=["acc"],
     drop_models=String[],
-    eps=range(0.0, 0.1, length=10) |> collect,
+    eps=range(0.0, 0.1; length=10) |> collect,
 )
 
 Serialization.serialize("paper/experiments/output/final_table_ablation_ar.jls", df)
-
