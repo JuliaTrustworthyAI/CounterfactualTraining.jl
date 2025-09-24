@@ -46,7 +46,7 @@ end
         x,
         y;
         loss = logitcrossentropy,
-        ε = 0.3,
+        eps = 0.3,
         α = 0.01,
         num_steps = 40,
         random_start = true,
@@ -63,7 +63,7 @@ back to the ε-ball around the original input.
 - `x`: Input data to perturb
 - `y`: True labels
 - `loss`: Loss function (default: logitcrossentropy)
-- `ε`: Maximum perturbation magnitude (L∞ norm)
+- `eps`: Maximum perturbation magnitude (L∞ norm)
 - `α`: Step size for each iteration
 - `num_steps`: Number of PGD iterations
 - `random_start`: Whether to start from a random point in the ε-ball
@@ -74,22 +74,23 @@ function pgd(
     x,
     y;
     loss=logitcrossentropy,
-    ε=0.3,
+    eps=0.3,
     α=0.01,
     num_steps=40,
     random_start=true,
     clamp_range::Union{Nothing,Tuple}=nothing,
 )
+
     x_orig = copy(x)
     x_adv = copy(x)
 
     # Random start: begin from random point in ε-ball
 
     if random_start
-        noise = (2 * rand(eltype(x), size(x)...) .- 1) .* ε
+        noise = (2 * rand(eltype(x), size(x)...) .- 1) .* eps
         x_adv .+= noise
         # Project back to ε-ball
-        x_adv = x_orig .+ clamp.(x_adv .- x_orig, -ε, ε)
+        x_adv = x_orig .+ clamp.(x_adv .- x_orig, -eps, eps)
     end
 
     for i in 1:num_steps
@@ -101,7 +102,7 @@ function pgd(
         x_adv .+= perturbation
 
         # Project back to ε-ball around original input
-        x_adv = x_orig .+ clamp.(x_adv .- x_orig, -ε, ε)
+        x_adv = x_orig .+ clamp.(x_adv .- x_orig, -eps, eps)
 
         # Clamp to valid input range if specified
         if !isnothing(clamp_range)

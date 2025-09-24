@@ -13,11 +13,12 @@ plt = CTExperiments.plot_performance(
     adversarial=true,
     byvars=["objective", "eps"],
     drop_synthetic=true,
+    attack_fun=[CTExperiments.pgd, CTExperiments.fgsm],
 )
 plt_out = draw(
     plt,
     scales(; Color=(; palette=:tab10));
-    figure=(size=(900, 200),),
+    figure=(size=(900, 350),),
     axis=(
         yticks=[0.0, 0.5, 1.0],
         limits=(nothing, (0, 1)),
@@ -25,4 +26,4 @@ plt_out = draw(
         xticksvisible=false,
     ),
 )
-save("paper/figures/acc_full.png", plt_out; px_per_unit=3)
+save("paper/figures/acc_full_both.png", plt_out; px_per_unit=3)

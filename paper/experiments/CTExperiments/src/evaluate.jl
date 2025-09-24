@@ -159,6 +159,7 @@ function test_performance(
     attack_fun::Function=fgsm,
     bootstrap::Union{Nothing,Int}=nothing,
 )
+    @info "Testing with $attack_fun"
     model, _, M = load_results(exper)
 
     # Get test data:

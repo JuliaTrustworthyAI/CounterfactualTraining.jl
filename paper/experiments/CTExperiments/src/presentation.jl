@@ -440,6 +440,7 @@ function aggregate_performance(
     adversarial::Bool=false,
     eps::Vector{<:AbstractFloat}=[0.03],
     bootstrap::Union{Nothing,Int}=nothing,
+    attack_fun::Function=fgsm,
     kwrgs...,
 )
 
@@ -452,7 +453,7 @@ function aggregate_performance(
         df, df_meta, df_perf = merge_with_meta(
             cfg,
             CTExperiments.test_performance(
-                exper_grid; measure, adversarial, bootstrap, return_df=true, eps=e
+                exper_grid; measure, adversarial, bootstrap, attack_fun, return_df=true, eps=e
             ),
         )
         df.eps .= e
@@ -880,6 +881,7 @@ function aggregate_performance(
     drop_models::Vector{String}=String[],
     eps::Vector{<:AbstractFloat}=[0.03],
     byvars=["objective"],
+    attack_fun::Function=fgsm,
 )
 
     # Get measures:
@@ -888,7 +890,7 @@ function aggregate_performance(
     end
 
     eval_grids, _ = final_results(res_dir; drop_models)
-    df = aggregate_performance(eval_grids; measure, adversarial, bootstrap, eps, byvars)
+    df = aggregate_performance(eval_grids; measure, adversarial, bootstrap, eps, byvars, attack_fun)
     df.objective .= replace.(df.objective, "Full" => "CT")
     df.objective .= replace.(df.objective, "Vanilla" => "BL")
     df.variable .= replace.(df.variable, "Accuracy" => adversarial ? "Acc.\$^*\$" : "Acc.")
@@ -915,6 +917,7 @@ function plot_performance(
     measure::Vector=["acc"],
     adversarial::Bool=false,
     bootstrap::Union{Nothing,Int}=nothing,
+    attack_fun::Vector{<:Function}=[fgsm],
     drop_models::Vector{String}=String[],
     eps::Vector{<:AbstractFloat}=[0.03],
     byvars=["objective"],
@@ -927,7 +930,18 @@ function plot_performance(
     end
 
     eval_grids, _ = final_results(res_dir; drop_models)
-    df = aggregate_performance(eval_grids; measure, adversarial, bootstrap, eps, byvars)
+    dfs = DataFrames.DataFrame[]
+    for fun in attack_fun
+        df = aggregate_performance(eval_grids; measure, adversarial, bootstrap, attack_fun=fun, eps, byvars)
+        if fun == CTExperiments.pgd
+            df.attack_fun .= "PGD"
+        end
+        if fun == CTExperiments.fgsm
+            df.attack_fun .= "FGSM"
+        end
+        push!(dfs, df)
+    end
+    df = reduce(vcat, dfs)
     df = DataFrames.transform(
         df,
         :objective =>
@@ -947,16 +961,30 @@ function plot_performance(
         filter!(df -> !(df.dataset in ["LS", "OL", "Circ", "Moon"]), df)
     end
 
-    plt =
-        data(df) *
-        mapping(
-            :eps => L"\text{Perturbation Size: }\varepsilon \in [0,0.1]",
-            :mean => L"\text{Accuracy}";
-            color=:objective => "Model",
-            marker=:objective => "Model",
-            col=:dataset,
-        ) *
-        visual(ScatterLines)
+    if length(attack_fun) == 1
+        plt =
+            data(df) *
+            mapping(
+                :eps => L"\text{Perturbation Size: }\varepsilon \in [0,0.1]",
+                :mean => L"\text{Accuracy}";
+                color=:objective => "Model",
+                marker=:objective => "Model",
+                col=:dataset,
+            ) *
+            visual(ScatterLines)
+    else
+        plt =
+            data(df) *
+            mapping(
+                :eps => L"\text{Perturbation Size: }\varepsilon \in [0,0.1]",
+                :mean => L"\text{Accuracy}";
+                color=:objective => "Model",
+                marker=:objective => "Model",
+                col=:dataset,
+                row=:attack_fun,
+            ) *
+            visual(ScatterLines)
+    end
     return plt
 end
 
