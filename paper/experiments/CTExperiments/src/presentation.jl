@@ -928,9 +928,22 @@ function plot_performance(
 
     eval_grids, _ = final_results(res_dir; drop_models)
     df = aggregate_performance(eval_grids; measure, adversarial, bootstrap, eps, byvars)
-    df.objective .= ifelse.(df.objective .== "Full", "CT", "BL")
+    df = DataFrames.transform(
+        df,
+        :objective =>
+            (
+                x -> replace(
+                    x,
+                    "Vanilla" => "BL",
+                    "Adversarial" => "AR",
+                    "Energy" => "CD",
+                    "Full" => "CT",
+                )
+            ) => :objective,
+    )
     df.dataset .= categorical(df.dataset; levels=ds_order)
     if drop_synthetic
+        @info "Dropping synthetic datasets"
         filter!(df -> !(df.dataset in ["LS", "OL", "Circ", "Moon"]), df)
     end
 

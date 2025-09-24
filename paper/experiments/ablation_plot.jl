@@ -15,15 +15,21 @@ result =
             end) => :pct_change,
     ) |> x -> filter(row -> row.objective != "Vanilla", x)
 result = transform(result, :variable => (x -> [L"%$s" for s in x]) => :variable)
+result = transform(
+    result,
+    :objective =>
+        (x -> replace(x, "Adversarial" => "AR", "Energy" => "CD", "Full" => "CT")) =>
+            :objective,
+)
 plt =
     data(result) *
     mapping(
         :objective, :pct_change; color=:dataset => "Data", dodge=:dataset, row=:variable
     ) *
-    visual(BarPlot) |> draw(;
+    visual(BarPlot) |> draw(
+        scales(; Color=(; palette=:tab10));
         figure=(; size=(900, 300)),
         axis=(; xlabel="Objective", ylabel="Percentage Reduction (%)"),
-        facet=(;),
     )
 
 save("paper/experiments/output/ablation.png", plt; px_per_unit=3)
