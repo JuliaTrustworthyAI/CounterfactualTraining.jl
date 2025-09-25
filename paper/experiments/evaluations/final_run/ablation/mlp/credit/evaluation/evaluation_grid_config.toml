@@ -1,0 +1,28 @@
+inherit = false
+grid_file = "paper/experiments/output/final_run/ablation/mlp/credit/grid_config.toml"
+test_time = true
+save_dir = "paper/experiments/output/final_run/ablation/mlp/credit/evaluation"
+
+[generator_params]
+opt = ["sgd"]
+lambda_cost = [0.0]
+lr = [0.25]
+maxiter = [30]
+lambda_energy = [0.1, 0.5, 1.0, 5.0, 10.0]
+decision_threshold = [0.75]
+type = []
+
+[counterfactual_params]
+maxiter = [50]
+n_individuals = [100]
+n_runs = [100]
+vertical_splits = [100]
+parallelizer = ["mpi"]
+ndiv = [100]
+concatenate_output = [true]
+threaded = [false]
+store_ce = [false]
+decision_threshold = [0.95]
+verbose = [true]
+generator_params = []
+conv = ["threshold"]

@@ -35,7 +35,7 @@ needs_counterfactuals(obj::VanillaObjective) = obj.needs_ce
 Outer constructor to allow passing just `class_loss` and `lambda` as positional arguments.
 """
 function VanillaObjective(class_loss, lambda; needs_ce=false)
-    VanillaObjective(class_loss, lambda, needs_ce)
+    return VanillaObjective(class_loss, lambda, needs_ce)
 end
 
 """
@@ -292,5 +292,7 @@ function (obj::FullObjective)(
     # Adversarial loss:
     adversarial_loss = agg(Float32.(adversarial_loss))
 
-    return [class_loss, implausibility_loss, regularization_loss, adversarial_loss]'obj.lambda
+    return [
+        class_loss, implausibility_loss, regularization_loss, adversarial_loss
+    ]'obj.lambda
 end

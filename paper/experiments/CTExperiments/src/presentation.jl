@@ -440,6 +440,7 @@ function aggregate_performance(
     adversarial::Bool=false,
     eps::Vector{<:AbstractFloat}=[0.03],
     bootstrap::Union{Nothing,Int}=nothing,
+    attack_fun::Function=fgsm,
     kwrgs...,
 )
 
@@ -452,7 +453,7 @@ function aggregate_performance(
         df, df_meta, df_perf = merge_with_meta(
             cfg,
             CTExperiments.test_performance(
-                exper_grid; measure, adversarial, bootstrap, return_df=true, eps=e
+                exper_grid; measure, adversarial, bootstrap, attack_fun, return_df=true, eps=e
             ),
         )
         df.eps .= e
@@ -594,7 +595,7 @@ function cidiff(df::DataFrame; var_interest::String="objective", alpha=0.95)
     x = Float64.(df[:, Symbol(vars[1])])
     y = Float64.(df[:, Symbol(vars[2])])
     delta = abs.(x) .- abs.(y)      # use absolute values because IP/IP* are always negative (as per CE.jl convention)
-    return (quantile(delta, (1-alpha)/2), quantile(delta, 1-(1-alpha)/2))
+    return (quantile(delta, (1 - alpha) / 2), quantile(delta, 1 - (1 - alpha) / 2))
 end
 
 """
@@ -616,7 +617,6 @@ function aggregate_ce_evaluation(
     byvars::Union{Nothing,String,Vector{String}}=nothing,
     var_interest::String="objective",
     agg_further_vars::Union{Nothing,Vector{String}}=nothing,
-    rebase::Bool=false,
     lambda_eval::Union{Nothing,Vector{<:Real}}=nothing,
     ratio::Bool=true,
     total_uncertainty::Bool=false,
@@ -740,8 +740,8 @@ function aggregate_ce_evaluation(
                         :ratio =>
                             (
                                 y -> (
-                                    mean=-(mean(skipmissing(y))-1)*100,
-                                    se=100*std(skipmissing(y)),
+                                    mean=-(mean(skipmissing(y)) - 1) * 100,
+                                    se=100 * std(skipmissing(y)),
                                 )
                             ) => AsTable,
                     )
@@ -846,17 +846,17 @@ function aggregate_ce_evaluation(
     res_dir::String;
     y="mmd",
     byvars=nothing,
-    rebase=true,
     ratio=true,
+    verbose=false,
     drop_models::Vector{String}=String[],
     kwrgs...,
 )
     byvars = gather_byvars(byvars, "data")
-    eval_grids, _ = final_results(res_dir; drop_models)
+    eval_grids, _ = final_results(res_dir; drop_models, verbose)
     df = DataFrame()
     for (i, cfg) in enumerate(eval_grids)
         @info "Evaluating model+data $i/$(length(eval_grids)) ..."
-        df_i = aggregate_ce_evaluation(cfg; y, byvars, rebase, ratio, kwrgs...)
+        df_i = aggregate_ce_evaluation(cfg; y, byvars, ratio, kwrgs...)
         df = vcat(df, df_i)
     end
     rename!(df, :data => :dataset)
@@ -881,6 +881,7 @@ function aggregate_performance(
     drop_models::Vector{String}=String[],
     eps::Vector{<:AbstractFloat}=[0.03],
     byvars=["objective"],
+    attack_fun::Function=fgsm,
 )
 
     # Get measures:
@@ -889,7 +890,7 @@ function aggregate_performance(
     end
 
     eval_grids, _ = final_results(res_dir; drop_models)
-    df = aggregate_performance(eval_grids; measure, adversarial, bootstrap, eps, byvars)
+    df = aggregate_performance(eval_grids; measure, adversarial, bootstrap, eps, byvars, attack_fun)
     df.objective .= replace.(df.objective, "Full" => "CT")
     df.objective .= replace.(df.objective, "Vanilla" => "BL")
     df.variable .= replace.(df.variable, "Accuracy" => adversarial ? "Acc.\$^*\$" : "Acc.")
@@ -916,6 +917,7 @@ function plot_performance(
     measure::Vector=["acc"],
     adversarial::Bool=false,
     bootstrap::Union{Nothing,Int}=nothing,
+    attack_fun::Vector{<:Function}=[fgsm],
     drop_models::Vector{String}=String[],
     eps::Vector{<:AbstractFloat}=[0.03],
     byvars=["objective"],
@@ -928,23 +930,61 @@ function plot_performance(
     end
 
     eval_grids, _ = final_results(res_dir; drop_models)
-    df = aggregate_performance(eval_grids; measure, adversarial, bootstrap, eps, byvars)
-    df.objective .= ifelse.(df.objective .== "Full", "CT", "BL")
+    dfs = DataFrames.DataFrame[]
+    for fun in attack_fun
+        df = aggregate_performance(eval_grids; measure, adversarial, bootstrap, attack_fun=fun, eps, byvars)
+        if fun == CTExperiments.pgd
+            df.attack_fun .= "PGD"
+        end
+        if fun == CTExperiments.fgsm
+            df.attack_fun .= "FGSM"
+        end
+        push!(dfs, df)
+    end
+    df = reduce(vcat, dfs)
+    df = DataFrames.transform(
+        df,
+        :objective =>
+            (
+                x -> replace(
+                    x,
+                    "Vanilla" => "BL",
+                    "Adversarial" => "AR",
+                    "Energy" => "CD",
+                    "Full" => "CT",
+                )
+            ) => :objective,
+    )
     df.dataset .= categorical(df.dataset; levels=ds_order)
     if drop_synthetic
+        @info "Dropping synthetic datasets"
         filter!(df -> !(df.dataset in ["LS", "OL", "Circ", "Moon"]), df)
     end
 
-    plt =
-        data(df) *
-        mapping(
-            :eps => L"\text{Perturbation Size: }\varepsilon \in [0,0.1]",
-            :mean => L"\text{Accuracy}";
-            color=:objective => "Model",
-            marker=:objective => "Model",
-            col=:dataset,
-        ) *
-        visual(ScatterLines)
+    if length(attack_fun) == 1
+        plt =
+            data(df) *
+            mapping(
+                :eps => L"\text{Perturbation Size: }\varepsilon \in [0,0.1]",
+                :mean => L"\text{Accuracy}";
+                color=:objective => "Model",
+                marker=:objective => "Model",
+                col=:dataset,
+            ) *
+            visual(ScatterLines)
+    else
+        plt =
+            data(df) *
+            mapping(
+                :eps => L"\text{Perturbation Size: }\varepsilon \in [0,0.1]",
+                :mean => L"\text{Accuracy}";
+                color=:objective => "Model",
+                marker=:objective => "Model",
+                col=:dataset,
+                row=:attack_fun,
+            ) *
+            visual(ScatterLines)
+    end
     return plt
 end
 
@@ -974,9 +1014,8 @@ function final_results(
     data_dirs = filter(
         x -> isfile(joinpath(x, "evaluation/evaluation_grid_config.toml")), data_dirs
     )
-    eval_grids = EvaluationGrid.(
-        joinpath.(data_dirs, "evaluation/evaluation_grid_config.toml")
-    )
+    eval_grids =
+        EvaluationGrid.(joinpath.(data_dirs, "evaluation/evaluation_grid_config.toml"))
     data_dirs = filter(x -> isfile(joinpath(x, "grid_config.toml")), data_dirs)
     exper_grids = ExperimentGrid.(joinpath.(data_dirs, "grid_config.toml"))
 
@@ -996,6 +1035,8 @@ function final_table(
     conf_int::Vector{<:AbstractFloat}=[0.99],
     include_performance::Bool=false,
     add_aggregates::Bool=true,
+    verbose::Bool=false,
+    ratio::Bool=true,
 )
     # CE:
     df_ce = DataFrame()
@@ -1004,11 +1045,11 @@ function final_table(
             res_dir;
             y,
             agg_further_vars=agg_further_vars[i],
-            rebase=false,
-            ratio=true,
+            ratio,
             total_uncertainty,
             drop_models,
             return_sig_level=true,
+            verbose,
         )
         df_ce = vcat(df_ce, df; cols=:union)
     end
@@ -1022,6 +1063,8 @@ function final_table(
     else
         df_ce
     end
+
+    display(df)
 
     if include_performance
         # Performance:
@@ -1040,7 +1083,7 @@ function final_table(
         df.sig_level .= coalesce.(df.sig_level, "")
     end
 
-    if add_aggregates
+    if add_aggregates && ratio
         df_agg = combine(groupby(df, :variable), :mean => mean => :mean)
         df_agg.dataset .= "Avg."
         df_agg.se .= NaN

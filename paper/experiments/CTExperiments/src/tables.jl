@@ -26,10 +26,10 @@ function tabulate_results(
     if "data" in names(df) && hlines != :none
         if "Avg." in df.data
             _ds_order = [ds_order..., "Avg."]
-            hlines = [0, 1, 5, length(_ds_order), length(_ds_order)+1]
+            hlines = [0, 1, 5, length(_ds_order), length(_ds_order) + 1]
         else
             _ds_order = ds_order
-            hlines = [0, 1, 5, length(_ds_order)+1]
+            hlines = [0, 1, 5, length(_ds_order) + 1]
         end
         df.data = categorical(df.data; levels=_ds_order)
         if sort_by_data
@@ -106,7 +106,7 @@ function tabulate_results(inputs, al::Vector{String}; kwargs...)
         r"\\begin\{tabular\}\{[^}]+\}" => "\\begin{tabular}{\n$( reduce((x,y) -> "$x\n$y", al))\n}",
     )
 
-    print(modified)
+    return print(modified)
 end
 
 function get_table_inputs(
