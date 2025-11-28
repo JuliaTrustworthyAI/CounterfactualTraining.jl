@@ -1,6 +1,6 @@
 using CTExperiments
 using CTExperiments.AlgebraOfGraphics
-using CTExperiments.CairoMakie
+using CTExperiments.Makie
 
 using DotEnv
 DotEnv.load!()

@@ -207,6 +207,7 @@ function setup_counterfactual_search(
         nsamples = size(X, 2)
         # Use whole dataset:
         xs = [x[:, :] for x in eachcol(X)]                          # factuals
+        ys = y
     else
 
         # Check that at least one counterfactual is generated for each batch:
@@ -219,7 +220,9 @@ function setup_counterfactual_search(
         # Use subset:
         idx_sub = sample(1:size(X, 2), nsamples; replace=false)
         Xsub = X[:, idx_sub]
+        ysub = y[idx_sub]
         xs = [x[:, :] for x in eachcol(Xsub)]                       # factuals
+        ys = ysub
     end
 
     # Factual label and targets:
@@ -227,11 +230,10 @@ function setup_counterfactual_search(
     targets = Vector{Int}(undef, nsamples)
     all_labels = counterfactual_data.y_levels
     for (i, x) in enumerate(xs)
-        factual_labels[i] = argmax(M.model(x))[1]                           # get factual label
-        # targets[i] = rand(all_labels)                                       # choose a random target (including possibly the factual label)
-        targets[i] = rand(all_labels[all_labels .!= factual_labels[i]])     # choose random target (excluding factual label)
+        yhat = argmax(M.model(x))[1]                            # get factual prediction
+        targets[i] = rand(all_labels[all_labels .!= yhat])      # choose random target (excluding factual label)
     end
-    factual_enc = Flux.onehotbatch(factual_labels, all_labels)
+    factual_enc = Flux.onehotbatch(ys, all_labels)              # ground-truth label for factual
 
     return xs, factual_enc, targets, counterfactual_data, M
 end

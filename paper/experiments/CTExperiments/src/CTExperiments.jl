@@ -7,6 +7,7 @@ using CounterfactualExplanations.Evaluation
 using CounterfactualExplanations.Objectives
 using KernelFunctions
 using Logging
+using Makie
 using Random
 using TaijaData
 

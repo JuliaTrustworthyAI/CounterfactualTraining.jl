@@ -1,7 +1,7 @@
 name = "CounterfactualTraining"
 uuid = "c5e5e904-ed0d-4ddb-967e-dbb7fd41a507"
-authors = ["Anonymous"]
 version = "0.1.2"
+authors = ["Anonymous"]
 
 [deps]
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
@@ -14,6 +14,10 @@ ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 TaijaParallel = "bf1c2c22-5e42-4e78-8b6b-92e6c673eeb0"
 UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
+
+[sources]
+CounterfactualExplanations = {rev = "counterfactual-training", url = "https://github.com/JuliaTrustworthyAI/CounterfactualExplanations.jl.git"}
+TaijaParallel = {rev = "counterfactual-training", url = "https://github.com/JuliaTrustworthyAI/TaijaParallel.jl.git"}
 
 [compat]
 Aqua = "0.8"

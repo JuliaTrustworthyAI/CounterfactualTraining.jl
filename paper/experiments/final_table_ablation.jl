@@ -3,7 +3,7 @@ using Pkg;
 Pkg.status();
 
 using CTExperiments
-using CTExperiments.CairoMakie
+using CTExperiments.Makie
 using CTExperiments.CSV
 using CTExperiments.DataFrames
 using CTExperiments.Plots

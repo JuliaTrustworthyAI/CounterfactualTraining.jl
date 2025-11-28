@@ -1,7 +1,7 @@
 using AlgebraOfGraphics
 using CategoricalArrays
 using CounterfactualExplanations
-using CairoMakie
+using Makie
 using DataFrames
 using HypothesisTests
 using Plots: Plots, PlotMeasures
