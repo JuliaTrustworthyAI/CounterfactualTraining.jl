@@ -5,6 +5,7 @@ projectdir = splitpath(pwd()) |>
 cd(projectdir)
 
 using CTExperiments
+using CTExperiments.AlgebraOfGraphics
 using CTExperiments.Makie
 using CTExperiments.CSV
 using CTExperiments.DataFrames
@@ -58,7 +59,6 @@ Final hyperparameters used for the main results presented in the main paper. Any
 df_mtbl = aggregate_ce_evaluation(
     mtbl_dir; 
     ratio=true, 
-    rebase=false, 
     y="distance", 
     agg_further_vars=["run", "lambda_energy_eval"], 
     total_uncertainty=false, 
