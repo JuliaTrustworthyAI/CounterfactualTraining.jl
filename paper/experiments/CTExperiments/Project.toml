@@ -1,7 +1,7 @@
 name = "CTExperiments"
 uuid = "5eca96c7-09a4-4424-a5a1-dee2b4aead1e"
-version = "0.0.0"
 authors = ["Anonymous"]
+version = "0.0.0"
 
 [deps]
 Accessors = "7d9f7c33-5ae7-4f3b-8dc6-eff91059b697"
@@ -39,7 +39,6 @@ UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 [sources]
 CounterfactualExplanations = {rev = "counterfactual-training", url = "https://github.com/JuliaTrustworthyAI/CounterfactualExplanations.jl.git"}
 CounterfactualTraining = {path = "../../.."}
-IntegratedGradients = {path = "../../../../IntegratedGradients"}
 TaijaParallel = {rev = "counterfactual-training", url = "https://github.com/JuliaTrustworthyAI/TaijaParallel.jl.git"}
 
 [compat]
