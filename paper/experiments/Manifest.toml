@@ -2,7 +2,7 @@
 
 julia_version = "1.11.5"
 manifest_format = "2.0"
-project_hash = "e1750241832ffabd0fb76d0f76bf2a91ff4fc282"
+project_hash = "952c707eab90b7327dd25770f8b62c77d2f5b3f2"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "f7304359109c768cf32dc5fa2d371565bb63b68a"
@@ -302,12 +302,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "e329286945d0cfc04456972ea732551869af1cfc"
 uuid = "4e9b3aee-d8a1-5a3d-ad8b-7d824db253f0"
 version = "1.0.1+0"
-
-[[deps.CSTParser]]
-deps = ["Tokenize"]
-git-tree-sha1 = "0157e592151e39fa570645e2b2debcdfb8a0f112"
-uuid = "00ebfdb7-1f24-5e51-bd34-a7502290713f"
-version = "3.4.3"
 
 [[deps.CSV]]
 deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers", "PooledArrays", "PrecompileTools", "SentinelArrays", "Tables", "Unicode", "WeakRefStrings", "WorkerUtilities"]
@@ -776,12 +770,6 @@ weakdeps = ["ChainRulesCore", "DensityInterface", "Test"]
 git-tree-sha1 = "7442a5dfe1ebb773c29cc2962a8980f47221d76c"
 uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.9.5"
-
-[[deps.DocumentFormat]]
-deps = ["CSTParser", "FilePathsBase", "Tokenize"]
-git-tree-sha1 = "cf048d65cbcdec70f10745e5801eeb0c6478a7f7"
-uuid = "ffa9a821-9c82-50df-894e-fbcef3ed31cd"
-version = "3.2.4"
 
 [[deps.DotEnv]]
 deps = ["PrecompileTools"]
@@ -1560,12 +1548,6 @@ version = "1.14.3"
     [deps.JSON3.weakdeps]
     ArrowTypes = "31f734f8-188a-4ce0-8406-c8a06bd891cd"
 
-[[deps.JSONRPC]]
-deps = ["JSON", "UUIDs"]
-git-tree-sha1 = "3928eaef5261194e95e8e99b1405e069e82b981e"
-uuid = "b9b8584e-8fd3-41f9-ad0c-7255d428e418"
-version = "1.4.2"
-
 [[deps.JpegTurbo]]
 deps = ["CEnum", "FileIO", "ImageCore", "JpegTurbo_jll", "TOML"]
 git-tree-sha1 = "9496de8fb52c224a2e3f9ff403947674517317d9"
@@ -1682,12 +1664,6 @@ version = "2.10.3+0"
 git-tree-sha1 = "dda21b8cbd6a6c40d9d02a73230f9d70fed6918c"
 uuid = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 version = "1.4.0"
-
-[[deps.LanguageServer]]
-deps = ["CSTParser", "DocumentFormat", "JSON", "JSONRPC", "Markdown", "Pkg", "REPL", "StaticLint", "SymbolServer", "Tokenize", "URIParser", "UUIDs"]
-git-tree-sha1 = "126d75fcacc527270a200c397d6ebbd6f826197a"
-uuid = "2b0e0bc5-e4fd-59b4-8912-456d1b03d8d7"
-version = "4.1.0"
 
 [[deps.LaplaceRedux]]
 deps = ["CategoricalDistributions", "ChainRulesCore", "Compat", "Distributions", "Flux", "LinearAlgebra", "MLJBase", "MLJModelInterface", "MLUtils", "Optimisers", "Random", "Statistics", "Tables", "Tullio", "Zygote"]
@@ -2286,12 +2262,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl"]
 git-tree-sha1 = "b6aa4566bb7ae78498a5e68943863fa8b5231b59"
 uuid = "e7412a2a-1a6e-54c0-be00-318e2571c051"
 version = "1.3.6+0"
-
-[[deps.OhMyREPL]]
-deps = ["Crayons", "JLFzf", "JuliaSyntax", "Markdown", "Pkg", "Printf", "REPL"]
-git-tree-sha1 = "1884e964b4da2afe26983a3298cdc6d41b228ddd"
-uuid = "5fb14364-9ced-5910-84b2-373655c76a03"
-version = "0.5.29"
 
 [[deps.OneHotArrays]]
 deps = ["Adapt", "ChainRulesCore", "Compat", "GPUArraysCore", "LinearAlgebra", "NNlib"]
@@ -3005,12 +2975,6 @@ git-tree-sha1 = "6ab403037779dae8c514bad259f32a447262455a"
 uuid = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
 version = "1.4.4"
 
-[[deps.StaticLint]]
-deps = ["CSTParser", "Serialization", "SymbolServer"]
-git-tree-sha1 = "36732c098f291ee3b867718bb9933e8b67ab4798"
-uuid = "b3cc710f-9c33-5bdb-a03d-a94903873e97"
-version = "8.2.2"
-
 [[deps.StatisticalMeasures]]
 deps = ["CategoricalArrays", "CategoricalDistributions", "Distributions", "LearnAPI", "LinearAlgebra", "MacroTools", "OrderedCollections", "PrecompileTools", "ScientificTypesBase", "StatisticalMeasuresBase", "Statistics", "StatsBase"]
 git-tree-sha1 = "c1d4318fa41056b839dfbb3ee841f011fa6e8518"
@@ -3141,12 +3105,6 @@ deps = ["Artifacts", "Libdl", "libblastrampoline_jll"]
 uuid = "bea87d4a-7f5b-5778-9afe-8cc45184846c"
 version = "7.7.0+0"
 
-[[deps.SymbolServer]]
-deps = ["InteractiveUtils", "LibGit2", "Markdown", "Pkg", "REPL", "SHA", "Serialization", "Sockets", "UUIDs"]
-git-tree-sha1 = "adcc6a2335e5448adc05939f67d382fb8d17a367"
-uuid = "cf896787-08d5-524d-9de7-132aaa0cb996"
-version = "7.4.0"
-
 [[deps.TOML]]
 deps = ["Dates"]
 uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
@@ -3257,11 +3215,6 @@ git-tree-sha1 = "1176cc31e867217b06928e2f140c90bd1bc88283"
 uuid = "06e1c1a7-607b-532d-9fad-de7d9aa2abac"
 version = "0.5.0"
 
-[[deps.Tokenize]]
-git-tree-sha1 = "468b4685af4abe0e9fd4d7bf495a6554a6276e75"
-uuid = "0796e94c-ce3b-5d07-9a54-7f471281c624"
-version = "0.5.29"
-
 [[deps.TranscodingStreams]]
 git-tree-sha1 = "0c45878dcfdcfa8480052b6ab162cdd138781742"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
@@ -3316,12 +3269,6 @@ version = "0.3.8"
     ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
     FillArrays = "1a297f60-69ca-5386-bcde-b61e274b549b"
     Tracker = "9f7883ad-71c0-57eb-9f7f-b5c9e6d3789c"
-
-[[deps.URIParser]]
-deps = ["Unicode"]
-git-tree-sha1 = "53a9f49546b8d2dd2e688d216421d050c9a31d0d"
-uuid = "30578b45-9adc-5946-b283-645ec420af67"
-version = "0.4.1"
 
 [[deps.URIs]]
 git-tree-sha1 = "bef26fb046d031353ef97a82e3fdb6afe7f21b1a"

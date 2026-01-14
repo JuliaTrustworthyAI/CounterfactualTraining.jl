@@ -11,11 +11,11 @@ using Serialization
 using Statistics
 using TaijaParallel
 
-res_dir = get_global_param("res_dir", "paper/experiments/output/final_run/mutability")
+res_dir = get_global_param("res_dir", "paper/experiments/output/satml/mutability")
 keep_models = [get_global_param("drop_models", "mlp")]
 nrounds = get_global_param("nrounds", 100)
-nsamples = get_global_param("nsamples", 1000)
-verbose = get_global_param("verbose", false)
+nsamples = get_global_param("nsamples", 2500)
+verbose = get_global_param("verbose", true)
 
 # Initialize MPI
 MPI.Init()
@@ -27,6 +27,7 @@ if MPI.Comm_rank(MPI.COMM_WORLD) != 0
     global_logger(NullLogger())
     expers = nothing
 else
+    @info "Running on $nprocs processes" 
     @info "Looking for results in $res_dir"
     # Get experiments for all datasets:
     expers = final_results(res_dir; keep_models)[2]
@@ -39,6 +40,7 @@ expers = MPI.bcast(expers, comm; root=0)
 
 # Compute IG:
 for (i, exper_list) in enumerate(expers)
+    @info "Data set $i/$(length(expers))"
     data = CTExperiments.dname(exper_list[1].data)      # get dataset name
 
     # Bootstrap sample indices
