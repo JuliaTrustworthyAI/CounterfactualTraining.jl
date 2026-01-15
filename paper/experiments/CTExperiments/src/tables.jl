@@ -2,6 +2,7 @@ using CategoricalArrays
 using ColorSchemes
 using DataFrames
 using PrettyTables
+using Printf
 using StatsBase
 
 function tabulate_results(
@@ -255,4 +256,95 @@ end
 function generator_highlighter(col_idx::Int, backend::Val{:latex})
     hl = LatexHighlighter((df, i, j) -> j == col_idx, "textit")
     return hl
+end
+
+function bootstrap_ci_table(df::DataFrame, filename::String="bootstrap_table.tex")
+    # Pivot the data to get full and vanilla side by side
+    pivoted = Dict()
+    
+    for row in eachrow(df)
+        dataset = row.data
+        obj = row.objective
+        
+        if !haskey(pivoted, dataset)
+            pivoted[dataset] = Dict()
+        end
+        
+        # Calculate lower and upper uncertainties
+        lower_unc = row.mean - row.lb
+        upper_unc = row.ub - row.mean
+        
+        pivoted[dataset][obj] = (mean=row.mean, lower=lower_unc, upper=upper_unc)
+    end
+    
+    # Dataset name mapping
+    name_map = Dict(
+        "adult" => "Adult",
+        "cali" => "CH",
+        "circles" => "Circ",
+        "credit" => "Cred",
+        "gmsc" => "GMSC",
+        "lin_sep" => "LS",
+        "mnist" => "MNIST",
+        "moons" => "Moons",
+        "over" => "Over"
+    )
+    
+    # Define dataset order with grouping
+    dataset_order = ["lin_sep", "circles", "moons", "over", "midrule", 
+                     "adult", "cali", "credit", "gmsc", "mnist"]
+    
+    # Build LaTeX table
+    latex = """
+    \\begin{table}[htbp]
+    \\centering
+    \\sisetup{
+        separate-uncertainty=true,
+        table-align-uncertainty=true
+    }
+    \\begin{tabular}{lSS}
+    \\toprule
+    \\textbf{Dataset} & {\\textbf{CT}} & {\\textbf{BL}} \\\\
+    \\midrule
+    """
+    
+    for dataset in dataset_order
+        if dataset == "midrule"
+            latex *= "    \\midrule\n"
+            continue
+        end
+        
+        display_name = get(name_map, dataset, dataset)
+        ct_val = get(get(pivoted, dataset, Dict()), "full", nothing)
+        bl_val = get(get(pivoted, dataset, Dict()), "vanilla", nothing)
+        
+        ct_str = if !isnothing(ct_val)
+            @sprintf("%.2f(%.2f:%.2f)", ct_val.mean, ct_val.upper, ct_val.lower)
+        else
+            "{---}"
+        end
+        
+        bl_str = if !isnothing(bl_val)
+            @sprintf("%.2f(%.2f:%.2f)", bl_val.mean, bl_val.upper, bl_val.lower)
+        else
+            "{---}"
+        end
+        
+        latex *= "    $display_name & $ct_str & $bl_str \\\\[1ex]\n"
+    end
+    
+    latex *= """    \\bottomrule
+    \\end{tabular}
+    \\caption{Bootstrap confidence intervals (95\\%) for different datasets. CT: conformal training; BL: baseline.}
+    \\label{tab:bootstrap_results}
+    \\end{table}
+    """
+    
+    # Write to file
+    open(filename, "w") do io
+        write(io, latex)
+    end
+    
+    println("Table saved to $filename")
+    return latex
 end

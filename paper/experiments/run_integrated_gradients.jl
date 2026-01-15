@@ -15,7 +15,7 @@ res_dir = get_global_param("res_dir", "paper/experiments/output/satml/mutability
 keep_models = [get_global_param("drop_models", "mlp")]
 nrounds = get_global_param("nrounds", 100)
 nsamples = get_global_param("nsamples", 2500)
-verbose = get_global_param("verbose", true)
+verbose = get_global_param("verbose", false)
 
 # Initialize MPI
 MPI.Init()
@@ -73,12 +73,12 @@ for (i, exper_list) in enumerate(expers)
 
             igs = (ig -> ig[exper.data.mutability, 1]).(igs) |> igs -> reduce(hcat, igs)
 
-            # Aggregate:
-            m = mean(igs; dims=2)       # across rounds
-            m = mean(m; dims=1)[1]      # across features
-            se = std(igs; dims=2)       # across rounds 
-            se = mean(se; dims=1)[1]    # across features
-            df = DataFrame(Dict(:data => data, :objective => obj, :mean => m, :se => se))
+            # aggregate:
+            m = mean(igs; dims=1)           # across features
+            lb = quantile(vec(m), 0.05/2)
+            ub = quantile(vec(m), 1 - 0.05/2)
+            m = median(vec(m))[1]        # across rounds
+            df = DataFrame(Dict(:data => data, :objective => obj, :mean => m, :lb => lb, :ub => ub))
             display(df)
 
             push!(output, df)
