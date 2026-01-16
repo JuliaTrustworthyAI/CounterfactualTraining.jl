@@ -11,6 +11,10 @@ using Serialization
 using Statistics
 using TaijaParallel
 
+# Setup:
+DotEnv.load!()
+set_global_seed()
+
 res_dir = get_global_param("res_dir", "paper/experiments/output/satml/mutability")
 keep_models = [get_global_param("drop_models", "mlp")]
 nrounds = get_global_param("nrounds", 100)
@@ -105,7 +109,7 @@ for (i, exper_list) in enumerate(expers)
 end
 
 if rank == 0
-    granular_output = reduce(vcat, granual_output)
+    granular_output = reduce(vcat, granular_output)
     Serialization.serialize(joinpath(res_dir, "ig_granular.jls"), output)
     output = reduce(vcat, output)
     Serialization.serialize(joinpath(res_dir, "ig.jls"), output)

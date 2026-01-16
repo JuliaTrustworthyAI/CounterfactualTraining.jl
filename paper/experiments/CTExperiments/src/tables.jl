@@ -270,7 +270,7 @@ function bootstrap_ci_table(df::DataFrame, filename::String="bootstrap_table.tex
             pivoted[dataset] = Dict()
         end
         
-        pivoted[dataset][obj] = (mean=row.mean, lb=row.lb, ub=row.ub)
+        pivoted[dataset][obj] = (median=row.median, lb=row.lb, ub=row.ub)
     end
     
     # Dataset name mapping
@@ -316,7 +316,7 @@ function bootstrap_ci_table(df::DataFrame, filename::String="bootstrap_table.tex
         bl_val = get(get(pivoted, dataset, Dict()), "vanilla", nothing)
         
         if !isnothing(ct_val)
-            ct_mean = @sprintf("%.2f", ct_val.mean)
+            ct_mean = @sprintf("%.2f", ct_val.median)
             ct_lb = @sprintf("%.2f", ct_val.lb)
             ct_ub = @sprintf("%.2f", ct_val.ub)
         else
@@ -326,7 +326,7 @@ function bootstrap_ci_table(df::DataFrame, filename::String="bootstrap_table.tex
         end
         
         if !isnothing(bl_val)
-            bl_mean = @sprintf("%.2f", bl_val.mean)
+            bl_mean = @sprintf("%.2f", bl_val.median)
             bl_lb = @sprintf("%.2f", bl_val.lb)
             bl_ub = @sprintf("%.2f", bl_val.ub)
         else
