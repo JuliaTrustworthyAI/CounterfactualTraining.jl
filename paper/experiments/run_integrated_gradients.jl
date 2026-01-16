@@ -32,6 +32,7 @@ else
     # Get experiments for all datasets:
     expers = final_results(res_dir; keep_models)[2]
     expers = load_list.(expers)
+    granular_output = DataFrame[]
     output = DataFrame[]
 end
 
@@ -73,20 +74,39 @@ for (i, exper_list) in enumerate(expers)
 
             igs = (ig -> ig[exper.data.mutability, 1]).(igs) |> igs -> reduce(hcat, igs)
 
+
             # aggregate:
             m = mean(igs; dims=1)           # across features
-            lb = quantile(vec(m), 0.05/2)
-            ub = quantile(vec(m), 1 - 0.05/2)
-            m = median(vec(m))[1]        # across rounds
-            df = DataFrame(Dict(:data => data, :objective => obj, :mean => m, :lb => lb, :ub => ub))
+
+            # Store granular means in separate DataFrame
+            m_vec = vec(m)
+            granular_df = DataFrame(
+                round = 1:length(m_vec),
+                data = fill(data, length(m_vec)),
+                objective = fill(obj, length(m_vec)),
+                mean = m_vec
+            )
+
+            # Calculate summary statistics
+            lb = quantile(m_vec, 0.05/2)
+            ub = quantile(m_vec, 1 - 0.05/2)
+            med = quantile(m_vec, 0.5)
+
+            # Create summary DataFrame
+            df = DataFrame(Dict(:data => data, :objective => obj, :median => med, :lb => lb, :ub => ub))
+            select!(df, [:data, :objective, :median, :lb, :ub])
             display(df)
 
             push!(output, df)
+            push!(granular_output, granular_df)  # Assuming you have a granular_output array
+ 
         end
     end
 end
 
 if rank == 0
+    granular_output = reduce(vcat, granual_output)
+    Serialization.serialize(joinpath(res_dir, "ig_granular.jls"), output)
     output = reduce(vcat, output)
     Serialization.serialize(joinpath(res_dir, "ig.jls"), output)
     CSV.write(joinpath(res_dir, "ig.csv"), output)

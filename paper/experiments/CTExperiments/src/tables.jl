@@ -270,11 +270,7 @@ function bootstrap_ci_table(df::DataFrame, filename::String="bootstrap_table.tex
             pivoted[dataset] = Dict()
         end
         
-        # Calculate lower and upper uncertainties
-        lower_unc = row.mean - row.lb
-        upper_unc = row.ub - row.mean
-        
-        pivoted[dataset][obj] = (mean=row.mean, lower=lower_unc, upper=upper_unc)
+        pivoted[dataset][obj] = (mean=row.mean, lb=row.lb, ub=row.ub)
     end
     
     # Dataset name mapping
@@ -298,13 +294,14 @@ function bootstrap_ci_table(df::DataFrame, filename::String="bootstrap_table.tex
     latex = """
     \\begin{table}[htbp]
     \\centering
-    \\sisetup{
-        separate-uncertainty=true,
-        table-align-uncertainty=true
+    \\begin{tabular}{l
+        S[table-format=1.3]
+        @{\\quad[\\,}S[table-format=1.2]@{,\\,}S[table-format=2.2]@{\\,]}
+        S[table-format=4.2]
+        @{\\quad[\\,}S[table-format=1.2]@{,\\,}S[table-format=4.2]@{\\,]}
     }
-    \\begin{tabular}{lSS}
     \\toprule
-    \\textbf{Dataset} & {\\textbf{CT}} & {\\textbf{BL}} \\\\
+    \\textbf{Dataset} & \\multicolumn{3}{c}{\\textbf{CT}} & \\multicolumn{3}{c}{\\textbf{BL}} \\\\
     \\midrule
     """
     
@@ -318,19 +315,27 @@ function bootstrap_ci_table(df::DataFrame, filename::String="bootstrap_table.tex
         ct_val = get(get(pivoted, dataset, Dict()), "full", nothing)
         bl_val = get(get(pivoted, dataset, Dict()), "vanilla", nothing)
         
-        ct_str = if !isnothing(ct_val)
-            @sprintf("%.2f(%.2f:%.2f)", ct_val.mean, ct_val.upper, ct_val.lower)
+        if !isnothing(ct_val)
+            ct_mean = @sprintf("%.2f", ct_val.mean)
+            ct_lb = @sprintf("%.2f", ct_val.lb)
+            ct_ub = @sprintf("%.2f", ct_val.ub)
         else
-            "{---}"
+            ct_mean = "{---}"
+            ct_lb = "{---}"
+            ct_ub = "{---}"
         end
         
-        bl_str = if !isnothing(bl_val)
-            @sprintf("%.2f(%.2f:%.2f)", bl_val.mean, bl_val.upper, bl_val.lower)
+        if !isnothing(bl_val)
+            bl_mean = @sprintf("%.2f", bl_val.mean)
+            bl_lb = @sprintf("%.2f", bl_val.lb)
+            bl_ub = @sprintf("%.2f", bl_val.ub)
         else
-            "{---}"
+            bl_mean = "{---}"
+            bl_lb = "{---}"
+            bl_ub = "{---}"
         end
         
-        latex *= "    $display_name & $ct_str & $bl_str \\\\[1ex]\n"
+        latex *= "    $display_name & $ct_mean & $ct_lb & $ct_ub & $bl_mean & $bl_lb & $bl_ub \\\\[1ex]\n"
     end
     
     latex *= """    \\bottomrule
@@ -348,3 +353,4 @@ function bootstrap_ci_table(df::DataFrame, filename::String="bootstrap_table.tex
     println("Table saved to $filename")
     return latex
 end
+
