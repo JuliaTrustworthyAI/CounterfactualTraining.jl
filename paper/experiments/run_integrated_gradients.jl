@@ -110,7 +110,7 @@ end
 
 if rank == 0
     granular_output = reduce(vcat, granular_output)
-    Serialization.serialize(joinpath(res_dir, "ig_granular.jls"), output)
+    Serialization.serialize(joinpath(res_dir, "ig_granular.jls"), granular_output)
     output = reduce(vcat, output)
     Serialization.serialize(joinpath(res_dir, "ig.jls"), output)
     CSV.write(joinpath(res_dir, "ig.csv"), output)
