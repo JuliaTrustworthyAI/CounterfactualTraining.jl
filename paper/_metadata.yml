@@ -1,6 +1,6 @@
 title: "Counterfactual Training: Teaching Models Plausible and Actionable Explanations"
 title-running: "Counterfactual Training"
-bibliography: quarto_aaai/bibliography.bib
+bibliography: bibliography.bib
 keywords: 
   - Counterfactual Training
   - Counterfactual Explanations

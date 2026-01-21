@@ -1,8 +1,8 @@
 ---
-title: Supplementary Appendix
-subtitle: "Counterfactual Training: Teaching Models Plausible and Actionable Explanations"
+subtitle: Supplementary Appendix
+title: "Counterfactual Training: Teaching Models Plausible and Actionable Explanations"
 abstract: |
-  This is the supplementary appendix to our paper titled *Counterfactual Training: Teaching Models Plausible and Actionable Explanations*. It provides helpful details on mathematical notations and formulas, our proposed training regime, extended empirical findings, hyperparameter tuning and grid searches as well as software and computations.
+  This is the supplementary appendix to our IEEE SaTML 2026 paper titled *Counterfactual Training: Teaching Models Plausible and Actionable Explanations*. It provides helpful details on mathematical notations and formulas, our proposed training regime, extended empirical findings, hyperparameter tuning and grid searches as well as software and computations.
 engine: julia
 julia: 
   exeflags: ["--project=../experiments/"]

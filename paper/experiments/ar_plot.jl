@@ -5,7 +5,7 @@ using CTExperiments.Makie
 using DotEnv
 DotEnv.load!()
 
-res_dir = joinpath(ENV["FINAL_GRID_RESULTS"], "ablation")
+res_dir = joinpath(ENV["FINAL_MAIN_RESULTS"], "ablation")
 
 plt = CTExperiments.plot_performance(
     res_dir;
