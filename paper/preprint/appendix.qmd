@@ -14,26 +14,6 @@ format:
     doublespacing: false
     runninghead: "Counterfactual Training"
     authorcols: true
-    include-in-header:
-      text: |
-        \usepackage[title]{appendix}
-        \usepackage{placeins}
-        \usepackage{amsthm}
-        \theoremstyle{plain}
-        \newtheorem{proposition}{Proposition}[section]
-        \theoremstyle{definition}
-        \newtheorem{definition}{Definition}[section]
-        \theoremstyle{definition}
-        \newtheorem{example}{Example}[section]
-        \theoremstyle{plain}
-        \usepackage{algorithm}
-        \usepackage{algorithmic}
-        \usepackage{amsfonts}
-        \usepackage{amsmath}
-        \usepackage{siunitx}
-        \sisetup{uncertainty-mode = separate}
-        \DeclareMathSizes{10}{9}{7}{6.5}
-        \usepackage{enumitem}
 ---
 
 {{< pagebreak >}}

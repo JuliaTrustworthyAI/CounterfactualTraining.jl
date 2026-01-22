@@ -956,6 +956,7 @@ function plot_performance(
             ) => :objective,
     )
     df.dataset .= categorical(df.dataset; levels=ds_order)
+    df.objective .= categorical(df.objective; levels=["BL", "CT", "AR", "CD"])
     if drop_synthetic
         @info "Dropping synthetic datasets"
         filter!(df -> !(df.dataset in ["LS", "OL", "Circ", "Moon"]), df)

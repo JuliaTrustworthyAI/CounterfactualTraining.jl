@@ -8,35 +8,36 @@ format:
     linenumbers: false
     doublespacing: false
     runninghead: "Counterfactual Training"
-    thanks: "A Preprint."
+    thanks: "This work has been accepted for publication at the IEEE Conference on Secure and Trustworthy Machine Learning (SaTML). The final version will be available on IEEE Xplore."
     authorcols: true
     include-in-header:
       text: |
-        \usepackage[title]{appendix}
         \usepackage{placeins}
-        \usepackage{amsthm}
-        \theoremstyle{plain}
-        \newtheorem{proposition}{Proposition}[section]
-        \theoremstyle{definition}
-        \newtheorem{definition}{Definition}[section]
-        \theoremstyle{definition}
-        \newtheorem{example}{Example}[section]
-        \theoremstyle{plain}
-        \usepackage{algorithm}
-        \usepackage{algorithmic}
-        \usepackage{amsfonts}
-        \usepackage{amsmath}
         \usepackage{siunitx}
-        \sisetup{uncertainty-mode = separate}
-        \DeclareMathSizes{10}{9}{7}{6.5}
-        \usepackage{enumitem}
+        \sisetup{
+            uncertainty-mode = separate,
+            table-align-uncertainty=true,
+        }
+        \usepackage[title]{appendix}
 ---
 
-\twocolumn
+{{< include /paper/sections/abstract.qmd >}}
 
-{{< include /paper/body.qmd >}}
+{{< include /paper/preprint/body.qmd >}}
 
 # References {-}
 
 ::: {#refs}
 :::
+
+{{< pagebreak >}}
+
+```{=latex}
+\begin{appendices}
+```
+
+{{< include /paper/sections/appendix.qmd >}}
+
+```{=latex}
+\end{appendices}
+```

@@ -7,13 +7,9 @@ keywords:
   - Algorithmic Recourse
   - Explainable AI
   - Representation Learning
-crossref:
-  exr-title: "Parameters"
-  exr-prefix: "Parameters"
-  cor-title: "Research Question"
-  cor-prefix: "RQ"
 filters: 
   - abstract-section
+  - pseudocode
 header-includes: |
   \usepackage{placeins}
   \usepackage{siunitx}
