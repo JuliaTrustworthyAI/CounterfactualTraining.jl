@@ -52,7 +52,7 @@ DocMeta.setdocmeta!(
 
 makedocs(;
     modules=[CounterfactualTraining],
-    authors="Anonymous",
+    authors="Patrick Altmeyer",
     sitename="CounterfactualTraining.jl",
     format=Documenter.HTML(;
         canonical="https://JuliaTrustworthyAI.github.io/CounterfactualTraining.jl",

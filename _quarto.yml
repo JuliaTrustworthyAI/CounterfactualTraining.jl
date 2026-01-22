@@ -9,6 +9,7 @@ crossref:
   tbl-prefix: Table
 resource-path:
   - docs/src/assets
+  - paper/figures
 format:
   commonmark:
     variant: -raw_html+tex_math_dollars
