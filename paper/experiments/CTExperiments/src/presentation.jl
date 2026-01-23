@@ -1,7 +1,7 @@
 using AlgebraOfGraphics
 using CategoricalArrays
 using CounterfactualExplanations
-using CairoMakie
+using Makie
 using DataFrames
 using HypothesisTests
 using Plots: Plots, PlotMeasures
@@ -453,7 +453,13 @@ function aggregate_performance(
         df, df_meta, df_perf = merge_with_meta(
             cfg,
             CTExperiments.test_performance(
-                exper_grid; measure, adversarial, bootstrap, attack_fun, return_df=true, eps=e
+                exper_grid;
+                measure,
+                adversarial,
+                bootstrap,
+                attack_fun,
+                return_df=true,
+                eps=e,
             ),
         )
         df.eps .= e
@@ -890,7 +896,9 @@ function aggregate_performance(
     end
 
     eval_grids, _ = final_results(res_dir; drop_models)
-    df = aggregate_performance(eval_grids; measure, adversarial, bootstrap, eps, byvars, attack_fun)
+    df = aggregate_performance(
+        eval_grids; measure, adversarial, bootstrap, eps, byvars, attack_fun
+    )
     df.objective .= replace.(df.objective, "Full" => "CT")
     df.objective .= replace.(df.objective, "Vanilla" => "BL")
     df.variable .= replace.(df.variable, "Accuracy" => adversarial ? "Acc.\$^*\$" : "Acc.")
@@ -932,7 +940,9 @@ function plot_performance(
     eval_grids, _ = final_results(res_dir; drop_models)
     dfs = DataFrames.DataFrame[]
     for fun in attack_fun
-        df = aggregate_performance(eval_grids; measure, adversarial, bootstrap, attack_fun=fun, eps, byvars)
+        df = aggregate_performance(
+            eval_grids; measure, adversarial, bootstrap, attack_fun=fun, eps, byvars
+        )
         if fun == CTExperiments.pgd
             df.attack_fun .= "PGD"
         end
@@ -956,6 +966,7 @@ function plot_performance(
             ) => :objective,
     )
     df.dataset .= categorical(df.dataset; levels=ds_order)
+    df.objective .= categorical(df.objective; levels=["BL", "CT", "AR", "CD"])
     if drop_synthetic
         @info "Dropping synthetic datasets"
         filter!(df -> !(df.dataset in ["LS", "OL", "Circ", "Moon"]), df)
@@ -1014,8 +1025,9 @@ function final_results(
     data_dirs = filter(
         x -> isfile(joinpath(x, "evaluation/evaluation_grid_config.toml")), data_dirs
     )
-    eval_grids =
-        EvaluationGrid.(joinpath.(data_dirs, "evaluation/evaluation_grid_config.toml"))
+    eval_grids = EvaluationGrid.(
+        joinpath.(data_dirs, "evaluation/evaluation_grid_config.toml")
+    )
     data_dirs = filter(x -> isfile(joinpath(x, "grid_config.toml")), data_dirs)
     exper_grids = ExperimentGrid.(joinpath.(data_dirs, "grid_config.toml"))
 

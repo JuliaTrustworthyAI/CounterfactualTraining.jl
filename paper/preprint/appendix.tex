@@ -233,7 +233,7 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
 \hypersetup{
-  pdftitle={Supplementary Appendix},
+  pdftitle={Counterfactual Training: Teaching Models Plausible and Actionable Explanations},
   pdfkeywords={Counterfactual Training, Counterfactual
 Explanations, Algorithmic Recourse, Explainable AI, Representation
 Learning},
@@ -247,15 +247,15 @@ Learning},
 
 \newcommand{\runninghead}{}
 \renewcommand{\runninghead}{Counterfactual Training }
-\title{Supplementary Appendix}
+\title{Counterfactual Training: Teaching Models Plausible and Actionable
+Explanations}
 \usepackage{etoolbox}
 \makeatletter
 \providecommand{\subtitle}[1]{% add subtitle to \maketitle
   \apptocmd{\@title}{\par {\large #1 \par}}{}{}
 }
 \makeatother
-\subtitle{Counterfactual Training: Teaching Models Plausible and
-Actionable Explanations}
+\subtitle{Supplementary Appendix}
 \def\asep{\\\\\\ } % default: all authors on same column
 \def\asep{\And }
 \author{}
@@ -263,7 +263,7 @@ Actionable Explanations}
 \begin{document}
 \maketitle
 \begin{abstract}
-This is the supplementary appendix to our paper titled
+This is the supplementary appendix to our IEEE SaTML 2026 paper titled
 \emph{Counterfactual Training: Teaching Models Plausible and Actionable
 Explanations}. It provides helpful details on mathematical notations and
 formulas, our proposed training regime, extended empirical findings,
@@ -564,7 +564,7 @@ the application.
 Note~\ref{nte-train-default} presents the default hyperparameters used
 during training.
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-train-default}: Training Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, opacityback=0, rightrule=.15mm, title={Note \ref*{nte-train-default}: Training Phase}, breakable, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, arc=.35mm, colback=white, titlerule=0mm, bottomrule=.15mm, coltitle=black, left=2mm, leftrule=.75mm, toprule=.15mm]
 
 \quartocalloutnte{nte-train-default} 
 
@@ -681,7 +681,7 @@ the paper, we use larger evaluations, specifically:
   \(\lambda_{\text{egy}}\in\{0.1, 0.5, 1.0, 5.0, 10.0\}\).
 \end{itemize}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-eval-default}: Evaluation Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, opacityback=0, rightrule=.15mm, title={Note \ref*{nte-eval-default}: Evaluation Phase}, breakable, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, arc=.35mm, colback=white, titlerule=0mm, bottomrule=.15mm, coltitle=black, left=2mm, leftrule=.75mm, toprule=.15mm]
 
 \quartocalloutnte{nte-eval-default} 
 
@@ -769,41 +769,42 @@ of the bootstrap distribution, respectively, for \(\alpha=0.01\).
 bootstrapped confidence intervals (99\%) for difference in mean outcomes
 grouped by dataset and evaluation metric. Column LB and UB show the
 lower and upper bound of the intervals, respectively, and computed using
-the percentile method. The underlying counterfactual evaluations are the
-same as the ones used to produce the main table in the paper.}
+the percentile method (for significance, interval should not include
+zero). The underlying counterfactual evaluations are the same as the
+ones used to produce the main table in the paper.}
 
 \centering{
 
 \begin{tabular}{lccccc}
   \toprule
   \textbf{Variable} & \textbf{Data} & \textbf{CT} & \textbf{BL} & \textbf{LB} & \textbf{UB} \\\midrule
-  Cost & Adult & 2.26 & 2.2 & -0.22 & 0.28 \\
-  Cost & CH & 1.46 & 2.46 & -1.1 & -0.89 \\
-  Cost & Circ & 0.67 & 1.23 & -0.58 & -0.53 \\
-  Cost & Cred & 2.68 & 2.29 & 0.16 & 0.63 \\
-  Cost & GMSC & 1.14 & 3.05 & -2.45 & -1.77 \\
-  Cost & LS & 3.82 & 4.44 & -0.7 & -0.56 \\
-  Cost & MNIST & 77.04 & 68.67 & -3.47 & 18.34 \\
-  Cost & Moon & 1.55 & 1.6 & -0.08 & -0.01 \\
-  Cost & OL & 1.62 & 2.63 & -1.15 & -0.81 \\
-  $ \text{IP}^* $ & Adult & 0.07 & 0.11 & -0.06 & -0.01 \\
-  $ \text{IP}^* $ & CH & 0.02 & 0.06 & -0.06 & -0.04 \\
+  Cost & Adult & 2.19 & 2.28 & -0.32 & 0.11 \\
+  Cost & CH & 1.37 & 2.46 & -1.18 & -1.0 \\
+  Cost & Circ & 0.7 & 1.22 & -0.55 & -0.49 \\
+  Cost & Cred & 2.7 & 2.29 & 0.16 & 0.6 \\
+  Cost & GMSC & 1.03 & 3.04 & -2.37 & -1.86 \\
+  Cost & LS & 3.75 & 4.48 & -0.8 & -0.67 \\
+  Cost & MNIST & 72.08 & 53.42 & 11.15 & 26.68 \\
+  Cost & Moon & 1.52 & 1.6 & -0.12 & -0.05 \\
+  Cost & OL & 1.55 & 2.62 & -1.25 & -0.9 \\
+  $ \text{IP}^* $ & Adult & 0.07 & 0.11 & -0.06 & -0.02 \\
+  $ \text{IP}^* $ & CH & 0.02 & 0.06 & -0.05 & -0.03 \\
   $ \text{IP}^* $ & Circ & 0.0 & 0.0 & -0.01 & -0.0 \\
   $ \text{IP}^* $ & Cred & 0.03 & 0.06 & -0.05 & -0.01 \\
-  $ \text{IP}^* $ & GMSC & 0.02 & 0.07 & -0.06 & -0.04 \\
-  $ \text{IP}^* $ & LS & 0.1 & 0.23 & -0.14 & -0.12 \\
-  $ \text{IP}^* $ & MNIST & 0.04 & 0.04 & -0.1 & 0.09 \\
-  $ \text{IP}^* $ & Moon & 0.02 & 0.02 & -0.01 & -0.0 \\
+  $ \text{IP}^* $ & GMSC & 0.05 & 0.07 & -0.02 & -0.01 \\
+  $ \text{IP}^* $ & LS & 0.11 & 0.23 & -0.13 & -0.11 \\
+  $ \text{IP}^* $ & MNIST & 0.02 & 0.02 & -0.07 & 0.07 \\
+  $ \text{IP}^* $ & Moon & 0.02 & 0.02 & -0.01 & 0.0 \\
   $ \text{IP}^* $ & OL & 0.12 & 0.09 & -0.01 & 0.05 \\
-  $ \text{IP} $ & Adult & 15.03 & 15.15 & -0.68 & 0.26 \\
-  $ \text{IP} $ & CH & 6.61 & 7.52 & -1.17 & -0.63 \\
-  $ \text{IP} $ & Circ & 1.03 & 2.36 & -1.37 & -1.29 \\
-  $ \text{IP} $ & Cred & 19.31 & 22.03 & -3.69 & -1.74 \\
-  $ \text{IP} $ & GMSC & 6.19 & 8.09 & -2.4 & -1.49 \\
-  $ \text{IP} $ & LS & 2.41 & 3.4 & -1.04 & -0.94 \\
-  $ \text{IP} $ & MNIST & 258.83 & 278.54 & -30.49 & -7.64 \\
-  $ \text{IP} $ & Moon & 1.36 & 1.71 & -0.38 & -0.32 \\
-  $ \text{IP} $ & OL & 4.49 & 4.44 & -0.03 & 0.13 \\\bottomrule
+  $ \text{IP} $ & Adult & 15.13 & 15.16 & -0.42 & 0.39 \\
+  $ \text{IP} $ & CH & 6.72 & 7.52 & -1.05 & -0.6 \\
+  $ \text{IP} $ & Circ & 0.97 & 2.36 & -1.44 & -1.35 \\
+  $ \text{IP} $ & Cred & 19.79 & 22.02 & -3.17 & -1.42 \\
+  $ \text{IP} $ & GMSC & 7.24 & 8.1 & -1.26 & -0.38 \\
+  $ \text{IP} $ & LS & 2.51 & 3.4 & -0.95 & -0.84 \\
+  $ \text{IP} $ & MNIST & 261.05 & 278.84 & -27.38 & -7.51 \\
+  $ \text{IP} $ & Moon & 1.37 & 1.71 & -0.36 & -0.3 \\
+  $ \text{IP} $ & OL & 4.52 & 4.44 & -0.03 & 0.19 \\\bottomrule
 \end{tabular}
 
 }
@@ -933,52 +934,21 @@ meaningful comparison. In the case of real-world datasets we choose to
 normalize the values to a \([0,1]\) range instead. We compare the
 (average) sensitivity to the features that were protected for CT models.
 Once again we use bootstrapping (100 rounds, 2500 samples per round) to
-establish the significance of our results. These are presented in
-Table~\ref{tbl-ig}.
+establish the significance of our results (Figure~\ref{fig-ig-box}).
 
-We observe substantial and statistically significant improvements for
-seven out of nine datasets. For the synthetic datasets we observe
-reduction in sensitivity to the protected feature in 3 out of 4 cases.
-The only dataset negatively impacted by CT --- albeit with highly
-variable results --- is \emph{Moon}, which clearly violates the
-assumptions in Proposition 3.1. For the real-world datasets, the
-reductions are over two-fold for \emph{Adult} and \emph{CH} and almost
-three-fold for \emph{MNIST}. In case of \emph{Cred} we can fully prevent
-the CT model from considering \emph{age} as a factor in classification.
-Only for \emph{GMSC} we observe negative impacts of CT which we believe
-is due to any or all of the following: a) data assumptions are violated;
-b) the impact of other components of the CT objective outweighs expected
-effects of feature protection; or c) the default baseline choice applied
-consistently to all datasets is not appropriate for GMSC.
-
-\begin{table}
-
-\caption{\label{tbl-ig}Average sensitivity \(\pm\) bootstrapped standard
-errors of protected features as per standardized integrated gradients.}
+\begin{figure}
 
 \centering{
 
-\begin{tabular}{
-l
-S[table-format=2.2(3.2)]
-S[table-format=2.2(2.2)]
-}
-  \toprule
-  \textbf{Data} & \textbf{CT} & \textbf{BL} \\\midrule
-  LS & 0.03 \pm 0.0 & 10.24 \pm 2.4 \\
-  Circ & 3.2 \pm 0.67 & 149.76 \pm 842.75 \\
-  Moon & 60.84 \pm 128.51 & 0.55 \pm 0.06 \\
-  OL & 0.78 \pm 0.12 & 4.81 \pm 1.08 \\\midrule
-  Adult & 0.43 \pm 0.01 & 1.0 \pm 0.0 \\
-  CH & 0.08 \pm 0.01 & 0.23 \pm 0.01 \\
-  Cred & 0.0 \pm 0.0 & 0.43 \pm 0.01 \\
-  GMSC & 1.0 \pm 0.0 & 0.21 \pm 0.03 \\
-  MNIST & 0.18 \pm 0.01 & 0.41 \pm 0.01 \\\bottomrule
-\end{tabular}
+\pandocbounded{\includegraphics[keepaspectratio]{../../paper/figures/ig_box.png}}
 
 }
 
-\end{table}%
+\caption{\label{fig-ig-box}Interquartile ranges of bootstrap outcomes
+for sensitivity to protected features measured by standardized
+integrated gradients.}
+
+\end{figure}%
 
 \subsubsection{Costs and Validity}\label{costs-and-validity}
 
@@ -1031,11 +1001,11 @@ of reasons this should not be seen as problematic:
   From a philosophical perspective on algorithmic recourse, validity in
   and off itself is not a sufficient desideratum for counterfactuals. In
   fact, Venkatasubramanian and Alfano
-  (\citeproc{ref-ven2020philosophical}{2020}) propose introducing an
-  upper bound on costs of the flipset (i.e.~the set of valid CE),
-  arguing that valid but highly costly counterfactuals are not useful to
-  individuals in practice. In a similar fashion, it could be argued that
-  there should be an upper bound on the implausibility of
+  (\citeproc{ref-venkatasubramanian2020philosophical}{2020}) propose
+  introducing an upper bound on costs of the flipset (i.e.~the set of
+  valid CE), arguing that valid but highly costly counterfactuals are
+  not useful to individuals in practice. In a similar fashion, it could
+  be argued that there should be an upper bound on the implausibility of
   counterfactuals in the flipset.
 \end{enumerate}
 
@@ -1057,16 +1027,16 @@ S[table-format=2.2(1.2)]
 }
   \toprule
   \textbf{Data} & \textbf{Cost $(-\%)$} \\\midrule
-  LS & -26.82\pm0.86 $^{*}$ \\
-  Circ & 40.97\pm0.82 $^{*}$ \\
-  Moon & 33.83\pm0.98 $^{*}$ \\
-  OL & 10.35\pm1.28 $^{*}$ \\\midrule
-  Adult & 1.16\pm3.53 $^{}$ \\
-  CH & -34.89\pm2.31 $^{*}$ \\
-  Cred & 28.24\pm1.08 $^{*}$ \\
-  GMSC & 3.54\pm5.78 $^{}$ \\
-  MNIST & -31.67\pm7.72 $^{*}$ \\\midrule
-  Avg. & 2.75 \\\bottomrule
+  LS & -27.11\pm0.75 $^{*}$ \\
+  Circ & 40.17\pm0.85 $^{*}$ \\
+  Moon & 32.54\pm1.23 $^{*}$ \\
+  OL & 12.08\pm1.58 $^{*}$ \\\midrule
+  Adult & -4.59\pm2.54 $^{}$ \\
+  CH & -33.04\pm1.96 $^{*}$ \\
+  Cred & 27.43\pm1.05 $^{*}$ \\
+  GMSC & -22.4\pm3.64 $^{*}$ \\
+  MNIST & -40.71\pm7.02 $^{*}$ \\\midrule
+  Avg. & -1.74 \\\bottomrule
 \end{tabular}
 
 }
@@ -1087,13 +1057,13 @@ and BL. Unconstrained case.}
   \toprule
   \textbf{Data} & \textbf{CT} & \textbf{BL} \\\midrule
   LS & 1.0 & 1.0 \\
-  Circ & 0.97 & 0.52 \\
+  Circ & 1.0 & 0.51 \\
   Moon & 1.0 & 1.0 \\
-  OL & 0.87 & 0.98 \\\midrule
-  Adult & 0.61 & 0.99 \\
-  CH & 0.96 & 1.0 \\
-  Cred & 0.7 & 1.0 \\
-  GMSC & 0.63 & 1.0 \\
+  OL & 0.86 & 0.98 \\\midrule
+  Adult & 0.68 & 0.99 \\
+  CH & 1.0 & 1.0 \\
+  Cred & 0.72 & 1.0 \\
+  GMSC & 0.94 & 1.0 \\
   MNIST & 1.0 & 1.0 \\\bottomrule
 \end{tabular}
 
@@ -1112,13 +1082,13 @@ for CT and BL. Mutability constrained case.}
   \toprule
   \textbf{Data} & \textbf{CT} & \textbf{BL} \\\midrule
   LS & 1.0 & 1.0 \\
-  Circ & 0.67 & 0.49 \\
-  Moon & 0.99 & 0.98 \\
-  OL & 0.37 & 0.57 \\\midrule
-  Adult & 0.56 & 0.99 \\
-  CH & 0.96 & 1.0 \\
-  Cred & 0.67 & 1.0 \\
-  GMSC & 0.38 & 1.0 \\
+  Circ & 0.71 & 0.48 \\
+  Moon & 1.0 & 0.98 \\
+  OL & 0.34 & 0.56 \\\midrule
+  Adult & 0.7 & 0.99 \\
+  CH & 1.0 & 1.0 \\
+  Cred & 0.74 & 1.0 \\
+  GMSC & 0.97 & 1.0 \\
   MNIST & 1.0 & 1.0 \\\bottomrule
 \end{tabular}
 
@@ -1264,7 +1234,7 @@ training is shown in Note~\ref{nte-gen-params-final-run-train}. The
 corresponding evaluation grid used for these experiments is shown in
 Note~\ref{nte-gen-params-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, opacityback=0, rightrule=.15mm, title={Note \ref*{nte-gen-params-final-run-train}: Training Phase}, breakable, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, arc=.35mm, colback=white, titlerule=0mm, bottomrule=.15mm, coltitle=black, left=2mm, leftrule=.75mm, toprule=.15mm]
 
 \quartocalloutnte{nte-gen-params-final-run-train} 
 
@@ -1298,7 +1268,7 @@ Note~\ref{nte-gen-params-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, opacityback=0, rightrule=.15mm, title={Note \ref*{nte-gen-params-final-run-eval}: Evaluation Phase}, breakable, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, arc=.35mm, colback=white, titlerule=0mm, bottomrule=.15mm, coltitle=black, left=2mm, leftrule=.75mm, toprule=.15mm]
 
 \quartocalloutnte{nte-gen-params-final-run-eval} 
 
@@ -1516,7 +1486,7 @@ is shown in Note~\ref{nte-pen-final-run-train}. The corresponding
 evaluation grid used for these experiments is shown in
 Note~\ref{nte-pen-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, opacityback=0, rightrule=.15mm, title={Note \ref*{nte-pen-final-run-train}: Training Phase}, breakable, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, arc=.35mm, colback=white, titlerule=0mm, bottomrule=.15mm, coltitle=black, left=2mm, leftrule=.75mm, toprule=.15mm]
 
 \quartocalloutnte{nte-pen-final-run-train} 
 
@@ -1544,7 +1514,7 @@ Note~\ref{nte-pen-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, opacityback=0, rightrule=.15mm, title={Note \ref*{nte-pen-final-run-eval}: Evaluation Phase}, breakable, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, arc=.35mm, colback=white, titlerule=0mm, bottomrule=.15mm, coltitle=black, left=2mm, leftrule=.75mm, toprule=.15mm]
 
 \quartocalloutnte{nte-pen-final-run-eval} 
 
@@ -1761,7 +1731,7 @@ in Note~\ref{nte-train-final-run-train}. The corresponding evaluation
 grid used for these experiments is shown in
 Note~\ref{nte-train-final-run-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-train-final-run-train}: Training Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, opacityback=0, rightrule=.15mm, title={Note \ref*{nte-train-final-run-train}: Training Phase}, breakable, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, arc=.35mm, colback=white, titlerule=0mm, bottomrule=.15mm, coltitle=black, left=2mm, leftrule=.75mm, toprule=.15mm]
 
 \quartocalloutnte{nte-train-final-run-train} 
 
@@ -1789,7 +1759,7 @@ Note~\ref{nte-train-final-run-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, opacityback=0, rightrule=.15mm, title={Note \ref*{nte-train-final-run-eval}: Evaluation Phase}, breakable, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, arc=.35mm, colback=white, titlerule=0mm, bottomrule=.15mm, coltitle=black, left=2mm, leftrule=.75mm, toprule=.15mm]
 
 \quartocalloutnte{nte-train-final-run-eval} 
 
@@ -2052,7 +2022,7 @@ The hyperparameter grid for tuning key parameters is shown in
 Note~\ref{nte-tune-train}. The corresponding evaluation grid used for
 these experiments is shown in Note~\ref{nte-tune-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-tune-train}: Training Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, opacityback=0, rightrule=.15mm, title={Note \ref*{nte-tune-train}: Training Phase}, breakable, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, arc=.35mm, colback=white, titlerule=0mm, bottomrule=.15mm, coltitle=black, left=2mm, leftrule=.75mm, toprule=.15mm]
 
 \quartocalloutnte{nte-tune-train} 
 
@@ -2082,7 +2052,7 @@ these experiments is shown in Note~\ref{nte-tune-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-tune-eval}: Evaluation Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, opacityback=0, rightrule=.15mm, title={Note \ref*{nte-tune-eval}: Evaluation Phase}, breakable, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, arc=.35mm, colback=white, titlerule=0mm, bottomrule=.15mm, coltitle=black, left=2mm, leftrule=.75mm, toprule=.15mm]
 
 \quartocalloutnte{nte-tune-eval} 
 
@@ -2389,7 +2359,7 @@ The hyperparameter grid for tuning the learning rate is shown in
 Note~\ref{nte-tune_lr-train}. The corresponding evaluation grid used for
 these experiments is shown in Note~\ref{nte-tune_lr-eval}.
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-tune_lr-train}: Training Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, opacityback=0, rightrule=.15mm, title={Note \ref*{nte-tune_lr-train}: Training Phase}, breakable, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, arc=.35mm, colback=white, titlerule=0mm, bottomrule=.15mm, coltitle=black, left=2mm, leftrule=.75mm, toprule=.15mm]
 
 \quartocalloutnte{nte-tune_lr-train} 
 
@@ -2419,7 +2389,7 @@ these experiments is shown in Note~\ref{nte-tune_lr-eval}.
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[enhanced jigsaw, breakable, bottomrule=.15mm, opacitybacktitle=0.6, colback=white, arc=.35mm, toprule=.15mm, coltitle=black, left=2mm, colbacktitle=quarto-callout-note-color!10!white, toptitle=1mm, titlerule=0mm, colframe=quarto-callout-note-color-frame, title={Note \ref*{nte-tune_lr-eval}: Evaluation Phase}, leftrule=.75mm, rightrule=.15mm, bottomtitle=1mm, opacityback=0]
+\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, opacityback=0, rightrule=.15mm, title={Note \ref*{nte-tune_lr-eval}: Evaluation Phase}, breakable, colframe=quarto-callout-note-color-frame, bottomtitle=1mm, colbacktitle=quarto-callout-note-color!10!white, opacitybacktitle=0.6, arc=.35mm, colback=white, titlerule=0mm, bottomrule=.15mm, coltitle=black, left=2mm, leftrule=.75mm, toprule=.15mm]
 
 \quartocalloutnte{nte-tune_lr-eval} 
 
@@ -2725,13 +2695,11 @@ counterfactuals in each epoch. Data: Overlapping.}
 
 \subsection{Hardware}\label{sec-app-hardware}
 
-We performed our experiments on a high-performance cluster. Details
-about the cluster will be disclosed upon publication to avoid revealing
-information that might interfere with the double-blind review process.
-Since our experiments involve highly parallel tasks and rather small
-models by today's standard, we have relied on distributed computing
-across multiple central processing units (CPU). Graphical processing
-units (GPU) were \emph{not} used.
+We performed our experiments on a high-performance cluster
+(\citeproc{ref-DHPC2022}{(DHPC) 2022}). Since our experiments involve
+highly parallel tasks and rather small models by today's standard, we
+have relied on distributed computing across multiple central processing
+units (CPU). Graphical processing units (GPU) were \emph{not} used.
 
 \subsubsection{Grid Searches}\label{grid-searches}
 
@@ -2763,6 +2731,8 @@ took 4h12m. For the \emph{CNN}, training of all models took
 
 \subsection{Software}\label{sec-app-software}
 
+Our code has been open-sourced on GitHub as Julia package:
+\href{https://github.com/JuliaTrustworthyAI/CounterfactualTraining.jl}{CounterfactualTraining.jl}.
 All computations were performed in the Julia Programming Language
 (\citeproc{ref-bezanson2017julia}{Bezanson et al. 2017}). We have
 developed a package for counterfactual training that leverages and
@@ -2779,10 +2749,8 @@ because it currently appears to be the most comprehensive and extensible
 package for counterfactual explanations. Despite its good interplay with
 Flux.jl, the package is not, however, optimized to be used in training.
 This has caused some issues with memory management and bottlenecked
-performance. All of our code will be provided to reviewers of this work
-and open-sourced upon publication. The code is commented with clearly
-marked references to the paper (look for
-\texttt{\#\ -\/-\/-\/-\/-\ PAPER\ REF\ -\/-\/-\/-\/-}).
+performance. The code is commented with clearly marked references to the
+paper (look for \texttt{\#\ -\/-\/-\/-\/-\ PAPER\ REF\ -\/-\/-\/-\/-}).
 
 For data-wrangling and presentation-ready tables we relied on
 \href{https://dataframes.juliadata.org/v1.7/}{DataFrames.jl}
@@ -2817,7 +2785,7 @@ sessions. Additional details can be found in the code base.
 \begin{CSLReferences}{1}{0}
 \bibitem[\citeproctext]{ref-altmeyer2023explaining}
 Altmeyer, Patrick, Arie van Deursen, and Cynthia C. S. Liem. 2023.
-{``{Explaining Black-Box Models through Counterfactuals}.''} In
+{``Explaining Black-Box Models Through Counterfactuals.''} In
 \emph{Proceedings of the JuliaCon Conferences}, 1:130.
 
 \bibitem[\citeproctext]{ref-altmeyer2024faithful}
@@ -2861,9 +2829,14 @@ High-Performance Data Visualization for {Julia}.''} \emph{Journal of
 Open Source Software} 6 (65): 3349.
 \url{https://doi.org/10.21105/joss.03349}.
 
+\bibitem[\citeproctext]{ref-DHPC2022}
+(DHPC), Delft High Performance Computing Centre. 2022. {``{D}elft{B}lue
+{S}upercomputer ({P}hase 1).''}
+\url{https://www.tudelft.nl/dhpc/ark:/44463/DelftBluePhase1}.
+
 \bibitem[\citeproctext]{ref-goodfellow2014explaining}
 Goodfellow, Ian, Jonathon Shlens, and Christian Szegedy. 2015.
-{``{Explaining and Harnessing Adversarial Examples}.''}
+{``Explaining and Harnessing Adversarial Examples.''}
 \url{https://arxiv.org/abs/1412.6572}.
 
 \bibitem[\citeproctext]{ref-grathwohl2020your}
@@ -2895,15 +2868,15 @@ Innes, Mike. 2018. {``Flux: {Elegant} Machine Learning with {Julia}.''}
 
 \bibitem[\citeproctext]{ref-joshi2019realistic}
 Joshi, Shalmali, Oluwasanmi Koyejo, Warut Vijitbenjaronk, Been Kim, and
-Joydeep Ghosh. 2019. {``{Towards Realistic Individual Recourse and
-Actionable Explanations in Black-Box Decision Making Systems}.''}
+Joydeep Ghosh. 2019. {``{Towards realistic individual recourse and
+actionable explanations in black-box decision making systems}.''}
 \url{https://arxiv.org/abs/1907.09615}.
 
 \bibitem[\citeproctext]{ref-schut2021generating}
 Schut, Lisa, Oscar Key, Rory McGrath, Luca Costabello, Bogdan Sacaleanu,
-Yarin Gal, et al. 2021. {``Generating {Interpretable Counterfactual
-Explanations By Implicit Minimisation} of {Epistemic} and {Aleatoric
-Uncertainties}.''} In \emph{International {Conference} on {Artificial
+Yarin Gal, et al. 2021. {``Generating Interpretable Counterfactual
+Explanations by Implicit Minimisation of Epistemic and Aleatoric
+Uncertainties.''} In \emph{International {Conference} on {Artificial
 Intelligence} and {Statistics}}, 1756--64. {PMLR}.
 
 \bibitem[\citeproctext]{ref-sturmfels2020visualizing}
@@ -2916,10 +2889,12 @@ Sundararajan, Mukund, Ankur Taly, and Qiqi Yan. 2017. {``Axiomatic
 Attribution for Deep Networks.''}
 \url{https://arxiv.org/abs/1703.01365}.
 
-\bibitem[\citeproctext]{ref-ven2020philosophical}
+\bibitem[\citeproctext]{ref-venkatasubramanian2020philosophical}
 Venkatasubramanian, Suresh, and Mark Alfano. 2020. {``The Philosophical
 Basis of Algorithmic Recourse.''} In \emph{Proceedings of the 2020
-Conference on Fairness, Accountability, and Transparency}, 284--93.
+Conference on Fairness, Accountability, and Transparency}, 284--93. FAT*
+'20. New York, NY, USA: Association for Computing Machinery.
+\url{https://doi.org/10.1145/3351095.3372876}.
 
 \bibitem[\citeproctext]{ref-wachter2017counterfactual}
 Wachter, Sandra, Brent Mittelstadt, and Chris Russell. 2017.

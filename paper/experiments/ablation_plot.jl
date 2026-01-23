@@ -1,5 +1,5 @@
 using CTExperiments.AlgebraOfGraphics
-using CTExperiments.CairoMakie
+using CTExperiments.Makie
 using CTExperiments.DataFrames
 using Serialization
 

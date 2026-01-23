@@ -5,12 +5,14 @@ projectdir = splitpath(pwd()) |>
 cd(projectdir)
 
 using CTExperiments
-using CTExperiments.CairoMakie
+using CTExperiments.AlgebraOfGraphics
+using CTExperiments.Makie
 using CTExperiments.CSV
 using CTExperiments.DataFrames
 using CTExperiments.Plots
 using CTExperiments.PrettyTables
 using CTExperiments.StatsBase
+using GLMakie
 using Random
 using Serialization
 
@@ -19,8 +21,8 @@ DotEnv.load!()
 ```
 
 ```{julia}
-res_dir = joinpath(ENV["FINAL_GRID_RESULTS"],"single")
-mtbl_dir = joinpath(ENV["FINAL_GRID_RESULTS"],"mutability")
+res_dir = joinpath(ENV["FINAL_MAIN_RESULTS"],"single")
+mtbl_dir = joinpath(ENV["FINAL_MAIN_RESULTS"],"mutability")
 ```
 
 \FloatBarrier
@@ -58,7 +60,6 @@ Final hyperparameters used for the main results presented in the main paper. Any
 df_mtbl = aggregate_ce_evaluation(
     mtbl_dir; 
     ratio=true, 
-    rebase=false, 
     y="distance", 
     agg_further_vars=["run", "lambda_energy_eval"], 
     total_uncertainty=false, 
@@ -73,7 +74,7 @@ Serialization.serialize("paper/experiments/output/final_table.jls", df)
 
 df = Serialization.deserialize("paper/experiments/output/final_table.jls")
 inputs = get_table_inputs(df, nothing; backend=Val(:latex))
-for fname in ["paper/quarto_aaai/tables/main.tex","paper/preprint/tables/main.tex"]
+for fname in ["paper/tables/main.tex","paper/preprint/tables/main.tex"]
     tabulate_results(
         inputs; 
         table_type=:tabular, 
@@ -164,7 +165,7 @@ tabulate_results(
 
 ```
 
-Mean outcomes for CT and BL along with bootstrapped confidence intervals (99%) for difference in mean outcomes grouped by dataset and evaluation metric. Column LB and UB show the lower and upper bound of the intervals, respectively, and computed using the percentile method. The underlying counterfactual evaluations are the same as the ones used to produce the main table in the paper. 
+Mean outcomes for CT and BL along with bootstrapped confidence intervals (99%) for difference in mean outcomes grouped by dataset and evaluation metric. Column LB and UB show the lower and upper bound of the intervals, respectively, and computed using the percentile method (for significance, interval should not include zero). The underlying counterfactual evaluations are the same as the ones used to produce the main table in the paper. 
 
 :::
 
@@ -218,42 +219,46 @@ We run IG on models trained on all datasets to compare their sensitivity to feat
 
 As IG outputs are not bounded (i.e., they are arbitrary real numbers), it becomes a challenge to meaningfully compare IG outputs of different models — ones that are trained conventionally, and ones that underwent counterfactual training. For our purposes, we observe with reference to our Proposition, that we are interested estimating changes in the relative contribution of protected features compared to mutable ones. Thus, to meaningfully compare integrated gradients for different models and to accommodate for variable ranges of outputs in absolute terms, we standardize the integrated gradients across features. 
 
-Let $\mathbf{g}_d$ denote the estimated IG for feature $d$. Then in the case of 2D synthetic datasets we find that taking the absolute value of the outputs, $|\mathbf{g}_d|$, and then dividing them by a $\max(\mathbf{g}) - \min(\mathbf{g})$ term allows us to make the most meaningful comparison. In the case of real-world datasets we choose to normalize the values to a $[0,1]$ range instead. We compare the (average) sensitivity to the features that were protected for CT models. Once again we use bootstrapping (100 rounds, 2500 samples per round) to establish the significance of our results. These are presented in @tbl-ig.
+Let $\mathbf{g}_d$ denote the estimated IG for feature $d$. Then in the case of 2D synthetic datasets we find that taking the absolute value of the outputs, $|\mathbf{g}_d|$, and then dividing them by a $\max(\mathbf{g}) - \min(\mathbf{g})$ term allows us to make the most meaningful comparison. In the case of real-world datasets we choose to normalize the values to a $[0,1]$ range instead. We compare the (average) sensitivity to the features that were protected for CT models. Once again we use bootstrapping (100 rounds, 2500 samples per round) to establish the significance of our results (@fig-ig-box). 
 
-We observe substantial and statistically significant improvements for seven out of nine datasets. For the synthetic datasets we observe reduction in sensitivity to the protected feature in 3 out of 4 cases. The only dataset negatively impacted by CT — albeit with highly variable results — is *Moon*, which clearly violates the assumptions in Proposition 3.1. For the real-world datasets, the reductions are over two-fold for *Adult* and *CH* and almost three-fold for *MNIST*. In case of *Cred* we can fully prevent the CT model from considering *age* as a factor in classification. Only for *GMSC* we observe negative impacts of CT which we believe is due to any or all of the following: a) data assumptions are violated; b) the impact of other components of the CT objective outweighs expected effects of feature protection; or c) the default baseline choice applied consistently to all datasets is not appropriate for GMSC.
-
-
-:::{#tbl-ig}
 
 ```{julia}
 #| output: asis
+#| eval: false
 
-df = Serialization.deserialize(joinpath(mtbl_dir, "ig.jls")) |>
-    df -> transform(df, [:mean, :se] => ByRow((m, s) -> LatexCell("$(round(m, digits=2)) \\pm $(round(s, digits=2))")) => :mean) |>
-    df -> select(df, Not(:se)) |>
-    df -> DataFrames.unstack(df, :objective, :mean) |>
-    df -> rename(df, :full => :CT, :vanilla => :BL) |>
-    df -> transform(df, :data => ByRow(d  -> CTExperiments.format_header(d)) => :data)
-inputs = get_table_inputs(df, nothing; backend=Val(:latex))
-al = [
-    "l", 
-    "S[table-format=2.2(3.2)]", 
-    "S[table-format=2.2(2.2)]"
-] 
-tabulate_results(
-    inputs,
-    al
-    ; 
-    table_type=:tabular,
-    alignment = [:l, fill(:c, ncol(df)-1)...],
-    wrap_table = false,
+df = Serialization.deserialize(joinpath(mtbl_dir, "ig.jls"))
+CTExperiments.bootstrap_ci_table(df, "ig.tex")
+```
+
+```{julia}
+#| eval: false
+
+df = Serialization.deserialize(joinpath(mtbl_dir, "ig_granular.jls"))
+df.data = [CTExperiments.LatexReplacements[x] for x in df.data]
+df.data = CTExperiments.CategoricalArrays.categorical(df.data, levels=["LS", "Circ", "Moon", "OL", "Adult", "CH", "Cred", "GMSC", "MNIST"])
+
+# Create the boxplots
+plt = data(df) * mapping(
+    :objective => (x -> ifelse(x == "vanilla", "BL", "CT")) => "Objective",
+    :mean => "Standardized IG",
+    col=:data,
+) * visual(BoxPlot, show_notch=true, show_outliers=false, orientation=:horizontal)
+
+# Draw the plot
+fig = draw(
+    plt,
+    figure=(; size=(1200, 220)),
+    facet=(; linkxaxes=:none),
+    axis = (; xticklabelrotation = pi/2),
 )
+
+# Save
+save("paper/figures/ig_box.png", fig, px_per_unit=2)
 
 ```
 
-Average sensitivity $\pm$ bootstrapped standard errors of protected features as per standardized integrated gradients.
 
-:::
+![Interquartile ranges of bootstrap outcomes for sensitivity to protected features measured by standardized integrated gradients.](/paper/figures/ig_box.png){#fig-ig-box}
 
 ### Costs and Validity
 
@@ -265,7 +270,7 @@ Concerning validity, we find that can lead to substantial reductions and only in
 
 1. Validity of gradient-based CE is a function on the number of steps and the step size which we both kept fixed during evaluation: simply adjusting $T=50$ to higher values or choosing a larger step size will lead to higher rates of validity.
 2. Even though reaching validity is sometimes "harder" in terms of the necessary number of steps for a given step size, we have already shown that the average distances that counterfactuals need to travel decrease for most datasets. Users care about costs in terms of feature distances, not search iteration steps.
-3. From a philosophical perspective on algorithmic recourse, validity in and off itself is not a sufficient desideratum for counterfactuals. In fact, @ven2020philosophical propose introducing an upper bound on costs of the flipset (i.e. the set of valid CE), arguing that valid but highly costly counterfactuals are not useful to individuals in practice. In a similar fashion, it could be argued that there should be an upper bound on the implausibility of counterfactuals in the flipset.
+3. From a philosophical perspective on algorithmic recourse, validity in and off itself is not a sufficient desideratum for counterfactuals. In fact, @venkatasubramanian2020philosophical propose introducing an upper bound on costs of the flipset (i.e. the set of valid CE), arguing that valid but highly costly counterfactuals are not useful to individuals in practice. In a similar fashion, it could be argued that there should be an upper bound on the implausibility of counterfactuals in the flipset.
 
 ::: {#tbl-panel layout="[[40,-20,40], [100]]"}
 
@@ -273,10 +278,10 @@ Concerning validity, we find that can lead to substantial reductions and only in
 #| eval: false
 
 df = final_table(
-    res_dir; 
+    res_dir;
     ce_var=["distance"], 
     agg_further_vars=[["run", "lambda_energy_eval"]], 
-    total_uncertainty=false, 
+    total_uncertainty=false,
 )
 Serialization.serialize("paper/experiments/output/costs.jls", df)
 ```
@@ -313,7 +318,6 @@ Reduction in average costs for CT vs. the baseline. Results correspond to the ca
 df = aggregate_ce_evaluation(
     res_dir; 
     ratio=false, 
-    rebase=false, 
     y="validity", 
     agg_further_vars=["run", "lambda_energy_eval"], 
     total_uncertainty=false, 
@@ -327,7 +331,6 @@ Serialization.serialize("paper/experiments/output/validity.jls", df)
 df = aggregate_ce_evaluation(
     mtbl_dir; 
     ratio=false, 
-    rebase=false, 
     y="validity", 
     agg_further_vars=["run", "lambda_energy_eval"], 
     total_uncertainty=false, 
@@ -383,3 +386,36 @@ Average validities of counterfactuals for CT and BL. Mutability constrained case
 Costs and validity.
 
 :::
+
+```{julia}
+#| output: asis
+#| eval: false
+
+df1 = Serialization.deserialize("paper/experiments/output/validity.jls")
+df2 = Serialization.deserialize("paper/experiments/output/validity_mtbl.jls")
+# Rename columns in df1
+df1_renamed = rename(df1, :CT => Symbol("CT mut."), :BL => Symbol("BL mut."))
+# Rename columns in df2  
+df2_renamed = rename(df2, :CT => Symbol("CT constr."), :BL => Symbol("BL constr."))
+# Remove the duplicate 'data' column from df2_renamed and horizontally concatenate
+df_combined = hcat(df1_renamed, select(df2_renamed, Not(:data)))
+# Calculate column averages (excluding the data column)
+avg_row = DataFrame(
+    :data => "Avg.",
+    Symbol("CT mut.") => mean(skipmissing(df_combined[:, Symbol("CT mut.")])),
+    Symbol("BL mut.") => mean(skipmissing(df_combined[:, Symbol("BL mut.")])),
+    Symbol("CT constr.") => mean(skipmissing(df_combined[:, Symbol("CT constr.")])),
+    Symbol("BL constr.") => mean(skipmissing(df_combined[:, Symbol("BL constr.")]))
+)
+# Append the average row
+df_combined = vcat(df_combined, avg_row)
+inputs = get_table_inputs(df_combined, nothing; backend=Val(:latex))
+tabulate_results(
+    inputs; 
+    table_type=:tabular,
+    alignment = [:l, fill(:c, ncol(df_combined)-1)...],
+    wrap_table = false,
+)
+
+```
+
