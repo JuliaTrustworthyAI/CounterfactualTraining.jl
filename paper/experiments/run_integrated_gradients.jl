@@ -31,7 +31,7 @@ if MPI.Comm_rank(MPI.COMM_WORLD) != 0
     global_logger(NullLogger())
     expers = nothing
 else
-    @info "Running on $nprocs processes" 
+    @info "Running on $nprocs processes"
     @info "Looking for results in $res_dir"
     # Get experiments for all datasets:
     expers = final_results(res_dir; keep_models)[2]
@@ -78,17 +78,16 @@ for (i, exper_list) in enumerate(expers)
 
             igs = (ig -> ig[exper.data.mutability, 1]).(igs) |> igs -> reduce(hcat, igs)
 
-
             # aggregate:
             m = mean(igs; dims=1)           # across features
 
             # Store granular means in separate DataFrame
             m_vec = vec(m)
-            granular_df = DataFrame(
-                round = 1:length(m_vec),
-                data = fill(data, length(m_vec)),
-                objective = fill(obj, length(m_vec)),
-                mean = m_vec
+            granular_df = DataFrame(;
+                round=1:length(m_vec),
+                data=fill(data, length(m_vec)),
+                objective=fill(obj, length(m_vec)),
+                mean=m_vec,
             )
 
             # Calculate summary statistics
@@ -97,13 +96,14 @@ for (i, exper_list) in enumerate(expers)
             med = quantile(m_vec, 0.5)
 
             # Create summary DataFrame
-            df = DataFrame(Dict(:data => data, :objective => obj, :median => med, :lb => lb, :ub => ub))
+            df = DataFrame(
+                Dict(:data => data, :objective => obj, :median => med, :lb => lb, :ub => ub)
+            )
             select!(df, [:data, :objective, :median, :lb, :ub])
             display(df)
 
             push!(output, df)
             push!(granular_output, granular_df)  # Assuming you have a granular_output array
- 
         end
     end
 end

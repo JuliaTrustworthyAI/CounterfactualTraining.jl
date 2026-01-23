@@ -21,13 +21,12 @@ df = aggregate_ce_evaluation(
     res_dir;
     ratio=false,
     verbose=true,
-    y="plausibility_distance_from_target", 
-    agg_further_vars=["run", "lambda_energy_eval"], 
-    total_uncertainty=false,    
+    y="plausibility_distance_from_target",
+    agg_further_vars=["run", "lambda_energy_eval"],
+    total_uncertainty=false,
     drop_models=String[],
     return_sig_level=true,
 )
-
 
 Serialization.serialize("paper/experiments/output/final_table_ablation.jls", df)
 
@@ -35,9 +34,9 @@ df = aggregate_ce_evaluation(
     res_dir;
     ratio=false,
     verbose=true,
-    y="mmd", 
-    agg_further_vars=["run", "lambda_energy_eval"], 
-    total_uncertainty=false,    
+    y="mmd",
+    agg_further_vars=["run", "lambda_energy_eval"],
+    total_uncertainty=false,
     drop_models=String[],
     return_sig_level=true,
 )

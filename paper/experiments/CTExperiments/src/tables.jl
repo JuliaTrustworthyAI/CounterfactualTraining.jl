@@ -261,18 +261,18 @@ end
 function bootstrap_ci_table(df::DataFrame, filename::String="bootstrap_table.tex")
     # Pivot the data to get full and vanilla side by side
     pivoted = Dict()
-    
+
     for row in eachrow(df)
         dataset = row.data
         obj = row.objective
-        
+
         if !haskey(pivoted, dataset)
             pivoted[dataset] = Dict()
         end
-        
+
         pivoted[dataset][obj] = (median=row.median, lb=row.lb, ub=row.ub)
     end
-    
+
     # Dataset name mapping
     name_map = Dict(
         "adult" => "Adult",
@@ -283,13 +283,23 @@ function bootstrap_ci_table(df::DataFrame, filename::String="bootstrap_table.tex
         "lin_sep" => "LS",
         "mnist" => "MNIST",
         "moons" => "Moons",
-        "over" => "Over"
+        "over" => "Over",
     )
-    
+
     # Define dataset order with grouping
-    dataset_order = ["lin_sep", "circles", "moons", "over", "midrule", 
-                     "adult", "cali", "credit", "gmsc", "mnist"]
-    
+    dataset_order = [
+        "lin_sep",
+        "circles",
+        "moons",
+        "over",
+        "midrule",
+        "adult",
+        "cali",
+        "credit",
+        "gmsc",
+        "mnist",
+    ]
+
     # Build LaTeX table
     latex = """
     \\begin{table}[htbp]
@@ -304,17 +314,17 @@ function bootstrap_ci_table(df::DataFrame, filename::String="bootstrap_table.tex
     \\textbf{Dataset} & \\multicolumn{3}{c}{\\textbf{CT}} & \\multicolumn{3}{c}{\\textbf{BL}} \\\\
     \\midrule
     """
-    
+
     for dataset in dataset_order
         if dataset == "midrule"
             latex *= "    \\midrule\n"
             continue
         end
-        
+
         display_name = get(name_map, dataset, dataset)
         ct_val = get(get(pivoted, dataset, Dict()), "full", nothing)
         bl_val = get(get(pivoted, dataset, Dict()), "vanilla", nothing)
-        
+
         if !isnothing(ct_val)
             ct_mean = @sprintf("%.2f", ct_val.median)
             ct_lb = @sprintf("%.2f", ct_val.lb)
@@ -324,7 +334,7 @@ function bootstrap_ci_table(df::DataFrame, filename::String="bootstrap_table.tex
             ct_lb = "{---}"
             ct_ub = "{---}"
         end
-        
+
         if !isnothing(bl_val)
             bl_mean = @sprintf("%.2f", bl_val.median)
             bl_lb = @sprintf("%.2f", bl_val.lb)
@@ -334,23 +344,22 @@ function bootstrap_ci_table(df::DataFrame, filename::String="bootstrap_table.tex
             bl_lb = "{---}"
             bl_ub = "{---}"
         end
-        
+
         latex *= "    $display_name & $ct_mean & $ct_lb & $ct_ub & $bl_mean & $bl_lb & $bl_ub \\\\[1ex]\n"
     end
-    
+
     latex *= """    \\bottomrule
     \\end{tabular}
     \\caption{Bootstrap confidence intervals (95\\%) for different datasets. CT: conformal training; BL: baseline.}
     \\label{tab:bootstrap_results}
     \\end{table}
     """
-    
+
     # Write to file
     open(filename, "w") do io
         write(io, latex)
     end
-    
+
     println("Table saved to $filename")
     return latex
 end
-

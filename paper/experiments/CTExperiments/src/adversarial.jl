@@ -80,7 +80,6 @@ function pgd(
     random_start=true,
     clamp_range::Union{Nothing,Tuple}=nothing,
 )
-
     x_orig = copy(x)
     x_adv = copy(x)
 
