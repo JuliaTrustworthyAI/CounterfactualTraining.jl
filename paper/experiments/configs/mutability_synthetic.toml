@@ -7,7 +7,7 @@ save_dir = ""
 
 [data_params]
 datadir = []
-mutability = [[1],"none"]
+mutability = [[1]]
 domain = []
 n_validation = []
 train_test_ratio = []
