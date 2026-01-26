@@ -292,7 +292,5 @@ function (obj::FullObjective)(
     # Adversarial loss:
     adversarial_loss = agg(Float32.(adversarial_loss))
 
-    return [
-        class_loss, implausibility_loss, regularization_loss, adversarial_loss
-    ]'obj.lambda
+    return [class_loss, implausibility_loss, regularization_loss, adversarial_loss]'obj.lambda
 end

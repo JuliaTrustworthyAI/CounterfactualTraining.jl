@@ -6,9 +6,13 @@ project:
     - "!docs/src/*.md"
 crossref:
   fig-prefix: Figure
-  tbl-prefix: Table
+  tbl-prefix: Table 
+  title-delim: 'space'
+  exr-prefix: RQ
+  exr-title: RQ
 resource-path:
   - docs/src/assets
+  - paper/figures
 format:
   commonmark:
     variant: -raw_html+tex_math_dollars
@@ -21,3 +25,5 @@ execute:
   output: false
   daemon: 60
 callout-icon: false
+
+ 

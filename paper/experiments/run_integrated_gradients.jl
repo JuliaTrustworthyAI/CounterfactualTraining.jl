@@ -11,10 +11,14 @@ using Serialization
 using Statistics
 using TaijaParallel
 
-res_dir = get_global_param("res_dir", "paper/experiments/output/final_run/mutability")
+# Setup:
+DotEnv.load!()
+set_global_seed()
+
+res_dir = get_global_param("res_dir", "paper/experiments/output/satml/mutability")
 keep_models = [get_global_param("drop_models", "mlp")]
 nrounds = get_global_param("nrounds", 100)
-nsamples = get_global_param("nsamples", 1000)
+nsamples = get_global_param("nsamples", 2500)
 verbose = get_global_param("verbose", false)
 
 # Initialize MPI
@@ -27,10 +31,12 @@ if MPI.Comm_rank(MPI.COMM_WORLD) != 0
     global_logger(NullLogger())
     expers = nothing
 else
+    @info "Running on $nprocs processes"
     @info "Looking for results in $res_dir"
     # Get experiments for all datasets:
     expers = final_results(res_dir; keep_models)[2]
     expers = load_list.(expers)
+    granular_output = DataFrame[]
     output = DataFrame[]
 end
 
@@ -39,6 +45,7 @@ expers = MPI.bcast(expers, comm; root=0)
 
 # Compute IG:
 for (i, exper_list) in enumerate(expers)
+    @info "Data set $i/$(length(expers))"
     data = CTExperiments.dname(exper_list[1].data)      # get dataset name
 
     # Bootstrap sample indices
@@ -71,20 +78,39 @@ for (i, exper_list) in enumerate(expers)
 
             igs = (ig -> ig[exper.data.mutability, 1]).(igs) |> igs -> reduce(hcat, igs)
 
-            # Aggregate:
-            m = mean(igs; dims=2)       # across rounds
-            m = mean(m; dims=1)[1]      # across features
-            se = std(igs; dims=2)       # across rounds 
-            se = mean(se; dims=1)[1]    # across features
-            df = DataFrame(Dict(:data => data, :objective => obj, :mean => m, :se => se))
+            # aggregate:
+            m = mean(igs; dims=1)           # across features
+
+            # Store granular means in separate DataFrame
+            m_vec = vec(m)
+            granular_df = DataFrame(;
+                round=1:length(m_vec),
+                data=fill(data, length(m_vec)),
+                objective=fill(obj, length(m_vec)),
+                mean=m_vec,
+            )
+
+            # Calculate summary statistics
+            lb = quantile(m_vec, 0.05/2)
+            ub = quantile(m_vec, 1 - 0.05/2)
+            med = quantile(m_vec, 0.5)
+
+            # Create summary DataFrame
+            df = DataFrame(
+                Dict(:data => data, :objective => obj, :median => med, :lb => lb, :ub => ub)
+            )
+            select!(df, [:data, :objective, :median, :lb, :ub])
             display(df)
 
             push!(output, df)
+            push!(granular_output, granular_df)  # Assuming you have a granular_output array
         end
     end
 end
 
 if rank == 0
+    granular_output = reduce(vcat, granular_output)
+    Serialization.serialize(joinpath(res_dir, "ig_granular.jls"), granular_output)
     output = reduce(vcat, output)
     Serialization.serialize(joinpath(res_dir, "ig.jls"), output)
     CSV.write(joinpath(res_dir, "ig.csv"), output)

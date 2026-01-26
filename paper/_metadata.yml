@@ -1,20 +1,37 @@
 title: "Counterfactual Training: Teaching Models Plausible and Actionable Explanations"
 title-running: "Counterfactual Training"
-bibliography: quarto_aaai/bibliography.bib
+bibliography: bibliography.bib
 keywords: 
   - Counterfactual Training
   - Counterfactual Explanations
   - Algorithmic Recourse
   - Explainable AI
   - Representation Learning
-crossref:
-  exr-title: "Parameters"
-  exr-prefix: "Parameters"
-  cor-title: "Research Question"
-  cor-prefix: "RQ"
 filters: 
   - abstract-section
+  - pseudocode
 header-includes: |
   \usepackage{placeins}
   \usepackage{siunitx}
 link-citations: true
+author:
+  - name: Patrick Altmeyer
+    affiliations:
+      - name: Delft University of Technology
+    orcid: 0000-0003-4726-8613
+    email: P.Altmeyer@tudelft.nl
+  - name: Aleksander Buszydlik
+    affiliations:
+      - name: Delft University of Technology
+    orcid: 0009-0004-1219-855X
+    email: A.J.Buszydlik@tudelft.nl
+  - name: Arie van Deursen
+    affiliations:
+      - name: Delft University of Technology
+    orcid: 0000-0003-4850-3312
+    email: Arie.vanDeursen@tudelft.nl
+  - name: Cynthia C. S. Liem
+    affiliations:
+      - name: Delft University of Technology
+    orcid: 0000-0002-5385-7695
+    email: C.C.S.Liem@tudelft.nl
