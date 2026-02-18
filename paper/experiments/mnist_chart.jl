@@ -31,7 +31,7 @@ img_ig = mosaicview(
 ## Counterfactuals:
 Random.seed!(42)    # change seed for different outcome
 overwrite = false   # set to `true` if you want to overwrite the file
-res_dir = "paper/experiments/output/final_run/mutability/"
+res_dir = "paper/experiments/output/satml/mutability/"
 fname = joinpath(res_dir, "mlp/mnist/grid_config.toml")
 expers = ExperimentGrid(fname) |> load_list                 # load the experiments
 models = (x -> load_results(x)[3]).(expers)                 # get models
@@ -69,10 +69,10 @@ end
 imgs_ct = imgs[1]
 imgs_bl = imgs[2]
 img_ce = mosaicview(imgs_bl..., imgs_ct...; nrow=2, rowmajor=true)
-Images.save("paper/figures/mnist_ce.png", img_ce)
+Images.save("paper/figures/mnist_ce.png", img_ce, dpi=400)
 
 # Combined image:
 idx = [findall(all_digits .== x)[1] for x in chosen_digits]
 img_ce = mosaicview(imgs_bl[idx]..., imgs_ct[idx]...; nrow=2, rowmajor=true)
 img = mosaicview(img_ce, img_ig; nrow=1)
-Images.save("paper/figures/mnist_body.png", img)
+Images.save("paper/figures/mnist_body.png", img, dpi=400)
