@@ -12,6 +12,9 @@ output: asis
 
 # CounterfactualTraining.jl
 
+> [!NOTE]
+> This is the version of the repository at the time of publication at SaTML. This version can be used to reproduce the results in the paper. It depends on the \#counterfactual-training branch of [CounterfactualExplanations.jl](https://github.com/JuliaTrustworthyAI/CounterfactualExplanations.jl/tree/counterfactual-training).
+
 This repository contains all the code used to generate the experiments for the paper *Counterfactual Training: Teaching Models Plausible and Actionable Explanations*.
 
 ## Structure
