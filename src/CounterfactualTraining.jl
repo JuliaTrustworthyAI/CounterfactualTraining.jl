@@ -17,15 +17,11 @@ module Native
     import ..CounterfactualTraining: VanillaObjective, EnergyDifferentialObjective
     import ..CounterfactualTraining: AdversarialObjective, FullObjective
 
-    include("native/data.jl")
-    include("native/convergence.jl")
-    include("native/generator.jl")
-    include("native/counterfactuals.jl")
-    include("native/training.jl")
+    using CounterfactualExplanations
+    import CounterfactualExplanations: AbstractGenerator, ECCoGenerator
+    using Flux
 
-    export AbstractNativeGenerator, ECCoGenerator
-    export NativeCFData
-    export MaxIterConvergence, DecisionThresholdConvergence
+    include("native/training.jl")
 end
 export Native
 
