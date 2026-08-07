@@ -14,6 +14,8 @@ module Native
     import ..CounterfactualTraining: AbstractObjective
     import ..CounterfactualTraining: implausibility, reg_loss
     import ..CounterfactualTraining: infer_domain_constraints, unwrap
+    import ..CounterfactualTraining: needs_counterfactuals
+    import ..CounterfactualTraining: accuracy
     import ..CounterfactualTraining: VanillaObjective, EnergyDifferentialObjective
     import ..CounterfactualTraining: AdversarialObjective, FullObjective
 
@@ -23,7 +25,7 @@ module Native
 
     include("native/training.jl")
 
-    export NativeGenerator, generate_counterfactuals!
+    export NativeGenerator, generate_counterfactuals!, generate_native!
 end
 export Native
 
