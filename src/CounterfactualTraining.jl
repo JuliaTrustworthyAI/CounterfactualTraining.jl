@@ -18,10 +18,12 @@ module Native
     import ..CounterfactualTraining: AdversarialObjective, FullObjective
 
     using CounterfactualExplanations
-    import CounterfactualExplanations: AbstractGenerator, ECCoGenerator
+    import CounterfactualExplanations: polynomial_decay
     using Flux
 
     include("native/training.jl")
+
+    export NativeGenerator, generate_counterfactuals!
 end
 export Native
 
