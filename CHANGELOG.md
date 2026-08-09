@@ -13,6 +13,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Removes all paper related infra.
 - Adds test suite.
 
+### Added
+
+- Updates to the documentation and README.
+
 ## Version [0.1.3] - 2026-02-18
 
 Changes and additions for final SaTML paper.
