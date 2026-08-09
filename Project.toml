@@ -16,9 +16,6 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 TaijaParallel = "bf1c2c22-5e42-4e78-8b6b-92e6c673eeb0"
 UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
 
-[sources]
-TaijaParallel = {rev = "counterfactual-training", url = "https://github.com/JuliaTrustworthyAI/TaijaParallel.jl.git"}
-
 [compat]
 Aqua = "0.8"
 ChainRulesCore = "1.25"
@@ -30,7 +27,7 @@ LinearAlgebra = "1"
 ProgressMeter = "1.10.2"
 Random = "1"
 StatsBase = "0.34"
-TaijaParallel = "1.0, 1.1"
+TaijaParallel = "1.1.2"
 Test = "1"
 UnicodePlots = "3.7"
 julia = "1.10"
