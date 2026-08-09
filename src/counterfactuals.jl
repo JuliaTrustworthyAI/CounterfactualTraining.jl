@@ -68,12 +68,15 @@ function generate!(
 
     # Get adversarial examples:
     advexms = map(ces) do ce
-        eltype(xs[1]).(get(ce.search, :last_valid_ae, ce.factual))
+        return eltype(xs[1]).(get(ce.search, :last_valid_ae, ce.factual))
     end
 
     targets = (ce -> ce.target).(ces)                                                               # get targets
-    neighbours =
-        (ce -> eltype(xs[1]).(find_potential_neighbours(ce, counterfactual_data, 1))).(ces)   # randomly draw a sample from the target class
+    neighbours = (
+        ce -> eltype(xs[1]).(find_potential_neighbours(ce, counterfactual_data, 1))
+    ).(
+        ces
+    )   # randomly draw a sample from the target class
     validities = (ce -> get(ce.search, :converged, false)).(ces)
     # Extract counterfactual if converged, else use neighbour (no penalty):
     counterfactuals = [

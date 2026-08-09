@@ -270,7 +270,7 @@ function generate_counterfactuals!(
     for iter in 1:maxiter
         # Compute gradient of the generator loss w.r.t. X′
         grads_val = Flux.withgradient(X′) do x
-            generator_loss(
+            return generator_loss(
                 generator,
                 model,
                 x,
@@ -666,7 +666,7 @@ function counterfactual_training(
                 ChainRulesCore.ignore_derivatives() do
                     push!(implausibilities, sum(implaus) / length(implaus))
                     push!(reg_losses, sum(regs) / length(regs))
-                    push!(validity_losses, adversarial_loss)
+                    return push!(validity_losses, adversarial_loss)
                 end
 
                 return loss(logits, label, implaus, regs, adversarial_loss)

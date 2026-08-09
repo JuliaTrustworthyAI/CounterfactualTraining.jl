@@ -34,7 +34,7 @@ function train!(model, X, y, opt_state; epochs=N_EPOCHS)
     for epoch in 1:epochs
         for (xb, yb) in loader
             grads = Flux.gradient(model) do m
-                Flux.logitcrossentropy(m(xb), yb)
+                return Flux.logitcrossentropy(m(xb), yb)
             end
             Flux.update!(opt_state, model, grads[1])
         end

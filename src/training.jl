@@ -167,7 +167,7 @@ function counterfactual_training(
                 ChainRulesCore.ignore_derivatives() do
                     push!(implausibilities, sum(implaus) / length(implaus))
                     push!(reg_losses, sum(regs) / length(regs))
-                    push!(validity_losses, adversarial_loss)
+                    return push!(validity_losses, adversarial_loss)
                 end
 
                 # ----- PAPER REF ----- #
@@ -296,7 +296,7 @@ function counterfactual_training(
             $validity_plt
             """
             open(fpath, "w") do file
-                write(file, a)
+                return write(file, a)
             end
         end
 
