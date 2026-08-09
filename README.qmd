@@ -10,6 +10,4 @@ crossref:
 output: asis
 ---
 
-# CounterfactualTraining.jl
-
-{{< include _intro.qmd >}}
+{{< include docs/src/_intro.qmd >}}
