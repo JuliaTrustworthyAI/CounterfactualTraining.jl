@@ -17,7 +17,7 @@ using LinearAlgebra
         @test gen.λ == [0.1f0, 1.0f0]
         @test gen.opt isa Flux.Descent
 
-        gen_custom = NativeGenerator(λ=[0.5f0, 2.0f0])
+        gen_custom = NativeGenerator(; λ=[0.5f0, 2.0f0])
         @test gen_custom.λ == [0.5f0, 2.0f0]
 
         # Test batched_energy
@@ -53,7 +53,9 @@ using LinearAlgebra
         # Test batched_apply_domain_constraints!
         X_data = randn(Float32, 3, 50)
         y_data = vcat(fill(1, 25), fill(2, 25))
-        data = CounterfactualData(X_data, y_data; domain=[(-2.0f0, 2.0f0), (-2.0f0, 2.0f0), (-2.0f0, 2.0f0)])
+        data = CounterfactualData(
+            X_data, y_data; domain=[(-2.0f0, 2.0f0), (-2.0f0, 2.0f0), (-2.0f0, 2.0f0)]
+        )
         X_clamped = copy(X_data)
         X_clamped[1, 1] = 100.0f0  # out of bounds
         Native.batched_apply_domain_constraints!(X_clamped, data)
@@ -132,12 +134,19 @@ using LinearAlgebra
 
         # Create generator and objective
         gen = NativeGenerator()
-        obj = VanillaObjective(needs_ce=true)
+        obj = VanillaObjective(; needs_ce=true)
 
         # Train
         model, log = counterfactual_training(
-            obj, model, gen, train_set, opt_state;
-            nepochs=10, verbose=0, maxiter=10, burnin=0.0f0
+            obj,
+            model,
+            gen,
+            train_set,
+            opt_state;
+            nepochs=10,
+            verbose=0,
+            maxiter=10,
+            burnin=0.0f0,
         )
 
         # Check results
@@ -185,11 +194,19 @@ using LinearAlgebra
             opt_state = Flux.setup(Flux.Adam(1e-3), model)
 
             gen = NativeGenerator()
-            obj = VanillaObjective(needs_ce=true)
+            obj = VanillaObjective(; needs_ce=true)
 
             model, log = counterfactual_training(
-                obj, model, gen, train_set, opt_state;
-                device=device, nepochs=5, verbose=0, maxiter=10, burnin=0.0f0
+                obj,
+                model,
+                gen,
+                train_set,
+                opt_state;
+                device=device,
+                nepochs=5,
+                verbose=0,
+                maxiter=10,
+                burnin=0.0f0,
             )
 
             @test length(log) == 5

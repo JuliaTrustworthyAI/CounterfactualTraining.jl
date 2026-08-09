@@ -65,7 +65,9 @@ Zeros out gradient components along immutable feature directions in-place.
 `mutability` is a vector of `Symbol`s (`:both`, `:none`, `:increase`, `:decrease`),
 one per feature row.
 """
-function batched_apply_mutability!(ΔX::AbstractMatrix, mutability::Union{Nothing,Vector{Symbol}})
+function batched_apply_mutability!(
+    ΔX::AbstractMatrix, mutability::Union{Nothing,Vector{Symbol}}
+)
     isnothing(mutability) && return ΔX
     T = eltype(ΔX)
     for (i, dir) in enumerate(mutability)
@@ -143,9 +145,9 @@ function track_adversarial_examples!(
 )
     perturbations = X′ .- X
     if p == Inf
-        norms = vec(maximum(abs, perturbations; dims = 1))
+        norms = vec(maximum(abs, perturbations; dims=1))
     else
-        norms = vec(sum(abs .^ p, perturbations; dims = 1) .^ (1 / p))
+        norms = vec(sum(abs .^ p, perturbations; dims=1) .^ (1 / p))
     end
     valid_ae = norms .<= epsilon
     last_valid_ae[:, valid_ae] .= X′[:, valid_ae]
@@ -180,7 +182,9 @@ function generator_loss(
     h1 = gen.λ[1] * sum(abs, X′ .- X)
 
     # Energy constraint with polynomial decay
-    ϕ = polynomial_decay(Float32(maxiter) / 250.0f0, Float32(maxiter) / 25.0f0, decay, iter + 1)
+    ϕ = polynomial_decay(
+        Float32(maxiter) / 250.0f0, Float32(maxiter) / 25.0f0, decay, iter + 1
+    )
     e = batched_energy(model, X′, target_idx)  # N-vector
     gen_loss = sum(e) / length(e)
     reg_loss_val = sum(abs2, e)
@@ -238,12 +242,12 @@ function generate_counterfactuals!(
     targets::Vector{Int},
     data::CounterfactualData,
     generator::NativeGenerator;
-    maxiter::Int = 30,
-    decision_threshold::Float32 = 0.75f0,
-    decay::Float32 = 0.9f0,
-    reg_strength::Float32 = 1.0f-3,
-    epsilon::Float32 = 0.3f0,
-    p::Real = Inf,
+    maxiter::Int=30,
+    decision_threshold::Float32=0.75f0,
+    decay::Float32=0.9f0,
+    reg_strength::Float32=1.0f-3,
+    epsilon::Float32=0.3f0,
+    p::Real=Inf,
 )
     N = size(X, 2)
 
@@ -266,8 +270,18 @@ function generate_counterfactuals!(
     for iter in 1:maxiter
         # Compute gradient of the generator loss w.r.t. X′
         grads_val = Flux.withgradient(X′) do x
-            generator_loss(generator, model, x, X, targets_onehot, targets, iter,
-                           reg_strength, decay, maxiter)
+            generator_loss(
+                generator,
+                model,
+                x,
+                X,
+                targets_onehot,
+                targets,
+                iter,
+                reg_strength,
+                decay,
+                maxiter,
+            )
         end
         ΔX = grads_val.grad[1]
 
@@ -284,8 +298,10 @@ function generate_counterfactuals!(
         track_adversarial_examples!(last_valid_ae, X, X′, epsilon, p)
 
         # Check convergence
-        probs = Flux.softmax(model(X′); dims = 1)
-        converged = check_batched_convergence(probs, targets, iter, maxiter, decision_threshold)
+        probs = Flux.softmax(model(X′); dims=1)
+        converged = check_batched_convergence(
+            probs, targets, iter, maxiter, decision_threshold
+        )
 
         # Early exit if all samples have converged
         if all(converged)
@@ -311,8 +327,8 @@ function find_neighbours(
     y::AbstractVector,
     targets::Vector{Int},
     y_levels::AbstractVector;
-    nneighbours::Int = 1,
-    rng = Random.default_rng(),
+    nneighbours::Int=1,
+    rng=Random.default_rng(),
 )
     D = size(X, 1)
     N = length(targets)
@@ -372,7 +388,10 @@ end
 Split `indices` into `n` roughly equal groups.  Returns a vector of vectors.
 """
 function split_obs(indices::AbstractRange, n::Int)
-    return [collect(part) for part in Base.Iterators.partition(indices, max(1, length(indices) ÷ n))]
+    return [
+        collect(part) for
+        part in Base.Iterators.partition(indices, max(1, length(indices) ÷ n))
+    ]
 end
 
 # ---------------------------------------------------------------------------
@@ -397,35 +416,36 @@ function generate_native!(
     model,
     train_set,
     generator::NativeGenerator;
-    nsamples::Union{Nothing,Int} = nothing,
-    nneighbours::Int = 1,
-    domain = nothing,
-    mutability = nothing,
-    maxiter::Int = 30,
-    decision_threshold::Float32 = 0.75f0,
-    decay::Float32 = 0.9f0,
-    reg_strength::Float32 = 1.0f-3,
-    epsilon::Float32 = 0.3f0,
-    p::Real = Inf,
-    verbose::Int = 1,
+    nsamples::Union{Nothing,Int}=nothing,
+    nneighbours::Int=1,
+    domain=nothing,
+    mutability=nothing,
+    maxiter::Int=30,
+    decision_threshold::Float32=0.75f0,
+    decay::Float32=0.9f0,
+    reg_strength::Float32=1.0f-3,
+    epsilon::Float32=0.3f0,
+    p::Real=Inf,
+    verbose::Int=1,
 )
     # Unwrap training data
     X, y_raw = unwrap(train_set)
 
     # Build CounterfactualData
-    data = CounterfactualData(X, y_raw; domain = domain, mutability = mutability)
+    data = CounterfactualData(X, y_raw; domain=domain, mutability=mutability)
 
     # Determine sample size
     N = size(X, 2)
     nsamples = isnothing(nsamples) ? N : min(nsamples, N)
     if nsamples < length(train_set)
-        @warn "Need at least one counterfactual per batch. Setting nsamples=$(length(train_set))." maxlog = 1
+        @warn "Need at least one counterfactual per batch. Setting nsamples=$(length(train_set))." maxlog =
+            1
         nsamples = length(train_set)
     end
 
     # Subsample factuals
     if nsamples < N
-        idx_sub = StatsBase.sample(1:N, nsamples; replace = false)
+        idx_sub = StatsBase.sample(1:N, nsamples; replace=false)
         X_sub = X[:, idx_sub]
     else
         idx_sub = collect(1:N)
@@ -443,14 +463,21 @@ function generate_native!(
 
     # Generate counterfactuals (batched)
     counterfactuals, last_valid_ae, converged_mask, maxiter = generate_counterfactuals!(
-        model, X_sub, targets, data, generator;
-        maxiter = maxiter, decision_threshold = decision_threshold,
-        decay = decay, reg_strength = reg_strength,
-        epsilon = epsilon, p = p,
+        model,
+        X_sub,
+        targets,
+        data,
+        generator;
+        maxiter=maxiter,
+        decision_threshold=decision_threshold,
+        decay=decay,
+        reg_strength=reg_strength,
+        epsilon=epsilon,
+        p=p,
     )
 
     # Find neighbours in target class
-    neighbours = find_neighbours(X, y_raw, targets, y_levels; nneighbours = nneighbours)
+    neighbours = find_neighbours(X, y_raw, targets, y_levels; nneighbours=nneighbours)
 
     # Protect immutable features
     protect_immutable!(neighbours, counterfactuals, data.mutability)
@@ -521,23 +548,23 @@ function counterfactual_training(
     generator::NativeGenerator,
     train_set,
     opt_state;
-    device = identity,
-    val_set = nothing,
-    nepochs::Int = 100,
-    burnin = 0.0f0,
-    nce::Union{Nothing,Int} = nothing,
-    nneighbours::Int = 100,
-    domain = nothing,
-    mutability = nothing,
-    maxiter::Int = 30,
-    decision_threshold::Float32 = 0.75f0,
-    decay::Float32 = 0.9f0,
-    reg_strength::Float32 = 1.0f-3,
-    epsilon::Float32 = 0.3f0,
-    p::Real = Inf,
-    verbose::Int = 1,
-    checkpoint_dir::Union{Nothing,String} = nothing,
-    callback::Union{Nothing,Function} = nothing,
+    device=identity,
+    val_set=nothing,
+    nepochs::Int=100,
+    burnin=0.0f0,
+    nce::Union{Nothing,Int}=nothing,
+    nneighbours::Int=100,
+    domain=nothing,
+    mutability=nothing,
+    maxiter::Int=30,
+    decision_threshold::Float32=0.75f0,
+    decay::Float32=0.9f0,
+    reg_strength::Float32=1.0f-3,
+    epsilon::Float32=0.3f0,
+    p::Real=Inf,
+    verbose::Int=1,
+    checkpoint_dir::Union{Nothing,String}=nothing,
+    callback::Union{Nothing,Function}=nothing,
     kwrgs...,
 )
     # Move model to device
@@ -556,7 +583,10 @@ function counterfactual_training(
         try
             _model, _opt_state, epoch, _log = JLD2.load(
                 joinpath(checkpoint_dir, "checkpoint.jld2"),
-                "model", "opt_state", "epoch", "log",
+                "model",
+                "opt_state",
+                "epoch",
+                "log",
             )
             model = _model |> device
             opt_state = _opt_state
@@ -572,7 +602,7 @@ function counterfactual_training(
     end
 
     if verbose in [1, 2]
-        p = Progress(nepochs - start_epoch; barglyphs = BarGlyphs("[=> ]"), color = :yellow)
+        p = Progress(nepochs - start_epoch; barglyphs=BarGlyphs("[=> ]"), color=:yellow)
     end
 
     for epoch in start_epoch:nepochs
@@ -585,18 +615,20 @@ function counterfactual_training(
         # Generate counterfactuals (batched, on device)
         if epoch > burnin && needs_counterfactuals(loss)
             counterfactual_dl, percent_valid, _ = generate_native!(
-                model, train_set, generator;
-                nsamples = nce,
-                nneighbours = nneighbours,
-                domain = domain,
-                mutability = mutability,
-                maxiter = maxiter,
-                decision_threshold = decision_threshold,
-                decay = decay,
-                reg_strength = reg_strength,
-                epsilon = epsilon,
-                p = p,
-                verbose = verbose,
+                model,
+                train_set,
+                generator;
+                nsamples=nce,
+                nneighbours=nneighbours,
+                domain=domain,
+                mutability=mutability,
+                maxiter=maxiter,
+                decision_threshold=decision_threshold,
+                decay=decay,
+                reg_strength=reg_strength,
+                epsilon=epsilon,
+                p=p,
+                verbose=verbose,
             )
             avg_iter = maxiter
         else
@@ -666,18 +698,29 @@ function counterfactual_training(
             log_adv_loss = nothing
         end
 
-        push!(log, (;
-            acc, acc_val, train_loss, implaus, log_reg_loss, log_adv_loss,
-            time_taken, percent_valid, avg_iter,
-        ))
+        push!(
+            log,
+            (;
+                acc,
+                acc_val,
+                train_loss,
+                implaus,
+                log_reg_loss,
+                log_adv_loss,
+                time_taken,
+                percent_valid,
+                avg_iter,
+            ),
+        )
 
         # Checkpointing (save CPU version)
         if !isnothing(checkpoint_dir)
             jldsave(
                 joinpath(checkpoint_dir, "checkpoint.jld2");
-                model = model |> Flux.cpu,
-                opt_state = opt_state,
-                epoch, log,
+                model=model |> Flux.cpu,
+                opt_state=opt_state,
+                epoch,
+                log,
             )
         end
 
