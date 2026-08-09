@@ -68,7 +68,7 @@ function generate!(
 
     # Get adversarial examples:
     advexms = map(ces) do ce
-        eltype(xs[1]).(get(ce.search, :last_valid_ae, ce.factual))
+        return eltype(xs[1]).(get(ce.search, :last_valid_ae, ce.factual))
     end
 
     targets = (ce -> ce.target).(ces)                                                               # get targets

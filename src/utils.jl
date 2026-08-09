@@ -25,12 +25,18 @@ function unwrap(train_set; labels=nothing)
     return X, ycold
 end
 
+"""
+    accuracy(model, train_set)
+
+Compute classification accuracy over a `DataLoader`. Uses `Flux.onecold` on
+whole matrices — GPU-compatible and faster than per-column `argmax`.
+"""
 function accuracy(model, train_set)
     acc = 0
     for (x, y) in train_set
-        yhat = [argmax(_x) for _x in eachcol(softmax(model(x)))]
-        y = Flux.onecold(y)
-        acc += sum(yhat .== y)
+        yhat = Flux.onecold(Flux.softmax(model(x)))
+        y_true = Flux.onecold(y)
+        acc += sum(yhat .== y_true)
     end
     return acc / size(train_set.data[1], 2)
 end

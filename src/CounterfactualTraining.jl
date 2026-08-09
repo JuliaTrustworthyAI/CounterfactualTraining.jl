@@ -9,4 +9,24 @@ export implausibility, reg_loss
 include("training.jl")
 export counterfactual_training
 
+module Native
+    import ..CounterfactualTraining: counterfactual_training
+    import ..CounterfactualTraining: AbstractObjective
+    import ..CounterfactualTraining: implausibility, reg_loss
+    import ..CounterfactualTraining: infer_domain_constraints, unwrap
+    import ..CounterfactualTraining: needs_counterfactuals
+    import ..CounterfactualTraining: accuracy
+    import ..CounterfactualTraining: VanillaObjective, EnergyDifferentialObjective
+    import ..CounterfactualTraining: AdversarialObjective, FullObjective
+
+    using CounterfactualExplanations
+    import CounterfactualExplanations: polynomial_decay
+    using Flux
+
+    include("native/training.jl")
+
+    export NativeGenerator, generate_counterfactuals!, generate_native!
+end
+export Native
+
 end

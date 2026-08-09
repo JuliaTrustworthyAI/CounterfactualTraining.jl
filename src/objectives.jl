@@ -1,4 +1,3 @@
-using CounterfactualExplanations
 using Flux
 using StatsBase
 

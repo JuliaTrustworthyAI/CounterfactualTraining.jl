@@ -6,9 +6,7 @@ CurrentModule = CounterfactualTraining
 
 Documentation for [CounterfactualTraining](https://github.com/JuliaTrustworthyAI/CounterfactualTraining.jl).
 
-```@index
-```
+{{< include _intro.qmd >}}
 
-```@autodocs
-Modules = [CounterfactualTraining]
+```@index
 ```
