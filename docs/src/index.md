@@ -8,7 +8,3 @@ Documentation for [CounterfactualTraining](https://github.com/JuliaTrustworthyAI
 
 ```@index
 ```
-
-```@autodocs
-Modules = [CounterfactualTraining]
-```
