@@ -1,5 +1,5 @@
 ``` @meta
-CurrentModule = CounterfactualExplanations
+CurrentModule = CounterfactualTraining
 ```
 
 # Reference
