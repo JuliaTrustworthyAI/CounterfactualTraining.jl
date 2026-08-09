@@ -22,3 +22,23 @@ The package was initially developed as part of our (IEEE SaTML 2026)[https://sat
 ## Package
 
 The package provides GPU-friendly training routines for models trained in Flux.jl.
+
+### Installation
+
+The package can be installed as follows:
+
+```{julia}
+#| eval: false
+#| echo: true
+
+using Pkg
+Pkg.add("CounterfactualTraining")
+```
+
+### Introduction
+
+<!-- TODO: Add an introductory example demonstrating the package functionality; the example should use the data and visualizations produced here: https://github.com/JuliaTrustworthyAI/CounterfactualTraining.jl/blob/main/paper/sections/other/constraints.qmd -->
+
+### Training on GPU
+
+<!-- TODO: Explain the two branches (initial research branch and performance-focused addition). Show how training can be done on the GPU. Ideally, add a somewhat more chunky model for MNIST, reproducing example here (only CE, not IG): https://github.com/JuliaTrustworthyAI/CounterfactualTraining.jl/blob/main/paper/experiments/mnist_chart.jl -->

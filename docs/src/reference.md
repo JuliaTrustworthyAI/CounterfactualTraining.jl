@@ -8,5 +8,5 @@ CurrentModule = CounterfactualTraining
 ```
 
 ```@autodocs
-Modules = [CounterfactualTraining]
+Modules = [CounterfactualTraining, CounterfactualTraining.Native]
 ```
