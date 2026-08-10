@@ -701,20 +701,25 @@ function counterfactual_training(
             label = label |> device
             perturbed_input, advexms, targets_enc, neighbours, factual_enc = counterfactual_dl[i]
 
+            # Move CF data to device before gradient (not differentiable)
+            if !isnothing(perturbed_input)
+                perturbed_input = perturbed_input |> device
+                advexms = advexms |> device
+                targets_enc = targets_enc |> device
+                neighbours = neighbours |> device
+                factual_enc = factual_enc |> device
+            end
+
             val, grads = Flux.withgradient(model) do m
                 logits = m(input)
 
                 if !isnothing(perturbed_input)
-                    perturbed_input = perturbed_input |> device
-                    advexms = advexms |> device
-                    targets_enc = targets_enc |> device
-                    neighbours = neighbours |> device
-                    factual_enc = factual_enc |> device
 
                     implaus = implausibility(m, perturbed_input, neighbours, targets_enc)
                     regs = reg_loss(m, perturbed_input, neighbours, targets_enc)
                     adversarial_loss = loss.class_loss(m(advexms), factual_enc)
                 else
+
                     implaus = [0.0f0]
                     regs = [0.0f0]
                     adversarial_loss = 0.0f0
