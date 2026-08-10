@@ -5,6 +5,8 @@ using Aqua
 using CounterfactualExplanations
 using Flux
 using LinearAlgebra
+using Random
+using Statistics
 
 @testset "CounterfactualTraining.jl" begin
     @testset "Code quality (Aqua.jl)" begin
@@ -218,4 +220,12 @@ using LinearAlgebra
             @test typeof(model.layers[1].weight) != Matrix{Float32}
         end
     end
+
+    include("loss_tests.jl")
+    include("utils_tests.jl")
+    include("objectives_tests.jl")
+    include("native_helpers_tests.jl")
+    include("native_edge_tests.jl")
+    include("counterfactuals_tests.jl")
+    include("training_tests.jl")
 end
