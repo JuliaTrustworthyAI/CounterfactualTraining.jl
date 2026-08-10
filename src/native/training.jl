@@ -175,19 +175,21 @@ function generator_loss(
     decay::Float32,
     maxiter::Int,
 )
-    # Classification loss (mean over N)
-    ℓ = Flux.logitcrossentropy(model(X′), targets_onehot)
+    # Classification loss (sum over N for full-strength per-sample gradients).
+    # CE.jl uses agg=mean then rescales the update by num_counterfactuals (×N);
+    # using agg=sum here is equivalent and avoids the rescale step.
+    ℓ = Flux.logitcrossentropy(model(X′), targets_onehot; agg=sum)
 
-    # L1 distance penalty (mean per-sample L1 norm, matching CE.jl's distance_l1 with agg=mean)
-    h1 = gen.λ[1] * sum(abs, X′ .- X) / size(X′, 2)
+    # L1 distance penalty (sum, equivalent to CE.jl's distance_l1 with agg=mean + rescale)
+    h1 = gen.λ[1] * sum(abs, X′ .- X)
 
     # Energy constraint with polynomial decay
     ϕ = polynomial_decay(
         Float32(maxiter) / 250.0f0, Float32(maxiter) / 25.0f0, decay, iter + 1
     )
     e = batched_energy(model, X′, target_idx)  # N-vector
-    gen_loss = sum(e) / length(e)
-    reg_loss_val = sum(abs2, e) / length(e)
+    gen_loss = sum(e)
+    reg_loss_val = sum(abs2, e)
     h2 = gen.λ[2] * ϕ * (gen_loss + reg_strength * reg_loss_val)
 
     return ℓ + h1 + h2

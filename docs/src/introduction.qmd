@@ -116,7 +116,7 @@ all_cfs = []
 for i in eachindex(models)
     cfs, _, converged, _ = generate_counterfactuals!(
         models[i], X_test, targets, ce_datasets[i], generator;
-        maxiter=30, decision_threshold=0.75f0,
+        maxiter=1000, decision_threshold=0.95f0,
     )
     push!(all_cfs, cfs)
 end
@@ -131,6 +131,11 @@ end
 _xlab = "Existing Debt"
 _ylab = "Age"
 
+# Subsample background data for plotting (GKS struggles with too many points):
+idx_plot = randperm(size(X, 2))[1:min(500, size(X, 2))]
+X_bg = X[:, idx_plot]
+y_bg = y[idx_plot]
+
 plts = []
 for (i, (title, obj, mutability)) in enumerate(specs)
     cfs = all_cfs[i]
@@ -142,16 +147,16 @@ for (i, (title, obj, mutability)) in enumerate(specs)
     ylab = mutability[2] == :both ? "$_ylab (mutable)" : "$_ylab (immutable)"
 
     plt = scatter(
-        X[1, y .== 1], X[2, y .== 1];
-        color=1, ms=3, label=false,
+        X_bg[1, y_bg .== 1], X_bg[2, y_bg .== 1];
+        color=1, ms=2, label=false,
         xlabel=xlab, ylabel=ylab,
         axis=nothing, legend=false, title=title,
     )
-    scatter!(plt, X[1, y .== 2], X[2, y .== 2]; color=2, ms=3, label=false)
+    scatter!(plt, X_bg[1, y_bg .== 2], X_bg[2, y_bg .== 2]; color=2, ms=2, label=false)
     if any(idx_plotted)
         scatter!(
             plt, cfs[1, idx_plotted], cfs[2, idx_plotted];
-            ms=15, shape=:star, color=yhat[idx_plotted],
+            ms=8, shape=:star, color=yhat[idx_plotted],
             group=yhat[idx_plotted], mscolor=yhat0[idx_plotted], label=false,
         )
     end
@@ -164,8 +169,7 @@ plt = plot(
     size=(1150, 250),
     left_margin=10mm, bottom_margin=5mm,
     top_margin=3mm, right_margin=10mm,
-)
-display(plt)
+);
 ```
 
 Only panel **(d)** — counterfactual training with mutability protection on the immutable feature — produces counterfactuals that move primarily along the **mutable** feature (Existing Debt), leaving the **immutable** feature (Age) relatively unchanged. The model has learned to be less sensitive to the immutable feature, producing counterfactuals that are more actionable.

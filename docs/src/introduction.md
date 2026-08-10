@@ -72,12 +72,13 @@ specs = [
     ("(d)", FullObjective(lambda=Float32[1.0, 0.5, 0.01, 0.1]), [:both, :none]),
 ]
 
+generator = NativeGenerator()
+
 models = []
 ce_datasets = []
 
 for (title, obj, mutability) in specs
     model = Chain(Dense(2, 32, relu), Dense(32, 2))
-    generator = NativeGenerator()
     opt_state = Flux.setup(Flux.AMSGrad(), model)
     domain = CounterfactualTraining.infer_domain_constraints(X)
     data = CounterfactualData(X, y; domain=domain, mutability=mutability)
@@ -107,7 +108,7 @@ targets = vcat(fill(2, length(idx1)), fill(1, length(idx2)))
 all_cfs = []
 for i in eachindex(models)
     cfs, _, converged, _ = generate_counterfactuals!(
-        models[i], X_test, targets, ce_datasets[i], NativeGenerator();
+        models[i], X_test, targets, ce_datasets[i], generator;
         maxiter=30, decision_threshold=0.75f0,
     )
     push!(all_cfs, cfs)
