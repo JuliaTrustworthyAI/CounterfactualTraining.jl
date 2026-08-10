@@ -60,23 +60,25 @@ end
 # Helper: apply mutability constraints to a batched gradient
 # ---------------------------------------------------------------------------
 """
-    batched_apply_mutability!(ΔX::AbstractMatrix, mutability)
+    batched_apply_mutability!(ΔX::AbstractMatrix, mutability; device=identity)
 
 Zeros out gradient components along immutable feature directions in-place.
 `mutability` is a vector of `Symbol`s (`:both`, `:none`, `:increase`, `:decrease`),
 one per feature row. Uses vectorized broadcasting for GPU compatibility.
+The `device` keyword moves the mask arrays to the compute device before
+broadcasting, preventing non-bitstype CPU array capture in GPU kernels.
 """
 function batched_apply_mutability!(
-    ΔX::AbstractMatrix, mutability::Union{Nothing,Vector{Symbol}}
+    ΔX::AbstractMatrix, mutability::Union{Nothing,Vector{Symbol}}; device=identity
 )
     isnothing(mutability) && return ΔX
     D = size(ΔX, 1)
     T = eltype(ΔX)
 
-    # Build per-direction column masks (D×1 for broadcasting)
-    none_mask = reshape([dir == :none for dir in mutability], D, 1)
-    inc_mask = reshape([dir == :increase for dir in mutability], D, 1)
-    dec_mask = reshape([dir == :decrease for dir in mutability], D, 1)
+    # Build per-direction masks (D×1 for broadcasting), moved to device
+    none_mask = reshape([dir == :none for dir in mutability], D, 1) |> device
+    inc_mask = reshape([dir == :increase for dir in mutability], D, 1) |> device
+    dec_mask = reshape([dir == :decrease for dir in mutability], D, 1) |> device
 
     # Zero out :none rows
     ΔX .*= ifelse.(none_mask, zero(T), one(T))
@@ -94,17 +96,21 @@ end
 # Helper: clamp counterfactuals to domain bounds
 # ---------------------------------------------------------------------------
 """
-    batched_apply_domain_constraints!(X′::AbstractMatrix, data::CounterfactualData)
+    batched_apply_domain_constraints!(X′::AbstractMatrix, data::CounterfactualData; device=identity)
 
 Clamps each feature row of `X′` to the domain bounds stored in `data.domain`.
 Uses vectorized broadcasting for GPU compatibility.
+The `device` keyword moves the bounds arrays to the compute device before
+broadcasting, preventing non-bitstype CPU array capture in GPU kernels.
 """
-function batched_apply_domain_constraints!(X′::AbstractMatrix, data::CounterfactualData)
+function batched_apply_domain_constraints!(
+    X′::AbstractMatrix, data::CounterfactualData; device=identity
+)
     domain = data.domain
     isnothing(domain) && return X′
     D = size(X′, 1)
-    lb = reshape([domain[i][1] for i in 1:D], D, 1)
-    ub = reshape([domain[i][2] for i in 1:D], D, 1)
+    lb = reshape([domain[i][1] for i in 1:D], D, 1) |> device
+    ub = reshape([domain[i][2] for i in 1:D], D, 1) |> device
     X′ .= clamp.(X′, lb, ub)
     return X′
 end
@@ -316,11 +322,11 @@ function generate_counterfactuals!(
         X′_old = copy(X′)
         Flux.update!(opt_state, X′, ΔX)
         update = X′ .- X′_old
-        batched_apply_mutability!(update, data.mutability)
+        batched_apply_mutability!(update, data.mutability; device=device)
         X′ .= X′_old .+ update
 
         # Clamp to domain bounds
-        batched_apply_domain_constraints!(X′, data)
+        batched_apply_domain_constraints!(X′, data; device=device)
 
         # Track last valid adversarial examples
         track_adversarial_examples!(last_valid_ae, X, X′, epsilon, p)

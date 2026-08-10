@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Fixes GPU training: optimizer state is now moved to the device alongside the model.
 - Fixes scalar indexing errors on GPU in `batched_energy`, `check_batched_convergence`, `batched_apply_mutability!`, and `batched_apply_domain_constraints!` by replacing `CartesianIndex` and row-by-row loops with vectorized broadcasting and linear indexing.
+- Fixes GPU kernel compilation error (non-bitstype argument) in `batched_apply_mutability!` and `batched_apply_domain_constraints!` by moving mask and bounds arrays to the device before broadcasting.
 - Threads `device` through `generate_native!` and `generate_counterfactuals!` so counterfactual search runs on GPU.
 - Moves labels to CPU in `unwrap` before `findall` to avoid scalar indexing on GPU arrays.
 - Moves logits to CPU in `accuracy` before `onecold` to avoid scalar indexing via `mapslices`.
