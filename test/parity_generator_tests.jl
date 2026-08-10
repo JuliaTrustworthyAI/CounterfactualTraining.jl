@@ -47,7 +47,11 @@ using Statistics
             decision_threshold=decision_threshold, max_iter=maxiter
         )
         ce = generate_counterfactual(
-            x_test, target, data, M, gen_ce;
+            x_test,
+            target,
+            data,
+            M,
+            gen_ce;
             initialization=:identity,  # match Native's X′ = copy(X)
             convergence=conv,
         )
@@ -56,9 +60,15 @@ using Statistics
         # Native NativeGenerator
         gen_native = NativeGenerator(λ=λ, opt=opt)
         cfs_native, _, _, _ = generate_counterfactuals!(
-            model, x_test, [target], data, gen_native;
-            maxiter=maxiter, decision_threshold=decision_threshold,
-            decay=decay, reg_strength=reg_strength,
+            model,
+            x_test,
+            [target],
+            data,
+            gen_native;
+            maxiter=maxiter,
+            decision_threshold=decision_threshold,
+            decay=decay,
+            reg_strength=reg_strength,
         )
         cf_native = cfs_native[:, 1]
 
@@ -83,7 +93,11 @@ using Statistics
                 decision_threshold=decision_threshold, max_iter=maxiter
             )
             ce = generate_counterfactual(
-                x_test[:, j:j], targets[j], data, M, gen_ce;
+                x_test[:, j:j],
+                targets[j],
+                data,
+                M,
+                gen_ce;
                 initialization=:identity,
                 convergence=conv,
             )
@@ -93,9 +107,15 @@ using Statistics
         # Native: generate batched (N=10)
         gen_native = NativeGenerator(λ=λ, opt=opt)
         cfs_native, _, _, _ = generate_counterfactuals!(
-            model, x_test, targets, data, gen_native;
-            maxiter=maxiter, decision_threshold=decision_threshold,
-            decay=decay, reg_strength=reg_strength,
+            model,
+            x_test,
+            targets,
+            data,
+            gen_native;
+            maxiter=maxiter,
+            decision_threshold=decision_threshold,
+            decay=decay,
+            reg_strength=reg_strength,
         )
 
         # Compare per-sample
@@ -123,9 +143,15 @@ using Statistics
         # Use Adam (momentum) to expose ordering differences
         gen_adam = NativeGenerator(λ=λ, opt=Flux.Adam(0.01f0))
         cfs_adam, _, _, _ = generate_counterfactuals!(
-            model, x_test, [target], data_imm, gen_adam;
-            maxiter=maxiter, decision_threshold=decision_threshold,
-            decay=decay, reg_strength=reg_strength,
+            model,
+            x_test,
+            [target],
+            data_imm,
+            gen_adam;
+            maxiter=maxiter,
+            decision_threshold=decision_threshold,
+            decay=decay,
+            reg_strength=reg_strength,
         )
 
         # Immutable feature (row 2) should not move at all

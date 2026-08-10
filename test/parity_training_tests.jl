@@ -35,9 +35,16 @@ using Statistics
     )
 
     model_ce, log_ce = counterfactual_training(
-        obj, model_ce, gen_ce, train_set, opt_ce;
-        nepochs=nepochs, mutability=mutability, domain=domain,
-        convergence=conv, verbose=0,
+        obj,
+        model_ce,
+        gen_ce,
+        train_set,
+        opt_ce;
+        nepochs=nepochs,
+        mutability=mutability,
+        domain=domain,
+        convergence=conv,
+        verbose=0,
     )
 
     # --- Native training (NativeGenerator) ---
@@ -47,10 +54,18 @@ using Statistics
     gen_native = NativeGenerator(λ=[0.1f0, 1.0f0], opt=Flux.Descent(0.1f0))
 
     model_native, log_native = counterfactual_training(
-        obj, model_native, gen_native, train_set, opt_native;
-        nepochs=nepochs, maxiter=maxiter, burnin=0.0f0,
+        obj,
+        model_native,
+        gen_native,
+        train_set,
+        opt_native;
+        nepochs=nepochs,
+        maxiter=maxiter,
+        burnin=0.0f0,
         decision_threshold=decision_threshold,
-        mutability=mutability, domain=domain, verbose=0,
+        mutability=mutability,
+        domain=domain,
+        verbose=0,
     )
 
     # Compare model weights (tolerance for different gradient computation paths)
