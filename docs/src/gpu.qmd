@@ -39,6 +39,8 @@ The code below detects available GPU backends (CUDA or AMDGPU) and falls back to
 
 has_gpu = false
 device = identity
+
+# Try CUDA
 try
     using CUDA
     if CUDA.functional()
@@ -46,14 +48,16 @@ try
         device = Flux.gpu
     end
 catch
-    try
-        using AMDGPU
-        if AMDGPU.functional()
-            has_gpu = true
-            device = Flux.gpu
-        end
-    catch
+end
+
+# Try AMD
+try
+    using AMDGPU
+    if AMDGPU.functional()
+        has_gpu = true
+        device = Flux.gpu
     end
+catch
 end
 
 if has_gpu
@@ -145,9 +149,9 @@ model_vanilla, log_vanilla = counterfactual_training(
 t_full = [l.time_taken for l in log_full]
 t_vanilla = [l.time_taken for l in log_vanilla]
 
-plot(1:length(t_full), t_full; label="Full objective",
+plt = plot(1:length(t_full), t_full; label="Full objective",
      xlabel="Epoch", ylabel="Time per epoch (s)", lw=2)
-plot!(1:length(t_vanilla), t_vanilla; label="Vanilla objective", lw=2)
+plt = plot!(1:length(t_vanilla), t_vanilla; label="Vanilla objective", lw=2)
 ```
 
 The gap between the two curves reflects the cost of generating counterfactuals each epoch (the per-sample batched search in `generate_native!`). Expect the difference to appear only after the burn-in fraction, since `VanillaObjective(; needs_ce=false)` short-circuits CF generation entirely via `needs_counterfactuals`.
