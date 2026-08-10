@@ -1,51 +1,124 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Introduction · CounterfactualTraining.jl</title><meta name="title" content="Introduction · CounterfactualTraining.jl"/><meta property="og:title" content="Introduction · CounterfactualTraining.jl"/><meta property="twitter:title" content="Introduction · CounterfactualTraining.jl"/><meta name="description" content="Documentation for CounterfactualTraining.jl."/><meta property="og:description" content="Documentation for CounterfactualTraining.jl."/><meta property="twitter:description" content="Documentation for CounterfactualTraining.jl."/><meta property="og:url" content="https://JuliaTrustworthyAI.github.io/CounterfactualTraining.jl/introduction/"/><meta property="twitter:url" content="https://JuliaTrustworthyAI.github.io/CounterfactualTraining.jl/introduction/"/><link rel="canonical" href="https://JuliaTrustworthyAI.github.io/CounterfactualTraining.jl/introduction/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">CounterfactualTraining.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li class="is-active"><a class="tocitem" href>Introduction</a><ul class="internal"><li><a class="tocitem" href="#Mutability-Protection"><span>Mutability Protection</span></a></li><li><a class="tocitem" href="#Setup"><span>Setup</span></a></li><li><a class="tocitem" href="#Data"><span>Data</span></a></li><li><a class="tocitem" href="#Training"><span>Training</span></a></li><li><a class="tocitem" href="#Counterfactual-Generation"><span>Counterfactual Generation</span></a></li><li><a class="tocitem" href="#Results"><span>Results</span></a></li></ul></li><li><a class="tocitem" href="../gpu/">Training on GPU</a></li><li><a class="tocitem" href="../reference/">Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Introduction</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Introduction</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/JuliaTrustworthyAI/CounterfactualTraining.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/JuliaTrustworthyAI/CounterfactualTraining.jl/blob/main/docs/src/introduction.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Introduction"><a class="docs-heading-anchor" href="#Introduction">Introduction</a><a id="Introduction-1"></a><a class="docs-heading-anchor-permalink" href="#Introduction" title="Permalink"></a></h1><p>This page demonstrates the core functionality of CounterfactualTraining.jl: training models that produce more plausible and actionable counterfactual explanations by holding them directly accountable during training.</p><h2 id="Mutability-Protection"><a class="docs-heading-anchor" href="#Mutability-Protection">Mutability Protection</a><a id="Mutability-Protection-1"></a><a class="docs-heading-anchor-permalink" href="#Mutability-Protection" title="Permalink"></a></h2><p>When generating counterfactual explanations, some features may be <strong>immutable</strong> (e.g., age, race) while others are <strong>mutable</strong> (e.g., debt, income). Without protection, the contrastive divergence penalty can inadvertently make models <em>more</em> sensitive to immutable features, which is undesirable.</p><p>The key insight is that the contrastive divergence penalty gradient with respect to coefficient θ_{y⁺,d} is:</p><p>∂/∂θ_{y⁺,d} div(x⁺, x′, y; θ) = x′_d − x⁺_d</p><p>Since immutable features tend to differ between classes, the penalty would exacerbate the model’s existing sensitivity to those features. By <strong>protecting</strong> (zeroing gradients on) immutable features during counterfactual generation, the model learns to be relatively <em>more</em> sensitive to mutable features — producing counterfactuals that are actionable rather than relying on changes to features that cannot actually be changed.</p><p>Domain constraints are also applied to keep counterfactuals within plausible ranges for each feature.</p><h2 id="Setup"><a class="docs-heading-anchor" href="#Setup">Setup</a><a id="Setup-1"></a><a class="docs-heading-anchor-permalink" href="#Setup" title="Permalink"></a></h2><pre><code class="language-julia hljs">using CounterfactualTraining
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Introduction · CounterfactualTraining.jl</title><meta name="title" content="Introduction · CounterfactualTraining.jl"/><meta property="og:title" content="Introduction · CounterfactualTraining.jl"/><meta property="twitter:title" content="Introduction · CounterfactualTraining.jl"/><meta name="description" content="Documentation for CounterfactualTraining.jl."/><meta property="og:description" content="Documentation for CounterfactualTraining.jl."/><meta property="twitter:description" content="Documentation for CounterfactualTraining.jl."/><meta property="og:url" content="https://JuliaTrustworthyAI.github.io/CounterfactualTraining.jl/introduction/"/><meta property="twitter:url" content="https://JuliaTrustworthyAI.github.io/CounterfactualTraining.jl/introduction/"/><link rel="canonical" href="https://JuliaTrustworthyAI.github.io/CounterfactualTraining.jl/introduction/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">CounterfactualTraining.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li class="is-active"><a class="tocitem" href>Introduction</a><ul class="internal"><li><a class="tocitem" href="#Mutability-Protection"><span>Mutability Protection</span></a></li><li><a class="tocitem" href="#Setup"><span>Setup</span></a></li><li><a class="tocitem" href="#Data"><span>Data</span></a></li><li><a class="tocitem" href="#Experiments"><span>Experiments</span></a></li><li><a class="tocitem" href="#Counterfactual-Generation"><span>Counterfactual Generation</span></a></li><li><a class="tocitem" href="#Results"><span>Results</span></a></li></ul></li><li><a class="tocitem" href="../gpu/">Training on GPU</a></li><li><a class="tocitem" href="../reference/">Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Introduction</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Introduction</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/JuliaTrustworthyAI/CounterfactualTraining.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/JuliaTrustworthyAI/CounterfactualTraining.jl/blob/main/docs/src/introduction.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Introduction"><a class="docs-heading-anchor" href="#Introduction">Introduction</a><a id="Introduction-1"></a><a class="docs-heading-anchor-permalink" href="#Introduction" title="Permalink"></a></h1><p>This page demonstrates the core functionality of CounterfactualTraining.jl: training models that produce more plausible and actionable counterfactual explanations by holding them directly accountable during training.</p><h2 id="Mutability-Protection"><a class="docs-heading-anchor" href="#Mutability-Protection">Mutability Protection</a><a id="Mutability-Protection-1"></a><a class="docs-heading-anchor-permalink" href="#Mutability-Protection" title="Permalink"></a></h2><p>When generating counterfactual explanations, some features may be <strong>immutable</strong> (e.g., age, race) while others are <strong>mutable</strong> (e.g., debt, income). Without protection, the contrastive divergence penalty can inadvertently make models <em>more</em> sensitive to immutable features, which is undesirable.</p><p>The key insight is that the contrastive divergence penalty gradient with respect to coefficient θ_{y⁺,d} is:</p><p>∂/∂θ_{y⁺,d} div(x⁺, x′, y; θ) = x′_d − x⁺_d</p><p>Since immutable features tend to differ between classes, the penalty would exacerbate the model’s existing sensitivity to those features. By <strong>protecting</strong> (zeroing gradients on) immutable features during counterfactual generation, the model learns to be relatively <em>more</em> sensitive to mutable features — producing counterfactuals that are actionable rather than relying on changes to features that cannot actually be changed.</p><p>Domain constraints are also applied to keep counterfactuals within plausible ranges for each feature.</p><h2 id="Setup"><a class="docs-heading-anchor" href="#Setup">Setup</a><a id="Setup-1"></a><a class="docs-heading-anchor-permalink" href="#Setup" title="Permalink"></a></h2><pre><code class="language-julia hljs">using CounterfactualTraining
 using CounterfactualTraining.Native
 using CounterfactualExplanations
 using Flux
 using Plots
+using Plots.PlotMeasures
 using Random
 
 Random.seed!(42)
-gr()</code></pre><h2 id="Data"><a class="docs-heading-anchor" href="#Data">Data</a><a id="Data-1"></a><a class="docs-heading-anchor-permalink" href="#Data" title="Permalink"></a></h2><p>We create a 2D synthetic dataset with two Gaussian clusters. Feature 1 (x-axis) is <strong>mutable</strong> (<code>:both</code>), while feature 2 (y-axis) is <strong>immutable</strong> (<code>:none</code>).</p><pre><code class="language-julia hljs">N = 150
-X1 = randn(Float32, 2, N)                # Class 1: centered at origin
-X2 = randn(Float32, 2, N) .+ 3.0f0       # Class 2: shifted by +3
-X = hcat(X1, X2)
-y = vcat(fill(1, N), fill(2, N))
+gr()</code></pre><h2 id="Data"><a class="docs-heading-anchor" href="#Data">Data</a><a id="Data-1"></a><a class="docs-heading-anchor-permalink" href="#Data" title="Permalink"></a></h2><p>We use a linearly separable synthetic dataset of two Gaussian blobs (cluster standard deviation 0.5). Feature 1 — “Existing Debt” — and feature 2 — “Age” — can each be declared <strong>mutable</strong> (<code>:both</code>) or <strong>immutable</strong> (<code>:none</code>) depending on the experiment.</p><pre><code class="language-julia hljs"># Linearly separable synthetic data (two Gaussian blobs, std=0.5):
+N = 3000
+centers = Float32[0.0 0.0; 5.0 5.0]
+n1 = N ÷ 2
+n2 = N - n1
+X1 = 0.5f0 .* randn(Float32, n1, 2) .+ centers[1:1, :]
+X2 = 0.5f0 .* randn(Float32, n2, 2) .+ centers[2:2, :]
+X = permutedims(vcat(X1, X2))              # 2 × N (features × observations)
+y = vcat(fill(1, n1), fill(2, n2))
 
-domain = [(-3.0f0, 6.0f0), (-3.0f0, 6.0f0)]
-mutability = [:both, :none]
-data = CounterfactualData(X, y; domain=domain, mutability=mutability)
+# Shuffle:
+perm = randperm(N)
+X, y = X[:, perm], y[perm]
 
 y_onehot = Flux.onehotbatch(y, 1:2)
-train_set = Flux.DataLoader((X, y_onehot); batchsize=32, shuffle=true)</code></pre><h2 id="Training"><a class="docs-heading-anchor" href="#Training">Training</a><a id="Training-1"></a><a class="docs-heading-anchor-permalink" href="#Training" title="Permalink"></a></h2><p>We train two identical models with different objectives:</p><ul><li><strong>Vanilla objective</strong> (<code>VanillaObjective</code>): standard cross-entropy training, no counterfactual penalty.</li><li><strong>Full objective</strong> (<code>FullObjective</code>): counterfactual training with energy differential, regularization, and adversarial loss.</li></ul><p>Both use <code>NativeGenerator</code> for fast, batched counterfactual generation, and pass <code>mutability=[:both, :none]</code> to protect the immutable feature.</p><pre><code class="language-julia hljs">generator = NativeGenerator()
+train_set = Flux.DataLoader((X, y_onehot); batchsize=50, shuffle=true)</code></pre><h2 id="Experiments"><a class="docs-heading-anchor" href="#Experiments">Experiments</a><a id="Experiments-1"></a><a class="docs-heading-anchor-permalink" href="#Experiments" title="Permalink"></a></h2><p>We train four models under different combinations of training objective and mutability constraints:</p><ul><li><strong>(a)</strong> <code>VanillaObjective</code>, both features mutable — standard training, no CF penalty.</li><li><strong>(b)</strong> <code>FullObjective</code>, both features mutable — CF training, no immutable feature to protect.</li><li><strong>(c)</strong> <code>VanillaObjective</code>, Age immutable — standard training; CFs may still move the immutable feature.</li><li><strong>(d)</strong> <code>FullObjective</code>, Age immutable — CF training with mutability protection.</li></ul><p>All models share the same architecture: a multi-layer perceptron with one hidden layer of 32 ReLU units. We use <code>AMSGrad</code> and <code>NativeGenerator</code> for fast, batched counterfactual generation.</p><pre><code class="language-julia hljs">specs = [
+    (&quot;(a)&quot;, VanillaObjective(; needs_ce=false), [:both, :both]),
+    (&quot;(b)&quot;, FullObjective(lambda=Float32[1.0, 0.5, 0.01, 0.1]), [:both, :both]),
+    (&quot;(c)&quot;, VanillaObjective(; needs_ce=false), [:both, :none]),
+    (&quot;(d)&quot;, FullObjective(lambda=Float32[1.0, 0.5, 0.01, 0.1]), [:both, :none]),
+]
 
-# Model A: Vanilla (no CF penalty)
-model_vanilla = Chain(Dense(2, 8, relu), Dense(8, 2))
-opt_vanilla = Flux.setup(Flux.Adam(1e-2), model_vanilla)
-model_vanilla, log_vanilla = counterfactual_training(
-    VanillaObjective(needs_ce=true), model_vanilla, generator, train_set, opt_vanilla;
-    nepochs=20, maxiter=10, burnin=0.0f0, mutability=mutability, domain=domain, verbose=0
+generator = NativeGenerator()
+
+models = []
+ce_datasets = []
+
+for (title, obj, mutability) in specs
+    model = Chain(Dense(2, 32, relu), Dense(32, 2))
+    opt_state = Flux.setup(Flux.Adam(), model)
+    domain = CounterfactualTraining.infer_domain_constraints(X)
+    data = CounterfactualData(X, y; domain=domain, mutability=mutability)
+
+    model, log = counterfactual_training(
+        obj, model, generator, train_set, opt_state;
+        nepochs=100, maxiter=30, burnin=0.0f0,
+        decision_threshold=0.75f0,
+        mutability=mutability, domain=domain, verbose=0,
+    )
+
+    push!(models, model)
+    push!(ce_datasets, data)
+end</code></pre><h2 id="Counterfactual-Generation"><a class="docs-heading-anchor" href="#Counterfactual-Generation">Counterfactual Generation</a><a id="Counterfactual-Generation-1"></a><a class="docs-heading-anchor-permalink" href="#Counterfactual-Generation" title="Permalink"></a></h2><p>For each trained model we generate counterfactuals for 100 samples from class 1, targeting class 2 — matching the one-directional setup in the paper.</p><pre><code class="language-julia hljs">idx1 = findall(==(2), y)[1:100]
+X_test = X[:, idx1]
+targets = fill(1, length(idx1))
+
+all_cfs = []
+for i in eachindex(models)
+    cfs, _, converged, _ = generate_counterfactuals!(
+        models[i], X_test, targets, ce_datasets[i], generator;
+        maxiter=100, decision_threshold=1.0f0,
+    )
+    push!(all_cfs, cfs)
+end</code></pre><h2 id="Results"><a class="docs-heading-anchor" href="#Results">Results</a><a id="Results-1"></a><a class="docs-heading-anchor-permalink" href="#Results" title="Permalink"></a></h2><pre><code class="language-julia hljs">_xlab = &quot;Existing Debt&quot;
+_ylab = &quot;Age&quot;
+
+# Subsample background data for plotting:
+idx_plot = randperm(size(X, 2))[1:min(500, size(X, 2))]
+X_bg = X[:, idx_plot]
+y_bg = y[idx_plot]
+
+# Grid for decision boundary contour:
+x1_range = range(minimum(X[1, :]), maximum(X[1, :]); length=50)
+x2_range = range(minimum(X[2, :]), maximum(X[2, :]); length=50)
+
+plts = []
+for (i, (title, obj, mutability)) in enumerate(specs)
+    cfs = all_cfs[i]
+    yhat0 = vec(Flux.onecold(models[i](X_test)))
+    yhat = vec(Flux.onecold(models[i](cfs)))
+    idx_plotted = (yhat0 .== 1) .| (yhat0 .== 2)
+
+    xlab = mutability[1] == :both ? &quot;$_xlab (mutable)&quot; : &quot;$_xlab (immutable)&quot;
+    ylab = mutability[2] == :both ? &quot;$_ylab (mutable)&quot; : &quot;$_ylab (immutable)&quot;
+
+    plt = scatter(
+        X_bg[1, y_bg .== 1], X_bg[2, y_bg .== 1];
+        color=1, ms=2, label=false,
+        xlabel=xlab, ylabel=ylab,
+        axis=nothing, legend=false, title=title,
+    )
+    scatter!(plt, X_bg[1, y_bg .== 2], X_bg[2, y_bg .== 2]; color=2, ms=2, label=false)
+
+    # Linear decision boundary approximation (contour at p=0.5):
+    Z = [Flux.softmax(models[i]([x1, x2]))[1] for x1 in x1_range, x2 in x2_range]
+    contour!(plt, x1_range, x2_range, Z&#39;; levels=[0.5], lw=5, color=:black, label=false)
+
+    if any(idx_plotted)
+        # Directional arrows from factual to counterfactual:
+        u = cfs[1, idx_plotted] .- X_test[1, idx_plotted]
+        v = cfs[2, idx_plotted] .- X_test[2, idx_plotted]
+        quiver!(
+            plt, X_test[1, idx_plotted], X_test[2, idx_plotted];
+            quiver=(u, v), color=:gray, alpha=0.5, label=false,
+        )
+
+        # CF endpoints:
+        scatter!(
+            plt, cfs[1, idx_plotted], cfs[2, idx_plotted];
+            ms=8, shape=:star, color=yhat[idx_plotted],
+            group=yhat[idx_plotted], mscolor=yhat0[idx_plotted], label=false,
+        )
+    end
+    push!(plts, plt)
+end
+
+plt = plot(
+    plts...;
+    layout=(1, 4),
+    size=(1150, 250),
+    left_margin=10mm, bottom_margin=5mm,
+    top_margin=3mm, right_margin=10mm,
 )
-
-# Model B: Full (with CF penalty)
-model_full = Chain(Dense(2, 8, relu), Dense(8, 2))
-opt_full = Flux.setup(Flux.Adam(1e-2), model_full)
-model_full, log_full = counterfactual_training(
-    FullObjective(), model_full, generator, train_set, opt_full;
-    nepochs=20, maxiter=10, burnin=0.0f0, mutability=mutability, domain=domain, verbose=0
-)</code></pre><h2 id="Counterfactual-Generation"><a class="docs-heading-anchor" href="#Counterfactual-Generation">Counterfactual Generation</a><a id="Counterfactual-Generation-1"></a><a class="docs-heading-anchor-permalink" href="#Counterfactual-Generation" title="Permalink"></a></h2><p>We generate counterfactuals for 20 samples from class 1, targeting class 2, using each trained model.</p><pre><code class="language-julia hljs">X_test = X[:, 1:20]
-targets = fill(2, 20)
-
-cfs_vanilla, _, _, _ = generate_counterfactuals!(
-    model_vanilla, X_test, targets, data, generator
-)
-cfs_full, _, _, _ = generate_counterfactuals!(
-    model_full, X_test, targets, data, generator
-)</code></pre><h2 id="Results"><a class="docs-heading-anchor" href="#Results">Results</a><a id="Results-1"></a><a class="docs-heading-anchor-permalink" href="#Results" title="Permalink"></a></h2><pre><code class="language-julia hljs">scatter(X[1, 1:N], X[2, 1:N], label=&quot;Class 1&quot;, color=:blue, ms=3)
-scatter!(X[1, N+1:end], X[2, N+1:end], label=&quot;Class 2&quot;, color=:red, ms=3)
-scatter!(cfs_vanilla[1, :], cfs_vanilla[2, :], label=&quot;CF (Vanilla)&quot;,
-    color=:green, markershape=:utriangle, ms=5)
-scatter!(cfs_full[1, :], cfs_full[2, :], label=&quot;CF (Full)&quot;,
-    color=:purple, markershape=:star5, ms=5)
-plot!(xlabel=&quot;Feature 1 (mutable)&quot;, ylabel=&quot;Feature 2 (immutable)&quot;)</code></pre><p><img src="../introduction_files/figure-commonmark/cell-6-output-1.svg" alt/></p><p>With the <code>FullObjective</code>, counterfactuals should move primarily along the <strong>mutable</strong> feature (x-axis), leaving the <strong>immutable</strong> feature (y-axis) relatively unchanged. The model has learned to be less sensitive to the immutable feature, producing counterfactuals that are more actionable.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../gpu/">Training on GPU »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Monday 10 August 2026 10:17">Monday 10 August 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+plt</code></pre><p><img src="../introduction_files/figure-commonmark/cell-6-output-1.svg" alt/></p><p>Only panel <strong>(d)</strong> — counterfactual training with mutability protection on the immutable feature — produces counterfactuals that move primarily along the <strong>mutable</strong> feature (Existing Debt), leaving the <strong>immutable</strong> feature (Age) relatively unchanged. The model has learned to be less sensitive to the immutable feature, producing counterfactuals that are more actionable.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../gpu/">Training on GPU »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Monday 10 August 2026 17:51">Monday 10 August 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

@@ -89,8 +89,8 @@ We use a "chunky" MLP with two hidden layers, suitable for demonstrating GPU acc
 #| echo: true
 
 model = Chain(
-    Dense(784, 256, relu),
-    Dense(256, 128, relu),
+    Dense(784, 1024, relu),
+    Dense(1024, 128, relu),
     Dense(128, 10)
 )
 ```
@@ -101,6 +101,7 @@ We train with `FullObjective` and `NativeGenerator`. The `device` keyword moves 
 
 ```{julia}
 #| echo: true
+#| eval: false
 
 gen = NativeGenerator()
 obj = FullObjective()
@@ -108,31 +109,8 @@ opt_state = Flux.setup(Flux.Adam(1e-3), model)
 
 model, log = counterfactual_training(
     obj, model, gen, train_set, opt_state;
-    device=device, nepochs=5, maxiter=10, burnin=0.0f0,
+    device=device, nepochs=10, maxiter=30, burnin=0.5f0,
     domain=domain, verbose=0
 )
 ```
 
-## Counterfactual Visualization
-
-We generate counterfactuals for a few test samples, targeting a different class, and visualize the original vs. counterfactual images side by side.
-
-```{julia}
-#| echo: true
-
-X_test = X[:, 1:5]
-targets = fill(2, 5)  # target class 2 (digit 1)
-data = CounterfactualData(X, y; domain=domain)
-cfs, _, converged, _ = generate_counterfactuals!(model, X_test, targets, data, gen; maxiter=30)
-```
-
-```{julia}
-#| echo: true
-#| output: true
-
-p1 = heatmap(reshape(X_test[:, 1], 28, 28), title="Original", color=:grays, aspect_ratio=:equal)
-p2 = heatmap(reshape(cfs[:, 1], 28, 28), title="Counterfactual", color=:grays, aspect_ratio=:equal)
-plot(p1, p2, layout=(1, 2), legend=false)
-```
-
-The counterfactual shows how the model would need the input to change to produce a different prediction. With counterfactual training, these changes should be plausible and respect the domain constraints of the pixel values.
