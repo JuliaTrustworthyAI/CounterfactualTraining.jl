@@ -183,10 +183,12 @@ function generator_loss(
     # L1 distance penalty (sum, equivalent to CE.jl's distance_l1 with agg=mean + rescale)
     h1 = gen.λ[1] * sum(abs, X′ .- X)
 
-    # Energy constraint with polynomial decay
-    ϕ = polynomial_decay(
-        Float32(maxiter) / 250.0f0, Float32(maxiter) / 25.0f0, decay, iter + 1
-    )
+    # Energy constraint with polynomial decay.
+    # Parameters match CE.jl's `energy_constraint` (penalties.jl):
+    #   b = round(max_steps / 25), a = b / 10, t = total_steps + 1 = iter
+    b = Float32(round(maxiter / 25))
+    a = b / 10.0f0
+    ϕ = polynomial_decay(a, b, decay, iter)
     e = batched_energy(model, X′, target_idx)  # N-vector
     gen_loss = sum(e)
     reg_loss_val = sum(abs2, e)

@@ -90,7 +90,7 @@ for (title, obj, mutability) in specs
 
     model, log = counterfactual_training(
         obj, model, generator, train_set, opt_state;
-        nepochs=30, maxiter=30, burnin=0.0f0,
+        nepochs=100, maxiter=30, burnin=0.0f0,
         decision_threshold=0.75f0,
         mutability=mutability, domain=domain, verbose=0,
     )

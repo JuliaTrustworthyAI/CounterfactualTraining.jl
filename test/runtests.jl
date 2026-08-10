@@ -228,4 +228,6 @@ using Statistics
     include("native_edge_tests.jl")
     include("counterfactuals_tests.jl")
     include("training_tests.jl")
+    include("parity_generator_tests.jl")
+    include("parity_training_tests.jl")
 end
