@@ -59,7 +59,12 @@ makedocs(;
         edit_link="main",
         assets=String[],
     ),
-    pages=["Home" => "index.md", "Reference" => "reference.md"],
+    pages=[
+        "Home" => "index.md",
+        "Introduction" => "introduction.md",
+        "Training on GPU" => "gpu.md",
+        "Reference" => "reference.md",
+    ],
 )
 
 deploydocs(;
