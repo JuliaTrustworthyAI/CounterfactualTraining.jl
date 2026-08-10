@@ -175,18 +175,22 @@ function generator_loss(
     decay::Float32,
     maxiter::Int,
 )
-    # Classification loss
-    ℓ = Flux.logitcrossentropy(model(X′), targets_onehot)
+    # Classification loss (sum over N for full-strength per-sample gradients).
+    # CE.jl uses agg=mean then rescales the update by num_counterfactuals (×N);
+    # using agg=sum here is equivalent and avoids the rescale step.
+    ℓ = Flux.logitcrossentropy(model(X′), targets_onehot; agg=sum)
 
-    # L1 distance penalty
+    # L1 distance penalty (sum, equivalent to CE.jl's distance_l1 with agg=mean + rescale)
     h1 = gen.λ[1] * sum(abs, X′ .- X)
 
-    # Energy constraint with polynomial decay
-    ϕ = polynomial_decay(
-        Float32(maxiter) / 250.0f0, Float32(maxiter) / 25.0f0, decay, iter + 1
-    )
+    # Energy constraint with polynomial decay.
+    # Parameters match CE.jl's `energy_constraint` (penalties.jl):
+    #   b = round(max_steps / 25), a = b / 10, t = total_steps + 1 = iter
+    b = Float32(round(maxiter / 25))
+    a = b / 10.0f0
+    ϕ = polynomial_decay(a, b, decay, iter)
     e = batched_energy(model, X′, target_idx)  # N-vector
-    gen_loss = sum(e) / length(e)
+    gen_loss = sum(e)
     reg_loss_val = sum(abs2, e)
     h2 = gen.λ[2] * ϕ * (gen_loss + reg_strength * reg_loss_val)
 
@@ -285,11 +289,18 @@ function generate_counterfactuals!(
         end
         ΔX = grads_val.grad[1]
 
-        # Apply mutability constraints
-        batched_apply_mutability!(ΔX, data.mutability)
-
-        # Update counterfactuals
+        # Apply optimizer step on the full gradient, then zero immutable
+        # directions in the resulting update. This matches CE.jl's ordering
+        # (search.jl: generate_perturbations → apply_mutability), where the
+        # optimizer sees the full gradient and mutability is applied to the
+        # update (Δstate), not the gradient. For Descent this is equivalent
+        # to zeroing the gradient first; for momentum optimizers it prevents
+        # accumulated momentum from moving immutable features.
+        X′_old = copy(X′)
         Flux.update!(opt_state, X′, ΔX)
+        update = X′ .- X′_old
+        batched_apply_mutability!(update, data.mutability)
+        X′ .= X′_old .+ update
 
         # Clamp to domain bounds
         batched_apply_domain_constraints!(X′, data)

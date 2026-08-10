@@ -31,8 +31,8 @@ Pkg.add("CounterfactualTraining")
 
 ### Introduction
 
-<!-- TODO: Add an introductory example demonstrating the package functionality; the example should use the data and visualizations produced here: https://github.com/JuliaTrustworthyAI/CounterfactualTraining.jl/blob/main/paper/sections/other/constraints.qmd -->
+A self-contained introductory example demonstrating counterfactual training with mutability protection is available on the [Introduction](introduction.md) page.
 
 ### Training on GPU
 
-<!-- TODO: Explain the two branches (initial research branch and performance-focused addition). Show how training can be done on the GPU. Ideally, add a somewhat more chunky model for MNIST, reproducing example here (only CE, not IG): https://github.com/JuliaTrustworthyAI/CounterfactualTraining.jl/blob/main/paper/experiments/mnist_chart.jl -->
+The package provides two training approaches: a branch using [CounterfactualExplanations.jl](https://github.com/JuliaTrustworthyAI/CounterfactualExplanations.jl) as the backend for generating counterfactuals and a performance-focused `Native` submodule with GPU support. The former approach was developed during the initial research stage of the project. See [Training on GPU](gpu.md) for a full walkthrough with MNIST.
