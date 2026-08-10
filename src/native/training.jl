@@ -289,11 +289,18 @@ function generate_counterfactuals!(
         end
         ΔX = grads_val.grad[1]
 
-        # Apply mutability constraints
-        batched_apply_mutability!(ΔX, data.mutability)
-
-        # Update counterfactuals
+        # Apply optimizer step on the full gradient, then zero immutable
+        # directions in the resulting update. This matches CE.jl's ordering
+        # (search.jl: generate_perturbations → apply_mutability), where the
+        # optimizer sees the full gradient and mutability is applied to the
+        # update (Δstate), not the gradient. For Descent this is equivalent
+        # to zeroing the gradient first; for momentum optimizers it prevents
+        # accumulated momentum from moving immutable features.
+        X′_old = copy(X′)
         Flux.update!(opt_state, X′, ΔX)
+        update = X′ .- X′_old
+        batched_apply_mutability!(update, data.mutability)
+        X′ .= X′_old .+ update
 
         # Clamp to domain bounds
         batched_apply_domain_constraints!(X′, data)

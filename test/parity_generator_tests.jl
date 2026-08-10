@@ -106,4 +106,34 @@ using Statistics
             @test cfs_ce[:, j] ≈ cfs_native[:, j] atol = 5e-2 rtol = 5e-2
         end
     end
+
+    # --- Mutability ordering test (momentum optimizer) ---
+    # Verifies that mutability constraints are applied to the update (after
+    # optimizer), not the gradient (before optimizer). With a momentum
+    # optimizer, zeroing the gradient first still allows momentum to move
+    # immutable features. Zeroing the update after prevents this.
+    @testset "Mutability ordering (Adam)" begin
+        Random.seed!(42)
+        x_test = X[:, 1:1]
+        target = 2
+        mut_immutable = [:both, :none]  # feature 2 is immutable
+
+        data_imm = CounterfactualData(X, y; domain=domain, mutability=mut_immutable)
+
+        # Use Adam (momentum) to expose ordering differences
+        gen_adam = NativeGenerator(λ=λ, opt=Flux.Adam(0.01f0))
+        cfs_adam, _, _, _ = generate_counterfactuals!(
+            model, x_test, [target], data_imm, gen_adam;
+            maxiter=maxiter, decision_threshold=decision_threshold,
+            decay=decay, reg_strength=reg_strength,
+        )
+
+        # Immutable feature (row 2) should not move at all
+        movement_immutable = abs(cfs_adam[2, 1] - x_test[2, 1])
+        @test movement_immutable ≈ 0.0f0 atol = 1.0f-6
+
+        # Mutable feature (row 1) should move
+        movement_mutable = abs(cfs_adam[1, 1] - x_test[1, 1])
+        @test movement_mutable > 0.0f0
+    end
 end
