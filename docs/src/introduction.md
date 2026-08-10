@@ -23,6 +23,7 @@ using CounterfactualTraining.Native
 using CounterfactualExplanations
 using Flux
 using Plots
+using Plots.PlotMeasures
 using Random
 
 Random.seed!(42)
@@ -31,80 +32,133 @@ gr()
 
 ## Data
 
-We create a 2D synthetic dataset with two Gaussian clusters. Feature 1 (x-axis) is **mutable** (`:both`), while feature 2 (y-axis) is **immutable** (`:none`).
+We use a linearly separable synthetic dataset of two Gaussian blobs (cluster standard deviation 0.5). Feature 1 — “Existing Debt” — and feature 2 — “Age” — can each be declared **mutable** (`:both`) or **immutable** (`:none`) depending on the experiment.
 
 ``` julia
-N = 150
-X1 = randn(Float32, 2, N)                # Class 1: centered at origin
-X2 = randn(Float32, 2, N) .+ 3.0f0       # Class 2: shifted by +3
-X = hcat(X1, X2)
-y = vcat(fill(1, N), fill(2, N))
+# Linearly separable synthetic data (two Gaussian blobs, std=0.5):
+N = 3000
+centers = Float32[0.0 0.0; 6.0 6.0]
+n1 = N ÷ 2
+n2 = N - n1
+X1 = 0.5f0 .* randn(Float32, n1, 2) .+ centers[1:1, :]
+X2 = 0.5f0 .* randn(Float32, n2, 2) .+ centers[2:2, :]
+X = permutedims(vcat(X1, X2))              # 2 × N (features × observations)
+y = vcat(fill(1, n1), fill(2, n2))
 
-domain = [(-3.0f0, 6.0f0), (-3.0f0, 6.0f0)]
-mutability = [:both, :none]
-data = CounterfactualData(X, y; domain=domain, mutability=mutability)
+# Shuffle:
+perm = randperm(N)
+X, y = X[:, perm], y[perm]
 
 y_onehot = Flux.onehotbatch(y, 1:2)
-train_set = Flux.DataLoader((X, y_onehot); batchsize=32, shuffle=true)
+train_set = Flux.DataLoader((X, y_onehot); batchsize=50, shuffle=true)
 ```
 
-## Training
+## Experiments
 
-We train two identical models with different objectives:
+We train four models under different combinations of training objective and mutability constraints:
 
-- **Vanilla objective** (`VanillaObjective`): standard cross-entropy training, no counterfactual penalty.
-- **Full objective** (`FullObjective`): counterfactual training with energy differential, regularization, and adversarial loss.
+- **(a)** `VanillaObjective`, both features mutable — standard training, no CF penalty.
+- **(b)** `FullObjective`, both features mutable — CF training, no immutable feature to protect.
+- **(c)** `VanillaObjective`, Age immutable — standard training; CFs may still move the immutable feature.
+- **(d)** `FullObjective`, Age immutable — CF training with mutability protection.
 
-Both use `NativeGenerator` for fast, batched counterfactual generation, and pass `mutability=[:both, :none]` to protect the immutable feature.
+All models share the same architecture: a multi-layer perceptron with one hidden layer of 32 ReLU units. We use `AMSGrad` and `NativeGenerator` for fast, batched counterfactual generation.
 
 ``` julia
-generator = NativeGenerator()
+specs = [
+    ("(a)", VanillaObjective(; needs_ce=false), [:both, :both]),
+    ("(b)", FullObjective(lambda=Float32[1.0, 0.5, 0.01, 0.1]), [:both, :both]),
+    ("(c)", VanillaObjective(; needs_ce=false), [:both, :none]),
+    ("(d)", FullObjective(lambda=Float32[1.0, 0.5, 0.01, 0.1]), [:both, :none]),
+]
 
-# Model A: Vanilla (no CF penalty)
-model_vanilla = Chain(Dense(2, 8, relu), Dense(8, 2))
-opt_vanilla = Flux.setup(Flux.Adam(1e-2), model_vanilla)
-model_vanilla, log_vanilla = counterfactual_training(
-    VanillaObjective(needs_ce=true), model_vanilla, generator, train_set, opt_vanilla;
-    nepochs=20, maxiter=10, burnin=0.0f0, mutability=mutability, domain=domain, verbose=0
-)
+models = []
+ce_datasets = []
 
-# Model B: Full (with CF penalty)
-model_full = Chain(Dense(2, 8, relu), Dense(8, 2))
-opt_full = Flux.setup(Flux.Adam(1e-2), model_full)
-model_full, log_full = counterfactual_training(
-    FullObjective(), model_full, generator, train_set, opt_full;
-    nepochs=20, maxiter=10, burnin=0.0f0, mutability=mutability, domain=domain, verbose=0
-)
+for (title, obj, mutability) in specs
+    model = Chain(Dense(2, 32, relu), Dense(32, 2))
+    generator = NativeGenerator()
+    opt_state = Flux.setup(Flux.AMSGrad(), model)
+    domain = CounterfactualTraining.infer_domain_constraints(X)
+    data = CounterfactualData(X, y; domain=domain, mutability=mutability)
+
+    model, log = counterfactual_training(
+        obj, model, generator, train_set, opt_state;
+        nepochs=30, maxiter=30, burnin=0.0f0,
+        decision_threshold=0.75f0,
+        mutability=mutability, domain=domain, verbose=0,
+    )
+
+    push!(models, model)
+    push!(ce_datasets, data)
+end
 ```
 
 ## Counterfactual Generation
 
-We generate counterfactuals for 20 samples from class 1, targeting class 2, using each trained model.
+For each trained model we generate counterfactuals for 100 samples from each class, targeting the opposite class.
 
 ``` julia
-X_test = X[:, 1:20]
-targets = fill(2, 20)
+idx1 = findall(==(1), y)[1:100]
+idx2 = findall(==(2), y)[1:100]
+X_test = hcat(X[:, idx1], X[:, idx2])
+targets = vcat(fill(2, length(idx1)), fill(1, length(idx2)))
 
-cfs_vanilla, _, _, _ = generate_counterfactuals!(
-    model_vanilla, X_test, targets, data, generator
-)
-cfs_full, _, _, _ = generate_counterfactuals!(
-    model_full, X_test, targets, data, generator
-)
+all_cfs = []
+for i in eachindex(models)
+    cfs, _, converged, _ = generate_counterfactuals!(
+        models[i], X_test, targets, ce_datasets[i], NativeGenerator();
+        maxiter=30, decision_threshold=0.75f0,
+    )
+    push!(all_cfs, cfs)
+end
 ```
 
 ## Results
 
 ``` julia
-scatter(X[1, 1:N], X[2, 1:N], label="Class 1", color=:blue, ms=3)
-scatter!(X[1, N+1:end], X[2, N+1:end], label="Class 2", color=:red, ms=3)
-scatter!(cfs_vanilla[1, :], cfs_vanilla[2, :], label="CF (Vanilla)",
-    color=:green, markershape=:utriangle, ms=5)
-scatter!(cfs_full[1, :], cfs_full[2, :], label="CF (Full)",
-    color=:purple, markershape=:star5, ms=5)
-plot!(xlabel="Feature 1 (mutable)", ylabel="Feature 2 (immutable)")
+_xlab = "Existing Debt"
+_ylab = "Age"
+
+plts = []
+for (i, (title, obj, mutability)) in enumerate(specs)
+    cfs = all_cfs[i]
+    yhat0 = vec(Flux.onecold(models[i](X_test)))
+    yhat = vec(Flux.onecold(models[i](cfs)))
+    idx_plotted = (yhat0 .== 1) .| (yhat0 .== 2)
+
+    xlab = mutability[1] == :both ? "$_xlab (mutable)" : "$_xlab (immutable)"
+    ylab = mutability[2] == :both ? "$_ylab (mutable)" : "$_ylab (immutable)"
+
+    plt = scatter(
+        X[1, y .== 1], X[2, y .== 1];
+        color=1, ms=3, label=false,
+        xlabel=xlab, ylabel=ylab,
+        axis=nothing, legend=false, title=title,
+    )
+    scatter!(plt, X[1, y .== 2], X[2, y .== 2]; color=2, ms=3, label=false)
+    if any(idx_plotted)
+        scatter!(
+            plt, cfs[1, idx_plotted], cfs[2, idx_plotted];
+            ms=15, shape=:star, color=yhat[idx_plotted],
+            group=yhat[idx_plotted], mscolor=yhat0[idx_plotted], label=false,
+        )
+    end
+    push!(plts, plt)
+end
+
+plt = plot(
+    plts...;
+    layout=(1, 4),
+    size=(1150, 250),
+    left_margin=10mm, bottom_margin=5mm,
+    top_margin=3mm, right_margin=10mm,
+)
+display(plt)
 ```
 
-![](introduction_files/figure-commonmark/cell-6-output-1.svg)
+    GKS: cannot open display - headless operation mode active
 
-With the `FullObjective`, counterfactuals should move primarily along the **mutable** feature (x-axis), leaving the **immutable** feature (y-axis) relatively unchanged. The model has learned to be less sensitive to the immutable feature, producing counterfactuals that are more actionable.
+![](introduction_files/figure-commonmark/cell-6-output-2.svg)
+
+Only panel **(d)** — counterfactual training with mutability protection on the immutable feature — produces counterfactuals that move primarily along the **mutable** feature (Existing Debt), leaving the **immutable** feature (Age) relatively unchanged. The model has learned to be less sensitive to the immutable feature, producing counterfactuals that are more actionable.
