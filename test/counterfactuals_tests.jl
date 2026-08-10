@@ -24,9 +24,7 @@
     train_set = Flux.DataLoader((X, Flux.onehotbatch(y, 1:2)); batchsize=32)
     model = Chain(Dense(2, 4, relu), Dense(4, 2))
     gen_ce = GenericGenerator()
-    dl, pct, ces = CounterfactualTraining.generate!(
-        model, train_set, gen_ce; nsamples=5
-    )
+    dl, pct, ces = CounterfactualTraining.generate!(model, train_set, gen_ce; nsamples=5)
     @test length(dl) == length(train_set)
     @test 0.0 <= pct <= 1.0
     data = CounterfactualData(X, y)

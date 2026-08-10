@@ -27,20 +27,11 @@
     @test isfinite(log_b[end].implaus)
 
     # val_set
-    val_set = Flux.DataLoader(
-        (X[:, 1:20], Flux.onehotbatch(y[1:20], 1:2)); batchsize=10
-    )
+    val_set = Flux.DataLoader((X[:, 1:20], Flux.onehotbatch(y[1:20], 1:2)); batchsize=10)
     model_v = Chain(Dense(2, 8, relu), Dense(8, 2))
     opt_v = Flux.setup(Flux.Adam(1e-2), model_v)
     model_v, log_v = counterfactual_training(
-        obj,
-        model_v,
-        gen_ce,
-        train_set,
-        opt_v;
-        nepochs=2,
-        verbose=0,
-        val_set=val_set,
+        obj, model_v, gen_ce, train_set, opt_v; nepochs=2, verbose=0, val_set=val_set
     )
     @test isfinite(log_v[end].acc_val)
 
@@ -65,14 +56,7 @@
     model_c = Chain(Dense(2, 8, relu), Dense(8, 2))
     opt_c = Flux.setup(Flux.Adam(1e-2), model_c)
     model_c, log_c = counterfactual_training(
-        obj,
-        model_c,
-        gen_ce,
-        train_set,
-        opt_c;
-        nepochs=2,
-        verbose=0,
-        checkpoint_dir=ckpt,
+        obj, model_c, gen_ce, train_set, opt_c; nepochs=2, verbose=0, checkpoint_dir=ckpt
     )
     @test isfile(joinpath(ckpt, "checkpoint.jld2"))
 
@@ -80,14 +64,7 @@
     model_c2 = Chain(Dense(2, 8, relu), Dense(8, 2))
     opt_c2 = Flux.setup(Flux.Adam(1e-2), model_c2)
     model_c2, log_c2 = counterfactual_training(
-        obj,
-        model_c2,
-        gen_ce,
-        train_set,
-        opt_c2;
-        nepochs=2,
-        verbose=0,
-        checkpoint_dir=ckpt,
+        obj, model_c2, gen_ce, train_set, opt_c2; nepochs=2, verbose=0, checkpoint_dir=ckpt
     )
     @test length(log_c2) >= 0
 end

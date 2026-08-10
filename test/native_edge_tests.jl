@@ -1,9 +1,7 @@
 @testset "generate_native! edge cases" begin
     X = randn(Float32, 10, 100)
     y = vcat(fill(1, 50), fill(2, 50))
-    train_set = Flux.DataLoader(
-        (Float32.(X), Flux.onehotbatch(y, 1:2)); batchsize=32
-    )
+    train_set = Flux.DataLoader((Float32.(X), Flux.onehotbatch(y, 1:2)); batchsize=32)
     model = Chain(Dense(10, 8, relu), Dense(8, 2))
     gen = NativeGenerator()
 
@@ -48,9 +46,7 @@ end
     @test isfinite(log_b[end].implaus)
 
     # val_set
-    val_set = Flux.DataLoader(
-        (X[:, 1:20], Flux.onehotbatch(y[1:20], 1:2)); batchsize=10
-    )
+    val_set = Flux.DataLoader((X[:, 1:20], Flux.onehotbatch(y[1:20], 1:2)); batchsize=10)
     model_v = Chain(Dense(2, 8, relu), Dense(8, 2))
     opt_v = Flux.setup(Flux.Adam(1e-2), model_v)
     model_v, log_v = counterfactual_training(

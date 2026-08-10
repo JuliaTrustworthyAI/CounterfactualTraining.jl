@@ -31,7 +31,8 @@ struct FooObj <: CounterfactualTraining.AbstractObjective end
     obj_e = EnergyDifferentialObjective()
     re = obj_e(yhat, y, ed, reg)
     @test isfinite(re)
-    @test re ≈ ce(yhat, y; agg=mean) * obj_e.lambda[1] +
+    @test re ≈
+        ce(yhat, y; agg=mean) * obj_e.lambda[1] +
           mean(Float32.(ed)) * obj_e.lambda[2] +
           mean(Float32.(reg)) * obj_e.lambda[3]
 
@@ -40,15 +41,16 @@ struct FooObj <: CounterfactualTraining.AbstractObjective end
     obj_a = AdversarialObjective()
     ra = obj_a(yhat, y, Float32[], Float32[], adv)
     @test isfinite(ra)
-    @test ra ≈ ce(yhat, y; agg=mean) * obj_a.lambda[1] +
-          mean(Float32.(adv)) * obj_a.lambda[2]
+    @test ra ≈
+        ce(yhat, y; agg=mean) * obj_a.lambda[1] + mean(Float32.(adv)) * obj_a.lambda[2]
 
     # FullObjective
     @test_throws AssertionError FullObjective(ce, Float32[1.0, 2.0])
     obj_f = FullObjective()
     rf = obj_f(yhat, y, ed, reg, adv)
     @test isfinite(rf)
-    @test rf ≈ ce(yhat, y; agg=mean) * obj_f.lambda[1] +
+    @test rf ≈
+        ce(yhat, y; agg=mean) * obj_f.lambda[1] +
           mean(Float32.(ed)) * obj_f.lambda[2] +
           mean(Float32.(reg)) * obj_f.lambda[3] +
           mean(Float32.(adv)) * obj_f.lambda[4]

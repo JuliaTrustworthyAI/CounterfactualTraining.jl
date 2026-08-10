@@ -16,9 +16,7 @@
     # accuracy
     X_acc = hcat(randn(Float32, 2, 50), randn(Float32, 2, 50) .+ 3.0f0)
     y_acc = vcat(fill(1, 50), fill(2, 50))
-    train_set_acc = Flux.DataLoader(
-        (X_acc, Flux.onehotbatch(y_acc, 1:2)); batchsize=25
-    )
+    train_set_acc = Flux.DataLoader((X_acc, Flux.onehotbatch(y_acc, 1:2)); batchsize=25)
     model_acc = Chain(Dense(2, 8, relu), Dense(8, 2))
     acc = CounterfactualTraining.accuracy(model_acc, train_set_acc)
     @test 0.0 <= acc <= 1.0
