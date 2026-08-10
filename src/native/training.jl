@@ -175,11 +175,11 @@ function generator_loss(
     decay::Float32,
     maxiter::Int,
 )
-    # Classification loss
+    # Classification loss (mean over N)
     ℓ = Flux.logitcrossentropy(model(X′), targets_onehot)
 
-    # L1 distance penalty
-    h1 = gen.λ[1] * sum(abs, X′ .- X)
+    # L1 distance penalty (mean per-sample L1 norm, matching CE.jl's distance_l1 with agg=mean)
+    h1 = gen.λ[1] * sum(abs, X′ .- X) / size(X′, 2)
 
     # Energy constraint with polynomial decay
     ϕ = polynomial_decay(
@@ -187,7 +187,7 @@ function generator_loss(
     )
     e = batched_energy(model, X′, target_idx)  # N-vector
     gen_loss = sum(e) / length(e)
-    reg_loss_val = sum(abs2, e)
+    reg_loss_val = sum(abs2, e) / length(e)
     h2 = gen.λ[2] * ϕ * (gen_loss + reg_strength * reg_loss_val)
 
     return ℓ + h1 + h2
