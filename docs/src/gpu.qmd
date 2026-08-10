@@ -112,7 +112,7 @@ model_full = Chain(x -> reshape(x, 28, 28, 1, :), ResNet(18; inchannels=1, nclas
 
 gen = NativeGenerator()
 obj = FullObjective()
-opt_state = Flux.setup(Flux.Adam(1e-3), model_full)
+opt_state = Flux.setup(Flux.Adam(1e-3), model_full);
 
 model_full, log_full = counterfactual_training(
     obj, model_full, gen, train_set, opt_state;
@@ -131,7 +131,7 @@ Random.seed!(42)
 model_vanilla = Chain(x -> reshape(x, 28, 28, 1, :), ResNet(18; inchannels=1, nclasses=10))
 
 obj_vanilla = VanillaObjective(; needs_ce=false)
-opt_state_vanilla = Flux.setup(Flux.Adam(1e-3), model_vanilla)
+opt_state_vanilla = Flux.setup(Flux.Adam(1e-3), model_vanilla);
 
 model_vanilla, log_vanilla = counterfactual_training(
     obj_vanilla, model_vanilla, gen, train_set, opt_state_vanilla;

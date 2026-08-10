@@ -46,13 +46,14 @@ end
     batched_energy(model, X′::AbstractMatrix, target_idx::AbstractVector)
 
 Returns a length-`N` vector of negative logits at the target class for each
-sample in `X′`.  Uses `CartesianIndex` for GPU compatibility.
+sample in `X′`.  Uses linear indexing for GPU compatibility.
 """
 function batched_energy(model, X′::AbstractMatrix, target_idx::AbstractVector{Int})
     logits = model(X′)          # C × N
     N = size(X′, 2)
-    idx = CartesianIndex.(target_idx, 1:N)
-    return -logits[idx]
+    C = size(logits, 1)
+    linear_idx = (0:N-1) .* C .+ target_idx
+    return -logits[linear_idx]
 end
 
 # ---------------------------------------------------------------------------
@@ -63,23 +64,29 @@ end
 
 Zeros out gradient components along immutable feature directions in-place.
 `mutability` is a vector of `Symbol`s (`:both`, `:none`, `:increase`, `:decrease`),
-one per feature row.
+one per feature row. Uses vectorized broadcasting for GPU compatibility.
 """
 function batched_apply_mutability!(
     ΔX::AbstractMatrix, mutability::Union{Nothing,Vector{Symbol}}
 )
     isnothing(mutability) && return ΔX
+    D = size(ΔX, 1)
     T = eltype(ΔX)
-    for (i, dir) in enumerate(mutability)
-        if dir == :none
-            @view(ΔX[i, :]) .= zero(T)
-        elseif dir == :increase
-            @view(ΔX[i, :]) .= ifelse.(@view(ΔX[i, :]) .< zero(T), zero(T), @view(ΔX[i, :]))
-        elseif dir == :decrease
-            @view(ΔX[i, :]) .= ifelse.(@view(ΔX[i, :]) .> zero(T), zero(T), @view(ΔX[i, :]))
-        end
-        # :both → no modification
-    end
+
+    # Build per-direction column masks (D×1 for broadcasting)
+    none_mask = reshape([dir == :none for dir in mutability], D, 1)
+    inc_mask = reshape([dir == :increase for dir in mutability], D, 1)
+    dec_mask = reshape([dir == :decrease for dir in mutability], D, 1)
+
+    # Zero out :none rows
+    ΔX .*= ifelse.(none_mask, zero(T), one(T))
+
+    # For :increase rows, clamp negative updates to zero
+    ΔX .*= ifelse.(inc_mask .& (ΔX .< zero(T)), zero(T), one(T))
+
+    # For :decrease rows, clamp positive updates to zero
+    ΔX .*= ifelse.(dec_mask .& (ΔX .> zero(T)), zero(T), one(T))
+
     return ΔX
 end
 
@@ -90,14 +97,15 @@ end
     batched_apply_domain_constraints!(X′::AbstractMatrix, data::CounterfactualData)
 
 Clamps each feature row of `X′` to the domain bounds stored in `data.domain`.
+Uses vectorized broadcasting for GPU compatibility.
 """
 function batched_apply_domain_constraints!(X′::AbstractMatrix, data::CounterfactualData)
     domain = data.domain
     isnothing(domain) && return X′
-    for i in axes(X′, 1)
-        lb, ub = domain[i]
-        @view(X′[i, :]) .= clamp.(@view(X′[i, :]), lb, ub)
-    end
+    D = size(X′, 1)
+    lb = reshape([domain[i][1] for i in 1:D], D, 1)
+    ub = reshape([domain[i][2] for i in 1:D], D, 1)
+    X′ .= clamp.(X′, lb, ub)
     return X′
 end
 
@@ -122,8 +130,9 @@ function check_batched_convergence(
     if iter >= maxiter
         return trues(N)
     end
-    idx = CartesianIndex.(target_idx, 1:N)
-    target_probs = probs[idx]
+    C = size(probs, 1)
+    linear_idx = (0:N-1) .* C .+ target_idx
+    target_probs = probs[linear_idx]
     return target_probs .>= threshold
 end
 
@@ -213,6 +222,7 @@ end
         reg_strength = 1.0f-3,
         epsilon = 0.3f0,
         p = Inf,
+        device = identity,
     )
 
 Generates counterfactual explanations for a batch of `N` factuals in a
@@ -233,6 +243,9 @@ fully batched (GPU-compatible) fashion.
 - `reg_strength`: Regularization strength for the energy penalty.
 - `epsilon`: Norm bound for tracking valid adversarial examples.
 - `p`: Norm order for the adversarial example bound (default `Inf`).
+- `device`: Function to move data to the compute device (`identity` for CPU,
+  `Flux.gpu` for GPU). Factuals and one-hot targets are moved to the device
+  before the search loop.
 
 # Returns
 - `counterfactuals::AbstractMatrix`: The final counterfactuals (`D×N`).
@@ -252,12 +265,16 @@ function generate_counterfactuals!(
     reg_strength::Float32=1.0f-3,
     epsilon::Float32=0.3f0,
     p::Real=Inf,
+    device=identity,
 )
+    # Move factuals to device so model calls and gradient computation run on GPU
+    X = X |> device
+
     N = size(X, 2)
 
     # Target encoding (one-hot), matching the element type of X
     nclasses = size(model(X), 1)  # infer number of classes from model output
-    targets_onehot = Float32.(Flux.onehotbatch(targets, 1:nclasses))
+    targets_onehot = Float32.(Flux.onehotbatch(targets, 1:nclasses)) |> device
 
     # Initialise counterfactuals as copy of factuals
     X′ = copy(X)
@@ -413,13 +430,19 @@ end
         model, train_set, generator::NativeGenerator;
         nsamples=nothing, nneighbours=1, domain=nothing, mutability=nothing,
         maxiter=30, decision_threshold=0.75f0, decay=0.9f0,
-        reg_strength=1.0f-3, epsilon=0.3f0, p=Inf, verbose=1,
+        reg_strength=1.0f-3, epsilon=0.3f0, p=Inf, verbose=1, device=identity,
     )
 
 Top-level counterfactual generation for the native branch.  Generates
 counterfactuals for a subset of the training data, finds neighbours, applies
 mutability protection, and partitions results into a data loader aligned
 with `train_set` batches.
+
+The `device` keyword (a function: `identity` for CPU, `Flux.gpu` for GPU)
+moves the subsampled factuals to the device for model calls and the
+counterfactual search. Results are moved back to CPU before building the
+data loader, so downstream code (neighbour finding, one-hot encoding) works
+on CPU arrays.
 
 Returns `(dl, percent_valid, nothing)` — same interface as the old `generate!()`.
 """
@@ -438,9 +461,16 @@ function generate_native!(
     epsilon::Float32=0.3f0,
     p::Real=Inf,
     verbose::Int=1,
+    device=identity,
 )
-    # Unwrap training data
+    # Unwrap training data (labels are decoded on CPU inside unwrap;
+    # X may be on GPU if the DataLoader holds GPU arrays)
     X, y_raw = unwrap(train_set)
+
+    # Keep X on CPU for downstream scalar-indexed operations (find_neighbours,
+    # protect_immutable!). The subsampled X_sub is moved to the device
+    # separately for model calls.
+    X = Flux.cpu(X)
 
     # Build CounterfactualData
     data = CounterfactualData(X, y_raw; domain=domain, mutability=mutability)
@@ -463,8 +493,11 @@ function generate_native!(
         X_sub = X
     end
 
+    # Move subsampled factuals to device for model calls
+    X_sub_dev = X_sub |> device
+
     # Predict factual labels and assign random targets
-    factual_preds = vec(Flux.onecold(model(X_sub)))
+    factual_preds = vec(Flux.onecold(model(X_sub_dev) |> Flux.cpu))
     y_levels = data.y_levels
     targets = Vector{Int}(undef, nsamples)
     for i in 1:nsamples
@@ -472,10 +505,10 @@ function generate_native!(
         targets[i] = rand(available)
     end
 
-    # Generate counterfactuals (batched)
+    # Generate counterfactuals (batched, on device)
     counterfactuals, last_valid_ae, converged_mask, maxiter = generate_counterfactuals!(
         model,
-        X_sub,
+        X_sub_dev,
         targets,
         data,
         generator;
@@ -485,7 +518,12 @@ function generate_native!(
         reg_strength=reg_strength,
         epsilon=epsilon,
         p=p,
+        device=device,
     )
+
+    # Move results back to CPU for downstream processing
+    counterfactuals = counterfactuals |> Flux.cpu
+    last_valid_ae = last_valid_ae |> Flux.cpu
 
     # Find neighbours in target class
     neighbours = find_neighbours(X, y_raw, targets, y_levels; nneighbours=nneighbours)
@@ -578,8 +616,9 @@ function counterfactual_training(
     callback::Union{Nothing,Function}=nothing,
     kwrgs...,
 )
-    # Move model to device
+    # Move model and optimizer state to device
     model = model |> device
+    opt_state = opt_state |> device
 
     # Setup
     burnin = Int(round(burnin * nepochs))
@@ -600,7 +639,7 @@ function counterfactual_training(
                 "log",
             )
             model = _model |> device
-            opt_state = _opt_state
+            opt_state = _opt_state |> device
             start_epoch = epoch + 1
             if start_epoch <= nepochs
                 @info "Resuming training from epoch $start_epoch."
@@ -640,6 +679,7 @@ function counterfactual_training(
                 epsilon=epsilon,
                 p=p,
                 verbose=verbose,
+                device=device,
             )
             avg_iter = maxiter
         else
@@ -695,8 +735,8 @@ function counterfactual_training(
 
         # Logging
         time_taken = time() - start
-        acc = accuracy(model, train_set)
-        acc_val = isnothing(val_set) ? nothing : accuracy(model, val_set)
+        acc = accuracy(model, train_set; device=device)
+        acc_val = isnothing(val_set) ? nothing : accuracy(model, val_set; device=device)
         train_loss = sum(losses) / length(losses)
 
         if epoch > burnin
@@ -729,7 +769,7 @@ function counterfactual_training(
             jldsave(
                 joinpath(checkpoint_dir, "checkpoint.jld2");
                 model=model |> Flux.cpu,
-                opt_state=opt_state,
+                opt_state=opt_state |> Flux.cpu,
                 epoch,
                 log,
             )

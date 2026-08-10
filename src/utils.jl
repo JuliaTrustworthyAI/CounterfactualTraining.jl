@@ -14,6 +14,10 @@ function unwrap(train_set; labels=nothing)
         train_set,
     )
 
+    # Move labels to CPU before decoding (findall uses scalar indexing,
+    # which is disallowed on GPU arrays)
+    ys = Flux.cpu(ys)
+
     # Decode one-hot labels:
     ycold = (x -> reduce(vcat, x))([findall(y) for y in eachcol(ys)])
 
@@ -26,15 +30,19 @@ function unwrap(train_set; labels=nothing)
 end
 
 """
-    accuracy(model, train_set)
+    accuracy(model, train_set; device=identity)
 
 Compute classification accuracy over a `DataLoader`. Uses `Flux.onecold` on
 whole matrices — GPU-compatible and faster than per-column `argmax`.
+The `device` keyword moves each batch to the device before the forward pass.
 """
-function accuracy(model, train_set)
+function accuracy(model, train_set; device=identity)
     acc = 0
     for (x, y) in train_set
-        yhat = Flux.onecold(Flux.softmax(model(x)))
+        x = x |> device
+        # Move logits to CPU before onecold (mapslices/argmax may scalar-index GPU arrays)
+        logits = model(x) |> Flux.cpu
+        yhat = Flux.onecold(Flux.softmax(logits))
         y_true = Flux.onecold(y)
         acc += sum(yhat .== y_true)
     end
