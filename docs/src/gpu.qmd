@@ -21,6 +21,7 @@ using CounterfactualTraining
 using CounterfactualTraining.Native
 using CounterfactualExplanations
 using Flux
+using Metalhead
 using Plots
 using Random
 using MLDatasets
@@ -83,34 +84,71 @@ train_set = Flux.DataLoader((X, y_onehot); batchsize=128, shuffle=true)
 
 ## Model
 
-We use a "chunky" MLP with two hidden layers, suitable for demonstrating GPU acceleration:
+We use a ResNet-18 from `Metalhead.jl`, configured for single-channel 28×28 MNIST inputs and 10 output classes. The native counterfactual pipeline operates on flattened `D×N` matrices throughout (see `generate_counterfactuals!` in `src/native/training.jl`), so we wrap the backbone in a `Chain` that reshapes the 784-dimensional input back to `28×28×1×N` before the first convolution. This keeps the counterfactual search in pixel space, where the per-pixel `domain` bounds (`(-1, 1)`) and mutability constraints remain valid, without requiring changes to the matrix-typed pipeline.
 
 ```{julia}
 #| echo: true
 
-model = Chain(
-    Dense(784, 1024, relu),
-    Dense(1024, 128, relu),
-    Dense(128, 10)
-)
+backbone = ResNet(18; inchannels=1, nclasses=10)
+model = Chain(x -> reshape(x, 28, 28, 1, :), backbone)
 ```
 
 ## Training
 
-We train with `FullObjective` and `NativeGenerator`. The `device` keyword moves the model to the GPU when available; training data should already be on the device (the `DataLoader` handles batching).
+We compare two objectives to illustrate the overhead of the counterfactual pipeline: `FullObjective` (generates counterfactuals each epoch after burn-in) and `VanillaObjective(; needs_ce=false)` (standard training, no CF generation). Both runs use the same model, optimizer, and hyperparameters, and start from identical initial weights (`Random.seed!(42)` is re-seeded before constructing each model). The training `log` records `time_taken` per epoch in both branches, so we plot the per-epoch wall-clock time for the two objectives.
+
+### Full objective
 
 ```{julia}
 #| echo: true
 #| eval: false
 
+Random.seed!(42)
+model_full = Chain(x -> reshape(x, 28, 28, 1, :), ResNet(18; inchannels=1, nclasses=10))
+
 gen = NativeGenerator()
 obj = FullObjective()
-opt_state = Flux.setup(Flux.Adam(1e-3), model)
+opt_state = Flux.setup(Flux.Adam(1e-3), model_full)
 
-model, log = counterfactual_training(
-    obj, model, gen, train_set, opt_state;
+model_full, log_full = counterfactual_training(
+    obj, model_full, gen, train_set, opt_state;
     device=device, nepochs=10, maxiter=30, burnin=0.5f0,
     domain=domain, verbose=0
 )
 ```
+
+### Vanilla objective
+
+```{julia}
+#| echo: true
+#| eval: false
+
+Random.seed!(42)
+model_vanilla = Chain(x -> reshape(x, 28, 28, 1, :), ResNet(18; inchannels=1, nclasses=10))
+
+obj_vanilla = VanillaObjective(; needs_ce=false)
+opt_state_vanilla = Flux.setup(Flux.Adam(1e-3), model_vanilla)
+
+model_vanilla, log_vanilla = counterfactual_training(
+    obj_vanilla, model_vanilla, gen, train_set, opt_state_vanilla;
+    device=device, nepochs=10, maxiter=30, burnin=0.5f0,
+    domain=domain, verbose=0
+)
+```
+
+### Timing comparison
+
+```{julia}
+#| echo: true
+#| eval: false
+
+t_full = [l.time_taken for l in log_full]
+t_vanilla = [l.time_taken for l in log_vanilla]
+
+plot(1:length(t_full), t_full; label="Full objective",
+     xlabel="Epoch", ylabel="Time per epoch (s)", lw=2)
+plot!(1:length(t_vanilla), t_vanilla; label="Vanilla objective", lw=2)
+```
+
+The gap between the two curves reflects the cost of generating counterfactuals each epoch (the per-sample batched search in `generate_native!`). Expect the difference to appear only after the burn-in fraction, since `VanillaObjective(; needs_ce=false)` short-circuits CF generation entirely via `needs_counterfactuals`.
 
