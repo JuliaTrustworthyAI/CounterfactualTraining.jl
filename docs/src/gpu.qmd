@@ -102,7 +102,7 @@ model = Chain(x -> reshape(x, 28, 28, 1, :), backbone)
 We compare two objectives to illustrate the overhead of the counterfactual pipeline: `FullObjective` (generates counterfactuals each epoch after burn-in) and `VanillaObjective(; needs_ce=false)` (standard training, no CF generation). Both runs use the same model, optimizer, and hyperparameters, and start from identical initial weights (`Random.seed!(42)` is re-seeded before constructing each model). The training `log` records `time_taken` per epoch in both branches, so we plot the per-epoch wall-clock time for the two objectives.
 
 ```{julia}
-nepochs = 5
+nepochs = 10
 verbose = 2
 opt = Flux.Adam(1e-3)
 nce = 128
@@ -156,9 +156,6 @@ model_vanilla, log_vanilla = counterfactual_training(
 ```{julia}
 #| echo: true
 #| eval: false
-#| label: fig-gpu
-#| fig-cap: "Per-epoch wall-clock time (left) and training accuracy (right) for the full and vanilla objectives."
-
 # Timing
 t_full = [l.time_taken for l in log_full]
 t_vanilla = [l.time_taken for l in log_vanilla]
@@ -194,5 +191,7 @@ combined = plot(
 savefig(combined, "docs/src/assets/gpu.svg")
 ```
 
-@fig-gpu compares the two objectives side by side. The left panel shows per-epoch wall-clock time; the right panel shows training accuracy. The gap between the two curves in the left panel reflects the cost of generating counterfactuals each epoch (the per-sample batched search in `generate_native!`). Expect the difference to appear only after the burn-in fraction, since `VanillaObjective(; needs_ce=false)` short-circuits CF generation entirely via `needs_counterfactuals`. The right panel confirms that both objectives achieve comparable training accuracy, indicating that the counterfactual regularization does not degrade the discriminative performance of the model.
+![Per-epoch wall-clock time (left) and training accuracy (right) for the full and vanilla objectives.](assets/gpu.svg)
+
+The figure above compares the two objectives side by side. The left panel shows per-epoch wall-clock time; the right panel shows training accuracy. The gap between the two curves in the left panel reflects the cost of generating counterfactuals each epoch (the per-sample batched search in `generate_native!`). Expect the difference to appear only after the burn-in fraction, since `VanillaObjective(; needs_ce=false)` short-circuits CF generation entirely via `needs_counterfactuals`. The right panel confirms that both objectives achieve comparable training accuracy, indicating that the counterfactual regularization does not degrade the discriminative performance of the model.
 
