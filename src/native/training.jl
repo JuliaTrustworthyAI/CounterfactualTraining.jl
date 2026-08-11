@@ -244,8 +244,10 @@ end
 # Helper: track last valid adversarial examples
 # ---------------------------------------------------------------------------
 """
-    track_adversarial_examples!(last_valid_ae, X, X′, epsilon, p)
+    track_adversarial_examples!(last_valid_ae, X, X′, epsilon, p, perturbations, norms)
 
+In-place version that writes the perturbation matrix into `perturbations` and
+the per-sample norms into `norms` (both preallocated, same shape/type as needed).
 Updates `last_valid_ae` in-place: for samples whose perturbation norm (in
 `p`-norm) is ≤ `epsilon`, the current counterfactual is stored.
 """
@@ -255,16 +257,39 @@ function track_adversarial_examples!(
     X′::AbstractMatrix,
     epsilon::Float32,
     p::Real,
+    perturbations::AbstractMatrix,
+    norms::AbstractVector,
 )
-    perturbations = X′ .- X
+    @assert size(perturbations) == size(X′)
+    @assert length(norms) == size(X′, 2)
+    perturbations .= X′ .- X
     if p == Inf
-        norms = vec(maximum(abs, perturbations; dims=1))
+        norms .= vec(maximum(abs, perturbations; dims=1))
     else
-        norms = vec(sum(abs .^ p, perturbations; dims=1) .^ (1 / p))
+        norms .= vec(sum(abs.(perturbations) .^ p; dims=1) .^ (1 / p))
     end
     valid_ae = norms .<= epsilon
     last_valid_ae[:, valid_ae] .= X′[:, valid_ae]
     return last_valid_ae
+end
+
+"""
+    track_adversarial_examples!(last_valid_ae, X, X′, epsilon, p)
+
+Convenience wrapper that allocates `perturbations` and `norms` on the fly.
+For repeated calls (e.g. inside the counterfactual search loop), prefer the
+6-argument signature with preallocated buffers.
+"""
+function track_adversarial_examples!(
+    last_valid_ae::AbstractMatrix,
+    X::AbstractMatrix,
+    X′::AbstractMatrix,
+    epsilon::Float32,
+    p::Real,
+)
+    perturbations = similar(X′)
+    norms = similar(X′, size(X′, 2))
+    return track_adversarial_examples!(last_valid_ae, X, X′, epsilon, p, perturbations, norms)
 end
 
 # ---------------------------------------------------------------------------
@@ -406,6 +431,10 @@ function generate_counterfactuals!(
     X′_old = similar(X′)
     update = similar(X′)
 
+    # Preallocate buffers for track_adversarial_examples! (reused each iteration)
+    perturbations = similar(X′)
+    norms = similar(X′, size(X′, 2))
+
     for iter in 1:maxiter
         # Compute gradient of the generator loss w.r.t. X′
         grads_val = Flux.withgradient(X′) do x
@@ -460,7 +489,7 @@ function generate_counterfactuals!(
         batched_apply_domain_constraints!(X′, domain_bounds)
 
         # Track last valid adversarial examples
-        track_adversarial_examples!(last_valid_ae, X, X′, epsilon, p)
+        track_adversarial_examples!(last_valid_ae, X, X′, epsilon, p, perturbations, norms)
 
         # Check convergence
         probs = Flux.softmax(model(X′); dims=1)

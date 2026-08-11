@@ -21,10 +21,11 @@ function unwrap(train_set; labels=nothing)
     # Decode one-hot labels:
     ycold = (x -> reduce(vcat, x))([findall(y) for y in eachcol(ys)])
 
-    # If labels are provided, replace indices with labels:
+    # If labels are provided, map indices to labels (builds a new vector
+    # with the correct element type — replace! cannot change eltype):
     if !isnothing(labels)
         @assert length(labels) == size(ys, 1)
-        replace!(ycold, [i => label for (i, label) in enumerate(labels)]...)
+        ycold = [labels[i] for i in ycold]
     end
     return X, ycold
 end

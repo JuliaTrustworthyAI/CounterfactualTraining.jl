@@ -23,13 +23,15 @@
     @test last_valid[:, 3] == Xp_ae[:, 3]
 
     # track_adversarial_examples! - finite p branch
-    # NOTE: native/training.jl:150 has a bug: `abs .^ p` tries to raise
-    # the function `abs` to a power instead of `abs.(perturbations) .^ p`
-    @test_broken begin
-        last_valid2 = copy(X_ae)
-        Native.track_adversarial_examples!(last_valid2, X_ae, Xp_ae, 0.5f0, 2)
-        last_valid2[:, 1] == Xp_ae[:, 1]
-    end
+    last_valid2 = copy(X_ae)
+    Native.track_adversarial_examples!(last_valid2, X_ae, Xp_ae, 0.5f0, 2)
+    # With p=2 and epsilon=0.5: perturbation norms are [0, sqrt(2), 0] (L2 norm per column).
+    # Column 1: norm 0 <= 0.5 → valid → last_valid = X′
+    # Column 2: norm sqrt(2) ≈ 1.414 > 0.5 → invalid → last_valid stays X (zeros)
+    # Column 3: norm 0 <= 0.5 → valid → last_valid = X′
+    @test last_valid2[:, 1] == Xp_ae[:, 1]
+    @test last_valid2[:, 2] == X_ae[:, 2]
+    @test last_valid2[:, 3] == Xp_ae[:, 3]
 
     # generator_loss
     gen = NativeGenerator()

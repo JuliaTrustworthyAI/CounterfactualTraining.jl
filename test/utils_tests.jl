@@ -7,11 +7,9 @@
     @test size(X2) == (3, 20)
     @test sort(unique(ycold)) == [1, 2]
 
-    # unwrap with labels (BUG: utils.jl:23 - ycold is Vector{Int}, can't hold Strings)
-    @test_broken begin
-        X3, ycold_labeled = CounterfactualTraining.unwrap(train_set; labels=["a", "b"])
-        sort(unique(ycold_labeled)) == ["a", "b"]
-    end
+    # unwrap with labels
+    X3, ycold_labeled = CounterfactualTraining.unwrap(train_set; labels=["a", "b"])
+    @test sort(unique(ycold_labeled)) == ["a", "b"]
 
     # accuracy
     X_acc = hcat(randn(Float32, 2, 50), randn(Float32, 2, 50) .+ 3.0f0)
