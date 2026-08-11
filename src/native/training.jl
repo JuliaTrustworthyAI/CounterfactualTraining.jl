@@ -77,8 +77,59 @@ function batched_energy(model, X′::AbstractMatrix, target_idx::AbstractVector{
 end
 
 # ---------------------------------------------------------------------------
+# Preparer: precompute mutability masks (hoisted out of the search loop)
+# ---------------------------------------------------------------------------
+"""
+    prepare_mutability_masks(mutability, D; device=identity)
+
+Precompute the per-direction boolean masks used by
+[`batched_apply_mutability!`](@ref).
+
+Returns `(none_mask, inc_mask, dec_mask)`, each a `D×1` boolean array on the
+compute device, or `nothing` if `mutability` is `nothing`.
+"""
+function prepare_mutability_masks(
+    mutability::Union{Nothing,Vector{Symbol}}, D::Int; device=identity
+)
+    isnothing(mutability) && return nothing
+    none_mask = reshape([dir == :none for dir in mutability], D, 1) |> device
+    inc_mask = reshape([dir == :increase for dir in mutability], D, 1) |> device
+    dec_mask = reshape([dir == :decrease for dir in mutability], D, 1) |> device
+    return (none_mask, inc_mask, dec_mask)
+end
+
+# ---------------------------------------------------------------------------
 # Helper: apply mutability constraints to a batched gradient
 # ---------------------------------------------------------------------------
+"""
+    batched_apply_mutability!(ΔX::AbstractMatrix, masks)
+
+Apply precomputed mutability masks to a batched gradient update in-place.
+`masks` is a 3-tuple `(none_mask, inc_mask, dec_mask)` as returned by
+[`prepare_mutability_masks`](@ref), or `nothing` (no-op).
+
+Zeros out gradient components along immutable feature directions in-place.
+Uses vectorized broadcasting for GPU compatibility.
+"""
+function batched_apply_mutability!(
+    ΔX::AbstractMatrix,
+    masks::Nothing,
+)
+    return ΔX  # no-op when mutability is nothing
+end
+
+function batched_apply_mutability!(
+    ΔX::AbstractMatrix,
+    masks::Tuple{<:AbstractMatrix,<:AbstractMatrix,<:AbstractMatrix},
+)
+    T = eltype(ΔX)
+    none_mask, inc_mask, dec_mask = masks
+    ΔX .*= ifelse.(none_mask, zero(T), one(T))
+    ΔX .*= ifelse.(inc_mask .& (ΔX .< zero(T)), zero(T), one(T))
+    ΔX .*= ifelse.(dec_mask .& (ΔX .> zero(T)), zero(T), one(T))
+    return ΔX
+end
+
 """
     batched_apply_mutability!(ΔX::AbstractMatrix, mutability; device=identity)
 
@@ -87,34 +138,66 @@ Zeros out gradient components along immutable feature directions in-place.
 one per feature row. Uses vectorized broadcasting for GPU compatibility.
 The `device` keyword moves the mask arrays to the compute device before
 broadcasting, preventing non-bitstype CPU array capture in GPU kernels.
+
+This is a convenience wrapper that builds the masks on the fly and delegates
+to [`batched_apply_mutability!(ΔX, masks)`](@ref). For repeated calls with
+the same `mutability`, precompute masks with [`prepare_mutability_masks`](@ref)
+and call the mask-accepting signature directly.
 """
 function batched_apply_mutability!(
     ΔX::AbstractMatrix, mutability::Union{Nothing,Vector{Symbol}}; device=identity
 )
     isnothing(mutability) && return ΔX
     D = size(ΔX, 1)
-    T = eltype(ΔX)
+    masks = prepare_mutability_masks(mutability, D; device=device)
+    return batched_apply_mutability!(ΔX, masks)
+end
 
-    # Build per-direction masks (D×1 for broadcasting), moved to device
-    none_mask = reshape([dir == :none for dir in mutability], D, 1) |> device
-    inc_mask = reshape([dir == :increase for dir in mutability], D, 1) |> device
-    dec_mask = reshape([dir == :decrease for dir in mutability], D, 1) |> device
+# ---------------------------------------------------------------------------
+# Preparer: precompute domain bounds (hoisted out of the search loop)
+# ---------------------------------------------------------------------------
+"""
+    prepare_domain_bounds(domain, D; device=identity)
 
-    # Zero out :none rows
-    ΔX .*= ifelse.(none_mask, zero(T), one(T))
+Precompute the lower/upper bound arrays used by
+[`batched_apply_domain_constraints!`](@ref).
 
-    # For :increase rows, clamp negative updates to zero
-    ΔX .*= ifelse.(inc_mask .& (ΔX .< zero(T)), zero(T), one(T))
-
-    # For :decrease rows, clamp positive updates to zero
-    ΔX .*= ifelse.(dec_mask .& (ΔX .> zero(T)), zero(T), one(T))
-
-    return ΔX
+Returns `(lb, ub)`, each a `D×1` array on the compute device, or `nothing` if
+`domain` is `nothing`.
+"""
+function prepare_domain_bounds(domain, D::Int; device=identity)
+    isnothing(domain) && return nothing
+    lb = reshape([domain[i][1] for i in 1:D], D, 1) |> device
+    ub = reshape([domain[i][2] for i in 1:D], D, 1) |> device
+    return (lb, ub)
 end
 
 # ---------------------------------------------------------------------------
 # Helper: clamp counterfactuals to domain bounds
 # ---------------------------------------------------------------------------
+"""
+    batched_apply_domain_constraints!(X′::AbstractMatrix, bounds)
+
+Clamp each feature row of `X′` to the precomputed domain bounds in-place.
+`bounds` is a 2-tuple `(lb, ub)` as returned by [`prepare_domain_bounds`](@ref),
+or `nothing` (no-op).
+
+Uses vectorized broadcasting for GPU compatibility.
+"""
+function batched_apply_domain_constraints!(
+    X′::AbstractMatrix, bounds::Nothing,
+)
+    return X′
+end
+
+function batched_apply_domain_constraints!(
+    X′::AbstractMatrix, bounds::Tuple{<:AbstractMatrix,<:AbstractMatrix},
+)
+    lb, ub = bounds
+    X′ .= clamp.(X′, lb, ub)
+    return X′
+end
+
 """
     batched_apply_domain_constraints!(X′::AbstractMatrix, data::CounterfactualData; device=identity)
 
@@ -122,6 +205,11 @@ Clamps each feature row of `X′` to the domain bounds stored in `data.domain`.
 Uses vectorized broadcasting for GPU compatibility.
 The `device` keyword moves the bounds arrays to the compute device before
 broadcasting, preventing non-bitstype CPU array capture in GPU kernels.
+
+This is a convenience wrapper that builds the bounds on the fly and delegates
+to [`batched_apply_domain_constraints!(X′, bounds)`](@ref). For repeated calls
+with the same `data`, precompute bounds with [`prepare_domain_bounds`](@ref)
+and call the bounds-accepting signature directly.
 """
 function batched_apply_domain_constraints!(
     X′::AbstractMatrix, data::CounterfactualData; device=identity
@@ -129,10 +217,8 @@ function batched_apply_domain_constraints!(
     domain = data.domain
     isnothing(domain) && return X′
     D = size(X′, 1)
-    lb = reshape([domain[i][1] for i in 1:D], D, 1) |> device
-    ub = reshape([domain[i][2] for i in 1:D], D, 1) |> device
-    X′ .= clamp.(X′, lb, ub)
-    return X′
+    bounds = prepare_domain_bounds(domain, D; device=device)
+    return batched_apply_domain_constraints!(X′, bounds)
 end
 
 # ---------------------------------------------------------------------------
@@ -315,6 +401,11 @@ function generate_counterfactuals!(
     # Convergence mask
     converged = falses(N)
 
+    # Precompute mutability masks and domain bounds once (hoisted out of the loop)
+    D = size(X, 1)
+    mutability_masks = prepare_mutability_masks(data.mutability, D; device=device)
+    domain_bounds = prepare_domain_bounds(data.domain, D; device=device)
+
     for iter in 1:maxiter
         # Compute gradient of the generator loss w.r.t. X′
         grads_val = Flux.withgradient(X′) do x
@@ -343,11 +434,11 @@ function generate_counterfactuals!(
         X′_old = copy(X′)
         Flux.update!(opt_state, X′, ΔX)
         update = X′ .- X′_old
-        batched_apply_mutability!(update, data.mutability; device=device)
+        batched_apply_mutability!(update, mutability_masks)
         X′ .= X′_old .+ update
 
         # Clamp to domain bounds
-        batched_apply_domain_constraints!(X′, data; device=device)
+        batched_apply_domain_constraints!(X′, domain_bounds)
 
         # Track last valid adversarial examples
         track_adversarial_examples!(last_valid_ae, X, X′, epsilon, p)
