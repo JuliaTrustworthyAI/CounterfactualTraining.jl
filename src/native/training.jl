@@ -40,20 +40,40 @@ Base.@kwdef struct NativeGenerator
 end
 
 # ---------------------------------------------------------------------------
-# Helper: batched energy (negative target logits for all N samples)
+# Helper: batched energy from pre-computed logits
+# ---------------------------------------------------------------------------
+"""
+    batched_energy_from_logits(logits::AbstractMatrix, target_idx::AbstractVector{Int})
+
+Returns a length-`N` vector of negative logits at the target class for each
+sample, given the `C×N` logits matrix.  Uses linear indexing for GPU
+compatibility.
+
+This is the core indexing logic extracted from [`batched_energy`](@ref) so
+that callers who already have `logits = model(X′)` can avoid a redundant
+forward pass.
+"""
+function batched_energy_from_logits(
+    logits::AbstractMatrix, target_idx::AbstractVector{Int}
+)
+    N = length(target_idx)
+    C = size(logits, 1)
+    linear_idx = (0:(N - 1)) .* C .+ target_idx
+    return -logits[linear_idx]
+end
+
+# ---------------------------------------------------------------------------
+# Helper: batched energy (convenience wrapper that calls the model)
 # ---------------------------------------------------------------------------
 """
     batched_energy(model, X′::AbstractMatrix, target_idx::AbstractVector)
 
 Returns a length-`N` vector of negative logits at the target class for each
-sample in `X′`.  Uses linear indexing for GPU compatibility.
+sample in `X′`.  Calls `model(X′)` internally and delegates to
+[`batched_energy_from_logits`](@ref).
 """
 function batched_energy(model, X′::AbstractMatrix, target_idx::AbstractVector{Int})
-    logits = model(X′)          # C × N
-    N = size(X′, 2)
-    C = size(logits, 1)
-    linear_idx = (0:(N - 1)) .* C .+ target_idx
-    return -logits[linear_idx]
+    return batched_energy_from_logits(model(X′), target_idx)
 end
 
 # ---------------------------------------------------------------------------
@@ -193,7 +213,8 @@ function generator_loss(
     # Classification loss (sum over N for full-strength per-sample gradients).
     # CE.jl uses agg=mean then rescales the update by num_counterfactuals (×N);
     # using agg=sum here is equivalent and avoids the rescale step.
-    ℓ = Flux.logitcrossentropy(model(X′), targets_onehot; agg=sum)
+    logits = model(X′)  # C × N — single forward pass, reused below
+    ℓ = Flux.logitcrossentropy(logits, targets_onehot; agg=sum)
 
     # L1 distance penalty (sum, equivalent to CE.jl's distance_l1 with agg=mean + rescale)
     h1 = gen.λ[1] * sum(abs, X′ .- X)
@@ -204,7 +225,7 @@ function generator_loss(
     b = Float32(round(maxiter / 25))
     a = b / 10.0f0
     ϕ = polynomial_decay(a, b, decay, iter)
-    e = batched_energy(model, X′, target_idx)  # N-vector
+    e = batched_energy_from_logits(logits, target_idx)  # N-vector — reuses logits
     gen_loss = sum(e)
     reg_loss_val = sum(abs2, e)
     h2 = gen.λ[2] * ϕ * (gen_loss + reg_strength * reg_loss_val)
