@@ -981,7 +981,7 @@ function counterfactual_training(
 
         # Generate counterfactuals (batched, on device)
         if epoch > burnin && needs_counterfactuals(loss)
-            # TODO: should this really happen outside of the data loader loop below? This design is inherited from the research branch, which did this to parallelize counterfactual generation across many counterfactuals. Might it bottleneck performance on the GPU?
+            # TODO: should this really happen outside of the data loader loop below? This design/antipattern is inherited from the research branch, which used this to parallelize counterfactual generation across many counterfactuals. Might it bottleneck performance on the GPU? Compare this, for example, to standard adversarial training which generates AEs as part of the `for (i, batch)` loop
             counterfactual_dl, percent_valid, _ = generate_native!(
                 model,
                 train_set,
@@ -1012,6 +1012,7 @@ function counterfactual_training(
 
         # Backprop
         for (i, batch) in enumerate(train_set)
+            # TODO: This is the loop I am referring to in the above todo comment.
             input, label = batch
             input = input |> device
             label = label |> device
