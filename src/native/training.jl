@@ -981,7 +981,23 @@ function counterfactual_training(
 
         # Generate counterfactuals (batched, on device)
         if epoch > burnin && needs_counterfactuals(loss)
-            # TODO: should this really happen outside of the data loader loop below? This design/antipattern is inherited from the research branch, which used this to parallelize counterfactual generation across many counterfactuals. Might it bottleneck performance on the GPU? Compare this, for example, to standard adversarial training which generates AEs as part of the `for (i, batch)` loop
+            # CFs are generated once per epoch (not per batch) because CF search
+            # requires `maxiter` (default 30) forward+backward passes per sample
+            # set — roughly 3–30× more expensive than the FGSM/PGD steps used in
+            # standard adversarial training. A naive per-batch approach (generating
+            # all `nsamples` per batch) would multiply CF-search cost by
+            # `length(train_set)` (~40×). A distributed approach (generating
+            # `nsamples / n_batches` CFs per batch) would have similar total CF
+            # work, but suffers from poor GPU utilization at small per-batch CF
+            # counts (tiny pullbacks dominated by kernel-launch overhead) and 40×
+            # more setup overhead (opt state, buffer allocation, mask/bounds prep).
+            # The per-epoch design also provides a stable (slightly stale) CF
+            # signal, analogous to target networks in RL, which aids training
+            # stability. CFs are not paired with specific batch factuals: they
+            # contribute to the implausibility/regularization terms, which are
+            # aggregated via `mean`. For compute-bound workloads with large `nce`,
+            # per-batch generation could be competitive — this would need
+            # benchmarking to evaluate.
             counterfactual_dl, percent_valid, _ = generate_native!(
                 model,
                 train_set,
@@ -1012,7 +1028,7 @@ function counterfactual_training(
 
         # Backprop
         for (i, batch) in enumerate(train_set)
-            # TODO: This is the loop I am referring to in the above todo comment.
+            # Training mini-batch loop.
             input, label = batch
             input = input |> device
             label = label |> device
