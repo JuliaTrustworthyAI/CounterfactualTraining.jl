@@ -463,41 +463,68 @@ function generate_counterfactuals!(
     perturbations = similar(X′)
     norms = similar(X′, size(X′, 2))
 
+    # Precompute chunk column ranges once (hoisted out of the iteration loop).
+    # When `cf_batchsize >= N` there is a single chunk `1:N`, and the fast path
+    # below avoids slicing the D×N arrays entirely.
+    chunk_ranges = collect(
+        start:min(start + cf_batchsize - 1, N) for start in 1:cf_batchsize:N
+    )
+
     for iter in 1:maxiter
         # Compute gradient of the generator loss w.r.t. X′ AND extract logits
         # for the convergence check — sharing the forward pass. The convergence
         # check is on the pre-update X′ (= post-update from the previous
         # iteration), so we detect convergence one iteration "late". This saves
         # one forward pass per iteration (the separate convergence forward).
-        for start in 1:cf_batchsize:N
-            stop = min(start + cf_batchsize - 1, N)
+        for cols in chunk_ranges
             local logits_chunk
-            y, back = Flux.pullback(X′[:, start:stop]) do xc
-                logits_chunk = model(xc)
-                return generator_loss_from_logits(
-                    generator,
-                    logits_chunk,
-                    xc,
-                    X[:, start:stop],
-                    targets_onehot[:, start:stop],
-                    @view(targets[start:stop]),
-                    iter,
-                    reg_strength,
-                    decay,
-                    maxiter,
-                )
+            if length(cols) == N
+                # Single chunk covering all columns: no slicing of D×N arrays.
+                y, back = Flux.pullback(X′) do xc
+                    logits_chunk = model(xc)
+                    return generator_loss_from_logits(
+                        generator,
+                        logits_chunk,
+                        xc,
+                        X,
+                        targets_onehot,
+                        targets,
+                        iter,
+                        reg_strength,
+                        decay,
+                        maxiter,
+                    )
+                end
+                copyto!(ΔX, back(one(y))[1])
+            else
+                # Chunked path: views instead of copies.
+                y, back = Flux.pullback(@view(X′[:, cols])) do xc
+                    logits_chunk = model(xc)
+                    return generator_loss_from_logits(
+                        generator,
+                        logits_chunk,
+                        xc,
+                        @view(X[:, cols]),
+                        @view(targets_onehot[:, cols]),
+                        @view(targets[cols]),
+                        iter,
+                        reg_strength,
+                        decay,
+                        maxiter,
+                    )
+                end
+                ΔX[:, cols] .= back(one(y))[1]
             end
-            ΔX[:, start:stop] .= back(one(y))[1]
 
             # Convergence check using the SAME logits_chunk (no extra forward)
             if iter < maxiter
                 probs_chunk = Flux.softmax(logits_chunk; dims=1)
-                target_idx_chunk = targets[start:stop]
+                target_idx_chunk = targets[cols]
                 C = size(probs_chunk, 1)
                 n_chunk = length(target_idx_chunk)
                 linear_idx = (0:(n_chunk - 1)) .* C .+ target_idx_chunk
                 target_probs = probs_chunk[linear_idx] |> Flux.cpu
-                converged[start:stop] .= target_probs .>= decision_threshold
+                converged[cols] .= target_probs .>= decision_threshold
             end
         end
 
@@ -954,6 +981,7 @@ function counterfactual_training(
 
         # Generate counterfactuals (batched, on device)
         if epoch > burnin && needs_counterfactuals(loss)
+            # TODO: should this really happen outside of the data loader loop below? This design is inherited from the research branch, which did this to parallelize counterfactual generation across many counterfactuals. Might it bottleneck performance on the GPU?
             counterfactual_dl, percent_valid, _ = generate_native!(
                 model,
                 train_set,
