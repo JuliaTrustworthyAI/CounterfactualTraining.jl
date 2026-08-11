@@ -406,6 +406,14 @@ function generate_counterfactuals!(
     mutability_masks = prepare_mutability_masks(data.mutability, D; device=device)
     domain_bounds = prepare_domain_bounds(data.domain, D; device=device)
 
+    # Preallocate buffers reused across iterations to avoid per-iteration
+    # allocations of D×N matrices. X′_old holds the pre-update state so the
+    # update can be computed as (X′ .- X′_old) and mutability applied to the
+    # update (not the gradient) — see comment below. `update` holds that
+    # post-optimizer, pre-mutability update.
+    X′_old = similar(X′)
+    update = similar(X′)
+
     for iter in 1:maxiter
         # Compute gradient of the generator loss w.r.t. X′
         grads_val = Flux.withgradient(X′) do x
@@ -439,9 +447,10 @@ function generate_counterfactuals!(
         # update (Δstate), not the gradient. For Descent this is equivalent
         # to zeroing the gradient first; for momentum optimizers it prevents
         # accumulated momentum from moving immutable features.
-        X′_old = copy(X′)
+        # X′_old and update are preallocated buffers reused each iteration.
+        copyto!(X′_old, X′)
         Flux.update!(opt_state, X′, ΔX)
-        update = X′ .- X′_old
+        update .= X′ .- X′_old
 
         # Also zero the update for converged samples. For Descent this is
         # redundant (zero gradient → zero update), but for momentum optimizers
