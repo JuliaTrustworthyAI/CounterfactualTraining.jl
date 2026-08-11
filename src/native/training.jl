@@ -424,6 +424,14 @@ function generate_counterfactuals!(
         end
         ΔX = grads_val.grad[1]
 
+        # Zero gradients for already-converged samples so the optimizer does no
+        # work on them and they don't drift. This is safe because converged
+        # samples are already at their final state; subsequent iterations only
+        # need to search for the remaining unconverged samples.
+        if any(converged)
+            ΔX[:, converged] .= zero(eltype(ΔX))
+        end
+
         # Apply optimizer step on the full gradient, then zero immutable
         # directions in the resulting update. This matches CE.jl's ordering
         # (search.jl: generate_perturbations → apply_mutability), where the
@@ -434,6 +442,16 @@ function generate_counterfactuals!(
         X′_old = copy(X′)
         Flux.update!(opt_state, X′, ΔX)
         update = X′ .- X′_old
+
+        # Also zero the update for converged samples. For Descent this is
+        # redundant (zero gradient → zero update), but for momentum optimizers
+        # (Adam, Momentum) the optimizer may produce a non-zero update from
+        # accumulated momentum even with a zero gradient. Zeroing the update
+        # guarantees converged samples don't move regardless of optimizer.
+        if any(converged)
+            update[:, converged] .= zero(eltype(update))
+        end
+
         batched_apply_mutability!(update, mutability_masks)
         X′ .= X′_old .+ update
 
@@ -447,7 +465,7 @@ function generate_counterfactuals!(
         probs = Flux.softmax(model(X′); dims=1)
         converged = check_batched_convergence(
             probs, targets, iter, maxiter, decision_threshold
-        )
+        ) |> Flux.cpu
 
         # Early exit if all samples have converged
         if all(converged)
