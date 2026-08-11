@@ -99,15 +99,13 @@
     # Full batch (no chunking)
     Random.seed!(42)
     cfs_full, advex_full, conv_full, _ = Native.generate_counterfactuals!(
-        model_mb, X_mb, targets_mb, data_mb, gen_mb;
-        maxiter=5, cf_batchsize=128,
+        model_mb, X_mb, targets_mb, data_mb, gen_mb; maxiter=5, cf_batchsize=128
     )
 
     # Mini-batched (chunked: 4 samples at a time)
     Random.seed!(42)
     cfs_chunked, advex_chunked, conv_chunked, _ = Native.generate_counterfactuals!(
-        model_mb, X_mb, targets_mb, data_mb, gen_mb;
-        maxiter=5, cf_batchsize=4,
+        model_mb, X_mb, targets_mb, data_mb, gen_mb; maxiter=5, cf_batchsize=4
     )
 
     @test cfs_full ≈ cfs_chunked rtol=1e-5
