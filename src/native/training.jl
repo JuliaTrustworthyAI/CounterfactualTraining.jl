@@ -52,7 +52,7 @@ function batched_energy(model, X′::AbstractMatrix, target_idx::AbstractVector{
     logits = model(X′)          # C × N
     N = size(X′, 2)
     C = size(logits, 1)
-    linear_idx = (0:N-1) .* C .+ target_idx
+    linear_idx = (0:(N - 1)) .* C .+ target_idx
     return -logits[linear_idx]
 end
 
@@ -137,7 +137,7 @@ function check_batched_convergence(
         return trues(N)
     end
     C = size(probs, 1)
-    linear_idx = (0:N-1) .* C .+ target_idx
+    linear_idx = (0:(N - 1)) .* C .+ target_idx
     target_probs = probs[linear_idx]
     return target_probs .>= threshold
 end
@@ -658,7 +658,7 @@ function counterfactual_training(
     end
 
     if verbose in [1, 2]
-        p = Progress(nepochs - start_epoch; barglyphs=BarGlyphs("[=> ]"), color=:yellow)
+        prog = Progress(nepochs - start_epoch; barglyphs=BarGlyphs("[=> ]"), color=:yellow)
     end
 
     for epoch in start_epoch:nepochs
@@ -714,12 +714,10 @@ function counterfactual_training(
                 logits = m(input)
 
                 if !isnothing(perturbed_input)
-
                     implaus = implausibility(m, perturbed_input, neighbours, targets_enc)
                     regs = reg_loss(m, perturbed_input, neighbours, targets_enc)
                     adversarial_loss = loss.class_loss(m(advexms), factual_enc)
                 else
-
                     implaus = [0.0f0]
                     regs = [0.0f0]
                     adversarial_loss = 0.0f0
@@ -787,7 +785,7 @@ function counterfactual_training(
         end
 
         if verbose in [1, 2]
-            next!(p)
+            next!(prog)
         elseif verbose > 2
             @info "Iteration $epoch:"
             @info "Training accuracy: $acc"

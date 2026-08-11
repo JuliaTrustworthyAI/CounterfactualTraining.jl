@@ -101,6 +101,12 @@ model = Chain(x -> reshape(x, 28, 28, 1, :), backbone)
 
 We compare two objectives to illustrate the overhead of the counterfactual pipeline: `FullObjective` (generates counterfactuals each epoch after burn-in) and `VanillaObjective(; needs_ce=false)` (standard training, no CF generation). Both runs use the same model, optimizer, and hyperparameters, and start from identical initial weights (`Random.seed!(42)` is re-seeded before constructing each model). The training `log` records `time_taken` per epoch in both branches, so we plot the per-epoch wall-clock time for the two objectives.
 
+```{julia}
+n_epochs = 10
+verbose = 1
+opt = Flux.Adam(1e-3)
+```
+
 ### Full objective
 
 ```{julia}
@@ -112,12 +118,12 @@ model_full = Chain(x -> reshape(x, 28, 28, 1, :), ResNet(18; inchannels=1, nclas
 
 gen = NativeGenerator()
 obj = FullObjective()
-opt_state = Flux.setup(Flux.Adam(1e-3), model_full);
+opt_state = Flux.setup(opt, model_full);
 
 model_full, log_full = counterfactual_training(
     obj, model_full, gen, train_set, opt_state;
-    device=device, nepochs=10, maxiter=30, burnin=0.5f0,
-    domain=domain, verbose=0
+    device, n_epochs, domain, verbose, 
+    maxiter=30, burnin=0.1f0, nce=1000
 )
 ```
 
@@ -131,12 +137,11 @@ Random.seed!(42)
 model_vanilla = Chain(x -> reshape(x, 28, 28, 1, :), ResNet(18; inchannels=1, nclasses=10))
 
 obj_vanilla = VanillaObjective(; needs_ce=false)
-opt_state_vanilla = Flux.setup(Flux.Adam(1e-3), model_vanilla);
+opt_state_vanilla = Flux.setup(opt, model_vanilla);
 
 model_vanilla, log_vanilla = counterfactual_training(
     obj_vanilla, model_vanilla, gen, train_set, opt_state_vanilla;
-    device=device, nepochs=10, maxiter=30, burnin=0.5f0,
-    domain=domain, verbose=0
+    device, nepochs, domain, verbose
 )
 ```
 
@@ -151,7 +156,10 @@ t_vanilla = [l.time_taken for l in log_vanilla]
 
 plt = plot(1:length(t_full), t_full; label="Full objective",
      xlabel="Epoch", ylabel="Time per epoch (s)", lw=2)
-plt = plot!(1:length(t_vanilla), t_vanilla; label="Vanilla objective", lw=2)
+plot!(1:length(t_vanilla), t_vanilla; label="Vanilla objective", lw=2, bottom_margin = 10Plots.mm, 
+     left_margin = 10Plots.mm)
+vline!([5], label="Burn-in ends", ls=:dash, color=:black) 
+savefig(plt, "docs/src/assets/gpu.svg")
 ```
 
 The gap between the two curves reflects the cost of generating counterfactuals each epoch (the per-sample batched search in `generate_native!`). Expect the difference to appear only after the burn-in fraction, since `VanillaObjective(; needs_ce=false)` short-circuits CF generation entirely via `needs_counterfactuals`.
