@@ -45,6 +45,7 @@ using Statistics
         domain=domain,
         convergence=conv,
         verbose=0,
+        accuracy_every=1,
     )
 
     # --- Native training (NativeGenerator) ---
@@ -66,6 +67,7 @@ using Statistics
         mutability=mutability,
         domain=domain,
         verbose=0,
+        accuracy_every=1,
     )
 
     # Compare model weights (tolerance for different gradient computation paths)

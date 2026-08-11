@@ -5,14 +5,14 @@ include("loss.jl")
 include("objectives.jl")
 include("counterfactuals.jl")
 export EnergyDifferentialObjective, AdversarialObjective, FullObjective, VanillaObjective
-export implausibility, reg_loss
+export implausibility, reg_loss, implausibility_and_reg_loss
 include("training.jl")
 export counterfactual_training
 
 module Native
     import ..CounterfactualTraining: counterfactual_training
     import ..CounterfactualTraining: AbstractObjective
-    import ..CounterfactualTraining: implausibility, reg_loss
+    import ..CounterfactualTraining: implausibility, reg_loss, implausibility_and_reg_loss
     import ..CounterfactualTraining: infer_domain_constraints, unwrap
     import ..CounterfactualTraining: needs_counterfactuals
     import ..CounterfactualTraining: accuracy

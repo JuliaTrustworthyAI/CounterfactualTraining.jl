@@ -149,6 +149,7 @@ using Statistics
             verbose=0,
             maxiter=10,
             burnin=0.0f0,
+            accuracy_every=1,
         )
 
         # Check results

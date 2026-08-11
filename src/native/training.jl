@@ -315,26 +315,43 @@ function generator_loss(
     decay::Float32,
     maxiter::Int,
 )
-    # Classification loss (sum over N for full-strength per-sample gradients).
-    # CE.jl uses agg=mean then rescales the update by num_counterfactuals (×N);
-    # using agg=sum here is equivalent and avoids the rescale step.
-    logits = model(X′)  # C × N — single forward pass, reused below
+    logits = model(X′)
+    return generator_loss_from_logits(
+        gen, logits, X′, X, targets_onehot, target_idx,
+        iter, reg_strength, decay, maxiter,
+    )
+end
+
+"""
+    generator_loss_from_logits(gen, logits, X′, X, targets_onehot, target_idx, iter,
+                               reg_strength, decay, maxiter)
+
+Like [`generator_loss`](@ref) but accepts precomputed `logits = model(X′)`
+instead of calling `model` internally. Used by [`generate_counterfactuals!`](@ref)
+to share the forward pass between the gradient computation and the convergence
+check.
+"""
+function generator_loss_from_logits(
+    gen::NativeGenerator,
+    logits::AbstractMatrix,
+    X′::AbstractMatrix,
+    X::AbstractMatrix,
+    targets_onehot::AbstractMatrix,
+    target_idx::AbstractVector{Int},
+    iter::Int,
+    reg_strength::Float32,
+    decay::Float32,
+    maxiter::Int,
+)
     ℓ = Flux.logitcrossentropy(logits, targets_onehot; agg=sum)
-
-    # L1 distance penalty (sum, equivalent to CE.jl's distance_l1 with agg=mean + rescale)
     h1 = gen.λ[1] * sum(abs, X′ .- X)
-
-    # Energy constraint with polynomial decay.
-    # Parameters match CE.jl's `energy_constraint` (penalties.jl):
-    #   b = round(max_steps / 25), a = b / 10, t = total_steps + 1 = iter
     b = Float32(round(maxiter / 25))
     a = b / 10.0f0
     ϕ = polynomial_decay(a, b, decay, iter)
-    e = batched_energy_from_logits(logits, target_idx)  # N-vector — reuses logits
+    e = batched_energy_from_logits(logits, target_idx)
     gen_loss = sum(e)
     reg_loss_val = sum(abs2, e)
     h2 = gen.λ[2] * ϕ * (gen_loss + reg_strength * reg_loss_val)
-
     return ℓ + h1 + h2
 end
 
@@ -448,15 +465,19 @@ function generate_counterfactuals!(
     norms = similar(X′, size(X′, 2))
 
     for iter in 1:maxiter
-        # Compute gradient of the generator loss w.r.t. X′, chunked to bound
-        # peak GPU memory. The loss is a sum over samples, so per-sample
-        # gradients are independent — chunking is mathematically exact.
+        # Compute gradient of the generator loss w.r.t. X′ AND extract logits
+        # for the convergence check — sharing the forward pass. The convergence
+        # check is on the pre-update X′ (= post-update from the previous
+        # iteration), so we detect convergence one iteration "late". This saves
+        # one forward pass per iteration (the separate convergence forward).
         for start in 1:cf_batchsize:N
             stop = min(start + cf_batchsize - 1, N)
-            grads_chunk = Flux.withgradient(X′[:, start:stop]) do xc
-                return generator_loss(
+            local logits_chunk
+            y, back = Flux.pullback(X′[:, start:stop]) do xc
+                logits_chunk = model(xc)
+                return generator_loss_from_logits(
                     generator,
-                    model,
+                    logits_chunk,
                     xc,
                     X[:, start:stop],
                     targets_onehot[:, start:stop],
@@ -467,7 +488,27 @@ function generate_counterfactuals!(
                     maxiter,
                 )
             end
-            ΔX[:, start:stop] .= grads_chunk.grad[1]
+            ΔX[:, start:stop] .= back(one(y))[1]
+
+            # Convergence check using the SAME logits_chunk (no extra forward)
+            if iter < maxiter
+                probs_chunk = Flux.softmax(logits_chunk; dims=1)
+                target_idx_chunk = targets[start:stop]
+                C = size(probs_chunk, 1)
+                n_chunk = length(target_idx_chunk)
+                linear_idx = (0:(n_chunk - 1)) .* C .+ target_idx_chunk
+                target_probs = probs_chunk[linear_idx] |> Flux.cpu
+                converged[start:stop] .= target_probs .>= decision_threshold
+            end
+        end
+
+        if iter >= maxiter
+            converged = trues(N)
+        end
+
+        # Early exit BEFORE the update (saves the update step when all converged)
+        if all(converged)
+            break
         end
 
         # Zero gradients for already-converged samples so the optimizer does no
@@ -507,33 +548,6 @@ function generate_counterfactuals!(
 
         # Track last valid adversarial examples
         track_adversarial_examples!(last_valid_ae, X, X′, epsilon, p, perturbations, norms)
-
-        # Check convergence only on unconverged samples (chunked to bound GPU
-        # memory). Converged samples stay converged — their X′ columns don't
-        # move (gradient and update are zeroed).
-        if iter >= maxiter
-            converged = trues(N)
-        else
-            unconverged_idx = findall(!, converged)  # CPU indices
-            for start in 1:cf_batchsize:length(unconverged_idx)
-                stop = min(start + cf_batchsize - 1, length(unconverged_idx))
-                idx_chunk = unconverged_idx[start:stop]
-                logits_chunk = model(X′[:, idx_chunk])
-                probs_chunk = Flux.softmax(logits_chunk; dims=1)
-                # Extract target-class probabilities for this chunk
-                target_idx_chunk = targets[idx_chunk]
-                C = size(probs_chunk, 1)
-                n_chunk = length(idx_chunk)
-                linear_idx = (0:(n_chunk - 1)) .* C .+ target_idx_chunk
-                target_probs = probs_chunk[linear_idx] |> Flux.cpu
-                converged[idx_chunk] .= target_probs .>= decision_threshold
-            end
-        end
-
-        # Early exit if all samples have converged
-        if all(converged)
-            break
-        end
     end
 
     return X′, last_valid_ae, converged, maxiter
@@ -829,6 +843,7 @@ end
         checkpoint_dir = nothing,
         callback = nothing,
         cf_batchsize = 128,
+        accuracy_every::Real = Inf,
     )
 
 Native GPU-compatible counterfactual training.  Dispatches here when the
@@ -845,6 +860,12 @@ DataLoader).
   at a time through the model. Default `128`. Set to a larger value for GPUs
   with more memory, or smaller for memory-constrained GPUs. When
   `cf_batchsize >= nsamples`, no chunking occurs.
+- `accuracy_every`: Compute training (and validation) accuracy only every
+  `accuracy_every` epochs. When `epoch % accuracy_every != 0`, the logged
+  `acc` and `acc_val` fields are `nothing`. Default `Inf` (accuracy is never
+  computed unless explicitly requested). Set to `1` for every epoch, or a
+  larger value (e.g. `10`) to reduce per-epoch wall-clock time for large
+  models and datasets.
 """
 function counterfactual_training(
     loss::AbstractObjective,
@@ -870,6 +891,7 @@ function counterfactual_training(
     checkpoint_dir::Union{Nothing,String}=nothing,
     callback::Union{Nothing,Function}=nothing,
     cf_batchsize::Int=128,
+    accuracy_every::Real=Inf,
     kwrgs...,
 )
     # Move model and optimizer state to device
@@ -972,8 +994,9 @@ function counterfactual_training(
                 logits = m(input)
 
                 if !isnothing(perturbed_input)
-                    implaus = implausibility(m, perturbed_input, neighbours, targets_enc)
-                    regs = reg_loss(m, perturbed_input, neighbours, targets_enc)
+                    implaus, regs = implausibility_and_reg_loss(
+                        m, perturbed_input, neighbours, targets_enc
+                    )
                     adversarial_loss = loss.class_loss(m(advexms), factual_enc)
                 else
                     implaus = [0.0f0]
@@ -1002,8 +1025,13 @@ function counterfactual_training(
 
         # Logging
         time_taken = time() - start
-        acc = accuracy(model, train_set; device=device)
-        acc_val = isnothing(val_set) ? nothing : accuracy(model, val_set; device=device)
+        if epoch % accuracy_every == 0
+            acc = accuracy(model, train_set; device=device)
+            acc_val = isnothing(val_set) ? nothing : accuracy(model, val_set; device=device)
+        else
+            acc = nothing
+            acc_val = nothing
+        end
         train_loss = sum(losses) / length(losses)
 
         if epoch > burnin

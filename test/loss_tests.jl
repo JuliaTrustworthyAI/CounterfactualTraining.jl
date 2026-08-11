@@ -19,6 +19,13 @@
     @test length(reg) == N
     @test all(>=(0.0f0), reg)
 
+    # implausibility_and_reg_loss (combined — should match separate calls)
+    impl_combined, reg_combined = CounterfactualTraining.implausibility_and_reg_loss(
+        m, counterfactual, samples, targets
+    )
+    @test impl_combined ≈ impl rtol=1e-5
+    @test reg_combined ≈ reg rtol=1e-5
+
     # adv_loss - branch with valid adversarial examples
     perturbations_small = zeros(Float32, 3, N)
     adv1 = CounterfactualTraining.adv_loss(m, counterfactual, perturbations_small, targets)
