@@ -65,7 +65,8 @@
     neigh = ones(Float32, 4, 3)
     cfs = fill(2.0f0, 4, 3)
     mut = [:both, :none, :increase, :decrease]
-    Native.protect_immutable!(neigh, cfs, mut)
+    masks = Native.prepare_mutability_masks(mut, 4)
+    Native.protect_immutable!(neigh, cfs, masks)
     @test all(neigh[1, :] .== 1.0f0)  # :both -> keep neighbour
     @test all(neigh[2, :] .== 2.0f0)  # :none -> use counterfactual
     @test all(neigh[3, :] .== 2.0f0)  # :increase -> max(cf=2,neigh=1)=2

@@ -582,6 +582,7 @@ end
         nsamples=nothing, nneighbours=1, domain=nothing, mutability=nothing,
         maxiter=30, decision_threshold=0.75f0, decay=0.9f0,
         reg_strength=1.0f-3, epsilon=0.3f0, p=Inf, verbose=1, device=identity,
+        cached_X=nothing, cached_y_raw=nothing, cached_data=nothing,
     )
 
 Top-level counterfactual generation for the native branch.  Generates
@@ -595,6 +596,16 @@ counterfactual search. Results stay on the compute device; the returned
 data loader contains device arrays ready for use in the training loop.
 
 Returns `(dl, percent_valid, nothing)` — same interface as the old `generate!()`.
+
+# Cached keyword arguments
+- `cached_X`: Pre-unwrapped feature matrix (CPU). When provided (by
+  `counterfactual_training`), avoids calling `unwrap(train_set)` every epoch.
+  When `nothing` (default, e.g. standalone calls), `unwrap` is called on the fly.
+- `cached_y_raw`: Pre-unwrapped label vector (CPU). Paired with `cached_X`.
+- `cached_data`: Pre-built `CounterfactualData` object. When provided, the
+  `domain` and `mutability` keyword arguments are ignored (they are already
+  baked into `cached_data`). When `nothing` (default), `CounterfactualData` is
+  constructed from `X`, `y_raw`, `domain`, and `mutability`.
 """
 function generate_native!(
     model,
@@ -612,18 +623,20 @@ function generate_native!(
     p::Real=Inf,
     verbose::Int=1,
     device=identity,
+    # Cached across epochs (built once by counterfactual_training):
+    cached_X::Union{Nothing,AbstractMatrix}=nothing,
+    cached_y_raw::Union{Nothing,AbstractVector}=nothing,
+    cached_data::Union{Nothing,CounterfactualData}=nothing,
 )
-    # Unwrap training data (labels are decoded on CPU inside unwrap;
-    # X may be on GPU if the DataLoader holds GPU arrays)
-    X, y_raw = unwrap(train_set)
-
-    # Keep X on CPU for downstream scalar-indexed operations (find_neighbours,
-    # protect_immutable!). The subsampled X_sub is moved to the device
-    # separately for model calls.
-    X = Flux.cpu(X)
-
-    # Build CounterfactualData
-    data = CounterfactualData(X, y_raw; domain=domain, mutability=mutability)
+    # Use cached unwrap/CounterfactualData when provided (avoids rebuilding
+    # every epoch); otherwise build on the fly for standalone use.
+    if isnothing(cached_X) || isnothing(cached_y_raw)
+        X, y_raw = unwrap(train_set)
+        X = Flux.cpu(X)
+    else
+        X, y_raw = cached_X, cached_y_raw
+    end
+    data = isnothing(cached_data) ? CounterfactualData(X, y_raw; domain=domain, mutability=mutability) : cached_data
     D = size(X, 1)
 
     # Determine sample size
@@ -808,6 +821,17 @@ function counterfactual_training(
         prog = Progress(nepochs - start_epoch; barglyphs=BarGlyphs("[=> ]"), color=:yellow)
     end
 
+    # Cache unwrap + CounterfactualData across epochs (built once, reused
+    # every epoch). Only needed when counterfactuals are generated.
+    cached_X = nothing
+    cached_y_raw = nothing
+    cached_data = nothing
+    if needs_counterfactuals(loss)
+        cached_X, cached_y_raw = unwrap(train_set)
+        cached_X = Flux.cpu(cached_X)
+        cached_data = CounterfactualData(cached_X, cached_y_raw; domain=domain, mutability=mutability)
+    end
+
     for epoch in start_epoch:nepochs
         losses = Float32[]
         implausibilities = Float32[]
@@ -833,6 +857,9 @@ function counterfactual_training(
                 p=p,
                 verbose=verbose,
                 device=device,
+                cached_X=cached_X,
+                cached_y_raw=cached_y_raw,
+                cached_data=cached_data,
             )
             avg_iter = maxiter
         else
