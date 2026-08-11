@@ -103,7 +103,7 @@ We compare two objectives to illustrate the overhead of the counterfactual pipel
 
 ```{julia}
 n_epochs = 10
-verbose = 1
+verbose = 2
 opt = Flux.Adam(1e-3)
 ```
 
@@ -123,7 +123,7 @@ opt_state = Flux.setup(opt, model_full);
 model_full, log_full = counterfactual_training(
     obj, model_full, gen, train_set, opt_state;
     device, n_epochs, domain, verbose, 
-    maxiter=30, burnin=0.1f0, nce=1000
+    maxiter=30, burnin=0.1f0
 )
 ```
 

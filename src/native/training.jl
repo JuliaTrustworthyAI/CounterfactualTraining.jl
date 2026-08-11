@@ -289,7 +289,9 @@ function track_adversarial_examples!(
 )
     perturbations = similar(X′)
     norms = similar(X′, size(X′, 2))
-    return track_adversarial_examples!(last_valid_ae, X, X′, epsilon, p, perturbations, norms)
+    return track_adversarial_examples!(
+        last_valid_ae, X, X′, epsilon, p, perturbations, norms
+    )
 end
 
 # ---------------------------------------------------------------------------
@@ -353,6 +355,7 @@ end
         epsilon = 0.3f0,
         p = Inf,
         device = identity,
+        cf_batchsize = 128,
     )
 
 Generates counterfactual explanations for a batch of `N` factuals in a
@@ -376,6 +379,11 @@ fully batched (GPU-compatible) fashion.
 - `device`: Function to move data to the compute device (`identity` for CPU,
   `Flux.gpu` for GPU). Factuals and one-hot targets are moved to the device
   before the search loop.
+- `cf_batchsize`: Mini-batch size for the counterfactual search forward/backward
+  passes. Controls peak GPU memory: the search processes `cf_batchsize` samples
+  at a time through the model. Default `128`. Set to a larger value for GPUs
+  with more memory, or smaller for memory-constrained GPUs. When
+  `cf_batchsize >= nsamples`, no chunking occurs.
 
 # Returns
 - `counterfactuals::AbstractMatrix`: The final counterfactuals (`D×N`).
@@ -396,6 +404,7 @@ function generate_counterfactuals!(
     epsilon::Float32=0.3f0,
     p::Real=Inf,
     device=identity,
+    cf_batchsize::Int=128,
 )
     # Move factuals to device so model calls and gradient computation run on GPU
     X = X |> device
@@ -403,7 +412,7 @@ function generate_counterfactuals!(
     N = size(X, 2)
 
     # Target encoding (one-hot), matching the element type of X
-    nclasses = size(model(X), 1)  # infer number of classes from model output
+    nclasses = size(model(X[:, 1:1]), 1)  # infer from single sample (avoids full-batch forward)
     targets_onehot = Float32.(Flux.onehotbatch(targets, 1:nclasses)) |> device
 
     # Initialise counterfactuals as copy of factuals
@@ -431,27 +440,35 @@ function generate_counterfactuals!(
     X′_old = similar(X′)
     update = similar(X′)
 
+    # Preallocate gradient buffer (reused across chunked forward/backward passes)
+    ΔX = similar(X′)
+
     # Preallocate buffers for track_adversarial_examples! (reused each iteration)
     perturbations = similar(X′)
     norms = similar(X′, size(X′, 2))
 
     for iter in 1:maxiter
-        # Compute gradient of the generator loss w.r.t. X′
-        grads_val = Flux.withgradient(X′) do x
-            return generator_loss(
-                generator,
-                model,
-                x,
-                X,
-                targets_onehot,
-                targets,
-                iter,
-                reg_strength,
-                decay,
-                maxiter,
-            )
+        # Compute gradient of the generator loss w.r.t. X′, chunked to bound
+        # peak GPU memory. The loss is a sum over samples, so per-sample
+        # gradients are independent — chunking is mathematically exact.
+        for start in 1:cf_batchsize:N
+            stop = min(start + cf_batchsize - 1, N)
+            grads_chunk = Flux.withgradient(X′[:, start:stop]) do xc
+                return generator_loss(
+                    generator,
+                    model,
+                    xc,
+                    X[:, start:stop],
+                    targets_onehot[:, start:stop],
+                    @view(targets[start:stop]),
+                    iter,
+                    reg_strength,
+                    decay,
+                    maxiter,
+                )
+            end
+            ΔX[:, start:stop] .= grads_chunk.grad[1]
         end
-        ΔX = grads_val.grad[1]
 
         # Zero gradients for already-converged samples so the optimizer does no
         # work on them and they don't drift. This is safe because converged
@@ -491,11 +508,27 @@ function generate_counterfactuals!(
         # Track last valid adversarial examples
         track_adversarial_examples!(last_valid_ae, X, X′, epsilon, p, perturbations, norms)
 
-        # Check convergence
-        probs = Flux.softmax(model(X′); dims=1)
-        converged =
-            check_batched_convergence(probs, targets, iter, maxiter, decision_threshold) |>
-            Flux.cpu
+        # Check convergence only on unconverged samples (chunked to bound GPU
+        # memory). Converged samples stay converged — their X′ columns don't
+        # move (gradient and update are zeroed).
+        if iter >= maxiter
+            converged = trues(N)
+        else
+            unconverged_idx = findall(!, converged)  # CPU indices
+            for start in 1:cf_batchsize:length(unconverged_idx)
+                stop = min(start + cf_batchsize - 1, length(unconverged_idx))
+                idx_chunk = unconverged_idx[start:stop]
+                logits_chunk = model(X′[:, idx_chunk])
+                probs_chunk = Flux.softmax(logits_chunk; dims=1)
+                # Extract target-class probabilities for this chunk
+                target_idx_chunk = targets[idx_chunk]
+                C = size(probs_chunk, 1)
+                n_chunk = length(idx_chunk)
+                linear_idx = (0:(n_chunk - 1)) .* C .+ target_idx_chunk
+                target_probs = probs_chunk[linear_idx] |> Flux.cpu
+                converged[idx_chunk] .= target_probs .>= decision_threshold
+            end
+        end
 
         # Early exit if all samples have converged
         if all(converged)
@@ -611,6 +644,7 @@ end
         nsamples=nothing, nneighbours=1, domain=nothing, mutability=nothing,
         maxiter=30, decision_threshold=0.75f0, decay=0.9f0,
         reg_strength=1.0f-3, epsilon=0.3f0, p=Inf, verbose=1, device=identity,
+        cf_batchsize=128,
         cached_X=nothing, cached_y_raw=nothing, cached_data=nothing,
     )
 
@@ -625,6 +659,13 @@ counterfactual search. Results stay on the compute device; the returned
 data loader contains device arrays ready for use in the training loop.
 
 Returns `(dl, percent_valid, nothing)` — same interface as the old `generate!()`.
+
+# Keyword arguments
+- `cf_batchsize`: Mini-batch size for the counterfactual search forward/backward
+  passes. Controls peak GPU memory: the search processes `cf_batchsize` samples
+  at a time through the model. Default `128`. Set to a larger value for GPUs
+  with more memory, or smaller for memory-constrained GPUs. When
+  `cf_batchsize >= nsamples`, no chunking occurs.
 
 # Cached keyword arguments
 - `cached_X`: Pre-unwrapped feature matrix (CPU). When provided (by
@@ -652,6 +693,7 @@ function generate_native!(
     p::Real=Inf,
     verbose::Int=1,
     device=identity,
+    cf_batchsize::Int=128,
     # Cached across epochs (built once by counterfactual_training):
     cached_X::Union{Nothing,AbstractMatrix}=nothing,
     cached_y_raw::Union{Nothing,AbstractVector}=nothing,
@@ -665,7 +707,11 @@ function generate_native!(
     else
         X, y_raw = cached_X, cached_y_raw
     end
-    data = isnothing(cached_data) ? CounterfactualData(X, y_raw; domain=domain, mutability=mutability) : cached_data
+    data = if isnothing(cached_data)
+        CounterfactualData(X, y_raw; domain=domain, mutability=mutability)
+    else
+        cached_data
+    end
     D = size(X, 1)
 
     # Determine sample size
@@ -689,8 +735,13 @@ function generate_native!(
     # Move subsampled factuals to device for model calls
     X_sub_dev = X_sub |> device
 
-    # Predict factual labels and assign random targets
-    factual_preds = vec(Flux.onecold(model(X_sub_dev) |> Flux.cpu))
+    # Predict factual labels (chunked to bound GPU memory)
+    factual_preds = Int[]
+    for start in 1:cf_batchsize:nsamples
+        stop = min(start + cf_batchsize - 1, nsamples)
+        logits_chunk = model(X_sub_dev[:, start:stop]) |> Flux.cpu
+        append!(factual_preds, vec(Flux.onecold(Flux.softmax(logits_chunk))))
+    end
     y_levels = data.y_levels
     targets = Vector{Int}(undef, nsamples)
     for i in 1:nsamples
@@ -712,6 +763,7 @@ function generate_native!(
         epsilon=epsilon,
         p=p,
         device=device,
+        cf_batchsize=cf_batchsize,
     )
 
     # Find neighbours in target class (on CPU — uses findall on y_raw)
@@ -776,6 +828,7 @@ end
         verbose = 1,
         checkpoint_dir = nothing,
         callback = nothing,
+        cf_batchsize = 128,
     )
 
 Native GPU-compatible counterfactual training.  Dispatches here when the
@@ -785,6 +838,13 @@ The `device` keyword is a function: `identity` (CPU), `Flux.gpu` (CUDA),
 or `AMDGPU.gpu` (AMDGPU).  The model is moved to the device; training data
 should already be on the device (user moves it before constructing the
 DataLoader).
+
+# Keyword arguments
+- `cf_batchsize`: Mini-batch size for the counterfactual search forward/backward
+  passes. Controls peak GPU memory: the search processes `cf_batchsize` samples
+  at a time through the model. Default `128`. Set to a larger value for GPUs
+  with more memory, or smaller for memory-constrained GPUs. When
+  `cf_batchsize >= nsamples`, no chunking occurs.
 """
 function counterfactual_training(
     loss::AbstractObjective,
@@ -809,6 +869,7 @@ function counterfactual_training(
     verbose::Int=1,
     checkpoint_dir::Union{Nothing,String}=nothing,
     callback::Union{Nothing,Function}=nothing,
+    cf_batchsize::Int=128,
     kwrgs...,
 )
     # Move model and optimizer state to device
@@ -858,7 +919,9 @@ function counterfactual_training(
     if needs_counterfactuals(loss)
         cached_X, cached_y_raw = unwrap(train_set)
         cached_X = Flux.cpu(cached_X)
-        cached_data = CounterfactualData(cached_X, cached_y_raw; domain=domain, mutability=mutability)
+        cached_data = CounterfactualData(
+            cached_X, cached_y_raw; domain=domain, mutability=mutability
+        )
     end
 
     for epoch in start_epoch:nepochs
@@ -886,6 +949,7 @@ function counterfactual_training(
                 p=p,
                 verbose=verbose,
                 device=device,
+                cf_batchsize=cf_batchsize,
                 cached_X=cached_X,
                 cached_y_raw=cached_y_raw,
                 cached_data=cached_data,
@@ -978,9 +1042,13 @@ function counterfactual_training(
             )
         end
 
+        # Progress bar
         if verbose in [1, 2]
             next!(prog)
-        elseif verbose > 2
+        end
+
+        # Logging
+        if verbose > 2
             @info "Iteration $epoch:"
             @info "Training accuracy: $acc"
             @info "Train loss: $train_loss"
