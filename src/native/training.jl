@@ -317,8 +317,7 @@ function generator_loss(
 )
     logits = model(X′)
     return generator_loss_from_logits(
-        gen, logits, X′, X, targets_onehot, target_idx,
-        iter, reg_strength, decay, maxiter,
+        gen, logits, X′, X, targets_onehot, target_idx, iter, reg_strength, decay, maxiter
     )
 end
 
@@ -1076,7 +1075,7 @@ function counterfactual_training(
         end
 
         # Logging
-        if verbose > 2
+        if verbose >= 2
             @info "Iteration $epoch:"
             @info "Training accuracy: $acc"
             @info "Train loss: $train_loss"
