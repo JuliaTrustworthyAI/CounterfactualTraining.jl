@@ -719,6 +719,11 @@ data loader contains device arrays ready for use in the training loop.
 
 Returns `(dl, percent_valid, nothing)` — same interface as the old `generate!()`.
 
+The factual-prediction loop and the counterfactual search run the model in
+**test (eval) mode** (train mode is restored afterwards). This keeps BatchNorm
+running statistics clean of adversarial inputs and makes the CF search
+deterministic w.r.t. chunk size. For BN-free models this is a no-op.
+
 # Keyword arguments
 - `cf_batchsize`: Mini-batch size for the counterfactual search forward/backward
   passes. Controls peak GPU memory: the search processes `cf_batchsize` samples
@@ -794,36 +799,54 @@ function generate_native!(
     # Move subsampled factuals to device for model calls
     X_sub_dev = X_sub |> device
 
-    # Predict factual labels (chunked to bound GPU memory)
-    factual_preds = Int[]
-    for start in 1:cf_batchsize:nsamples
-        stop = min(start + cf_batchsize - 1, nsamples)
-        logits_chunk = model(X_sub_dev[:, start:stop]) |> Flux.cpu
-        append!(factual_preds, vec(Flux.onecold(Flux.softmax(logits_chunk))))
-    end
+    # Run the factual-prediction loop and the counterfactual search in test
+    # (eval) mode. This keeps BatchNorm running statistics clean of adversarial
+    # inputs and makes the CF search deterministic w.r.t. chunk size (batch
+    # statistics no longer depend on chunking). For BN-free models (e.g. the
+    # Dense test models) `testmode!` is a no-op, so behaviour is unchanged.
+    # Train mode is always restored via `finally`.
+    # `targets`, `y_levels`, and the `generate_counterfactuals!` outputs are
+    # assigned inside the try block below but are needed again afterwards;
+    # declare them here so they remain in scope after the try/finally.
     y_levels = data.y_levels
     targets = Vector{Int}(undef, nsamples)
-    for i in 1:nsamples
-        available = setdiff(y_levels, factual_preds[i])
-        targets[i] = rand(available)
-    end
+    counterfactuals = similar(X_sub_dev)
+    last_valid_ae = similar(X_sub_dev)
+    converged_mask = falses(nsamples)
 
-    # Generate counterfactuals (batched, on device)
-    counterfactuals, last_valid_ae, converged_mask, maxiter = generate_counterfactuals!(
-        model,
-        X_sub_dev,
-        targets,
-        data,
-        generator;
-        maxiter=maxiter,
-        decision_threshold=decision_threshold,
-        decay=decay,
-        reg_strength=reg_strength,
-        epsilon=epsilon,
-        p=p,
-        device=device,
-        cf_batchsize=cf_batchsize,
-    )
+    Flux.testmode!(model)
+    try
+        # Predict factual labels (chunked to bound GPU memory)
+        factual_preds = Int[]
+        for start in 1:cf_batchsize:nsamples
+            stop = min(start + cf_batchsize - 1, nsamples)
+            logits_chunk = model(X_sub_dev[:, start:stop]) |> Flux.cpu
+            append!(factual_preds, vec(Flux.onecold(Flux.softmax(logits_chunk))))
+        end
+        for i in 1:nsamples
+            available = setdiff(y_levels, factual_preds[i])
+            targets[i] = rand(available)
+        end
+
+        # Generate counterfactuals (batched, on device)
+        counterfactuals, last_valid_ae, converged_mask, maxiter = generate_counterfactuals!(
+            model,
+            X_sub_dev,
+            targets,
+            data,
+            generator;
+            maxiter=maxiter,
+            decision_threshold=decision_threshold,
+            decay=decay,
+            reg_strength=reg_strength,
+            epsilon=epsilon,
+            p=p,
+            device=device,
+            cf_batchsize=cf_batchsize,
+        )
+    finally
+        Flux.trainmode!(model)
+    end
 
     # Find neighbours in target class (on CPU — uses findall on y_raw)
     neighbours = find_neighbours(X, y_raw, targets, y_levels; nneighbours=nneighbours)
