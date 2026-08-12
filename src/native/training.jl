@@ -912,6 +912,7 @@ end
         callback = nothing,
         cf_batchsize = 128,
         accuracy_every::Real = Inf,
+        fuse_cf_forwards::Bool = false,
     )
 
 Native GPU-compatible counterfactual training.  Dispatches here when the
@@ -934,6 +935,13 @@ DataLoader).
   computed unless explicitly requested). Set to `1` for every epoch, or a
   larger value (e.g. `10`) to reduce per-epoch wall-clock time for large
   models and datasets.
+- `fuse_cf_forwards`: When `true`, the three counterfactual forward passes in
+  the training loop (`perturbed_input`, `neighbours`, `advexms`) are fused into
+  a single concatenated forward pass, reducing kernel-launch overhead for
+  launch-bound workloads. **Caveat:** fusing changes BatchNorm batch statistics
+  (stats are computed over the concatenated mini-batch rather than each tensor
+  at its native width). For BN-free models results are identical; for BN models
+  results differ slightly. Off by default.
 """
 function counterfactual_training(
     loss::AbstractObjective,
@@ -960,6 +968,7 @@ function counterfactual_training(
     callback::Union{Nothing,Function}=nothing,
     cf_batchsize::Int=128,
     accuracy_every::Real=Inf,
+    fuse_cf_forwards::Bool=false,
     kwrgs...,
 )
     # Move model and optimizer state to device
@@ -1080,10 +1089,27 @@ function counterfactual_training(
                 logits = m(input)
 
                 if !isnothing(perturbed_input)
-                    implaus, regs = implausibility_and_reg_loss(
-                        m, perturbed_input, neighbours, targets_enc
-                    )
-                    adversarial_loss = loss.class_loss(m(advexms), factual_enc)
+                    if fuse_cf_forwards
+                        # Fuse the three tiny CF forward passes into one
+                        # concatenated forward, then split the logits. Reduces
+                        # kernel-launch overhead for launch-bound workloads.
+                        # Note: changes BatchNorm batch statistics (see docstring).
+                        n_cf = size(perturbed_input, 2)
+                        n_nb = size(neighbours, 2)
+                        logits_all = m(cat(perturbed_input, neighbours, advexms; dims=2))
+                        logits_cf = @view(logits_all[:, 1:n_cf])
+                        logits_nb = @view(logits_all[:, n_cf+1:n_cf+n_nb])
+                        logits_ae = @view(logits_all[:, n_cf+n_nb+1:end])
+                        implaus, regs = implausibility_and_reg_loss_from_logits(
+                            logits_cf, logits_nb, targets_enc
+                        )
+                        adversarial_loss = loss.class_loss(logits_ae, factual_enc)
+                    else
+                        implaus, regs = implausibility_and_reg_loss(
+                            m, perturbed_input, neighbours, targets_enc
+                        )
+                        adversarial_loss = loss.class_loss(m(advexms), factual_enc)
+                    end
                 else
                     implaus = [0.0f0]
                     regs = [0.0f0]
