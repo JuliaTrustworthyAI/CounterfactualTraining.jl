@@ -10,6 +10,9 @@ _freeze/
 /.vscode/
 **.DS_Store
 
+# Generated training logs for the GPU docs comparison figure
+/docs/src/data/*.jld2
+
 
 
 **/*.quarto_ipynb
