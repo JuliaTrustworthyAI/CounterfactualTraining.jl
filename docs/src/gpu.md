@@ -20,6 +20,7 @@ using CounterfactualTraining
 using CounterfactualTraining.Native
 using CounterfactualExplanations
 using Flux
+using Metalhead
 using Plots
 using Random
 using MLDatasets
@@ -35,6 +36,8 @@ The code below detects available GPU backends (CUDA or AMDGPU) and falls back to
 ``` julia
 has_gpu = false
 device = identity
+
+# Try CUDA
 try
     using CUDA
     if CUDA.functional()
@@ -42,14 +45,16 @@ try
         device = Flux.gpu
     end
 catch
-    try
-        using AMDGPU
-        if AMDGPU.functional()
-            has_gpu = true
-            device = Flux.gpu
-        end
-    catch
+end
+
+# Try AMD
+try
+    using AMDGPU
+    if AMDGPU.functional()
+        has_gpu = true
+        device = Flux.gpu
     end
+catch
 end
 
 if has_gpu
@@ -78,49 +83,90 @@ train_set = Flux.DataLoader((X, y_onehot); batchsize=128, shuffle=true)
 
 ## Model
 
-We use a “chunky” MLP with two hidden layers, suitable for demonstrating GPU acceleration:
+We use a ResNet-18 from `Metalhead.jl`, configured for single-channel 28×28 MNIST inputs and 10 output classes. The native counterfactual pipeline operates on flattened `D×N` matrices throughout (see `generate_counterfactuals!` in `src/native/training.jl`), so we wrap the backbone in a `Chain` that reshapes the 784-dimensional input back to `28×28×1×N` before the first convolution. This keeps the counterfactual search in pixel space, where the per-pixel `domain` bounds (`(-1, 1)`) and mutability constraints remain valid, without requiring changes to the matrix-typed pipeline.
 
 ``` julia
-model = Chain(
-    Dense(784, 256, relu),
-    Dense(256, 128, relu),
-    Dense(128, 10)
-)
+backbone = ResNet(18; inchannels=1, nclasses=10)
+model = Chain(x -> reshape(x, 28, 28, 1, :), backbone)
 ```
 
 ## Training
 
-We train with `FullObjective` and `NativeGenerator`. The `device` keyword moves the model to the GPU when available; training data should already be on the device (the `DataLoader` handles batching).
+We compare two objectives to illustrate the overhead of the counterfactual pipeline: `FullObjective` (generates counterfactuals each epoch after burn-in) and `VanillaObjective(; needs_ce=false)` (standard training, no CF generation). Both runs use the same model, optimizer, and hyperparameters, and start from identical initial weights (`Random.seed!(42)` is re-seeded before constructing each model). The training `log` records `time_taken` per epoch in both branches, so we plot the per-epoch wall-clock time for the two objectives.
+
+### Full objective
 
 ``` julia
+Random.seed!(42)
+model_full = Chain(x -> reshape(x, 28, 28, 1, :), ResNet(18; inchannels=1, nclasses=10))
+
 gen = NativeGenerator()
 obj = FullObjective()
-opt_state = Flux.setup(Flux.Adam(1e-3), model)
+opt_state = Flux.setup(opt, model_full);
 
-model, log = counterfactual_training(
-    obj, model, gen, train_set, opt_state;
-    device=device, nepochs=5, maxiter=10, burnin=0.0f0,
-    domain=domain, verbose=0
+model_full, log_full = counterfactual_training(
+    obj, model_full, gen, train_set, opt_state;
+    device, nepochs, domain, verbose, accuracy_every,
+    nce, cf_batchsize, 
+    maxiter=30, burnin=burnin
 )
 ```
 
-## Counterfactual Visualization
-
-We generate counterfactuals for a few test samples, targeting a different class, and visualize the original vs. counterfactual images side by side.
+### Vanilla objective
 
 ``` julia
-X_test = X[:, 1:5]
-targets = fill(2, 5)  # target class 2 (digit 1)
-data = CounterfactualData(X, y; domain=domain)
-cfs, _, converged, _ = generate_counterfactuals!(model, X_test, targets, data, gen; maxiter=30)
+Random.seed!(42)
+model_vanilla = Chain(x -> reshape(x, 28, 28, 1, :), ResNet(18; inchannels=1, nclasses=10))
+
+obj_vanilla = VanillaObjective(; needs_ce=false)
+opt_state_vanilla = Flux.setup(opt, model_vanilla);
+
+model_vanilla, log_vanilla = counterfactual_training(
+    obj_vanilla, model_vanilla, gen, train_set, opt_state_vanilla;
+    device, nepochs, domain, verbose, accuracy_every,
+)
 ```
+
+### Timing and accuracy comparison
 
 ``` julia
-p1 = heatmap(reshape(X_test[:, 1], 28, 28), title="Original", color=:grays, aspect_ratio=:equal)
-p2 = heatmap(reshape(cfs[:, 1], 28, 28), title="Counterfactual", color=:grays, aspect_ratio=:equal)
-plot(p1, p2, layout=(1, 2), legend=false)
+# Timing
+t_full = [l.time_taken for l in log_full]
+t_vanilla = [l.time_taken for l in log_vanilla]
+
+# Accuracy (non-nothing epochs only — depends on accuracy_every)
+epochs_acc = [i for (i, l) in enumerate(log_full) if !isnothing(l.acc)]
+acc_full = [l.acc for l in log_full if !isnothing(l.acc)]
+acc_vanilla = [l.acc for l in log_vanilla if !isnothing(l.acc)]
+
+plt1 = plot(
+    1:length(t_full), t_full;
+    label="Full objective",
+    xlabel="Epoch", ylabel="Time per epoch (s)", lw=2,
+)
+plot!(plt1, 1:length(t_vanilla), t_vanilla; label="Vanilla objective", lw=2)
+vline!(plt1, [burnin_epochs]; label="Burn-in ends", ls=:dash, color=:black)
+
+plt2 = plot(
+    epochs_acc, acc_full;
+    label="Full objective",
+    xlabel="Epoch", ylabel="Training accuracy", lw=2,
+)
+plot!(plt2, epochs_acc, acc_vanilla; label="Vanilla objective", lw=2)
+vline!(plt2, [burnin_epochs]; label="Burn-in ends", ls=:dash, color=:black)
+
+combined = plot(
+    plt1, plt2;
+    layout=(1, 2),
+    size=(900, 400),
+    bottom_margin=10Plots.mm,
+    left_margin=10Plots.mm,
+)
+savefig(combined, "docs/src/assets/gpu.svg")
 ```
 
-![](gpu_files/figure-commonmark/cell-8-output-1.svg)
+![Per-epoch wall-clock time (left) and training accuracy (right) for the full and vanilla objectives.](assets/gpu.svg)
 
-The counterfactual shows how the model would need the input to change to produce a different prediction. With counterfactual training, these changes should be plausible and respect the domain constraints of the pixel values.
+Per-epoch wall-clock time (left) and training accuracy (right) for the full and vanilla objectives.
+
+The figure above compares the two objectives side by side. The left panel shows per-epoch wall-clock time; the right panel shows training accuracy. The gap between the two curves in the left panel reflects the cost of generating counterfactuals each epoch (the per-sample batched search in `generate_native!`). Expect the difference to appear only after the burn-in fraction, since `VanillaObjective(; needs_ce=false)` short-circuits CF generation entirely via `needs_counterfactuals`. The right panel confirms that both objectives achieve comparable training accuracy, indicating that the counterfactual regularization does not degrade the discriminative performance of the model.

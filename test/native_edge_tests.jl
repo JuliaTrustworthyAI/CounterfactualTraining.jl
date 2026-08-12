@@ -60,6 +60,7 @@ end
         maxiter=10,
         burnin=0.0f0,
         val_set=val_set,
+        accuracy_every=1,
     )
     @test isfinite(log_v[end].acc_val)
 

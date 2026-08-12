@@ -23,13 +23,15 @@
     @test last_valid[:, 3] == Xp_ae[:, 3]
 
     # track_adversarial_examples! - finite p branch
-    # NOTE: native/training.jl:150 has a bug: `abs .^ p` tries to raise
-    # the function `abs` to a power instead of `abs.(perturbations) .^ p`
-    @test_broken begin
-        last_valid2 = copy(X_ae)
-        Native.track_adversarial_examples!(last_valid2, X_ae, Xp_ae, 0.5f0, 2)
-        last_valid2[:, 1] == Xp_ae[:, 1]
-    end
+    last_valid2 = copy(X_ae)
+    Native.track_adversarial_examples!(last_valid2, X_ae, Xp_ae, 0.5f0, 2)
+    # With p=2 and epsilon=0.5: perturbation norms are [0, sqrt(2), 0] (L2 norm per column).
+    # Column 1: norm 0 <= 0.5 → valid → last_valid = X′
+    # Column 2: norm sqrt(2) ≈ 1.414 > 0.5 → invalid → last_valid stays X (zeros)
+    # Column 3: norm 0 <= 0.5 → valid → last_valid = X′
+    @test last_valid2[:, 1] == Xp_ae[:, 1]
+    @test last_valid2[:, 2] == X_ae[:, 2]
+    @test last_valid2[:, 3] == Xp_ae[:, 3]
 
     # generator_loss
     gen = NativeGenerator()
@@ -65,7 +67,8 @@
     neigh = ones(Float32, 4, 3)
     cfs = fill(2.0f0, 4, 3)
     mut = [:both, :none, :increase, :decrease]
-    Native.protect_immutable!(neigh, cfs, mut)
+    masks = Native.prepare_mutability_masks(mut, 4)
+    Native.protect_immutable!(neigh, cfs, masks)
     @test all(neigh[1, :] .== 1.0f0)  # :both -> keep neighbour
     @test all(neigh[2, :] .== 2.0f0)  # :none -> use counterfactual
     @test all(neigh[3, :] .== 2.0f0)  # :increase -> max(cf=2,neigh=1)=2
@@ -82,4 +85,30 @@
     parts2 = Native.split_obs(1:5, 10)
     @test length(parts2) >= 5
     @test sort(reduce(vcat, parts2)) == collect(1:5)
+
+    # Mini-batch chunking: cf_batchsize < nsamples should give identical
+    # results to cf_batchsize >= nsamples (gradient accumulation is exact
+    # for sums; only floating-point reordering differences, rtol=1e-5).
+    Random.seed!(42)
+    X_mb = randn(Float32, 3, 20)
+    model_mb = Chain(Dense(3, 5, relu), Dense(5, 2))
+    data_mb = CounterfactualData(X_mb, fill(2, 20))
+    gen_mb = NativeGenerator()
+    targets_mb = fill(1, 20)
+
+    # Full batch (no chunking)
+    Random.seed!(42)
+    cfs_full, advex_full, conv_full, _ = Native.generate_counterfactuals!(
+        model_mb, X_mb, targets_mb, data_mb, gen_mb; maxiter=5, cf_batchsize=128
+    )
+
+    # Mini-batched (chunked: 4 samples at a time)
+    Random.seed!(42)
+    cfs_chunked, advex_chunked, conv_chunked, _ = Native.generate_counterfactuals!(
+        model_mb, X_mb, targets_mb, data_mb, gen_mb; maxiter=5, cf_batchsize=4
+    )
+
+    @test cfs_full ≈ cfs_chunked rtol=1e-5
+    @test advex_full ≈ advex_chunked rtol=1e-5
+    @test conv_full == conv_chunked
 end

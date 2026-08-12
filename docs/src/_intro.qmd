@@ -37,8 +37,8 @@ Pkg.add("CounterfactualTraining")
 
 ### Introduction
 
-A self-contained introductory example demonstrating counterfactual training with mutability protection is available on the [Introduction](introduction.md) page.
+A self-contained introductory example demonstrating counterfactual training with mutability protection is available on the [Introduction](https://www.taija.org/CounterfactualTraining.jl/dev/introduction/) page.
 
 ### Training on GPU
 
-The package provides two training approaches: a branch using [CounterfactualExplanations.jl](https://github.com/JuliaTrustworthyAI/CounterfactualExplanations.jl) as the backend for generating counterfactuals and a performance-focused `Native` submodule with GPU support. The former approach was developed during the initial research stage of the project. See [Training on GPU](gpu.md) for a full walkthrough with MNIST.
+The package provides two training approaches: a branch using [CounterfactualExplanations.jl](https://github.com/JuliaTrustworthyAI/CounterfactualExplanations.jl) as the backend for generating counterfactuals and a performance-focused `Native` submodule with GPU support. The former approach was developed during the initial research stage of the project. See [Training on GPU](https://www.taija.org/CounterfactualTraining.jl/dev/gpu/) for a full walkthrough with MNIST.

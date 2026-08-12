@@ -12,7 +12,6 @@ using ChainRulesCore: ChainRulesCore
 using JLD2
 using ProgressMeter
 using StatsBase
-using UnicodePlots
 using Random
 
 # ---------------------------------------------------------------------------
@@ -40,65 +39,177 @@ Base.@kwdef struct NativeGenerator
 end
 
 # ---------------------------------------------------------------------------
-# Helper: batched energy (negative target logits for all N samples)
+# Helper: batched energy from pre-computed logits
+# ---------------------------------------------------------------------------
+"""
+    batched_energy_from_logits(logits::AbstractMatrix, target_idx::AbstractVector{Int})
+
+Returns a length-`N` vector of negative logits at the target class for each
+sample, given the `C×N` logits matrix.  Uses linear indexing for GPU
+compatibility.
+
+This is the core indexing logic extracted from [`batched_energy`](@ref) so
+that callers who already have `logits = model(X′)` can avoid a redundant
+forward pass.
+"""
+function batched_energy_from_logits(logits::AbstractMatrix, target_idx::AbstractVector{Int})
+    N = length(target_idx)
+    C = size(logits, 1)
+    linear_idx = (0:(N - 1)) .* C .+ target_idx
+    return -logits[linear_idx]
+end
+
+# ---------------------------------------------------------------------------
+# Helper: batched energy (convenience wrapper that calls the model)
 # ---------------------------------------------------------------------------
 """
     batched_energy(model, X′::AbstractMatrix, target_idx::AbstractVector)
 
 Returns a length-`N` vector of negative logits at the target class for each
-sample in `X′`.  Uses `CartesianIndex` for GPU compatibility.
+sample in `X′`.  Calls `model(X′)` internally and delegates to
+[`batched_energy_from_logits`](@ref).
 """
 function batched_energy(model, X′::AbstractMatrix, target_idx::AbstractVector{Int})
-    logits = model(X′)          # C × N
-    N = size(X′, 2)
-    idx = CartesianIndex.(target_idx, 1:N)
-    return -logits[idx]
+    return batched_energy_from_logits(model(X′), target_idx)
+end
+
+# ---------------------------------------------------------------------------
+# Preparer: precompute mutability masks (hoisted out of the search loop)
+# ---------------------------------------------------------------------------
+"""
+    prepare_mutability_masks(mutability, D; device=identity)
+
+Precompute the per-direction boolean masks used by
+[`batched_apply_mutability!`](@ref).
+
+Returns `(none_mask, inc_mask, dec_mask)`, each a `D×1` boolean array on the
+compute device, or `nothing` if `mutability` is `nothing`.
+"""
+function prepare_mutability_masks(
+    mutability::Union{Nothing,Vector{Symbol}}, D::Int; device=identity
+)
+    isnothing(mutability) && return nothing
+    none_mask = reshape([dir == :none for dir in mutability], D, 1) |> device
+    inc_mask = reshape([dir == :increase for dir in mutability], D, 1) |> device
+    dec_mask = reshape([dir == :decrease for dir in mutability], D, 1) |> device
+    return (none_mask, inc_mask, dec_mask)
 end
 
 # ---------------------------------------------------------------------------
 # Helper: apply mutability constraints to a batched gradient
 # ---------------------------------------------------------------------------
 """
-    batched_apply_mutability!(ΔX::AbstractMatrix, mutability)
+    batched_apply_mutability!(ΔX::AbstractMatrix, masks)
+
+Apply precomputed mutability masks to a batched gradient update in-place.
+`masks` is a 3-tuple `(none_mask, inc_mask, dec_mask)` as returned by
+[`prepare_mutability_masks`](@ref), or `nothing` (no-op).
+
+Zeros out gradient components along immutable feature directions in-place.
+Uses vectorized broadcasting for GPU compatibility.
+"""
+function batched_apply_mutability!(ΔX::AbstractMatrix, masks::Nothing)
+    return ΔX  # no-op when mutability is nothing
+end
+
+function batched_apply_mutability!(
+    ΔX::AbstractMatrix, masks::Tuple{<:AbstractMatrix,<:AbstractMatrix,<:AbstractMatrix}
+)
+    T = eltype(ΔX)
+    none_mask, inc_mask, dec_mask = masks
+    ΔX .*= ifelse.(none_mask, zero(T), one(T))
+    ΔX .*= ifelse.(inc_mask .& (ΔX .< zero(T)), zero(T), one(T))
+    ΔX .*= ifelse.(dec_mask .& (ΔX .> zero(T)), zero(T), one(T))
+    return ΔX
+end
+
+"""
+    batched_apply_mutability!(ΔX::AbstractMatrix, mutability; device=identity)
 
 Zeros out gradient components along immutable feature directions in-place.
 `mutability` is a vector of `Symbol`s (`:both`, `:none`, `:increase`, `:decrease`),
-one per feature row.
+one per feature row. Uses vectorized broadcasting for GPU compatibility.
+The `device` keyword moves the mask arrays to the compute device before
+broadcasting, preventing non-bitstype CPU array capture in GPU kernels.
+
+This is a convenience wrapper that builds the masks on the fly and delegates
+to [`batched_apply_mutability!(ΔX, masks)`](@ref). For repeated calls with
+the same `mutability`, precompute masks with [`prepare_mutability_masks`](@ref)
+and call the mask-accepting signature directly.
 """
 function batched_apply_mutability!(
-    ΔX::AbstractMatrix, mutability::Union{Nothing,Vector{Symbol}}
+    ΔX::AbstractMatrix, mutability::Union{Nothing,Vector{Symbol}}; device=identity
 )
     isnothing(mutability) && return ΔX
-    T = eltype(ΔX)
-    for (i, dir) in enumerate(mutability)
-        if dir == :none
-            @view(ΔX[i, :]) .= zero(T)
-        elseif dir == :increase
-            @view(ΔX[i, :]) .= ifelse.(@view(ΔX[i, :]) .< zero(T), zero(T), @view(ΔX[i, :]))
-        elseif dir == :decrease
-            @view(ΔX[i, :]) .= ifelse.(@view(ΔX[i, :]) .> zero(T), zero(T), @view(ΔX[i, :]))
-        end
-        # :both → no modification
-    end
-    return ΔX
+    D = size(ΔX, 1)
+    masks = prepare_mutability_masks(mutability, D; device=device)
+    return batched_apply_mutability!(ΔX, masks)
+end
+
+# ---------------------------------------------------------------------------
+# Preparer: precompute domain bounds (hoisted out of the search loop)
+# ---------------------------------------------------------------------------
+"""
+    prepare_domain_bounds(domain, D; device=identity)
+
+Precompute the lower/upper bound arrays used by
+[`batched_apply_domain_constraints!`](@ref).
+
+Returns `(lb, ub)`, each a `D×1` array on the compute device, or `nothing` if
+`domain` is `nothing`.
+"""
+function prepare_domain_bounds(domain, D::Int; device=identity)
+    isnothing(domain) && return nothing
+    lb = reshape([domain[i][1] for i in 1:D], D, 1) |> device
+    ub = reshape([domain[i][2] for i in 1:D], D, 1) |> device
+    return (lb, ub)
 end
 
 # ---------------------------------------------------------------------------
 # Helper: clamp counterfactuals to domain bounds
 # ---------------------------------------------------------------------------
 """
-    batched_apply_domain_constraints!(X′::AbstractMatrix, data::CounterfactualData)
+    batched_apply_domain_constraints!(X′::AbstractMatrix, bounds)
+
+Clamp each feature row of `X′` to the precomputed domain bounds in-place.
+`bounds` is a 2-tuple `(lb, ub)` as returned by [`prepare_domain_bounds`](@ref),
+or `nothing` (no-op).
+
+Uses vectorized broadcasting for GPU compatibility.
+"""
+function batched_apply_domain_constraints!(X′::AbstractMatrix, bounds::Nothing)
+    return X′
+end
+
+function batched_apply_domain_constraints!(
+    X′::AbstractMatrix, bounds::Tuple{<:AbstractMatrix,<:AbstractMatrix}
+)
+    lb, ub = bounds
+    X′ .= clamp.(X′, lb, ub)
+    return X′
+end
+
+"""
+    batched_apply_domain_constraints!(X′::AbstractMatrix, data::CounterfactualData; device=identity)
 
 Clamps each feature row of `X′` to the domain bounds stored in `data.domain`.
+Uses vectorized broadcasting for GPU compatibility.
+The `device` keyword moves the bounds arrays to the compute device before
+broadcasting, preventing non-bitstype CPU array capture in GPU kernels.
+
+This is a convenience wrapper that builds the bounds on the fly and delegates
+to [`batched_apply_domain_constraints!(X′, bounds)`](@ref). For repeated calls
+with the same `data`, precompute bounds with [`prepare_domain_bounds`](@ref)
+and call the bounds-accepting signature directly.
 """
-function batched_apply_domain_constraints!(X′::AbstractMatrix, data::CounterfactualData)
+function batched_apply_domain_constraints!(
+    X′::AbstractMatrix, data::CounterfactualData; device=identity
+)
     domain = data.domain
     isnothing(domain) && return X′
-    for i in axes(X′, 1)
-        lb, ub = domain[i]
-        @view(X′[i, :]) .= clamp.(@view(X′[i, :]), lb, ub)
-    end
-    return X′
+    D = size(X′, 1)
+    bounds = prepare_domain_bounds(domain, D; device=device)
+    return batched_apply_domain_constraints!(X′, bounds)
 end
 
 # ---------------------------------------------------------------------------
@@ -122,8 +233,9 @@ function check_batched_convergence(
     if iter >= maxiter
         return trues(N)
     end
-    idx = CartesianIndex.(target_idx, 1:N)
-    target_probs = probs[idx]
+    C = size(probs, 1)
+    linear_idx = (0:(N - 1)) .* C .+ target_idx
+    target_probs = probs[linear_idx]
     return target_probs .>= threshold
 end
 
@@ -131,8 +243,10 @@ end
 # Helper: track last valid adversarial examples
 # ---------------------------------------------------------------------------
 """
-    track_adversarial_examples!(last_valid_ae, X, X′, epsilon, p)
+    track_adversarial_examples!(last_valid_ae, X, X′, epsilon, p, perturbations, norms)
 
+In-place version that writes the perturbation matrix into `perturbations` and
+the per-sample norms into `norms` (both preallocated, same shape/type as needed).
 Updates `last_valid_ae` in-place: for samples whose perturbation norm (in
 `p`-norm) is ≤ `epsilon`, the current counterfactual is stored.
 """
@@ -142,16 +256,45 @@ function track_adversarial_examples!(
     X′::AbstractMatrix,
     epsilon::Float32,
     p::Real,
+    perturbations::AbstractMatrix,
+    norms::AbstractVector,
 )
-    perturbations = X′ .- X
+    @assert size(perturbations) == size(X′)
+    @assert length(norms) == size(X′, 2)
+    perturbations .= X′ .- X
     if p == Inf
-        norms = vec(maximum(abs, perturbations; dims=1))
+        norms .= vec(maximum(abs, perturbations; dims=1))
     else
-        norms = vec(sum(abs .^ p, perturbations; dims=1) .^ (1 / p))
+        norms .= vec(sum(abs.(perturbations) .^ p; dims=1) .^ (1 / p))
     end
-    valid_ae = norms .<= epsilon
-    last_valid_ae[:, valid_ae] .= X′[:, valid_ae]
+    # Broadcast selection instead of boolean-mask indexing. Masked indexing on
+    # GPUs requires a `findall` (sync) to size the gather plus a scatter; the
+    # broadcast `ifelse.` is a single fused elementwise kernel with no sync.
+    # Pure selection (no arithmetic), so results are bitwise identical.
+    valid_mask = reshape(norms .<= epsilon, 1, :)
+    last_valid_ae .= ifelse.(valid_mask, X′, last_valid_ae)
     return last_valid_ae
+end
+
+"""
+    track_adversarial_examples!(last_valid_ae, X, X′, epsilon, p)
+
+Convenience wrapper that allocates `perturbations` and `norms` on the fly.
+For repeated calls (e.g. inside the counterfactual search loop), prefer the
+6-argument signature with preallocated buffers.
+"""
+function track_adversarial_examples!(
+    last_valid_ae::AbstractMatrix,
+    X::AbstractMatrix,
+    X′::AbstractMatrix,
+    epsilon::Float32,
+    p::Real,
+)
+    perturbations = similar(X′)
+    norms = similar(X′, size(X′, 2))
+    return track_adversarial_examples!(
+        last_valid_ae, X, X′, epsilon, p, perturbations, norms
+    )
 end
 
 # ---------------------------------------------------------------------------
@@ -175,25 +318,42 @@ function generator_loss(
     decay::Float32,
     maxiter::Int,
 )
-    # Classification loss (sum over N for full-strength per-sample gradients).
-    # CE.jl uses agg=mean then rescales the update by num_counterfactuals (×N);
-    # using agg=sum here is equivalent and avoids the rescale step.
-    ℓ = Flux.logitcrossentropy(model(X′), targets_onehot; agg=sum)
+    logits = model(X′)
+    return generator_loss_from_logits(
+        gen, logits, X′, X, targets_onehot, target_idx, iter, reg_strength, decay, maxiter
+    )
+end
 
-    # L1 distance penalty (sum, equivalent to CE.jl's distance_l1 with agg=mean + rescale)
+"""
+    generator_loss_from_logits(gen, logits, X′, X, targets_onehot, target_idx, iter,
+                               reg_strength, decay, maxiter)
+
+Like [`generator_loss`](@ref) but accepts precomputed `logits = model(X′)`
+instead of calling `model` internally. Used by [`generate_counterfactuals!`](@ref)
+to share the forward pass between the gradient computation and the convergence
+check.
+"""
+function generator_loss_from_logits(
+    gen::NativeGenerator,
+    logits::AbstractMatrix,
+    X′::AbstractMatrix,
+    X::AbstractMatrix,
+    targets_onehot::AbstractMatrix,
+    target_idx::AbstractVector{Int},
+    iter::Int,
+    reg_strength::Float32,
+    decay::Float32,
+    maxiter::Int,
+)
+    ℓ = Flux.logitcrossentropy(logits, targets_onehot; agg=sum)
     h1 = gen.λ[1] * sum(abs, X′ .- X)
-
-    # Energy constraint with polynomial decay.
-    # Parameters match CE.jl's `energy_constraint` (penalties.jl):
-    #   b = round(max_steps / 25), a = b / 10, t = total_steps + 1 = iter
     b = Float32(round(maxiter / 25))
     a = b / 10.0f0
     ϕ = polynomial_decay(a, b, decay, iter)
-    e = batched_energy(model, X′, target_idx)  # N-vector
+    e = batched_energy_from_logits(logits, target_idx)
     gen_loss = sum(e)
     reg_loss_val = sum(abs2, e)
     h2 = gen.λ[2] * ϕ * (gen_loss + reg_strength * reg_loss_val)
-
     return ℓ + h1 + h2
 end
 
@@ -213,6 +373,8 @@ end
         reg_strength = 1.0f-3,
         epsilon = 0.3f0,
         p = Inf,
+        device = identity,
+        cf_batchsize = 128,
     )
 
 Generates counterfactual explanations for a batch of `N` factuals in a
@@ -233,6 +395,14 @@ fully batched (GPU-compatible) fashion.
 - `reg_strength`: Regularization strength for the energy penalty.
 - `epsilon`: Norm bound for tracking valid adversarial examples.
 - `p`: Norm order for the adversarial example bound (default `Inf`).
+- `device`: Function to move data to the compute device (`identity` for CPU,
+  `Flux.gpu` for GPU). Factuals and one-hot targets are moved to the device
+  before the search loop.
+- `cf_batchsize`: Mini-batch size for the counterfactual search forward/backward
+  passes. Controls peak GPU memory: the search processes `cf_batchsize` samples
+  at a time through the model. Default `128`. Set to a larger value for GPUs
+  with more memory, or smaller for memory-constrained GPUs. When
+  `cf_batchsize >= nsamples`, no chunking occurs.
 
 # Returns
 - `counterfactuals::AbstractMatrix`: The final counterfactuals (`D×N`).
@@ -252,12 +422,17 @@ function generate_counterfactuals!(
     reg_strength::Float32=1.0f-3,
     epsilon::Float32=0.3f0,
     p::Real=Inf,
+    device=identity,
+    cf_batchsize::Int=128,
 )
+    # Move factuals to device so model calls and gradient computation run on GPU
+    X = X |> device
+
     N = size(X, 2)
 
     # Target encoding (one-hot), matching the element type of X
-    nclasses = size(model(X), 1)  # infer number of classes from model output
-    targets_onehot = Float32.(Flux.onehotbatch(targets, 1:nclasses))
+    nclasses = size(model(X[:, 1:1]), 1)  # infer from single sample (avoids full-batch forward)
+    targets_onehot = Float32.(Flux.onehotbatch(targets, 1:nclasses)) |> device
 
     # Initialise counterfactuals as copy of factuals
     X′ = copy(X)
@@ -271,23 +446,124 @@ function generate_counterfactuals!(
     # Convergence mask
     converged = falses(N)
 
+    # Precompute mutability masks and domain bounds once (hoisted out of the loop)
+    D = size(X, 1)
+    mutability_masks = prepare_mutability_masks(data.mutability, D; device=device)
+    domain_bounds = prepare_domain_bounds(data.domain, D; device=device)
+
+    # Preallocate buffers reused across iterations to avoid per-iteration
+    # allocations of D×N matrices. X′_old holds the pre-update state so the
+    # update can be computed as (X′ .- X′_old) and mutability applied to the
+    # update (not the gradient) — see comment below. `update` holds that
+    # post-optimizer, pre-mutability update.
+    X′_old = similar(X′)
+    update = similar(X′)
+
+    # Preallocate gradient buffer (reused across chunked forward/backward passes)
+    ΔX = similar(X′)
+
+    # Preallocate buffers for track_adversarial_examples! (reused each iteration)
+    perturbations = similar(X′)
+    norms = similar(X′, size(X′, 2))
+
+    # Precompute chunk column ranges once (hoisted out of the iteration loop).
+    # When `cf_batchsize >= N` there is a single chunk `1:N`, and the fast path
+    # below avoids slicing the D×N arrays entirely.
+    chunk_ranges = collect(
+        start:min(start + cf_batchsize - 1, N) for start in 1:cf_batchsize:N
+    )
+
+    # Preallocate a device buffer for the per-sample target-class probabilities
+    # (length-N vector). Each chunk writes its slice here (GPU→GPU, no sync);
+    # the convergence mask is materialized on the host ONCE per iteration.
+    target_probs_buf = similar(X′, N)
+
     for iter in 1:maxiter
-        # Compute gradient of the generator loss w.r.t. X′
-        grads_val = Flux.withgradient(X′) do x
-            return generator_loss(
-                generator,
-                model,
-                x,
-                X,
-                targets_onehot,
-                targets,
-                iter,
-                reg_strength,
-                decay,
-                maxiter,
-            )
+        # Compute gradient of the generator loss w.r.t. X′ AND extract logits
+        # for the convergence check — sharing the forward pass. The convergence
+        # check is on the pre-update X′ (= post-update from the previous
+        # iteration), so we detect convergence one iteration "late". This saves
+        # one forward pass per iteration (the separate convergence forward).
+        for cols in chunk_ranges
+            local logits_chunk
+            if length(cols) == N
+                # Single chunk covering all columns: no slicing of D×N arrays.
+                y, back = Flux.pullback(X′) do xc
+                    logits_chunk = model(xc)
+                    return generator_loss_from_logits(
+                        generator,
+                        logits_chunk,
+                        xc,
+                        X,
+                        targets_onehot,
+                        targets,
+                        iter,
+                        reg_strength,
+                        decay,
+                        maxiter,
+                    )
+                end
+                copyto!(ΔX, back(one(y))[1])
+            else
+                # Chunked path: views instead of copies.
+                y, back = Flux.pullback(@view(X′[:, cols])) do xc
+                    logits_chunk = model(xc)
+                    return generator_loss_from_logits(
+                        generator,
+                        logits_chunk,
+                        xc,
+                        @view(X[:, cols]),
+                        @view(targets_onehot[:, cols]),
+                        @view(targets[cols]),
+                        iter,
+                        reg_strength,
+                        decay,
+                        maxiter,
+                    )
+                end
+                ΔX[:, cols] .= back(one(y))[1]
+            end
+
+            # Convergence check using the SAME logits_chunk (no extra forward).
+            # Write the target-class probability into the preallocated device
+            # buffer (GPU→GPU gather+copy, no host sync). The host sync happens
+            # once per iteration after the chunk loop.
+            if iter < maxiter
+                probs_chunk = Flux.softmax(logits_chunk; dims=1)
+                target_idx_chunk = targets[cols]
+                C = size(probs_chunk, 1)
+                n_chunk = length(target_idx_chunk)
+                linear_idx = (0:(n_chunk - 1)) .* C .+ target_idx_chunk
+                target_probs_buf[cols] .= probs_chunk[linear_idx]
+            end
         end
-        ΔX = grads_val.grad[1]
+
+        # Materialize the convergence mask on the host ONCE per iteration
+        # (a single GPU→CPU sync instead of one per chunk).
+        if iter < maxiter
+            converged_dev = target_probs_buf .>= decision_threshold
+            converged = Flux.cpu(converged_dev)
+        else
+            converged = trues(N)
+        end
+
+        # Early exit BEFORE the update (saves the update step when all converged)
+        if all(converged)
+            break
+        end
+
+        # Device-side mask for converged samples (1×N). Multiplying by this
+        # zeros the gradient/update for already-converged samples so the
+        # optimizer does no work on them and they don't drift. This is safe
+        # because converged samples are already at their final state. Using a
+        # broadcast multiply instead of boolean-mask indexing (`ΔX[:, converged]`)
+        # avoids the `findall`/gather/scatter sync that GPU masked indexing
+        # forces. When nothing is converged the mask is all-ones and the
+        # multiply is numerically exact, so no `any(converged)` guard is needed.
+        # `converged_dev` is always defined here: at `iter == maxiter` the
+        # early-exit above breaks before reaching this point.
+        mask = reshape(.!converged_dev, 1, N)
+        ΔX .*= mask
 
         # Apply optimizer step on the full gradient, then zero immutable
         # directions in the resulting update. This matches CE.jl's ordering
@@ -296,28 +572,26 @@ function generate_counterfactuals!(
         # update (Δstate), not the gradient. For Descent this is equivalent
         # to zeroing the gradient first; for momentum optimizers it prevents
         # accumulated momentum from moving immutable features.
-        X′_old = copy(X′)
+        # X′_old and update are preallocated buffers reused each iteration.
+        copyto!(X′_old, X′)
         Flux.update!(opt_state, X′, ΔX)
-        update = X′ .- X′_old
-        batched_apply_mutability!(update, data.mutability)
+        update .= X′ .- X′_old
+
+        # Also zero the update for converged samples. For Descent this is
+        # redundant (zero gradient → zero update), but for momentum optimizers
+        # (Adam, Momentum) the optimizer may produce a non-zero update from
+        # accumulated momentum even with a zero gradient. Zeroing the update
+        # guarantees converged samples don't move regardless of optimizer.
+        update .*= mask
+
+        batched_apply_mutability!(update, mutability_masks)
         X′ .= X′_old .+ update
 
         # Clamp to domain bounds
-        batched_apply_domain_constraints!(X′, data)
+        batched_apply_domain_constraints!(X′, domain_bounds)
 
         # Track last valid adversarial examples
-        track_adversarial_examples!(last_valid_ae, X, X′, epsilon, p)
-
-        # Check convergence
-        probs = Flux.softmax(model(X′); dims=1)
-        converged = check_batched_convergence(
-            probs, targets, iter, maxiter, decision_threshold
-        )
-
-        # Early exit if all samples have converged
-        if all(converged)
-            break
-        end
+        track_adversarial_examples!(last_valid_ae, X, X′, epsilon, p, perturbations, norms)
     end
 
     return X′, last_valid_ae, converged, maxiter
@@ -327,11 +601,15 @@ end
 # Helper: find neighbours in target class
 # ---------------------------------------------------------------------------
 """
-    find_neighbours(X, y, targets, y_levels; rng=Random.default_rng())
+    find_neighbours(X, y, targets, y_levels; nneighbours=1, rng=Random.default_rng())
 
 For each counterfactual with target `targets[i]`, samples a random training
 point that has label `targets[i]`.  Returns a `D×N` matrix (one neighbour
 per counterfactual column).
+
+Uses a precomputed class→indices dictionary to avoid per-sample `findall`
+calls.  The `nneighbours` keyword is accepted for API compatibility but
+currently only one neighbour per sample is returned.
 """
 function find_neighbours(
     X::AbstractMatrix,
@@ -343,18 +621,18 @@ function find_neighbours(
 )
     D = size(X, 1)
     N = length(targets)
-    neighbours = similar(X, D, N)
     y_plain = Vector{Int}(y)  # convert from CategoricalVector if needed
+    # Precompute candidate indices per class (one findall per class, not per sample)
+    class_idx = Dict{Int,Vector{Int}}(c => findall(==(c), y_plain) for c in y_levels)
+    # Draw one index per target (cheap CPU loop — just random draws)
+    chosen = Vector{Int}(undef, N)
+    n_X = size(X, 2)
     for i in 1:N
-        target = targets[i]
-        candidates = findall(==(target), y_plain)
-        if isempty(candidates)
-            chosen = rand(rng, 1:size(X, 2))
-        else
-            chosen = rand(rng, candidates)
-        end
-        neighbours[:, i] = X[:, chosen]
+        candidates = get(class_idx, targets[i], Int[])
+        chosen[i] = isempty(candidates) ? rand(rng, 1:n_X) : rand(rng, candidates)
     end
+    # Single gather (one indexing operation instead of N column assignments)
+    neighbours = X[:, chosen]
     return neighbours
 end
 
@@ -362,7 +640,7 @@ end
 # Helper: protect immutable features (batched)
 # ---------------------------------------------------------------------------
 """
-    protect_immutable!(neighbours, counterfactuals, mutability)
+    protect_immutable!(neighbours, counterfactuals, masks)
 
 Protects immutable features by setting neighbour values according to mutability
 directions.  For each feature row:
@@ -370,23 +648,33 @@ directions.  For each feature row:
 - `:none` → use counterfactual value (no change)
 - `:increase` → max(counterfactual, neighbour)
 - `:decrease` → min(counterfactual, neighbour)
+
+Accepts precomputed masks (a 3-tuple of `D×1` boolean arrays as returned by
+[`prepare_mutability_masks`](@ref)), or `nothing` (no-op).  The mask-based
+signature uses broadcast `ifelse.` with `D×1` masks against `D×N` arrays,
+making it GPU-safe.
+
+The old signature accepting a `Vector{Symbol}` is kept as a back-compat
+wrapper that builds masks on the fly (CPU-only).
 """
+function protect_immutable!(
+    neighbours::AbstractMatrix, counterfactuals::AbstractMatrix, masks::Nothing
+)
+    return neighbours
+end
+
 function protect_immutable!(
     neighbours::AbstractMatrix,
     counterfactuals::AbstractMatrix,
-    mutability::Union{Nothing,Vector{Symbol}},
+    masks::Tuple{<:AbstractMatrix,<:AbstractMatrix,<:AbstractMatrix},
 )
-    isnothing(mutability) && return neighbours
-    for (j, dir) in enumerate(mutability)
-        if dir == :none
-            neighbours[j, :] = counterfactuals[j, :]
-        elseif dir == :increase
-            neighbours[j, :] = max.(counterfactuals[j, :], neighbours[j, :])
-        elseif dir == :decrease
-            neighbours[j, :] = min.(counterfactuals[j, :], neighbours[j, :])
-        end
-        # :both → keep neighbour as-is
-    end
+    none_mask, inc_mask, dec_mask = masks
+    # :none → use counterfactual value
+    neighbours .= ifelse.(none_mask, counterfactuals, neighbours)
+    # :increase → max(counterfactual, neighbour)
+    neighbours .= ifelse.(inc_mask, max.(counterfactuals, neighbours), neighbours)
+    # :decrease → min(counterfactual, neighbour)
+    neighbours .= ifelse.(dec_mask, min.(counterfactuals, neighbours), neighbours)
     return neighbours
 end
 
@@ -413,7 +701,9 @@ end
         model, train_set, generator::NativeGenerator;
         nsamples=nothing, nneighbours=1, domain=nothing, mutability=nothing,
         maxiter=30, decision_threshold=0.75f0, decay=0.9f0,
-        reg_strength=1.0f-3, epsilon=0.3f0, p=Inf, verbose=1,
+        reg_strength=1.0f-3, epsilon=0.3f0, p=Inf, verbose=1, device=identity,
+        cf_batchsize=128,
+        cached_X=nothing, cached_y_raw=nothing, cached_data=nothing,
     )
 
 Top-level counterfactual generation for the native branch.  Generates
@@ -421,7 +711,34 @@ counterfactuals for a subset of the training data, finds neighbours, applies
 mutability protection, and partitions results into a data loader aligned
 with `train_set` batches.
 
+The `device` keyword (a function: `identity` for CPU, `Flux.gpu` for GPU)
+moves the subsampled factuals to the device for model calls and the
+counterfactual search. Results stay on the compute device; the returned
+data loader contains device arrays ready for use in the training loop.
+
 Returns `(dl, percent_valid, nothing)` — same interface as the old `generate!()`.
+
+The factual-prediction loop and the counterfactual search run the model in
+**test (eval) mode** (train mode is restored afterwards). This keeps BatchNorm
+running statistics clean of adversarial inputs and makes the CF search
+deterministic w.r.t. chunk size. For BN-free models this is a no-op.
+
+# Keyword arguments
+- `cf_batchsize`: Mini-batch size for the counterfactual search forward/backward
+  passes. Controls peak GPU memory: the search processes `cf_batchsize` samples
+  at a time through the model. Default `128`. Set to a larger value for GPUs
+  with more memory, or smaller for memory-constrained GPUs. When
+  `cf_batchsize >= nsamples`, no chunking occurs.
+
+# Cached keyword arguments
+- `cached_X`: Pre-unwrapped feature matrix (CPU). When provided (by
+  `counterfactual_training`), avoids calling `unwrap(train_set)` every epoch.
+  When `nothing` (default, e.g. standalone calls), `unwrap` is called on the fly.
+- `cached_y_raw`: Pre-unwrapped label vector (CPU). Paired with `cached_X`.
+- `cached_data`: Pre-built `CounterfactualData` object. When provided, the
+  `domain` and `mutability` keyword arguments are ignored (they are already
+  baked into `cached_data`). When `nothing` (default), `CounterfactualData` is
+  constructed from `X`, `y_raw`, `domain`, and `mutability`.
 """
 function generate_native!(
     model,
@@ -438,12 +755,27 @@ function generate_native!(
     epsilon::Float32=0.3f0,
     p::Real=Inf,
     verbose::Int=1,
+    device=identity,
+    cf_batchsize::Int=128,
+    # Cached across epochs (built once by counterfactual_training):
+    cached_X::Union{Nothing,AbstractMatrix}=nothing,
+    cached_y_raw::Union{Nothing,AbstractVector}=nothing,
+    cached_data::Union{Nothing,CounterfactualData}=nothing,
 )
-    # Unwrap training data
-    X, y_raw = unwrap(train_set)
-
-    # Build CounterfactualData
-    data = CounterfactualData(X, y_raw; domain=domain, mutability=mutability)
+    # Use cached unwrap/CounterfactualData when provided (avoids rebuilding
+    # every epoch); otherwise build on the fly for standalone use.
+    if isnothing(cached_X) || isnothing(cached_y_raw)
+        X, y_raw = unwrap(train_set)
+        X = Flux.cpu(X)
+    else
+        X, y_raw = cached_X, cached_y_raw
+    end
+    data = if isnothing(cached_data)
+        CounterfactualData(X, y_raw; domain=domain, mutability=mutability)
+    else
+        cached_data
+    end
+    D = size(X, 1)
 
     # Determine sample size
     N = size(X, 2)
@@ -463,53 +795,87 @@ function generate_native!(
         X_sub = X
     end
 
-    # Predict factual labels and assign random targets
-    factual_preds = vec(Flux.onecold(model(X_sub)))
+    # Move subsampled factuals to device for model calls
+    X_sub_dev = X_sub |> device
+
+    # Run the factual-prediction loop and the counterfactual search in test
+    # (eval) mode. This keeps BatchNorm running statistics clean of adversarial
+    # inputs and makes the CF search deterministic w.r.t. chunk size (batch
+    # statistics no longer depend on chunking). For BN-free models (e.g. the
+    # Dense test models) `testmode!` is a no-op, so behaviour is unchanged.
+    # Train mode is always restored via `finally`.
+    # `targets`, `y_levels`, and the `generate_counterfactuals!` outputs are
+    # assigned inside the try block below but are needed again afterwards;
+    # declare them here so they remain in scope after the try/finally.
     y_levels = data.y_levels
     targets = Vector{Int}(undef, nsamples)
-    for i in 1:nsamples
-        available = setdiff(y_levels, factual_preds[i])
-        targets[i] = rand(available)
+    counterfactuals = similar(X_sub_dev)
+    last_valid_ae = similar(X_sub_dev)
+    converged_mask = falses(nsamples)
+
+    Flux.testmode!(model)
+    try
+        # Predict factual labels (chunked to bound GPU memory)
+        factual_preds = Int[]
+        for start in 1:cf_batchsize:nsamples
+            stop = min(start + cf_batchsize - 1, nsamples)
+            logits_chunk = model(X_sub_dev[:, start:stop]) |> Flux.cpu
+            append!(factual_preds, vec(Flux.onecold(Flux.softmax(logits_chunk))))
+        end
+        for i in 1:nsamples
+            available = setdiff(y_levels, factual_preds[i])
+            targets[i] = rand(available)
+        end
+
+        # Generate counterfactuals (batched, on device)
+        counterfactuals, last_valid_ae, converged_mask, maxiter = generate_counterfactuals!(
+            model,
+            X_sub_dev,
+            targets,
+            data,
+            generator;
+            maxiter=maxiter,
+            decision_threshold=decision_threshold,
+            decay=decay,
+            reg_strength=reg_strength,
+            epsilon=epsilon,
+            p=p,
+            device=device,
+            cf_batchsize=cf_batchsize,
+        )
+    finally
+        Flux.trainmode!(model)
     end
 
-    # Generate counterfactuals (batched)
-    counterfactuals, last_valid_ae, converged_mask, maxiter = generate_counterfactuals!(
-        model,
-        X_sub,
-        targets,
-        data,
-        generator;
-        maxiter=maxiter,
-        decision_threshold=decision_threshold,
-        decay=decay,
-        reg_strength=reg_strength,
-        epsilon=epsilon,
-        p=p,
-    )
-
-    # Find neighbours in target class
+    # Find neighbours in target class (on CPU — uses findall on y_raw)
     neighbours = find_neighbours(X, y_raw, targets, y_levels; nneighbours=nneighbours)
 
-    # Protect immutable features
-    protect_immutable!(neighbours, counterfactuals, data.mutability)
+    # Move neighbours to device for protect_immutable! (counterfactuals already on device)
+    neighbours = neighbours |> device
 
-    # One-hot encodings
+    # Precompute mutability masks on device (reused by protect_immutable!)
+    mutability_masks = prepare_mutability_masks(data.mutability, D; device=device)
+
+    # Protect immutable features (GPU-safe broadcast with D×1 masks)
+    protect_immutable!(neighbours, counterfactuals, mutability_masks)
+
+    # One-hot encodings (batched, on device)
     nclasses = length(y_levels)
-    targets_enc = [Flux.onehot(t, 1:nclasses) for t in targets]
-    factual_enc = [Flux.onehot(y_raw[idx_sub[i]], 1:nclasses) for i in 1:nsamples]
+    targets_enc = Flux.onehotbatch(targets, 1:nclasses) |> device
+    factual_enc = Flux.onehotbatch(y_raw[idx_sub], 1:nclasses) |> device
 
     # Validity
     percent_valid = sum(converged_mask) / nsamples
 
-    # Partition into batch-aligned data loader
+    # Partition into batch-aligned data loader (all arrays on device)
     group_indices = split_obs(1:nsamples, length(train_set))
     dl = [
         (
-            stack(counterfactuals[:, group_indices[i]]),
-            stack(last_valid_ae[:, group_indices[i]]),
-            stack(targets_enc[group_indices[i]]),
-            stack(neighbours[:, group_indices[i]]),
-            stack(factual_enc[group_indices[i]]),
+            counterfactuals[:, group_indices[i]],
+            last_valid_ae[:, group_indices[i]],
+            targets_enc[:, group_indices[i]],
+            neighbours[:, group_indices[i]],
+            factual_enc[:, group_indices[i]],
         ) for i in eachindex(group_indices)
     ]
 
@@ -543,6 +909,9 @@ end
         verbose = 1,
         checkpoint_dir = nothing,
         callback = nothing,
+        cf_batchsize = 128,
+        accuracy_every::Real = Inf,
+        fuse_cf_forwards::Bool = false,
     )
 
 Native GPU-compatible counterfactual training.  Dispatches here when the
@@ -552,6 +921,26 @@ The `device` keyword is a function: `identity` (CPU), `Flux.gpu` (CUDA),
 or `AMDGPU.gpu` (AMDGPU).  The model is moved to the device; training data
 should already be on the device (user moves it before constructing the
 DataLoader).
+
+# Keyword arguments
+- `cf_batchsize`: Mini-batch size for the counterfactual search forward/backward
+  passes. Controls peak GPU memory: the search processes `cf_batchsize` samples
+  at a time through the model. Default `128`. Set to a larger value for GPUs
+  with more memory, or smaller for memory-constrained GPUs. When
+  `cf_batchsize >= nsamples`, no chunking occurs.
+- `accuracy_every`: Compute training (and validation) accuracy only every
+  `accuracy_every` epochs. When `epoch % accuracy_every != 0`, the logged
+  `acc` and `acc_val` fields are `nothing`. Default `Inf` (accuracy is never
+  computed unless explicitly requested). Set to `1` for every epoch, or a
+  larger value (e.g. `10`) to reduce per-epoch wall-clock time for large
+  models and datasets.
+- `fuse_cf_forwards`: When `true`, the three counterfactual forward passes in
+  the training loop (`perturbed_input`, `neighbours`, `advexms`) are fused into
+  a single concatenated forward pass, reducing kernel-launch overhead for
+  launch-bound workloads. **Caveat:** fusing changes BatchNorm batch statistics
+  (stats are computed over the concatenated mini-batch rather than each tensor
+  at its native width). For BN-free models results are identical; for BN models
+  results differ slightly. Off by default.
 """
 function counterfactual_training(
     loss::AbstractObjective,
@@ -576,10 +965,14 @@ function counterfactual_training(
     verbose::Int=1,
     checkpoint_dir::Union{Nothing,String}=nothing,
     callback::Union{Nothing,Function}=nothing,
+    cf_batchsize::Int=128,
+    accuracy_every::Real=Inf,
+    fuse_cf_forwards::Bool=false,
     kwrgs...,
 )
-    # Move model to device
+    # Move model and optimizer state to device
     model = model |> device
+    opt_state = opt_state |> device
 
     # Setup
     burnin = Int(round(burnin * nepochs))
@@ -600,7 +993,7 @@ function counterfactual_training(
                 "log",
             )
             model = _model |> device
-            opt_state = _opt_state
+            opt_state = _opt_state |> device
             start_epoch = epoch + 1
             if start_epoch <= nepochs
                 @info "Resuming training from epoch $start_epoch."
@@ -613,18 +1006,48 @@ function counterfactual_training(
     end
 
     if verbose in [1, 2]
-        p = Progress(nepochs - start_epoch; barglyphs=BarGlyphs("[=> ]"), color=:yellow)
+        prog = Progress(nepochs - start_epoch; barglyphs=BarGlyphs("[=> ]"), color=:yellow)
+    end
+
+    # Cache unwrap + CounterfactualData across epochs (built once, reused
+    # every epoch). Only needed when counterfactuals are generated.
+    cached_X = nothing
+    cached_y_raw = nothing
+    cached_data = nothing
+    if needs_counterfactuals(loss)
+        cached_X, cached_y_raw = unwrap(train_set)
+        cached_X = Flux.cpu(cached_X)
+        cached_data = CounterfactualData(
+            cached_X, cached_y_raw; domain=domain, mutability=mutability
+        )
     end
 
     for epoch in start_epoch:nepochs
         losses = Float32[]
-        implausibilities = Float32[]
-        reg_losses = Float32[]
-        validity_losses = Float32[]
+        implaus_acc = 0.0f0
+        reg_acc = 0.0f0
+        adv_acc = 0.0f0
         start = time()
 
         # Generate counterfactuals (batched, on device)
         if epoch > burnin && needs_counterfactuals(loss)
+            # CFs are generated once per epoch (not per batch) because CF search
+            # requires `maxiter` (default 30) forward+backward passes per sample
+            # set — roughly 3–30× more expensive than the FGSM/PGD steps used in
+            # standard adversarial training. A naive per-batch approach (generating
+            # all `nsamples` per batch) would multiply CF-search cost by
+            # `length(train_set)` (~40×). A distributed approach (generating
+            # `nsamples / n_batches` CFs per batch) would have similar total CF
+            # work, but suffers from poor GPU utilization at small per-batch CF
+            # counts (tiny pullbacks dominated by kernel-launch overhead) and 40×
+            # more setup overhead (opt state, buffer allocation, mask/bounds prep).
+            # The per-epoch design also provides a stable (slightly stale) CF
+            # signal, analogous to target networks in RL, which aids training
+            # stability. CFs are not paired with specific batch factuals: they
+            # contribute to the implausibility/regularization terms, which are
+            # aggregated via `mean`. For compute-bound workloads with large `nce`,
+            # per-batch generation could be competitive — this would need
+            # benchmarking to evaluate.
             counterfactual_dl, percent_valid, _ = generate_native!(
                 model,
                 train_set,
@@ -640,6 +1063,11 @@ function counterfactual_training(
                 epsilon=epsilon,
                 p=p,
                 verbose=verbose,
+                device=device,
+                cf_batchsize=cf_batchsize,
+                cached_X=cached_X,
+                cached_y_raw=cached_y_raw,
+                cached_data=cached_data,
             )
             avg_iter = maxiter
         else
@@ -650,6 +1078,7 @@ function counterfactual_training(
 
         # Backprop
         for (i, batch) in enumerate(train_set)
+            # Training mini-batch loop.
             input, label = batch
             input = input |> device
             label = label |> device
@@ -659,15 +1088,27 @@ function counterfactual_training(
                 logits = m(input)
 
                 if !isnothing(perturbed_input)
-                    perturbed_input = perturbed_input |> device
-                    advexms = advexms |> device
-                    targets_enc = targets_enc |> device
-                    neighbours = neighbours |> device
-                    factual_enc = factual_enc |> device
-
-                    implaus = implausibility(m, perturbed_input, neighbours, targets_enc)
-                    regs = reg_loss(m, perturbed_input, neighbours, targets_enc)
-                    adversarial_loss = loss.class_loss(m(advexms), factual_enc)
+                    if fuse_cf_forwards
+                        # Fuse the three tiny CF forward passes into one
+                        # concatenated forward, then split the logits. Reduces
+                        # kernel-launch overhead for launch-bound workloads.
+                        # Note: changes BatchNorm batch statistics (see docstring).
+                        n_cf = size(perturbed_input, 2)
+                        n_nb = size(neighbours, 2)
+                        logits_all = m(cat(perturbed_input, neighbours, advexms; dims=2))
+                        logits_cf = @view(logits_all[:, 1:n_cf])
+                        logits_nb = @view(logits_all[:, (n_cf + 1):(n_cf + n_nb)])
+                        logits_ae = @view(logits_all[:, (n_cf + n_nb + 1):end])
+                        implaus, regs = implausibility_and_reg_loss_from_logits(
+                            logits_cf, logits_nb, targets_enc
+                        )
+                        adversarial_loss = loss.class_loss(logits_ae, factual_enc)
+                    else
+                        implaus, regs = implausibility_and_reg_loss(
+                            m, perturbed_input, neighbours, targets_enc
+                        )
+                        adversarial_loss = loss.class_loss(m(advexms), factual_enc)
+                    end
                 else
                     implaus = [0.0f0]
                     regs = [0.0f0]
@@ -675,9 +1116,13 @@ function counterfactual_training(
                 end
 
                 ChainRulesCore.ignore_derivatives() do
-                    push!(implausibilities, sum(implaus) / length(implaus))
-                    push!(reg_losses, sum(regs) / length(regs))
-                    return push!(validity_losses, adversarial_loss)
+                    # `implaus`/`regs` are CPU arrays (diag returns CPU even on
+                    # GPU), so accumulate on the host with scalars — no GPU
+                    # broadcast, no per-batch sync.
+                    implaus_acc += sum(implaus) / length(implaus)
+                    reg_acc += sum(regs) / length(regs)
+                    adv_acc += adversarial_loss
+                    return nothing
                 end
 
                 return loss(logits, label, implaus, regs, adversarial_loss)
@@ -695,14 +1140,20 @@ function counterfactual_training(
 
         # Logging
         time_taken = time() - start
-        acc = accuracy(model, train_set)
-        acc_val = isnothing(val_set) ? nothing : accuracy(model, val_set)
+        if epoch % accuracy_every == 0
+            acc = accuracy(model, train_set; device=device)
+            acc_val = isnothing(val_set) ? nothing : accuracy(model, val_set; device=device)
+        else
+            acc = nothing
+            acc_val = nothing
+        end
         train_loss = sum(losses) / length(losses)
 
         if epoch > burnin
-            implaus = sum(implausibilities) / length(implausibilities)
-            log_reg_loss = sum(reg_losses) / length(reg_losses)
-            log_adv_loss = sum(validity_losses) / length(validity_losses)
+            n_batches = length(train_set)
+            implaus = implaus_acc / n_batches
+            log_reg_loss = reg_acc / n_batches
+            log_adv_loss = adv_acc / n_batches
         else
             implaus = nothing
             log_reg_loss = nothing
@@ -729,15 +1180,19 @@ function counterfactual_training(
             jldsave(
                 joinpath(checkpoint_dir, "checkpoint.jld2");
                 model=model |> Flux.cpu,
-                opt_state=opt_state,
+                opt_state=opt_state |> Flux.cpu,
                 epoch,
                 log,
             )
         end
 
+        # Progress bar
         if verbose in [1, 2]
-            next!(p)
-        elseif verbose > 2
+            next!(prog)
+        end
+
+        # Logging
+        if verbose >= 2
             @info "Iteration $epoch:"
             @info "Training accuracy: $acc"
             @info "Train loss: $train_loss"

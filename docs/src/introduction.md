@@ -37,7 +37,7 @@ We use a linearly separable synthetic dataset of two Gaussian blobs (cluster sta
 ``` julia
 # Linearly separable synthetic data (two Gaussian blobs, std=0.5):
 N = 3000
-centers = Float32[0.0 0.0; 6.0 6.0]
+centers = Float32[0.0 0.0; 5.0 5.0]
 n1 = N ÷ 2
 n2 = N - n1
 X1 = 0.5f0 .* randn(Float32, n1, 2) .+ centers[1:1, :]
@@ -79,13 +79,13 @@ ce_datasets = []
 
 for (title, obj, mutability) in specs
     model = Chain(Dense(2, 32, relu), Dense(32, 2))
-    opt_state = Flux.setup(Flux.AMSGrad(), model)
+    opt_state = Flux.setup(Flux.Adam(), model)
     domain = CounterfactualTraining.infer_domain_constraints(X)
     data = CounterfactualData(X, y; domain=domain, mutability=mutability)
 
     model, log = counterfactual_training(
         obj, model, generator, train_set, opt_state;
-        nepochs=30, maxiter=30, burnin=0.0f0,
+        nepochs=100, maxiter=30, burnin=0.0f0,
         decision_threshold=0.75f0,
         mutability=mutability, domain=domain, verbose=0,
     )
@@ -97,19 +97,18 @@ end
 
 ## Counterfactual Generation
 
-For each trained model we generate counterfactuals for 100 samples from each class, targeting the opposite class.
+For each trained model we generate counterfactuals for 100 samples from class 1, targeting class 2 — matching the one-directional setup in the paper.
 
 ``` julia
-idx1 = findall(==(1), y)[1:100]
-idx2 = findall(==(2), y)[1:100]
-X_test = hcat(X[:, idx1], X[:, idx2])
-targets = vcat(fill(2, length(idx1)), fill(1, length(idx2)))
+idx1 = findall(==(2), y)[1:100]
+X_test = X[:, idx1]
+targets = fill(1, length(idx1))
 
 all_cfs = []
 for i in eachindex(models)
     cfs, _, converged, _ = generate_counterfactuals!(
         models[i], X_test, targets, ce_datasets[i], generator;
-        maxiter=30, decision_threshold=0.75f0,
+        maxiter=100, decision_threshold=1.0f0,
     )
     push!(all_cfs, cfs)
 end
@@ -120,6 +119,15 @@ end
 ``` julia
 _xlab = "Existing Debt"
 _ylab = "Age"
+
+# Subsample background data for plotting:
+idx_plot = randperm(size(X, 2))[1:min(500, size(X, 2))]
+X_bg = X[:, idx_plot]
+y_bg = y[idx_plot]
+
+# Grid for decision boundary contour:
+x1_range = range(minimum(X[1, :]), maximum(X[1, :]); length=50)
+x2_range = range(minimum(X[2, :]), maximum(X[2, :]); length=50)
 
 plts = []
 for (i, (title, obj, mutability)) in enumerate(specs)
@@ -132,16 +140,30 @@ for (i, (title, obj, mutability)) in enumerate(specs)
     ylab = mutability[2] == :both ? "$_ylab (mutable)" : "$_ylab (immutable)"
 
     plt = scatter(
-        X[1, y .== 1], X[2, y .== 1];
-        color=1, ms=3, label=false,
+        X_bg[1, y_bg .== 1], X_bg[2, y_bg .== 1];
+        color=1, ms=2, label=false,
         xlabel=xlab, ylabel=ylab,
         axis=nothing, legend=false, title=title,
     )
-    scatter!(plt, X[1, y .== 2], X[2, y .== 2]; color=2, ms=3, label=false)
+    scatter!(plt, X_bg[1, y_bg .== 2], X_bg[2, y_bg .== 2]; color=2, ms=2, label=false)
+
+    # Linear decision boundary approximation (contour at p=0.5):
+    Z = [Flux.softmax(models[i]([x1, x2]))[1] for x1 in x1_range, x2 in x2_range]
+    contour!(plt, x1_range, x2_range, Z'; levels=[0.5], lw=5, color=:black, label=false)
+
     if any(idx_plotted)
+        # Directional arrows from factual to counterfactual:
+        u = cfs[1, idx_plotted] .- X_test[1, idx_plotted]
+        v = cfs[2, idx_plotted] .- X_test[2, idx_plotted]
+        quiver!(
+            plt, X_test[1, idx_plotted], X_test[2, idx_plotted];
+            quiver=(u, v), color=:gray, alpha=0.5, label=false,
+        )
+
+        # CF endpoints:
         scatter!(
             plt, cfs[1, idx_plotted], cfs[2, idx_plotted];
-            ms=15, shape=:star, color=yhat[idx_plotted],
+            ms=8, shape=:star, color=yhat[idx_plotted],
             group=yhat[idx_plotted], mscolor=yhat0[idx_plotted], label=false,
         )
     end
@@ -155,11 +177,9 @@ plt = plot(
     left_margin=10mm, bottom_margin=5mm,
     top_margin=3mm, right_margin=10mm,
 )
-display(plt)
+plt
 ```
 
-    GKS: cannot open display - headless operation mode active
-
-![](introduction_files/figure-commonmark/cell-6-output-2.svg)
+![](introduction_files/figure-commonmark/cell-6-output-1.svg)
 
 Only panel **(d)** — counterfactual training with mutability protection on the immutable feature — produces counterfactuals that move primarily along the **mutable** feature (Existing Debt), leaving the **immutable** feature (Age) relatively unchanged. The model has learned to be less sensitive to the immutable feature, producing counterfactuals that are more actionable.

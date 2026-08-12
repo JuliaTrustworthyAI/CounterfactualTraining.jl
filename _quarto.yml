@@ -12,7 +12,6 @@ crossref:
   exr-title: RQ
 resource-path:
   - docs/src/assets
-  - paper/figures
 format:
   commonmark:
     variant: -raw_html+tex_math_dollars

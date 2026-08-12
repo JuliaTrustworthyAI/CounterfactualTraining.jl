@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Version [Unreleased]
+
+### Fixed
+
+- Fixes GPU training: optimizer state is now moved to the device alongside the model.
+- Fixes scalar indexing errors on GPU in `batched_energy`, `check_batched_convergence`, `batched_apply_mutability!`, and `batched_apply_domain_constraints!` by replacing `CartesianIndex` and row-by-row loops with vectorized broadcasting and linear indexing.
+- Fixes GPU kernel compilation error (non-bitstype argument) in `batched_apply_mutability!` and `batched_apply_domain_constraints!` by moving mask and bounds arrays to the device before broadcasting.
+- Fixes `MethodError` when calling objectives (`FullObjective`, `VanillaObjective`, `EnergyDifferentialObjective`, `AdversarialObjective`) with GPU arrays by widening type annotations from `Vector{<:AbstractFloat}` to `AbstractVector{<:AbstractFloat}`.
+- Fixes Zygote `ArgumentError: tuple must be non-empty` by moving `|> device` calls outside the `withgradient` block — device transfer is not differentiable.
+- Threads `device` through `generate_native!` and `generate_counterfactuals!` so counterfactual search runs on GPU.
+- Moves labels to CPU in `unwrap` before `findall` to avoid scalar indexing on GPU arrays.
+- Moves logits to CPU in `accuracy` before `onecold` to avoid scalar indexing via `mapslices`.
+- Saves optimizer state to CPU in checkpoints to prevent JLD2 serialization errors on GPU arrays.
+- `accuracy` now evaluates the model in test (eval) mode and accumulates match counts on the device, syncing once per call. This is a correctness fix (accuracy now uses running rather than batch statistics for BatchNorm models) and may change accuracy numbers slightly.
+
 ## Version [0.2.1] - 2026-08-10
 
 ### Added

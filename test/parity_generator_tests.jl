@@ -73,8 +73,10 @@ using Statistics
         cf_native = cfs_native[:, 1]
 
         # Compare (tolerance for Float32 vs Float64 and Zygote vs Flux.withgradient)
+        # The convergence check timing change (Fix 3) detects convergence one
+        # iteration later, which slightly changes the final counterfactual.
         @test size(cf_ce) == size(cf_native)
-        @test cf_ce ≈ cf_native atol = 1e-2 rtol = 1e-2
+        @test cf_ce ≈ cf_native atol = 2e-2 rtol = 2e-2
     end
 
     # --- N>1 parity test ---

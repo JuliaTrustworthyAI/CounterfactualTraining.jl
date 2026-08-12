@@ -24,6 +24,50 @@ function reg_loss(model, counterfactual, samples, targets)
 end
 
 """
+    implausibility_and_reg_loss(model, counterfactual, samples, targets)
+
+Computes both [`implausibility`](@ref) and [`reg_loss`](@ref) in a single pass,
+sharing the forward passes through `model` for `samples` and `counterfactual`.
+Returns `(implaus, regs)` — the same values that `implausibility(...)` and
+`reg_loss(...)` would return separately.
+
+This avoids redundant forward passes when both losses are needed (e.g. inside
+the training loop's gradient tape).
+"""
+function implausibility_and_reg_loss(model, counterfactual, samples, targets)
+    logits_samples = model(samples)
+    logits_cf = model(counterfactual)
+    # implausibility: (-logits_samples) - (-logits_cf) = logits_cf - logits_samples
+    # x = ((E(samples)) - (E(counterfactual)))[:, :]'targets
+    #   = (logits_cf - logits_samples)'targets
+    implaus_x = (logits_cf .- logits_samples)[:, :]' * targets
+    implaus = diag(implaus_x[:, :])
+    # reg_loss: (abs2.(model(samples)) + abs2.(model(counterfactual)))'targets
+    reg_x = (abs2.(logits_samples) .+ abs2.(logits_cf))' * targets
+    regs = diag(reg_x[:, :])
+    return implaus, regs
+end
+
+"""
+    implausibility_and_reg_loss_from_logits(logits_cf, logits_nb, targets)
+
+Like [`implausibility_and_reg_loss`](@ref) but accepts precomputed logits
+(`logits_cf` for the counterfactuals and `logits_nb` for the neighbours)
+instead of calling `model` internally. Used by the training loop when
+`fuse_cf_forwards=true` to share a single concatenated forward pass between
+the implausibility/regularization computation and the adversarial loss.
+
+The algebra matches [`implausibility_and_reg_loss`](@ref) exactly.
+"""
+function implausibility_and_reg_loss_from_logits(logits_cf, logits_nb, targets)
+    implaus_x = (logits_cf .- logits_nb)[:, :]' * targets
+    implaus = diag(implaus_x[:, :])
+    reg_x = (abs2.(logits_nb) .+ abs2.(logits_cf))' * targets
+    regs = diag(reg_x[:, :])
+    return implaus, regs
+end
+
+"""
     adv_loss(
         model, counterfactual, perturbations, targets; epsilon=2.0, p::Real=Inf, validities=nothing
     )
