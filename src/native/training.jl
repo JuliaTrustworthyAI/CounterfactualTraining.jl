@@ -549,13 +549,18 @@ function generate_counterfactuals!(
             break
         end
 
-        # Zero gradients for already-converged samples so the optimizer does no
-        # work on them and they don't drift. This is safe because converged
-        # samples are already at their final state; subsequent iterations only
-        # need to search for the remaining unconverged samples.
-        if any(converged)
-            ΔX[:, converged] .= zero(eltype(ΔX))
-        end
+        # Device-side mask for converged samples (1×N). Multiplying by this
+        # zeros the gradient/update for already-converged samples so the
+        # optimizer does no work on them and they don't drift. This is safe
+        # because converged samples are already at their final state. Using a
+        # broadcast multiply instead of boolean-mask indexing (`ΔX[:, converged]`)
+        # avoids the `findall`/gather/scatter sync that GPU masked indexing
+        # forces. When nothing is converged the mask is all-ones and the
+        # multiply is numerically exact, so no `any(converged)` guard is needed.
+        # `converged_dev` is always defined here: at `iter == maxiter` the
+        # early-exit above breaks before reaching this point.
+        mask = reshape(.!converged_dev, 1, N)
+        ΔX .*= mask
 
         # Apply optimizer step on the full gradient, then zero immutable
         # directions in the resulting update. This matches CE.jl's ordering
@@ -574,9 +579,7 @@ function generate_counterfactuals!(
         # (Adam, Momentum) the optimizer may produce a non-zero update from
         # accumulated momentum even with a zero gradient. Zeroing the update
         # guarantees converged samples don't move regardless of optimizer.
-        if any(converged)
-            update[:, converged] .= zero(eltype(update))
-        end
+        update .*= mask
 
         batched_apply_mutability!(update, mutability_masks)
         X′ .= X′_old .+ update
