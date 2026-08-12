@@ -597,6 +597,62 @@ Compare against `dev/bench_baseline.txt` (Phase 0, same device). Paste the befor
 
 ---
 
+## Results
+
+**Device:** CPU (`identity`) — no GPU available in this environment. The benchmark
+(`dev/bench_native.jl`) uses a Dense model on synthetic data (D=128, N=8000, 2 classes),
+matching the test-suite model family so parity is verifiable and relative speedups are
+measurable. The reference GPU numbers in the plan's Context section (ResNet-18/MNIST)
+could not be reproduced here; the CPU numbers below are the comparison target.
+
+### Full test suite
+
+`julia --project=. -e 'using Pkg; Pkg.test()'` → **185/185 tests pass** (all testsets:
+loss, utils, objectives, native_helpers, native_edge, counterfactuals, training,
+parity_generator, parity_training, plus the new fused-vs-unfused test).
+
+### Benchmark: before vs after
+
+`generate_native!` standalone time (the number that should collapse after Phase 1):
+
+| | Baseline | After |
+|---|---|---|
+| `generate_native!` standalone | 0.601 s (contaminated by first-call compilation) | **0.067 s** |
+
+The baseline standalone figure included one-time compilation; the after figure is the
+steady-state value. The benchmark's default `cf_batchsize=32` (chunked) does not trigger
+the Phase 1 Step 1 fast path, so the headline benchmark number is not the right metric for
+that step. Measured separately (same process, after warmup), the fast path
+(`cf_batchsize=128`, no chunking) runs `generate_native!` in **~0.024–0.031 s** vs
+**~0.040–0.046 s** chunked — roughly **1.5–1.7× faster**.
+
+Full-objective per-epoch times (epochs 2–3, after burn-in) were ~0.11–0.16 s both before
+and after; the sync/masking reductions (Steps 2–4, 6) are GPU-focused and do not show up
+on this CPU-only, tiny-Dense-model setup.
+
+### Correctness / parity
+
+- All native + parity tests pass unmodified after every step.
+- Steps 1–4 are **bitwise parity-preserving**: chunked vs fast path with the same RNG seed
+  produce identical counterfactuals and adversarial examples (max diff = 0.0).
+- Step 5 (testmode during search) and Phase 4 (accuracy testmode) are **intentional numeric
+  changes** for BatchNorm correctness; they are no-ops on the Dense test models.
+- Step 7 (`fuse_cf_forwards`): fused vs unfused produce bit-for-bit identical losses and
+  gradients on BN-free models (new test passes).
+
+### Notes
+
+- The full test suite intermittently crashes with an LLVM compilation segfault in this
+  environment (Julia 1.12.6 + LLVM 18), unrelated to these changes — it also occurred on
+  the untouched baseline. Running it detached (`setsid nohup ... &`) completed successfully
+  (185/185).
+- The plan's reference GPU acceptance criterion (full-objective epoch ≈ 4–6 s from ~15 s)
+  could not be verified here (no GPU, no ResNet/MNIST deps). The CPU results confirm the
+  parity-preservation and the fast-path speedup; the GPU sync/masking wins (Steps 2–4, 6)
+  remain to be confirmed on a real GPU.
+
+---
+
 ## Hand-off checklist
 
 1. Phase 0: run `dev/bench_native.jl`, save `dev/bench_baseline.txt` (note the device).
