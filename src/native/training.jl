@@ -1024,9 +1024,9 @@ function counterfactual_training(
 
     for epoch in start_epoch:nepochs
         losses = Float32[]
-        implaus_acc = device([0.0f0])
-        reg_acc = device([0.0f0])
-        adv_acc = device([0.0f0])
+        implaus_acc = 0.0f0
+        reg_acc = 0.0f0
+        adv_acc = 0.0f0
         start = time()
 
         # Generate counterfactuals (batched, on device)
@@ -1116,9 +1116,12 @@ function counterfactual_training(
                 end
 
                 ChainRulesCore.ignore_derivatives() do
-                    implaus_acc .+= sum(implaus; dims=1) ./ length(implaus)
-                    reg_acc .+= sum(regs; dims=1) ./ length(regs)
-                    adv_acc .+= adversarial_loss
+                    # `implaus`/`regs` are CPU arrays (diag returns CPU even on
+                    # GPU), so accumulate on the host with scalars — no GPU
+                    # broadcast, no per-batch sync.
+                    implaus_acc += sum(implaus) / length(implaus)
+                    reg_acc += sum(regs) / length(regs)
+                    adv_acc += adversarial_loss
                     nothing
                 end
 
@@ -1148,9 +1151,9 @@ function counterfactual_training(
 
         if epoch > burnin
             n_batches = length(train_set)
-            implaus = Flux.cpu(implaus_acc)[1] / n_batches
-            log_reg_loss = Flux.cpu(reg_acc)[1] / n_batches
-            log_adv_loss = Flux.cpu(adv_acc)[1] / n_batches
+            implaus = implaus_acc / n_batches
+            log_reg_loss = reg_acc / n_batches
+            log_adv_loss = adv_acc / n_batches
         else
             implaus = nothing
             log_reg_loss = nothing
