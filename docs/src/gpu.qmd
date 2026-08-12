@@ -44,20 +44,22 @@ device = identity
 try
     using CUDA
     if CUDA.functional()
-        has_gpu = true
-        device = Flux.gpu
+        global has_gpu = true
+        global device = Flux.gpu
     end
 catch
 end
 
 # Try AMD
-try
-    using AMDGPU
-    if AMDGPU.functional()
-        has_gpu = true
-        device = Flux.gpu
+if !has_gpu
+    try
+        using AMDGPU
+        if AMDGPU.functional()
+            global has_gpu = true
+            global device = Flux.gpu
+        end
+    catch
     end
-catch
 end
 
 if has_gpu

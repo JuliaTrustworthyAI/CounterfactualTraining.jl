@@ -12,7 +12,6 @@ using ChainRulesCore: ChainRulesCore
 using JLD2
 using ProgressMeter
 using StatsBase
-using UnicodePlots
 using Random
 
 # ---------------------------------------------------------------------------
@@ -1098,8 +1097,8 @@ function counterfactual_training(
                         n_nb = size(neighbours, 2)
                         logits_all = m(cat(perturbed_input, neighbours, advexms; dims=2))
                         logits_cf = @view(logits_all[:, 1:n_cf])
-                        logits_nb = @view(logits_all[:, n_cf+1:n_cf+n_nb])
-                        logits_ae = @view(logits_all[:, n_cf+n_nb+1:end])
+                        logits_nb = @view(logits_all[:, (n_cf + 1):(n_cf + n_nb)])
+                        logits_ae = @view(logits_all[:, (n_cf + n_nb + 1):end])
                         implaus, regs = implausibility_and_reg_loss_from_logits(
                             logits_cf, logits_nb, targets_enc
                         )

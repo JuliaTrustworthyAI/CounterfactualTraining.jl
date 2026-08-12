@@ -13,7 +13,7 @@
 #   - a UnicodePlots bar chart of mean per-epoch times for easy visual reading.
 #
 # Usage:
-#   julia --project=. dev/bench_native.jl | tee dev/bench_gpu.txt
+#   julia --project=dev dev/bench_native.jl | tee dev/bench_gpu.txt
 
 using CounterfactualTraining
 using CounterfactualTraining.Native
@@ -36,8 +36,8 @@ device = identity
 try
     using CUDA
     if CUDA.functional()
-        has_gpu = true
-        device = Flux.gpu
+        global has_gpu = true
+        global device = Flux.gpu
     end
 catch
 end
@@ -45,8 +45,8 @@ if !has_gpu
     try
         using AMDGPU
         if AMDGPU.functional()
-            has_gpu = true
-            device = Flux.gpu
+            global has_gpu = true
+            global device = Flux.gpu
         end
     catch
     end
@@ -61,7 +61,7 @@ end
 # Data: MNIST subset 5000, flattened 784, normalized [-1,1]
 # ---------------------------------------------------------------------------
 train_data = MLDatasets.MNIST(; split=:train)
-X = Float32.(reshape(train_data.features, 784, :)) .* 2f0 .- 1f0
+X = Float32.(reshape(train_data.features, 784, :)) .* 2.0f0 .- 1.0f0
 y = train_data.targets .+ 1  # 0-9 -> 1-10
 idx = shuffle(1:size(X, 2))[1:5000]
 X, y = X[:, idx], y[idx]
@@ -83,18 +83,40 @@ function run_training(objective; kw...)
     Random.seed!(42)
     m = make_model() |> device
     o = Flux.setup(opt, m)
-    _, log = counterfactual_training(objective, m, gen, train_set, o;
-        device, nepochs, domain, verbose=0, nce=128, cf_batchsize=32,
-        maxiter=30, burnin=0.2f0, accuracy_every=nepochs, kw...)
+    _, log = counterfactual_training(
+        objective,
+        m,
+        gen,
+        train_set,
+        o;
+        device,
+        nepochs,
+        domain,
+        verbose=0,
+        nce=128,
+        cf_batchsize=32,
+        maxiter=30,
+        burnin=0.2f0,
+        accuracy_every=nepochs,
+        kw...,
+    )
     return [l.time_taken for l in log], [l.percent_valid for l in log]
 end
 
 # Standalone timing of CF generation (no training), for a given cf_batchsize.
 function time_generate_native(cf_batchsize)
     m = make_model() |> device
-    t = @timed generate_native!(m, train_set, gen;
-        nsamples=128, domain=domain, maxiter=30, verbose=0,
-        device=device, cf_batchsize=cf_batchsize)
+    t = @timed generate_native!(
+        m,
+        train_set,
+        gen;
+        nsamples=128,
+        domain=domain,
+        maxiter=30,
+        verbose=0,
+        device=device,
+        cf_batchsize=cf_batchsize,
+    )
     return t.time
 end
 
@@ -134,7 +156,12 @@ for rep in 1:5
     tf = time_generate_native(128)
     push!(chunked_times, tc)
     push!(fast_times, tf)
-    @printf("rep%d: chunked(cf_batchsize=32)=%.4f s   fast(cf_batchsize=128)=%.4f s\n", rep, tc, tf)
+    @printf(
+        "rep%d: chunked(cf_batchsize=32)=%.4f s   fast(cf_batchsize=128)=%.4f s\n",
+        rep,
+        tc,
+        tf
+    )
 end
 
 # ---------------------------------------------------------------------------
@@ -162,29 +189,40 @@ end
 # CF overhead = full - vanilla, averaged over CF epochs (after burn-in)
 cf_epochs = 2:length(full_mean)
 cf_overhead = mean(full_mean[cf_epochs]) - mean(vanilla_mean[cf_epochs])
-@printf("\nMean CF overhead per epoch (full - vanilla, epochs %s): %.4f s\n",
-    join(cf_epochs, ","), cf_overhead)
+@printf(
+    "\nMean CF overhead per epoch (full - vanilla, epochs %s): %.4f s\n",
+    join(cf_epochs, ","),
+    cf_overhead
+)
 
 # Standalone CF generation speedup (fast vs chunked)
 tc_mean = mean(chunked_times)
 tf_mean = mean(fast_times)
-@printf("Standalone generate_native!: chunked=%.4f s, fast=%.4f s, speedup=%.2fx\n",
-    tc_mean, tf_mean, tc_mean / tf_mean)
+@printf(
+    "Standalone generate_native!: chunked=%.4f s, fast=%.4f s, speedup=%.2fx\n",
+    tc_mean,
+    tf_mean,
+    tc_mean / tf_mean
+)
 
 # Bar chart: mean per-epoch time, full vs vanilla
 labels = ["epoch $e" for e in 1:length(full_mean)]
 bp = barplot(
-    labels, full_mean;
+    labels,
+    full_mean;
     title="Mean per-epoch time (s) — Full vs Vanilla",
-    xlabel="seconds", ylabel="",
+    xlabel="seconds",
+    ylabel="",
     color=:green,
 )
 # Overlay vanilla as a second series via a combined plot is not supported by
 # UnicodePlots barplot; print both side by side instead.
 bp2 = barplot(
-    labels, vanilla_mean;
+    labels,
+    vanilla_mean;
     title="Mean per-epoch time (s) — Vanilla",
-    xlabel="seconds", ylabel="",
+    xlabel="seconds",
+    ylabel="",
     color=:blue,
 )
 println("\n" * "-"^72)
@@ -195,9 +233,11 @@ println()
 
 # Bar chart: standalone CF generation chunked vs fast
 bp3 = barplot(
-    ["chunked (32)", "fast (128)"], [tc_mean, tf_mean];
+    ["chunked (32)", "fast (128)"],
+    [tc_mean, tf_mean];
     title="Standalone generate_native! (s)",
-    xlabel="seconds", ylabel="",
+    xlabel="seconds",
+    ylabel="",
     color=:red,
 )
 println("-"^72)
