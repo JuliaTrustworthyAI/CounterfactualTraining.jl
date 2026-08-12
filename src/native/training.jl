@@ -268,8 +268,12 @@ function track_adversarial_examples!(
     else
         norms .= vec(sum(abs.(perturbations) .^ p; dims=1) .^ (1 / p))
     end
-    valid_ae = norms .<= epsilon
-    last_valid_ae[:, valid_ae] .= X′[:, valid_ae]
+    # Broadcast selection instead of boolean-mask indexing. Masked indexing on
+    # GPUs requires a `findall` (sync) to size the gather plus a scatter; the
+    # broadcast `ifelse.` is a single fused elementwise kernel with no sync.
+    # Pure selection (no arithmetic), so results are bitwise identical.
+    valid_mask = reshape(norms .<= epsilon, 1, :)
+    last_valid_ae .= ifelse.(valid_mask, X′, last_valid_ae)
     return last_valid_ae
 end
 
