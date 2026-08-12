@@ -1,0 +1,2 @@
+[AMDGPU]
+eager_gc = true
