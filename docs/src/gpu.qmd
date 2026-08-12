@@ -83,6 +83,11 @@ X, y = X[:, idx], y[idx]
 
 domain = [(-1.0f0, 1.0f0) for _ in 1:784]
 y_onehot = Flux.onehotbatch(y, 1:10)
+
+# Keep the data on the device so the training loop's `input |> device` is a
+# cheap no-op instead of a per-batch H2D copy.
+X = X |> device
+y_onehot = y_onehot |> device
 train_set = Flux.DataLoader((X, y_onehot); batchsize=128, shuffle=true)
 ```
 
@@ -106,7 +111,9 @@ nepochs = 10
 verbose = 2
 opt = Flux.Adam(1e-3)
 nce = 128
-cf_batchsize = 32
+# cf_batchsize is a GPU-memory knob for the CF search; 128 (= nce, so no
+# chunking) is fastest here — lower it only on memory-constrained GPUs.
+cf_batchsize = 128
 accuracy_every = div(nepochs, 5)
 burnin = 0.2f0
 burnin_epochs = Int(round(burnin * nepochs))
@@ -194,4 +201,11 @@ savefig(combined, "docs/src/assets/gpu.svg")
 ![Per-epoch wall-clock time (left) and training accuracy (right) for the full and vanilla objectives.](assets/gpu.svg)
 
 The figure above compares the two objectives side by side. The left panel shows per-epoch wall-clock time; the right panel shows training accuracy. The gap between the two curves in the left panel reflects the cost of generating counterfactuals each epoch (the per-sample batched search in `generate_native!`). Expect the difference to appear only after the burn-in fraction, since `VanillaObjective(; needs_ce=false)` short-circuits CF generation entirely via `needs_counterfactuals`. The right panel confirms that both objectives achieve comparable training accuracy, indicating that the counterfactual regularization does not degrade the discriminative performance of the model.
+
+## Performance tips
+
+- **Keep the full dataset on the device** before building the `DataLoader` (as shown above) so the training loop's `input |> device` is a no-op rather than a per-batch copy.
+- **Set `cf_batchsize` as large as memory allows** to avoid chunking the counterfactual search (e.g. `128` when `nce = 128`). Lower it only on memory-constrained GPUs.
+- **Use `accuracy_every`** (e.g. `div(nepochs, 5)`) to skip per-epoch accuracy when wall-clock time matters.
+- For **BatchNorm models**, consider `fuse_cf_forwards = true` only if slightly different batch statistics are acceptable (it fuses the three counterfactual forward passes into one).
 
