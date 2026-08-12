@@ -4,6 +4,7 @@ using Statistics
 using Printf
 
 AMDGPU.allowscalar(false)
+AMDGPU.eager_gc!(true)   # proactively collect before large allocs at >75% pool pressure
 
 const N_EPOCHS = 10
 const N_HIDDEN = 1024
@@ -57,6 +58,12 @@ cpu_r = @timed train!(model_cpu, X, y, opt_cpu; epochs=N_EPOCHS)
 )
 
 println("\n── GPU ────────────────────────────────────")
+# Return pooled GPU memory from the warmup/CPU phase to the driver before the
+# timed GPU run, and report the baseline heap (avoids silent memory-pressure
+# stalls during benchmarking).
+GC.gc()
+AMDGPU.HIP.reclaim()
+@printf("GPU memory before run (used): %.2f GiB\n", AMDGPU.used() / 2^30)
 model_gpu = make_model() |> gpu
 opt_gpu = Flux.setup(Flux.Adam(1e-3), model_gpu)
 X_gpu, y_gpu = X |> gpu, y |> gpu
