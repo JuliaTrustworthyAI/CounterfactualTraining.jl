@@ -470,6 +470,11 @@ function generate_counterfactuals!(
         start:min(start + cf_batchsize - 1, N) for start in 1:cf_batchsize:N
     )
 
+    # Preallocate a device buffer for the per-sample target-class probabilities
+    # (length-N vector). Each chunk writes its slice here (GPU→GPU, no sync);
+    # the convergence mask is materialized on the host ONCE per iteration.
+    target_probs_buf = similar(X′, N)
+
     for iter in 1:maxiter
         # Compute gradient of the generator loss w.r.t. X′ AND extract logits
         # for the convergence check — sharing the forward pass. The convergence
@@ -516,19 +521,26 @@ function generate_counterfactuals!(
                 ΔX[:, cols] .= back(one(y))[1]
             end
 
-            # Convergence check using the SAME logits_chunk (no extra forward)
+            # Convergence check using the SAME logits_chunk (no extra forward).
+            # Write the target-class probability into the preallocated device
+            # buffer (GPU→GPU gather+copy, no host sync). The host sync happens
+            # once per iteration after the chunk loop.
             if iter < maxiter
                 probs_chunk = Flux.softmax(logits_chunk; dims=1)
                 target_idx_chunk = targets[cols]
                 C = size(probs_chunk, 1)
                 n_chunk = length(target_idx_chunk)
                 linear_idx = (0:(n_chunk - 1)) .* C .+ target_idx_chunk
-                target_probs = probs_chunk[linear_idx] |> Flux.cpu
-                converged[cols] .= target_probs .>= decision_threshold
+                target_probs_buf[cols] .= probs_chunk[linear_idx]
             end
         end
 
-        if iter >= maxiter
+        # Materialize the convergence mask on the host ONCE per iteration
+        # (a single GPU→CPU sync instead of one per chunk).
+        if iter < maxiter
+            converged_dev = target_probs_buf .>= decision_threshold
+            converged = Flux.cpu(converged_dev)
+        else
             converged = trues(N)
         end
 
