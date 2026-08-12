@@ -91,8 +91,8 @@ end
     # Fused path
     logits_all = m(cat(perturbed_input, neighbours, advexms; dims=2))
     logits_cf = @view(logits_all[:, 1:n_cf])
-    logits_nb = @view(logits_all[:, n_cf+1:n_cf+n_nb])
-    logits_ae = @view(logits_all[:, n_cf+n_nb+1:end])
+    logits_nb = @view(logits_all[:, (n_cf + 1):(n_cf + n_nb)])
+    logits_ae = @view(logits_all[:, (n_cf + n_nb + 1):end])
     implaus_f, regs_f = implausibility_and_reg_loss_from_logits(
         logits_cf, logits_nb, targets_enc
     )
@@ -111,8 +111,8 @@ end
     loss_f = Flux.withgradient(m) do mm
         la = mm(cat(perturbed_input, neighbours, advexms; dims=2))
         lc = @view(la[:, 1:n_cf])
-        ln = @view(la[:, n_cf+1:n_cf+n_nb])
-        lae = @view(la[:, n_cf+n_nb+1:end])
+        ln = @view(la[:, (n_cf + 1):(n_cf + n_nb)])
+        lae = @view(la[:, (n_cf + n_nb + 1):end])
         i, r = implausibility_and_reg_loss_from_logits(lc, ln, targets_enc)
         a = Flux.logitcrossentropy(lae, factual_enc; agg=sum)
         return sum(i) + sum(r) + a

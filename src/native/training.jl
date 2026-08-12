@@ -1122,7 +1122,7 @@ function counterfactual_training(
                     implaus_acc += sum(implaus) / length(implaus)
                     reg_acc += sum(regs) / length(regs)
                     adv_acc += adversarial_loss
-                    nothing
+                    return nothing
                 end
 
                 return loss(logits, label, implaus, regs, adversarial_loss)
