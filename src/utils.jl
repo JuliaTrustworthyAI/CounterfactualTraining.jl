@@ -33,21 +33,29 @@ end
 """
     accuracy(model, train_set; device=identity)
 
-Compute classification accuracy over a `DataLoader`. Uses `Flux.onecold` on
-whole matrices — GPU-compatible and faster than per-column `argmax`.
+Compute classification accuracy over a `DataLoader`. Evaluates the model in
+test (eval) mode so BatchNorm uses running rather than batch statistics, and
+accumulates match counts on the device, syncing to the host once per call.
 The `device` keyword moves each batch to the device before the forward pass.
 """
 function accuracy(model, train_set; device=identity)
-    acc = 0
-    for (x, y) in train_set
-        x = x |> device
-        # Move logits to CPU before onecold (mapslices/argmax may scalar-index GPU arrays)
-        logits = model(x) |> Flux.cpu
-        yhat = Flux.onecold(Flux.softmax(logits))
-        y_true = Flux.onecold(y)
-        acc += sum(yhat .== y_true)
+    acc_dev = device([0])
+    Flux.testmode!(model)
+    try
+        for (x, y) in train_set
+            x = x |> device
+            y = y |> device
+            logits = model(x)
+            # argmax(logits) == argmax(softmax(logits)) — softmax is monotone per
+            # column, so it can be skipped without changing predictions.
+            yhat = vec(argmax(logits; dims=1))
+            y_true = vec(argmax(y; dims=1))
+            acc_dev .+= sum(yhat .== y_true; dims=1)   # dims=1 keeps result on device (no sync)
+        end
+    finally
+        Flux.trainmode!(model)
     end
-    return acc / size(train_set.data[1], 2)
+    return Flux.cpu(acc_dev)[1] / size(train_set.data[1], 2)
 end
 
 """

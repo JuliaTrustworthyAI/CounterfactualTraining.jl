@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Moves labels to CPU in `unwrap` before `findall` to avoid scalar indexing on GPU arrays.
 - Moves logits to CPU in `accuracy` before `onecold` to avoid scalar indexing via `mapslices`.
 - Saves optimizer state to CPU in checkpoints to prevent JLD2 serialization errors on GPU arrays.
+- `accuracy` now evaluates the model in test (eval) mode and accumulates match counts on the device, syncing once per call. This is a correctness fix (accuracy now uses running rather than batch statistics for BatchNorm models) and may change accuracy numbers slightly.
 
 ## Version [0.2.1] - 2026-08-10
 
